@@ -30,7 +30,7 @@ int WINAPI WinMain(HINSTANCE, HINSTANCE, LPSTR, int) {
 	//ウィンドウクラス名
 	wc.lpszClassName = L"CGWindowClass";
 	//インスタンスハンドル
-	wc.hInstance = DrvGetModuleHandle(nullptr);
+	wc.hInstance = GetModuleHandle(nullptr);
 	//カーソル
 	wc.hCursor = LoadCursor(nullptr, IDC_ARROW);
 
