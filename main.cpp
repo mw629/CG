@@ -112,13 +112,9 @@ int WINAPI WinMain(HINSTANCE, HINSTANCE, LPSTR, int) {
 		wc.hInstance,//インスタンスハンドル
 		nullptr);
 
-	//ウィンドウを表示する
-	ShowWindow(hwnd, SW_SHOW);
-
 
 	//DebugLayer//
-
-#ifdef  _DEBUG
+#ifdef _DEBUG
 	ID3D12Debug1* debugController = nullptr;
 	if (SUCCEEDED(D3D12GetDebugInterface(IID_PPV_ARGS(&debugController)))) {
 		//デバッグレイヤーを有効化する
@@ -126,8 +122,12 @@ int WINAPI WinMain(HINSTANCE, HINSTANCE, LPSTR, int) {
 		//さらにGPU側でもチェックを行うようにする
 		debugController->SetEnableGPUBasedValidation(TRUE);
 	}
-#endif //  _DEBUG
+#endif  
 
+
+
+	//ウィンドウを表示する
+	ShowWindow(hwnd, SW_SHOW);
 
 
 
