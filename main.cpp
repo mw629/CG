@@ -72,6 +72,8 @@ std::string ConvertString(const std::wstring& str) {
 //Windowsアプリでのエントリーポイント(main関数)
 int WINAPI WinMain(HINSTANCE, HINSTANCE, LPSTR, int) {
 
+	std::filesystem::create_directory("logs");
+
 
 	//現在時刻でログファイルを生成する//
 
