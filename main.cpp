@@ -9,10 +9,13 @@
 #include<fstream>
 #include<chrono>
 #include<dxgidebug.h>
+#include<dbgHelp.h>
+#include<strsafe.h>
 
 #pragma comment(lib,"d3d12.lib")
 #pragma comment(lib,"dxgi.lib")
 #pragma comment(lib,"dxguid.lib")
+#pragma comment(lib,"dbgHelp.lib")
 
 
 
@@ -35,7 +38,7 @@ LRESULT CALLBACK WindowProc(HWND hwnd, UINT msg, WPARAM wparam, LPARAM lparam)
 
 //出力ウィンドウに文字を出す//
 
-void Log(std::ostream& os,const std::string& message) {
+void Log(std::ostream& os, const std::string& message) {
 	os << message << std::endl;
 	OutputDebugStringA(message.c_str());
 }
@@ -71,9 +74,41 @@ std::string ConvertString(const std::wstring& str) {
 }
 
 
+//CrashHandlerの登録//
+
+static LONG WINAPI ExportDump(EXCEPTION_POINTERS* exception) {
+	//Dumpを出力する//
+
+	SYSTEMTIME time;
+	GetLocalTime(&time);
+	wchar_t filePath[MAX_PATH] = { 0 };
+	CreateDirectory(L"./Dump", nullptr);
+	StringCchPrintf(filePath, MAX_PATH, L"./Dump/%04d-%02d%02d-%02d%02d.dmp", time.wYear, time.wMonth, time.wDay, time.wHour, time.wMinute);
+	HANDLE dumpFileHandle = CreateFile(filePath, GENERIC_READ | GENERIC_WRITE, FILE_SHARE_WRITE | FILE_SHARE_READ, 0, CREATE_ALWAYS, 0, 0);
+	//preocessID(このexeのID)とクラッシュ(例外)の発生したthreadIDを取得
+	DWORD processId = GetCurrentProcessId();
+	DWORD threadId = GetCurrentThreadId();
+	//設定情報を入力
+	_MINIDUMP_EXCEPTION_INFORMATION minidumpInformation{ 0 };
+	minidumpInformation.ThreadId = threadId;
+	minidumpInformation.ExceptionPointers = exception;
+	minidumpInformation.ClientPointers = TRUE;
+	//Dumpを出力。MiniDumpNormalは最低限の情報を出力するフラグ
+	MiniDumpWriteDump(GetCurrentProcess(), processId, dumpFileHandle, MiniDumpNormal, &minidumpInformation, nullptr, nullptr);
+	//他に関連付けられているSEH例外ハンドルがあれば実行。通常のプロセスを終了する。
+
+	return EXCEPTION_EXECUTE_HANDLER;
+}
+
+
+
 
 //Windowsアプリでのエントリーポイント(main関数)
 int WINAPI WinMain(HINSTANCE, HINSTANCE, LPSTR, int) {
+
+
+	SetUnhandledExceptionFilter(ExportDump);
+
 
 
 	//現在時刻でログファイルを生成する//
@@ -91,6 +126,12 @@ int WINAPI WinMain(HINSTANCE, HINSTANCE, LPSTR, int) {
 	std::string logFilePath = std::string("logs/") + dateString + ".log";
 	//ファイル名を作って書き込み準備
 	std::ofstream logStream(logFilePath);
+
+
+
+	
+
+
 
 
 	//ウィンドウクラスの登録//
@@ -182,7 +223,7 @@ int WINAPI WinMain(HINSTANCE, HINSTANCE, LPSTR, int) {
 		//ソフトウェアアダプタでなければ採用!
 		if (!(adapterDesc.Flags & DXGI_ADAPTER_FLAG3_SOFTWARE)) {
 			//採用したアダプタの情報をログに出力、wstringの方なので注意
-			Log(logStream,ConvertString(std::format(L"Use Adapter:{}\n", adapterDesc.Description)));
+			Log(logStream, ConvertString(std::format(L"Use Adapter:{}\n", adapterDesc.Description)));
 			break;
 		}
 		useAdapter = nullptr;//ソフトウェアアダプタの場合は見なかったことにする
@@ -204,13 +245,13 @@ int WINAPI WinMain(HINSTANCE, HINSTANCE, LPSTR, int) {
 		//指定した機能レベルでデバイスが生成できたかを確認
 		if (SUCCEEDED(hr)) {
 			//生成できたのでログ出力を行ってループを抜ける
-			Log(logStream,std::format("FeatureLevel : {}\n", featureLevelStrings[i]));
+			Log(logStream, std::format("FeatureLevel : {}\n", featureLevelStrings[i]));
 			break;
 		}
 	}
 	//デバイスの生成がうまくいかなかったので起動できない
 	assert(device != nullptr);
-	Log(logStream,"Complete createD3D12Device!!!\n");//初期化完了ログを出す
+	Log(logStream, "Complete createD3D12Device!!!\n");//初期化完了ログを出す
 
 
 	//エラー・警告、即ちに停止//
@@ -346,8 +387,8 @@ int WINAPI WinMain(HINSTANCE, HINSTANCE, LPSTR, int) {
 
 	//これから書き込むバックバッファのインデックスを取得
 	UINT backBufferIndex = swapChain->GetCurrentBackBufferIndex();
-	
-	
+
+
 	//TransitionBarrierを張る//
 	D3D12_RESOURCE_BARRIER barrier{};
 	//今回バリアはTransition
@@ -363,14 +404,14 @@ int WINAPI WinMain(HINSTANCE, HINSTANCE, LPSTR, int) {
 	//TransitionBarrierを張る
 	commandList->ResourceBarrier(1, &barrier);
 
-	
+
 	//描画先のRTVを設定する
 	commandList->OMSetRenderTargets(1, &rtvHandles[backBufferIndex], false, nullptr);
 	//指定した色で画面全体をクリアする
 	float clearColor[] = { 0.1f,0.25f,0.5f,1.0f };//青っぽい色。RGBAの順
 	commandList->ClearRenderTargetView(rtvHandles[backBufferIndex], clearColor, 0, nullptr);
 
-	
+
 	//画面に描く処理はすべて終わり、画面に映すので、状態を遷移
 	//今回RenderTargetからPresentにする
 	barrier.Transition.StateBefore = D3D12_RESOURCE_STATE_RENDER_TARGET;
@@ -383,7 +424,7 @@ int WINAPI WinMain(HINSTANCE, HINSTANCE, LPSTR, int) {
 	hr = commandList->Close();
 	assert(SUCCEEDED(hr));
 
-	
+
 	//初期値0でFenceを作る
 	ID3D12Fence* fence = nullptr;
 	uint64_t fenceValue = 0;
