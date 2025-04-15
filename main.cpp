@@ -17,8 +17,14 @@
 #pragma comment(lib,"dxgi.lib")
 #pragma comment(lib,"dxguid.lib")
 #pragma comment(lib,"dbgHelp.lib")
-#pragma comment(lib,"dxcapiler.lib")
+#pragma comment(lib,"dxcompiler.lib")
 
+struct Vector4 {
+	float x;
+	float y;
+	float z;
+	float w;
+};
 
 
 //ウィンドウプロシージャ//
@@ -456,6 +462,10 @@ int WINAPI WinMain(HINSTANCE, HINSTANCE, LPSTR, int) {
 	device->CreateRenderTargetView(swapChainResources[1], &rtvDesc, rtvHandles[1]);
 
 
+
+
+
+
 	//Descriptorの位置決め//
 
 	//rtvHandles[0] = rtvStartHandle;
@@ -491,6 +501,9 @@ int WINAPI WinMain(HINSTANCE, HINSTANCE, LPSTR, int) {
 	commandList->ClearRenderTargetView(rtvHandles[backBufferIndex], clearColor, 0, nullptr);
 
 
+
+
+
 	//画面に描く処理はすべて終わり、画面に映すので、状態を遷移
 	//今回RenderTargetからPresentにする
 	barrier.Transition.StateBefore = D3D12_RESOURCE_STATE_RENDER_TARGET;
@@ -514,20 +527,19 @@ int WINAPI WinMain(HINSTANCE, HINSTANCE, LPSTR, int) {
 	HANDLE fenceEvent = CreateEvent(NULL, FALSE, FALSE, NULL);
 	assert(fenceEvent != nullptr);
 
-
-	//現時点でincludeはしないが、includeに対応するための設定を行っておく
-	IDxcIncludeHandler* includeHandler = nullptr;
-	hr = dxcUtils->CreateDefaultIncludeHandler(&includeHandler);
-	assert(SUCCEEDED(hr));
-
-
 	//DXCの初期化//
 
 	IDxcUtils* dxcUtils = nullptr;
 	IDxcCompiler3* dxcCompiler = nullptr;
 	hr = DxcCreateInstance(CLSID_DxcUtils, IID_PPV_ARGS(&dxcUtils));
 	assert(SUCCEEDED(hr));
-	hr = DxcCreateInstance(CLSID_DxcUtils, IID_PPV_ARGS(&dxcCompiler));
+	hr = DxcCreateInstance(CLSID_DxcCompiler, IID_PPV_ARGS(&dxcCompiler));
+	assert(SUCCEEDED(hr));
+
+
+	//現時点でincludeはしないが、includeに対応するための設定を行っておく
+	IDxcIncludeHandler* includeHandler = nullptr;
+	hr = dxcUtils->CreateDefaultIncludeHandler(&includeHandler);
 	assert(SUCCEEDED(hr));
 
 
@@ -561,9 +573,9 @@ int WINAPI WinMain(HINSTANCE, HINSTANCE, LPSTR, int) {
 	inputElementDescs[0].SemanticIndex = 0;
 	inputElementDescs[0].Format = DXGI_FORMAT_R32G32B32A32_FLOAT;
 	inputElementDescs[0].AlignedByteOffset = D3D12_APPEND_ALIGNED_ELEMENT;
-	D3D12_INPUT_LAYOUT_DESC inputLayoutDescs{};
-	inputLayoutDescs.pInputElementDescs = inputElementDescs;
-	inputLayoutDescs.NumElements = _countof(inputElementDescs);
+	D3D12_INPUT_LAYOUT_DESC inputLayoutDesc{};
+	inputLayoutDesc.pInputElementDescs = inputElementDescs;
+	inputLayoutDesc.NumElements = _countof(inputElementDescs);
 
 
 	//BlendStateの設定を行う//
@@ -600,11 +612,11 @@ int WINAPI WinMain(HINSTANCE, HINSTANCE, LPSTR, int) {
 
 	D3D12_GRAPHICS_PIPELINE_STATE_DESC graphicsPipelineStateDesc{};
 	graphicsPipelineStateDesc.pRootSignature = rootSignature;//RootSignature
-	graphicsPipelineStateDesc.InputLayout = inputLayoutDescs;//InputLayout
+	graphicsPipelineStateDesc.InputLayout = inputLayoutDesc;//InputLayout
 	graphicsPipelineStateDesc.VS = { vertexShaderBlob->GetBufferPointer(),
 	vertexShaderBlob->GetBufferSize() };//VertexShader
 	graphicsPipelineStateDesc.PS = { pixelShaderBlob->GetBufferPointer(),
-	vertexShaderBlob->GetBufferSize() };//PixelShader
+	pixelShaderBlob->GetBufferSize() };//PixelShader
 	graphicsPipelineStateDesc.BlendState = blendDesc;//BlenderState
 	graphicsPipelineStateDesc.RasterizerState = rasterizerDesc;//RasterizerState
 	//書き込むRTVの情報
@@ -681,10 +693,10 @@ int WINAPI WinMain(HINSTANCE, HINSTANCE, LPSTR, int) {
 	//クライアント領域のサイズと一緒にして画面全体に表示
 	viewport.Width = kClientWidth;
 	viewport.Height = kClientHeight;
-	viewport.TopLeftX = 0;
-	viewport.TopLeftY = 0;
-	viewport.MinDepth = 0;
-	viewport.MaxDepth = 0;
+	viewport.TopLeftX = 0.0f;
+	viewport.TopLeftY = 0.0f;
+	viewport.MinDepth = 0.0f;
+	viewport.MaxDepth = 1.0f;
 
 	//シーザー矩形
 	D3D12_RECT scissorRect{};
@@ -695,21 +707,7 @@ int WINAPI WinMain(HINSTANCE, HINSTANCE, LPSTR, int) {
 	scissorRect.bottom = kClientHeight;
 
 
-	//コマンドを積む//
-
-	commandList->RSSetViewports(1, &viewport);//Viewportを設定
-	commandList->RSSetScissorRects(1, &scissorRect);//Sxirssorを設定
-	//RootSignatureを設定。POSに設定しているけど別途設定が必要
-	commandList->SetGraphicsRootSignature(rootSignature);
-	commandList->SetPipelineState(graphicsPipelineState);//PSOを設定
-	commandList->IASetVertexBuffers(0, 1, &vertexBufferView);//VBVを設定
-	//形状を設定。PSOに設定しているものとはまた別。同じものを設定すると考えておけばいい
-	commandList->IASetPrimitiveTopology(D3D10_PRIMITIVE_TOPOLOGY_TRIANGLELIST);
-	//描画！（DrawCall/ドローコール）。3頂点で1つのインスタンス。インスタンスについては今後
-	commandList->DrawInstanced(3, 1, 0, 0);
-
-
-
+	
 
 
 	//コマンドをキックする//
@@ -761,6 +759,23 @@ int WINAPI WinMain(HINSTANCE, HINSTANCE, LPSTR, int) {
 		}
 		else {
 			//ゲーム処理
+			 
+		 
+			//コマンドを積む//
+
+			
+
+			commandList->RSSetViewports(1, &viewport);//Viewportを設定
+			commandList->RSSetScissorRects(1, &scissorRect);//Sxirssorを設定
+			//RootSignatureを設定。POSに設定しているけど別途設定が必要
+			commandList->SetGraphicsRootSignature(rootSignature);
+			commandList->SetPipelineState(graphicsPipelineState);//PSOを設定
+			commandList->IASetVertexBuffers(0, 1, &vertexBufferView);//VBVを設定
+			//形状を設定。PSOに設定しているものとはまた別。同じものを設定すると考えておけばいい
+			commandList->IASetPrimitiveTopology(D3D10_PRIMITIVE_TOPOLOGY_TRIANGLELIST);
+			//描画！（DrawCall/ドローコール）。3頂点で1つのインスタンス。インスタンスについては今後
+			commandList->DrawInstanced(3, 1, 0, 0);
+
 		}
 	}
 
