@@ -530,6 +530,7 @@ int WINAPI WinMain(HINSTANCE, HINSTANCE, LPSTR, int) {
 	descriptionRootSignature.Flags =
 		D3D12_ROOT_SIGNATURE_FLAG_ALLOW_INPUT_ASSEMBLER_INPUT_LAYOUT;
 
+
 	//RootParameter//
 
 	//RootParameter
@@ -544,20 +545,13 @@ int WINAPI WinMain(HINSTANCE, HINSTANCE, LPSTR, int) {
 	//Material用のResourceを作る//
 
 	//マテリアル用のリソースを作る。今回はcolor1つ分のサイズを用意する
-	ID3D12Resource* materialResource = CreateBufferResource(device, sizeof(Vector4));//ここ後で聞く
+	ID3D12Resource* materialResource = CreateBufferResource(device, sizeof(Vector4));
 	//マテリアルデータを書き込む
 	Vector4* materialData = nullptr;
 	//書き込むためのアドレス取得
 	materialResource->Map(0, nullptr, reinterpret_cast<void**>(&materialData));
 	//今回は書き込んでみる
 	*materialData = Vector4(1.0f, 0.0f, 0.0f, 1.0f);
-
-	
-	//CBVを設定する//
-
-	//マテリアルCBufferの場所を設定
-	commandList->SetGraphicsRootConstantBufferView(0, materialResource->GetGPUVirtualAddress());
-
 
 
 
@@ -576,6 +570,9 @@ int WINAPI WinMain(HINSTANCE, HINSTANCE, LPSTR, int) {
 		signatureBlob->GetBufferPointer(), signatureBlob->GetBufferSize(),
 		IID_PPV_ARGS(&rootSignature));
 	assert(SUCCEEDED(hr));
+
+
+	
 
 
 	//InputLayoutの設定を行う//
@@ -767,6 +764,11 @@ int WINAPI WinMain(HINSTANCE, HINSTANCE, LPSTR, int) {
 			commandList->RSSetScissorRects(1, &scissorRect);//Sxirssorを設定
 			//RootSignatureを設定。POSに設定しているけど別途設定が必要
 			commandList->SetGraphicsRootSignature(rootSignature);
+			
+			//CBVを設定する//
+			//マテリアルCBufferの場所を設定
+			commandList->SetGraphicsRootConstantBufferView(0, materialResource->GetGPUVirtualAddress());
+
 			commandList->SetPipelineState(graphicsPipelineState);//PSOを設定
 			commandList->IASetVertexBuffers(0, 1, &vertexBufferView);//VBVを設定
 			//形状を設定。PSOに設定しているものとはまた別。同じものを設定すると考えておけばいい
