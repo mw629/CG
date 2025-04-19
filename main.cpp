@@ -13,11 +13,15 @@
 #include <strsafe.h>
 #include <dxcapi.h>
 
+#include "Calculation.h"
+
 #pragma comment(lib,"d3d12.lib")
 #pragma comment(lib,"dxgi.lib")
 #pragma comment(lib,"dxguid.lib")
 #pragma comment(lib,"dbgHelp.lib")
 #pragma comment(lib,"dxcompiler.lib")
+
+
 
 struct Vector4 {
 	float x;
@@ -25,6 +29,14 @@ struct Vector4 {
 	float z;
 	float w;
 };
+
+struct Transform
+{
+	Vector3 scale;
+	Vector3 rotate;
+	Vector3 translate;
+};
+
 
 
 //ウィンドウプロシージャ//
@@ -187,7 +199,7 @@ IDxcBlob* CompileShader(
 
 //Resource作成関数//
 ID3D12Resource* CreateBufferResource(ID3D12Device* device, size_t sizeInBytes) {
-	
+
 	//リソース用のヒープの設定
 	D3D12_HEAP_PROPERTIES uploadHeapProperties{};
 	uploadHeapProperties.Type = D3D12_HEAP_TYPE_UPLOAD;//UploadHeepを使う
@@ -236,9 +248,6 @@ int WINAPI WinMain(HINSTANCE, HINSTANCE, LPSTR, int) {
 	std::string logFilePath = std::string("logs/") + dateString + ".log";
 	//ファイル名を作って書き込み準備
 	std::ofstream logStream(logFilePath);
-
-
-
 
 
 
@@ -534,10 +543,15 @@ int WINAPI WinMain(HINSTANCE, HINSTANCE, LPSTR, int) {
 	//RootParameter//
 
 	//RootParameter
-	D3D12_ROOT_PARAMETER rootParameter[1] = {};
+	D3D12_ROOT_PARAMETER rootParameter[2] = {};
 	rootParameter[0].ParameterType = D3D12_ROOT_PARAMETER_TYPE_CBV;//CBVを使う
 	rootParameter[0].ShaderVisibility = D3D12_SHADER_VISIBILITY_PIXEL;//PixelShaderで行う
 	rootParameter[0].Descriptor.ShaderRegister = 0;//レジスタ番号0とバインド
+
+	rootParameter[1].ParameterType = D3D12_ROOT_PARAMETER_TYPE_CBV;//CBVを使う
+	rootParameter[1].ShaderVisibility = D3D12_SHADER_VISIBILITY_VERTEX;//VertexShaderで行う
+	rootParameter[1].Descriptor.ShaderRegister = 0;//レジスタ番号0とバインド
+
 	descriptionRootSignature.pParameters = rootParameter;//ルートパラメータ配列へのポインタ
 	descriptionRootSignature.NumParameters = _countof(rootParameter);//配列の長さ
 
@@ -552,6 +566,15 @@ int WINAPI WinMain(HINSTANCE, HINSTANCE, LPSTR, int) {
 	materialResource->Map(0, nullptr, reinterpret_cast<void**>(&materialData));
 	//今回は書き込んでみる
 	*materialData = Vector4(1.0f, 0.0f, 0.0f, 1.0f);
+
+	//WVP用のリソースを作る
+	ID3D12Resource* wvpResource = CreateBufferResource(device, sizeof(Matrix4x4));
+	//
+	Matrix4x4* wvpData = nullptr;
+	//
+	wvpResource->Map(0, nullptr, reinterpret_cast<void**>(&wvpData));
+	//
+	*wvpData = IdentityMatrix();
 
 
 
@@ -572,7 +595,7 @@ int WINAPI WinMain(HINSTANCE, HINSTANCE, LPSTR, int) {
 	assert(SUCCEEDED(hr));
 
 
-	
+
 
 
 	//InputLayoutの設定を行う//
@@ -716,7 +739,8 @@ int WINAPI WinMain(HINSTANCE, HINSTANCE, LPSTR, int) {
 	scissorRect.top = 0;
 	scissorRect.bottom = kClientHeight;
 
-
+	Transform transfrom{ {1.0f,1.0f,1.0f},{0.0f,0.0f,0.0f},{0.0f,0.0f,0.0f} };
+	Transform camraTransform{ {1.0f,1.0f,1.0f},{0.0f,0.0f,0.0f},{0.0f,0.0f,-5.0f} };
 
 	//メインループ//
 
@@ -730,7 +754,17 @@ int WINAPI WinMain(HINSTANCE, HINSTANCE, LPSTR, int) {
 		}
 		else {
 			//ゲーム処理
-			 
+
+			transfrom.rotate.y += 0.03f;
+			
+			Matrix4x4 worldMatrix = MakeAffineMatrix(transfrom.translate, transfrom.scale, transfrom.rotate);
+			Matrix4x4 cameraMatrix = MakeAffineMatrix(transfrom.translate, transfrom.scale, transfrom.rotate);
+			Matrix4x4 viewMatrix = InverseMatrix4x4(cameraMatrix);
+			Matrix4x4 projectionMatrix = MakePerspectiveFovMatrix(0.45f, float(kClientWidth) / float(kClientHeight), 0.1f, 100.0f);
+			Matrix4x4 worldViewProjectionMatrix = MultiplyMatrix4x4(worldMatrix, MultiplyMatrix4x4(viewMatrix, projectionMatrix));
+			*wvpData = worldViewProjectionMatrix;//camera?
+
+			*wvpData = worldMatrix;
 
 			 //コマンドを積み込んで確定させる//
 
@@ -764,15 +798,17 @@ int WINAPI WinMain(HINSTANCE, HINSTANCE, LPSTR, int) {
 			commandList->RSSetScissorRects(1, &scissorRect);//Sxirssorを設定
 			//RootSignatureを設定。POSに設定しているけど別途設定が必要
 			commandList->SetGraphicsRootSignature(rootSignature);
-			
+
 			//CBVを設定する//
 			//マテリアルCBufferの場所を設定
 			commandList->SetGraphicsRootConstantBufferView(0, materialResource->GetGPUVirtualAddress());
+			commandList->SetGraphicsRootConstantBufferView(1, wvpResource->GetGPUVirtualAddress());
+
 
 			commandList->SetPipelineState(graphicsPipelineState);//PSOを設定
 			commandList->IASetVertexBuffers(0, 1, &vertexBufferView);//VBVを設定
 			//形状を設定。PSOに設定しているものとはまた別。同じものを設定すると考えておけばいい
-			commandList->IASetPrimitiveTopology(D3D10_PRIMITIVE_TOPOLOGY_TRIANGLELIST);
+			commandList->IASetPrimitiveTopology(D3D_PRIMITIVE_TOPOLOGY_TRIANGLELIST);
 			//描画！（DrawCall/ドローコール）。3頂点で1つのインスタンス。インスタンスについては今後
 			commandList->DrawInstanced(3, 1, 0, 0);
 
@@ -783,7 +819,7 @@ int WINAPI WinMain(HINSTANCE, HINSTANCE, LPSTR, int) {
 			barrier.Transition.StateAfter = D3D12_RESOURCE_STATE_PRESENT;
 			//TransitionBarrierを張る
 			commandList->ResourceBarrier(1, &barrier);
-			
+
 			//コマンドリストの内容を確定させる。すべてのコマンドを積んでからCloseすること
 			hr = commandList->Close();
 			assert(SUCCEEDED(hr));
