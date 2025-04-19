@@ -13,11 +13,15 @@
 #include <strsafe.h>
 #include <dxcapi.h>
 
+#include "Calculation.h"
+
 #pragma comment(lib,"d3d12.lib")
 #pragma comment(lib,"dxgi.lib")
 #pragma comment(lib,"dxguid.lib")
 #pragma comment(lib,"dbgHelp.lib")
 #pragma comment(lib,"dxcompiler.lib")
+
+
 
 struct Vector4 {
 	float x;
@@ -26,24 +30,13 @@ struct Vector4 {
 	float w;
 };
 
-struct Matrix4x4
+struct Transform
 {
-	float m[4][4] = {
-		{0,0,0,0},
-		{0,0,0,0},
-		{0,0,0,0},
-		{0,0,0,0}
-	};
+	Vector3 scale;
+	Vector3 rotate;
+	Vector3 translate;
 };
 
-Matrix4x4 MakeIdentityMatrix4x4() {
-	Matrix4x4 m = {
-		1.0f,0.0f,0.0f,0.0f,
-		0.0f,1.0f,0.0f,0.0f,
-		0.0f,0.0f,1.0f,0.0f,
-		0.0f,0.0f,0.0f,1.0f };
-	return m;
-}
 
 
 //ウィンドウプロシージャ//
@@ -581,7 +574,7 @@ int WINAPI WinMain(HINSTANCE, HINSTANCE, LPSTR, int) {
 	//
 	wvpResource->Map(0, nullptr, reinterpret_cast<void**>(&wvpData));
 	//
-	*wvpData = MakeIdentityMatrix4x4();
+	*wvpData = IdentityMatrix();
 
 
 
@@ -746,7 +739,8 @@ int WINAPI WinMain(HINSTANCE, HINSTANCE, LPSTR, int) {
 	scissorRect.top = 0;
 	scissorRect.bottom = kClientHeight;
 
-
+	Transform transfrom{ {1.0f,1.0f,1.0f},{0.0f,0.0f,0.0f},{0.0f,0.0f,0.0f} };
+	Transform camraTransform{ {1.0f,1.0f,1.0f},{0.0f,0.0f,0.0f},{0.0f,0.0f,-5.0f} };
 
 	//メインループ//
 
@@ -761,6 +755,16 @@ int WINAPI WinMain(HINSTANCE, HINSTANCE, LPSTR, int) {
 		else {
 			//ゲーム処理
 
+			transfrom.rotate.y += 0.03f;
+			
+			Matrix4x4 worldMatrix = MakeAffineMatrix(transfrom.translate, transfrom.scale, transfrom.rotate);
+			Matrix4x4 cameraMatrix = MakeAffineMatrix(transfrom.translate, transfrom.scale, transfrom.rotate);
+			Matrix4x4 viewMatrix = InverseMatrix4x4(cameraMatrix);
+			Matrix4x4 projectionMatrix = MakePerspectiveFovMatrix(0.45f, float(kClientWidth) / float(kClientHeight), 0.1f, 100.0f);
+			Matrix4x4 worldViewProjectionMatrix = MultiplyMatrix4x4(worldMatrix, MultiplyMatrix4x4(viewMatrix, projectionMatrix));
+			*wvpData = worldViewProjectionMatrix;//camera?
+
+			*wvpData = worldMatrix;
 
 			 //コマンドを積み込んで確定させる//
 
