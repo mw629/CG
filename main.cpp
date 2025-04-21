@@ -826,13 +826,13 @@ int WINAPI WinMain(HINSTANCE, HINSTANCE, LPSTR, int) {
 
 
 			Matrix4x4 worldMatrix = MakeAffineMatrix(transfrom.translate, transfrom.scale, transfrom.rotate);
-			Matrix4x4 cameraMatrix = MakeAffineMatrix(transfrom.translate, transfrom.scale, transfrom.rotate);
+			Matrix4x4 cameraMatrix = MakeAffineMatrix(camraTransform.translate, camraTransform.scale, camraTransform.rotate);
 			Matrix4x4 viewMatrix = InverseMatrix4x4(cameraMatrix);
 			Matrix4x4 projectionMatrix = MakePerspectiveFovMatrix(0.45f, float(kClientWidth) / float(kClientHeight), 0.1f, 100.0f);
 			Matrix4x4 worldViewProjectionMatrix = MultiplyMatrix4x4(worldMatrix, MultiplyMatrix4x4(viewMatrix, projectionMatrix));
 			*wvpData = worldViewProjectionMatrix;//camera?
 
-			*wvpData = worldMatrix;
+			//*wvpData = worldMatrix;
 
 
 
