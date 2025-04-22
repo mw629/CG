@@ -13,6 +13,7 @@
 #include <strsafe.h>
 #include <dxcapi.h>
 
+#include "externals/DirectXTex/DirectXTex.h"
 #include "externals/imgui/imgui.h"
 #include "externals/imgui/imgui_impl_dx12.h"
 #include "externals/imgui/imgui_impl_win32.h"
@@ -30,6 +31,7 @@ extern IMGUI_IMPL_API LRESULT ImGui_ImplWin32_WndProcHandler(HWND hWnd, UINT msg
 #pragma comment(lib,"dxcompiler.lib")
 
 
+///構造体///
 
 struct Vector4 {
 	float x;
@@ -46,6 +48,8 @@ struct Transform
 };
 
 
+
+///クラス///
 
 //ウィンドウプロシージャ//
 
@@ -249,9 +253,14 @@ ID3D12DescriptorHeap* CreateDescriptorHeep(
 }
 
 
+
+
+
 //Windowsアプリでのエントリーポイント(main関数)
 int WINAPI WinMain(HINSTANCE, HINSTANCE, LPSTR, int) {
 
+	//COMの初期化
+	CoInitializeEx(0, COINIT_MULTITHREADED);
 
 	SetUnhandledExceptionFilter(ExportDump);
 
@@ -964,6 +973,9 @@ int WINAPI WinMain(HINSTANCE, HINSTANCE, LPSTR, int) {
 	ImGui_ImplDX12_Shutdown();
 	ImGui_ImplWin32_Shutdown();
 	ImGui::DestroyContext();
+
+	//COM終了処理
+	CoUninitialize();
 
 
 	//ReportLiveObjects//
