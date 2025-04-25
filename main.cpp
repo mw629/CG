@@ -50,7 +50,7 @@ struct Transform
 struct VertexData
 {
 	Vector4 position;
-	Vector2 texcood;
+	Vector2 texcoord;
 };
 
 
@@ -740,7 +740,7 @@ int WINAPI WinMain(HINSTANCE, HINSTANCE, LPSTR, int) {
 	inputElementDescs[0].Format = DXGI_FORMAT_R32G32B32A32_FLOAT;
 	inputElementDescs[0].AlignedByteOffset = D3D12_APPEND_ALIGNED_ELEMENT;
 	
-	inputElementDescs[1].SemanticName = "TEXCOOD";
+	inputElementDescs[1].SemanticName = "texcoord";
 	inputElementDescs[1].SemanticIndex = 0;
 	inputElementDescs[1].Format = DXGI_FORMAT_R32G32_FLOAT;
 	inputElementDescs[1].AlignedByteOffset = D3D12_APPEND_ALIGNED_ELEMENT;
@@ -831,13 +831,13 @@ int WINAPI WinMain(HINSTANCE, HINSTANCE, LPSTR, int) {
 	vertexResource->Map(0, nullptr, reinterpret_cast<void**>(&vertexData));
 	//左下
 	vertexData[0].position = { -0.5f,-0.5f,0.0f,1.0f };
-	vertexData[0].texcood = { 0.0f,1.0f };
+	vertexData[0].texcoord = { 0.0f,1.0f };
 	//上
 	vertexData[1].position = { 0.0f,0.5f,0.0f,1.0f };
-	vertexData[1].texcood = { 0.5f,0.0f };
+	vertexData[1].texcoord = { 0.5f,0.0f };
 	//右下
 	vertexData[2].position = { 0.5f,-0.5f,0.0f,1.0f };
-	vertexData[2].texcood = { 1.0f,1.0f };
+	vertexData[2].texcoord = { 1.0f,1.0f };
 
 
 	//ViewportとScissor（シザー）//
