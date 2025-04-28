@@ -718,7 +718,9 @@ int WINAPI WinMain(HINSTANCE, HINSTANCE, LPSTR, int) {
 	DirectX::ScratchImage mipImages = LoadTexture("resources/uvChecker.png");
 	const DirectX::TexMetadata& metaData = mipImages.GetMetadata();
 	ID3D12Resource* textureResource = CreateTextureResource(device, metaData);
-	UploadTextureData(textureResource, mipImages, device, commandList);
+	ID3D12Resource* intermediateResource = UploadTextureData(textureResource, mipImages, device, commandList);
+
+	
 
 
 	//実際にShaderResourceView
