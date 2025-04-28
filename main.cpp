@@ -720,6 +720,9 @@ int WINAPI WinMain(HINSTANCE, HINSTANCE, LPSTR, int) {
 	ID3D12Resource* textureResource = CreateTextureResource(device, metaData);
 	ID3D12Resource* intermediateResource = UploadTextureData(textureResource, mipImages, device, commandList);
 
+
+	///ここ怪しい///
+
 	//コマンドリストの内容を確定させる。すべてのコマンドを積んでからCloseすること
 	hr = commandList->Close();
 	assert(SUCCEEDED(hr));
@@ -758,6 +761,9 @@ int WINAPI WinMain(HINSTANCE, HINSTANCE, LPSTR, int) {
 	assert(SUCCEEDED(hr));
 	hr = commandList->Reset(commandAllocator, nullptr);
 	assert(SUCCEEDED(hr));
+
+
+	//////
 
 
 	//実際にShaderResourceView
