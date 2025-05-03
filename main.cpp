@@ -1041,49 +1041,6 @@ int WINAPI WinMain(HINSTANCE, HINSTANCE, LPSTR, int) {
 	vertexDataSprite[5].texcoord = { 1.0f,1.0f };
 
 
-	//円の描画//
-
-	float pi = 3.14f;
-	uint32_t kSubdivision = 16;
-	//経度分割1つ分の角度φd
-	const float kLonEvery = pi * 2.0f / float(kSubdivision);
-	//緯度分割1つ分の角度Θd
-	const float kLatEvery = pi / float(kSubdivision);
-	//緯度の方向に分割	
-	for (uint32_t latIndex = 0; latIndex < kSubdivision; ++latIndex) {
-		float lat = -pi / 2.0f + kLatEvery * latIndex;//Θ
-		//経度方向に分割しながら線を描く
-		for (uint32_t lonIndex = 0; lonIndex < kSubdivision; ++lonIndex) {
-			uint32_t start = (latIndex * kSubdivision + lonIndex) * 6;
-			float lon = lonIndex * kLonEvery;
-			//頂点にデータを入力する。基準点a
-			vertexData[start].position.x = cos(lat) + cos(lon);
-			vertexData[start].position.y = sin(lat);
-			vertexData[start].position.z = cos(lat) * sin(lon);
-			vertexData[start].position.w = 1.0f;
-			vertexData[start].texcoord = { 0.0f,1.0f };
-			//基準点b
-			vertexData[start].position.x = cos(lat + kLatEvery) + cos(lon);
-			vertexData[start].position.y = sin(lat + kLatEvery);
-			vertexData[start].position.z = cos(lat + kLatEvery) * sin(lon);
-			vertexData[start].position.w = 1.0f;
-			vertexData[start].texcoord = { 0.0f,0.0f };
-			//基準点b
-			vertexData[start].position.x = cos(lat) + cos(lon + kLonEvery);
-			vertexData[start].position.y = sin(lat);
-			vertexData[start].position.z = cos(lat) * sin(lon + kLonEvery);
-			vertexData[start].position.w = 1.0f;
-			vertexData[start].texcoord = { 1.0f,1.0f };
-			//基準点d
-			vertexData[start].position.x = cos(lat + kLatEvery) + cos(lon + kLonEvery);
-			vertexData[start].position.y = sin(lat + kLatEvery);
-			vertexData[start].position.z = cos(lat + kLatEvery) * sin(lon + kLonEvery);
-			vertexData[start].position.w = 1.0f;
-			vertexData[start].texcoord = { 1.0f,0.0f };
-		}
-	}
-
-
 
 	//Sprite用ののTransformationMatrix用のリソースを作る。Matrix4x41つ分のサイズを用意する
 	ID3D12Resource* transformationMatrixResourceSprite = CreateBufferResource(device, sizeof(Matrix4x4));
@@ -1266,7 +1223,7 @@ int WINAPI WinMain(HINSTANCE, HINSTANCE, LPSTR, int) {
 			commandList->SetGraphicsRootConstantBufferView(1, transformationMatrixResourceSprite->GetGPUVirtualAddress());
 
 			//描画
-			commandList->DrawInstanced(kSubdivision, 1, 0, 0);
+			commandList->DrawInstanced(6, 1, 0, 0);
 
 
 
