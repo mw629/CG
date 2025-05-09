@@ -1033,18 +1033,46 @@ int WINAPI WinMain(HINSTANCE, HINSTANCE, LPSTR, int) {
 	vertexDataSprite[2].position = { 640.0f,360.0f,0.0f,1.0f };//右下
 	vertexDataSprite[2].texcoord = { 1.0f,1.0f };
 	//2枚目の三角形
-	vertexDataSprite[3].position = { 0.0f,0.0f,0.0f,1.0f };//左下
+	vertexDataSprite[3].position = { 0.0f,0.0f,0.0f,1.0f };//左上
 	vertexDataSprite[3].texcoord = { 0.0f,0.0f };
 	vertexDataSprite[4].position = { 640.0f,0.0f,0.0f,1.0f };//右上
 	vertexDataSprite[4].texcoord = { 1.0f,0.0f };
 	vertexDataSprite[5].position = { 640.0f,360.0f,0.0f,1.0f };//右下
 	vertexDataSprite[5].texcoord = { 1.0f,1.0f };
 
+	//Sprite用ののTransformationMatrix用のリソースを作る。Matrix4x41つ分のサイズを用意する
+	ID3D12Resource* transformationMatrixResourceSprite = CreateBufferResource(device, sizeof(Matrix4x4));
+	//データを書き込む
+	Matrix4x4* transformationMatrixDataSprite = nullptr;
+	//書き込むためのアドレスを取得
+	transformationMatrixResourceSprite->Map(0, nullptr, reinterpret_cast<void**>(&transformationMatrixDataSprite));
+	//単位行列をかきこんでおく
+	*transformationMatrixDataSprite = IdentityMatrix();
 
-	//円の描画//
+
+	//球円の描画//
 
 	float pi = 3.14f;
 	uint32_t kSubdivision = 16;
+
+	//Shpere用の頂点リソースを作る//
+
+	ID3D12Resource* vertexResourceSpriteShpere = CreateBufferResource(device, sizeof(VertexData) * (kSubdivision * kSubdivision + kSubdivision) * 6);
+
+	//頂点バッファービューを作成する
+	D3D12_VERTEX_BUFFER_VIEW vertexBufferViewSpriteShpere{};
+	//リソースの先頭アドレスから使う
+	vertexBufferViewSpriteShpere.BufferLocation = vertexResourceSpriteShpere->GetGPUVirtualAddress();
+	//使用するリソースのサイズは頂点6つ分のサイズ
+	vertexBufferViewSpriteShpere.SizeInBytes = sizeof(VertexData) * (kSubdivision * kSubdivision + kSubdivision) * 6;
+	//1頂点当たりのサイズ
+	vertexBufferViewSpriteShpere.StrideInBytes = sizeof(VertexData);
+
+	//頂点データを設定する//
+
+	VertexData* vertexDataSpriteShpere = nullptr;
+	vertexResourceSpriteShpere->Map(0, nullptr, reinterpret_cast<void**>(&vertexDataSpriteShpere));
+
 	//経度分割1つ分の角度φd
 	const float kLonEvery = pi * 2.0f / float(kSubdivision);
 	//緯度分割1つ分の角度Θd
@@ -1057,44 +1085,38 @@ int WINAPI WinMain(HINSTANCE, HINSTANCE, LPSTR, int) {
 			uint32_t start = (latIndex * kSubdivision + lonIndex) * 6;
 			float lon = lonIndex * kLonEvery;
 			//頂点にデータを入力する。基準点a
-			vertexData[start].position.x = cos(lat) + cos(lon);
-			vertexData[start].position.y = sin(lat);
-			vertexData[start].position.z = cos(lat) * sin(lon);
-			vertexData[start].position.w = 1.0f;
-			vertexData[start].texcoord = { 0.0f,1.0f };
+			vertexDataSpriteShpere[start].position = { cos(lat) + cos(lon), sin(lat),cos(lat) * sin(lon),1.0f };
+			vertexDataSpriteShpere[start].texcoord = { float(lonIndex) / float(kSubdivision),1.0f - float(latIndex) / float(kSubdivision) };
 			//基準点b
-			vertexData[start].position.x = cos(lat + kLatEvery) + cos(lon);
-			vertexData[start].position.y = sin(lat + kLatEvery);
-			vertexData[start].position.z = cos(lat + kLatEvery) * sin(lon);
-			vertexData[start].position.w = 1.0f;
-			vertexData[start].texcoord = { 0.0f,0.0f };
-			//基準点b
-			vertexData[start].position.x = cos(lat) + cos(lon + kLonEvery);
-			vertexData[start].position.y = sin(lat);
-			vertexData[start].position.z = cos(lat) * sin(lon + kLonEvery);
-			vertexData[start].position.w = 1.0f;
-			vertexData[start].texcoord = { 1.0f,1.0f };
+			vertexDataSpriteShpere[start + 1].position = { cos(lat + kLatEvery) + cos(lon), sin(lat + kLatEvery),cos(lat + kLatEvery) * sin(lon) };
+			vertexDataSpriteShpere[start + 1].texcoord = { float(lonIndex) / float(kSubdivision),1.0f - float(latIndex + 1) / float(kSubdivision) };
+			vertexDataSpriteShpere[start + 3].position = { cos(lat + kLatEvery) + cos(lon), sin(lat + kLatEvery),cos(lat + kLatEvery) * sin(lon) };
+			vertexDataSpriteShpere[start + 3].texcoord = { float(lonIndex) / float(kSubdivision),1.0f - float(latIndex + 1) / float(kSubdivision) };
+			//基準点c
+			vertexDataSpriteShpere[start + 2].position = { cos(lat) + cos(lon + kLonEvery), sin(lat), cos(lat) * sin(lon + kLonEvery), 1.0f };
+			vertexDataSpriteShpere[start + 2].texcoord = { float(lonIndex + 1) / float(kSubdivision), 1.0f - float(latIndex) / float(kSubdivision) };
+			vertexDataSpriteShpere[start + 5].position = { cos(lat) + cos(lon + kLonEvery), sin(lat), cos(lat) * sin(lon + kLonEvery), 1.0f };
+			vertexDataSpriteShpere[start + 5].texcoord = { float(lonIndex + 1) / float(kSubdivision), 1.0f - float(latIndex) / float(kSubdivision) };
 			//基準点d
-			vertexData[start].position.x = cos(lat + kLatEvery) + cos(lon + kLonEvery);
-			vertexData[start].position.y = sin(lat + kLatEvery);
-			vertexData[start].position.z = cos(lat + kLatEvery) * sin(lon + kLonEvery);
-			vertexData[start].position.w = 1.0f;
-			vertexData[start].texcoord = { 1.0f,0.0f };
+			vertexDataSpriteShpere[start + 4].position = { cos(lat + kLatEvery) + cos(lon + kLonEvery), sin(lat + kLatEvery), cos(lat + kLatEvery) * sin(lon + kLonEvery),1.0f };
+			vertexDataSpriteShpere[start + 4].texcoord = { float(lonIndex + 1) / float(kSubdivision), 1.0f - float(latIndex + 1) / float(kSubdivision) };
 		}
 	}
 
 	//Sprite用ののTransformationMatrix用のリソースを作る。Matrix4x41つ分のサイズを用意する
-	ID3D12Resource* transformationMatrixResourceSprite = CreateBufferResource(device, sizeof(Matrix4x4));
+	ID3D12Resource* transformationMatrixResourceSpriteShpere = CreateBufferResource(device, sizeof(Matrix4x4));
 	//データを書き込む
-	Matrix4x4* transformationMatrixDataSprite = nullptr;
+	Matrix4x4* transformationMatrixDataSpriteShpere = nullptr;
 	//書き込むためのアドレスを取得
-	transformationMatrixResourceSprite->Map(0, nullptr, reinterpret_cast<void**>(&transformationMatrixDataSprite));
+	transformationMatrixResourceSpriteShpere->Map(0, nullptr, reinterpret_cast<void**>(&transformationMatrixDataSpriteShpere));
 	//単位行列をかきこんでおく
-	*transformationMatrixDataSprite = IdentityMatrix();
+	*transformationMatrixDataSpriteShpere = IdentityMatrix();
 
 
 
-	
+
+
+
 
 	//ViewportとScissor（シザー）//
 
@@ -1121,6 +1143,7 @@ int WINAPI WinMain(HINSTANCE, HINSTANCE, LPSTR, int) {
 
 	Transform transformSprite{ {1.0f,1.0f,1.0f},{0.0f,0.0f,0.0f},{0.0f,0.0f,0.0f} };
 
+	Transform transformSpriteSphere{ {1.0f,1.0f,1.0f},{0.0f,0.0f,0.0f},{0.0f,0.0f,0.0f} };
 
 	IMGUI_CHECKVERSION();
 	ImGui::CreateContext();
@@ -1184,7 +1207,9 @@ int WINAPI WinMain(HINSTANCE, HINSTANCE, LPSTR, int) {
 			ImGui::DragFloat3("TranslateSprite", &transformSprite.translate.x, 1.00f);
 			ImGui::DragFloat3("RotateSprite", &transformSprite.rotate.x, 0.01f);
 			ImGui::DragFloat3("ScaleSprite", &transformSprite.scale.x, 0.01f);
-
+			ImGui::DragFloat3("TranslateSpriteShpere", &transformSpriteSphere.translate.x, 1.00f);
+			ImGui::DragFloat3("RotateSpriteShpere", &transformSpriteSphere.rotate.x, 0.01f);
+			ImGui::DragFloat3("ScaleSpriteShpere", &transformSpriteSphere.scale.x, 0.01f);
 
 
 			Matrix4x4 worldMatrix = MakeAffineMatrix(transform.translate, transform.scale, transform.rotate);
@@ -1202,7 +1227,11 @@ int WINAPI WinMain(HINSTANCE, HINSTANCE, LPSTR, int) {
 			Matrix4x4 worldViewProjectionMatrixSprite = MultiplyMatrix4x4(worldMatrixSprite, MultiplyMatrix4x4(viewMatrixSprite, projectionMatrixSprite));
 			*transformationMatrixDataSprite = worldViewProjectionMatrixSprite;
 
-
+			Matrix4x4 worldMatrixSpriteSphere = MakeAffineMatrix(transformSpriteSphere.translate, transformSpriteSphere.scale, transformSpriteSphere.rotate);
+			Matrix4x4 viewMatrixSpriteShpere = IdentityMatrix();
+			Matrix4x4 projectionMatrixSpriteShpere = MakeOrthographicMatrix(0, float(kClientWidth), 0, float(kClientHeight), 0.0f, 100.0f);
+			Matrix4x4 worldViewProjectionMatrixSpriteShpere = MultiplyMatrix4x4(worldMatrixSpriteSphere, MultiplyMatrix4x4(viewMatrixSpriteShpere, projectionMatrixSpriteShpere));
+			*transformationMatrixDataSpriteShpere = worldViewProjectionMatrixSpriteShpere;
 
 
 			//描画先のRTVを設定する
@@ -1262,9 +1291,19 @@ int WINAPI WinMain(HINSTANCE, HINSTANCE, LPSTR, int) {
 			commandList->IASetVertexBuffers(0, 1, &vertexBufferViewSprite);//VBVを設定
 
 			commandList->SetGraphicsRootConstantBufferView(1, transformationMatrixResourceSprite->GetGPUVirtualAddress());
+			
+			//描画
+			//commandList->DrawInstanced(6, 1, 0, 0);
+
+			//球の描画//
+
+			commandList->IASetVertexBuffers(0, 1, &vertexBufferViewSpriteShpere);//VBVを設定
+
+			commandList->SetGraphicsRootConstantBufferView(1, transformationMatrixResourceSpriteShpere->GetGPUVirtualAddress());
 
 			//描画
-			commandList->DrawInstanced(6, 1, 0, 0);
+			commandList->DrawInstanced(pow(kSubdivision,2)*kSubdivision*6, 1, 0, 0);
+			
 
 
 
