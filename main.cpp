@@ -761,44 +761,44 @@ int WINAPI WinMain(HINSTANCE, HINSTANCE, LPSTR, int) {
 
 	///ここ怪しい///
 
-	//コマンドリストの内容を確定させる。すべてのコマンドを積んでからCloseすること
-	hr = commandList->Close();
-	assert(SUCCEEDED(hr));
+	////コマンドリストの内容を確定させる。すべてのコマンドを積んでからCloseすること
+	//hr = commandList->Close();
+	//assert(SUCCEEDED(hr));
 
 
-	//コマンドをキックする//
+	////コマンドをキックする//
 
 
-	//GPU2コマンドリストの実行を行わせる
-	ID3D12CommandList* commandLists[] = { commandList };
-	commandQueue->ExecuteCommandLists(1, commandLists);
-	//GPUとOSに画面の交換を行うよう通知する
-	swapChain->Present(1, 0);
+	////GPU2コマンドリストの実行を行わせる
+	//ID3D12CommandList* commandLists[] = { commandList };
+	//commandQueue->ExecuteCommandLists(1, commandLists);
+	////GPUとOSに画面の交換を行うよう通知する
+	//swapChain->Present(1, 0);
 
 	//GPUにSignalを送る//
 
-	//Fenceの値を更新
-	fenceValue++;
-	//GPUがここまでたどり着いたとき、Fenceの値に代入するようにSignalを送る
-	commandQueue->Signal(fence, fenceValue);
+	////Fenceの値を更新
+	//fenceValue++;
+	////GPUがここまでたどり着いたとき、Fenceの値に代入するようにSignalを送る
+	//commandQueue->Signal(fence, fenceValue);
 
 
-	//Fenceの値を確認してGPUを待つ
+	////Fenceの値を確認してGPUを待つ
 
-	//Fenceの値が指定したSognal値にたどり着いているか確認する
-	//GetCompletedValueの初期値はFence作成時に渡した初期値
-	if (fence->GetCompletedValue() < fenceValue) {
-		//指定したSignalにたどりついていないので、たどりつくまで待つようにイベントを設定する
-		fence->SetEventOnCompletion(fenceValue, fenceEvent);
-		//イベントを待つ
-		WaitForSingleObject(fenceEvent, INFINITE);
-	}
+	////Fenceの値が指定したSognal値にたどり着いているか確認する
+	////GetCompletedValueの初期値はFence作成時に渡した初期値
+	//if (fence->GetCompletedValue() < fenceValue) {
+	//	//指定したSignalにたどりついていないので、たどりつくまで待つようにイベントを設定する
+	//	fence->SetEventOnCompletion(fenceValue, fenceEvent);
+	//	//イベントを待つ
+	//	WaitForSingleObject(fenceEvent, INFINITE);
+	//}
 
-	//次のフレーム用のコマンドリストを準備
-	hr = commandAllocator->Reset();
-	assert(SUCCEEDED(hr));
-	hr = commandList->Reset(commandAllocator, nullptr);
-	assert(SUCCEEDED(hr));
+	////次のフレーム用のコマンドリストを準備
+	//hr = commandAllocator->Reset();
+	//assert(SUCCEEDED(hr));
+	//hr = commandList->Reset(commandAllocator, nullptr);
+	//assert(SUCCEEDED(hr));
 
 
 	//////
@@ -1088,17 +1088,17 @@ int WINAPI WinMain(HINSTANCE, HINSTANCE, LPSTR, int) {
 			vertexDataSpriteShpere[start].position = { cos(lat) + cos(lon), sin(lat),cos(lat) * sin(lon),1.0f };
 			vertexDataSpriteShpere[start].texcoord = { float(lonIndex) / float(kSubdivision),1.0f - float(latIndex) / float(kSubdivision) };
 			//基準点b
-			vertexDataSpriteShpere[start + 1].position = { cos(lat + kLatEvery) + cos(lon), sin(lat + kLatEvery),cos(lat + kLatEvery) * sin(lon) };
+			vertexDataSpriteShpere[start + 1].position = { cos(lat + kLatEvery) * cos(lon), sin(lat + kLatEvery),cos(lat + kLatEvery) * sin(lon) };
 			vertexDataSpriteShpere[start + 1].texcoord = { float(lonIndex) / float(kSubdivision),1.0f - float(latIndex + 1) / float(kSubdivision) };
-			vertexDataSpriteShpere[start + 3].position = { cos(lat + kLatEvery) + cos(lon), sin(lat + kLatEvery),cos(lat + kLatEvery) * sin(lon) };
+			vertexDataSpriteShpere[start + 3].position = { cos(lat + kLatEvery)* cos(lon), sin(lat + kLatEvery),cos(lat + kLatEvery) * sin(lon) };
 			vertexDataSpriteShpere[start + 3].texcoord = { float(lonIndex) / float(kSubdivision),1.0f - float(latIndex + 1) / float(kSubdivision) };
 			//基準点c
-			vertexDataSpriteShpere[start + 2].position = { cos(lat) + cos(lon + kLonEvery), sin(lat), cos(lat) * sin(lon + kLonEvery), 1.0f };
+			vertexDataSpriteShpere[start + 2].position = { cos(lat) * cos(lon + kLonEvery), sin(lat), cos(lat) * sin(lon + kLonEvery), 1.0f };
 			vertexDataSpriteShpere[start + 2].texcoord = { float(lonIndex + 1) / float(kSubdivision), 1.0f - float(latIndex) / float(kSubdivision) };
-			vertexDataSpriteShpere[start + 5].position = { cos(lat) + cos(lon + kLonEvery), sin(lat), cos(lat) * sin(lon + kLonEvery), 1.0f };
+			vertexDataSpriteShpere[start + 5].position = { cos(lat) * cos(lon + kLonEvery), sin(lat), cos(lat) * sin(lon + kLonEvery), 1.0f };
 			vertexDataSpriteShpere[start + 5].texcoord = { float(lonIndex + 1) / float(kSubdivision), 1.0f - float(latIndex) / float(kSubdivision) };
 			//基準点d
-			vertexDataSpriteShpere[start + 4].position = { cos(lat + kLatEvery) + cos(lon + kLonEvery), sin(lat + kLatEvery), cos(lat + kLatEvery) * sin(lon + kLonEvery),1.0f };
+			vertexDataSpriteShpere[start + 4].position = { cos(lat + kLatEvery) * cos(lon + kLonEvery), sin(lat + kLatEvery), cos(lat + kLatEvery) * sin(lon + kLonEvery),1.0f };
 			vertexDataSpriteShpere[start + 4].texcoord = { float(lonIndex + 1) / float(kSubdivision), 1.0f - float(latIndex + 1) / float(kSubdivision) };
 		}
 	}
@@ -1302,7 +1302,7 @@ int WINAPI WinMain(HINSTANCE, HINSTANCE, LPSTR, int) {
 			commandList->SetGraphicsRootConstantBufferView(1, transformationMatrixResourceSpriteShpere->GetGPUVirtualAddress());
 
 			//描画
-			commandList->DrawInstanced(pow(kSubdivision,2)*kSubdivision*6, 1, 0, 0);
+			commandList->DrawInstanced(kSubdivision*kSubdivision*6, 1, 0, 0);
 			
 
 
