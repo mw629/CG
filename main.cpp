@@ -320,7 +320,10 @@ ID3D12Resource* UploadTextureData(ID3D12Resource* texture, const DirectX::Scratc
 	DirectX::PrepareUpload(device, mipImages.GetImages(), mipImages.GetImageCount(), mipImages.GetMetadata(), subresources);
 	uint64_t intermediateSize = GetRequiredIntermediateSize(texture, 0, UINT(subresources.size()));
 	ID3D12Resource* intermediateResource = CreateBufferResource(device, intermediateSize);
+	
 	UpdateSubresources(commandList, texture, intermediateResource, 0, 0, UINT(subresources.size()), subresources.data());
+
+
 	//Tetureへの転送後は利用できるよう。D3D12_RESOURCE_STATE_COPY_DESTからD3D12_RESOURCE_STATE_GENERIC_READへResourceStateを変更する
 	D3D12_RESOURCE_BARRIER barrier{};
 	barrier.Type = D3D12_RESOURCE_BARRIER_TYPE_TRANSITION;
@@ -330,6 +333,7 @@ ID3D12Resource* UploadTextureData(ID3D12Resource* texture, const DirectX::Scratc
 	barrier.Transition.StateBefore = D3D12_RESOURCE_STATE_COPY_DEST;
 	barrier.Transition.StateAfter = D3D12_RESOURCE_STATE_GENERIC_READ;
 	commandList->ResourceBarrier(1, &barrier);
+
 	return intermediateResource;
 
 }
@@ -757,8 +761,7 @@ int WINAPI WinMain(HINSTANCE, HINSTANCE, LPSTR, int) {
 	const DirectX::TexMetadata& metaData = mipImages.GetMetadata();
 	ID3D12Resource* textureResource = CreateTextureResource(device, metaData);
 	ID3D12Resource* intermediateResource = UploadTextureData(textureResource, mipImages, device, commandList);
-
-
+	
 	///ここ怪しい///
 
 	////コマンドリストの内容を確定させる。すべてのコマンドを積んでからCloseすること
@@ -1057,14 +1060,14 @@ int WINAPI WinMain(HINSTANCE, HINSTANCE, LPSTR, int) {
 
 	//Shpere用の頂点リソースを作る//
 
-	ID3D12Resource* vertexResourceSpriteShpere = CreateBufferResource(device, sizeof(VertexData) * (kSubdivision * kSubdivision + kSubdivision) * 6);
+	ID3D12Resource* vertexResourceSpriteShpere = CreateBufferResource(device, sizeof(VertexData) * (kSubdivision * kSubdivision) * 6);
 
 	//頂点バッファービューを作成する
 	D3D12_VERTEX_BUFFER_VIEW vertexBufferViewSpriteShpere{};
 	//リソースの先頭アドレスから使う
 	vertexBufferViewSpriteShpere.BufferLocation = vertexResourceSpriteShpere->GetGPUVirtualAddress();
 	//使用するリソースのサイズは頂点6つ分のサイズ
-	vertexBufferViewSpriteShpere.SizeInBytes = sizeof(VertexData) * (kSubdivision * kSubdivision + kSubdivision) * 6;
+	vertexBufferViewSpriteShpere.SizeInBytes = sizeof(VertexData) * (kSubdivision * kSubdivision) * 6;
 	//1頂点当たりのサイズ
 	vertexBufferViewSpriteShpere.StrideInBytes = sizeof(VertexData);
 
@@ -1084,22 +1087,83 @@ int WINAPI WinMain(HINSTANCE, HINSTANCE, LPSTR, int) {
 		for (uint32_t lonIndex = 0; lonIndex < kSubdivision; ++lonIndex) {
 			uint32_t start = (latIndex * kSubdivision + lonIndex) * 6;
 			float lon = lonIndex * kLonEvery;
+
+			//一つ目の三角形
+
 			//頂点にデータを入力する。基準点a
-			vertexDataSpriteShpere[start].position = { cos(lat) + cos(lon), sin(lat),cos(lat) * sin(lon),1.0f };
-			vertexDataSpriteShpere[start].texcoord = { float(lonIndex) / float(kSubdivision),1.0f - float(latIndex) / float(kSubdivision) };
-			//基準点b
-			vertexDataSpriteShpere[start + 1].position = { cos(lat + kLatEvery) * cos(lon), sin(lat + kLatEvery),cos(lat + kLatEvery) * sin(lon) };
-			vertexDataSpriteShpere[start + 1].texcoord = { float(lonIndex) / float(kSubdivision),1.0f - float(latIndex + 1) / float(kSubdivision) };
-			vertexDataSpriteShpere[start + 3].position = { cos(lat + kLatEvery)* cos(lon), sin(lat + kLatEvery),cos(lat + kLatEvery) * sin(lon) };
-			vertexDataSpriteShpere[start + 3].texcoord = { float(lonIndex) / float(kSubdivision),1.0f - float(latIndex + 1) / float(kSubdivision) };
+			vertexDataSpriteShpere[start].position = {
+				cos(lat) * cos(lon),
+				sin(lat),
+				cos(lat) * sin(lon),
+				1.0f };
+
+			vertexDataSpriteShpere[start].texcoord = {
+				float(lonIndex) / float(kSubdivision),
+				1.0f - float(latIndex) / float(kSubdivision) };
+
+			
 			//基準点c
-			vertexDataSpriteShpere[start + 2].position = { cos(lat) * cos(lon + kLonEvery), sin(lat), cos(lat) * sin(lon + kLonEvery), 1.0f };
-			vertexDataSpriteShpere[start + 2].texcoord = { float(lonIndex + 1) / float(kSubdivision), 1.0f - float(latIndex) / float(kSubdivision) };
-			vertexDataSpriteShpere[start + 5].position = { cos(lat) * cos(lon + kLonEvery), sin(lat), cos(lat) * sin(lon + kLonEvery), 1.0f };
-			vertexDataSpriteShpere[start + 5].texcoord = { float(lonIndex + 1) / float(kSubdivision), 1.0f - float(latIndex) / float(kSubdivision) };
+			vertexDataSpriteShpere[start + 1].position = {
+				cos(lat) * cos(lon + kLonEvery),
+				sin(lat),
+				cos(lat) * sin(lon + kLonEvery),
+				1.0f };
+
+			vertexDataSpriteShpere[start + 1].texcoord = {
+				float(lonIndex + 1) / float(kSubdivision),
+				1.0f - float(latIndex) / float(kSubdivision) };
+
+
+
+			//基準点b
+			vertexDataSpriteShpere[start + 2].position = {
+				cos(lat + kLatEvery) * cos(lon),
+				sin(lat + kLatEvery),
+				cos(lat + kLatEvery) * sin(lon) ,
+				1.0f };
+
+			vertexDataSpriteShpere[start + 2].texcoord = {
+				float(lonIndex) / float(kSubdivision),
+				1.0f - float(latIndex + 1) / float(kSubdivision) };
+
+			
+
+			//二つ目の三角形
+
+				//基準点b
+			vertexDataSpriteShpere[start + 3].position = {
+				cos(lat + kLatEvery) * cos(lon),
+				sin(lat + kLatEvery),
+				cos(lat + kLatEvery) * sin(lon) ,
+				1.0f };
+
+			vertexDataSpriteShpere[start + 3].texcoord = {
+				float(lonIndex) / float(kSubdivision),
+				1.0f - float(latIndex + 1) / float(kSubdivision) };
+
+
+			//基準点c
+			vertexDataSpriteShpere[start + 4].position = {
+				cos(lat) * cos(lon + kLonEvery),
+				sin(lat), 
+				cos(lat) * sin(lon + kLonEvery),
+				1.0f };
+
+			vertexDataSpriteShpere[start + 4].texcoord = {
+				float(lonIndex + 1) / float(kSubdivision),
+				1.0f - float(latIndex) / float(kSubdivision) };
+
+
 			//基準点d
-			vertexDataSpriteShpere[start + 4].position = { cos(lat + kLatEvery) * cos(lon + kLonEvery), sin(lat + kLatEvery), cos(lat + kLatEvery) * sin(lon + kLonEvery),1.0f };
-			vertexDataSpriteShpere[start + 4].texcoord = { float(lonIndex + 1) / float(kSubdivision), 1.0f - float(latIndex + 1) / float(kSubdivision) };
+			vertexDataSpriteShpere[start + 5].position = {
+				cos(lat + kLatEvery) * cos(lon + kLonEvery),
+				sin(lat + kLatEvery),
+				cos(lat + kLatEvery) * sin(lon + kLonEvery),
+				1.0f };
+
+			vertexDataSpriteShpere[start + 5].texcoord = { 
+				float(lonIndex + 1) / float(kSubdivision), 
+				1.0f - float(latIndex + 1) / float(kSubdivision) };
 		}
 	}
 
@@ -1143,7 +1207,7 @@ int WINAPI WinMain(HINSTANCE, HINSTANCE, LPSTR, int) {
 
 	Transform transformSprite{ {1.0f,1.0f,1.0f},{0.0f,0.0f,0.0f},{0.0f,0.0f,0.0f} };
 
-	Transform transformSpriteSphere{ {1.0f,1.0f,1.0f},{0.0f,0.0f,0.0f},{0.0f,0.0f,0.0f} };
+	Transform transformSpriteSphere{ {300.0f,300.0f,300.0f},{0.0f,0.0f,0.0f},{0.0f,0.0f,0.0f} };
 
 	IMGUI_CHECKVERSION();
 	ImGui::CreateContext();
@@ -1254,6 +1318,8 @@ int WINAPI WinMain(HINSTANCE, HINSTANCE, LPSTR, int) {
 
 			//コマンドを積む//
 
+			
+
 			ID3D12DescriptorHeap* descriptorHeeps[] = { srvDescriptorHeap };
 			commandList->SetDescriptorHeaps(1, descriptorHeeps);
 
@@ -1276,6 +1342,7 @@ int WINAPI WinMain(HINSTANCE, HINSTANCE, LPSTR, int) {
 
 
 			//CBVを設定する//
+			
 			//マテリアルCBufferの場所を設定
 			commandList->SetGraphicsRootConstantBufferView(0, materialResource->GetGPUVirtualAddress());
 			commandList->SetGraphicsRootConstantBufferView(1, wvpResource->GetGPUVirtualAddress());
@@ -1283,16 +1350,16 @@ int WINAPI WinMain(HINSTANCE, HINSTANCE, LPSTR, int) {
 			commandList->SetGraphicsRootDescriptorTable(2, textureSrvHandleGPU);
 
 			//描画！（DrawCall/ドローコール）。3頂点で1つのインスタンス。インスタンスについては今後
-			commandList->DrawInstanced(6, 1, 0, 0);
+			//commandList->DrawInstanced(6, 1, 0, 0);
 
 
 			//Spriteの描画//
 
-			commandList->IASetVertexBuffers(0, 1, &vertexBufferViewSprite);//VBVを設定
+			//commandList->IASetVertexBuffers(0, 1, &vertexBufferViewSprite);//VBVを設定
 
-			commandList->SetGraphicsRootConstantBufferView(1, transformationMatrixResourceSprite->GetGPUVirtualAddress());
-			
-			//描画
+			//commandList->SetGraphicsRootConstantBufferView(1, transformationMatrixResourceSprite->GetGPUVirtualAddress());
+
+			////描画
 			//commandList->DrawInstanced(6, 1, 0, 0);
 
 			//球の描画//
@@ -1302,8 +1369,8 @@ int WINAPI WinMain(HINSTANCE, HINSTANCE, LPSTR, int) {
 			commandList->SetGraphicsRootConstantBufferView(1, transformationMatrixResourceSpriteShpere->GetGPUVirtualAddress());
 
 			//描画
-			commandList->DrawInstanced(kSubdivision*kSubdivision*6, 1, 0, 0);
-			
+			commandList->DrawInstanced(kSubdivision * kSubdivision * 6, 1, 0, 0);
+
 
 
 
@@ -1390,6 +1457,7 @@ int WINAPI WinMain(HINSTANCE, HINSTANCE, LPSTR, int) {
 	pixelShaderBlob->Release();
 	vertexShaderBlob->Release();
 	materialResource->Release();
+	intermediateResource->Release();
 #ifdef _DEBUG
 	debugController->Release();
 #endif 
