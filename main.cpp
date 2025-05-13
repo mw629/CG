@@ -25,7 +25,7 @@
 extern IMGUI_IMPL_API LRESULT ImGui_ImplWin32_WndProcHandler(HWND hWnd, UINT msg, WPARAM wParam, LPARAM lParam);
 
 #include "Calculation.h"//MTで作った
-
+#include "VariableTypes.h"
 
 
 #pragma comment(lib,"d3d12.lib")
@@ -35,27 +35,7 @@ extern IMGUI_IMPL_API LRESULT ImGui_ImplWin32_WndProcHandler(HWND hWnd, UINT msg
 #pragma comment(lib,"dxcompiler.lib")
 
 
-///構造体///
 
-struct Vector4 {
-	float x;
-	float y;
-	float z;
-	float w;
-};
-
-struct Transform
-{
-	Vector3 scale;
-	Vector3 rotate;
-	Vector3 translate;
-};
-
-struct VertexData
-{
-	Vector4 position;
-	Vector2 texcoord;
-};
 
 
 ///クラス///
