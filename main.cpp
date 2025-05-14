@@ -1057,6 +1057,7 @@ int WINAPI WinMain(HINSTANCE, HINSTANCE, LPSTR, int) {
 
 	float pi = 3.14f;
 	uint32_t kSubdivision = 16;
+	
 
 	//Shpere用の頂点リソースを作る//
 
@@ -1190,7 +1191,9 @@ int WINAPI WinMain(HINSTANCE, HINSTANCE, LPSTR, int) {
 
 	Transform transformSprite{ {1.0f,1.0f,1.0f},{0.0f,0.0f,0.0f},{0.0f,0.0f,0.0f} };
 
-	Transform transformSpriteSphere{ {300.0f,300.0f,300.0f},{0.0f,0.0f,0.0f},{640.0f,360.0f,0.0f} };
+	float rdius = 100.0f;
+
+	Transform transformSpriteSphere{ ScalarMultiply({1.0f,1.0f,1.0f},rdius),{0.0f,0.0f,0.0f},{640.0f,360.0f,0.0f} };
 
 	IMGUI_CHECKVERSION();
 	ImGui::CreateContext();
