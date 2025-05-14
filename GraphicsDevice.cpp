@@ -3,11 +3,11 @@
 
 
 
-void GraphicsDevice::Initialize()
+void GraphicsDevice::Initialize(std::ostream& os)
 {
 	CreateDxgiFactory();
-	SelectAdapter();
-	CreateD3D12Device();
+	SelectAdapter(os);
+	CreateD3D12Device(os);
 
 }
 
@@ -21,7 +21,7 @@ void GraphicsDevice::CreateDxgiFactory()
 	assert(SUCCEEDED(hr));
 }
 
-void GraphicsDevice::SelectAdapter()
+void GraphicsDevice::SelectAdapter(std::ostream& os)
 {
 	//良い順にアダプタを頼む
 	for (UINT i = 0; dxgiFactory->EnumAdapterByGpuPreference(i,
@@ -34,7 +34,7 @@ void GraphicsDevice::SelectAdapter()
 		//ソフトウェアアダプタでなければ採用!
 		if (!(adapterDesc.Flags & DXGI_ADAPTER_FLAG3_SOFTWARE)) {
 			//採用したアダプタの情報をログに出力、wstringの方なので注意
-			Log(CurrentTimestamp(),ConvertString(std::format(L"Use Adapter:{}\n", adapterDesc.Description)));
+			Log(os,ConvertString(std::format(L"Use Adapter:{}\n", adapterDesc.Description)));
 			break;
 		}
 		useAdapter = nullptr;//ソフトウェアアダプタの場合は見なかったことにする
@@ -43,7 +43,7 @@ void GraphicsDevice::SelectAdapter()
 	assert(useAdapter != nullptr);
 }
 
-void GraphicsDevice::CreateD3D12Device()
+void GraphicsDevice::CreateD3D12Device(std::ostream& os)
 {
 	//機能レベルとログ出力用の文字列
 	D3D_FEATURE_LEVEL featureLevels[] = {
@@ -56,11 +56,11 @@ void GraphicsDevice::CreateD3D12Device()
 		//指定した機能レベルでデバイスが生成できたかを確認
 		if (SUCCEEDED(hr)) {
 			//生成できたのでログ出力を行ってループを抜ける
-			Log(CurrentTimestamp(),std::format("FeatureLevel : {}\n", featureLevelStrings[i]));
+			Log(os,std::format("FeatureLevel : {}\n", featureLevelStrings[i]));
 			break;
 		}
 	}
 	//デバイスの生成がうまくいかなかったので起動できない
 	assert(device != nullptr);
-	Log(CurrentTimestamp(),"Complete createD3D12Device!!!\n");//初期化完了ログを出す
+	Log(os,"Complete createD3D12Device!!!\n");//初期化完了ログを出す
 }

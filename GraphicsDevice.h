@@ -28,7 +28,7 @@ private:
 
 public:
 	
-	void Initialize();
+	void Initialize(std::ostream& os);
 
 	/// <summary>
 	/// DXGIFactoryの生成をする
@@ -38,11 +38,11 @@ public:
 	/// <summary>
 	/// 使用するアダプタを決定する
 	/// </summary>
-	void SelectAdapter();
+	void SelectAdapter(std::ostream& os);
 
 	/// <summary>
 	/// D3D12Deviceの生成
 	/// </summary>
-	void CreateD3D12Device();
+	void CreateD3D12Device(std::ostream& os);
 };
 
