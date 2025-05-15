@@ -757,7 +757,7 @@ int WINAPI WinMain(HINSTANCE, HINSTANCE, LPSTR, int) {
 
 
 	//Textureを読み込んで転送する//
-	DirectX::ScratchImage mipImages = LoadTexture("resources/uvChecker.png");
+	DirectX::ScratchImage mipImages = LoadTexture("resources/white64x64.png");
 	const DirectX::TexMetadata& metaData = mipImages.GetMetadata();
 	ID3D12Resource* textureResource = CreateTextureResource(device, metaData);
 	ID3D12Resource* intermediateResource = UploadTextureData(textureResource, mipImages, device, commandList);
@@ -1024,144 +1024,7 @@ int WINAPI WinMain(HINSTANCE, HINSTANCE, LPSTR, int) {
 	vertexBufferViewSprite.StrideInBytes = sizeof(VertexData);
 
 
-	//頂点データを設定する//
-
-	VertexData* vertexDataSprite = nullptr;
-	vertexResourceSprite->Map(0, nullptr, reinterpret_cast<void**>(&vertexDataSprite));
-	//１枚目の三角形
-	vertexDataSprite[0].position = { 0.0f,360.0f,0.0f,1.0f };//左下
-	vertexDataSprite[0].texcoord = { 0.0f,1.0f };
-	vertexDataSprite[1].position = { 0.0f,0.0f,0.0f,1.0f };//左上
-	vertexDataSprite[1].texcoord = { 0.0f,0.0f };
-	vertexDataSprite[2].position = { 640.0f,360.0f,0.0f,1.0f };//右下
-	vertexDataSprite[2].texcoord = { 1.0f,1.0f };
-	//2枚目の三角形
-	vertexDataSprite[3].position = { 0.0f,0.0f,0.0f,1.0f };//左上
-	vertexDataSprite[3].texcoord = { 0.0f,0.0f };
-	vertexDataSprite[4].position = { 640.0f,0.0f,0.0f,1.0f };//右上
-	vertexDataSprite[4].texcoord = { 1.0f,0.0f };
-	vertexDataSprite[5].position = { 640.0f,360.0f,0.0f,1.0f };//右下
-	vertexDataSprite[5].texcoord = { 1.0f,1.0f };
-
-	//Sprite用ののTransformationMatrix用のリソースを作る。Matrix4x41つ分のサイズを用意する
-	ID3D12Resource* transformationMatrixResourceSprite = CreateBufferResource(device, sizeof(Matrix4x4));
-	//データを書き込む
-	Matrix4x4* transformationMatrixDataSprite = nullptr;
-	//書き込むためのアドレスを取得
-	transformationMatrixResourceSprite->Map(0, nullptr, reinterpret_cast<void**>(&transformationMatrixDataSprite));
-	//単位行列をかきこんでおく
-	*transformationMatrixDataSprite = IdentityMatrix();
-
-
-	//球円の描画//
-
-	float pi = 3.14f;
-	uint32_t kSubdivision = 16;
-
-	//Shpere用の頂点リソースを作る//
-
-	ID3D12Resource* vertexResourceSpriteShpere = CreateBufferResource(device, sizeof(VertexData) * (kSubdivision * kSubdivision) * 6);
-
-	//頂点バッファービューを作成する
-	D3D12_VERTEX_BUFFER_VIEW vertexBufferViewSpriteShpere{};
-	//リソースの先頭アドレスから使う
-	vertexBufferViewSpriteShpere.BufferLocation = vertexResourceSpriteShpere->GetGPUVirtualAddress();
-	//使用するリソースのサイズは頂点6つ分のサイズ
-	vertexBufferViewSpriteShpere.SizeInBytes = sizeof(VertexData) * (kSubdivision * kSubdivision) * 6;
-	//1頂点当たりのサイズ
-	vertexBufferViewSpriteShpere.StrideInBytes = sizeof(VertexData);
-
-	//頂点データを設定する//
-
-	VertexData* vertexDataSpriteShpere = nullptr;
-	vertexResourceSpriteShpere->Map(0, nullptr, reinterpret_cast<void**>(&vertexDataSpriteShpere));
-
-	//経度分割1つ分の角度φd
-	const float kLonEvery = pi * 2.0f / float(kSubdivision);
-	//緯度分割1つ分の角度Θd
-	const float kLatEvery = pi / float(kSubdivision);
-	//緯度の方向に分割	
-	for (uint32_t latIndex = 0; latIndex < kSubdivision; ++latIndex) {
-		float lat = -pi / 2.0f + kLatEvery * latIndex;//Θ
-		//経度方向に分割しながら線を描く
-		for (uint32_t lonIndex = 0; lonIndex < kSubdivision; ++lonIndex) {
-			uint32_t start = (latIndex * kSubdivision + lonIndex) * 6;
-			float lon = lonIndex * kLonEvery;
-
-			//一つ目の三角形
-
-			VertexData a;
-			VertexData b;
-			VertexData c;
-			VertexData d;
-
-			//position
-
-			a.position = {
-				cos(lat) * cos(lon),
-				sin(lat),
-				cos(lat) * sin(lon),
-				1.0f };
-
-			b.position = {
-				cos(lat + kLatEvery) * cos(lon),
-				sin(lat + kLatEvery),
-				cos(lat + kLatEvery) * sin(lon) ,
-				1.0f };
-
-			c.position = {
-				cos(lat) * cos(lon + kLonEvery),
-				sin(lat),
-				cos(lat) * sin(lon + kLonEvery),
-				1.0f };
-
-			d.position = {
-				cos(lat + kLatEvery) * cos(lon + kLonEvery),
-				sin(lat + kLatEvery),
-				cos(lat + kLatEvery) * sin(lon + kLonEvery),
-				1.0f };
-
-			//texcoord
-
-			a.texcoord = {
-				float(lonIndex) / float(kSubdivision),
-				 float(latIndex) / float(kSubdivision) };
-
-			b.texcoord = {
-				float(lonIndex) / float(kSubdivision),
-				 float(latIndex + 1) / float(kSubdivision) };
-
-			c.texcoord = {
-				float(lonIndex + 1) / float(kSubdivision),
-				 float(latIndex) / float(kSubdivision) };
-
-			d.texcoord = {
-				float(lonIndex + 1) / float(kSubdivision),
-				 float(latIndex + 1) / float(kSubdivision) };
-
-			//頂点にデータを入力する。基準点a
-			vertexDataSpriteShpere[start] = a;
-			vertexDataSpriteShpere[start + 1] = c;
-			vertexDataSpriteShpere[start + 2] = b;
-			//二つ目の三角形
-			vertexDataSpriteShpere[start + 3] = b;
-			vertexDataSpriteShpere[start + 4] = c;
-			vertexDataSpriteShpere[start + 5] = d;
-		}
-	}
-
-	//Sprite用ののTransformationMatrix用のリソースを作る。Matrix4x41つ分のサイズを用意する
-	ID3D12Resource* transformationMatrixResourceSpriteShpere = CreateBufferResource(device, sizeof(Matrix4x4));
-	//データを書き込む
-	Matrix4x4* transformationMatrixDataSpriteShpere = nullptr;
-	//書き込むためのアドレスを取得
-	transformationMatrixResourceSpriteShpere->Map(0, nullptr, reinterpret_cast<void**>(&transformationMatrixDataSpriteShpere));
-	//単位行列をかきこんでおく
-	*transformationMatrixDataSpriteShpere = IdentityMatrix();
-
-
-
-
+	
 
 
 
@@ -1190,7 +1053,9 @@ int WINAPI WinMain(HINSTANCE, HINSTANCE, LPSTR, int) {
 
 	Transform transformSprite{ {1.0f,1.0f,1.0f},{0.0f,0.0f,0.0f},{0.0f,0.0f,0.0f} };
 
-	Transform transformSpriteSphere{ {300.0f,300.0f,300.0f},{0.0f,0.0f,0.0f},{640.0f,360.0f,0.0f} };
+	float rdius = 100.0f;
+
+	Transform transformSpriteSphere{ ScalarMultiply({1.0f,1.0f,1.0f},rdius),{0.0f,0.0f,0.0f},{640.0f,360.0f,0.0f} };
 
 	IMGUI_CHECKVERSION();
 	ImGui::CreateContext();
@@ -1251,6 +1116,7 @@ int WINAPI WinMain(HINSTANCE, HINSTANCE, LPSTR, int) {
 			ImGui::DragFloat3("Rotate", &transform.rotate.x, 0.01f);
 			ImGui::DragFloat3("Scale", &transform.scale.x, 0.01f);
 			ImGui::DragFloat4("Color", &materialData->x, 1.0f);
+			ImGui::ColorPicker4("Color", &materialData->x);
 			ImGui::DragFloat3("TranslateSprite", &transformSprite.translate.x, 1.00f);
 			ImGui::DragFloat3("RotateSprite", &transformSprite.rotate.x, 0.01f);
 			ImGui::DragFloat3("ScaleSprite", &transformSprite.scale.x, 0.01f);
@@ -1267,18 +1133,6 @@ int WINAPI WinMain(HINSTANCE, HINSTANCE, LPSTR, int) {
 			*wvpData = worldViewProjectionMatrix;//camera?
 
 
-
-			Matrix4x4 worldMatrixSprite = MakeAffineMatrix(transformSprite.translate, transformSprite.scale, transformSprite.rotate);
-			Matrix4x4 viewMatrixSprite = InverseMatrix4x4(cameraMatrix);
-			Matrix4x4 projectionMatrixSprite = MakeOrthographicMatrix(0, float(kClientWidth), 0, float(kClientHeight), 0.0f, 100.0f);
-			Matrix4x4 worldViewProjectionMatrixSprite = MultiplyMatrix4x4(worldMatrixSprite, MultiplyMatrix4x4(viewMatrixSprite, projectionMatrixSprite));
-			*transformationMatrixDataSprite = worldViewProjectionMatrixSprite;
-
-			Matrix4x4 worldMatrixSpriteSphere = MakeAffineMatrix(transformSpriteSphere.translate, transformSpriteSphere.scale, transformSpriteSphere.rotate);
-			Matrix4x4 viewMatrixSpriteShpere = InverseMatrix4x4(cameraMatrix);
-			Matrix4x4 projectionMatrixSpriteShpere = MakeOrthographicMatrix(0, float(kClientWidth), 0, float(kClientHeight), 0.0f, 100.0f);
-			Matrix4x4 worldViewProjectionMatrixSpriteShpere = MultiplyMatrix4x4(worldMatrixSpriteSphere, MultiplyMatrix4x4(viewMatrixSpriteShpere, projectionMatrixSpriteShpere));
-			*transformationMatrixDataSpriteShpere = worldViewProjectionMatrixSpriteShpere;
 
 
 			//描画先のRTVを設定する
@@ -1333,29 +1187,10 @@ int WINAPI WinMain(HINSTANCE, HINSTANCE, LPSTR, int) {
 			commandList->SetGraphicsRootDescriptorTable(2, textureSrvHandleGPU);
 
 			//描画！（DrawCall/ドローコール）。3頂点で1つのインスタンス。インスタンスについては今後
-			//commandList->DrawInstanced(6, 1, 0, 0);
+			commandList->DrawInstanced(6, 1, 0, 0);
 
 
-			//Spriteの描画//
-
-			//commandList->IASetVertexBuffers(0, 1, &vertexBufferViewSprite);//VBVを設定
-
-			//commandList->SetGraphicsRootConstantBufferView(1, transformationMatrixResourceSprite->GetGPUVirtualAddress());
-
-			////描画
-			//commandList->DrawInstanced(6, 1, 0, 0);
-
-			//球の描画//
-
-			commandList->IASetVertexBuffers(0, 1, &vertexBufferViewSpriteShpere);//VBVを設定
-
-			commandList->SetGraphicsRootConstantBufferView(1, transformationMatrixResourceSpriteShpere->GetGPUVirtualAddress());
-
-			//描画
-			commandList->DrawInstanced(kSubdivision * kSubdivision * 6, 1, 0, 0);
-
-
-
+		
 
 			//ImGuiの描画コマンド
 			ImGui_ImplDX12_RenderDrawData(ImGui::GetDrawData(), commandList);
