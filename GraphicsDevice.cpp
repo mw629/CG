@@ -3,6 +3,33 @@
 
 
 
+
+ID3D12Resource* GraphicsDevice::CreateBufferResource(ID3D12Device* device, size_t sizeInBytes)
+{
+	//リソース用のヒープの設定
+	D3D12_HEAP_PROPERTIES uploadHeapProperties{};
+	uploadHeapProperties.Type = D3D12_HEAP_TYPE_UPLOAD;//UploadHeepを使う
+	//リソースの設定
+	D3D12_RESOURCE_DESC ResourceDesc{};
+	//バッファリソース。テクスチャの場合はまた別の設定をする
+	ResourceDesc.Dimension = D3D12_RESOURCE_DIMENSION_BUFFER;
+	ResourceDesc.Width = sizeInBytes;//リソースサイズ。
+	//バッファの場合はこれらは1にする決まり
+	ResourceDesc.Height = 1;
+	ResourceDesc.DepthOrArraySize = 1;
+	ResourceDesc.MipLevels = 1;
+	ResourceDesc.SampleDesc.Count = 1;
+	//バッファの場合はこれにする決まり
+	ResourceDesc.Layout = D3D12_TEXTURE_LAYOUT_ROW_MAJOR;
+	//実際にリソースを作る
+	ID3D12Resource* Resource = nullptr;
+	 hr_ = device->CreateCommittedResource(&uploadHeapProperties, D3D12_HEAP_FLAG_NONE,
+		&ResourceDesc, D3D12_RESOURCE_STATE_GENERIC_READ, nullptr,
+		IID_PPV_ARGS(&Resource));
+	assert(SUCCEEDED(hr_));
+	return Resource;
+}
+
 void GraphicsDevice::Initialize(std::ostream& os)
 {
 	CreateDxgiFactory();
@@ -13,34 +40,34 @@ void GraphicsDevice::Initialize(std::ostream& os)
 
 void GraphicsDevice::CreateDxgiFactory()
 {
-	//HRESULTはWindows系のエラーコードであり、
+	//hr_ESULTはWindows系のエラーコードであり、
 	// 関数が成功したかどうかをSUCCEEDEDマクロで判定できる
-	hr = CreateDXGIFactory(IID_PPV_ARGS(&dxgiFactory));
+	hr_ = CreateDXGIFactory(IID_PPV_ARGS(&dxgiFactory_));
 	//初期化の根本的な部分でエラーが出た場合はプログラムが間違ってるか、
 	//どうにもできない場合が多いのでassertにしておく
-	assert(SUCCEEDED(hr));
+	assert(SUCCEEDED(hr_));
 }
 
 void GraphicsDevice::SelectAdapter(std::ostream& os)
 {
 	//良い順にアダプタを頼む
-	for (UINT i = 0; dxgiFactory->EnumAdapterByGpuPreference(i,
-		DXGI_GPU_PREFERENCE_HIGH_PERFORMANCE, IID_PPV_ARGS(&useAdapter)) !=
+	for (UINT i = 0; dxgiFactory_->EnumAdapterByGpuPreference(i,
+		DXGI_GPU_PREFERENCE_HIGH_PERFORMANCE, IID_PPV_ARGS(&useAdapter_)) !=
 		DXGI_ERROR_NOT_FOUND; i++) {
 		//アダプターの情報を取得する
 		DXGI_ADAPTER_DESC3 adapterDesc{};
-		hr = useAdapter->GetDesc3(&adapterDesc);
-		assert(SUCCEEDED(hr));//取得できないのは一大事
+		hr_ = useAdapter_->GetDesc3(&adapterDesc);
+		assert(SUCCEEDED(hr_));//取得できないのは一大事
 		//ソフトウェアアダプタでなければ採用!
 		if (!(adapterDesc.Flags & DXGI_ADAPTER_FLAG3_SOFTWARE)) {
 			//採用したアダプタの情報をログに出力、wstringの方なので注意
 			Log(os,ConvertString(std::format(L"Use Adapter:{}\n", adapterDesc.Description)));
 			break;
 		}
-		useAdapter = nullptr;//ソフトウェアアダプタの場合は見なかったことにする
+		useAdapter_ = nullptr;//ソフトウェアアダプタの場合は見なかったことにする
 	}
 	//適切なアダプタがみつからなかったので起動できない
-	assert(useAdapter != nullptr);
+	assert(useAdapter_ != nullptr);
 }
 
 void GraphicsDevice::CreateD3D12Device(std::ostream& os)
@@ -52,15 +79,15 @@ void GraphicsDevice::CreateD3D12Device(std::ostream& os)
 	//高い順に生成できるか試していく
 	for (size_t i = 0; i < _countof(featureLevels); ++i) {
 		//採用したアダプターでデバイスを作成
-		hr = D3D12CreateDevice(useAdapter, featureLevels[i], IID_PPV_ARGS(&device));
+		hr_ = D3D12CreateDevice(useAdapter_, featureLevels[i], IID_PPV_ARGS(&device_));
 		//指定した機能レベルでデバイスが生成できたかを確認
-		if (SUCCEEDED(hr)) {
+		if (SUCCEEDED(hr_)) {
 			//生成できたのでログ出力を行ってループを抜ける
 			Log(os,std::format("FeatureLevel : {}\n", featureLevelStrings[i]));
 			break;
 		}
 	}
 	//デバイスの生成がうまくいかなかったので起動できない
-	assert(device != nullptr);
+	assert(device_ != nullptr);
 	Log(os,"Complete createD3D12Device!!!\n");//初期化完了ログを出す
 }

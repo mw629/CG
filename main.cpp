@@ -27,6 +27,8 @@ extern IMGUI_IMPL_API LRESULT ImGui_ImplWin32_WndProcHandler(HWND hWnd, UINT msg
 
 #include "Calculation.h"//MTで作った
 #include "VariableTypes.h"
+#include "GraphicsDevice.h"
+#include "Draw.h"
 
 
 #pragma comment(lib,"d3d12.lib")
@@ -169,32 +171,7 @@ IDxcBlob* CompileShader(
 	return shaderBlob;
 }
 
-//Resource作成関数//
-ID3D12Resource* CreateBufferResource(ID3D12Device* device, size_t sizeInBytes) {
 
-	//リソース用のヒープの設定
-	D3D12_HEAP_PROPERTIES uploadHeapProperties{};
-	uploadHeapProperties.Type = D3D12_HEAP_TYPE_UPLOAD;//UploadHeepを使う
-	//リソースの設定
-	D3D12_RESOURCE_DESC ResourceDesc{};
-	//バッファリソース。テクスチャの場合はまた別の設定をする
-	ResourceDesc.Dimension = D3D12_RESOURCE_DIMENSION_BUFFER;
-	ResourceDesc.Width = sizeInBytes;//リソースサイズ。
-	//バッファの場合はこれらは1にする決まり
-	ResourceDesc.Height = 1;
-	ResourceDesc.DepthOrArraySize = 1;
-	ResourceDesc.MipLevels = 1;
-	ResourceDesc.SampleDesc.Count = 1;
-	//バッファの場合はこれにする決まり
-	ResourceDesc.Layout = D3D12_TEXTURE_LAYOUT_ROW_MAJOR;
-	//実際にリソースを作る
-	ID3D12Resource* Resource = nullptr;
-	HRESULT hr = device->CreateCommittedResource(&uploadHeapProperties, D3D12_HEAP_FLAG_NONE,
-		&ResourceDesc, D3D12_RESOURCE_STATE_GENERIC_READ, nullptr,
-		IID_PPV_ARGS(&Resource));
-	assert(SUCCEEDED(hr));
-	return Resource;
-}
 
 ID3D12DescriptorHeap* CreateDescriptorHeep(
 	ID3D12Device* device, D3D12_DESCRIPTOR_HEAP_TYPE heapType, UINT numDesxriptors, bool shaderVisible)
@@ -267,9 +244,10 @@ ID3D12Resource* CreateTextureResource(ID3D12Device* device, const DirectX::TexMe
 ID3D12Resource* UploadTextureData(ID3D12Resource* texture, const DirectX::ScratchImage& mipImages, ID3D12Device* device, ID3D12GraphicsCommandList* commandList)
 {
 	std::vector<D3D12_SUBRESOURCE_DATA> subresources;
+	GraphicsDevice graphicsDevice;
 	DirectX::PrepareUpload(device, mipImages.GetImages(), mipImages.GetImageCount(), mipImages.GetMetadata(), subresources);
 	uint64_t intermediateSize = GetRequiredIntermediateSize(texture, 0, UINT(subresources.size()));
-	ID3D12Resource* intermediateResource = CreateBufferResource(device, intermediateSize);
+	ID3D12Resource* intermediateResource = graphicsDevice.CreateBufferResource(device, intermediateSize);
 
 	UpdateSubresources(commandList, texture, intermediateResource, 0, 0, UINT(subresources.size()), subresources.data());
 
@@ -325,8 +303,9 @@ ID3D12Resource* CreateDepthStencilTextureResource(ID3D12Device* device, int32_t 
 
 
 
-
-
+///-------------------------------------------
+///WinMain
+///------------------------------------------
 
 
 //Windowsアプリでのエントリーポイント(main関数)
@@ -339,6 +318,7 @@ int WINAPI WinMain(HINSTANCE, HINSTANCE, LPSTR, int) {
 
 	std::ofstream logStream= CurrentTimestamp();
 
+	GraphicsDevice graphicsDevice;
 
 	//ウィンドウクラスの登録//
 	WNDCLASS wc{};
@@ -669,7 +649,7 @@ int WINAPI WinMain(HINSTANCE, HINSTANCE, LPSTR, int) {
 	//Material用のResourceを作る//
 
 	//マテリアル用のリソースを作る。今回はcolor1つ分のサイズを用意する
-	ID3D12Resource* materialResource = CreateBufferResource(device, sizeof(Vector4));
+	ID3D12Resource* materialResource = graphicsDevice.CreateBufferResource(device, sizeof(Vector4));
 	//マテリアルデータを書き込む
 	Vector4* materialData = nullptr;
 	//書き込むためのアドレス取得
@@ -678,7 +658,7 @@ int WINAPI WinMain(HINSTANCE, HINSTANCE, LPSTR, int) {
 	*materialData = Vector4(1.0f, 1.0f, 1.0f, 1.0f);
 
 	//WVP用のリソースを作る
-	ID3D12Resource* wvpResource = CreateBufferResource(device, sizeof(Matrix4x4));
+	ID3D12Resource* wvpResource = graphicsDevice.CreateBufferResource(device, sizeof(Matrix4x4));
 	//
 	Matrix4x4* wvpData = nullptr;
 	//
@@ -893,7 +873,7 @@ int WINAPI WinMain(HINSTANCE, HINSTANCE, LPSTR, int) {
 
 
 	//VertexResourceを生成する//
-	ID3D12Resource* vertexResource = CreateBufferResource(device, sizeof(VertexData) * 6);
+	ID3D12Resource* vertexResource = graphicsDevice.CreateBufferResource(device, sizeof(VertexData) * 6);
 
 
 	//VertexxBuffViewを作成する//
@@ -943,7 +923,7 @@ int WINAPI WinMain(HINSTANCE, HINSTANCE, LPSTR, int) {
 
 	//Sprote用の頂点リソースを作る//
 
-	ID3D12Resource* vertexResourceSprite = CreateBufferResource(device, sizeof(VertexData) * 6);
+	ID3D12Resource* vertexResourceSprite = graphicsDevice.CreateBufferResource(device, sizeof(VertexData) * 6);
 
 	//頂点バッファービューを作成する
 	D3D12_VERTEX_BUFFER_VIEW vertexBufferViewSprite{};
@@ -975,7 +955,7 @@ int WINAPI WinMain(HINSTANCE, HINSTANCE, LPSTR, int) {
 	vertexDataSprite[5].texcoord = { 1.0f,1.0f };
 
 	//Sprite用ののTransformationMatrix用のリソースを作る。Matrix4x41つ分のサイズを用意する
-	ID3D12Resource* transformationMatrixResourceSprite = CreateBufferResource(device, sizeof(Matrix4x4));
+	ID3D12Resource* transformationMatrixResourceSprite = graphicsDevice.CreateBufferResource(device, sizeof(Matrix4x4));
 	//データを書き込む
 	Matrix4x4* transformationMatrixDataSprite = nullptr;
 	//書き込むためのアドレスを取得
@@ -991,7 +971,7 @@ int WINAPI WinMain(HINSTANCE, HINSTANCE, LPSTR, int) {
 
 	//Shpere用の頂点リソースを作る//
 
-	ID3D12Resource* vertexResourceSpriteShpere = CreateBufferResource(device, sizeof(VertexData) * (kSubdivision * kSubdivision) * 6);
+	ID3D12Resource* vertexResourceSpriteShpere = graphicsDevice.CreateBufferResource(device, sizeof(VertexData) * (kSubdivision * kSubdivision) * 6);
 
 	//頂点バッファービューを作成する
 	D3D12_VERTEX_BUFFER_VIEW vertexBufferViewSpriteShpere{};
@@ -1082,7 +1062,7 @@ int WINAPI WinMain(HINSTANCE, HINSTANCE, LPSTR, int) {
 	}
 
 	//Sprite用ののTransformationMatrix用のリソースを作る。Matrix4x41つ分のサイズを用意する
-	ID3D12Resource* transformationMatrixResourceSpriteShpere = CreateBufferResource(device, sizeof(Matrix4x4));
+	ID3D12Resource* transformationMatrixResourceSpriteShpere = graphicsDevice.CreateBufferResource(device, sizeof(Matrix4x4));
 	//データを書き込む
 	Matrix4x4* transformationMatrixDataSpriteShpere = nullptr;
 	//書き込むためのアドレスを取得
@@ -1092,8 +1072,11 @@ int WINAPI WinMain(HINSTANCE, HINSTANCE, LPSTR, int) {
 
 
 
-
-
+	Draw* draw = new Draw[100];
+	
+	for (int i = 0; i < 100; i++) {
+		draw[i].CreateTriangle(device);
+	}
 
 
 	//ViewportとScissor（シザー）//
@@ -1264,16 +1247,16 @@ int WINAPI WinMain(HINSTANCE, HINSTANCE, LPSTR, int) {
 			commandList->SetGraphicsRootDescriptorTable(2, textureSrvHandleGPU);
 
 			//描画！（DrawCall/ドローコール）。3頂点で1つのインスタンス。インスタンスについては今後
-			//commandList->DrawInstanced(6, 1, 0, 0);
+		   // commandList->DrawInstanced(6, 1, 0, 0);
 
 
 			//Spriteの描画//
 
-			//commandList->IASetVertexBuffers(0, 1, &vertexBufferViewSprite);//VBVを設定
+			commandList->IASetVertexBuffers(0, 1, &vertexBufferViewSprite);//VBVを設定
 
-			//commandList->SetGraphicsRootConstantBufferView(1, transformationMatrixResourceSprite->GetGPUVirtualAddress());
+			commandList->SetGraphicsRootConstantBufferView(1, transformationMatrixResourceSprite->GetGPUVirtualAddress());
 
-			////描画
+			//描画
 			//commandList->DrawInstanced(6, 1, 0, 0);
 
 			//球の描画//
@@ -1283,9 +1266,9 @@ int WINAPI WinMain(HINSTANCE, HINSTANCE, LPSTR, int) {
 			commandList->SetGraphicsRootConstantBufferView(1, transformationMatrixResourceSpriteShpere->GetGPUVirtualAddress());
 
 			//描画
-			commandList->DrawInstanced(kSubdivision * kSubdivision * 6, 1, 0, 0);
+			//commandList->DrawInstanced(kSubdivision * kSubdivision * 6, 1, 0, 0);
 
-
+			
 
 
 			//ImGuiの描画コマンド
