@@ -1,25 +1,33 @@
-#pragma once
-#include "VariableTypes.h"
-#include "Calculation.h"
-#include <d3d12.h>
-#include <cstdint>
+#pragma once  
+#include "VariableTypes.h"  
+#include "Calculation.h"  
+#include <d3d12.h>  
+#include <cstdint>  
+#include "Camera.h"
 
-class Draw
-{
+class Draw {
 private:
 
-	int kClientWidth = 1280;
-	int kClientHeight = 720;
+	ID3D12Resource* vertexResource;
+	D3D12_VERTEX_BUFFER_VIEW vertexBufferView{};
+	VertexData* vertexData = nullptr;
+	ID3D12Resource* wvpResource;
+	Matrix4x4* wvpData;
 
-	float pi = 3.14f;
-	uint32_t kSubdivision = 16;
+	Camera camera;
+
 
 public:
 
-	
+	Draw();
+	~Draw();
 
-	void CreateTriangle(ID3D12Device* device);
-	void DrawTriangle(ID3D12Device* device, ID3D12GraphicsCommandList* commandList,Transform camraTransform, Transform transform);
+	void Initialize();
 
+	void DrawTriangle(Transform transform,
+		Transform cameraTransform,
+		ID3D12Device* device,
+		ID3D12GraphicsCommandList* commandList,
+		ID3D12Resource* materialResource,
+		D3D12_GPU_DESCRIPTOR_HANDLE textureSrvHandleGPU);
 };
-

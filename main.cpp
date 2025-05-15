@@ -28,7 +28,9 @@ extern IMGUI_IMPL_API LRESULT ImGui_ImplWin32_WndProcHandler(HWND hWnd, UINT msg
 #include "Calculation.h"//MTで作った
 #include "VariableTypes.h"
 #include "GraphicsDevice.h"
+#include "Camera.h"
 #include "Draw.h"
+
 
 
 #pragma comment(lib,"d3d12.lib")
@@ -318,7 +320,13 @@ int WINAPI WinMain(HINSTANCE, HINSTANCE, LPSTR, int) {
 
 	std::ofstream logStream= CurrentTimestamp();
 
+	
+	///クラス宣言///
 	GraphicsDevice graphicsDevice;
+	Camera camera;
+	Draw draw;
+	draw.Initialize();;
+
 
 	//ウィンドウクラスの登録//
 	WNDCLASS wc{};
@@ -657,15 +665,6 @@ int WINAPI WinMain(HINSTANCE, HINSTANCE, LPSTR, int) {
 	//今回は書き込んでみる
 	*materialData = Vector4(1.0f, 1.0f, 1.0f, 1.0f);
 
-	//WVP用のリソースを作る
-	ID3D12Resource* wvpResource = graphicsDevice.CreateBufferResource(device, sizeof(Matrix4x4));
-	//
-	Matrix4x4* wvpData = nullptr;
-	//
-	wvpResource->Map(0, nullptr, reinterpret_cast<void**>(&wvpData));
-	//
-	*wvpData = IdentityMatrix();
-
 
 	//Textureを読み込んで転送する//
 	DirectX::ScratchImage mipImages = LoadTexture("resources/uvChecker.png");
@@ -673,49 +672,7 @@ int WINAPI WinMain(HINSTANCE, HINSTANCE, LPSTR, int) {
 	ID3D12Resource* textureResource = CreateTextureResource(device, metaData);
 	ID3D12Resource* intermediateResource = UploadTextureData(textureResource, mipImages, device, commandList);
 
-	///ここ怪しい///
-
-	////コマンドリストの内容を確定させる。すべてのコマンドを積んでからCloseすること
-	//hr = commandList->Close();
-	//assert(SUCCEEDED(hr));
-
-
-	////コマンドをキックする//
-
-
-	////GPU2コマンドリストの実行を行わせる
-	//ID3D12CommandList* commandLists[] = { commandList };
-	//commandQueue->ExecuteCommandLists(1, commandLists);
-	////GPUとOSに画面の交換を行うよう通知する
-	//swapChain->Present(1, 0);
-
-	//GPUにSignalを送る//
-
-	////Fenceの値を更新
-	//fenceValue++;
-	////GPUがここまでたどり着いたとき、Fenceの値に代入するようにSignalを送る
-	//commandQueue->Signal(fence, fenceValue);
-
-
-	////Fenceの値を確認してGPUを待つ
-
-	////Fenceの値が指定したSognal値にたどり着いているか確認する
-	////GetCompletedValueの初期値はFence作成時に渡した初期値
-	//if (fence->GetCompletedValue() < fenceValue) {
-	//	//指定したSignalにたどりついていないので、たどりつくまで待つようにイベントを設定する
-	//	fence->SetEventOnCompletion(fenceValue, fenceEvent);
-	//	//イベントを待つ
-	//	WaitForSingleObject(fenceEvent, INFINITE);
-	//}
-
-	////次のフレーム用のコマンドリストを準備
-	//hr = commandAllocator->Reset();
-	//assert(SUCCEEDED(hr));
-	//hr = commandList->Reset(commandAllocator, nullptr);
-	//assert(SUCCEEDED(hr));
-
-
-	//////
+	
 
 	//どこいれればいいの(汗)//
 	ID3D12Resource* depthStencilResource = CreateDepthStencilTextureResource(device, kClientWidth, kClientHeight);
@@ -919,6 +876,14 @@ int WINAPI WinMain(HINSTANCE, HINSTANCE, LPSTR, int) {
 	vertexData[5].position = { 0.5f,-0.5f,-0.5f,1.0f };
 	vertexData[5].texcoord = { 1.0f,1.0f };
 
+	//WVP用のリソースを作る
+	ID3D12Resource* wvpResource = graphicsDevice.CreateBufferResource(device, sizeof(Matrix4x4));
+	//
+	Matrix4x4* wvpData = nullptr;
+	//
+	wvpResource->Map(0, nullptr, reinterpret_cast<void**>(&wvpData));
+	//
+	*wvpData = IdentityMatrix();
 
 
 	//Sprote用の頂点リソースを作る//
@@ -1072,12 +1037,6 @@ int WINAPI WinMain(HINSTANCE, HINSTANCE, LPSTR, int) {
 
 
 
-	Draw* draw = new Draw[100];
-	
-	for (int i = 0; i < 100; i++) {
-		draw[i].CreateTriangle(device);
-	}
-
 
 	//ViewportとScissor（シザー）//
 
@@ -1106,6 +1065,8 @@ int WINAPI WinMain(HINSTANCE, HINSTANCE, LPSTR, int) {
 
 	Transform transformSpriteSphere{ {300.0f,300.0f,300.0f},{0.0f,0.0f,0.0f},{640.0f,360.0f,0.0f} };
 
+	
+	
 	IMGUI_CHECKVERSION();
 	ImGui::CreateContext();
 	ImGui::StyleColorsDark();
@@ -1173,26 +1134,11 @@ int WINAPI WinMain(HINSTANCE, HINSTANCE, LPSTR, int) {
 			ImGui::DragFloat3("ScaleSpriteShpere", &transformSpriteSphere.scale.x, 0.01f);
 
 
-			Matrix4x4 worldMatrix = MakeAffineMatrix(transform.translate, transform.scale, transform.rotate);
-			Matrix4x4 cameraMatrix = MakeAffineMatrix(camraTransform.translate, camraTransform.scale, camraTransform.rotate);
-			Matrix4x4 viewMatrix = InverseMatrix4x4(cameraMatrix);
-			Matrix4x4 projectionMatrix = MakePerspectiveFovMatrix(0.45f, float(kClientWidth) / float(kClientHeight), 0.1f, 100.0f);
-			Matrix4x4 worldViewProjectionMatrix = MultiplyMatrix4x4(worldMatrix, MultiplyMatrix4x4(viewMatrix, projectionMatrix));
-			*wvpData = worldViewProjectionMatrix;//camera?
+			*wvpData = camera.MakeWorldViewProjectionMatrix(transform, camraTransform);
+			
+			*transformationMatrixDataSprite = camera.MakeWorldViewProjectionMatrix(transformSprite, camraTransform);
 
-
-
-			Matrix4x4 worldMatrixSprite = MakeAffineMatrix(transformSprite.translate, transformSprite.scale, transformSprite.rotate);
-			Matrix4x4 viewMatrixSprite = InverseMatrix4x4(cameraMatrix);
-			Matrix4x4 projectionMatrixSprite = MakeOrthographicMatrix(0, float(kClientWidth), 0, float(kClientHeight), 0.0f, 100.0f);
-			Matrix4x4 worldViewProjectionMatrixSprite = MultiplyMatrix4x4(worldMatrixSprite, MultiplyMatrix4x4(viewMatrixSprite, projectionMatrixSprite));
-			*transformationMatrixDataSprite = worldViewProjectionMatrixSprite;
-
-			Matrix4x4 worldMatrixSpriteSphere = MakeAffineMatrix(transformSpriteSphere.translate, transformSpriteSphere.scale, transformSpriteSphere.rotate);
-			Matrix4x4 viewMatrixSpriteShpere = InverseMatrix4x4(cameraMatrix);
-			Matrix4x4 projectionMatrixSpriteShpere = MakeOrthographicMatrix(0, float(kClientWidth), 0, float(kClientHeight), 0.0f, 100.0f);
-			Matrix4x4 worldViewProjectionMatrixSpriteShpere = MultiplyMatrix4x4(worldMatrixSpriteSphere, MultiplyMatrix4x4(viewMatrixSpriteShpere, projectionMatrixSpriteShpere));
-			*transformationMatrixDataSpriteShpere = worldViewProjectionMatrixSpriteShpere;
+			*transformationMatrixDataSpriteShpere = camera.MakeWorldViewProjectionMatrix(transformSpriteSphere, camraTransform);
 
 
 			//描画先のRTVを設定する
@@ -1240,24 +1186,30 @@ int WINAPI WinMain(HINSTANCE, HINSTANCE, LPSTR, int) {
 
 			//CBVを設定する//
 
+			
+
+
 			//マテリアルCBufferの場所を設定
-			commandList->SetGraphicsRootConstantBufferView(0, materialResource->GetGPUVirtualAddress());
-			commandList->SetGraphicsRootConstantBufferView(1, wvpResource->GetGPUVirtualAddress());
+			//commandList->SetGraphicsRootConstantBufferView(0, materialResource->GetGPUVirtualAddress());
+			//commandList->SetGraphicsRootConstantBufferView(1, wvpResource->GetGPUVirtualAddress());
 
-			commandList->SetGraphicsRootDescriptorTable(2, textureSrvHandleGPU);
+			//commandList->SetGraphicsRootDescriptorTable(2, textureSrvHandleGPU);
 
-			//描画！（DrawCall/ドローコール）。3頂点で1つのインスタンス。インスタンスについては今後
-		   // commandList->DrawInstanced(6, 1, 0, 0);
+			////描画！（DrawCall/ドローコール）。3頂点で1つのインスタンス。インスタンスについては今後
+		 //   commandList->DrawInstanced(6, 1, 0, 0);
 
 
 			//Spriteの描画//
 
-			commandList->IASetVertexBuffers(0, 1, &vertexBufferViewSprite);//VBVを設定
+			//commandList->IASetVertexBuffers(0, 1, &vertexBufferViewSprite);//VBVを設定
 
-			commandList->SetGraphicsRootConstantBufferView(1, transformationMatrixResourceSprite->GetGPUVirtualAddress());
+			//commandList->SetGraphicsRootConstantBufferView(1, transformationMatrixResourceSprite->GetGPUVirtualAddress());
 
 			//描画
 			//commandList->DrawInstanced(6, 1, 0, 0);
+
+			draw.DrawTriangle(transformSprite,camraTransform,device, commandList, materialResource, textureSrvHandleGPU);
+			
 
 			//球の描画//
 
@@ -1268,7 +1220,8 @@ int WINAPI WinMain(HINSTANCE, HINSTANCE, LPSTR, int) {
 			//描画
 			//commandList->DrawInstanced(kSubdivision * kSubdivision * 6, 1, 0, 0);
 
-			
+
+
 
 
 			//ImGuiの描画コマンド
