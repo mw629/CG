@@ -1183,25 +1183,8 @@ int WINAPI WinMain(HINSTANCE, HINSTANCE, LPSTR, int) {
 			ImGui::DragFloat3("Scale", &transform.scale.x, 0.01f);*/
 			ImGui::DragFloat4("Color", &materialData->x, 1.0f);
 			ImGui::ColorPicker4("Color", &materialData->x);
-			ImGui::DragFloat3("TranslateSprite", &transformSprite.translate.x, 1.00f);
-			ImGui::DragFloat3("RotateSprite", &transformSprite.rotate.x, 0.01f);
-			ImGui::DragFloat3("ScaleSprite", &transformSprite.scale.x, 0.01f);
-			ImGui::DragFloat3("TranslateSpriteShpere", &transformSpriteSphere.translate.x, 1.00f);
-			ImGui::DragFloat3("RotateSpriteShpere", &transformSpriteSphere.rotate.x, 0.01f);
-			ImGui::DragFloat3("ScaleSpriteShpere", &transformSpriteSphere.scale.x, 0.01f);
+	
 
-
-
-			
-
-
-
-			
-
-
-			//*wvpData = camera.MakeWorldViewProjectionMatrix(transform, camraTransform);
-
-			
 
 			//描画先のRTVを設定する
 			commandList->OMSetRenderTargets(1, &rtvHandles[backBufferIndex], false, nullptr);
@@ -1246,28 +1229,16 @@ int WINAPI WinMain(HINSTANCE, HINSTANCE, LPSTR, int) {
 
 
 
+
+
 			for (int i = 0; i < 10; i++) {
-				if (!useMonsterBall) {
-					draw.DrawTriangle(transform[i], camraTransform, device, commandList, materialResource, textureSrvHandleGPU);
-				}
-				else
-				{
-					draw.DrawTriangle(transform[i], camraTransform, device, commandList, materialResource, textureSrvHandleGPU2);
-				}
+				draw.DrawTriangle(transform[i], camraTransform, device, commandList, materialResource, textureSrvHandleGPU);
 			}
 
 
-			
-
-
-
-		
-
-		
 
 			//ImGuiの描画コマンド
 			ImGui_ImplDX12_RenderDrawData(ImGui::GetDrawData(), commandList);
-
 
 			//画面に描く処理はすべて終わり、画面に映すので、状態を遷移
 			//今回RenderTargetからPresentにする
