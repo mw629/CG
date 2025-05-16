@@ -863,86 +863,6 @@ int WINAPI WinMain(HINSTANCE, HINSTANCE, LPSTR, int) {
 	assert(SUCCEEDED(hr));
 
 
-
-
-
-
-
-	////VertexResourceを生成する//
-	//ID3D12Resource* vertexResource = graphicsDevice.CreateBufferResource(device, sizeof(VertexData) * 6);
-
-
-	////VertexxBuffViewを作成する//
-
-	////頂点バッファビューを作成する
-	//D3D12_VERTEX_BUFFER_VIEW vertexBufferView{};
-	////リソースの先頭のアドレスから使う
-	//vertexBufferView.BufferLocation = vertexResource->GetGPUVirtualAddress();
-	////使用するリソースのサイズは頂点3つ分のサイズ
-	//vertexBufferView.SizeInBytes = sizeof(VertexData) * 6;
-	////1頂点当たりのサイズ
-	//vertexBufferView.StrideInBytes = sizeof(VertexData);
-
-
-	////Resouceにデータを書き込む//
-
-	////頂点リソースにデータを書き込む
-	//VertexData* vertexData = nullptr;
-	////書き込むためのアドレスを取得
-	//vertexResource->Map(0, nullptr, reinterpret_cast<void**>(&vertexData));
-
-	////1枚目
-
-	////左下
-	//vertexData[0].position = { -0.1f,-0.1f,0.0f,1.0f };
-	//vertexData[0].texcoord = { 0.0f,1.0f };
-	////上
-	//vertexData[1].position = { 0.0f,0.1f,0.0f,1.0f };
-	//vertexData[1].texcoord = { 0.5f,0.0f };
-	////右下
-	//vertexData[2].position = { 0.1f,-0.1f,0.0f,1.0f };
-	//vertexData[2].texcoord = { 1.0f,1.0f };
-
-	////2枚
-
-	////左下
-	//vertexData[3].position = { -0.5f,-0.5f,0.5f,1.0f };
-	//vertexData[3].texcoord = { 0.0f,1.0f };
-	////上
-	//vertexData[4].position = { 0.0f,0.0f,0.0f,1.0f };
-	//vertexData[4].texcoord = { 0.5f,0.0f };
-	////右下
-	//vertexData[5].position = { 0.5f,-0.5f,-0.5f,1.0f };
-	//vertexData[5].texcoord = { 1.0f,1.0f };
-
-	////枚
-
-	////左下
-	//vertexData[3].position = { -0.5f,-0.5f,0.5f,1.0f };
-	//vertexData[3].texcoord = { 0.0f,1.0f };
-	////上
-	//vertexData[4].position = { 0.0f,0.0f,0.0f,1.0f };
-	//vertexData[4].texcoord = { 0.5f,0.0f };
-	////右下
-	//vertexData[5].position = { 0.5f,-0.5f,-0.5f,1.0f };
-	//vertexData[5].texcoord = { 1.0f,1.0f };
-
-	////WVP用のリソースを作る
-	//ID3D12Resource* wvpResource = graphicsDevice.CreateBufferResource(device, sizeof(Matrix4x4));
-	////
-	//Matrix4x4* wvpData = nullptr;
-	////
-	//wvpResource->Map(0, nullptr, reinterpret_cast<void**>(&wvpData));
-	////
-	//*wvpData = IdentityMatrix();
-
-
-
-	
-
-
-
-
 	//ViewportとScissor（シザー）//
 
 	//ビューポート
@@ -963,25 +883,25 @@ int WINAPI WinMain(HINSTANCE, HINSTANCE, LPSTR, int) {
 	scissorRect.top = 0;
 	scissorRect.bottom = kClientHeight;
 
-	const int TriangleIndex = 40;
+	const int TriangleIndex = 50;
 	Transform transform[TriangleIndex];
-	//bool isAlive[TriangleIndex] = { false };
+	bool isAlive[TriangleIndex] = { false };
 	for (int i = 0; i < TriangleIndex; i++) {
-		transform[i] = { {1.0f,1.0f,1.0f},{0.0f,0.0f,0.0f},{0.0f,0.5f,0.0f} };
+		transform[i] = { {1.0f,1.0f,1.0f},{0.0f,0.0f,0.0f},{1.0f,1.0f,0.0f} };
 		if (i < TriangleIndex/2) {
 			transform[i].translate.x -= 0.2f*i;
 		}
 		else
 		{
-			transform[i].translate.x -= 0.2f * (i- TriangleIndex/2);
-			transform[i].translate.y -= 1.0f ;
+			transform[i].translate.x += 0.2f * (i- TriangleIndex);
+			transform[i].translate.y -= 2.0f ;
 		}
 	}
 
 	Transform camraTransform{ {1.0f,1.0f,1.0f},{0.0f,0.0f,0.0f},{0.0f,0.0f,-5.0f} };
 
 
-	bool useMonsterBall = false;
+	bool changeTexture = false;
 
 	IMGUI_CHECKVERSION();
 	ImGui::CreateContext();
@@ -1036,7 +956,7 @@ int WINAPI WinMain(HINSTANCE, HINSTANCE, LPSTR, int) {
 			//ゲーム処理
 
 			//開発用UIの処理。実際に開発用UIを出す場合はここをゲ0無固有の処理に置き換える
-			ImGui::Checkbox("useMonsterBall", &useMonsterBall);
+			ImGui::Checkbox("changeTexture", &changeTexture);
 			//ImGui::ShowDemoWindow();
 			ImGui::DragFloat3("camera.translate", &camraTransform.translate.x,0.01f);
 			ImGui::DragFloat3("camera.scale", &camraTransform.scale.x, 0.01f);
@@ -1048,9 +968,9 @@ int WINAPI WinMain(HINSTANCE, HINSTANCE, LPSTR, int) {
 			for (int i = 0; i < TriangleIndex; i++) {
 				transform[i].translate.x += 0.01f;
 				transform[i].rotate.y += 0.1f;
-				if (transform[i].translate.x >= 2)
+				if (transform[i].translate.x >= 2.5)
 				{
-					transform[i].translate.x = -2;
+					transform[i].translate.x = -2.5;
 				}
 			}
 
@@ -1081,15 +1001,12 @@ int WINAPI WinMain(HINSTANCE, HINSTANCE, LPSTR, int) {
 			commandList->SetDescriptorHeaps(1, descriptorHeeps);
 
 
-
 			commandList->SetPipelineState(graphicsPipelineState);//PSOを設定
 			//commandList->IASetVertexBuffers(0, 1, &vertexBufferView);//VBVを設定
 
 
-
 			//形状を設定。PSOに設定しているものとはまた別。同じものを設定すると考えておけばいい
 			commandList->IASetPrimitiveTopology(D3D_PRIMITIVE_TOPOLOGY_TRIANGLELIST);
-
 
 			commandList->RSSetViewports(1, &viewport);//Viewportを設定
 			commandList->RSSetScissorRects(1, &scissorRect);//Sxirssorを設定
@@ -1098,13 +1015,11 @@ int WINAPI WinMain(HINSTANCE, HINSTANCE, LPSTR, int) {
 
 
 
-
-
 			for (int i = 0; i < TriangleIndex; i++) {
-				if (useMonsterBall) {
+				if (changeTexture) {
 					draw.DrawTriangle(transform[i], camraTransform, device, commandList, materialResource, textureSrvHandleGPU2);
 				}
-				if (!useMonsterBall) {
+				if (!changeTexture) {
 					draw.DrawTriangle(transform[i], camraTransform, device, commandList, materialResource, textureSrvHandleGPU);
 				}
 			}
