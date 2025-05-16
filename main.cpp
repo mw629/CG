@@ -963,25 +963,25 @@ int WINAPI WinMain(HINSTANCE, HINSTANCE, LPSTR, int) {
 	scissorRect.top = 0;
 	scissorRect.bottom = kClientHeight;
 
-	const int TriangleIndex = 50;
+	const int TriangleIndex = 40;
 	Transform transform[TriangleIndex];
-
+	//bool isAlive[TriangleIndex] = { false };
 	for (int i = 0; i < TriangleIndex; i++) {
-		transform[i] = { {1.0f,1.0f,1.0f},{0.0f,0.0f,0.0f},{1.0f,1.0f,0.0f} };
+		transform[i] = { {1.0f,1.0f,1.0f},{0.0f,0.0f,0.0f},{0.0f,0.5f,0.0f} };
 		if (i < TriangleIndex/2) {
-			transform[i].translate.x -= 0.1f*i;
+			transform[i].translate.x -= 0.2f*i;
 		}
 		else
 		{
-			transform[i].translate.x += 0.1f * (i- TriangleIndex);
-			transform[i].translate.y -= 2.0f ;
+			transform[i].translate.x -= 0.2f * (i- TriangleIndex/2);
+			transform[i].translate.y -= 1.0f ;
 		}
 	}
 
-	Transform camraTransform{ {1.0f,1.0f,1.0f},{0.0f,0.0f,0.0f},{0.0f,0.0f,-10.0f} };
+	Transform camraTransform{ {1.0f,1.0f,1.0f},{0.0f,0.0f,0.0f},{0.0f,0.0f,-5.0f} };
 
 
-	bool useMonsterBall = true;
+	bool useMonsterBall = false;
 
 	IMGUI_CHECKVERSION();
 	ImGui::CreateContext();
@@ -1044,6 +1044,15 @@ int WINAPI WinMain(HINSTANCE, HINSTANCE, LPSTR, int) {
 			ImGui::DragFloat4("Color", &materialData->x, 1.0f);
 			ImGui::ColorPicker4("Color", &materialData->x);
 	
+
+			for (int i = 0; i < TriangleIndex; i++) {
+				transform[i].translate.x += 0.01f;
+				transform[i].rotate.y += 0.1f;
+				if (transform[i].translate.x >= 2)
+				{
+					transform[i].translate.x = -2;
+				}
+			}
 
 
 			//描画先のRTVを設定する

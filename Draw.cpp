@@ -56,7 +56,30 @@ void Draw::DrawTriangle(Transform transform,
 	//右下
 	vertexData[2].position = { 0.1f,-0.1f,0.0f,1.0f };
 	vertexData[2].texcoord = { 1.0f,1.0f };
+	
+	//2枚
 
+	//左下
+	vertexData[3].position = { 0.0f,-0.1f,-0.1f,1.0f };
+	vertexData[3].texcoord = { 0.0f,1.0f };
+	//上
+	vertexData[4].position = { 0.0f,0.1f,0.0f,1.0f };
+	vertexData[4].texcoord = { 0.1f,0.0f };
+	//右下
+	vertexData[5].position = { -0.1f,-0.1f,0.0f,1.0f };
+	vertexData[5].texcoord = { 1.0f,1.0f };
+
+	//3枚
+
+	//左下
+	vertexData[6].position = { 0.1f,-0.1f,0.0f,1.0f };
+	vertexData[6].texcoord = { 0.0f,1.0f };
+	//上
+	vertexData[7].position = { 0.0f,0.1f,0.0f,1.0f };
+	vertexData[7].texcoord = { 0.1f,0.0f };
+	//右下
+	vertexData[8].position = { 0.0f,-0.1f,-0.1f,1.0f };
+	vertexData[8].texcoord = { 1.0f,1.0f };
 
 	//WVP用のリソースを作る
 	wvpResource = graphicsDevice.CreateBufferResource(device, sizeof(Matrix4x4));
