@@ -1201,13 +1201,7 @@ int WINAPI WinMain(HINSTANCE, HINSTANCE, LPSTR, int) {
 
 			//*wvpData = camera.MakeWorldViewProjectionMatrix(transform, camraTransform);
 
-			/**transformationMatrixDataSprite = camera.MakeWorldViewProjectionMatrix(transformSprite, camraTransform);
-
-			Matrix4x4 worldMatrixSpriteSphere = MakeAffineMatrix(transformSpriteSphere.translate, transformSpriteSphere.scale, transformSpriteSphere.rotate);
-			Matrix4x4 viewMatrixSpriteShpere = IdentityMatrix();
-			Matrix4x4 projectionMatrixSpriteShpere = MakeOrthographicMatrix(0, float(kClientWidth), 0, float(kClientHeight), 0.0f, 100.0f);
-			Matrix4x4 worldViewProjectionMatrixSpriteShpere = MultiplyMatrix4x4(worldMatrixSpriteSphere, MultiplyMatrix4x4(viewMatrixSpriteShpere, projectionMatrixSpriteShpere));
-			*transformationMatrixDataSpriteShpere = worldViewProjectionMatrixSpriteShpere;*/
+			
 
 			//描画先のRTVを設定する
 			commandList->OMSetRenderTargets(1, &rtvHandles[backBufferIndex], false, nullptr);
@@ -1252,22 +1246,6 @@ int WINAPI WinMain(HINSTANCE, HINSTANCE, LPSTR, int) {
 
 
 
-			//CBVを設定する//
-
-
-
-
-			//マテリアルCBufferの場所を設定
-			/*commandList->SetGraphicsRootConstantBufferView(0, materialResource->GetGPUVirtualAddress());
-			commandList->SetGraphicsRootConstantBufferView(1, wvpResource->GetGPUVirtualAddress());
-			commandList->SetGraphicsRootDescriptorTable(2, textureSrvHandleGPU);
-			if (!useMonsterBall) {
-				
-			}
-			else {
-				commandList->SetGraphicsRootDescriptorTable(2, textureSrvHandleGPU2);
-			}*/
-
 			for (int i = 0; i < 10; i++) {
 				if (!useMonsterBall) {
 					draw.DrawTriangle(transform[i], camraTransform, device, commandList, materialResource, textureSrvHandleGPU);
@@ -1278,32 +1256,10 @@ int WINAPI WinMain(HINSTANCE, HINSTANCE, LPSTR, int) {
 				}
 			}
 
-			////描画！（DrawCall/ドローコール）。3頂点で1つのインスタンス。インスタンスについては今後
-		 //   commandList->DrawInstanced(6, 1, 0, 0);
-
-
-			//Spriteの描画//
-
-			//commandList->IASetVertexBuffers(0, 1, &vertexBufferViewSprite);//VBVを設定
-
-			//commandList->SetGraphicsRootConstantBufferView(1, transformationMatrixResourceSprite->GetGPUVirtualAddress());
-
-			//描画
-			//commandList->DrawInstanced(6, 1, 0, 0);
-
 
 			
 
-			////球の描画//
 
-			//commandList->IASetVertexBuffers(0, 1, &vertexBufferViewSpriteShpere);//VBVを設定
-
-			//commandList->SetGraphicsRootConstantBufferView(1, transformationMatrixResourceSpriteShpere->GetGPUVirtualAddress());
-
-			////描画
-			//commandList->DrawInstanced(kSubdivision * kSubdivision * 6, 1, 0, 0);
-
-			
 
 		
 
@@ -1393,6 +1349,7 @@ int WINAPI WinMain(HINSTANCE, HINSTANCE, LPSTR, int) {
 	vertexShaderBlob->Release();
 	materialResource->Release();
 	intermediateResource->Release();
+	intermediateResource2->Release();
 #ifdef _DEBUG
 	debugController->Release();
 #endif 
