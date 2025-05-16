@@ -667,7 +667,7 @@ int WINAPI WinMain(HINSTANCE, HINSTANCE, LPSTR, int) {
 
 
 	//Textureを読み込んで転送する//
-	DirectX::ScratchImage mipImages = LoadTexture("resources/uvChecker.png");
+	DirectX::ScratchImage mipImages = LoadTexture("resources/white64x64.png");
 	const DirectX::TexMetadata& metaData = mipImages.GetMetadata();
 	ID3D12Resource* textureResource = CreateTextureResource(device, metaData);
 	ID3D12Resource* intermediateResource = UploadTextureData(textureResource, mipImages, device, commandList);
@@ -900,6 +900,7 @@ int WINAPI WinMain(HINSTANCE, HINSTANCE, LPSTR, int) {
 	vertexBufferViewSprite.StrideInBytes = sizeof(VertexData);
 
 
+
 	//頂点データを設定する//
 
 	VertexData* vertexDataSprite = nullptr;
@@ -1038,6 +1039,7 @@ int WINAPI WinMain(HINSTANCE, HINSTANCE, LPSTR, int) {
 
 
 
+
 	//ViewportとScissor（シザー）//
 
 	//ビューポート
@@ -1076,7 +1078,9 @@ int WINAPI WinMain(HINSTANCE, HINSTANCE, LPSTR, int) {
 
 	Transform transformSprite{ {1.0f,1.0f,1.0f},{0.0f,0.0f,0.0f},{0.0f,0.0f,0.0f} };
 
-	Transform transformSpriteSphere{ {300.0f,300.0f,300.0f},{0.0f,0.0f,0.0f},{640.0f,360.0f,0.0f} };
+	float rdius = 100.0f;
+
+	Transform transformSpriteSphere{ ScalarMultiply({1.0f,1.0f,1.0f},rdius),{0.0f,0.0f,0.0f},{640.0f,360.0f,0.0f} };
 
 
 
@@ -1139,6 +1143,7 @@ int WINAPI WinMain(HINSTANCE, HINSTANCE, LPSTR, int) {
 			ImGui::DragFloat3("Rotate", &transform.rotate.x, 0.01f);
 			ImGui::DragFloat3("Scale", &transform.scale.x, 0.01f);*/
 			ImGui::DragFloat4("Color", &materialData->x, 1.0f);
+			ImGui::ColorPicker4("Color", &materialData->x);
 			ImGui::DragFloat3("TranslateSprite", &transformSprite.translate.x, 1.00f);
 			ImGui::DragFloat3("RotateSprite", &transformSprite.rotate.x, 0.01f);
 			ImGui::DragFloat3("ScaleSprite", &transformSprite.scale.x, 0.01f);
@@ -1151,6 +1156,7 @@ int WINAPI WinMain(HINSTANCE, HINSTANCE, LPSTR, int) {
 			//*wvpData = camera.MakeWorldViewProjectionMatrix(transform, camraTransform);
 
 			*transformationMatrixDataSprite = camera.MakeWorldViewProjectionMatrix(transformSprite, camraTransform);
+
 
 			*transformationMatrixDataSpriteShpere = camera.MakeWorldViewProjectionMatrix(transformSpriteSphere, camraTransform);
 
@@ -1209,6 +1215,7 @@ int WINAPI WinMain(HINSTANCE, HINSTANCE, LPSTR, int) {
 
 			//commandList->SetGraphicsRootDescriptorTable(2, textureSrvHandleGPU);
 
+
 			////描画！（DrawCall/ドローコール）。3頂点で1つのインスタンス。インスタンスについては今後
 		 //   commandList->DrawInstanced(6, 1, 0, 0);
 
@@ -1238,7 +1245,12 @@ int WINAPI WinMain(HINSTANCE, HINSTANCE, LPSTR, int) {
 
 
 
+			//描画！（DrawCall/ドローコール）。3頂点で1つのインスタンス。インスタンスについては今後
+			commandList->DrawInstanced(6, 1, 0, 0);
 
+
+
+		
 
 			//ImGuiの描画コマンド
 			ImGui_ImplDX12_RenderDrawData(ImGui::GetDrawData(), commandList);
