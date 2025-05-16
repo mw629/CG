@@ -318,9 +318,9 @@ int WINAPI WinMain(HINSTANCE, HINSTANCE, LPSTR, int) {
 
 	SetUnhandledExceptionFilter(ExportDump);
 
-	std::ofstream logStream= CurrentTimestamp();
+	std::ofstream logStream = CurrentTimestamp();
 
-	
+
 	///クラス宣言///
 	GraphicsDevice graphicsDevice;
 	Camera camera;
@@ -672,7 +672,7 @@ int WINAPI WinMain(HINSTANCE, HINSTANCE, LPSTR, int) {
 	ID3D12Resource* textureResource = CreateTextureResource(device, metaData);
 	ID3D12Resource* intermediateResource = UploadTextureData(textureResource, mipImages, device, commandList);
 
-	
+
 
 	//どこいれればいいの(汗)//
 	ID3D12Resource* depthStencilResource = CreateDepthStencilTextureResource(device, kClientWidth, kClientHeight);
@@ -855,13 +855,13 @@ int WINAPI WinMain(HINSTANCE, HINSTANCE, LPSTR, int) {
 	//1枚目
 
 	//左下
-	vertexData[0].position = { -0.5f,-0.5f,0.0f,1.0f };
+	vertexData[0].position = { -0.1f,-0.1f,0.0f,1.0f };
 	vertexData[0].texcoord = { 0.0f,1.0f };
 	//上
-	vertexData[1].position = { 0.0f,0.5f,0.0f,1.0f };
+	vertexData[1].position = { 0.0f,0.1f,0.0f,1.0f };
 	vertexData[1].texcoord = { 0.5f,0.0f };
 	//右下
-	vertexData[2].position = { 0.5f,-0.5f,0.0f,1.0f };
+	vertexData[2].position = { 0.1f,-0.1f,0.0f,1.0f };
 	vertexData[2].texcoord = { 1.0f,1.0f };
 
 	//2枚
@@ -1058,15 +1058,28 @@ int WINAPI WinMain(HINSTANCE, HINSTANCE, LPSTR, int) {
 	scissorRect.top = 0;
 	scissorRect.bottom = kClientHeight;
 
-	Transform transform{ {1.0f,1.0f,1.0f},{0.0f,0.0f,0.0f},{0.0f,0.0f,0.0f} };
+	Transform transform[10];
+
+	for (int i = 0; i < 10; i++) {
+		transform[i] = { {1.0f,1.0f,1.0f},{0.0f,0.0f,0.0f},{1.0f,1.0f,0.0f} };
+		if (i < 5) {
+			transform[i].translate.x -= 0.1f * i;
+		}
+		else
+		{
+			transform[i].translate.x += 0.1f * (i-5);
+			transform[i].translate.y -= 2.0f ;
+		}
+	}
+
 	Transform camraTransform{ {1.0f,1.0f,1.0f},{0.0f,0.0f,0.0f},{0.0f,0.0f,-5.0f} };
 
 	Transform transformSprite{ {1.0f,1.0f,1.0f},{0.0f,0.0f,0.0f},{0.0f,0.0f,0.0f} };
 
 	Transform transformSpriteSphere{ {300.0f,300.0f,300.0f},{0.0f,0.0f,0.0f},{640.0f,360.0f,0.0f} };
 
-	
-	
+
+
 	IMGUI_CHECKVERSION();
 	ImGui::CreateContext();
 	ImGui::StyleColorsDark();
@@ -1122,9 +1135,9 @@ int WINAPI WinMain(HINSTANCE, HINSTANCE, LPSTR, int) {
 			//開発用UIの処理。実際に開発用UIを出す場合はここをゲ0無固有の処理に置き換える
 
 			//ImGui::ShowDemoWindow();
-			ImGui::DragFloat3("Translate", &transform.translate.x, 0.01f);
+			/*ImGui::DragFloat3("Translate", &transform.translate.x, 0.01f);
 			ImGui::DragFloat3("Rotate", &transform.rotate.x, 0.01f);
-			ImGui::DragFloat3("Scale", &transform.scale.x, 0.01f);
+			ImGui::DragFloat3("Scale", &transform.scale.x, 0.01f);*/
 			ImGui::DragFloat4("Color", &materialData->x, 1.0f);
 			ImGui::DragFloat3("TranslateSprite", &transformSprite.translate.x, 1.00f);
 			ImGui::DragFloat3("RotateSprite", &transformSprite.rotate.x, 0.01f);
@@ -1134,8 +1147,9 @@ int WINAPI WinMain(HINSTANCE, HINSTANCE, LPSTR, int) {
 			ImGui::DragFloat3("ScaleSpriteShpere", &transformSpriteSphere.scale.x, 0.01f);
 
 
-			*wvpData = camera.MakeWorldViewProjectionMatrix(transform, camraTransform);
-			
+
+			//*wvpData = camera.MakeWorldViewProjectionMatrix(transform, camraTransform);
+
 			*transformationMatrixDataSprite = camera.MakeWorldViewProjectionMatrix(transformSprite, camraTransform);
 
 			*transformationMatrixDataSpriteShpere = camera.MakeWorldViewProjectionMatrix(transformSpriteSphere, camraTransform);
@@ -1186,7 +1200,7 @@ int WINAPI WinMain(HINSTANCE, HINSTANCE, LPSTR, int) {
 
 			//CBVを設定する//
 
-			
+
 
 
 			//マテリアルCBufferの場所を設定
@@ -1208,8 +1222,10 @@ int WINAPI WinMain(HINSTANCE, HINSTANCE, LPSTR, int) {
 			//描画
 			//commandList->DrawInstanced(6, 1, 0, 0);
 
-			draw.DrawTriangle(transformSprite,camraTransform,device, commandList, materialResource, textureSrvHandleGPU);
-			
+
+			for (int i = 0; i < 10; i++) {
+				draw.DrawTriangle(transform[i], camraTransform, device, commandList, materialResource, textureSrvHandleGPU);
+			}
 
 			//球の描画//
 
