@@ -693,7 +693,7 @@ int WINAPI WinMain(HINSTANCE, HINSTANCE, LPSTR, int) {
 	ID3D12Resource* textureResource = CreateTextureResource(device, metaData);
 	ID3D12Resource* intermediateResource = UploadTextureData(textureResource, mipImages, device, commandList);
 	//二枚目のTextureを読み込む
-	DirectX::ScratchImage mapImages2 = LoadTexture("resources/monsterBall.png");
+	DirectX::ScratchImage mapImages2 = LoadTexture("resources/WHITE64x64.png");
 	const DirectX::TexMetadata& metaData2 = mapImages2.GetMetadata();
 	ID3D12Resource* textureResource2 = CreateTextureResource(device, metaData2);
 	ID3D12Resource* intermediateResource2= UploadTextureData(textureResource2, mapImages2, device, commandList);
@@ -1194,19 +1194,18 @@ int WINAPI WinMain(HINSTANCE, HINSTANCE, LPSTR, int) {
 
 
 
-			transformSpriteSphere.rotate.y += 0.1f;
-
+			
 
 
 			//*wvpData = camera.MakeWorldViewProjectionMatrix(transform, camraTransform);
 
-			*transformationMatrixDataSprite = camera.MakeWorldViewProjectionMatrix(transformSprite, camraTransform);
+			/**transformationMatrixDataSprite = camera.MakeWorldViewProjectionMatrix(transformSprite, camraTransform);
 
 			Matrix4x4 worldMatrixSpriteSphere = MakeAffineMatrix(transformSpriteSphere.translate, transformSpriteSphere.scale, transformSpriteSphere.rotate);
 			Matrix4x4 viewMatrixSpriteShpere = IdentityMatrix();
 			Matrix4x4 projectionMatrixSpriteShpere = MakeOrthographicMatrix(0, float(kClientWidth), 0, float(kClientHeight), 0.0f, 100.0f);
 			Matrix4x4 worldViewProjectionMatrixSpriteShpere = MultiplyMatrix4x4(worldMatrixSpriteSphere, MultiplyMatrix4x4(viewMatrixSpriteShpere, projectionMatrixSpriteShpere));
-			*transformationMatrixDataSpriteShpere = worldViewProjectionMatrixSpriteShpere;
+			*transformationMatrixDataSpriteShpere = worldViewProjectionMatrixSpriteShpere;*/
 
 			//描画先のRTVを設定する
 			commandList->OMSetRenderTargets(1, &rtvHandles[backBufferIndex], false, nullptr);
@@ -1259,12 +1258,16 @@ int WINAPI WinMain(HINSTANCE, HINSTANCE, LPSTR, int) {
 			//マテリアルCBufferの場所を設定
 			commandList->SetGraphicsRootConstantBufferView(0, materialResource->GetGPUVirtualAddress());
 			commandList->SetGraphicsRootConstantBufferView(1, wvpResource->GetGPUVirtualAddress());
-
-			if (!useMonsterBall) {
-				commandList->SetGraphicsRootDescriptorTable(2, textureSrvHandleGPU);
+			commandList->SetGraphicsRootDescriptorTable(2, textureSrvHandleGPU);
+			/*if (!useMonsterBall) {
+				
 			}
 			else {
 				commandList->SetGraphicsRootDescriptorTable(2, textureSrvHandleGPU2);
+			}*/
+
+			for (int i = 0; i < 10; i++) {
+				draw.DrawTriangle(transform[i], camraTransform, device, commandList, materialResource, textureSrvHandleGPU);
 			}
 
 			////描画！（DrawCall/ドローコール）。3頂点で1つのインスタンス。インスタンスについては今後
@@ -1281,18 +1284,16 @@ int WINAPI WinMain(HINSTANCE, HINSTANCE, LPSTR, int) {
 			//commandList->DrawInstanced(6, 1, 0, 0);
 
 
-			/*for (int i = 0; i < 10; i++) {
-				draw.DrawTriangle(transform[i], camraTransform, device, commandList, materialResource, textureSrvHandleGPU);
-			}*/
+			
 
-			//球の描画//
+			////球の描画//
 
-			commandList->IASetVertexBuffers(0, 1, &vertexBufferViewSpriteShpere);//VBVを設定
+			//commandList->IASetVertexBuffers(0, 1, &vertexBufferViewSpriteShpere);//VBVを設定
 
-			commandList->SetGraphicsRootConstantBufferView(1, transformationMatrixResourceSpriteShpere->GetGPUVirtualAddress());
+			//commandList->SetGraphicsRootConstantBufferView(1, transformationMatrixResourceSpriteShpere->GetGPUVirtualAddress());
 
-			//描画
-			commandList->DrawInstanced(kSubdivision * kSubdivision * 6, 1, 0, 0);
+			////描画
+			//commandList->DrawInstanced(kSubdivision * kSubdivision * 6, 1, 0, 0);
 
 			
 
