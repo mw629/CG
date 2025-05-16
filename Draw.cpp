@@ -14,6 +14,7 @@ Draw::~Draw()
 void Draw::Initialize()
 {
 	
+	
 }
 
 void Draw::DrawTriangle(Transform transform,
@@ -25,17 +26,17 @@ void Draw::DrawTriangle(Transform transform,
 {
 	GraphicsDevice graphicsDevice;
 	// VertexResourceを生成する//
-	vertexResource = graphicsDevice.CreateBufferResource(device, sizeof(VertexData) * 3);
+	vertexResource = graphicsDevice.CreateBufferResource(device, sizeof(VertexData) * vertexIndex);
 
 
 	//VertexxBuffViewを作成する//
 
 	//頂点バッファビューを作成する
-	vertexBufferView;
+
 	//リソースの先頭のアドレスから使う
 	vertexBufferView.BufferLocation = vertexResource->GetGPUVirtualAddress();
 	//使用するリソースのサイズは頂点3つ分のサイズ
-	vertexBufferView.SizeInBytes = sizeof(VertexData) * 3;
+	vertexBufferView.SizeInBytes = sizeof(VertexData) * vertexIndex;
 	//1頂点当たりのサイズ
 	vertexBufferView.StrideInBytes = sizeof(VertexData);
 
@@ -47,13 +48,13 @@ void Draw::DrawTriangle(Transform transform,
 	//Resouceにデータを書き込む//
 
 	//左下
-	vertexData[0].position = { -0.5f,-0.5f,0.0f,1.0f };
+	vertexData[0].position = { -0.1f,-0.1f,0.0f,1.0f };
 	vertexData[0].texcoord = { 0.0f,1.0f };
 	//上
-	vertexData[1].position = { 0.0f,0.5f,0.0f,1.0f };
+	vertexData[1].position = { 0.0f,0.1f,0.0f,1.0f };
 	vertexData[1].texcoord = { 0.5f,0.0f };
 	//右下
-	vertexData[2].position = { 0.5f,-0.5f,0.0f,1.0f };
+	vertexData[2].position = { 0.1f,-0.1f,0.0f,1.0f };
 	vertexData[2].texcoord = { 1.0f,1.0f };
 
 
@@ -66,7 +67,7 @@ void Draw::DrawTriangle(Transform transform,
 	//
 	*wvpData = camera.MakeWorldViewProjectionMatrix(transform, cameraTransform);
 
-	
+	commandList->IASetVertexBuffers(0, 1, &vertexBufferView);//VBVを設定
 
 	//マテリアルCBufferの場所を設定
 	commandList->SetGraphicsRootConstantBufferView(0, materialResource->GetGPUVirtualAddress());
@@ -75,5 +76,5 @@ void Draw::DrawTriangle(Transform transform,
 	commandList->SetGraphicsRootDescriptorTable(2, textureSrvHandleGPU);
 
 	//描画！（DrawCall/ドローコール）。3頂点で1つのインスタンス。インスタンスについては今後
-	commandList->DrawInstanced(3, 1, 0, 0);
+	commandList->DrawInstanced(vertexIndex, 1, 0, 0);
 }

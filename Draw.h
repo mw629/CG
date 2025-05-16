@@ -16,6 +16,8 @@ private:
 
 	Camera camera;
 
+	int vertexIndex=9;
+
 
 public:
 
