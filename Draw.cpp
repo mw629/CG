@@ -70,7 +70,7 @@ void Draw::DrawTriangle(Transform transform,
 	vertexData[5].texcoord = { 1.0f,1.0f };
 
 	//3枚
-
+	
 	//左下
 	vertexData[6].position = { 0.1f,-0.1f,0.0f,1.0f };
 	vertexData[6].texcoord = { 0.0f,1.0f };

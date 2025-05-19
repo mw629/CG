@@ -304,7 +304,7 @@ ID3D12Resource* CreateDepthStencilTextureResource(ID3D12Device* device, int32_t 
 }
 
 D3D12_CPU_DESCRIPTOR_HANDLE GetCPUDescriptorHandle(ID3D12DescriptorHeap* descriptorHeap, uint32_t descriprtorSize, uint32_t index) {
-	
+
 	D3D12_CPU_DESCRIPTOR_HANDLE handleCPU = descriptorHeap->GetCPUDescriptorHandleForHeapStart();
 	handleCPU.ptr += (descriprtorSize * index);
 	return handleCPU;
@@ -558,7 +558,7 @@ int WINAPI WinMain(HINSTANCE, HINSTANCE, LPSTR, int) {
 	//
 	ID3D12DescriptorHeap* srvDescriptorHeap = CreateDescriptorHeep(device, D3D12_DESCRIPTOR_HEAP_TYPE_CBV_SRV_UAV, 128, true);
 
-	
+
 
 	//SwapChainからResourceを引っ張ってくる//
 
@@ -696,7 +696,7 @@ int WINAPI WinMain(HINSTANCE, HINSTANCE, LPSTR, int) {
 	DirectX::ScratchImage mapImages2 = LoadTexture("resources/WHITE64x64.png");
 	const DirectX::TexMetadata& metaData2 = mapImages2.GetMetadata();
 	ID3D12Resource* textureResource2 = CreateTextureResource(device, metaData2);
-	ID3D12Resource* intermediateResource2= UploadTextureData(textureResource2, mapImages2, device, commandList);
+	ID3D12Resource* intermediateResource2 = UploadTextureData(textureResource2, mapImages2, device, commandList);
 
 
 	//どこいれればいいの(汗)//
@@ -737,8 +737,8 @@ int WINAPI WinMain(HINSTANCE, HINSTANCE, LPSTR, int) {
 	D3D12_CPU_DESCRIPTOR_HANDLE textureSrvHandleCPU2 = GetCPUDescriptorHandle(srvDescriptorHeap, descriptorSizeSRV, 2);
 	D3D12_GPU_DESCRIPTOR_HANDLE textureSrvHandleGPU2 = GetGPUDescriptorHandle(srvDescriptorHeap, descriptorSizeSRV, 2);
 
-	
-	
+
+
 	////先頭はImGuiが使っているのでその次を使う
 	//textureSrvHandleCPU.ptr += device->GetDescriptorHandleIncrementSize(D3D12_DESCRIPTOR_HEAP_TYPE_CBV_SRV_UAV);
 	//textureSrvHandleGPU.ptr += device->GetDescriptorHandleIncrementSize(D3D12_DESCRIPTOR_HEAP_TYPE_CBV_SRV_UAV);
@@ -888,13 +888,13 @@ int WINAPI WinMain(HINSTANCE, HINSTANCE, LPSTR, int) {
 	bool isAlive[TriangleIndex] = { false };
 	for (int i = 0; i < TriangleIndex; i++) {
 		transform[i] = { {1.0f,1.0f,1.0f},{0.0f,0.0f,0.0f},{1.0f,1.0f,0.0f} };
-		if (i < TriangleIndex/2) {
-			transform[i].translate.x -= 0.2f*i;
+		if (i < TriangleIndex / 2) {
+			transform[i].translate.x -= 0.2f * i;
 		}
 		else
 		{
-			transform[i].translate.x += 0.2f * (i- TriangleIndex);
-			transform[i].translate.y -= 2.0f ;
+			transform[i].translate.x += 0.2f * (i - TriangleIndex);
+			transform[i].translate.y -= 2.0f;
 		}
 	}
 
@@ -958,12 +958,12 @@ int WINAPI WinMain(HINSTANCE, HINSTANCE, LPSTR, int) {
 			//開発用UIの処理。実際に開発用UIを出す場合はここをゲ0無固有の処理に置き換える
 			ImGui::Checkbox("changeTexture", &changeTexture);
 			//ImGui::ShowDemoWindow();
-			ImGui::DragFloat3("camera.translate", &camraTransform.translate.x,0.01f);
+			ImGui::DragFloat3("camera.translate", &camraTransform.translate.x, 0.01f);
 			ImGui::DragFloat3("camera.scale", &camraTransform.scale.x, 0.01f);
 			ImGui::DragFloat3("camera.rotate", &camraTransform.rotate.x, 0.01f);
 			ImGui::DragFloat4("Color", &materialData->x, 1.0f);
 			ImGui::ColorPicker4("Color", &materialData->x);
-	
+
 
 			for (int i = 0; i < TriangleIndex; i++) {
 				transform[i].translate.x += 0.01f;
@@ -1020,6 +1020,7 @@ int WINAPI WinMain(HINSTANCE, HINSTANCE, LPSTR, int) {
 					draw.DrawTriangle(transform[i], camraTransform, device, commandList, materialResource, textureSrvHandleGPU2);
 				}
 				if (!changeTexture) {
+					draw.DrawTriangle(transform[i], camraTransform, device, commandList, materialResource, textureSrvHandleGPU);
 					draw.DrawTriangle(transform[i], camraTransform, device, commandList, materialResource, textureSrvHandleGPU);
 				}
 			}
