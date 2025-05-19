@@ -1,4 +1,5 @@
 #pragma once
+#include <cstdint>
 
 
 ///構造体///
@@ -14,7 +15,7 @@ struct Vector3 {
 	float x;
 	float y;
 	float z;
-	float w = 1.0f;
+	
 
 	Vector3 operator+(const Vector3& other) { return { x + other.x, y + other.y,z + other.z }; }
 	Vector3 operator-(const Vector3& other) { return { x - other.x, y - other.y,z - other.z }; }
@@ -48,8 +49,27 @@ struct Transform
 	Vector3 translate;
 };
 
+struct TransformMatrix
+{
+	Matrix4x4 WVP;
+	Matrix4x4 World;
+};
+
 struct VertexData
 {
 	Vector4 position;
 	Vector2 texcoord;
+	Vector3 normal;
+};
+
+struct Material
+{
+	Vector4 color;
+	int32_t endbleLighting;
+};
+
+struct DirectionalLight {
+	Vector4 color;//ライトの色
+	Vector3 direction;//ライトの向き
+	float intensity;//輝度
 };
