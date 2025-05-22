@@ -49,7 +49,7 @@ struct Transform
 	Vector3 translate;
 };
 
-struct TransformMatrix
+struct TransformationMatrix
 {
 	Matrix4x4 WVP;
 	Matrix4x4 World;
