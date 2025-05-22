@@ -997,21 +997,21 @@ int WINAPI WinMain(HINSTANCE, HINSTANCE, LPSTR, int) {
 
 	//Shpere用の頂点リソースを作る//
 
-	ID3D12Resource* vertexResourceSpriteShpere = graphicsDevice.CreateBufferResource(device, sizeof(VertexData) * (kSubdivision * kSubdivision) * 6);
+	ID3D12Resource* vertexResourceShpere = graphicsDevice.CreateBufferResource(device, sizeof(VertexData) * (kSubdivision * kSubdivision) * 6);
 
 	//頂点バッファービューを作成する
-	D3D12_VERTEX_BUFFER_VIEW vertexBufferViewSpriteShpere{};
+	D3D12_VERTEX_BUFFER_VIEW vertexBufferViewShpere{};
 	//リソースの先頭アドレスから使う
-	vertexBufferViewSpriteShpere.BufferLocation = vertexResourceSpriteShpere->GetGPUVirtualAddress();
+	vertexBufferViewShpere.BufferLocation = vertexResourceShpere->GetGPUVirtualAddress();
 	//使用するリソースのサイズは頂点6つ分のサイズ
-	vertexBufferViewSpriteShpere.SizeInBytes = sizeof(VertexData) * (kSubdivision * kSubdivision) * 6;
+	vertexBufferViewShpere.SizeInBytes = sizeof(VertexData) * (kSubdivision * kSubdivision) * 6;
 	//1頂点当たりのサイズ
-	vertexBufferViewSpriteShpere.StrideInBytes = sizeof(VertexData);
+	vertexBufferViewShpere.StrideInBytes = sizeof(VertexData);
 
 	//頂点データを設定する//
 
-	VertexData* vertexDataSpriteShpere = nullptr;
-	vertexResourceSpriteShpere->Map(0, nullptr, reinterpret_cast<void**>(&vertexDataSpriteShpere));
+	VertexData* vertexDataShpere = nullptr;
+	vertexResourceShpere->Map(0, nullptr, reinterpret_cast<void**>(&vertexDataShpere));
 
 	//経度分割1つ分の角度φd
 	const float kLonEvery = pi * 2.0f / float(kSubdivision);
@@ -1022,86 +1022,69 @@ int WINAPI WinMain(HINSTANCE, HINSTANCE, LPSTR, int) {
 		float lat = -pi / 2.0f + kLatEvery * latIndex;//Θ
 		//経度方向に分割しながら線を描く
 		for (uint32_t lonIndex = 0; lonIndex < kSubdivision; ++lonIndex) {
-			uint32_t start = (latIndex * kSubdivision + lonIndex) * 6;
+			uint32_t startIndex = (latIndex * kSubdivision + lonIndex) * 6;
 			float lon = lonIndex * kLonEvery;
 
-			//一つ目の三角形
+			vertexDataShpere[startIndex].position.x = cos(lat) * cos(lon);
+			vertexDataShpere[startIndex].position.y = sin(lat);
+			vertexDataShpere[startIndex].position.z = cos(lat) * sin(lon);
+			vertexDataShpere[startIndex].position.w = 1.0f;
+			vertexDataShpere[startIndex].texcoord = { (float(lonIndex) / float(kSubdivision)) , 1.0f - float(latIndex) / float(kSubdivision) };
+			vertexDataShpere[startIndex].normal.x = vertexDataShpere[startIndex].position.x;
+			vertexDataShpere[startIndex].normal.y = vertexDataShpere[startIndex].position.y;
+			vertexDataShpere[startIndex].normal.z = vertexDataShpere[startIndex].position.z;
+			vertexDataShpere[startIndex + 1].position.x = cos(lat + kLatEvery) * cos(lon);
+			vertexDataShpere[startIndex + 1].position.y = sin(lat + kLatEvery);
+			vertexDataShpere[startIndex + 1].position.z = cos(lat + kLatEvery) * sin(lon);
+			vertexDataShpere[startIndex + 1].position.w = 1.0f;
+			vertexDataShpere[startIndex + 1].texcoord = { (float(lonIndex) / float(kSubdivision)) , 1.0f - float(latIndex + 1) / float(kSubdivision) };
+			vertexDataShpere[startIndex + 1].normal.x = vertexDataShpere[startIndex].position.x;
+			vertexDataShpere[startIndex + 1].normal.y = vertexDataShpere[startIndex].position.y;
+			vertexDataShpere[startIndex + 1].normal.z = vertexDataShpere[startIndex].position.z;
+			vertexDataShpere[startIndex + 2].position.x = cos(lat) * cos(lon + kLonEvery);
+			vertexDataShpere[startIndex + 2].position.y = sin(lat);
+			vertexDataShpere[startIndex + 2].position.z = cos(lat) * sin(lon + kLonEvery);
+			vertexDataShpere[startIndex + 2].position.w = 1.0f;
+			vertexDataShpere[startIndex + 2].texcoord = { (float(lonIndex + 1) / float(kSubdivision)) , 1.0f - float(latIndex) / float(kSubdivision) };
+			vertexDataShpere[startIndex + 2].normal.x = vertexDataShpere[startIndex].position.x;
+			vertexDataShpere[startIndex + 2].normal.y = vertexDataShpere[startIndex].position.y;
+			vertexDataShpere[startIndex + 2].normal.z = vertexDataShpere[startIndex].position.z;
+			vertexDataShpere[startIndex + 4].position.x = cos(lat + kLatEvery) * cos(lon);
+			vertexDataShpere[startIndex + 4].position.y = sin(lat + kLatEvery);
+			vertexDataShpere[startIndex + 4].position.z = cos(lat + kLatEvery) * sin(lon);
+			vertexDataShpere[startIndex + 4].position.w = 1.0f;
+			vertexDataShpere[startIndex + 4].texcoord = { (float(lonIndex) / float(kSubdivision)) , 1.0f - float(latIndex + 1) / float(kSubdivision) };
+			vertexDataShpere[startIndex + 4].normal.x = vertexDataShpere[startIndex].position.x;
+			vertexDataShpere[startIndex + 4].normal.y = vertexDataShpere[startIndex].position.y;
+			vertexDataShpere[startIndex + 4].normal.z = vertexDataShpere[startIndex].position.z;
+			vertexDataShpere[startIndex + 3].position.x = cos(lat) * cos(lon + kLonEvery);
+			vertexDataShpere[startIndex + 3].position.y = sin(lat);
+			vertexDataShpere[startIndex + 3].position.z = cos(lat) * sin(lon + kLonEvery);
+			vertexDataShpere[startIndex + 3].position.w = 1.0f;
+			vertexDataShpere[startIndex + 3].texcoord = { (float(lonIndex + 1) / float(kSubdivision)) , 1.0f - float(latIndex) / float(kSubdivision) };
+			vertexDataShpere[startIndex + 3].normal.x = vertexDataShpere[startIndex].position.x;
+			vertexDataShpere[startIndex + 3].normal.y = vertexDataShpere[startIndex].position.y;
+			vertexDataShpere[startIndex + 3].normal.z = vertexDataShpere[startIndex].position.z;
+			vertexDataShpere[startIndex + 5].position.x = cos(lat + kLatEvery) * cos(lon + kLonEvery);
+			vertexDataShpere[startIndex + 5].position.y = sin(lat + kLatEvery);
+			vertexDataShpere[startIndex + 5].position.z = cos(lat + kLatEvery) * sin(lon + kLonEvery);
+			vertexDataShpere[startIndex + 5].position.w = 1.0f;
+			vertexDataShpere[startIndex + 5].texcoord = { (float(lonIndex + 1) / float(kSubdivision)) , 1.0f - float(latIndex + 1) / float(kSubdivision) };
+			vertexDataShpere[startIndex + 5].normal.x = vertexDataShpere[startIndex].position.x;
+			vertexDataShpere[startIndex + 5].normal.y = vertexDataShpere[startIndex].position.y;
+			vertexDataShpere[startIndex + 5].normal.z = vertexDataShpere[startIndex].position.z;
 
-			VertexData a;
-			VertexData b;
-			VertexData c;
-			VertexData d;
-
-			//position
-
-			a.position = {
-				cos(lat) * cos(lon),
-				sin(lat),
-				cos(lat) * sin(lon),
-				1.0f };
-
-			b.position = {
-				cos(lat + kLatEvery) * cos(lon),
-				sin(lat + kLatEvery),
-				cos(lat + kLatEvery) * sin(lon) ,
-				1.0f };
-
-			c.position = {
-				cos(lat) * cos(lon + kLonEvery),
-				sin(lat),
-				cos(lat) * sin(lon + kLonEvery),
-				1.0f };
-
-			d.position = {
-				cos(lat + kLatEvery) * cos(lon + kLonEvery),
-				sin(lat + kLatEvery),
-				cos(lat + kLatEvery) * sin(lon + kLonEvery),
-				1.0f };
-
-			//texcoord
-
-			a.texcoord = {
-				float(lonIndex) / float(kSubdivision),
-				 float(latIndex) / float(kSubdivision) };
-
-			b.texcoord = {
-				float(lonIndex) / float(kSubdivision),
-				 float(latIndex + 1) / float(kSubdivision) };
-
-			c.texcoord = {
-				float(lonIndex + 1) / float(kSubdivision),
-				 float(latIndex) / float(kSubdivision) };
-
-			d.texcoord = {
-				float(lonIndex + 1) / float(kSubdivision),
-				 float(latIndex + 1) / float(kSubdivision) };
-
-			//法線
-
-			a.normal = { a.position.x,a.position.y,a.position.z };
-			b.normal = { b.position.x,b.position.y,b.position.z };
-			c.normal = { c.position.x,c.position.y,c.position.z };
-			d.normal = { d.position.x,d.position.y,d.position.z };
-
-			//頂点にデータを入力する。基準点a
-			vertexDataSpriteShpere[start] = a;
-			vertexDataSpriteShpere[start + 1] = c;
-			vertexDataSpriteShpere[start + 2] = b;
-			//二つ目の三角形
-			vertexDataSpriteShpere[start + 3] = b;
-			vertexDataSpriteShpere[start + 4] = c;
-			vertexDataSpriteShpere[start + 5] = d;
 		}
 	}
 
 	//Sprite用ののTransformationMatrix用のリソースを作る。Matrix4x41つ分のサイズを用意する
-	ID3D12Resource* transformationMatrixResourceSpriteShpere = graphicsDevice.CreateBufferResource(device, sizeof(Matrix4x4));
+	ID3D12Resource* transformationMatrixResourceShpere = graphicsDevice.CreateBufferResource(device, sizeof(Matrix4x4));
 	//データを書き込む
-	Matrix4x4* transformationMatrixDataSpriteShpere = nullptr;
+	Matrix4x4* transformationMatrixDataShpere = nullptr;
 	//書き込むためのアドレスを取得
-	transformationMatrixResourceSpriteShpere->Map(0, nullptr, reinterpret_cast<void**>(&transformationMatrixDataSpriteShpere));
+	transformationMatrixResourceShpere->Map(0, nullptr, reinterpret_cast<void**>(&transformationMatrixDataShpere));
 	//単位行列をかきこんでおく
-	*transformationMatrixDataSpriteShpere = IdentityMatrix();
+	*transformationMatrixDataShpere = IdentityMatrix();
 
 
 	ID3D12Resource* directinalLightResource = graphicsDevice.CreateBufferResource(device, sizeof(DirectionalLight));
@@ -1154,7 +1137,7 @@ int WINAPI WinMain(HINSTANCE, HINSTANCE, LPSTR, int) {
 	Transform camraTransform{ {1.0f,1.0f,1.0f},{0.0f,0.0f,0.0f},{0.0f,0.0f,-.0f} };
 	Transform transformSprite{ {1.0f,1.0f,1.0f},{0.0f,0.0f,0.0f},{0.0f,0.0f,0.0f} };
 	float rdius = 200.0f;
-	Transform transformSpriteSphere{ ScalarMultiply({1.0f,1.0f,1.0f},rdius),{0.0f,0.0f,0.0f},{640.0f,360.0f,-5.0f} };
+	Transform transformShpere{ ScalarMultiply({1.0f,1.0f,1.0f},rdius),{0.0f,0.0f,0.0f},{640.0f,360.0f,-5.0f} };
 
 	bool useMonsterBall = true;
 
@@ -1222,28 +1205,34 @@ int WINAPI WinMain(HINSTANCE, HINSTANCE, LPSTR, int) {
 				ImGui::DragFloat3("RotateSprite", &transformSprite.rotate.x, 0.01f);
 				ImGui::DragFloat3("ScaleSprite", &transformSprite.scale.x, 0.01f);
 			}
-			ImGui::DragFloat3("TranslateSpriteShpere", &transformSpriteSphere.translate.x, 1.00f);
-			ImGui::DragFloat3("RotateSpriteShpere", &transformSpriteSphere.rotate.x, 0.01f);
-			ImGui::DragFloat3("ScaleSpriteShpere", &transformSpriteSphere.scale.x, 0.01f);
+			if (ImGui::CollapsingHeader("Shpere")) {
+				ImGui::DragFloat3("TranslateShpere", &transformShpere.translate.x, 1.00f);
+				ImGui::DragFloat3("RotateShpere", &transformShpere.rotate.x, 0.01f);
+				ImGui::DragFloat3("ScaleShpere", &transformShpere.scale.x, 0.01f);
+			}
+			if (ImGui::CollapsingHeader("ライト"))
+			{
+				ImGui::DragFloat4("directinalLightData", &directinalLightData->color.x, 1.00f);
+				ImGui::DragFloat3("directinalLightData", &directinalLightData->direction.x, 1.00f);
+				ImGui::DragFloat("directinalLightData", &directinalLightData->intensity, 1.00f);
+			}
 
 
 
 
 
-
-
-			transformSpriteSphere.rotate.y += 0.1f;
+			//transformShpere.rotate.y += 0.1f;
 
 
 
 			//*wvpData = camera.MakeWorldViewProjectionMatrix(transform, camraTransform);
 			//*transformationMatrixDataSprite = camera.MakeWorldViewProjectionMatrix(transformSprite, camraTransform);
 
-			Matrix4x4 worldMatrixSpriteSphere = MakeAffineMatrix(transformSpriteSphere.translate, transformSpriteSphere.scale, transformSpriteSphere.rotate);
-			Matrix4x4 viewMatrixSpriteShpere = IdentityMatrix();
-			Matrix4x4 projectionMatrixSpriteShpere = MakeOrthographicMatrix(0, float(kClientWidth), 0, float(kClientHeight), 0.0f, 100.0f);
-			Matrix4x4 worldViewProjectionMatrixSpriteShpere = MultiplyMatrix4x4(worldMatrixSpriteSphere, MultiplyMatrix4x4(viewMatrixSpriteShpere, projectionMatrixSpriteShpere));
-			*transformationMatrixDataSpriteShpere = worldViewProjectionMatrixSpriteShpere;
+			Matrix4x4 worldMatrixShpere = MakeAffineMatrix(transformShpere.translate, transformShpere.scale, transformShpere.rotate);
+			Matrix4x4 viewMatrixShpere = IdentityMatrix();
+			Matrix4x4 projectionMatrixShpere = MakeOrthographicMatrix(0, float(kClientWidth), 0, float(kClientHeight), 0.0f, 100.0f);
+			Matrix4x4 worldViewProjectionMatrixShpere = MultiplyMatrix4x4(worldMatrixShpere, MultiplyMatrix4x4(viewMatrixShpere, projectionMatrixShpere));
+			*transformationMatrixDataShpere = worldViewProjectionMatrixShpere;
 
 			//描画先のRTVを設定する
 			commandList->OMSetRenderTargets(1, &rtvHandles[backBufferIndex], false, nullptr);
@@ -1285,9 +1274,9 @@ int WINAPI WinMain(HINSTANCE, HINSTANCE, LPSTR, int) {
 			commandList->SetGraphicsRootConstantBufferView(3, directinalLightResource->GetGPUVirtualAddress());
 
 			//球の描画
-			commandList->IASetVertexBuffers(0, 1, &vertexBufferViewSpriteShpere);//VBVを設定
+			commandList->IASetVertexBuffers(0, 1, &vertexBufferViewShpere);//VBVを設定
 			commandList->SetGraphicsRootConstantBufferView(0, materialResourceSprite->GetGPUVirtualAddress());
-			commandList->SetGraphicsRootConstantBufferView(1, transformationMatrixResourceSpriteShpere->GetGPUVirtualAddress());
+			commandList->SetGraphicsRootConstantBufferView(1, transformationMatrixResourceShpere->GetGPUVirtualAddress());
 			if (!useMonsterBall) {
 				commandList->SetGraphicsRootDescriptorTable(2, textureSrvHandleGPU);
 			}
