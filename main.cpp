@@ -1078,14 +1078,14 @@ int WINAPI WinMain(HINSTANCE, HINSTANCE, LPSTR, int) {
 	}
 
 	//Sprite用ののTransformationMatrix用のリソースを作る。Matrix4x41つ分のサイズを用意する
-	ID3D12Resource* transformationMatrixResourceShpere = graphicsDevice.CreateBufferResource(device, sizeof(Matrix4x4));
+	ID3D12Resource* transformationMatrixResourceShpere = graphicsDevice.CreateBufferResource(device, sizeof(TransformationMatrix));
 	//データを書き込む
-	Matrix4x4* transformationMatrixDataShpere = nullptr;
+	TransformationMatrix* transformationMatrixDataShpere = nullptr;
 	//書き込むためのアドレスを取得
 	transformationMatrixResourceShpere->Map(0, nullptr, reinterpret_cast<void**>(&transformationMatrixDataShpere));
 	//単位行列をかきこんでおく
-	*transformationMatrixDataShpere = IdentityMatrix();
-
+	transformationMatrixDataShpere->WVP = IdentityMatrix();
+	transformationMatrixDataShpere->World = IdentityMatrix();
 
 	ID3D12Resource* directinalLightResource = graphicsDevice.CreateBufferResource(device, sizeof(DirectionalLight));
 
@@ -1094,7 +1094,7 @@ int WINAPI WinMain(HINSTANCE, HINSTANCE, LPSTR, int) {
 	directinalLightResource->Map(0, nullptr, reinterpret_cast<void**>(&directinalLightData));
 	
 	directinalLightData->color = { 1.0f,1.0f,1.0f,1.0f };
-	directinalLightData->direction = { 0.0f,-1.0f,0.0f };
+	directinalLightData->direction = { 1.0f,0.0f,0.0f };
 	directinalLightData->intensity = 1.0f;
 
 
@@ -1137,7 +1137,7 @@ int WINAPI WinMain(HINSTANCE, HINSTANCE, LPSTR, int) {
 	Transform camraTransform{ {1.0f,1.0f,1.0f},{0.0f,0.0f,0.0f},{0.0f,0.0f,-.0f} };
 	Transform transformSprite{ {1.0f,1.0f,1.0f},{0.0f,0.0f,0.0f},{0.0f,0.0f,0.0f} };
 	float rdius = 200.0f;
-	Transform transformShpere{ ScalarMultiply({1.0f,1.0f,1.0f},rdius),{0.0f,0.0f,0.0f},{640.0f,360.0f,-5.0f} };
+	Transform transformShpere{ ScalarMultiply({1.0f,1.0f,1.0f},rdius),{3.16f,1.58f,0.0f},{640.0f,360.0f,-5.0f} };
 
 	bool useMonsterBall = true;
 
@@ -1210,11 +1210,11 @@ int WINAPI WinMain(HINSTANCE, HINSTANCE, LPSTR, int) {
 				ImGui::DragFloat3("RotateShpere", &transformShpere.rotate.x, 0.01f);
 				ImGui::DragFloat3("ScaleShpere", &transformShpere.scale.x, 0.01f);
 			}
-			if (ImGui::CollapsingHeader("ライト"))
+			if (ImGui::CollapsingHeader("Light"))
 			{
-				ImGui::DragFloat4("directinalLightData", &directinalLightData->color.x, 1.00f);
-				ImGui::DragFloat3("directinalLightData", &directinalLightData->direction.x, 1.00f);
-				ImGui::DragFloat("directinalLightData", &directinalLightData->intensity, 1.00f);
+				ImGui::DragFloat4("directinalLightData.Color", &directinalLightData->color.x, 1.00f);
+				ImGui::DragFloat3("directinalLightData.Direction", &directinalLightData->direction.x, 1.00f);
+				ImGui::DragFloat("directinalLightData.intensity", &directinalLightData->intensity, 1.00f);
 			}
 
 
@@ -1232,7 +1232,7 @@ int WINAPI WinMain(HINSTANCE, HINSTANCE, LPSTR, int) {
 			Matrix4x4 viewMatrixShpere = IdentityMatrix();
 			Matrix4x4 projectionMatrixShpere = MakeOrthographicMatrix(0, float(kClientWidth), 0, float(kClientHeight), 0.0f, 100.0f);
 			Matrix4x4 worldViewProjectionMatrixShpere = MultiplyMatrix4x4(worldMatrixShpere, MultiplyMatrix4x4(viewMatrixShpere, projectionMatrixShpere));
-			*transformationMatrixDataShpere = worldViewProjectionMatrixShpere;
+			*transformationMatrixDataShpere = { worldViewProjectionMatrixShpere,worldMatrixShpere };
 
 			//描画先のRTVを設定する
 			commandList->OMSetRenderTargets(1, &rtvHandles[backBufferIndex], false, nullptr);
