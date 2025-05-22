@@ -692,7 +692,7 @@ int WINAPI WinMain(HINSTANCE, HINSTANCE, LPSTR, int) {
 	materialResource->Map(0, nullptr, reinterpret_cast<void**>(&materialData));
 	//今回は書き込んでみる
 	materialData->color = Vector4(1.0f, 1.0f, 1.0f, 1.0f);
-	materialData->endbleLighting = false;
+	materialData->endbleLighting = true;
 
 	//Sprite用のマテリアルリソースを作る
 	ID3D12Resource* materialResourceSprite = graphicsDevice.CreateBufferResource(device, sizeof(Material));
@@ -702,7 +702,7 @@ int WINAPI WinMain(HINSTANCE, HINSTANCE, LPSTR, int) {
 	materialResourceSprite->Map(0, nullptr, reinterpret_cast<void**>(&materialDataSprite));
 	//今回は書き込んでみる
 	materialDataSprite->color = Vector4(1.0f, 1.0f, 1.0f, 1.0f);
-	materialDataSprite->endbleLighting = false;
+	materialDataSprite->endbleLighting = true;
 
 
 	//Textureを読み込んで転送する//
@@ -1079,9 +1079,9 @@ int WINAPI WinMain(HINSTANCE, HINSTANCE, LPSTR, int) {
 			//法線
 
 			a.normal = { a.position.x,a.position.y,a.position.z };
-			a.normal = { b.position.x,b.position.y,b.position.z };
-			a.normal = { c.position.x,c.position.y,c.position.z };
-			a.normal = { d.position.x,d.position.y,d.position.z };
+			b.normal = { b.position.x,b.position.y,b.position.z };
+			c.normal = { c.position.x,c.position.y,c.position.z };
+			d.normal = { d.position.x,d.position.y,d.position.z };
 
 			//頂点にデータを入力する。基準点a
 			vertexDataSpriteShpere[start] = a;
