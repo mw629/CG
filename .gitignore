@@ -357,5 +357,8 @@ MigrationBackup/
 DirectXGame/DirectXGame.exe
 DirectXGame/imgui.ini
 
+# Dump files 
+Dump/
+
 # DirectXTex Compiled Shaders
 **/DirectXTex/Shaders/Compiled/
