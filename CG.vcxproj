@@ -88,6 +88,7 @@ copy "$(WindowsSdkDir)bin\$(TargetPlatformVersion)\x64\dxil.dll" "$(TargetDir)dx
   <ItemGroup>
     <ClCompile Include="Calculation.cpp" />
     <ClCompile Include="Camera.cpp" />
+    <ClCompile Include="RootSignature.cpp" />
     <ClCompile Include="WindowConfig.cpp" />
     <ClCompile Include="Draw.cpp" />
     <ClCompile Include="externals\imgui\imgui.cpp" />
@@ -116,6 +117,7 @@ copy "$(WindowsSdkDir)bin\$(TargetPlatformVersion)\x64\dxil.dll" "$(TargetDir)dx
   <ItemGroup>
     <ClInclude Include="Calculation.h" />
     <ClInclude Include="Camera.h" />
+    <ClInclude Include="RootSignature.h" />
     <ClInclude Include="WindowConfig.h" />
     <ClInclude Include="Draw.h" />
     <ClInclude Include="externals\imgui\imconfig.h" />

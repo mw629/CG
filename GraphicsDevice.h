@@ -18,7 +18,7 @@ class GraphicsDevice
 private:
 
 	HRESULT hr_;
-	
+
 	IDXGIFactory7* dxgiFactory_ = nullptr;
 
 	IDXGIAdapter4* useAdapter_ = nullptr;
@@ -27,7 +27,9 @@ private:
 
 
 public:
-	
+
+	~GraphicsDevice();
+
 	ID3D12Resource* CreateBufferResource(ID3D12Device* device, size_t sizeInBytes);
 
 	void Initialize(std::ostream& os);
@@ -47,7 +49,8 @@ public:
 	/// </summary>
 	void CreateD3D12Device(std::ostream& os);
 
-
-	ID3D12Device *GetDevice() { return device_; };
+	IDXGIFactory7* GetDxgiFactory_() { return dxgiFactory_; };
+	IDXGIAdapter4* GetUseAdapter_() { return useAdapter_; };
+	ID3D12Device* GetDevice() { return device_; };
 };
 

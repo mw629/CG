@@ -4,6 +4,22 @@
 
 
 
+GraphicsDevice::~GraphicsDevice()
+{
+	if (device_) {
+		device_->Release();
+		device_ = nullptr;
+	}
+	if (useAdapter_) {
+		useAdapter_->Release();
+		useAdapter_ = nullptr;
+	}
+	if (dxgiFactory_) {
+		dxgiFactory_->Release();
+		dxgiFactory_ = nullptr;
+	}
+}
+
 ID3D12Resource* GraphicsDevice::CreateBufferResource(ID3D12Device* device, size_t sizeInBytes)
 {
 	//リソース用のヒープの設定
