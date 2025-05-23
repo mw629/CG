@@ -46,5 +46,8 @@ public:
 	/// D3D12Deviceの生成
 	/// </summary>
 	void CreateD3D12Device(std::ostream& os);
+
+
+	ID3D12Device *GetDevice() { return device_; };
 };
 
