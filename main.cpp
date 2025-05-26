@@ -1094,7 +1094,7 @@ int WINAPI WinMain(HINSTANCE, HINSTANCE, LPSTR, int) {
 	directinalLightResource->Map(0, nullptr, reinterpret_cast<void**>(&directinalLightData));
 	
 	directinalLightData->color = { 1.0f,1.0f,1.0f,1.0f };
-	directinalLightData->direction = { 1.0f,0.0f,0.0f };
+	directinalLightData->direction = { 0.0f,-1.0f,0.0f };
 	directinalLightData->intensity = 1.0f;
 
 
@@ -1137,7 +1137,7 @@ int WINAPI WinMain(HINSTANCE, HINSTANCE, LPSTR, int) {
 	Transform camraTransform{ {1.0f,1.0f,1.0f},{0.0f,0.0f,0.0f},{0.0f,0.0f,-.0f} };
 	Transform transformSprite{ {1.0f,1.0f,1.0f},{0.0f,0.0f,0.0f},{0.0f,0.0f,0.0f} };
 	float rdius = 200.0f;
-	Transform transformShpere{ ScalarMultiply({1.0f,1.0f,1.0f},rdius),{3.16f,1.58f,0.0f},{640.0f,360.0f,-5.0f} };
+	Transform transformShpere{ ScalarMultiply({1.0f,1.0f,1.0f},rdius),{0.0f,0.0f,0.0f},{640.0f,360.0f,-5.0f} };
 
 	bool useMonsterBall = true;
 
