@@ -1,6 +1,6 @@
 #pragma once
 #include <cstdint>
-
+#include <vector>
 
 ///構造体///
 
@@ -74,4 +74,9 @@ struct DirectionalLight {
 	Vector4 color;//ライトの色
 	Vector3 direction;//ライトの向き
 	float intensity;//輝度
+};
+
+struct ModelData
+{
+	std::vector<VertexData> vertices;
 };

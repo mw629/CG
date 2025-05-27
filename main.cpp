@@ -7,6 +7,7 @@
 #include <cassert>
 #include <filesystem>
 #include <fstream>
+#include <sstream>
 #include <chrono>
 #include <dxgidebug.h>
 #include <dbgHelp.h>
@@ -315,6 +316,67 @@ D3D12_GPU_DESCRIPTOR_HANDLE GetGPUDescriptorHandle(ID3D12DescriptorHeap* descrip
 	D3D12_GPU_DESCRIPTOR_HANDLE handleGPU = descriptorHeap->GetGPUDescriptorHandleForHeapStart();
 	handleGPU.ptr += (descriprtorSize * index);
 	return handleGPU;
+}
+
+ModelData LoadObjFile(const std::string& directoryPath, const std::string& filename)
+{
+	ModelData modelData;
+	std::vector<Vector4> positions;//位置
+	std::vector<Vector3> normals;//法線
+	std::vector<Vector2> texcoords;//テクスチャ座標
+	std::string line;//1行分の文字列を入れる変数
+
+	std::ifstream file(directoryPath + "/" + filename);//ファイルを開く
+	assert(file.is_open());
+
+	while (std::getline(file,line))
+	{
+		std::string identifier;
+		std::istringstream s(line);
+		s >> identifier;
+
+		if (identifier == "v") {
+			Vector4 position;
+			s >> position.x >> position.y >> position.z;
+			position.w = 1.0f;
+			positions.push_back(position);
+		}
+		else if (identifier == "vt") {
+			Vector2 texcoord;
+			s >> texcoord.x >> texcoord.y;
+			texcoords.push_back(texcoord);
+		}
+		else if (identifier == "vn") {
+			Vector3 normal;
+			s >> normal.x >> normal.y >> normal.z;
+			normals.push_back(normal);
+		}
+		else if (identifier == "f") {
+			//面は三角形限定。そのほか未対応
+			for (int32_t faceVertex = 0;faceVertex < 3;++faceVertex) {
+				std::string vertexDefinition;
+				s >> vertexDefinition;
+				//頂点の要素へのIndexは「位置/UV/法線」で格納されてるので、分解してIndexを取得する
+				std::istringstream v(vertexDefinition);
+				uint32_t elementIndices[3];
+				for (int32_t element = 0;element < 3;++element) {
+					std::string index;
+					std::getline(v, index, '/');//区切りでインデックスを読んでいく
+					elementIndices[element] = std::stoi(index);
+				}
+
+				Vector4 position = positions[elementIndices[0] - 1];
+				Vector2 texcoord = texcoords[elementIndices[1] - 1];
+				Vector3 normal = normals[elementIndices[2] - 1];
+				VertexData vertex = { position ,texcoord ,normal };
+				modelData.vertices.push_back(vertex);
+			}
+
+		}
+
+	}
+	return modelData;
+
 }
 
 
@@ -659,10 +721,10 @@ int WINAPI WinMain(HINSTANCE, HINSTANCE, LPSTR, int) {
 	descriptionRootSignature.NumParameters = _countof(rootParameter);//配列の長さ
 
 
-	
 
 
-	
+
+
 
 
 
@@ -995,7 +1057,7 @@ int WINAPI WinMain(HINSTANCE, HINSTANCE, LPSTR, int) {
 	indexData[4] = 3;
 	indexData[5] = 2;
 
-	
+
 
 	//Sprite用ののTransformationMatrix用のリソースを作る。Matrix4x41つ分のサイズを用意する
 	ID3D12Resource* transformationMatrixResourceSprite = graphicsDevice.CreateBufferResource(device, sizeof(TransformationMatrix));
@@ -1007,8 +1069,42 @@ int WINAPI WinMain(HINSTANCE, HINSTANCE, LPSTR, int) {
 	transformationMatrixDataSprite->World = IdentityMatrix();
 	transformationMatrixDataSprite->WVP = IdentityMatrix();
 
-	//球円の描画//
 
+
+	//Objectの描画//
+
+	ModelData modelData = LoadObjFile("resources/obj", "plane.obj");
+	//頂点リソースを作る
+	ID3D12Resource* vertexResourceObj = graphicsDevice.CreateBufferResource(device, sizeof(VertexData) * modelData.vertices.size());
+	//頂点バッファービューを作成する
+	D3D12_VERTEX_BUFFER_VIEW vertexBufferViewObj{};
+	//リソースの先頭アドレスから使う
+	vertexBufferViewObj.BufferLocation = vertexResource->GetGPUVirtualAddress();
+	//使用するリソースのサイズは頂点6つ分のサイズ
+	vertexBufferViewObj.SizeInBytes = sizeof(VertexData) * modelData.vertices.size();
+	//1頂点当たりのサイズ
+	vertexBufferViewObj.StrideInBytes = sizeof(VertexData);
+
+	//頂点リソースにデータを書き込む
+	VertexData* vertexDataObj = nullptr;
+	vertexResourceObj->Map(0, nullptr, reinterpret_cast<void**>(&vertexDataObj));
+	std::memcpy(vertexDataObj, modelData.vertices.data(), sizeof(vertexData)* modelData.vertices.size());
+
+
+	//Sprite用ののTransformationMatrix用のリソースを作る。Matrix4x41つ分のサイズを用意する
+	ID3D12Resource* transformationMatrixResourceObj = graphicsDevice.CreateBufferResource(device, sizeof(TransformationMatrix));
+	//データを書き込む
+	TransformationMatrix* transformationMatrixDataObj = nullptr;
+	//書き込むためのアドレスを取得
+	transformationMatrixResourceObj->Map(0, nullptr, reinterpret_cast<void**>(&transformationMatrixDataObj));
+	//単位行列をかきこんでおく
+	transformationMatrixDataObj->WVP = IdentityMatrix();
+	transformationMatrixDataObj->World = IdentityMatrix();
+
+
+
+
+	//球円の描画//
 
 
 	float pi = 3.14f;
@@ -1127,10 +1223,10 @@ int WINAPI WinMain(HINSTANCE, HINSTANCE, LPSTR, int) {
 
 	ID3D12Resource* directinalLightResource = graphicsDevice.CreateBufferResource(device, sizeof(DirectionalLight));
 
-	DirectionalLight* directinalLightData=nullptr;
+	DirectionalLight* directinalLightData = nullptr;
 
 	directinalLightResource->Map(0, nullptr, reinterpret_cast<void**>(&directinalLightData));
-	
+
 	directinalLightData->color = { 1.0f,1.0f,1.0f,1.0f };
 	directinalLightData->direction = { 0.0f,-1.0f,0.0f };
 	directinalLightData->intensity = 1.0f;
@@ -1157,18 +1253,21 @@ int WINAPI WinMain(HINSTANCE, HINSTANCE, LPSTR, int) {
 	scissorRect.bottom = kClientHeight;
 
 
-	
+	float rdius = 200.0f;
+	bool useMonsterBall = true;
 
 	Transform camraTransform{ {1.0f,1.0f,1.0f},{0.0f,0.0f,0.0f},{0.0f,0.0f,-.0f} };
 	Transform transformSprite{ {1.0f,1.0f,1.0f},{0.0f,0.0f,0.0f},{0.0f,0.0f,0.0f} };
-	
-	Transform uvTransformSprite{ {1.0f,1.0f,1.0f},{0.0f,0.0f,0.0f},{0.0f,0.0f,0.0f} };
-	
-	
-	float rdius = 200.0f;
 	Transform transformShpere{ ScalarMultiply({1.0f,1.0f,1.0f},rdius),{0.0f,0.0f,0.0f},{640.0f,360.0f,-5.0f} };
+	Transform transformObj{ {1.0f,1.0f,1.0f},{0.0f,0.0f,0.0f},{0.0f,0.0f,0.0f} };
 
-	bool useMonsterBall = true;
+	Transform uvTransformSprite{ {1.0f,1.0f,1.0f},{0.0f,0.0f,0.0f},{0.0f,0.0f,0.0f} };
+
+
+	
+	
+
+	
 
 	IMGUI_CHECKVERSION();
 	ImGui::CreateContext();
@@ -1239,13 +1338,18 @@ int WINAPI WinMain(HINSTANCE, HINSTANCE, LPSTR, int) {
 				ImGui::DragFloat3("RotateShpere", &transformShpere.rotate.x, 0.01f);
 				ImGui::DragFloat3("ScaleShpere", &transformShpere.scale.x, 0.01f);
 			}
+			if (ImGui::CollapsingHeader("Obj")) {
+				ImGui::DragFloat3("TranslateObj", &transformObj.translate.x, 1.00f);
+				ImGui::DragFloat3("RotateObj", &transformObj.rotate.x, 0.01f);
+				ImGui::DragFloat3("ScaleObj", &transformObj.scale.x, 0.01f);
+			}
 			if (ImGui::CollapsingHeader("Light"))
 			{
 				ImGui::DragFloat4("directinalLightData.Color", &directinalLightData->color.x, 1.00f);
 				ImGui::DragFloat3("directinalLightData.Direction", &directinalLightData->direction.x, 1.00f);
 				ImGui::DragFloat("directinalLightData.intensity", &directinalLightData->intensity, 1.00f);
 			}
-			if (ImGui::CollapsingHeader("SpriteUV")) 
+			if (ImGui::CollapsingHeader("SpriteUV"))
 			{
 				ImGui::DragFloat2("TranslateSpriteUV", &uvTransformSprite.translate.x, 0.01f, -10.0f, 10.0f);
 				ImGui::DragFloat2("ScaleSpriteUV", &uvTransformSprite.scale.x, 0.01f, -10.0f, 10.0f);
@@ -1263,18 +1367,19 @@ int WINAPI WinMain(HINSTANCE, HINSTANCE, LPSTR, int) {
 			//*wvpData = camera.MakeWorldViewProjectionMatrix(transform, camraTransform);
 			//*transformationMatrixDataSprite = camera.MakeWorldViewProjectionMatrix(transformSprite, camraTransform);
 
-			
+			Matrix4x4 viewMatrix = IdentityMatrix();
+			Matrix4x4 projectionMatri = MakeOrthographicMatrix(0, float(kClientWidth), 0, float(kClientHeight), 0.0f, 100.0f);
+
+			Matrix4x4 worldMatrixObj = MakeAffineMatrix(transformSprite.translate, transformSprite.scale, transformSprite.rotate);
+			Matrix4x4 worldViewProjectionMatrixObj = MultiplyMatrix4x4(worldMatrixObj, MultiplyMatrix4x4(viewMatrix, projectionMatri));
+			*transformationMatrixDataObj = { worldViewProjectionMatrixObj,worldMatrixObj };
 
 			Matrix4x4 worldMatrixSprite = MakeAffineMatrix(transformSprite.translate, transformSprite.scale, transformSprite.rotate);
-			Matrix4x4 viewMatrixSprite = IdentityMatrix();
-			Matrix4x4 projectionMatrixSprite = MakeOrthographicMatrix(0, float(kClientWidth), 0, float(kClientHeight), 0.0f, 100.0f);
-			Matrix4x4 worldViewProjectionMatrixSprite = MultiplyMatrix4x4(worldMatrixSprite, MultiplyMatrix4x4(viewMatrixSprite, projectionMatrixSprite));
+			Matrix4x4 worldViewProjectionMatrixSprite = MultiplyMatrix4x4(worldMatrixSprite, MultiplyMatrix4x4(viewMatrix, projectionMatri));
 			*transformationMatrixDataSprite = { worldViewProjectionMatrixSprite,worldMatrixSprite };
 
 			Matrix4x4 worldMatrixShpere = MakeAffineMatrix(transformShpere.translate, transformShpere.scale, transformShpere.rotate);
-			Matrix4x4 viewMatrixShpere = IdentityMatrix();
-			Matrix4x4 projectionMatrixShpere = MakeOrthographicMatrix(0, float(kClientWidth), 0, float(kClientHeight), 0.0f, 100.0f);
-			Matrix4x4 worldViewProjectionMatrixShpere = MultiplyMatrix4x4(worldMatrixShpere, MultiplyMatrix4x4(viewMatrixShpere, projectionMatrixShpere));
+			Matrix4x4 worldViewProjectionMatrixShpere = MultiplyMatrix4x4(worldMatrixShpere, MultiplyMatrix4x4(viewMatrix, projectionMatri));
 			*transformationMatrixDataShpere = { worldViewProjectionMatrixShpere,worldMatrixShpere };
 
 
@@ -1329,7 +1434,15 @@ int WINAPI WinMain(HINSTANCE, HINSTANCE, LPSTR, int) {
 			commandList->SetGraphicsRootConstantBufferView(1, transformationMatrixResourceSprite->GetGPUVirtualAddress());
 			commandList->SetGraphicsRootDescriptorTable(2, textureSrvHandleGPU);
 
-			commandList->DrawIndexedInstanced(6, 1, 0, 0, 0);
+			//commandList->DrawIndexedInstanced(6, 1, 0, 0, 0);
+
+			//objectの描画
+			commandList->IASetVertexBuffers(0, 1, &vertexBufferViewObj);//VBVを設定
+			commandList->SetGraphicsRootConstantBufferView(0, materialResourceSprite->GetGPUVirtualAddress());
+			commandList->SetGraphicsRootConstantBufferView(1, transformationMatrixResourceObj->GetGPUVirtualAddress());
+			commandList->SetGraphicsRootDescriptorTable(2, textureSrvHandleGPU);
+
+			commandList->DrawInstanced(UINT(modelData.vertices.size()), 1, 0, 0);
 
 			//球の描画
 			commandList->IASetVertexBuffers(0, 1, &vertexBufferViewShpere);//VBVを設定
@@ -1342,7 +1455,7 @@ int WINAPI WinMain(HINSTANCE, HINSTANCE, LPSTR, int) {
 				commandList->SetGraphicsRootDescriptorTable(2, textureSrvHandleGPU2);
 			}
 			//描画
-			commandList->DrawInstanced(kSubdivision * kSubdivision * 6, 1, 0, 0);
+			//commandList->DrawInstanced(kSubdivision * kSubdivision * 6, 1, 0, 0);
 
 
 			//ImGuiの描画コマンド
