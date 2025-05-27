@@ -693,6 +693,7 @@ int WINAPI WinMain(HINSTANCE, HINSTANCE, LPSTR, int) {
 	//今回は書き込んでみる
 	materialData->color = Vector4(1.0f, 1.0f, 1.0f, 1.0f);
 	materialData->endbleLighting = true;
+	materialData->uvTransform = IdentityMatrix();
 
 	//Sprite用のマテリアルリソースを作る
 	ID3D12Resource* materialResourceSprite = graphicsDevice.CreateBufferResource(device, sizeof(Material));
@@ -703,6 +704,7 @@ int WINAPI WinMain(HINSTANCE, HINSTANCE, LPSTR, int) {
 	//今回は書き込んでみる
 	materialDataSprite->color = Vector4(1.0f, 1.0f, 1.0f, 1.0f);
 	materialDataSprite->endbleLighting = false;
+	materialDataSprite->uvTransform = IdentityMatrix();
 
 
 	//Textureを読み込んで転送する//
@@ -1159,6 +1161,10 @@ int WINAPI WinMain(HINSTANCE, HINSTANCE, LPSTR, int) {
 
 	Transform camraTransform{ {1.0f,1.0f,1.0f},{0.0f,0.0f,0.0f},{0.0f,0.0f,-.0f} };
 	Transform transformSprite{ {1.0f,1.0f,1.0f},{0.0f,0.0f,0.0f},{0.0f,0.0f,0.0f} };
+	
+	Transform uvTransformSprite{ {1.0f,1.0f,1.0f},{0.0f,0.0f,0.0f},{0.0f,0.0f,0.0f} };
+	
+	
 	float rdius = 200.0f;
 	Transform transformShpere{ ScalarMultiply({1.0f,1.0f,1.0f},rdius),{0.0f,0.0f,0.0f},{640.0f,360.0f,-5.0f} };
 
@@ -1239,6 +1245,12 @@ int WINAPI WinMain(HINSTANCE, HINSTANCE, LPSTR, int) {
 				ImGui::DragFloat3("directinalLightData.Direction", &directinalLightData->direction.x, 1.00f);
 				ImGui::DragFloat("directinalLightData.intensity", &directinalLightData->intensity, 1.00f);
 			}
+			if (ImGui::CollapsingHeader("SpriteUV")) 
+			{
+				ImGui::DragFloat2("TranslateSpriteUV", &uvTransformSprite.translate.x, 0.01f, -10.0f, 10.0f);
+				ImGui::DragFloat2("ScaleSpriteUV", &uvTransformSprite.scale.x, 0.01f, -10.0f, 10.0f);
+				ImGui::SliderAngle("RotateSpriteUV", &uvTransformSprite.rotate.z);
+			}
 
 
 
@@ -1251,6 +1263,8 @@ int WINAPI WinMain(HINSTANCE, HINSTANCE, LPSTR, int) {
 			//*wvpData = camera.MakeWorldViewProjectionMatrix(transform, camraTransform);
 			//*transformationMatrixDataSprite = camera.MakeWorldViewProjectionMatrix(transformSprite, camraTransform);
 
+			
+
 			Matrix4x4 worldMatrixSprite = MakeAffineMatrix(transformSprite.translate, transformSprite.scale, transformSprite.rotate);
 			Matrix4x4 viewMatrixSprite = IdentityMatrix();
 			Matrix4x4 projectionMatrixSprite = MakeOrthographicMatrix(0, float(kClientWidth), 0, float(kClientHeight), 0.0f, 100.0f);
@@ -1262,6 +1276,12 @@ int WINAPI WinMain(HINSTANCE, HINSTANCE, LPSTR, int) {
 			Matrix4x4 projectionMatrixShpere = MakeOrthographicMatrix(0, float(kClientWidth), 0, float(kClientHeight), 0.0f, 100.0f);
 			Matrix4x4 worldViewProjectionMatrixShpere = MultiplyMatrix4x4(worldMatrixShpere, MultiplyMatrix4x4(viewMatrixShpere, projectionMatrixShpere));
 			*transformationMatrixDataShpere = { worldViewProjectionMatrixShpere,worldMatrixShpere };
+
+
+			Matrix4x4 uvTransformMatrix = Scale(uvTransformSprite.scale);
+			uvTransformMatrix = MultiplyMatrix4x4(uvTransformMatrix, Rotation(uvTransformSprite.rotate));
+			uvTransformMatrix = MultiplyMatrix4x4(uvTransformMatrix, Translation(uvTransformSprite.translate));
+			materialDataSprite->uvTransform = uvTransformMatrix;
 
 			//描画先のRTVを設定する
 			commandList->OMSetRenderTargets(1, &rtvHandles[backBufferIndex], false, nullptr);
