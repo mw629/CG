@@ -373,7 +373,6 @@ ModelData LoadObjFile(const std::string& directoryPath, const std::string& filen
 			}
 
 		}
-
 	}
 	return modelData;
 
@@ -1088,7 +1087,7 @@ int WINAPI WinMain(HINSTANCE, HINSTANCE, LPSTR, int) {
 	//頂点リソースにデータを書き込む
 	VertexData* vertexDataObj = nullptr;
 	vertexResourceObj->Map(0, nullptr, reinterpret_cast<void**>(&vertexDataObj));
-	std::memcpy(vertexDataObj, modelData.vertices.data(), sizeof(vertexData) * modelData.vertices.size());
+	std::memcpy(vertexDataObj, modelData.vertices.data(), sizeof(VertexData) * modelData.vertices.size());
 
 
 	//Sprite用ののTransformationMatrix用のリソースを作る。Matrix4x41つ分のサイズを用意する
@@ -1258,7 +1257,7 @@ int WINAPI WinMain(HINSTANCE, HINSTANCE, LPSTR, int) {
 
 	Transform camraTransform{ {1.0f,1.0f,1.0f},{0.0f,0.0f,0.0f},{0.0f,0.0f,-5.0f} };
 	Transform transformSprite{ {1.0f,1.0f,1.0f},{0.0f,0.0f,0.0f},{0.0f,0.0f,0.0f} };
-	Transform transformShpere{ ScalarMultiply({1.0f,1.0f,1.0f},rdius),{0.0f,0.0f,0.0f},{0.0f,0.0f,0.0f} };
+	Transform transformShpere{ ScalarMultiply({1.0f,180.0f,1.0f},rdius),{0.0f,0.0f,0.0f},{0.0f,0.0f,0.0f} };
 	Transform transformObj{ {1.0f,1.0f,1.0f},{0.0f,0.0f,0.0f},{0.0f,0.0f,0.0f} };
 
 	Transform uvTransformSprite{ {1.0f,1.0f,1.0f},{0.0f,0.0f,0.0f},{0.0f,0.0f,0.0f} };
@@ -1532,6 +1531,15 @@ int WINAPI WinMain(HINSTANCE, HINSTANCE, LPSTR, int) {
 	useAdapter->Release();
 	dxgiFactory->Release();
 	vertexResource->Release();
+	vertexResourceShpere->Release();
+	vertexResourceSprite->Release();
+	vertexResourceObj->Release();
+	wvpResource->Release();
+	indexResource->Release();
+	transformationMatrixResourceSprite->Release();
+	transformationMatrixResourceShpere->Release();
+	transformationMatrixResourceObj->Release();
+	directinalLightResource->Release();
 	graphicsPipelineState->Release();
 	signatureBlob->Release();
 	if (errorBlob) {
@@ -1543,6 +1551,7 @@ int WINAPI WinMain(HINSTANCE, HINSTANCE, LPSTR, int) {
 	materialResource->Release();
 	intermediateResource->Release();
 	intermediateResource2->Release();
+	
 #ifdef _DEBUG
 	debugController->Release();
 #endif 
