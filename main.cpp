@@ -1253,12 +1253,12 @@ int WINAPI WinMain(HINSTANCE, HINSTANCE, LPSTR, int) {
 	scissorRect.bottom = kClientHeight;
 
 
-	float rdius = 0.5f;
+	float rdius = 1.0f;
 	bool useMonsterBall = true;
 
-	Transform camraTransform{ {1.0f,1.0f,1.0f},{0.0f,0.0f,0.0f},{0.0f,0.0f,-.0f} };
+	Transform camraTransform{ {1.0f,1.0f,1.0f},{0.0f,0.0f,0.0f},{0.0f,0.0f,-5.0f} };
 	Transform transformSprite{ {1.0f,1.0f,1.0f},{0.0f,0.0f,0.0f},{0.0f,0.0f,0.0f} };
-	Transform transformShpere{ ScalarMultiply({1.0f,1.0f,1.0f},rdius),{0.0f,0.0f,0.0f},{0.0f,0.0f,5.0f} };
+	Transform transformShpere{ ScalarMultiply({1.0f,1.0f,1.0f},rdius),{0.0f,0.0f,0.0f},{0.0f,0.0f,0.0f} };
 	Transform transformObj{ {1.0f,1.0f,1.0f},{0.0f,0.0f,0.0f},{0.0f,0.0f,0.0f} };
 
 	Transform uvTransformSprite{ {1.0f,1.0f,1.0f},{0.0f,0.0f,0.0f},{0.0f,0.0f,0.0f} };
@@ -1329,25 +1329,25 @@ int WINAPI WinMain(HINSTANCE, HINSTANCE, LPSTR, int) {
 				ImGui::ColorPicker4("Color", &materialData->color.x);
 			}
 			if (ImGui::CollapsingHeader("Sprite")) {
-				ImGui::DragFloat3("TranslateSprite", &transformSprite.translate.x, 1.00f);
+				ImGui::DragFloat3("TranslateSprite", &transformSprite.translate.x, 0.01f);
 				ImGui::DragFloat3("RotateSprite", &transformSprite.rotate.x, 0.01f);
 				ImGui::DragFloat3("ScaleSprite", &transformSprite.scale.x, 0.01f);
 			}
 			if (ImGui::CollapsingHeader("Shpere")) {
-				ImGui::DragFloat3("TranslateShpere", &transformShpere.translate.x, 1.00f);
+				ImGui::DragFloat3("TranslateShpere", &transformShpere.translate.x, 0.01f);
 				ImGui::DragFloat3("RotateShpere", &transformShpere.rotate.x, 0.01f);
 				ImGui::DragFloat3("ScaleShpere", &transformShpere.scale.x, 0.01f);
 			}
 			if (ImGui::CollapsingHeader("Obj")) {
-				ImGui::DragFloat3("TranslateObj", &transformObj.translate.x, 1.00f);
+				ImGui::DragFloat3("TranslateObj", &transformObj.translate.x, 0.01f);
 				ImGui::DragFloat3("RotateObj", &transformObj.rotate.x, 0.01f);
 				ImGui::DragFloat3("ScaleObj", &transformObj.scale.x, 0.01f);
 			}
 			if (ImGui::CollapsingHeader("Light"))
 			{
-				ImGui::DragFloat4("directinalLightData.Color", &directinalLightData->color.x, 1.00f);
-				ImGui::DragFloat3("directinalLightData.Direction", &directinalLightData->direction.x, 1.00f);
-				ImGui::DragFloat("directinalLightData.intensity", &directinalLightData->intensity, 1.00f);
+				ImGui::DragFloat4("directinalLightData.Color", &directinalLightData->color.x, 0.01f);
+				ImGui::DragFloat3("directinalLightData.Direction", &directinalLightData->direction.x, 0.01f);
+				ImGui::DragFloat("directinalLightData.intensity", &directinalLightData->intensity, 0.01f);
 			}
 			if (ImGui::CollapsingHeader("SpriteUV"))
 			{

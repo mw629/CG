@@ -365,7 +365,7 @@ Matrix4x4 MakePerspectiveFovMatrix(float fovY, float a, float zn, float zf)
 {
 	Matrix4x4 result;
 	result.m[0][0] = static_cast<float>(1.0f / a * (1.0f / tan(fovY / 2.0f)));
-	result.m[1][1] = static_cast<float>(1.0f / tan(fovY / 2.0f));
+	result.m[1][1] = static_cast<float>(-1.0f / tan(fovY / 2.0f));
 	result.m[2][2] = static_cast<float>(zf / (zf - zn));
 	result.m[2][3] = 1.0f;
 	result.m[3][2] = static_cast<float>(-zn * zf / (zf - zn));
