@@ -1073,13 +1073,13 @@ int WINAPI WinMain(HINSTANCE, HINSTANCE, LPSTR, int) {
 
 	//Objectの描画//
 
-	ModelData modelData = LoadObjFile("resources/obj", "plane.obj");
+	ModelData modelData = LoadObjFile("resources/obj", "multiMaterial.obj");
 	//頂点リソースを作る
 	ID3D12Resource* vertexResourceObj = graphicsDevice.CreateBufferResource(device, sizeof(VertexData) * modelData.vertices.size());
 	//頂点バッファービューを作成する
 	D3D12_VERTEX_BUFFER_VIEW vertexBufferViewObj{};
 	//リソースの先頭アドレスから使う
-	vertexBufferViewObj.BufferLocation = vertexResource->GetGPUVirtualAddress();
+	vertexBufferViewObj.BufferLocation = vertexResourceObj->GetGPUVirtualAddress();
 	//使用するリソースのサイズは頂点6つ分のサイズ
 	vertexBufferViewObj.SizeInBytes = sizeof(VertexData) * modelData.vertices.size();
 	//1頂点当たりのサイズ
@@ -1370,7 +1370,7 @@ int WINAPI WinMain(HINSTANCE, HINSTANCE, LPSTR, int) {
 			Matrix4x4 viewMatrix = InverseMatrix4x4(MakeAffineMatrix(camraTransform.translate, camraTransform.scale, camraTransform.rotate));
 			Matrix4x4 projectionMatri = MakePerspectiveFovMatrix(0.45f, float(kClientWidth) / float(kClientHeight), 0.1f, 100.0f);
 
-			Matrix4x4 worldMatrixObj = MakeAffineMatrix(transformSprite.translate, transformSprite.scale, transformSprite.rotate);
+			Matrix4x4 worldMatrixObj = MakeAffineMatrix(transformObj.translate, transformObj.scale, transformObj.rotate);
 			Matrix4x4 worldViewProjectionMatrixObj = MultiplyMatrix4x4(worldMatrixObj, MultiplyMatrix4x4(viewMatrix, projectionMatri));
 			*transformationMatrixDataObj = { worldViewProjectionMatrixObj,worldMatrixObj };
 
@@ -1442,7 +1442,7 @@ int WINAPI WinMain(HINSTANCE, HINSTANCE, LPSTR, int) {
 			commandList->SetGraphicsRootConstantBufferView(1, transformationMatrixResourceObj->GetGPUVirtualAddress());
 			commandList->SetGraphicsRootDescriptorTable(2, textureSrvHandleGPU);
 
-			//commandList->DrawInstanced(UINT(modelData.vertices.size()), 1, 0, 0);
+			commandList->DrawInstanced(UINT(modelData.vertices.size()), 1, 0, 0);
 
 			//球の描画
 			commandList->IASetVertexBuffers(0, 1, &vertexBufferViewShpere);//VBVを設定
@@ -1455,7 +1455,7 @@ int WINAPI WinMain(HINSTANCE, HINSTANCE, LPSTR, int) {
 				commandList->SetGraphicsRootDescriptorTable(2, textureSrvHandleGPU2);
 			}
 			//描画
-			commandList->DrawInstanced(kSubdivision * kSubdivision * 6, 1, 0, 0);
+			//commandList->DrawInstanced(kSubdivision * kSubdivision * 6, 1, 0, 0);
 
 
 			//ImGuiの描画コマンド
