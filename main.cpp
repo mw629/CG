@@ -1367,7 +1367,7 @@ int WINAPI WinMain(HINSTANCE, HINSTANCE, LPSTR, int) {
 			//*wvpData = camera.MakeWorldViewProjectionMatrix(transform, camraTransform);
 			//*transformationMatrixDataSprite = camera.MakeWorldViewProjectionMatrix(transformSprite, camraTransform);
 
-			Matrix4x4 viewMatrix = IdentityMatrix();
+			Matrix4x4 viewMatrix = InverseMatrix4x4(MakeAffineMatrix(camraTransform.translate, camraTransform.scale, camraTransform.rotate));
 			Matrix4x4 projectionMatri = MakePerspectiveFovMatrix(0.45f, float(kClientWidth) / float(kClientHeight), 0.1f, 100.0f);
 
 			Matrix4x4 worldMatrixObj = MakeAffineMatrix(transformSprite.translate, transformSprite.scale, transformSprite.rotate);
