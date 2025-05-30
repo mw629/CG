@@ -329,7 +329,7 @@ ModelData LoadObjFile(const std::string& directoryPath, const std::string& filen
 	std::ifstream file(directoryPath + "/" + filename);//ファイルを開く
 	assert(file.is_open());
 
-	while (std::getline(file,line))
+	while (std::getline(file, line))
 	{
 		std::string identifier;
 		std::istringstream s(line);
@@ -353,13 +353,13 @@ ModelData LoadObjFile(const std::string& directoryPath, const std::string& filen
 		}
 		else if (identifier == "f") {
 			//面は三角形限定。そのほか未対応
-			for (int32_t faceVertex = 0;faceVertex < 3;++faceVertex) {
+			for (int32_t faceVertex = 0; faceVertex < 3; ++faceVertex) {
 				std::string vertexDefinition;
 				s >> vertexDefinition;
 				//頂点の要素へのIndexは「位置/UV/法線」で格納されてるので、分解してIndexを取得する
 				std::istringstream v(vertexDefinition);
 				uint32_t elementIndices[3];
-				for (int32_t element = 0;element < 3;++element) {
+				for (int32_t element = 0; element < 3; ++element) {
 					std::string index;
 					std::getline(v, index, '/');//区切りでインデックスを読んでいく
 					elementIndices[element] = std::stoi(index);
@@ -1088,7 +1088,7 @@ int WINAPI WinMain(HINSTANCE, HINSTANCE, LPSTR, int) {
 	//頂点リソースにデータを書き込む
 	VertexData* vertexDataObj = nullptr;
 	vertexResourceObj->Map(0, nullptr, reinterpret_cast<void**>(&vertexDataObj));
-	std::memcpy(vertexDataObj, modelData.vertices.data(), sizeof(vertexData)* modelData.vertices.size());
+	std::memcpy(vertexDataObj, modelData.vertices.data(), sizeof(vertexData) * modelData.vertices.size());
 
 
 	//Sprite用ののTransformationMatrix用のリソースを作る。Matrix4x41つ分のサイズを用意する
@@ -1253,21 +1253,21 @@ int WINAPI WinMain(HINSTANCE, HINSTANCE, LPSTR, int) {
 	scissorRect.bottom = kClientHeight;
 
 
-	float rdius = 200.0f;
+	float rdius = 0.5f;
 	bool useMonsterBall = true;
 
 	Transform camraTransform{ {1.0f,1.0f,1.0f},{0.0f,0.0f,0.0f},{0.0f,0.0f,-.0f} };
 	Transform transformSprite{ {1.0f,1.0f,1.0f},{0.0f,0.0f,0.0f},{0.0f,0.0f,0.0f} };
-	Transform transformShpere{ ScalarMultiply({1.0f,1.0f,1.0f},rdius),{0.0f,0.0f,0.0f},{640.0f,360.0f,-5.0f} };
+	Transform transformShpere{ ScalarMultiply({1.0f,1.0f,1.0f},rdius),{0.0f,0.0f,0.0f},{0.0f,0.0f,5.0f} };
 	Transform transformObj{ {1.0f,1.0f,1.0f},{0.0f,0.0f,0.0f},{0.0f,0.0f,0.0f} };
 
 	Transform uvTransformSprite{ {1.0f,1.0f,1.0f},{0.0f,0.0f,0.0f},{0.0f,0.0f,0.0f} };
 
 
-	
-	
 
-	
+
+
+
 
 	IMGUI_CHECKVERSION();
 	ImGui::CreateContext();
@@ -1368,7 +1368,7 @@ int WINAPI WinMain(HINSTANCE, HINSTANCE, LPSTR, int) {
 			//*transformationMatrixDataSprite = camera.MakeWorldViewProjectionMatrix(transformSprite, camraTransform);
 
 			Matrix4x4 viewMatrix = IdentityMatrix();
-			Matrix4x4 projectionMatri = MakeOrthographicMatrix(0, float(kClientWidth), 0, float(kClientHeight), 0.0f, 100.0f);
+			Matrix4x4 projectionMatri = MakePerspectiveFovMatrix(0.45f, float(kClientWidth) / float(kClientHeight), 0.1f, 100.0f);
 
 			Matrix4x4 worldMatrixObj = MakeAffineMatrix(transformSprite.translate, transformSprite.scale, transformSprite.rotate);
 			Matrix4x4 worldViewProjectionMatrixObj = MultiplyMatrix4x4(worldMatrixObj, MultiplyMatrix4x4(viewMatrix, projectionMatri));
@@ -1442,7 +1442,7 @@ int WINAPI WinMain(HINSTANCE, HINSTANCE, LPSTR, int) {
 			commandList->SetGraphicsRootConstantBufferView(1, transformationMatrixResourceObj->GetGPUVirtualAddress());
 			commandList->SetGraphicsRootDescriptorTable(2, textureSrvHandleGPU);
 
-			commandList->DrawInstanced(UINT(modelData.vertices.size()), 1, 0, 0);
+			//commandList->DrawInstanced(UINT(modelData.vertices.size()), 1, 0, 0);
 
 			//球の描画
 			commandList->IASetVertexBuffers(0, 1, &vertexBufferViewShpere);//VBVを設定
@@ -1455,7 +1455,7 @@ int WINAPI WinMain(HINSTANCE, HINSTANCE, LPSTR, int) {
 				commandList->SetGraphicsRootDescriptorTable(2, textureSrvHandleGPU2);
 			}
 			//描画
-			//commandList->DrawInstanced(kSubdivision * kSubdivision * 6, 1, 0, 0);
+			commandList->DrawInstanced(kSubdivision * kSubdivision * 6, 1, 0, 0);
 
 
 			//ImGuiの描画コマンド
