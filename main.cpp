@@ -7,6 +7,7 @@
 #include <cassert>
 #include <filesystem>
 #include <fstream>
+#include <sstream>
 #include <chrono>
 #include <dxgidebug.h>
 #include <dbgHelp.h>
@@ -316,6 +317,104 @@ D3D12_GPU_DESCRIPTOR_HANDLE GetGPUDescriptorHandle(ID3D12DescriptorHeap* descrip
 	handleGPU.ptr += (descriprtorSize * index);
 	return handleGPU;
 }
+
+MaterialData LoadMaterialTemplateFile(const std::string& directoryPath, const std::string& filename) {
+	MaterialData materiaData;//構築するMaterialData
+	std::string line;//ファイルから読んだ一行を格納する
+	std::ifstream file(directoryPath + "/" + filename);//ファイルを開く
+	assert(file.is_open());
+
+	while (std::getline(file, line))
+	{
+		std::string identifier;
+		std::istringstream s(line);
+		s >> identifier;
+
+		//identifierに応じた処理
+		if (identifier == "map_Kd") {
+			std::string textureFilename;
+			s >> textureFilename;
+			//連結してファイルパス
+			materiaData.textureDilePath = directoryPath + "/" + textureFilename;
+		}
+	}
+	return materiaData;
+}
+
+
+ModelData LoadObjFile(const std::string& directoryPath, const std::string& filename)
+{
+	ModelData modelData;
+	std::vector<Vector4> positions;//位置
+	std::vector<Vector3> normals;//法線
+	std::vector<Vector2> texcoords;//テクスチャ座標
+	std::string line;//1行分の文字列を入れる変数
+	VertexData Triangle[3]{};
+
+	std::ifstream file(directoryPath + "/" + filename);//ファイルを開く
+	assert(file.is_open());
+
+	while (std::getline(file, line))
+	{
+		std::string identifier;
+		std::istringstream s(line);
+		s >> identifier;
+
+		if (identifier == "v") {
+			Vector4 position;
+			s >> position.x >> position.y >> position.z;
+			position.w = 1.0f;
+			position.x *= -1.0f;
+			positions.push_back(position);
+		}
+		else if (identifier == "vt") {
+			Vector2 texcoord;
+			s >> texcoord.x >> texcoord.y;
+			texcoord.y = 1.0f - texcoord.y;
+			texcoords.push_back(texcoord);
+		}
+		else if (identifier == "vn") {
+			Vector3 normal;
+			s >> normal.x >> normal.y >> normal.z;
+			normal.x *= -1.0f;
+			normals.push_back(normal);
+		}
+		else if (identifier == "f") {
+			//面は三角形限定。そのほか未対応
+			for (int32_t faceVertex = 0; faceVertex < 3; ++faceVertex) {
+				std::string vertexDefinition;
+				s >> vertexDefinition;
+				//頂点の要素へのIndexは「位置/UV/法線」で格納されてるので、分解してIndexを取得する
+				std::istringstream v(vertexDefinition);
+				uint32_t elementIndices[3];
+				for (int32_t element = 0; element < 3; ++element) {
+					std::string index;
+					std::getline(v, index, '/');//区切りでインデックスを読んでいく
+					elementIndices[element] = std::stoi(index);
+				}
+
+				Vector4 position = positions[elementIndices[0] - 1];
+				Vector2 texcoord = texcoords[elementIndices[1] - 1];
+				Vector3 normal = normals[elementIndices[2] - 1];
+				Triangle[faceVertex] = {position ,texcoord ,normal};
+				
+			}
+			modelData.vertices.push_back(Triangle[2]);
+			modelData.vertices.push_back(Triangle[1]);
+			modelData.vertices.push_back(Triangle[0]);
+		}
+		else if (identifier == "mtllib") {
+			//makterialTemplateLibraryファイルの名前を取得する
+			std::string materiaFilename;
+			s >> materiaFilename;
+			//基本的にobjファイルと同一改装にmtlは存在させるので、ディレクトリ名とファイル名を渡す 
+			modelData.material = LoadMaterialTemplateFile(directoryPath, materiaFilename);
+		}
+	}
+	return modelData;
+
+}
+
 
 
 ///-------------------------------------------
@@ -659,10 +758,10 @@ int WINAPI WinMain(HINSTANCE, HINSTANCE, LPSTR, int) {
 	descriptionRootSignature.NumParameters = _countof(rootParameter);//配列の長さ
 
 
-	
 
 
-	
+
+
 
 
 
@@ -707,18 +806,7 @@ int WINAPI WinMain(HINSTANCE, HINSTANCE, LPSTR, int) {
 	materialDataSprite->uvTransform = IdentityMatrix();
 
 
-	//Textureを読み込んで転送する//
-	DirectX::ScratchImage mipImages = LoadTexture("resources/uvChecker.png");
-	const DirectX::TexMetadata& metaData = mipImages.GetMetadata();
-	ID3D12Resource* textureResource = CreateTextureResource(device, metaData);
-	ID3D12Resource* intermediateResource = UploadTextureData(textureResource, mipImages, device, commandList);
-	//二枚目のTextureを読み込む
-	DirectX::ScratchImage mapImages2 = LoadTexture("resources/monsterBall.png");
-	const DirectX::TexMetadata& metaData2 = mapImages2.GetMetadata();
-	ID3D12Resource* textureResource2 = CreateTextureResource(device, metaData2);
-	ID3D12Resource* intermediateResource2 = UploadTextureData(textureResource2, mapImages2, device, commandList);
-
-
+	
 	//どこいれればいいの(汗)//
 	ID3D12Resource* depthStencilResource = CreateDepthStencilTextureResource(device, kClientWidth, kClientHeight);
 
@@ -729,41 +817,6 @@ int WINAPI WinMain(HINSTANCE, HINSTANCE, LPSTR, int) {
 	dsvDesc.ViewDimension = D3D12_DSV_DIMENSION_TEXTURE2D;//2dTexture
 	//DSVHeapの先端にDSVを作る
 	device->CreateDepthStencilView(depthStencilResource, &dsvDesc, dsvDescriptorHeap->GetCPUDescriptorHandleForHeapStart());
-
-
-
-
-	//実際にShaderResourceView
-
-	//meteDataを基にSRVの設定
-	D3D12_SHADER_RESOURCE_VIEW_DESC srvDesc{};
-	srvDesc.Format = metaData.format;
-	srvDesc.Shader4ComponentMapping = D3D12_DEFAULT_SHADER_4_COMPONENT_MAPPING;
-	srvDesc.ViewDimension = D3D12_SRV_DIMENSION_TEXTURE2D;//2Dテクスチャ
-	srvDesc.Texture2D.MipLevels = UINT(metaData.mipLevels);
-	//meteDataを基にSRVの設定
-	D3D12_SHADER_RESOURCE_VIEW_DESC srvDesc2{};
-	srvDesc2.Format = metaData2.format;
-	srvDesc2.Shader4ComponentMapping = D3D12_DEFAULT_SHADER_4_COMPONENT_MAPPING;
-	srvDesc2.ViewDimension = D3D12_SRV_DIMENSION_TEXTURE2D;//2Dテクスチャ
-	srvDesc2.Texture2D.MipLevels = UINT(metaData2.mipLevels);
-
-
-	//SRVを作成するDescriptorHeapの場所を決める
-	D3D12_CPU_DESCRIPTOR_HANDLE textureSrvHandleCPU = GetCPUDescriptorHandle(srvDescriptorHeap, descriptorSizeSRV, 1);
-	D3D12_GPU_DESCRIPTOR_HANDLE textureSrvHandleGPU = GetGPUDescriptorHandle(srvDescriptorHeap, descriptorSizeSRV, 1);
-	//SRVを作成するDescriptorHeapの場所を決める
-	D3D12_CPU_DESCRIPTOR_HANDLE textureSrvHandleCPU2 = GetCPUDescriptorHandle(srvDescriptorHeap, descriptorSizeSRV, 2);
-	D3D12_GPU_DESCRIPTOR_HANDLE textureSrvHandleGPU2 = GetGPUDescriptorHandle(srvDescriptorHeap, descriptorSizeSRV, 2);
-
-
-	////先頭はImGuiが使っているのでその次を使う
-	//textureSrvHandleCPU.ptr += device->GetDescriptorHandleIncrementSize(D3D12_DESCRIPTOR_HEAP_TYPE_CBV_SRV_UAV);
-	//textureSrvHandleGPU.ptr += device->GetDescriptorHandleIncrementSize(D3D12_DESCRIPTOR_HEAP_TYPE_CBV_SRV_UAV);
-
-	device->CreateShaderResourceView(textureResource, &srvDesc, textureSrvHandleCPU);
-	device->CreateShaderResourceView(textureResource2, &srvDesc2, textureSrvHandleCPU2);
-
 
 	//シリアライズしてバイナリにする
 	ID3DBlob* signatureBlob = nullptr;
@@ -907,12 +960,14 @@ int WINAPI WinMain(HINSTANCE, HINSTANCE, LPSTR, int) {
 	vertexBufferView.StrideInBytes = sizeof(VertexData);
 
 
+
 	//Resouceにデータを書き込む//
 
 	//頂点リソースにデータを書き込む
 	VertexData* vertexData = nullptr;
 	//書き込むためのアドレスを取得
 	vertexResource->Map(0, nullptr, reinterpret_cast<void**>(&vertexData));
+
 
 	//1枚目
 
@@ -995,7 +1050,7 @@ int WINAPI WinMain(HINSTANCE, HINSTANCE, LPSTR, int) {
 	indexData[4] = 3;
 	indexData[5] = 2;
 
-	
+
 
 	//Sprite用ののTransformationMatrix用のリソースを作る。Matrix4x41つ分のサイズを用意する
 	ID3D12Resource* transformationMatrixResourceSprite = graphicsDevice.CreateBufferResource(device, sizeof(TransformationMatrix));
@@ -1007,8 +1062,43 @@ int WINAPI WinMain(HINSTANCE, HINSTANCE, LPSTR, int) {
 	transformationMatrixDataSprite->World = IdentityMatrix();
 	transformationMatrixDataSprite->WVP = IdentityMatrix();
 
-	//球円の描画//
 
+
+	//Objectの描画//
+
+	ModelData modelData = LoadObjFile("resources/obj", "axis.obj");
+
+	//頂点リソースを作る
+	ID3D12Resource* vertexResourceObj = graphicsDevice.CreateBufferResource(device, sizeof(VertexData) * modelData.vertices.size());
+	//頂点バッファービューを作成する
+	D3D12_VERTEX_BUFFER_VIEW vertexBufferViewObj{};
+	//リソースの先頭アドレスから使う
+	vertexBufferViewObj.BufferLocation = vertexResourceObj->GetGPUVirtualAddress();
+	//使用するリソースのサイズは頂点6つ分のサイズ
+	vertexBufferViewObj.SizeInBytes = sizeof(VertexData) * modelData.vertices.size();
+	//1頂点当たりのサイズ
+	vertexBufferViewObj.StrideInBytes = sizeof(VertexData);
+
+	//頂点リソースにデータを書き込む
+	VertexData* vertexDataObj = nullptr;
+	vertexResourceObj->Map(0, nullptr, reinterpret_cast<void**>(&vertexDataObj));
+	std::memcpy(vertexDataObj, modelData.vertices.data(), sizeof(VertexData) * modelData.vertices.size());
+
+
+	//Sprite用ののTransformationMatrix用のリソースを作る。Matrix4x41つ分のサイズを用意する
+	ID3D12Resource* transformationMatrixResourceObj = graphicsDevice.CreateBufferResource(device, sizeof(TransformationMatrix));
+	//データを書き込む
+	TransformationMatrix* transformationMatrixDataObj = nullptr;
+	//書き込むためのアドレスを取得
+	transformationMatrixResourceObj->Map(0, nullptr, reinterpret_cast<void**>(&transformationMatrixDataObj));
+	//単位行列をかきこんでおく
+	transformationMatrixDataObj->WVP = IdentityMatrix();
+	transformationMatrixDataObj->World = IdentityMatrix();
+
+
+
+
+	//球円の描画//
 
 
 	float pi = 3.14f;
@@ -1127,13 +1217,53 @@ int WINAPI WinMain(HINSTANCE, HINSTANCE, LPSTR, int) {
 
 	ID3D12Resource* directinalLightResource = graphicsDevice.CreateBufferResource(device, sizeof(DirectionalLight));
 
-	DirectionalLight* directinalLightData=nullptr;
+	DirectionalLight* directinalLightData = nullptr;
 
 	directinalLightResource->Map(0, nullptr, reinterpret_cast<void**>(&directinalLightData));
-	
+
 	directinalLightData->color = { 1.0f,1.0f,1.0f,1.0f };
 	directinalLightData->direction = { 0.0f,-1.0f,0.0f };
 	directinalLightData->intensity = 1.0f;
+
+
+
+
+	//Textureを読み込んで転送する//
+	DirectX::ScratchImage mipImages = LoadTexture("resources/uvChecker.png");
+	const DirectX::TexMetadata& metaData = mipImages.GetMetadata();
+	ID3D12Resource* textureResource = CreateTextureResource(device, metaData);
+	ID3D12Resource* intermediateResource = UploadTextureData(textureResource, mipImages, device, commandList);
+	//二枚目のTextureを読み込む
+	DirectX::ScratchImage mapImages2 = LoadTexture(modelData.material.textureDilePath);
+	const DirectX::TexMetadata& metaData2 = mapImages2.GetMetadata();
+	ID3D12Resource* textureResource2 = CreateTextureResource(device, metaData2);
+	ID3D12Resource* intermediateResource2 = UploadTextureData(textureResource2, mapImages2, device, commandList);
+
+	//実際にShaderResourceView
+
+	//meteDataを基にSRVの設定
+	D3D12_SHADER_RESOURCE_VIEW_DESC srvDesc{};
+	srvDesc.Format = metaData.format;
+	srvDesc.Shader4ComponentMapping = D3D12_DEFAULT_SHADER_4_COMPONENT_MAPPING;
+	srvDesc.ViewDimension = D3D12_SRV_DIMENSION_TEXTURE2D;//2Dテクスチャ
+	srvDesc.Texture2D.MipLevels = UINT(metaData.mipLevels);
+	//metaDataを基にSRVの設定
+	D3D12_SHADER_RESOURCE_VIEW_DESC srvDesc2{};
+	srvDesc2.Format = metaData2.format;
+	srvDesc2.Shader4ComponentMapping = D3D12_DEFAULT_SHADER_4_COMPONENT_MAPPING;
+	srvDesc2.ViewDimension = D3D12_SRV_DIMENSION_TEXTURE2D;//2Dテクスチャ
+	srvDesc2.Texture2D.MipLevels = UINT(metaData2.mipLevels);
+
+
+	//SRVを作成するDescriptorHeapの場所を決める
+	D3D12_CPU_DESCRIPTOR_HANDLE textureSrvHandleCPU = GetCPUDescriptorHandle(srvDescriptorHeap, descriptorSizeSRV, 1);
+	D3D12_GPU_DESCRIPTOR_HANDLE textureSrvHandleGPU = GetGPUDescriptorHandle(srvDescriptorHeap, descriptorSizeSRV, 1);
+	//SRVを作成するDescriptorHeapの場所を決める
+	D3D12_CPU_DESCRIPTOR_HANDLE textureSrvHandleCPU2 = GetCPUDescriptorHandle(srvDescriptorHeap, descriptorSizeSRV, 2);
+	D3D12_GPU_DESCRIPTOR_HANDLE textureSrvHandleGPU2 = GetGPUDescriptorHandle(srvDescriptorHeap, descriptorSizeSRV, 2);
+
+	device->CreateShaderResourceView(textureResource, &srvDesc, textureSrvHandleCPU);
+	device->CreateShaderResourceView(textureResource2, &srvDesc2, textureSrvHandleCPU2);
 
 
 	//ViewportとScissor（シザー）//
@@ -1157,18 +1287,21 @@ int WINAPI WinMain(HINSTANCE, HINSTANCE, LPSTR, int) {
 	scissorRect.bottom = kClientHeight;
 
 
-	
-
-	Transform camraTransform{ {1.0f,1.0f,1.0f},{0.0f,0.0f,0.0f},{0.0f,0.0f,-.0f} };
-	Transform transformSprite{ {1.0f,1.0f,1.0f},{0.0f,0.0f,0.0f},{0.0f,0.0f,0.0f} };
-	
-	Transform uvTransformSprite{ {1.0f,1.0f,1.0f},{0.0f,0.0f,0.0f},{0.0f,0.0f,0.0f} };
-	
-	
-	float rdius = 200.0f;
-	Transform transformShpere{ ScalarMultiply({1.0f,1.0f,1.0f},rdius),{0.0f,0.0f,0.0f},{640.0f,360.0f,-5.0f} };
-
+	float rdius = 1.0f;
 	bool useMonsterBall = true;
+
+	Transform camraTransform{ {1.0f,1.0f,1.0f},{0.0f,0.0f,0.0f},{0.0f,0.0f,-5.0f} };
+	Transform transformSprite{ {1.0f,1.0f,1.0f},{0.0f,0.0f,0.0f},{0.0f,0.0f,0.0f} };
+	Transform transformShpere{ ScalarMultiply({1.0f,180.0f,1.0f},rdius),{0.0f,0.0f,0.0f},{0.0f,0.0f,0.0f} };
+	Transform transformObj{ {1.0f,1.0f,1.0f},{0.0f,0.0f,0.0f},{0.0f,0.0f,1.0f} };
+
+	Transform uvTransformSprite{ {1.0f,1.0f,1.0f},{0.0f,0.0f,0.0f},{0.0f,0.0f,0.0f} };
+
+
+
+
+
+
 
 	IMGUI_CHECKVERSION();
 	ImGui::CreateContext();
@@ -1229,23 +1362,33 @@ int WINAPI WinMain(HINSTANCE, HINSTANCE, LPSTR, int) {
 				ImGui::DragFloat4("Color", &materialData->color.x, 1.0f);
 				ImGui::ColorPicker4("Color", &materialData->color.x);
 			}
+			if (ImGui::CollapsingHeader("Camera")) {
+				ImGui::DragFloat3("camraTranslate", &camraTransform.translate.x, 0.01f);
+				ImGui::DragFloat3("camraRotate", &camraTransform.rotate.x, 0.01f);
+				ImGui::DragFloat3("camraScale", &camraTransform.scale.x, 0.01f);
+			}
 			if (ImGui::CollapsingHeader("Sprite")) {
-				ImGui::DragFloat3("TranslateSprite", &transformSprite.translate.x, 1.00f);
+				ImGui::DragFloat3("TranslateSprite", &transformSprite.translate.x, 0.01f);
 				ImGui::DragFloat3("RotateSprite", &transformSprite.rotate.x, 0.01f);
 				ImGui::DragFloat3("ScaleSprite", &transformSprite.scale.x, 0.01f);
 			}
 			if (ImGui::CollapsingHeader("Shpere")) {
-				ImGui::DragFloat3("TranslateShpere", &transformShpere.translate.x, 1.00f);
+				ImGui::DragFloat3("TranslateShpere", &transformShpere.translate.x, 0.01f);
 				ImGui::DragFloat3("RotateShpere", &transformShpere.rotate.x, 0.01f);
 				ImGui::DragFloat3("ScaleShpere", &transformShpere.scale.x, 0.01f);
 			}
+			if (ImGui::CollapsingHeader("Obj")) {
+				ImGui::DragFloat3("TranslateObj", &transformObj.translate.x, 0.01f);
+				ImGui::DragFloat3("RotateObj", &transformObj.rotate.x, 0.01f);
+				ImGui::DragFloat3("ScaleObj", &transformObj.scale.x, 0.01f);
+			}
 			if (ImGui::CollapsingHeader("Light"))
 			{
-				ImGui::DragFloat4("directinalLightData.Color", &directinalLightData->color.x, 1.00f);
-				ImGui::DragFloat3("directinalLightData.Direction", &directinalLightData->direction.x, 1.00f);
-				ImGui::DragFloat("directinalLightData.intensity", &directinalLightData->intensity, 1.00f);
+				ImGui::DragFloat4("directinalLightData.Color", &directinalLightData->color.x, 0.01f);
+				ImGui::DragFloat3("directinalLightData.Direction", &directinalLightData->direction.x, 0.01f);
+				ImGui::DragFloat("directinalLightData.intensity", &directinalLightData->intensity, 0.01f);
 			}
-			if (ImGui::CollapsingHeader("SpriteUV")) 
+			if (ImGui::CollapsingHeader("SpriteUV"))
 			{
 				ImGui::DragFloat2("TranslateSpriteUV", &uvTransformSprite.translate.x, 0.01f, -10.0f, 10.0f);
 				ImGui::DragFloat2("ScaleSpriteUV", &uvTransformSprite.scale.x, 0.01f, -10.0f, 10.0f);
@@ -1263,18 +1406,19 @@ int WINAPI WinMain(HINSTANCE, HINSTANCE, LPSTR, int) {
 			//*wvpData = camera.MakeWorldViewProjectionMatrix(transform, camraTransform);
 			//*transformationMatrixDataSprite = camera.MakeWorldViewProjectionMatrix(transformSprite, camraTransform);
 
-			
+			Matrix4x4 viewMatrix = InverseMatrix4x4(MakeAffineMatrix(camraTransform.translate, camraTransform.scale, camraTransform.rotate));
+			Matrix4x4 projectionMatri = MakePerspectiveFovMatrix(0.45f, float(kClientWidth) / float(kClientHeight), 0.1f, 100.0f);
+
+			Matrix4x4 worldMatrixObj = MakeAffineMatrix(transformObj.translate, transformObj.scale, transformObj.rotate);
+			Matrix4x4 worldViewProjectionMatrixObj = MultiplyMatrix4x4(worldMatrixObj, MultiplyMatrix4x4(viewMatrix, projectionMatri));
+			*transformationMatrixDataObj = { worldViewProjectionMatrixObj,worldMatrixObj };
 
 			Matrix4x4 worldMatrixSprite = MakeAffineMatrix(transformSprite.translate, transformSprite.scale, transformSprite.rotate);
-			Matrix4x4 viewMatrixSprite = IdentityMatrix();
-			Matrix4x4 projectionMatrixSprite = MakeOrthographicMatrix(0, float(kClientWidth), 0, float(kClientHeight), 0.0f, 100.0f);
-			Matrix4x4 worldViewProjectionMatrixSprite = MultiplyMatrix4x4(worldMatrixSprite, MultiplyMatrix4x4(viewMatrixSprite, projectionMatrixSprite));
+			Matrix4x4 worldViewProjectionMatrixSprite = MultiplyMatrix4x4(worldMatrixSprite, MultiplyMatrix4x4(viewMatrix, projectionMatri));
 			*transformationMatrixDataSprite = { worldViewProjectionMatrixSprite,worldMatrixSprite };
 
 			Matrix4x4 worldMatrixShpere = MakeAffineMatrix(transformShpere.translate, transformShpere.scale, transformShpere.rotate);
-			Matrix4x4 viewMatrixShpere = IdentityMatrix();
-			Matrix4x4 projectionMatrixShpere = MakeOrthographicMatrix(0, float(kClientWidth), 0, float(kClientHeight), 0.0f, 100.0f);
-			Matrix4x4 worldViewProjectionMatrixShpere = MultiplyMatrix4x4(worldMatrixShpere, MultiplyMatrix4x4(viewMatrixShpere, projectionMatrixShpere));
+			Matrix4x4 worldViewProjectionMatrixShpere = MultiplyMatrix4x4(worldMatrixShpere, MultiplyMatrix4x4(viewMatrix, projectionMatri));
 			*transformationMatrixDataShpere = { worldViewProjectionMatrixShpere,worldMatrixShpere };
 
 
@@ -1329,7 +1473,15 @@ int WINAPI WinMain(HINSTANCE, HINSTANCE, LPSTR, int) {
 			commandList->SetGraphicsRootConstantBufferView(1, transformationMatrixResourceSprite->GetGPUVirtualAddress());
 			commandList->SetGraphicsRootDescriptorTable(2, textureSrvHandleGPU);
 
-			commandList->DrawIndexedInstanced(6, 1, 0, 0, 0);
+			//commandList->DrawIndexedInstanced(6, 1, 0, 0, 0);
+
+			//objectの描画
+			commandList->IASetVertexBuffers(0, 1, &vertexBufferViewObj);//VBVを設定
+			commandList->SetGraphicsRootConstantBufferView(0, materialResourceSprite->GetGPUVirtualAddress());
+			commandList->SetGraphicsRootConstantBufferView(1, transformationMatrixResourceObj->GetGPUVirtualAddress());
+			commandList->SetGraphicsRootDescriptorTable(2, textureSrvHandleGPU);
+
+			commandList->DrawInstanced(UINT(modelData.vertices.size()), 1, 0, 0);
 
 			//球の描画
 			commandList->IASetVertexBuffers(0, 1, &vertexBufferViewShpere);//VBVを設定
@@ -1342,7 +1494,7 @@ int WINAPI WinMain(HINSTANCE, HINSTANCE, LPSTR, int) {
 				commandList->SetGraphicsRootDescriptorTable(2, textureSrvHandleGPU2);
 			}
 			//描画
-			commandList->DrawInstanced(kSubdivision * kSubdivision * 6, 1, 0, 0);
+			//commandList->DrawInstanced(kSubdivision * kSubdivision * 6, 1, 0, 0);
 
 
 			//ImGuiの描画コマンド
@@ -1419,6 +1571,15 @@ int WINAPI WinMain(HINSTANCE, HINSTANCE, LPSTR, int) {
 	useAdapter->Release();
 	dxgiFactory->Release();
 	vertexResource->Release();
+	vertexResourceShpere->Release();
+	vertexResourceSprite->Release();
+	vertexResourceObj->Release();
+	wvpResource->Release();
+	indexResource->Release();
+	transformationMatrixResourceSprite->Release();
+	transformationMatrixResourceShpere->Release();
+	transformationMatrixResourceObj->Release();
+	directinalLightResource->Release();
 	graphicsPipelineState->Release();
 	signatureBlob->Release();
 	if (errorBlob) {
@@ -1430,6 +1591,7 @@ int WINAPI WinMain(HINSTANCE, HINSTANCE, LPSTR, int) {
 	materialResource->Release();
 	intermediateResource->Release();
 	intermediateResource2->Release();
+	
 #ifdef _DEBUG
 	debugController->Release();
 #endif 

@@ -1,6 +1,7 @@
 #pragma once
 #include <cstdint>
-
+#include <vector>
+#include <string>
 
 ///構造体///
 
@@ -75,3 +76,18 @@ struct DirectionalLight {
 	Vector3 direction;//ライトの向き
 	float intensity;//輝度
 };
+
+struct MaterialData
+{
+	std::string textureDilePath;
+};
+
+struct ModelData
+{
+	std::vector<VertexData> vertices;
+	MaterialData material;
+};
+
+
+
+
