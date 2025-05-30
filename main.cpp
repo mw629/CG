@@ -318,6 +318,30 @@ D3D12_GPU_DESCRIPTOR_HANDLE GetGPUDescriptorHandle(ID3D12DescriptorHeap* descrip
 	return handleGPU;
 }
 
+MaterialData LoadMaterialTemplateFile(const std::string& directoryPath, const std::string& filename) {
+	MaterialData materiaData;//構築するMaterialData
+	std::string line;//ファイルから読んだ一行を格納する
+	std::ifstream file(directoryPath + "/" + filename);//ファイルを開く
+	assert(file.is_open());
+
+	while (std::getline(file, line))
+	{
+		std::string identifier;
+		std::istringstream s(line);
+		s >> identifier;
+
+		//identifierに応じた処理
+		if (identifier == "map_kd") {
+			std::string textureFilename;
+			s >> textureFilename;
+			//連結してファイルパス
+			materiaData.textureDilePath = directoryPath + "/" + textureFilename;
+		}
+	}
+	return materiaData;
+}
+
+
 ModelData LoadObjFile(const std::string& directoryPath, const std::string& filename)
 {
 	ModelData modelData;
@@ -325,6 +349,7 @@ ModelData LoadObjFile(const std::string& directoryPath, const std::string& filen
 	std::vector<Vector3> normals;//法線
 	std::vector<Vector2> texcoords;//テクスチャ座標
 	std::string line;//1行分の文字列を入れる変数
+	VertexData Triangle[3]{};
 
 	std::ifstream file(directoryPath + "/" + filename);//ファイルを開く
 	assert(file.is_open());
@@ -339,6 +364,7 @@ ModelData LoadObjFile(const std::string& directoryPath, const std::string& filen
 			Vector4 position;
 			s >> position.x >> position.y >> position.z;
 			position.w = 1.0f;
+			position.x *= -1.0f;
 			positions.push_back(position);
 		}
 		else if (identifier == "vt") {
@@ -349,6 +375,7 @@ ModelData LoadObjFile(const std::string& directoryPath, const std::string& filen
 		else if (identifier == "vn") {
 			Vector3 normal;
 			s >> normal.x >> normal.y >> normal.z;
+			normal.x *= -1.0f;
 			normals.push_back(normal);
 		}
 		else if (identifier == "f") {
@@ -368,15 +395,25 @@ ModelData LoadObjFile(const std::string& directoryPath, const std::string& filen
 				Vector4 position = positions[elementIndices[0] - 1];
 				Vector2 texcoord = texcoords[elementIndices[1] - 1];
 				Vector3 normal = normals[elementIndices[2] - 1];
-				VertexData vertex = { position ,texcoord ,normal };
-				modelData.vertices.push_back(vertex);
+				Triangle[faceVertex] = {position ,texcoord ,normal};
+				
 			}
-
+			modelData.vertices.push_back(Triangle[2]);
+			modelData.vertices.push_back(Triangle[1]);
+			modelData.vertices.push_back(Triangle[0]);
+		}
+		else if (identifier == "mtllib") {
+			//makterialTemplateLibraryファイルの名前を取得する
+			std::string materiaFilename;
+			s >> materiaFilename;
+			//基本的にobjファイルと同一改装にmtlは存在させるので、ディレクトリ名とファイル名を渡す 
+			modelData.material = LoadMaterialTemplateFile(directoryPath, materiaFilename);
 		}
 	}
 	return modelData;
 
 }
+
 
 
 ///-------------------------------------------
@@ -802,7 +839,7 @@ int WINAPI WinMain(HINSTANCE, HINSTANCE, LPSTR, int) {
 	srvDesc.Shader4ComponentMapping = D3D12_DEFAULT_SHADER_4_COMPONENT_MAPPING;
 	srvDesc.ViewDimension = D3D12_SRV_DIMENSION_TEXTURE2D;//2Dテクスチャ
 	srvDesc.Texture2D.MipLevels = UINT(metaData.mipLevels);
-	//meteDataを基にSRVの設定
+	//metaDataを基にSRVの設定
 	D3D12_SHADER_RESOURCE_VIEW_DESC srvDesc2{};
 	srvDesc2.Format = metaData2.format;
 	srvDesc2.Shader4ComponentMapping = D3D12_DEFAULT_SHADER_4_COMPONENT_MAPPING;
@@ -1072,7 +1109,8 @@ int WINAPI WinMain(HINSTANCE, HINSTANCE, LPSTR, int) {
 
 	//Objectの描画//
 
-	ModelData modelData = LoadObjFile("resources/obj", "multiMaterial.obj");
+	ModelData modelData = LoadObjFile("resources/obj", "plane.obj");
+
 	//頂点リソースを作る
 	ID3D12Resource* vertexResourceObj = graphicsDevice.CreateBufferResource(device, sizeof(VertexData) * modelData.vertices.size());
 	//頂点バッファービューを作成する
@@ -1258,7 +1296,7 @@ int WINAPI WinMain(HINSTANCE, HINSTANCE, LPSTR, int) {
 	Transform camraTransform{ {1.0f,1.0f,1.0f},{0.0f,0.0f,0.0f},{0.0f,0.0f,-5.0f} };
 	Transform transformSprite{ {1.0f,1.0f,1.0f},{0.0f,0.0f,0.0f},{0.0f,0.0f,0.0f} };
 	Transform transformShpere{ ScalarMultiply({1.0f,180.0f,1.0f},rdius),{0.0f,0.0f,0.0f},{0.0f,0.0f,0.0f} };
-	Transform transformObj{ {1.0f,1.0f,1.0f},{0.0f,0.0f,0.0f},{0.0f,0.0f,0.0f} };
+	Transform transformObj{ {1.0f,1.0f,1.0f},{0.0f,0.0f,0.0f},{0.0f,0.0f,1.0f} };
 
 	Transform uvTransformSprite{ {1.0f,1.0f,1.0f},{0.0f,0.0f,0.0f},{0.0f,0.0f,0.0f} };
 
@@ -1326,6 +1364,11 @@ int WINAPI WinMain(HINSTANCE, HINSTANCE, LPSTR, int) {
 			if (ImGui::CollapsingHeader("Color")) {
 				ImGui::DragFloat4("Color", &materialData->color.x, 1.0f);
 				ImGui::ColorPicker4("Color", &materialData->color.x);
+			}
+			if (ImGui::CollapsingHeader("Camera")) {
+				ImGui::DragFloat3("camraTranslate", &camraTransform.translate.x, 0.01f);
+				ImGui::DragFloat3("camraRotate", &camraTransform.rotate.x, 0.01f);
+				ImGui::DragFloat3("camraScale", &camraTransform.scale.x, 0.01f);
 			}
 			if (ImGui::CollapsingHeader("Sprite")) {
 				ImGui::DragFloat3("TranslateSprite", &transformSprite.translate.x, 0.01f);
