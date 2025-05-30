@@ -331,7 +331,7 @@ MaterialData LoadMaterialTemplateFile(const std::string& directoryPath, const st
 		s >> identifier;
 
 		//identifierに応じた処理
-		if (identifier == "map_kd") {
+		if (identifier == "map_Kd") {
 			std::string textureFilename;
 			s >> textureFilename;
 			//連結してファイルパス
@@ -370,6 +370,7 @@ ModelData LoadObjFile(const std::string& directoryPath, const std::string& filen
 		else if (identifier == "vt") {
 			Vector2 texcoord;
 			s >> texcoord.x >> texcoord.y;
+			texcoord.y = 1.0f - texcoord.y;
 			texcoords.push_back(texcoord);
 		}
 		else if (identifier == "vn") {
@@ -805,18 +806,7 @@ int WINAPI WinMain(HINSTANCE, HINSTANCE, LPSTR, int) {
 	materialDataSprite->uvTransform = IdentityMatrix();
 
 
-	//Textureを読み込んで転送する//
-	DirectX::ScratchImage mipImages = LoadTexture("resources/uvChecker.png");
-	const DirectX::TexMetadata& metaData = mipImages.GetMetadata();
-	ID3D12Resource* textureResource = CreateTextureResource(device, metaData);
-	ID3D12Resource* intermediateResource = UploadTextureData(textureResource, mipImages, device, commandList);
-	//二枚目のTextureを読み込む
-	DirectX::ScratchImage mapImages2 = LoadTexture("resources/monsterBall.png");
-	const DirectX::TexMetadata& metaData2 = mapImages2.GetMetadata();
-	ID3D12Resource* textureResource2 = CreateTextureResource(device, metaData2);
-	ID3D12Resource* intermediateResource2 = UploadTextureData(textureResource2, mapImages2, device, commandList);
-
-
+	
 	//どこいれればいいの(汗)//
 	ID3D12Resource* depthStencilResource = CreateDepthStencilTextureResource(device, kClientWidth, kClientHeight);
 
@@ -827,41 +817,6 @@ int WINAPI WinMain(HINSTANCE, HINSTANCE, LPSTR, int) {
 	dsvDesc.ViewDimension = D3D12_DSV_DIMENSION_TEXTURE2D;//2dTexture
 	//DSVHeapの先端にDSVを作る
 	device->CreateDepthStencilView(depthStencilResource, &dsvDesc, dsvDescriptorHeap->GetCPUDescriptorHandleForHeapStart());
-
-
-
-
-	//実際にShaderResourceView
-
-	//meteDataを基にSRVの設定
-	D3D12_SHADER_RESOURCE_VIEW_DESC srvDesc{};
-	srvDesc.Format = metaData.format;
-	srvDesc.Shader4ComponentMapping = D3D12_DEFAULT_SHADER_4_COMPONENT_MAPPING;
-	srvDesc.ViewDimension = D3D12_SRV_DIMENSION_TEXTURE2D;//2Dテクスチャ
-	srvDesc.Texture2D.MipLevels = UINT(metaData.mipLevels);
-	//metaDataを基にSRVの設定
-	D3D12_SHADER_RESOURCE_VIEW_DESC srvDesc2{};
-	srvDesc2.Format = metaData2.format;
-	srvDesc2.Shader4ComponentMapping = D3D12_DEFAULT_SHADER_4_COMPONENT_MAPPING;
-	srvDesc2.ViewDimension = D3D12_SRV_DIMENSION_TEXTURE2D;//2Dテクスチャ
-	srvDesc2.Texture2D.MipLevels = UINT(metaData2.mipLevels);
-
-
-	//SRVを作成するDescriptorHeapの場所を決める
-	D3D12_CPU_DESCRIPTOR_HANDLE textureSrvHandleCPU = GetCPUDescriptorHandle(srvDescriptorHeap, descriptorSizeSRV, 1);
-	D3D12_GPU_DESCRIPTOR_HANDLE textureSrvHandleGPU = GetGPUDescriptorHandle(srvDescriptorHeap, descriptorSizeSRV, 1);
-	//SRVを作成するDescriptorHeapの場所を決める
-	D3D12_CPU_DESCRIPTOR_HANDLE textureSrvHandleCPU2 = GetCPUDescriptorHandle(srvDescriptorHeap, descriptorSizeSRV, 2);
-	D3D12_GPU_DESCRIPTOR_HANDLE textureSrvHandleGPU2 = GetGPUDescriptorHandle(srvDescriptorHeap, descriptorSizeSRV, 2);
-
-
-	////先頭はImGuiが使っているのでその次を使う
-	//textureSrvHandleCPU.ptr += device->GetDescriptorHandleIncrementSize(D3D12_DESCRIPTOR_HEAP_TYPE_CBV_SRV_UAV);
-	//textureSrvHandleGPU.ptr += device->GetDescriptorHandleIncrementSize(D3D12_DESCRIPTOR_HEAP_TYPE_CBV_SRV_UAV);
-
-	device->CreateShaderResourceView(textureResource, &srvDesc, textureSrvHandleCPU);
-	device->CreateShaderResourceView(textureResource2, &srvDesc2, textureSrvHandleCPU2);
-
 
 	//シリアライズしてバイナリにする
 	ID3DBlob* signatureBlob = nullptr;
@@ -1005,12 +960,14 @@ int WINAPI WinMain(HINSTANCE, HINSTANCE, LPSTR, int) {
 	vertexBufferView.StrideInBytes = sizeof(VertexData);
 
 
+
 	//Resouceにデータを書き込む//
 
 	//頂点リソースにデータを書き込む
 	VertexData* vertexData = nullptr;
 	//書き込むためのアドレスを取得
 	vertexResource->Map(0, nullptr, reinterpret_cast<void**>(&vertexData));
+
 
 	//1枚目
 
@@ -1109,7 +1066,7 @@ int WINAPI WinMain(HINSTANCE, HINSTANCE, LPSTR, int) {
 
 	//Objectの描画//
 
-	ModelData modelData = LoadObjFile("resources/obj", "plane.obj");
+	ModelData modelData = LoadObjFile("resources/obj", "axis.obj");
 
 	//頂点リソースを作る
 	ID3D12Resource* vertexResourceObj = graphicsDevice.CreateBufferResource(device, sizeof(VertexData) * modelData.vertices.size());
@@ -1267,6 +1224,46 @@ int WINAPI WinMain(HINSTANCE, HINSTANCE, LPSTR, int) {
 	directinalLightData->color = { 1.0f,1.0f,1.0f,1.0f };
 	directinalLightData->direction = { 0.0f,-1.0f,0.0f };
 	directinalLightData->intensity = 1.0f;
+
+
+
+
+	//Textureを読み込んで転送する//
+	DirectX::ScratchImage mipImages = LoadTexture("resources/uvChecker.png");
+	const DirectX::TexMetadata& metaData = mipImages.GetMetadata();
+	ID3D12Resource* textureResource = CreateTextureResource(device, metaData);
+	ID3D12Resource* intermediateResource = UploadTextureData(textureResource, mipImages, device, commandList);
+	//二枚目のTextureを読み込む
+	DirectX::ScratchImage mapImages2 = LoadTexture(modelData.material.textureDilePath);
+	const DirectX::TexMetadata& metaData2 = mapImages2.GetMetadata();
+	ID3D12Resource* textureResource2 = CreateTextureResource(device, metaData2);
+	ID3D12Resource* intermediateResource2 = UploadTextureData(textureResource2, mapImages2, device, commandList);
+
+	//実際にShaderResourceView
+
+	//meteDataを基にSRVの設定
+	D3D12_SHADER_RESOURCE_VIEW_DESC srvDesc{};
+	srvDesc.Format = metaData.format;
+	srvDesc.Shader4ComponentMapping = D3D12_DEFAULT_SHADER_4_COMPONENT_MAPPING;
+	srvDesc.ViewDimension = D3D12_SRV_DIMENSION_TEXTURE2D;//2Dテクスチャ
+	srvDesc.Texture2D.MipLevels = UINT(metaData.mipLevels);
+	//metaDataを基にSRVの設定
+	D3D12_SHADER_RESOURCE_VIEW_DESC srvDesc2{};
+	srvDesc2.Format = metaData2.format;
+	srvDesc2.Shader4ComponentMapping = D3D12_DEFAULT_SHADER_4_COMPONENT_MAPPING;
+	srvDesc2.ViewDimension = D3D12_SRV_DIMENSION_TEXTURE2D;//2Dテクスチャ
+	srvDesc2.Texture2D.MipLevels = UINT(metaData2.mipLevels);
+
+
+	//SRVを作成するDescriptorHeapの場所を決める
+	D3D12_CPU_DESCRIPTOR_HANDLE textureSrvHandleCPU = GetCPUDescriptorHandle(srvDescriptorHeap, descriptorSizeSRV, 1);
+	D3D12_GPU_DESCRIPTOR_HANDLE textureSrvHandleGPU = GetGPUDescriptorHandle(srvDescriptorHeap, descriptorSizeSRV, 1);
+	//SRVを作成するDescriptorHeapの場所を決める
+	D3D12_CPU_DESCRIPTOR_HANDLE textureSrvHandleCPU2 = GetCPUDescriptorHandle(srvDescriptorHeap, descriptorSizeSRV, 2);
+	D3D12_GPU_DESCRIPTOR_HANDLE textureSrvHandleGPU2 = GetGPUDescriptorHandle(srvDescriptorHeap, descriptorSizeSRV, 2);
+
+	device->CreateShaderResourceView(textureResource, &srvDesc, textureSrvHandleCPU);
+	device->CreateShaderResourceView(textureResource2, &srvDesc2, textureSrvHandleCPU2);
 
 
 	//ViewportとScissor（シザー）//
