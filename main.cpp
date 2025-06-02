@@ -15,7 +15,7 @@
 #include <dxcapi.h>
 #include <vector>
 
-#include <wrl/client.h> // ComPtr を使用するために追加
+#include <wrl.h> // ComPtr を使用するために追加
 
 #include "LogHandler.h"
 
@@ -579,7 +579,7 @@ int WINAPI WinMain(HINSTANCE, HINSTANCE, LPSTR, int) {
 	swapChainDesc.SwapEffect = DXGI_SWAP_EFFECT_FLIP_DISCARD;//モニタにうつしたら、中身を破棄
 	//コマンドキュー、ウィンドウハンドル、設定を渡して生成する
 
-	hr = dxgiFactory->CreateSwapChainForHwnd(commandQueue.Get(), hwnd, &swapChainDesc,
+	hr = dxgiFactory->CreateSwapChainForHwnd(commandQueue.Get(), window.GetHwnd(), &swapChainDesc,
 		nullptr, nullptr, reinterpret_cast<IDXGISwapChain1**>(swapChain.GetAddressOf()));
 
 	assert(SUCCEEDED(hr));
@@ -1242,7 +1242,7 @@ int WINAPI WinMain(HINSTANCE, HINSTANCE, LPSTR, int) {
 	IMGUI_CHECKVERSION();
 	ImGui::CreateContext();
 	ImGui::StyleColorsDark();
-	ImGui_ImplWin32_Init(hwnd);
+	ImGui_ImplWin32_Init(window.GetHwnd());
 	ImGui_ImplDX12_Init(device.Get(),
 		swapChainDesc.BufferCount,
 		rtvDesc.Format,
@@ -1486,7 +1486,7 @@ int WINAPI WinMain(HINSTANCE, HINSTANCE, LPSTR, int) {
 
 
 	//ウィンドウを閉じる
-	CloseWindow(hwnd);
+	CloseWindow(window.GetHwnd());
 
 	//COMの終了処理
 	CoUninitialize();

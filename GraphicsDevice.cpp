@@ -80,7 +80,7 @@ void GraphicsDevice::CreateD3D12Device(std::ostream& os)
 	//高い順に生成できるか試していく
 	for (size_t i = 0; i < _countof(featureLevels); ++i) {
 		//採用したアダプターでデバイスを作成
-		hr_ = D3D12CreateDevice(useAdapter_, featureLevels[i], IID_PPV_ARGS(&device_));
+		hr_ = D3D12CreateDevice(useAdapter_.Get(), featureLevels[i], IID_PPV_ARGS(&device_));
 		//指定した機能レベルでデバイスが生成できたかを確認
 		if (SUCCEEDED(hr_)) {
 			//生成できたのでログ出力を行ってループを抜ける
