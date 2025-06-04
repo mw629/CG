@@ -86,6 +86,7 @@ copy "$(WindowsSdkDir)bin\$(TargetPlatformVersion)\x64\dxil.dll" "$(TargetDir)dx
     </Link>
   </ItemDefinitionGroup>
   <ItemGroup>
+    <ClCompile Include="BlendState.cpp" />
     <ClCompile Include="Calculation.cpp" />
     <ClCompile Include="Camera.cpp" />
     <ClCompile Include="CommandContext .cpp" />
@@ -99,8 +100,12 @@ copy "$(WindowsSdkDir)bin\$(TargetPlatformVersion)\x64\dxil.dll" "$(TargetDir)dx
     <ClCompile Include="externals\imgui\imgui_widgets.cpp" />
     <ClCompile Include="GraphicsDevice.cpp" />
     <ClCompile Include="GraphicsPipelineState.cpp" />
+    <ClCompile Include="InputLayout.cpp" />
     <ClCompile Include="LogHandler.cpp" />
     <ClCompile Include="main.cpp" />
+    <ClCompile Include="RasterizerState.cpp" />
+    <ClCompile Include="RootParameter.cpp" />
+    <ClCompile Include="RootSignature.cpp" />
     <ClCompile Include="WindowConfig.cpp" />
   </ItemGroup>
   <ItemGroup>
@@ -116,6 +121,7 @@ copy "$(WindowsSdkDir)bin\$(TargetPlatformVersion)\x64\dxil.dll" "$(TargetDir)dx
     </FxCompile>
   </ItemGroup>
   <ItemGroup>
+    <ClInclude Include="BlendState.h" />
     <ClInclude Include="Calculation.h" />
     <ClInclude Include="Camera.h" />
     <ClInclude Include="CommandContext .h" />
@@ -130,7 +136,11 @@ copy "$(WindowsSdkDir)bin\$(TargetPlatformVersion)\x64\dxil.dll" "$(TargetDir)dx
     <ClInclude Include="externals\imgui\imstb_truetype.h" />
     <ClInclude Include="GraphicsDevice.h" />
     <ClInclude Include="GraphicsPipelineState.h" />
+    <ClInclude Include="InputLayout.h" />
     <ClInclude Include="LogHandler.h" />
+    <ClInclude Include="RasterizerState.h" />
+    <ClInclude Include="RootParameter.h" />
+    <ClInclude Include="RootSignature.h" />
     <ClInclude Include="VariableTypes.h" />
     <ClInclude Include="WindowConfig.h" />
   </ItemGroup>

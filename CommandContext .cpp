@@ -1,6 +1,18 @@
 #include "CommandContext .h"
 #include <cassert>
 
+CommandContext::~CommandContext()
+{
+	delete graphicsDevice_;
+}
+
+CommandContext::CommandContext()
+{
+	CreateCommandQueue();
+	CreateCommandAllocator();
+	CreateCommandList();
+}
+
 void CommandContext::CreateCommandQueue()
 {
 	//コマンドキューを生成する

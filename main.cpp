@@ -701,12 +701,6 @@ int WINAPI WinMain(HINSTANCE, HINSTANCE, LPSTR, int) {
 
 
 
-
-
-
-
-
-
 	//Samplerの設定//
 
 	D3D12_STATIC_SAMPLER_DESC staticSamplers[1] = {};

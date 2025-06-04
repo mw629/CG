@@ -69,6 +69,21 @@
     <ClCompile Include="GraphicsPipelineState.cpp">
       <Filter>PSO</Filter>
     </ClCompile>
+    <ClCompile Include="RootSignature.cpp">
+      <Filter>PSO</Filter>
+    </ClCompile>
+    <ClCompile Include="InputLayout.cpp">
+      <Filter>PSO</Filter>
+    </ClCompile>
+    <ClCompile Include="RootParameter.cpp">
+      <Filter>PSO</Filter>
+    </ClCompile>
+    <ClCompile Include="BlendState.cpp">
+      <Filter>PSO</Filter>
+    </ClCompile>
+    <ClCompile Include="RasterizerState.cpp">
+      <Filter>PSO</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <FxCompile Include="Object3d.VS.hlsl" />
@@ -124,6 +139,21 @@
       <Filter>ヘッダー ファイル</Filter>
     </ClInclude>
     <ClInclude Include="GraphicsPipelineState.h">
+      <Filter>PSO</Filter>
+    </ClInclude>
+    <ClInclude Include="RootSignature.h">
+      <Filter>PSO</Filter>
+    </ClInclude>
+    <ClInclude Include="InputLayout.h">
+      <Filter>PSO</Filter>
+    </ClInclude>
+    <ClInclude Include="RootParameter.h">
+      <Filter>PSO</Filter>
+    </ClInclude>
+    <ClInclude Include="BlendState.h">
+      <Filter>PSO</Filter>
+    </ClInclude>
+    <ClInclude Include="RasterizerState.h">
       <Filter>PSO</Filter>
     </ClInclude>
   </ItemGroup>

@@ -15,7 +15,8 @@ private:
 	Microsoft::WRL::ComPtr<ID3D12GraphicsCommandList> commandList_ = nullptr;
 
 public:
-	
+	~CommandContext();
+	CommandContext();
 	void CreateCommandQueue();
 	void CreateCommandAllocator();
 	void CreateCommandList();
