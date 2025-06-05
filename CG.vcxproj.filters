@@ -84,6 +84,15 @@
     <ClCompile Include="RasterizerState.cpp">
       <Filter>PSO</Filter>
     </ClCompile>
+    <ClCompile Include="ShaderCompile.cpp">
+      <Filter>PSO</Filter>
+    </ClCompile>
+    <ClCompile Include="DirectXShaderCompiler.cpp">
+      <Filter>PSO</Filter>
+    </ClCompile>
+    <ClCompile Include="DepthStencilState.cpp">
+      <Filter>PSO</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <FxCompile Include="Object3d.VS.hlsl" />
@@ -154,6 +163,15 @@
       <Filter>PSO</Filter>
     </ClInclude>
     <ClInclude Include="RasterizerState.h">
+      <Filter>PSO</Filter>
+    </ClInclude>
+    <ClInclude Include="ShaderCompile.h">
+      <Filter>PSO</Filter>
+    </ClInclude>
+    <ClInclude Include="DirectXShaderCompiler.h">
+      <Filter>PSO</Filter>
+    </ClInclude>
+    <ClInclude Include="DepthStencilState.h">
       <Filter>PSO</Filter>
     </ClInclude>
   </ItemGroup>

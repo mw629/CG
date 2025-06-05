@@ -3,8 +3,10 @@
 class RasterizerState
 {
 private:
-	D3D12_RASTERIZER_DESC rasterizerDesc{};
+	D3D12_RASTERIZER_DESC rasterizerDesc_{};
 public:
 	void CreateRasterizerState();
+
+	D3D12_RASTERIZER_DESC GetRasterizerDesc() { return rasterizerDesc_; };
 };
 

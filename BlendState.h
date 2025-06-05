@@ -3,8 +3,10 @@
 class BlendState
 {
 private:
-	D3D12_BLEND_DESC blendDesc{};
+	D3D12_BLEND_DESC blendDesc_{};
 public:
 	void CreateBlendDesc();
+
+	D3D12_BLEND_DESC GetBlendDesc() { return blendDesc_; }
 };
 
