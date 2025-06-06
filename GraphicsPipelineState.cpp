@@ -12,7 +12,7 @@ GraphicsPipelineState::~GraphicsPipelineState()
 	delete graphicsDevice_;
 }
 
-void GraphicsPipelineState::PSOSetting(std::ostream& os)
+void GraphicsPipelineState::PSOSetting(std::ostream& os, Microsoft::WRL::ComPtr <ID3D12Device> device)
 {
 	//DXCの初期化
 	
@@ -21,7 +21,7 @@ void GraphicsPipelineState::PSOSetting(std::ostream& os)
 
 	//<RootSignature>//
 	//ShaderとResourceの関連付けを示したobj
-	rootSignature_->CreateRootSignature(os);
+	rootSignature_->CreateRootSignature(os,device);
 	//<RootParameter>//
 	//Shaderがどこでデータ読み込みするかまとめたもの
 	rootParameter_->CreateRootParameter(rootSignature_->GetDescriptionRootSignature());
@@ -45,7 +45,7 @@ void GraphicsPipelineState::PSOSetting(std::ostream& os)
 
 void GraphicsPipelineState::CreatePSO(std::ostream& os,Microsoft::WRL::ComPtr<ID3D12Device> device)
 {
-	PSOSetting(os);
+	PSOSetting(os,device);
 	graphicsPipelineStateDesc_.pRootSignature = rootSignature_->GetRootSignature().Get();//RootSignature
 	graphicsPipelineStateDesc_.InputLayout = inputLayout_->GetInputLayoutDesc();//InputLayout
 	graphicsPipelineStateDesc_.VS = { shaderCompile_->GetVertexShaderBlob().Get()->GetBufferPointer(),

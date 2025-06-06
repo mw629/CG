@@ -18,7 +18,7 @@ private:
 public:
 	~RootSignature();
 
-	void CreateRootSignature(std::ostream& os);
+	void CreateRootSignature(std::ostream& os, Microsoft::WRL::ComPtr <ID3D12Device> device);
 
 	D3D12_ROOT_SIGNATURE_DESC GetDescriptionRootSignature() { return descriptionRootSignature_; };
 	Microsoft::WRL::ComPtr<ID3D12RootSignature> GetRootSignature() { return rootSignature_; }

@@ -7,7 +7,7 @@ RootSignature::~RootSignature()
 	delete graphicsDevice;
 }
 
-void RootSignature::CreateRootSignature(std::ostream& os)
+void RootSignature::CreateRootSignature(std::ostream& os, Microsoft::WRL::ComPtr <ID3D12Device> device)
 {
 
 	descriptionRootSignature_.Flags =
@@ -21,7 +21,7 @@ void RootSignature::CreateRootSignature(std::ostream& os)
 	}
 	//バイナリを元に生成
 	
-	hr_ = graphicsDevice->GetDevice()->CreateRootSignature(0,
+	hr_ = device->CreateRootSignature(0,
 		signatureBlob_->GetBufferPointer(), signatureBlob_->GetBufferSize(),
 		IID_PPV_ARGS(&rootSignature_));
 	assert(SUCCEEDED(hr_));

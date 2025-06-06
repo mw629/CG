@@ -7,6 +7,6 @@ void DirectXShaderCompiler::CreateDXC()
 	assert(SUCCEEDED(hr_));
 	hr_ = DxcCreateInstance(CLSID_DxcCompiler, IID_PPV_ARGS(&dxcCompiler_));
 	assert(SUCCEEDED(hr_));
-	hr_ = dxcUtils->CreateDefaultIncludeHandler(&includeHandler_);
+	hr_ = dxcUtils_->CreateDefaultIncludeHandler(&includeHandler_);
 	assert(SUCCEEDED(hr_));
 }
