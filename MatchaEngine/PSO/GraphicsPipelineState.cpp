@@ -1,5 +1,7 @@
 #include "GraphicsPipelineState.h"
 
+#include <cassert>
+
 GraphicsPipelineState::~GraphicsPipelineState()
 {
 	delete directXShaderCompiler;
@@ -9,7 +11,6 @@ GraphicsPipelineState::~GraphicsPipelineState()
 	delete blendState_;
 	delete rasterizerState_;
 	delete shaderCompile_;
-	delete graphicsDevice_;
 }
 
 void GraphicsPipelineState::PSOSetting(std::ostream& os, Microsoft::WRL::ComPtr <ID3D12Device> device)

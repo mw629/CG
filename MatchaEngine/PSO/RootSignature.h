@@ -1,7 +1,6 @@
 #pragma once
-#include "externals/DirectXTex/d3dx12.h"
+#include "../externals/DirectXTex/d3dx12.h"
 
-#include "GraphicsDevice.h"
 
 class RootSignature
 {
@@ -12,11 +11,11 @@ private:
 	Microsoft::WRL::ComPtr<ID3D12RootSignature> rootSignature_ = nullptr;
 	Microsoft::WRL::ComPtr<ID3DBlob> signatureBlob_ = nullptr;
 	Microsoft::WRL::ComPtr<ID3DBlob> errorBlob_ = nullptr;
-	GraphicsDevice* graphicsDevice;
+	
 
 
 public:
-	~RootSignature();
+	
 
 	void CreateRootSignature(std::ostream& os, Microsoft::WRL::ComPtr <ID3D12Device> device);
 

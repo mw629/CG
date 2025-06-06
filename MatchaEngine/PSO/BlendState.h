@@ -1,5 +1,6 @@
 #pragma once
-#include "externals/DirectXTex/d3dx12.h"
+#include "../externals/DirectXTex/d3dx12.h"
+
 class BlendState
 {
 private:

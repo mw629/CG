@@ -1,11 +1,8 @@
 #include "RootSignature.h"
-#include "LogHandler.h"
+#include "../LogHandler.h"
 #include <cassert>
 
-RootSignature::~RootSignature()
-{
-	delete graphicsDevice;
-}
+
 
 void RootSignature::CreateRootSignature(std::ostream& os, Microsoft::WRL::ComPtr <ID3D12Device> device)
 {

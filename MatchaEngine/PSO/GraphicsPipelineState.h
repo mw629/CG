@@ -7,7 +7,7 @@
 #include "ShaderCompile.h"
 #include "DepthStencilState.h"
 
-//#include "GraphicsDevice.h"
+
 
 class GraphicsPipelineState {
 private:
@@ -22,7 +22,7 @@ private:
 
 	D3D12_GRAPHICS_PIPELINE_STATE_DESC graphicsPipelineStateDesc_{};
 
-	GraphicsDevice* graphicsDevice_;
+
 	HRESULT hr_;
 
 public:
