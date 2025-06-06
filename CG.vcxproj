@@ -53,6 +53,7 @@
       <AdditionalOptions>/utf-8 %(AdditionalOptions)</AdditionalOptions>
       <MultiProcessorCompilation>true</MultiProcessorCompilation>
       <RuntimeLibrary>MultiThreadedDebug</RuntimeLibrary>
+      <AdditionalIncludeDirectories>C:\TechnicalSchool\CG2\PSO;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
     </ClCompile>
     <Link>
       <SubSystem>Windows</SubSystem>
@@ -86,13 +87,13 @@ copy "$(WindowsSdkDir)bin\$(TargetPlatformVersion)\x64\dxil.dll" "$(TargetDir)dx
     </Link>
   </ItemDefinitionGroup>
   <ItemGroup>
-    <ClCompile Include="BlendState.cpp" />
+    <ClCompile Include="PSO\BlendState.cpp" />
     <ClCompile Include="Calculation.cpp" />
     <ClCompile Include="Camera.cpp" />
     <ClCompile Include="CommandContext .cpp" />
-    <ClCompile Include="DepthStencilState.cpp" />
+    <ClCompile Include="PSO\DepthStencilState.cpp" />
     <ClCompile Include="Draw.cpp" />
-    <ClCompile Include="DirectXShaderCompiler.cpp" />
+    <ClCompile Include="PSO\DirectXShaderCompiler.cpp" />
     <ClCompile Include="externals\imgui\imgui.cpp" />
     <ClCompile Include="externals\imgui\imgui_demo.cpp" />
     <ClCompile Include="externals\imgui\imgui_draw.cpp" />
@@ -101,14 +102,14 @@ copy "$(WindowsSdkDir)bin\$(TargetPlatformVersion)\x64\dxil.dll" "$(TargetDir)dx
     <ClCompile Include="externals\imgui\imgui_tables.cpp" />
     <ClCompile Include="externals\imgui\imgui_widgets.cpp" />
     <ClCompile Include="GraphicsDevice.cpp" />
-    <ClCompile Include="GraphicsPipelineState.cpp" />
-    <ClCompile Include="InputLayout.cpp" />
+    <ClCompile Include="PSO\GraphicsPipelineState.cpp" />
+    <ClCompile Include="PSO\InputLayout.cpp" />
     <ClCompile Include="LogHandler.cpp" />
     <ClCompile Include="main.cpp" />
-    <ClCompile Include="RasterizerState.cpp" />
-    <ClCompile Include="RootParameter.cpp" />
-    <ClCompile Include="RootSignature.cpp" />
-    <ClCompile Include="ShaderCompile.cpp" />
+    <ClCompile Include="PSO\RasterizerState.cpp" />
+    <ClCompile Include="PSO\RootParameter.cpp" />
+    <ClCompile Include="PSO\RootSignature.cpp" />
+    <ClCompile Include="PSO\ShaderCompile.cpp" />
     <ClCompile Include="WindowConfig.cpp" />
   </ItemGroup>
   <ItemGroup>
@@ -124,13 +125,13 @@ copy "$(WindowsSdkDir)bin\$(TargetPlatformVersion)\x64\dxil.dll" "$(TargetDir)dx
     </FxCompile>
   </ItemGroup>
   <ItemGroup>
-    <ClInclude Include="BlendState.h" />
+    <ClInclude Include="PSO\BlendState.h" />
     <ClInclude Include="Calculation.h" />
     <ClInclude Include="Camera.h" />
     <ClInclude Include="CommandContext .h" />
-    <ClInclude Include="DepthStencilState.h" />
+    <ClInclude Include="PSO\DepthStencilState.h" />
     <ClInclude Include="Draw.h" />
-    <ClInclude Include="DirectXShaderCompiler.h" />
+    <ClInclude Include="PSO\DirectXShaderCompiler.h" />
     <ClInclude Include="externals\imgui\imconfig.h" />
     <ClInclude Include="externals\imgui\imgui.h" />
     <ClInclude Include="externals\imgui\imgui_impl_dx12.h" />
@@ -140,13 +141,13 @@ copy "$(WindowsSdkDir)bin\$(TargetPlatformVersion)\x64\dxil.dll" "$(TargetDir)dx
     <ClInclude Include="externals\imgui\imstb_textedit.h" />
     <ClInclude Include="externals\imgui\imstb_truetype.h" />
     <ClInclude Include="GraphicsDevice.h" />
-    <ClInclude Include="GraphicsPipelineState.h" />
-    <ClInclude Include="InputLayout.h" />
+    <ClInclude Include="PSO\GraphicsPipelineState.h" />
+    <ClInclude Include="PSO\InputLayout.h" />
     <ClInclude Include="LogHandler.h" />
-    <ClInclude Include="RasterizerState.h" />
-    <ClInclude Include="RootParameter.h" />
-    <ClInclude Include="RootSignature.h" />
-    <ClInclude Include="ShaderCompile.h" />
+    <ClInclude Include="PSO\RasterizerState.h" />
+    <ClInclude Include="PSO\RootParameter.h" />
+    <ClInclude Include="PSO\RootSignature.h" />
+    <ClInclude Include="PSO\ShaderCompile.h" />
     <ClInclude Include="VariableTypes.h" />
     <ClInclude Include="WindowConfig.h" />
   </ItemGroup>
