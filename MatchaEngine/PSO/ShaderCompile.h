@@ -3,6 +3,7 @@
 #include <wrl.h>
 #include <ostream>
 #include <dxcapi.h>
+
 class ShaderCompile
 {
 private:

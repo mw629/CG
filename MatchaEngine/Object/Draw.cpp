@@ -23,9 +23,9 @@ void Draw::DrawTriangle(Transform transform,
 	ID3D12Resource* materialResource,
 	D3D12_GPU_DESCRIPTOR_HANDLE textureSrvHandleGPU)
 {
-	GraphicsDevice graphicsDevice;
+
 	// VertexResourceを生成する//
-	vertexResource = graphicsDevice.CreateBufferResource(device, sizeof(VertexData) * 3);
+	vertexResource = GraphicsDevice::CreateBufferResource(device, sizeof(VertexData) * 3);
 
 
 	//VertexxBuffViewを作成する//
@@ -58,7 +58,7 @@ void Draw::DrawTriangle(Transform transform,
 
 
 	//WVP用のリソースを作る
-	wvpResource = graphicsDevice.CreateBufferResource(device, sizeof(Matrix4x4));
+	wvpResource = GraphicsDevice::CreateBufferResource(device, sizeof(Matrix4x4));
 	//
 	wvpData = nullptr;
 	//
