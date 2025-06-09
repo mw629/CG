@@ -31,6 +31,7 @@ std::wstring ConvertString(const std::string& str) {
 	return result;
 }
 
+
 void Log(std::ostream& os, const std::string& message) {
 	os << message << std::endl;
 	OutputDebugStringA(message.c_str());
@@ -40,7 +41,7 @@ std::ofstream CurrentTimestamp()
 {
 	//現在時刻でログファイルを生成する//
 
-//現在時刻を取得(UTC時刻)
+	//現在時刻を取得(UTC時刻)
 	std::chrono::system_clock::time_point now = std::chrono::system_clock::now();
 	//ログファイルの名前にコンマ何秒はいらないので。削って秒にする
 	std::chrono::time_point<std::chrono::system_clock, std::chrono::seconds>

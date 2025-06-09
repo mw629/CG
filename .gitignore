@@ -360,5 +360,8 @@ DirectXGame/imgui.ini
 # Dump files 
 Dump/
 
+# log files 
+logs/
+
 # DirectXTex Compiled Shaders
 **/DirectXTex/Shaders/Compiled/
