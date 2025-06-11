@@ -1,6 +1,6 @@
 #pragma once  
-#include "VariableTypes.h"  
-#include "Calculation.h"  
+#include "Common/VariableTypes.h"  
+#include "Math/Calculation.h"  
 #include <d3d12.h>  
 #include <cstdint>  
 #include "Camera.h"

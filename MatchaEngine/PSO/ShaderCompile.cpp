@@ -1,7 +1,7 @@
 #include "ShaderCompile.h"
 #include <cassert>
 
-#include "../LogHandler.h"
+#include "../Common/LogHandler.h"
 
 Microsoft::WRL::ComPtr<IDxcBlob> ShaderCompile::CompileShader(std::ostream& os, 
 	const std::wstring& filePath, 

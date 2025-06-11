@@ -1,8 +1,9 @@
 #pragma once
-#include "VariableTypes.h"
+#include "Common/VariableTypes.h"
 
 class Camera
 {
+private:
 	int kClientWidth = 1280;
 	int kClientHeight = 720;
 	float fovY = 0.45f;

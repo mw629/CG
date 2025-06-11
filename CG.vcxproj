@@ -56,7 +56,7 @@
       <AdditionalOptions>/utf-8 %(AdditionalOptions)</AdditionalOptions>
       <MultiProcessorCompilation>true</MultiProcessorCompilation>
       <RuntimeLibrary>MultiThreadedDebug</RuntimeLibrary>
-      <AdditionalIncludeDirectories>C:\TechnicalSchool\CG2\MatchaEngine\Math;C:\TechnicalSchool\CG2\MatchaEngine\Object;C:\TechnicalSchool\CG2\MatchaEngine\Common;C:\TechnicalSchool\CG2\MatchaEngine\PSO;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+      <AdditionalIncludeDirectories>$(ProjectDir)MatchaEngine;$(ProjectDir)externals\imgui;$(ProjectDir)externals\DirectXTex;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
     </ClCompile>
     <Link>
       <SubSystem>Windows</SubSystem>
@@ -90,6 +90,8 @@ copy "$(WindowsSdkDir)bin\$(TargetPlatformVersion)\x64\dxil.dll" "$(TargetDir)dx
     </Link>
   </ItemDefinitionGroup>
   <ItemGroup>
+    <ClCompile Include="MatchaEngine\Resource\Audio.cpp" />
+    <ClCompile Include="Input.cpp" />
     <ClCompile Include="MatchaEngine\Engine.cpp" />
     <ClCompile Include="MatchaEngine\PSO\BlendState.cpp" />
     <ClCompile Include="MatchaEngine\Math\Calculation.cpp" />
@@ -129,6 +131,8 @@ copy "$(WindowsSdkDir)bin\$(TargetPlatformVersion)\x64\dxil.dll" "$(TargetDir)dx
     </FxCompile>
   </ItemGroup>
   <ItemGroup>
+    <ClInclude Include="MatchaEngine\Resource\Audio.h" />
+    <ClInclude Include="Input.h" />
     <ClInclude Include="MatchaEngine\Engine.h" />
     <ClInclude Include="MatchaEngine\PSO\BlendState.h" />
     <ClInclude Include="MatchaEngine\Math\Calculation.h" />

@@ -14,10 +14,11 @@
 #include <strsafe.h>
 #include <dxcapi.h>
 #include <vector>
+#include <wrl.h> 
+#include <xaudio2.h>
 
-#include <wrl.h> // ComPtr を使用するために追加
 
-#include "LogHandler.h"
+#include "Common/LogHandler.h"
 
 #include "externals/DirectXTex/DirectXTex.h"
 #include "externals/imgui/imgui.h"
@@ -28,13 +29,14 @@
 
 extern IMGUI_IMPL_API LRESULT ImGui_ImplWin32_WndProcHandler(HWND hWnd, UINT msg, WPARAM wParam, LPARAM lParam);
 
-#include "Calculation.h"//MTで作った
-#include "VariableTypes.h"
+#include "Math/Calculation.h"//MTで作った
+#include "Common/VariableTypes.h"
 #include "MatchaEngine/Common/GraphicsDevice.h"
-#include "WindowConfig.h"
-#include "Camera.h"
-#include "Draw.h"
-#include "DirectXShaderCompiler.h"
+#include "Common/WindowConfig.h"
+#include "Object/Camera.h"
+#include "Object/Draw.h"
+#include "PSO/DirectXShaderCompiler.h"
+#include "Input.h"
 
 
 #pragma comment(lib,"d3d12.lib")
@@ -42,6 +44,8 @@ extern IMGUI_IMPL_API LRESULT ImGui_ImplWin32_WndProcHandler(HWND hWnd, UINT msg
 #pragma comment(lib,"dxguid.lib")
 #pragma comment(lib,"dbgHelp.lib")
 #pragma comment(lib,"dxcompiler.lib")
+#pragma comment(lib,"xaudio2.lib")
+
 
 
 
@@ -225,7 +229,7 @@ Microsoft::WRL::ComPtr<ID3D12Resource> CreateTextureResource(ID3D12Device* devic
 Microsoft::WRL::ComPtr<ID3D12Resource> UploadTextureData(ID3D12Resource* texture, const DirectX::ScratchImage& mipImages, ID3D12Device* device, ID3D12GraphicsCommandList* commandList)
 {
 	std::vector<D3D12_SUBRESOURCE_DATA> subresources;
-	
+
 	DirectX::PrepareUpload(device, mipImages.GetImages(), mipImages.GetImageCount(), mipImages.GetMetadata(), subresources);
 	uint64_t intermediateSize = GetRequiredIntermediateSize(texture, 0, UINT(subresources.size()));
 	Microsoft::WRL::ComPtr<ID3D12Resource> intermediateResource = GraphicsDevice::CreateBufferResource(device, intermediateSize);
@@ -418,6 +422,7 @@ int WINAPI WinMain(HINSTANCE, HINSTANCE, LPSTR, int) {
 	draw.Initialize();;
 
 
+
 	//ウィンドウサイズの設定//
 
 	//クライアント領域のサイズ
@@ -425,6 +430,10 @@ int WINAPI WinMain(HINSTANCE, HINSTANCE, LPSTR, int) {
 	const int32_t kClientHeight = 720;
 
 	window.DrawWindow(kClientWidth, kClientHeight);
+
+	//キーの初期化
+	Input* input =new Input;
+	input->Initialize(window.GeWc(), window.GetHwnd());
 
 
 	//DebugLayer//
@@ -698,6 +707,7 @@ int WINAPI WinMain(HINSTANCE, HINSTANCE, LPSTR, int) {
 	assert(SUCCEEDED(hr));
 
 
+	
 	//RootSignatureを生成する//
 
 	D3D12_ROOT_SIGNATURE_DESC descriptionRootSignature{};
@@ -754,7 +764,7 @@ int WINAPI WinMain(HINSTANCE, HINSTANCE, LPSTR, int) {
 
 
 
-	
+
 	//シリアライズしてバイナリにする
 	Microsoft::WRL::ComPtr<ID3DBlob> signatureBlob = nullptr;
 	Microsoft::WRL::ComPtr<ID3DBlob> errorBlob = nullptr;
@@ -861,7 +871,7 @@ int WINAPI WinMain(HINSTANCE, HINSTANCE, LPSTR, int) {
 	graphicsPipelineStateDesc.SampleDesc.Count = 1;
 	graphicsPipelineStateDesc.SampleMask = D3D12_DEFAULT_SAMPLE_MASK;
 
-	
+
 	//作成したらPSOに代入、DSCのFormatを設定する//
 	graphicsPipelineStateDesc.DepthStencilState = depthStencilDesc;
 	graphicsPipelineStateDesc.DSVFormat = DXGI_FORMAT_D24_UNORM_S8_UINT;
@@ -1231,6 +1241,7 @@ int WINAPI WinMain(HINSTANCE, HINSTANCE, LPSTR, int) {
 
 
 
+	
 
 	IMGUI_CHECKVERSION();
 	ImGui::CreateContext();
@@ -1255,6 +1266,20 @@ int WINAPI WinMain(HINSTANCE, HINSTANCE, LPSTR, int) {
 		}
 		else {
 
+			input->Updata();
+
+			if(input->PushKey(DIK_0)){
+				OutputDebugStringA("Hit 0\n");
+			}
+			if (input->PressKey(DIK_0)) {
+				OutputDebugStringA("Hit 1\n");
+			}
+			if (input->ReleaseKey(DIK_0)) {
+				OutputDebugStringA("Hit 2\n");
+			}
+			if (input->FreeKey(DIK_0)) {
+				OutputDebugStringA("Hit 3\n");
+			}
 
 			ImGui_ImplDX12_NewFrame();
 			ImGui_ImplWin32_NewFrame();
@@ -1326,6 +1351,8 @@ int WINAPI WinMain(HINSTANCE, HINSTANCE, LPSTR, int) {
 
 
 
+
+			
 			//transformShpere.rotate.y += 0.1f;
 
 
@@ -1483,6 +1510,7 @@ int WINAPI WinMain(HINSTANCE, HINSTANCE, LPSTR, int) {
 
 	//COMの終了処理
 	CoUninitialize();
+	delete input;
 
 	return 0;
 }

@@ -17,7 +17,8 @@ public:
 
 	void DrawWindow(const int32_t kClientWidth, const int32_t kClientHeight);
 
-	HWND GetHwnd() { return hwnd; };
+	WNDCLASS GeWc() { return wc; }
+	HWND GetHwnd() { return hwnd; }
 
 
 };

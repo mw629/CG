@@ -1,5 +1,6 @@
 #pragma once
-#include "../externals/DirectXTex/d3dx12.h"
+#include <d3d12.h> 
+
 class DepthStencilState
 {
 private:
