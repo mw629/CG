@@ -1,5 +1,5 @@
 #include "RootSignature.h"
-#include "../LogHandler.h"
+#include "../Common/LogHandler.h"
 #include <cassert>
 
 

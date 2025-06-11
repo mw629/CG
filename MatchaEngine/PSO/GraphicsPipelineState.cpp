@@ -41,7 +41,7 @@ void GraphicsPipelineState::PSOSetting(std::ostream& os, Microsoft::WRL::ComPtr 
 		directXShaderCompiler->GetDxcCompiler(), directXShaderCompiler->GetIncludeHandler());
 	//<DepthStencilState>//
 	//深度にかかわる設定
-	depthStencilState_->CreateDepthStencilState();
+	depthStencilState_->CreateDepthStencilState( );
 }
 
 void GraphicsPipelineState::CreatePSO(std::ostream& os,Microsoft::WRL::ComPtr<ID3D12Device> device)
