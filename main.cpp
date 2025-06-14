@@ -1344,8 +1344,10 @@ int WINAPI WinMain(HINSTANCE, HINSTANCE, LPSTR, int) {
 				ImGui::DragFloat2("ScaleSpriteUV", &uvTransformSprite.scale.x, 0.01f, -10.0f, 10.0f);
 				ImGui::SliderAngle("RotateSpriteUV", &uvTransformSprite.rotate.z);
 			}
-		
-
+			ImGui::Text("move");
+			ImGui::Text("x:AD\ny:WS\nz:SHIFT + WS\n");
+			ImGui::Text("rotate");
+			ImGui::Text("x:LEFT,RIGHT\ny:UP,DOEN\nz:QE\n");
 
 
 
