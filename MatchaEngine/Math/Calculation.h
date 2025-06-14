@@ -110,7 +110,7 @@ Matrix4x4 TransposeMatrix4x4(Matrix4x4 m);
 /// </summary>
 /// <param name="m">行列</param>
 /// <returns>逆行列</returns>
-Matrix4x4 InverseMatrix4x4(Matrix4x4 m);
+Matrix4x4 Inverse(Matrix4x4 m);
 
 /// <summary>
 /// この関数は、ベクトルを行列で変換します。

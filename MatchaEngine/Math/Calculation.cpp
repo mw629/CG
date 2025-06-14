@@ -122,7 +122,7 @@ Matrix4x4 TransposeMatrix4x4(Matrix4x4 m)//o
 	return result;
 }
 
-Matrix4x4 InverseMatrix4x4(Matrix4x4 m)
+Matrix4x4 Inverse(Matrix4x4 m)
 {
 	Matrix4x4 result;
 

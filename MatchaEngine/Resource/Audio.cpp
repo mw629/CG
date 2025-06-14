@@ -1,8 +1,5 @@
 #include "Audio.h"
-
-
-#include "Audio.h"
-#include <fstream> // for debug
+#include <fstream> 
 
 // 静的メンバ変数の実体を定義
 Microsoft::WRL::ComPtr<IXAudio2> Audio::sXaudio2;

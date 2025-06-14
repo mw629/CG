@@ -90,6 +90,7 @@ copy "$(WindowsSdkDir)bin\$(TargetPlatformVersion)\x64\dxil.dll" "$(TargetDir)dx
     </Link>
   </ItemDefinitionGroup>
   <ItemGroup>
+    <ClCompile Include="DebugCamera.cpp" />
     <ClCompile Include="MatchaEngine\Resource\Audio.cpp" />
     <ClCompile Include="Input.cpp" />
     <ClCompile Include="MatchaEngine\Engine.cpp" />
@@ -131,6 +132,7 @@ copy "$(WindowsSdkDir)bin\$(TargetPlatformVersion)\x64\dxil.dll" "$(TargetDir)dx
     </FxCompile>
   </ItemGroup>
   <ItemGroup>
+    <ClInclude Include="DebugCamera.h" />
     <ClInclude Include="MatchaEngine\Resource\Audio.h" />
     <ClInclude Include="Input.h" />
     <ClInclude Include="MatchaEngine\Engine.h" />

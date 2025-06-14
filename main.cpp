@@ -30,13 +30,15 @@
 extern IMGUI_IMPL_API LRESULT ImGui_ImplWin32_WndProcHandler(HWND hWnd, UINT msg, WPARAM wParam, LPARAM lParam);
 
 #include "Math/Calculation.h"//MTで作った
-#include "Common/VariableTypes.h"
+#include "MatchaEngine/Resource/Audio.h"
 #include "MatchaEngine/Common/GraphicsDevice.h"
 #include "Common/WindowConfig.h"
 #include "Object/Camera.h"
 #include "Object/Draw.h"
 #include "PSO/DirectXShaderCompiler.h"
 #include "Input.h"
+#include "DebugCamera.h"
+
 
 
 #pragma comment(lib,"d3d12.lib")
@@ -434,7 +436,8 @@ int WINAPI WinMain(HINSTANCE, HINSTANCE, LPSTR, int) {
 	//キーの初期化
 	Input* input =new Input;
 	input->Initialize(window.GeWc(), window.GetHwnd());
-
+	DebugCamera* debudCamera = new DebugCamera;
+	debudCamera->Initialize();
 
 	//DebugLayer//
 #ifdef _DEBUG
@@ -1238,9 +1241,11 @@ int WINAPI WinMain(HINSTANCE, HINSTANCE, LPSTR, int) {
 
 	Transform uvTransformSprite{ {1.0f,1.0f,1.0f},{0.0f,0.0f,0.0f},{0.0f,0.0f,0.0f} };
 
-
-
-
+	Audio* audio = new Audio;
+	int BGMHandle;
+	audio->Initialize();
+	BGMHandle= audio->Load("resources/Audio/BGM/sweet_pop.mp3");
+	audio->Play(BGMHandle, false, 1.0f);
 	
 
 	IMGUI_CHECKVERSION();
@@ -1268,18 +1273,7 @@ int WINAPI WinMain(HINSTANCE, HINSTANCE, LPSTR, int) {
 
 			input->Updata();
 
-			if(input->PushKey(DIK_0)){
-				OutputDebugStringA("Hit 0\n");
-			}
-			if (input->PressKey(DIK_0)) {
-				OutputDebugStringA("Hit 1\n");
-			}
-			if (input->ReleaseKey(DIK_0)) {
-				OutputDebugStringA("Hit 2\n");
-			}
-			if (input->FreeKey(DIK_0)) {
-				OutputDebugStringA("Hit 3\n");
-			}
+			
 
 			ImGui_ImplDX12_NewFrame();
 			ImGui_ImplWin32_NewFrame();
@@ -1308,6 +1302,8 @@ int WINAPI WinMain(HINSTANCE, HINSTANCE, LPSTR, int) {
 
 
 			//ゲーム処理
+
+
 
 			//開発用UIの処理。実際に開発用UIを出す場合はここをゲ0無固有の処理に置き換える
 			ImGui::Checkbox("useMonsterBall", &useMonsterBall);
@@ -1348,7 +1344,10 @@ int WINAPI WinMain(HINSTANCE, HINSTANCE, LPSTR, int) {
 				ImGui::DragFloat2("ScaleSpriteUV", &uvTransformSprite.scale.x, 0.01f, -10.0f, 10.0f);
 				ImGui::SliderAngle("RotateSpriteUV", &uvTransformSprite.rotate.z);
 			}
-
+			ImGui::Text("move");
+			ImGui::Text("x:AD\ny:WS\nz:SHIFT + WS\n");
+			ImGui::Text("rotate");
+			ImGui::Text("x:LEFT,RIGHT\ny:UP,DOEN\nz:QE\n");
 
 
 
@@ -1358,8 +1357,11 @@ int WINAPI WinMain(HINSTANCE, HINSTANCE, LPSTR, int) {
 
 			//*wvpData = camera.MakeWorldViewProjectionMatrix(transform, camraTransform);
 			//*transformationMatrixDataSprite = camera.MakeWorldViewProjectionMatrix(transformSprite, camraTransform);
+			debudCamera->Update(*input);
 
-			Matrix4x4 viewMatrix = InverseMatrix4x4(MakeAffineMatrix(camraTransform.translate, camraTransform.scale, camraTransform.rotate));
+			Matrix4x4 viewMatrix = debudCamera->GetViewMatrix();
+
+
 			Matrix4x4 projectionMatri = MakePerspectiveFovMatrix(0.45f, float(kClientWidth) / float(kClientHeight), 0.1f, 100.0f);
 
 			Matrix4x4 worldMatrixObj = MakeAffineMatrix(transformObj.translate, transformObj.scale, transformObj.rotate);
