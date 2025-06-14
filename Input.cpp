@@ -54,7 +54,7 @@ bool Input::ReleaseKey(uint32_t key) {
 }
 bool Input::FreeKey(uint32_t key)
 {
-	return !(key_[key] & 0x80) && !(prevKey_[key] & 0x80);
+	return !(key_[key] & 0x80);
 }
 
 
