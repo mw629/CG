@@ -7,7 +7,7 @@ IXAudio2MasteringVoice* Audio::sMasterVoice = nullptr;
 std::vector<Audio::SoundData> Audio::sSoundData;
 
 void Audio::Initialize() {
-    // Media Foundationの初期化 (Microsoft Docs参照)
+    // Media Foundationの初期化 
     HRESULT hr = MFStartup(MF_VERSION);
     assert(SUCCEEDED(hr));
 
@@ -26,7 +26,7 @@ void Audio::Finalize() {
         Unload(static_cast<int>(i));
     }
 
-    // XAudio2の解放 (ComPtrが自動で行う)
+    // XAudio2の解放 
     sXaudio2.Reset();
 
     // Media Foundationの終了
@@ -34,8 +34,7 @@ void Audio::Finalize() {
 }
 
 int Audio::Load(const std::string& filePath) {
-    // --- Media Foundationによるファイル読み込みとデコード --- (Zenn記事/Microsoft Docs参照)
-
+ 
     // 1. ソースリーダーの作成
     Microsoft::WRL::ComPtr<IMFSourceReader> pReader;
     std::wstring wFilePath(filePath.begin(), filePath.end());
@@ -119,7 +118,6 @@ int Audio::Play(int soundHandle, bool loop, float volume) {
         data.pSourceVoice = nullptr;
     }
 
-    // --- XAudio2による再生 --- (Qiita記事参照)
 
     // 1. ソースボイスの作成
     HRESULT hr = sXaudio2->CreateSourceVoice(&data.pSourceVoice, &data.wfex);
@@ -140,7 +138,7 @@ int Audio::Play(int soundHandle, bool loop, float volume) {
     hr = data.pSourceVoice->Start();
     assert(SUCCEEDED(hr));
 
-    return 0; // 本来はインスタンスIDなどを返すが、今回は未使用
+    return 0; 
 }
 
 void Audio::Stop(int soundHandle) {
