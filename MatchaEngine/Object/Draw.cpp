@@ -9,6 +9,7 @@ Draw::Draw()
 
 Draw::~Draw()
 {
+	Initialize();
 }
 
 void Draw::Initialize()

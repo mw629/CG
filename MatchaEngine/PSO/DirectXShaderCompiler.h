@@ -11,8 +11,8 @@ private:
 public:
 	void CreateDXC();
 
-	Microsoft::WRL::ComPtr<IDxcUtils> GetDxcUtils() { return dxcUtils_; }
-	Microsoft::WRL::ComPtr<IDxcCompiler3> GetDxcCompiler() { return dxcCompiler_; }
-	Microsoft::WRL::ComPtr<IDxcIncludeHandler> GetIncludeHandler() { return includeHandler_; }
+	IDxcUtils* GetDxcUtils() { return dxcUtils_.Get(); }
+	IDxcCompiler3* GetDxcCompiler() { return dxcCompiler_.Get(); }
+	IDxcIncludeHandler* GetIncludeHandler() { return includeHandler_.Get(); }
 };
 

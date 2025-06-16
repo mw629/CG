@@ -47,12 +47,12 @@ void GraphicsPipelineState::PSOSetting(std::ostream& os, Microsoft::WRL::ComPtr 
 void GraphicsPipelineState::CreatePSO(std::ostream& os,Microsoft::WRL::ComPtr<ID3D12Device> device)
 {
 	PSOSetting(os,device);
-	graphicsPipelineStateDesc_.pRootSignature = rootSignature_->GetRootSignature().Get();//RootSignature
+	graphicsPipelineStateDesc_.pRootSignature = rootSignature_->GetRootSignature();//RootSignature
 	graphicsPipelineStateDesc_.InputLayout = inputLayout_->GetInputLayoutDesc();//InputLayout
-	graphicsPipelineStateDesc_.VS = { shaderCompile_->GetVertexShaderBlob().Get()->GetBufferPointer(),
-	shaderCompile_->GetVertexShaderBlob().Get()->GetBufferSize() };//VertexShader
-	graphicsPipelineStateDesc_.VS = { shaderCompile_->GetPixelShaderBlob().Get()->GetBufferPointer(),
-	shaderCompile_->GetPixelShaderBlob().Get()->GetBufferSize() };//PixelShader
+	graphicsPipelineStateDesc_.VS = { shaderCompile_->GetVertexShaderBlob()->GetBufferPointer(),
+	shaderCompile_->GetVertexShaderBlob()->GetBufferSize() };//VertexShader
+	graphicsPipelineStateDesc_.VS = { shaderCompile_->GetPixelShaderBlob()->GetBufferPointer(),
+	shaderCompile_->GetPixelShaderBlob()->GetBufferSize() };//PixelShader
 	graphicsPipelineStateDesc_.BlendState = blendState_->GetBlendDesc();//BlenderState
 	graphicsPipelineStateDesc_.RasterizerState = rasterizerState_->GetRasterizerDesc();//RasterizerState
 	//書き込むRTVの情報

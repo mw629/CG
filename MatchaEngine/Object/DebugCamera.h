@@ -1,6 +1,6 @@
 #pragma once
-#include "MatchaEngine/Common/VariableTypes.h"
-#include "Input.h"
+#include "../Common/VariableTypes.h"
+#include "../Common/Input.h"
 
 class DebugCamera
 {
