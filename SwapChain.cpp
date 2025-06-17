@@ -16,6 +16,15 @@ void SwapChain::CreateSwapChain(IDXGIFactory7 *DxgiFactory, ID3D12CommandQueue* 
 
 	hr_ = DxgiFactory->CreateSwapChainForHwnd(CommandQueue,Hwnd, &swapChainDesc_,
 		nullptr, nullptr, reinterpret_cast<IDXGISwapChain1**>(swapChain_.GetAddressOf()));
-
 	assert(SUCCEEDED(hr_));
+
+	//SwapChainからResourceを引っ張ってくる//
+
+	hr_ = swapChain_->GetBuffer(0, IID_PPV_ARGS(&swapChainResources_[0]));
+	//うまく起動できなければ起動できない
+	assert(SUCCEEDED(hr_));
+	hr_ = swapChain_->GetBuffer(1, IID_PPV_ARGS(&swapChainResources_[1]));
+	assert(SUCCEEDED(hr_));
+
+
 }

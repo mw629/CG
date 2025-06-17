@@ -90,6 +90,7 @@ copy "$(WindowsSdkDir)bin\$(TargetPlatformVersion)\x64\dxil.dll" "$(TargetDir)dx
     </Link>
   </ItemDefinitionGroup>
   <ItemGroup>
+    <ClCompile Include="DescriptorHeap.cpp" />
     <ClCompile Include="MatchaEngine\Object\DebugCamera.cpp" />
     <ClCompile Include="MatchaEngine\Resource\Audio.cpp" />
     <ClCompile Include="MatchaEngine\Common\Input.cpp" />

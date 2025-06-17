@@ -40,6 +40,8 @@ extern IMGUI_IMPL_API LRESULT ImGui_ImplWin32_WndProcHandler(HWND hWnd, UINT msg
 #include "Object/DebugCamera.h"
 #include "Common/CommandContext .h"
 #include "SwapChain.h"
+#include "DescriptorHeap.h"
+#include "RenderTargetView.h"
 
 #pragma comment(lib,"d3d12.lib")
 #pragma comment(lib,"dxgi.lib")
@@ -440,7 +442,8 @@ int WINAPI WinMain(HINSTANCE, HINSTANCE, LPSTR, int) {
 	std::unique_ptr<GraphicsDevice> graphics = std::make_unique<GraphicsDevice>(logStream);
 	std::unique_ptr<CommandContext> command = std::make_unique<CommandContext>(graphics.get()->GetDevice());
 	std::unique_ptr<SwapChain> swapChain = std::make_unique<SwapChain>();
-	
+	std::unique_ptr<DescriptorHeap> descriptorHeap = std::make_unique<DescriptorHeap>(graphics.get()->GetDevice());
+	std::unique_ptr<RenderTargetView> renderTargetView = std::make_unique<RenderTargetView>();
 	//入力
 	Input* input = new Input;
 
@@ -496,54 +499,27 @@ int WINAPI WinMain(HINSTANCE, HINSTANCE, LPSTR, int) {
 
 
 	swapChain.get()->CreateSwapChain(graphics.get()->GetDxgiFactory(), command.get()->GetCommandQueue(), window.GetHwnd(), kClientWidth, kClientHeight);
+	descriptorHeap.get()->CreateHeap(graphics.get()->GetDevice());
+	//renderTargetView.get()->CreateRenderTargetView(graphics.get()->GetDevice(), swapChain.get()->GetSwapChainResources(), descriptorHeap.get()->GetRtvDescriptorHeap());
 
 
+		//RTVを作る//
 
-
-	//DescriptorHeapを生成する
-
-	const uint32_t descriptorSizeSRV = graphics.get()->GetDevice()->GetDescriptorHandleIncrementSize(D3D12_DESCRIPTOR_HEAP_TYPE_CBV_SRV_UAV);
-	//const uint32_t descriptorSizeRTV = device->GetDescriptorHandleIncrementSize(D3D12_DESCRIPTOR_HEAP_TYPE_RTV);
-	//const uint32_t descriptorSizeDSV = device->GetDescriptorHandleIncrementSize(D3D12_DESCRIPTOR_HEAP_TYPE_DSV);
-
-
-
-
-	//ディスクリプタヒープの生成
-	Microsoft::WRL::ComPtr<ID3D12DescriptorHeap> rtvDescriptorHeap = CreateDescriptorHeep(graphics.get()->GetDevice(), D3D12_DESCRIPTOR_HEAP_TYPE_RTV, 2, false);
-
-	//
-	Microsoft::WRL::ComPtr<ID3D12DescriptorHeap> srvDescriptorHeap = CreateDescriptorHeep(graphics.get()->GetDevice(), D3D12_DESCRIPTOR_HEAP_TYPE_CBV_SRV_UAV, 128, true);
-
-
-
-	//SwapChainからResourceを引っ張ってくる//
-
-	Microsoft::WRL::ComPtr<ID3D12Resource> swapChainResources[2] = { nullptr };
-	hr = swapChain.get()->GetSwapChain()->GetBuffer(0, IID_PPV_ARGS(&swapChainResources[0]));
-	//うまく起動できなければ起動できない
-	assert(SUCCEEDED(hr));
-	hr = swapChain.get()->GetSwapChain()->GetBuffer(1, IID_PPV_ARGS(&swapChainResources[1]));
-	assert(SUCCEEDED(hr));
-
-
-	//RTVを作る//
-
-	//RTVの設定
-	D3D12_RENDER_TARGET_VIEW_DESC rtvDesc{};
+		//RTVの設定
+		D3D12_RENDER_TARGET_VIEW_DESC rtvDesc{};
 	rtvDesc.Format = DXGI_FORMAT_R8G8B8A8_UNORM_SRGB;//出力結果をSRGBに変換して書き込む
 	rtvDesc.ViewDimension = D3D12_RTV_DIMENSION_TEXTURE2D;//2dテクスチャとして書き込む
 	//ディスクリプタの先頭を取得する(ここが変わるかも05-01)
-	D3D12_CPU_DESCRIPTOR_HANDLE rtvStartHandle = rtvDescriptorHeap->GetCPUDescriptorHandleForHeapStart();
+	D3D12_CPU_DESCRIPTOR_HANDLE rtvStartHandle = descriptorHeap.get()->GetRtvDescriptorHeap()->GetCPUDescriptorHandleForHeapStart();
 	//RTVを2つ作るのでディスクリプタを2つ用意
 	D3D12_CPU_DESCRIPTOR_HANDLE rtvHandles[2];
 	//まず一つ目作る。1つ目は最初のところに作る。作る場所をこちらで指定してあげる必要がある
 	rtvHandles[0] = rtvStartHandle;
-	graphics.get()->GetDevice()->CreateRenderTargetView(swapChainResources[0].Get(), &rtvDesc, rtvHandles[0]);
+	graphics.get()->GetDevice()->CreateRenderTargetView(swapChain.get()->GetSwapChainResources(0), &rtvDesc, rtvHandles[0]);
 	//2つ目のディスクリプタハンドルを得る（自力で）
 	rtvHandles[1].ptr = rtvHandles[0].ptr + graphics.get()->GetDevice()->GetDescriptorHandleIncrementSize(D3D12_DESCRIPTOR_HEAP_TYPE_RTV);
 	//2つ目を作る
-	graphics.get()->GetDevice()->CreateRenderTargetView(swapChainResources[1].Get(), &rtvDesc, rtvHandles[1]);
+	graphics.get()->GetDevice()->CreateRenderTargetView(swapChain.get()->GetSwapChainResources(1), &rtvDesc, rtvHandles[1]);
 
 
 
@@ -1104,11 +1080,11 @@ int WINAPI WinMain(HINSTANCE, HINSTANCE, LPSTR, int) {
 
 
 	//SRVを作成するDescriptorHeapの場所を決める
-	D3D12_CPU_DESCRIPTOR_HANDLE textureSrvHandleCPU = GetCPUDescriptorHandle(srvDescriptorHeap.Get(), descriptorSizeSRV, 1);
-	D3D12_GPU_DESCRIPTOR_HANDLE textureSrvHandleGPU = GetGPUDescriptorHandle(srvDescriptorHeap.Get(), descriptorSizeSRV, 1);
+	D3D12_CPU_DESCRIPTOR_HANDLE textureSrvHandleCPU = GetCPUDescriptorHandle(descriptorHeap.get()->GetSrvDescriptorHeap(), descriptorHeap.get()->GetDescriptorSizeSRV(), 1);
+	D3D12_GPU_DESCRIPTOR_HANDLE textureSrvHandleGPU = GetGPUDescriptorHandle(descriptorHeap.get()->GetSrvDescriptorHeap(), descriptorHeap.get()->GetDescriptorSizeSRV(), 1);
 	//SRVを作成するDescriptorHeapの場所を決める
-	D3D12_CPU_DESCRIPTOR_HANDLE textureSrvHandleCPU2 = GetCPUDescriptorHandle(srvDescriptorHeap.Get(), descriptorSizeSRV, 2);
-	D3D12_GPU_DESCRIPTOR_HANDLE textureSrvHandleGPU2 = GetGPUDescriptorHandle(srvDescriptorHeap.Get(), descriptorSizeSRV, 2);
+	D3D12_CPU_DESCRIPTOR_HANDLE textureSrvHandleCPU2 = GetCPUDescriptorHandle(descriptorHeap.get()->GetSrvDescriptorHeap(), descriptorHeap.get()->GetDescriptorSizeSRV(), 2);
+	D3D12_GPU_DESCRIPTOR_HANDLE textureSrvHandleGPU2 = GetGPUDescriptorHandle(descriptorHeap.get()->GetSrvDescriptorHeap(), descriptorHeap.get()->GetDescriptorSizeSRV(), 2);
 
 	graphics.get()->GetDevice()->CreateShaderResourceView(textureResource.Get(), &srvDesc, textureSrvHandleCPU);
 	graphics.get()->GetDevice()->CreateShaderResourceView(textureResource2.Get(), &srvDesc2, textureSrvHandleCPU2);
@@ -1159,9 +1135,9 @@ int WINAPI WinMain(HINSTANCE, HINSTANCE, LPSTR, int) {
 	ImGui_ImplDX12_Init(graphics.get()->GetDevice(),
 		swapChain.get()->GetSwapChainDesc().BufferCount,
 		rtvDesc.Format,
-		srvDescriptorHeap.Get(),
-		srvDescriptorHeap->GetCPUDescriptorHandleForHeapStart(),
-		srvDescriptorHeap->GetGPUDescriptorHandleForHeapStart());
+		descriptorHeap.get()->GetSrvDescriptorHeap(),
+		descriptorHeap.get()->GetSrvDescriptorHeap()->GetCPUDescriptorHandleForHeapStart(),
+		descriptorHeap.get()->GetSrvDescriptorHeap()->GetGPUDescriptorHandleForHeapStart());
 
 	//メインループ//
 
@@ -1196,7 +1172,7 @@ int WINAPI WinMain(HINSTANCE, HINSTANCE, LPSTR, int) {
 			//Noneにしておく
 			barrier.Flags = D3D12_RESOURCE_BARRIER_FLAG_NONE;
 			//バリアを張る対象のリソース。現在のバックバッファに対して行う
-			barrier.Transition.pResource = swapChainResources[backBufferIndex].Get();
+			barrier.Transition.pResource = swapChain.get()->GetSwapChainResources(backBufferIndex);
 			//遷移前（現在）のResouce
 			barrier.Transition.StateBefore = D3D12_RESOURCE_STATE_PRESENT;
 			//遷移後のResouce
@@ -1308,7 +1284,7 @@ int WINAPI WinMain(HINSTANCE, HINSTANCE, LPSTR, int) {
 
 
 
-			ID3D12DescriptorHeap* descriptorHeeps[] = { srvDescriptorHeap.Get() };
+			ID3D12DescriptorHeap* descriptorHeeps[] = { descriptorHeap.get()->GetSrvDescriptorHeap() };
 			command.get()->GetCommandList()->SetDescriptorHeaps(1, descriptorHeeps);
 
 
