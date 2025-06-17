@@ -3,6 +3,8 @@
 #include <cstdint>
 #include <cstring> 
 
+
+
 void Input::Initialize(WNDCLASS wc, HWND hwnd) {
 	directInput_=nullptr;
 	result = DirectInput8Create(

@@ -7,7 +7,6 @@ class CommandContext
 {
 private:
 	HRESULT hr_;
-	GraphicsDevice* graphicsDevice_;
 	Microsoft::WRL::ComPtr<ID3D12CommandQueue> commandQueue_ = nullptr;
 	D3D12_COMMAND_QUEUE_DESC commandQueueDesc_{};
 	Microsoft::WRL::ComPtr<ID3D12CommandAllocator> commandAllocator_ = nullptr;
@@ -16,13 +15,13 @@ private:
 
 public:
 	~CommandContext();
-	CommandContext();
-	void CreateCommandQueue();
-	void CreateCommandAllocator();
-	void CreateCommandList();
+	CommandContext(ID3D12Device* device);
+	void CreateCommandQueue(ID3D12Device* device);
+	void CreateCommandAllocator(ID3D12Device* device);
+	void CreateCommandList(ID3D12Device* device);
 
-	Microsoft::WRL::ComPtr<ID3D12CommandQueue> GetCommandQueue() { return commandQueue_; }
-	Microsoft::WRL::ComPtr<ID3D12CommandAllocator> GetCommandAllocator() { return commandAllocator_; }
-	Microsoft::WRL::ComPtr<ID3D12GraphicsCommandList> GetCommandList() { return commandList_; }
+	ID3D12CommandQueue* GetCommandQueue() { return commandQueue_.Get(); }
+	ID3D12CommandAllocator* GetCommandAllocator() { return commandAllocator_.Get(); }
+	ID3D12GraphicsCommandList* GetCommandList() { return commandList_.Get(); }
 };
 

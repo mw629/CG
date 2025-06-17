@@ -13,6 +13,8 @@
 
 #pragma comment(lib,"d3d12.lib")  
 #pragma comment(lib,"dxgi.lib")  
+#pragma comment(lib,"dxguid.lib")
+
 
 class GraphicsDevice  
 {  
@@ -51,8 +53,10 @@ public:
 	void CreateD3D12Device(std::ostream& os);  
 
 
-	Microsoft::WRL::ComPtr <IDXGIFactory7> GetDxgiFactory() {return dxgiFactory_;}  
-	Microsoft::WRL::ComPtr <IDXGIAdapter4> GetUseAdapter() { return useAdapter_; }  
-	Microsoft::WRL::ComPtr <ID3D12Device> GetDevice() { return device_; }  
+	IDXGIFactory7 *GetDxgiFactory() {return dxgiFactory_.Get();}  
+	IDXGIAdapter4 *GetUseAdapter() { return useAdapter_.Get(); }
+	ID3D12Device *GetDevice() {
+		return device_.Get();
+	}
 
 };

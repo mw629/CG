@@ -28,9 +28,9 @@ public:
 		Microsoft::WRL::ComPtr<IDxcCompiler3> dxcCompiler,
 		Microsoft::WRL::ComPtr<IDxcIncludeHandler> includeHandler);
 
-	Microsoft::WRL::ComPtr<IDxcBlob>GetVertexShaderBlob(){return vertexShaderBlob_; }
+	IDxcBlob* GetVertexShaderBlob(){return vertexShaderBlob_.Get(); }
 
-	Microsoft::WRL::ComPtr<IDxcBlob>GetPixelShaderBlob() { return pixelShaderBlob_; }
+	IDxcBlob* GetPixelShaderBlob() { return pixelShaderBlob_.Get(); }
 
 
 

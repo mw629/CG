@@ -19,6 +19,8 @@ private:
 	
 
 public:
+
+
 	void Initialize(WNDCLASS wc, HWND hwnd);
 
 	void CreateInpuDevice();
