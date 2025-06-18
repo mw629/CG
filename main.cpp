@@ -890,7 +890,7 @@ int WINAPI WinMain(HINSTANCE, HINSTANCE, LPSTR, int) {
 
 	//Objectの描画//
 
-	ModelData modelData = LoadObjFile("resources/obj", "axis.obj");
+	ModelData modelData = LoadObjFile("resources/block", "block.obj");
 
 	//頂点リソースを作る
 	Microsoft::WRL::ComPtr<ID3D12Resource> vertexResourceObj = GraphicsDevice::CreateBufferResource(graphics.get()->GetDevice(), sizeof(VertexData) * modelData.vertices.size());
@@ -941,103 +941,6 @@ int WINAPI WinMain(HINSTANCE, HINSTANCE, LPSTR, int) {
 	//1頂点当たりのサイズ
 	vertexBufferViewShpere.StrideInBytes = sizeof(VertexData);
 
-	//頂点データを設定する//
-
-	VertexData* vertexDataShpere = nullptr;
-	vertexResourceShpere->Map(0, nullptr, reinterpret_cast<void**>(&vertexDataShpere));
-
-	//経度分割1つ分の角度φd
-	const float kLonEvery = pi * 2.0f / float(kSubdivision);
-	//緯度分割1つ分の角度Θd
-	const float kLatEvery = pi / float(kSubdivision);
-	//緯度の方向に分割	
-	for (uint32_t latIndex = 0; latIndex < kSubdivision; ++latIndex) {
-		float lat = -pi / 2.0f + kLatEvery * latIndex;//Θ
-		//経度方向に分割しながら線を描く
-		for (uint32_t lonIndex = 0; lonIndex < kSubdivision; ++lonIndex) {
-			uint32_t startIndex = (latIndex * kSubdivision + lonIndex) * 6;
-			float lon = lonIndex * kLonEvery;
-
-			//一つ目の三角形
-
-			VertexData a;
-			VertexData b;
-			VertexData c;
-			VertexData d;
-
-			//position
-
-			a.position = {
-				cos(lat) * cos(lon),
-				sin(lat),
-				cos(lat) * sin(lon),
-				1.0f };
-
-			b.position = {
-				cos(lat + kLatEvery) * cos(lon),
-				sin(lat + kLatEvery),
-				cos(lat + kLatEvery) * sin(lon) ,
-				1.0f };
-
-			c.position = {
-				cos(lat) * cos(lon + kLonEvery),
-				sin(lat),
-				cos(lat) * sin(lon + kLonEvery),
-				1.0f };
-
-			d.position = {
-				cos(lat + kLatEvery) * cos(lon + kLonEvery),
-				sin(lat + kLatEvery),
-				cos(lat + kLatEvery) * sin(lon + kLonEvery),
-				1.0f };
-
-			//texcoord
-
-			a.texcoord = {
-				float(lonIndex) / float(kSubdivision),
-				 float(latIndex) / float(kSubdivision) };
-
-			b.texcoord = {
-				float(lonIndex) / float(kSubdivision),
-				 float(latIndex + 1) / float(kSubdivision) };
-
-			c.texcoord = {
-				float(lonIndex + 1) / float(kSubdivision),
-				 float(latIndex) / float(kSubdivision) };
-
-			d.texcoord = {
-				float(lonIndex + 1) / float(kSubdivision),
-				 float(latIndex + 1) / float(kSubdivision) };
-
-			//法線ベクトルを計算する
-
-			a.normal = Vector3(a.position.x, a.position.y, a.position.z);
-			b.normal = Vector3(b.position.x, b.position.y, b.position.z);
-			c.normal = Vector3(c.position.x, c.position.y, c.position.z);
-			d.normal = Vector3(d.position.x, d.position.y, d.position.z);
-
-
-			//頂点にデータを入力する。基準点a
-			vertexDataShpere[startIndex] = a;
-			vertexDataShpere[startIndex + 1] = c;
-			vertexDataShpere[startIndex + 2] = b;
-			//二つ目の三角形
-			vertexDataShpere[startIndex + 3] = b;
-			vertexDataShpere[startIndex + 4] = c;
-			vertexDataShpere[startIndex + 5] = d;
-
-		}
-	}
-
-	//Sprite用ののTransformationMatrix用のリソースを作る。Matrix4x41つ分のサイズを用意する
-	Microsoft::WRL::ComPtr<ID3D12Resource> transformationMatrixResourceShpere = GraphicsDevice::CreateBufferResource(graphics.get()->GetDevice(), sizeof(TransformationMatrix));
-	//データを書き込む
-	TransformationMatrix* transformationMatrixDataShpere = nullptr;
-	//書き込むためのアドレスを取得
-	transformationMatrixResourceShpere->Map(0, nullptr, reinterpret_cast<void**>(&transformationMatrixDataShpere));
-	//単位行列をかきこんでおく
-	transformationMatrixDataShpere->WVP = IdentityMatrix();
-	transformationMatrixDataShpere->World = IdentityMatrix();
 
 	Microsoft::WRL::ComPtr<ID3D12Resource> directinalLightResource = GraphicsDevice::CreateBufferResource(graphics.get()->GetDevice(), sizeof(DirectionalLight));
 
@@ -1247,16 +1150,7 @@ int WINAPI WinMain(HINSTANCE, HINSTANCE, LPSTR, int) {
 			Matrix4x4 worldMatrixObj = MakeAffineMatrix(transformObj.translate, transformObj.scale, transformObj.rotate);
 			Matrix4x4 worldViewProjectionMatrixObj = MultiplyMatrix4x4(worldMatrixObj, MultiplyMatrix4x4(viewMatrix, projectionMatri));
 			*transformationMatrixDataObj = { worldViewProjectionMatrixObj,worldMatrixObj };
-
-			Matrix4x4 worldMatrixSprite = MakeAffineMatrix(transformSprite.translate, transformSprite.scale, transformSprite.rotate);
-			Matrix4x4 worldViewProjectionMatrixSprite = MultiplyMatrix4x4(worldMatrixSprite, MultiplyMatrix4x4(viewMatrix, projectionMatri));
-			*transformationMatrixDataSprite = { worldViewProjectionMatrixSprite,worldMatrixSprite };
-
-			Matrix4x4 worldMatrixShpere = MakeAffineMatrix(transformShpere.translate, transformShpere.scale, transformShpere.rotate);
-			Matrix4x4 worldViewProjectionMatrixShpere = MultiplyMatrix4x4(worldMatrixShpere, MultiplyMatrix4x4(viewMatrix, projectionMatri));
-			*transformationMatrixDataShpere = { worldViewProjectionMatrixShpere,worldMatrixShpere };
-
-
+		
 			Matrix4x4 uvTransformMatrix = Scale(uvTransformSprite.scale);
 			uvTransformMatrix = MultiplyMatrix4x4(uvTransformMatrix, Rotation(uvTransformSprite.rotate));
 			uvTransformMatrix = MultiplyMatrix4x4(uvTransformMatrix, Translation(uvTransformSprite.translate));
@@ -1295,20 +1189,13 @@ int WINAPI WinMain(HINSTANCE, HINSTANCE, LPSTR, int) {
 			command.get()->GetCommandList()->IASetPrimitiveTopology(D3D_PRIMITIVE_TOPOLOGY_TRIANGLELIST);
 			command.get()->GetCommandList()->IASetIndexBuffer(&indexBufferView);//IBVを設定
 
-
+			
 			command.get()->GetCommandList()->RSSetViewports(1, &viewport);//Viewportを設定
 			command.get()->GetCommandList()->RSSetScissorRects(1, &scissorRect);//Sxirssorを設定
 			//RootSignatureを設定。POSに設定しているけど別途設定が必要
 			command.get()->GetCommandList()->SetGraphicsRootSignature(rootSignature.Get());
 			command.get()->GetCommandList()->SetGraphicsRootConstantBufferView(3, directinalLightResource->GetGPUVirtualAddress());
 
-			//スプライトの描画	
-			command.get()->GetCommandList()->IASetVertexBuffers(0, 1, &vertexBufferViewSprite);//VBVを設定
-			command.get()->GetCommandList()->SetGraphicsRootConstantBufferView(0, materialResourceSprite->GetGPUVirtualAddress());
-			command.get()->GetCommandList()->SetGraphicsRootConstantBufferView(1, transformationMatrixResourceSprite->GetGPUVirtualAddress());
-			command.get()->GetCommandList()->SetGraphicsRootDescriptorTable(2, textureSrvHandleGPU);
-
-			//commandList->DrawIndexedInstanced(6, 1, 0, 0, 0);
 
 			//objectの描画
 			command.get()->GetCommandList()->IASetVertexBuffers(0, 1, &vertexBufferViewObj);//VBVを設定
@@ -1317,19 +1204,6 @@ int WINAPI WinMain(HINSTANCE, HINSTANCE, LPSTR, int) {
 			command.get()->GetCommandList()->SetGraphicsRootDescriptorTable(2, textureSrvHandleGPU);
 
 			command.get()->GetCommandList()->DrawInstanced(UINT(modelData.vertices.size()), 1, 0, 0);
-
-			//球の描画
-			command.get()->GetCommandList()->IASetVertexBuffers(0, 1, &vertexBufferViewShpere);//VBVを設定
-			command.get()->GetCommandList()->SetGraphicsRootConstantBufferView(0, materialResourceSprite->GetGPUVirtualAddress());
-			command.get()->GetCommandList()->SetGraphicsRootConstantBufferView(1, transformationMatrixResourceShpere->GetGPUVirtualAddress());
-			if (!useMonsterBall) {
-				command.get()->GetCommandList()->SetGraphicsRootDescriptorTable(2, textureSrvHandleGPU);
-			}
-			else {
-				command.get()->GetCommandList()->SetGraphicsRootDescriptorTable(2, textureSrvHandleGPU2);
-			}
-			//描画
-			//commandList->DrawInstanced(kSubdivision * kSubdivision * 6, 1, 0, 0);
 
 
 			//ImGuiの描画コマンド
