@@ -928,7 +928,7 @@ int WINAPI WinMain(HINSTANCE, HINSTANCE, LPSTR, int) {
 
 	skydome->SetTransform(Transform{ {10.0f,10.0f,10.0f}, { 0.0f,0.0f,0.0f },{0.0f,0.0f,0.0f } });
 
-	Title->SetTransform(Transform{ {1.0f,0.9f,1.0f}, { 0.0f,0.0f,0.0f },{0.0f,0.0f,-0.5f } });
+	Title->SetTransform(Transform{ {1.0f,1.0f,1.0f}, { 0.0f,0.0f,0.0f },{4.0f,2.0f,-0.5f } });
 
 	kuro->SetTransform(Transform{ {1.0f,0.9f,1.0f}, { 0.0f,0.0f,0.0f },{0.0f,0.0f,-0.5f } });
 
@@ -941,7 +941,7 @@ int WINAPI WinMain(HINSTANCE, HINSTANCE, LPSTR, int) {
 
 	bool enemyMoveFlag = false;
 
-	Transform cameraTransform{ {1.0f,1.0f,1.0f},{0.0f,0.0f,0.0f},{0.0f,0.0f,-50.0f} };
+	Transform cameraTransform{ {1.0f,1.0f,1.0f},{0.0f,0.0f,0.0f},{4.0f,3.0f,-50.0f} };
 	Transform uvTransformSprite{ {1.0f,1.0f,1.0f},{0.0f,0.0f,0.0f},{0.0f,0.0f,0.0f} };
 
 	Audio* audio = new Audio;
