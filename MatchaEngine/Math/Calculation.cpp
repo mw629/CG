@@ -10,7 +10,7 @@
 
 // ベクトル
 
-Vector3 AddVector3(Vector3 v1, Vector3 v2)
+Vector3 Add(Vector3 v1, Vector3 v2)
 {
 	Vector3 result;
 	result.x = v1.x + v2.x;
@@ -19,7 +19,7 @@ Vector3 AddVector3(Vector3 v1, Vector3 v2)
 	return result;
 }
 
-Vector3 SubtractVector3(Vector3 v1, Vector3 v2)
+Vector3 Subtract(Vector3 v1, Vector3 v2)
 {
 	Vector3 result;
 	result.x = v1.x - v2.x;
@@ -28,7 +28,7 @@ Vector3 SubtractVector3(Vector3 v1, Vector3 v2)
 	return result;
 }
 
-Vector3 MultiplyVector3(Vector3 v1, Vector3 v2)
+Vector3 Multiply(Vector3 v1, Vector3 v2)
 {
 	Vector3 result;
 	result.x = v1.x * v2.x;
@@ -37,7 +37,7 @@ Vector3 MultiplyVector3(Vector3 v1, Vector3 v2)
 	return result;
 }
 
-Vector3 ScalarMultiply(Vector3 v, float s)
+Vector3 Multiply(Vector3 v, float s)
 {
 	Vector3 result;
 	result = { v.x * s,v.y * s,v.z * s };
@@ -79,7 +79,7 @@ Vector3 Cross(const Vector3& v1, const Vector3& v2) {
 
 // 行列
 
-Matrix4x4 AddMatrix4x4(Matrix4x4 m1, Matrix4x4 m2)//o
+Matrix4x4 Add(Matrix4x4 m1, Matrix4x4 m2)//o
 {
 	Matrix4x4 result;
 	for (int i = 0; i < 4; i++)
@@ -92,7 +92,7 @@ Matrix4x4 AddMatrix4x4(Matrix4x4 m1, Matrix4x4 m2)//o
 	return result;
 }
 
-Matrix4x4 MultiplyMatrix4x4(Matrix4x4 m1, Matrix4x4 m2)//o
+Matrix4x4 Multiply(Matrix4x4 m1, Matrix4x4 m2)//o
 {
 	Matrix4x4 result;
 	for (int i = 0; i < 4; i++)
@@ -109,7 +109,7 @@ Matrix4x4 MultiplyMatrix4x4(Matrix4x4 m1, Matrix4x4 m2)//o
 	return result;
 }
 
-Matrix4x4 TransposeMatrix4x4(Matrix4x4 m)//o
+Matrix4x4 Transpose(Matrix4x4 m)//o
 {
 	Matrix4x4 result;
 	for (int i = 0; i < 4; i++)
@@ -213,7 +213,7 @@ Matrix4x4 Inverse(Matrix4x4 m)
 	return result;
 }
 
-Matrix4x4 ScaleMultiplyMatrix4x4(Matrix4x4 m, float s)
+Matrix4x4 Multiply(Matrix4x4 m, float s)
 {
 	Matrix4x4 result;
 	for (int i = 0; i < 4; i++)
@@ -239,6 +239,14 @@ Vector3 TransformMatrix(const Vector3& v, const Matrix4x4& m)
 		result.y /= w;
 		result.z /= w;
 	}
+	return result;
+}
+
+Vector3 TransformDirection(const Vector3& v, const Matrix4x4& m) {
+	Vector3 result{};
+	result.x = v.x * m.m[0][0] + v.y * m.m[1][0] + v.z * m.m[2][0];
+	result.y = v.x * m.m[0][1] + v.y * m.m[1][1] + v.z * m.m[2][1];
+	result.z = v.x * m.m[0][2] + v.y * m.m[1][2] + v.z * m.m[2][2];
 	return result;
 }
 
@@ -292,7 +300,7 @@ Matrix4x4 RotationZ(float angle)
 Matrix4x4 Rotation(Vector3 angle)
 {
 	Matrix4x4 result;
-	result = MultiplyMatrix4x4(RotationX(angle.x), MultiplyMatrix4x4(RotationY(angle.y), RotationZ(angle.z)));
+	result = Multiply(RotationX(angle.x), Multiply(RotationY(angle.y), RotationZ(angle.z)));
 	return result;
 }
 
@@ -311,7 +319,7 @@ Matrix4x4 Translation(Vector3 pos)
 	return result;
 }
 
-Matrix4x4 IdentityMatrix()
+Matrix4x4 Identity()
 {
 	Matrix4x4 m = {
 		1.0f,0.0f,0.0f,0.0f,

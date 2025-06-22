@@ -29,3 +29,17 @@ Microsoft::WRL::ComPtr<ID3D12DescriptorHeap> DescriptorHeap::CreateDescriptorHee
 	assert(SUCCEEDED(hr));
 	return descriptorHeap;
 }
+
+D3D12_CPU_DESCRIPTOR_HANDLE GetCPUDescriptorHandle(ID3D12DescriptorHeap* descriptorHeap, uint32_t descriprtorSize, uint32_t index)
+{
+		D3D12_CPU_DESCRIPTOR_HANDLE handleCPU = descriptorHeap->GetCPUDescriptorHandleForHeapStart();
+		handleCPU.ptr += (descriprtorSize * index);
+		return handleCPU;
+	}
+
+D3D12_GPU_DESCRIPTOR_HANDLE GetGPUDescriptorHandle(ID3D12DescriptorHeap* descriptorHeap, uint32_t descriprtorSize, uint32_t index)
+{
+	D3D12_GPU_DESCRIPTOR_HANDLE handleGPU = descriptorHeap->GetGPUDescriptorHandleForHeapStart();
+	handleGPU.ptr += (descriprtorSize * index);
+	return handleGPU;
+}
