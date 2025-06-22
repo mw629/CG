@@ -939,6 +939,8 @@ int WINAPI WinMain(HINSTANCE, HINSTANCE, LPSTR, int) {
 	bool ChangeScene = false;
 	bool GameScene = false;
 
+	bool enemyMoveFlag = false;
+
 	Transform cameraTransform{ {1.0f,1.0f,1.0f},{0.0f,0.0f,0.0f},{0.0f,0.0f,-50.0f} };
 	Transform uvTransformSprite{ {1.0f,1.0f,1.0f},{0.0f,0.0f,0.0f},{0.0f,0.0f,0.0f} };
 
@@ -1023,9 +1025,8 @@ int WINAPI WinMain(HINSTANCE, HINSTANCE, LPSTR, int) {
 				ImGui::DragFloat2("ScaleSpriteUV", &uvTransformSprite.scale.x, 0.01f, -10.0f, 10.0f);
 				ImGui::SliderAngle("RotateSpriteUV", &uvTransformSprite.rotate.z);
 			}
-			ImGui::DragFloat4("matrial", &materialDataSprite->color.x, 0.01f, -10.0f, 10.0f);
-			ImGui::DragFloat4("detgmatrial", &dethmaterialDataSprite->color.x, 0.01f, -10.0f, 10.0f);
-
+			ImGui::Checkbox("enemyMoveFlag", &enemyMoveFlag);
+		
 			if (!GameScene)
 			{
 
@@ -1151,9 +1152,13 @@ int WINAPI WinMain(HINSTANCE, HINSTANCE, LPSTR, int) {
 					}
 				}
 
-
-			
 			}
+
+			if (enemyMoveFlag) {
+				Vector3 pos= enemy->GetTransform().translate;
+				pos.x -= 0.1f;
+				enemy->SetPos(pos);
+				}
 
 			for (int i = 0; i < blockHeight; i++) {
 				for (int j = 0; j < blockWidht; j++) {
