@@ -14,10 +14,10 @@ private:
 
 public:
 
-	void CreateRenderTargetView(ID3D12Device* device, ID3D12Resource* swapChainResources, ID3D12DescriptorHeap* rtvDescriptorHeap);
-
+	void CreateRenderTargetView(ID3D12Device* device, ID3D12Resource* swapChainResources0, ID3D12Resource* swapChainResources1, ID3D12DescriptorHeap* rtvDescriptorHeap);
+	
 	D3D12_RENDER_TARGET_VIEW_DESC GetRtvDesc() { return rtvDesc_; }
 	D3D12_CPU_DESCRIPTOR_HANDLE GetRtvStartHandle_() { return rtvStartHandle_; }
 	D3D12_CPU_DESCRIPTOR_HANDLE* GetRtvHandles(int index) { return &rtvHandles_[index]; };
-};
+	};
 

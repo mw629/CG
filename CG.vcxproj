@@ -119,6 +119,8 @@ copy "$(WindowsSdkDir)bin\$(TargetPlatformVersion)\x64\dxil.dll" "$(TargetDir)dx
     <ClCompile Include="MatchaEngine\PSO\RootSignature.cpp" />
     <ClCompile Include="MatchaEngine\PSO\ShaderCompile.cpp" />
     <ClCompile Include="MatchaEngine\Common\WindowConfig.cpp" />
+    <ClCompile Include="Matrial.cpp" />
+    <ClCompile Include="RenderTargetView.cpp" />
     <ClCompile Include="SwapChain.cpp" />
   </ItemGroup>
   <ItemGroup>
@@ -163,6 +165,8 @@ copy "$(WindowsSdkDir)bin\$(TargetPlatformVersion)\x64\dxil.dll" "$(TargetDir)dx
     <ClInclude Include="MatchaEngine\PSO\ShaderCompile.h" />
     <ClInclude Include="MatchaEngine\Common\VariableTypes.h" />
     <ClInclude Include="MatchaEngine\Common\WindowConfig.h" />
+    <ClInclude Include="Matrial.h" />
+    <ClInclude Include="RenderTargetView.h" />
     <ClInclude Include="SwapChain.h" />
   </ItemGroup>
   <ItemGroup>
