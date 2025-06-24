@@ -42,6 +42,7 @@ extern IMGUI_IMPL_API LRESULT ImGui_ImplWin32_WndProcHandler(HWND hWnd, UINT msg
 #include "SwapChain.h"
 #include "DescriptorHeap.h"
 #include "RenderTargetView.h"
+#include "Matrial.h"
 
 #pragma comment(lib,"d3d12.lib")
 #pragma comment(lib,"dxgi.lib")
@@ -449,6 +450,8 @@ int WINAPI WinMain(HINSTANCE, HINSTANCE, LPSTR, int) {
 
 	//描画
 	DebugCamera* debudCamera = new DebugCamera;
+	std::unique_ptr<Matrial> matrial = std::make_unique<Matrial>();
+	std::unique_ptr<Matrial> spriteMatrial = std::make_unique<Matrial>();
 	Camera camera;
 	Draw draw;
 
@@ -522,27 +525,9 @@ int WINAPI WinMain(HINSTANCE, HINSTANCE, LPSTR, int) {
 
 	//Material用のResourceを作る//
 
-	//マテリアル用のリソースを作る。今回はcolor1つ分のサイズを用意する
-	Microsoft::WRL::ComPtr<ID3D12Resource> materialResource = GraphicsDevice::CreateBufferResource(graphics.get()->GetDevice(), sizeof(Material));
-	//マテリアルデータを書き込む
-	Material* materialData = nullptr;
-	//書き込むためのアドレス取得
-	materialResource->Map(0, nullptr, reinterpret_cast<void**>(&materialData));
-	//今回は書き込んでみる
-	materialData->color = Vector4(1.0f, 1.0f, 1.0f, 1.0f);
-	materialData->endbleLighting = true;
-	materialData->uvTransform = IdentityMatrix();
+	matrial->CreateMatrial(graphics->GetDevice(),false);
 
-	//Sprite用のマテリアルリソースを作る
-	Microsoft::WRL::ComPtr<ID3D12Resource> materialResourceSprite = GraphicsDevice::CreateBufferResource(graphics.get()->GetDevice(), sizeof(Material));
-	//マテリアルデータを書き込む
-	Material* materialDataSprite = nullptr;
-	//書き込むためのアドレス取得
-	materialResourceSprite->Map(0, nullptr, reinterpret_cast<void**>(&materialDataSprite));
-	//今回は書き込んでみる
-	materialDataSprite->color = Vector4(1.0f, 1.0f, 1.0f, 1.0f);
-	materialDataSprite->endbleLighting = false;
-	materialDataSprite->uvTransform = IdentityMatrix();
+	spriteMatrial->CreateMatrial(graphics->GetDevice(),false);
 
 
 	//どこいれればいいの(汗)//
@@ -1171,10 +1156,7 @@ int WINAPI WinMain(HINSTANCE, HINSTANCE, LPSTR, int) {
 			//開発用UIの処理。実際に開発用UIを出す場合はここをゲ0無固有の処理に置き換える
 			ImGui::Checkbox("useMonsterBall", &useMonsterBall);
 			//ImGui::ShowDemoWindow();
-			if (ImGui::CollapsingHeader("Color")) {
-				ImGui::DragFloat4("Color", &materialData->color.x, 1.0f);
-				ImGui::ColorPicker4("Color", &materialData->color.x);
-			}
+			
 			if (ImGui::CollapsingHeader("Camera")) {
 				ImGui::DragFloat3("camraTranslate", &camraTransform.translate.x, 0.01f);
 				ImGui::DragFloat3("camraRotate", &camraTransform.rotate.x, 0.01f);
@@ -1243,7 +1225,7 @@ int WINAPI WinMain(HINSTANCE, HINSTANCE, LPSTR, int) {
 			Matrix4x4 uvTransformMatrix = Scale(uvTransformSprite.scale);
 			uvTransformMatrix = MultiplyMatrix4x4(uvTransformMatrix, Rotation(uvTransformSprite.rotate));
 			uvTransformMatrix = MultiplyMatrix4x4(uvTransformMatrix, Translation(uvTransformSprite.translate));
-			materialDataSprite->uvTransform = uvTransformMatrix;
+			spriteMatrial.get()->GetMaterialData()->uvTransform = uvTransformMatrix;
 
 			//描画先のRTVを設定する
 			command.get()->GetCommandList()->OMSetRenderTargets(1, renderTargetView.get()->GetRtvHandles(backBufferIndex), false, nullptr);
@@ -1287,7 +1269,7 @@ int WINAPI WinMain(HINSTANCE, HINSTANCE, LPSTR, int) {
 
 			//スプライトの描画	
 			command.get()->GetCommandList()->IASetVertexBuffers(0, 1, &vertexBufferViewSprite);//VBVを設定
-			command.get()->GetCommandList()->SetGraphicsRootConstantBufferView(0, materialResourceSprite->GetGPUVirtualAddress());
+			command.get()->GetCommandList()->SetGraphicsRootConstantBufferView(0, spriteMatrial.get()->GetMaterialResource()->GetGPUVirtualAddress());
 			command.get()->GetCommandList()->SetGraphicsRootConstantBufferView(1, transformationMatrixResourceSprite->GetGPUVirtualAddress());
 			command.get()->GetCommandList()->SetGraphicsRootDescriptorTable(2, textureSrvHandleGPU);
 
@@ -1295,7 +1277,7 @@ int WINAPI WinMain(HINSTANCE, HINSTANCE, LPSTR, int) {
 
 			//objectの描画
 			command.get()->GetCommandList()->IASetVertexBuffers(0, 1, &vertexBufferViewObj);//VBVを設定
-			command.get()->GetCommandList()->SetGraphicsRootConstantBufferView(0, materialResourceSprite->GetGPUVirtualAddress());
+			command.get()->GetCommandList()->SetGraphicsRootConstantBufferView(0, spriteMatrial.get()->GetMaterialResource()->GetGPUVirtualAddress());
 			command.get()->GetCommandList()->SetGraphicsRootConstantBufferView(1, transformationMatrixResourceObj->GetGPUVirtualAddress());
 			command.get()->GetCommandList()->SetGraphicsRootDescriptorTable(2, textureSrvHandleGPU);
 
@@ -1303,7 +1285,7 @@ int WINAPI WinMain(HINSTANCE, HINSTANCE, LPSTR, int) {
 
 			//球の描画
 			command.get()->GetCommandList()->IASetVertexBuffers(0, 1, &vertexBufferViewShpere);//VBVを設定
-			command.get()->GetCommandList()->SetGraphicsRootConstantBufferView(0, materialResourceSprite->GetGPUVirtualAddress());
+			command.get()->GetCommandList()->SetGraphicsRootConstantBufferView(0, spriteMatrial.get()->GetMaterialResource()->GetGPUVirtualAddress());
 			command.get()->GetCommandList()->SetGraphicsRootConstantBufferView(1, transformationMatrixResourceShpere->GetGPUVirtualAddress());
 			if (!useMonsterBall) {
 				command.get()->GetCommandList()->SetGraphicsRootDescriptorTable(2, textureSrvHandleGPU);

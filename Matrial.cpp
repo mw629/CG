@@ -2,16 +2,16 @@
 #include "MatchaEngine/Common/GraphicsDevice.h"
 #include "MatchaEngine/Math/Calculation.h"
 
-void Matrial::CreateMatrial(ID3D12Device* device)
+void Matrial::CreateMatrial(ID3D12Device* device,bool Lighting)
 {
 	//マテリアル用のリソースを作る。今回はcolor1つ分のサイズを用意する
-	materialResource = GraphicsDevice::CreateBufferResource(device, sizeof(Material));
+	materialResource_ = GraphicsDevice::CreateBufferResource(device, sizeof(Material));
 	//マテリアルデータを書き込む
-	materialData = nullptr;
+	materialData_ = nullptr;
 	//書き込むためのアドレス取得
-	materialResource->Map(0, nullptr, reinterpret_cast<void**>(&materialData));
+	materialResource_->Map(0, nullptr, reinterpret_cast<void**>(&materialData_));
 	//今回は書き込んでみる
-	materialData->color = Vector4(1.0f, 1.0f, 1.0f, 1.0f);
-	materialData->endbleLighting = true;
-	materialData->uvTransform = IdentityMatrix();
+	materialData_->color = Vector4(1.0f, 1.0f, 1.0f, 1.0f);
+	materialData_->endbleLighting = Lighting;
+	materialData_->uvTransform = IdentityMatrix();
 }

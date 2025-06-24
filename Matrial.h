@@ -7,12 +7,16 @@ class Matrial
 {
 private:
 
-	Microsoft::WRL::ComPtr<ID3D12Resource> materialResource;
-	Material* materialData;
+	Microsoft::WRL::ComPtr<ID3D12Resource> materialResource_;
+	Material* materialData_;
 
 public:
 	
-	void CreateMatrial(ID3D12Device* device);
+	void CreateMatrial(ID3D12Device* device, bool Lighting);
+
+	ID3D12Resource* GetMaterialResource() { return materialResource_.Get(); }
+	Material* GetMaterialData() { return materialData_; }
 
 };
+
 
