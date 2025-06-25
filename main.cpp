@@ -35,7 +35,6 @@ extern IMGUI_IMPL_API LRESULT ImGui_ImplWin32_WndProcHandler(HWND hWnd, UINT msg
 #include "Common/WindowConfig.h"
 #include "Object/Camera.h"
 #include "Object/Draw.h"
-#include "PSO/DirectXShaderCompiler.h"
 #include "Common/Input.h"
 #include "Object/DebugCamera.h"
 #include "Common/CommandContext .h"
@@ -46,6 +45,15 @@ extern IMGUI_IMPL_API LRESULT ImGui_ImplWin32_WndProcHandler(HWND hWnd, UINT msg
 #include "Matrial.h"
 
 //PSO
+
+#include "PSO/DirectXShaderCompiler.h"
+#include "PSO/RootSignature.h"
+#include "PSO/RootParameter.h"
+#include "PSO/InputLayout.h"
+#include "PSO/BlendState.h"
+#include "PSO/RasterizerState.h"
+#include "PSO/ShaderCompile.h"
+#include "PSO/DepthStencilState.h"
 
 #pragma comment(lib,"d3d12.lib")
 #pragma comment(lib,"dxgi.lib")
