@@ -138,6 +138,7 @@ copy "$(WindowsSdkDir)bin\$(TargetPlatformVersion)\x64\dxil.dll" "$(TargetDir)dx
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="DepthStencil.h" />
+    <ClInclude Include="DescriptorHeap.h" />
     <ClInclude Include="MatchaEngine\Object\DebugCamera.h" />
     <ClInclude Include="MatchaEngine\Resource\Audio.h" />
     <ClInclude Include="MatchaEngine\Common\Input.h" />

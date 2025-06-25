@@ -28,7 +28,7 @@ private:
 public:
 	~GraphicsPipelineState();
 
-	void PSOSetting(std::ostream& os, Microsoft::WRL::ComPtr <ID3D12Device> device);
+	void PSOSetting(std::ostream& os, ID3D12Device* device);
 
-	void CreatePSO(std::ostream& os,Microsoft::WRL::ComPtr<ID3D12Device> device);
+	void CreatePSO(std::ostream& os, ID3D12Device* device);
 };

@@ -13,7 +13,7 @@ GraphicsPipelineState::~GraphicsPipelineState()
 	delete shaderCompile_;
 }
 
-void GraphicsPipelineState::PSOSetting(std::ostream& os, Microsoft::WRL::ComPtr <ID3D12Device> device)
+void GraphicsPipelineState::PSOSetting(std::ostream& os, ID3D12Device* device)
 {
 	//DXCの初期化
 	
@@ -44,7 +44,7 @@ void GraphicsPipelineState::PSOSetting(std::ostream& os, Microsoft::WRL::ComPtr 
 	depthStencilState_->CreateDepthStencilState( );
 }
 
-void GraphicsPipelineState::CreatePSO(std::ostream& os,Microsoft::WRL::ComPtr<ID3D12Device> device)
+void GraphicsPipelineState::CreatePSO(std::ostream& os, ID3D12Device* device)
 {
 	PSOSetting(os,device);
 	graphicsPipelineStateDesc_.pRootSignature = rootSignature_->GetRootSignature();//RootSignature
