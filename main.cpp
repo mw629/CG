@@ -541,6 +541,8 @@ int WINAPI WinMain(HINSTANCE, HINSTANCE, LPSTR, int) {
 	std::unique_ptr<RootParameter> rootParameter = std::make_unique<RootParameter>();
 	std::unique_ptr<Sampler> sampler = std::make_unique<Sampler>();
 	std::unique_ptr<InputLayout> inputLayout = std::make_unique<InputLayout>();
+	std::unique_ptr<BlendState> blendState = std::make_unique<BlendState>();
+	std::unique_ptr<RasterizerState> rasterizerState = std::make_unique<RasterizerState>();
 
 	//DXCの初期化//
 	directXShaderCompiler.CreateDXC();
@@ -561,21 +563,11 @@ int WINAPI WinMain(HINSTANCE, HINSTANCE, LPSTR, int) {
 
 	//BlendStateの設定を行う//
 
-	//BlendStateの設定
-	D3D12_BLEND_DESC blendDesc{};
-	//すべての色要素を書き込む
-	blendDesc.RenderTarget[0].RenderTargetWriteMask = D3D12_COLOR_WRITE_ENABLE_ALL;
-
+	blendState->CreateBlendDesc();
 
 	//RasterizerStateの設定を行う//
 
-	//RasterizerStateの設定
-	D3D12_RASTERIZER_DESC rasterizerDesc{};
-	//裏面（時計回り）を表示しない
-	rasterizerDesc.CullMode = D3D12_CULL_MODE_BACK;
-	//三角形の中を塗りつぶす
-	rasterizerDesc.FillMode = D3D12_FILL_MODE_SOLID;
-
+	rasterizerState->CreateRasterizerState();
 
 	//ShaderをCompileする//
 
@@ -609,8 +601,8 @@ int WINAPI WinMain(HINSTANCE, HINSTANCE, LPSTR, int) {
 	vertexShaderBlob->GetBufferSize() };//VertexShader
 	graphicsPipelineStateDesc.PS = { pixelShaderBlob->GetBufferPointer(),
 	pixelShaderBlob->GetBufferSize() };//PixelShader
-	graphicsPipelineStateDesc.BlendState = blendDesc;//BlenderState
-	graphicsPipelineStateDesc.RasterizerState = rasterizerDesc;//RasterizerState
+	graphicsPipelineStateDesc.BlendState = blendState.get()->GetBlendDesc();//BlenderState
+	graphicsPipelineStateDesc.RasterizerState = rasterizerState.get()->GetRasterizerDesc();//RasterizerState
 	//書き込むRTVの情報
 	graphicsPipelineStateDesc.NumRenderTargets = 1;
 	graphicsPipelineStateDesc.RTVFormats[0] = DXGI_FORMAT_R8G8B8A8_UNORM_SRGB;
