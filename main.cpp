@@ -42,6 +42,7 @@ extern IMGUI_IMPL_API LRESULT ImGui_ImplWin32_WndProcHandler(HWND hWnd, UINT msg
 #include "SwapChain.h"
 #include "DescriptorHeap.h"
 #include "RenderTargetView.h"
+#include "DepthStencil.h"
 #include "Matrial.h"
 
 #pragma comment(lib,"d3d12.lib")
@@ -328,7 +329,6 @@ MaterialData LoadMaterialTemplateFile(const std::string& directoryPath, const st
 	return materiaData;
 }
 
-
 ModelData LoadObjFile(const std::string& directoryPath, const std::string& filename)
 {
 	ModelData modelData;
@@ -450,6 +450,7 @@ int WINAPI WinMain(HINSTANCE, HINSTANCE, LPSTR, int) {
 
 	//描画
 	DebugCamera* debudCamera = new DebugCamera;
+	std::unique_ptr<DepthStencil> depthStencil = std::make_unique<DepthStencil>();
 	std::unique_ptr<Matrial> matrial = std::make_unique<Matrial>();
 	std::unique_ptr<Matrial> spriteMatrial = std::make_unique<Matrial>();
 	Camera camera;
@@ -522,6 +523,7 @@ int WINAPI WinMain(HINSTANCE, HINSTANCE, LPSTR, int) {
 	HANDLE fenceEvent = CreateEvent(NULL, FALSE, FALSE, NULL);
 	assert(fenceEvent != nullptr);
 
+	depthStencil->CreateDepthStencil(graphics.get()->GetDevice(), kClientWidth, kClientHeight);
 
 	//Material用のResourceを作る//
 
@@ -529,17 +531,6 @@ int WINAPI WinMain(HINSTANCE, HINSTANCE, LPSTR, int) {
 
 	spriteMatrial->CreateMatrial(graphics->GetDevice(),false);
 
-
-	//どこいれればいいの(汗)//
-	Microsoft::WRL::ComPtr<ID3D12Resource> depthStencilResource = CreateDepthStencilTextureResource(graphics.get()->GetDevice(), kClientWidth, kClientHeight);
-
-	Microsoft::WRL::ComPtr<ID3D12DescriptorHeap> dsvDescriptorHeap = CreateDescriptorHeep(graphics.get()->GetDevice(), D3D12_DESCRIPTOR_HEAP_TYPE_DSV, 1, false);
-
-	D3D12_DEPTH_STENCIL_VIEW_DESC dsvDesc{};
-	dsvDesc.Format = DXGI_FORMAT_D24_UNORM_S8_UINT;//format。基本的にresourceに合わせる
-	dsvDesc.ViewDimension = D3D12_DSV_DIMENSION_TEXTURE2D;//2dTexture
-	//DSVHeapの先端にDSVを作る
-	graphics.get()->GetDevice()->CreateDepthStencilView(depthStencilResource.Get(), &dsvDesc, dsvDescriptorHeap->GetCPUDescriptorHandleForHeapStart());
 
 
 	//DXCの初期化//
@@ -1235,7 +1226,7 @@ int WINAPI WinMain(HINSTANCE, HINSTANCE, LPSTR, int) {
 			command.get()->GetCommandList()->ClearRenderTargetView(*renderTargetView.get()->GetRtvHandles(backBufferIndex), clearColor, 0, nullptr);
 
 			//DSVを設定する
-			D3D12_CPU_DESCRIPTOR_HANDLE dsvHandle = dsvDescriptorHeap->GetCPUDescriptorHandleForHeapStart();
+			D3D12_CPU_DESCRIPTOR_HANDLE dsvHandle = depthStencil.get()->GetDsvDescriptorHeap()->GetCPUDescriptorHandleForHeapStart();
 			command.get()->GetCommandList()->OMSetRenderTargets(1, renderTargetView.get()->GetRtvHandles(backBufferIndex), false, &dsvHandle);
 
 			command.get()->GetCommandList()->ClearDepthStencilView(dsvHandle, D3D12_CLEAR_FLAG_DEPTH, 1.0f, 0, 0, nullptr);

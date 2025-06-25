@@ -1,0 +1,25 @@
+#pragma once
+#include <wrl.h>
+#include <d3dx12.h>
+
+class DepthStencil
+{
+private:
+
+	Microsoft::WRL::ComPtr<ID3D12Resource> depthStencilResource_;
+	Microsoft::WRL::ComPtr<ID3D12DescriptorHeap> dsvDescriptorHeap_;
+
+public:
+
+	Microsoft::WRL::ComPtr<ID3D12DescriptorHeap> CreateDescriptorHeep(
+		ID3D12Device* device, D3D12_DESCRIPTOR_HEAP_TYPE heapType, UINT numDesxriptors, bool shaderVisible);
+
+
+	Microsoft::WRL::ComPtr<ID3D12Resource> CreateDepthStencilTextureResource(ID3D12Device* device, int32_t width, int32_t height);
+
+	void CreateDepthStencil(ID3D12Device* device, int32_t width, int32_t height);
+
+	ID3D12Resource* GetDepthStencilResource() { return depthStencilResource_.Get(); }
+	ID3D12DescriptorHeap* GetDsvDescriptorHeap() { return dsvDescriptorHeap_.Get(); }
+
+};
