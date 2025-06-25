@@ -2,77 +2,76 @@
 
 #include <cassert>
 
-GraphicsPipelineState::~GraphicsPipelineState()
-{
-	delete directXShaderCompiler;
-	delete rootSignature_;
-	delete rootParameter_;
-	delete inputLayout_;
-	delete blendState_;
-	delete rasterizerState_;
-	delete shaderCompile_;
-}
+
 
 void GraphicsPipelineState::PSOSetting(std::ostream& os, ID3D12Device* device)
 {
-	//DXCの初期化
-	
-	directXShaderCompiler->CreateDXC();
+	//DXCの初期化//
+	directXShaderCompiler.CreateDXC();
+
+	//DescriptorRange//
+	//RootParameter//
+	rootParameter->CreateRootParameter(rootSignature.get()->GetDescriptionRootSignature());
+
+	//Samplerの設定//
+	sampler->CreateSampler(rootSignature.get()->GetDescriptionRootSignature());
+
+	//シリアライズしてバイナリする
+	rootSignature->CreateRootSignature(os, device);
+
+	//InputLayoutの設定を行う//
+
+	inputLayout->CreateInputLayout();
+
+	//BlendStateの設定を行う//
+
+	blendState->CreateBlendDesc();
+
+	//RasterizerStateの設定を行う//
+
+	rasterizerState->CreateRasterizerState();
+
+	//ShaderをCompileする//
+
+	shaderCompile->CreateShaderCompile(os, directXShaderCompiler.GetDxcUtils(), directXShaderCompiler.GetDxcCompiler(), directXShaderCompiler.GetIncludeHandler());
 
 
-	//<RootSignature>//
-	//ShaderとResourceの関連付けを示したobj
-	rootSignature_->CreateRootSignature(os,device);
-	//<RootParameter>//
-	//Shaderがどこでデータ読み込みするかまとめたもの
-	rootParameter_->CreateRootParameter(rootSignature_->GetDescriptionRootSignature());
-	//<INputLayout>//
-	//VertexShaderへ渡す頂点データの指定
-	inputLayout_->CreateInputLayout();
-	//<BlendState>//
-	//PixelShaderからの出力の書き込み方の設定
-	blendState_->CreateBlendDesc();
-	//<RasterizerState>//
-	//Rasterizerの設定
-	rasterizerState_->CreateRasterizerState();
-	//<ShaderCompile>//
-	//Shaderをコンパイルする
-	shaderCompile_->CreateShaderCompile(os, directXShaderCompiler->GetDxcUtils(),
-		directXShaderCompiler->GetDxcCompiler(), directXShaderCompiler->GetIncludeHandler());
-	//<DepthStencilState>//
-	//深度にかかわる設定
-	depthStencilState_->CreateDepthStencilState( );
+	//DepthStencilStateの設定//
+
+	depthStencilState->CreateDepthStencilState();
 }
 
 void GraphicsPipelineState::CreatePSO(std::ostream& os, ID3D12Device* device)
 {
 	PSOSetting(os,device);
-	graphicsPipelineStateDesc_.pRootSignature = rootSignature_->GetRootSignature();//RootSignature
-	graphicsPipelineStateDesc_.InputLayout = inputLayout_->GetInputLayoutDesc();//InputLayout
-	graphicsPipelineStateDesc_.VS = { shaderCompile_->GetVertexShaderBlob()->GetBufferPointer(),
-	shaderCompile_->GetVertexShaderBlob()->GetBufferSize() };//VertexShader
-	graphicsPipelineStateDesc_.VS = { shaderCompile_->GetPixelShaderBlob()->GetBufferPointer(),
-	shaderCompile_->GetPixelShaderBlob()->GetBufferSize() };//PixelShader
-	graphicsPipelineStateDesc_.BlendState = blendState_->GetBlendDesc();//BlenderState
-	graphicsPipelineStateDesc_.RasterizerState = rasterizerState_->GetRasterizerDesc();//RasterizerState
+	//PSOを生成する//
+
+	D3D12_GRAPHICS_PIPELINE_STATE_DESC graphicsPipelineStateDesc{};
+	graphicsPipelineStateDesc.pRootSignature = rootSignature.get()->GetRootSignature();//RootSignature
+	graphicsPipelineStateDesc.InputLayout = inputLayout.get()->GetInputLayoutDesc();//InputLayout
+	graphicsPipelineStateDesc.VS = { shaderCompile.get()->GetVertexShaderBlob()->GetBufferPointer(),
+	 shaderCompile.get()->GetVertexShaderBlob()->GetBufferSize() };//VertexShader
+	graphicsPipelineStateDesc.PS = { shaderCompile.get()->GetPixelShaderBlob()->GetBufferPointer(),
+	shaderCompile.get()->GetPixelShaderBlob()->GetBufferSize() };//PixelShader
+	graphicsPipelineStateDesc.BlendState = blendState.get()->GetBlendDesc();//BlenderState
+	graphicsPipelineStateDesc.RasterizerState = rasterizerState.get()->GetRasterizerDesc();//RasterizerState
 	//書き込むRTVの情報
-	graphicsPipelineStateDesc_.NumRenderTargets = 1;
-	graphicsPipelineStateDesc_.RTVFormats[0] = DXGI_FORMAT_R8G8B8A8_UNORM_SRGB;
+	graphicsPipelineStateDesc.NumRenderTargets = 1;
+	graphicsPipelineStateDesc.RTVFormats[0] = DXGI_FORMAT_R8G8B8A8_UNORM_SRGB;
 	//利用するトポロジ（形状）のタイプ。三角形
-	graphicsPipelineStateDesc_.PrimitiveTopologyType =
+	graphicsPipelineStateDesc.PrimitiveTopologyType =
 		D3D12_PRIMITIVE_TOPOLOGY_TYPE_TRIANGLE;
 	//どのように画面に色を打ち込むのかの設定(気にしなくていい)
-	graphicsPipelineStateDesc_.SampleDesc.Count = 1;
-	graphicsPipelineStateDesc_.SampleMask = D3D12_DEFAULT_SAMPLE_MASK;
-
+	graphicsPipelineStateDesc.SampleDesc.Count = 1;
+	graphicsPipelineStateDesc.SampleMask = D3D12_DEFAULT_SAMPLE_MASK;
 
 	//作成したらPSOに代入、DSCのFormatを設定する//
-	graphicsPipelineStateDesc_.DepthStencilState = depthStencilState_->GetDepthStencilDesc();
-	graphicsPipelineStateDesc_.DSVFormat = DXGI_FORMAT_D24_UNORM_S8_UINT;
+	graphicsPipelineStateDesc.DepthStencilState = depthStencilState.get()->GetDepthStencilDesc();
+	graphicsPipelineStateDesc.DSVFormat = DXGI_FORMAT_D24_UNORM_S8_UINT;
 
 	//実際に生成
 	Microsoft::WRL::ComPtr<ID3D12PipelineState> graphicsPipelineState = nullptr;
-	hr_ = device->CreateGraphicsPipelineState(&graphicsPipelineStateDesc_,
+	hr = graphics.get()->GetDevice()->CreateGraphicsPipelineState(&graphicsPipelineStateDesc,
 		IID_PPV_ARGS(&graphicsPipelineState));
-	assert(SUCCEEDED(hr_));
+	assert(SUCCEEDED(hr));
 }
