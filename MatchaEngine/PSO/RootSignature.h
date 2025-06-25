@@ -16,7 +16,7 @@ private:
 
 
 public:
-
+	RootSignature();
 
 	void CreateRootSignature(std::ostream& os, ID3D12Device* device);
 

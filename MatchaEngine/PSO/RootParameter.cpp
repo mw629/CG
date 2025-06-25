@@ -8,7 +8,7 @@ void RootParameter::CreateDescriptorRange()
 	descriptorRange_[0].OffsetInDescriptorsFromTableStart = D3D12_DESCRIPTOR_RANGE_OFFSET_APPEND;//Offsetを自動計算
 }
 
-void RootParameter::CreateRootParameter(D3D12_ROOT_SIGNATURE_DESC descriptionRootSignature)
+void RootParameter::CreateRootParameter(D3D12_ROOT_SIGNATURE_DESC& descriptionRootSignature)
 {
 	CreateDescriptorRange();
 	rootParameter[0].ParameterType = D3D12_ROOT_PARAMETER_TYPE_CBV;//CBVを使う

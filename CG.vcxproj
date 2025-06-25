@@ -122,6 +122,7 @@ copy "$(WindowsSdkDir)bin\$(TargetPlatformVersion)\x64\dxil.dll" "$(TargetDir)dx
     <ClCompile Include="MatchaEngine\Common\WindowConfig.cpp" />
     <ClCompile Include="Matrial.cpp" />
     <ClCompile Include="RenderTargetView.cpp" />
+    <ClCompile Include="MatchaEngine\PSO\Sampler.cpp" />
     <ClCompile Include="SwapChain.cpp" />
   </ItemGroup>
   <ItemGroup>
@@ -170,6 +171,7 @@ copy "$(WindowsSdkDir)bin\$(TargetPlatformVersion)\x64\dxil.dll" "$(TargetDir)dx
     <ClInclude Include="MatchaEngine\Common\WindowConfig.h" />
     <ClInclude Include="Matrial.h" />
     <ClInclude Include="RenderTargetView.h" />
+    <ClInclude Include="MatchaEngine\PSO\Sampler.h" />
     <ClInclude Include="SwapChain.h" />
   </ItemGroup>
   <ItemGroup>

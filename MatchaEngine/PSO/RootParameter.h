@@ -10,6 +10,6 @@ private:
 public:
 	void CreateDescriptorRange();
 
-	void CreateRootParameter(D3D12_ROOT_SIGNATURE_DESC descriptionRootSignature);
+	void CreateRootParameter(D3D12_ROOT_SIGNATURE_DESC& descriptionRootSignature);
 };
 
