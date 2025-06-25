@@ -515,7 +515,7 @@ int WINAPI WinMain(HINSTANCE, HINSTANCE, LPSTR, int) {
 
 	swapChain.get()->CreateSwapChain(graphics.get()->GetDxgiFactory(), command.get()->GetCommandQueue(), window.GetHwnd(), kClientWidth, kClientHeight);
 	descriptorHeap.get()->CreateHeap(graphics.get()->GetDevice());
-	renderTargetView.get()->CreateRenderTargetView(graphics.get()->GetDevice(), swapChain.get()->GetSwapChainResources(0),swapChain.get()->GetSwapChainResources(1), descriptorHeap.get()->GetRtvDescriptorHeap());
+	renderTargetView.get()->CreateRenderTargetView(graphics.get()->GetDevice(), swapChain.get()->GetSwapChainResources(0), swapChain.get()->GetSwapChainResources(1), descriptorHeap.get()->GetRtvDescriptorHeap());
 
 	//初期値0でFenceを作る
 	Microsoft::WRL::ComPtr<ID3D12Fence> fence = nullptr;
@@ -531,8 +531,8 @@ int WINAPI WinMain(HINSTANCE, HINSTANCE, LPSTR, int) {
 
 	//Material用のResourceを作る//
 
-	matrial->CreateMatrial(graphics->GetDevice(),false);
-	spriteMatrial->CreateMatrial(graphics->GetDevice(),false);
+	matrial->CreateMatrial(graphics->GetDevice(), false);
+	spriteMatrial->CreateMatrial(graphics->GetDevice(), false);
 
 	//PSO
 
@@ -543,17 +543,18 @@ int WINAPI WinMain(HINSTANCE, HINSTANCE, LPSTR, int) {
 	std::unique_ptr<InputLayout> inputLayout = std::make_unique<InputLayout>();
 	std::unique_ptr<BlendState> blendState = std::make_unique<BlendState>();
 	std::unique_ptr<RasterizerState> rasterizerState = std::make_unique<RasterizerState>();
+	std::unique_ptr<ShaderCompile> shaderCompile = std::make_unique<ShaderCompile>();
 
 	//DXCの初期化//
 	directXShaderCompiler.CreateDXC();
-	
+
 	//DescriptorRange//
 	//RootParameter//
 	rootParameter->CreateRootParameter(rootSignature.get()->GetDescriptionRootSignature());
-	
+
 	//Samplerの設定//
 	sampler->CreateSampler(rootSignature.get()->GetDescriptionRootSignature());
-	
+
 	//シリアライズしてバイナリする
 	rootSignature->CreateRootSignature(logStream, graphics.get()->GetDevice());
 
@@ -571,14 +572,7 @@ int WINAPI WinMain(HINSTANCE, HINSTANCE, LPSTR, int) {
 
 	//ShaderをCompileする//
 
-	//Shaderをコンパイルする
-	Microsoft::WRL::ComPtr<IDxcBlob> vertexShaderBlob = CompileShader(logStream, L"Object3D.VS.hlsl",
-		L"vs_6_0", directXShaderCompiler.GetDxcUtils(), directXShaderCompiler.GetDxcCompiler(), directXShaderCompiler.GetIncludeHandler());
-	assert(vertexShaderBlob != nullptr);
-
-	Microsoft::WRL::ComPtr<IDxcBlob> pixelShaderBlob = CompileShader(logStream, L"Object3D.PS.hlsl",
-		L"ps_6_0", directXShaderCompiler.GetDxcUtils(), directXShaderCompiler.GetDxcCompiler(), directXShaderCompiler.GetIncludeHandler());
-	assert(pixelShaderBlob != nullptr);
+	shaderCompile->CreateShaderCompile(logStream, directXShaderCompiler.GetDxcUtils(), directXShaderCompiler.GetDxcCompiler(), directXShaderCompiler.GetIncludeHandler());
 
 
 	//DepthStencilStateの設定//
@@ -597,10 +591,10 @@ int WINAPI WinMain(HINSTANCE, HINSTANCE, LPSTR, int) {
 	D3D12_GRAPHICS_PIPELINE_STATE_DESC graphicsPipelineStateDesc{};
 	graphicsPipelineStateDesc.pRootSignature = rootSignature.get()->GetRootSignature();//RootSignature
 	graphicsPipelineStateDesc.InputLayout = inputLayout.get()->GetInputLayoutDesc();//InputLayout
-	graphicsPipelineStateDesc.VS = { vertexShaderBlob->GetBufferPointer(),
-	vertexShaderBlob->GetBufferSize() };//VertexShader
-	graphicsPipelineStateDesc.PS = { pixelShaderBlob->GetBufferPointer(),
-	pixelShaderBlob->GetBufferSize() };//PixelShader
+	graphicsPipelineStateDesc.VS = { shaderCompile.get()->GetVertexShaderBlob()->GetBufferPointer(),
+	 shaderCompile.get()->GetVertexShaderBlob()->GetBufferSize() };//VertexShader
+	graphicsPipelineStateDesc.PS = { shaderCompile.get()->GetPixelShaderBlob()->GetBufferPointer(),
+	shaderCompile.get()->GetPixelShaderBlob()->GetBufferSize() };//PixelShader
 	graphicsPipelineStateDesc.BlendState = blendState.get()->GetBlendDesc();//BlenderState
 	graphicsPipelineStateDesc.RasterizerState = rasterizerState.get()->GetRasterizerDesc();//RasterizerState
 	//書き込むRTVの情報
@@ -1047,7 +1041,7 @@ int WINAPI WinMain(HINSTANCE, HINSTANCE, LPSTR, int) {
 			//開発用UIの処理。実際に開発用UIを出す場合はここをゲ0無固有の処理に置き換える
 			ImGui::Checkbox("useMonsterBall", &useMonsterBall);
 			//ImGui::ShowDemoWindow();
-			
+
 			if (ImGui::CollapsingHeader("Camera")) {
 				ImGui::DragFloat3("camraTranslate", &camraTransform.translate.x, 0.01f);
 				ImGui::DragFloat3("camraRotate", &camraTransform.rotate.x, 0.01f);
