@@ -989,6 +989,7 @@ int WINAPI WinMain(HINSTANCE, HINSTANCE, LPSTR, int) {
 			input->Updata();
 
 
+
 			ImGui_ImplDX12_NewFrame();
 			ImGui_ImplWin32_NewFrame();
 			ImGui::NewFrame();
@@ -1060,7 +1061,7 @@ int WINAPI WinMain(HINSTANCE, HINSTANCE, LPSTR, int) {
 			ImGui::Text("x:LEFT,RIGHT\ny:UP,DOEN\nz:QE\n");
 
 
-			
+
 
 			//transformShpere.rotate.y += 0.1f;
 

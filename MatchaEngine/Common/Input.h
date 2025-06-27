@@ -16,10 +16,6 @@ private:
 	BYTE key_[256] = {};
 	BYTE prevKey_[256] = {};
 
-	IDirectInputDevice8* mouse;
-
-	DIMOUSESTATE mouseState{};
-	DIMOUSESTATE prevMouseState{};
 	
 
 public:
@@ -43,19 +39,6 @@ public:
 	bool ReleaseKey(uint32_t key);
 	//離してる
 	bool FreeKey(uint32_t key);
-
-	//押して瞬間
-	bool PushMouse(uint32_t Key);
-	//押している
-	bool PressMouse(uint32_t key);
-	//離した瞬間
-	bool ReleaseMouse(uint32_t key);
-	//離してる
-	bool FreeMouse(uint32_t key);
-	//マウスの移動
-	float GetMouseXDelta() { return mouseState.lX; }
-	float GetMouseYDelta() { return mouseState.lY; }
-	float GetMouseWheelDelta() { return mouseState.lZ; }
 	
 
 	BYTE GetKey(int keyNum) { return key_[keyNum]; }
