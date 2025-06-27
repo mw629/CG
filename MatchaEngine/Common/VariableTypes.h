@@ -6,41 +6,41 @@
 ///構造体///
 
 struct Vector4 {
-	float x;
-	float y;
-	float z;
-	float w;
+    float x;
+    float y;
+    float z;
+    float w;
 };
 
 struct Vector3 {
-	float x;
-	float y;
-	float z;
+    float x;
+    float y;
+    float z;
 
 
-	Vector3 operator+(const Vector3& other) const { return { x + other.x, y + other.y, z + other.z }; }
-	Vector3 operator-(const Vector3& other) const { return { x - other.x, y - other.y, z - other.z }; }
-	Vector3 operator*(float other) const { return { x * other, y * other, z * other }; }
-	Vector3 operator/(const Vector3& other) const { return { x / other.x, y / other.y, z / other.z }; }
-	Vector3& operator=(const Vector3& other) { x = other.x; y = other.y; z = other.z; return *this; }
-	Vector3& operator+=(const Vector3& other) { x += other.x; y += other.y; z += other.z; return *this; }
-	Vector3& operator-=(const Vector3& other) { x -= other.x; y -= other.y; z -= other.z; return *this; }
-	Vector3& operator*=(const Vector3& other) { x *= other.x; y *= other.y; z *= other.z; return *this; }
-	Vector3& operator/=(const Vector3& other) { x /= other.x; y /= other.y; z /= other.z; return *this; }
+    Vector3 operator+(const Vector3& other) const { return { x + other.x, y + other.y, z + other.z }; }
+    Vector3 operator-(const Vector3& other) const { return { x - other.x, y - other.y, z - other.z }; }
+    Vector3 operator*(float other) const { return { x * other, y * other, z * other }; }
+    Vector3 operator/(const Vector3& other) const { return { x / other.x, y / other.y, z / other.z }; }
+    Vector3& operator=(const Vector3& other) { x = other.x; y = other.y; z = other.z; return *this; }
+    Vector3& operator+=(const Vector3& other) { x += other.x; y += other.y; z += other.z; return *this; }
+    Vector3& operator-=(const Vector3& other) { x -= other.x; y -= other.y; z -= other.z; return *this; }
+    Vector3& operator*=(const Vector3& other) { x *= other.x; y *= other.y; z *= other.z; return *this; }
+    Vector3& operator/=(const Vector3& other) { x /= other.x; y /= other.y; z /= other.z; return *this; }
 };
 struct Vector2
 {
-	float x;
-	float y;
+    float x;
+    float y;
 };
 
 struct Matrix4x4 {
-	float m[4][4] = {
-		{0,0,0,0},
-		{0,0,0,0},
-		{0,0,0,0},
-		{0,0,0,0},
-	}; 
+    float m[4][4] = {
+        {0,0,0,0},
+        {0,0,0,0},
+        {0,0,0,0},
+        {0,0,0,0},
+    };
 
     Matrix4x4 operator+(const Matrix4x4& other) const {
         Matrix4x4 result;
@@ -117,52 +117,52 @@ struct Matrix4x4 {
 /// </summary>
 struct Transform
 {
-	Vector3 scale;
-	Vector3 rotate;
-	Vector3 translate;
+    Vector3 scale;
+    Vector3 rotate;
+    Vector3 translate;
 };
 
 struct TransformationMatrix
 {
-	Matrix4x4 WVP;
-	Matrix4x4 World;
+    Matrix4x4 WVP;
+    Matrix4x4 World;
 };
 
 struct VertexData
 {
-	Vector4 position;
-	Vector2 texcoord;
-	Vector3 normal;
+    Vector4 position;
+    Vector2 texcoord;
+    Vector3 normal;
 };
 
 struct Material
 {
-	Vector4 color;
-	int32_t endbleLighting;
-	float paddinmg[3];
-	Matrix4x4 uvTransform;
+    Vector4 color;
+    int32_t endbleLighting;
+    float paddinmg[3];
+    Matrix4x4 uvTransform;
 };
 
 struct DirectionalLight {
-	Vector4 color;//ライトの色
-	Vector3 direction;//ライトの向き
-	float intensity;//輝度
+    Vector4 color;//ライトの色
+    Vector3 direction;//ライトの向き
+    float intensity;//輝度
 };
 
 struct MaterialData
 {
-	std::string textureDilePath;
+    std::string textureDilePath;
 };
 
 struct ModelData
 {
-	std::vector<VertexData> vertices;
-	MaterialData material;
+    std::vector<VertexData> vertices;
+    MaterialData material;
 };
 
 struct Segment {
-	Vector3 origin; //始点
-	Vector3 diff;//終点への差分
+    Vector3 origin; //始点
+    Vector3 diff;//終点への差分
 };
 
 
