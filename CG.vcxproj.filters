@@ -252,7 +252,7 @@
     <ClInclude Include="MatchaEngine\Object\Model.h">
       <Filter>ヘッダー ファイル</Filter>
     </ClInclude>
-    <ClInclude Include="MatchaEngine\Load.h">
+    <ClInclude Include="MatchaEngine\Resource\Load.h">
       <Filter>ヘッダー ファイル</Filter>
     </ClInclude>
   </ItemGroup>
