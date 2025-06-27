@@ -99,7 +99,6 @@ copy "$(WindowsSdkDir)bin\$(TargetPlatformVersion)\x64\dxil.dll" "$(TargetDir)dx
     <ClCompile Include="MatchaEngine\Engine.cpp" />
     <ClCompile Include="MatchaEngine\PSO\BlendState.cpp" />
     <ClCompile Include="MatchaEngine\Math\Calculation.cpp" />
-    <ClCompile Include="MatchaEngine\Object\Camera.cpp" />
     <ClCompile Include="MatchaEngine\Common\CommandContext .cpp" />
     <ClCompile Include="MatchaEngine\PSO\DepthStencilState.cpp" />
     <ClCompile Include="MatchaEngine\Object\Draw.cpp" />
@@ -151,7 +150,6 @@ copy "$(WindowsSdkDir)bin\$(TargetPlatformVersion)\x64\dxil.dll" "$(TargetDir)dx
     <ClInclude Include="MatchaEngine\Engine.h" />
     <ClInclude Include="MatchaEngine\PSO\BlendState.h" />
     <ClInclude Include="MatchaEngine\Math\Calculation.h" />
-    <ClInclude Include="MatchaEngine\Object\Camera.h" />
     <ClInclude Include="MatchaEngine\Common\CommandContext .h" />
     <ClInclude Include="MatchaEngine\PSO\DepthStencilState.h" />
     <ClInclude Include="MatchaEngine\Object\Draw.h" />

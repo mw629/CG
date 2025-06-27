@@ -2,6 +2,7 @@
 
 
 
+
 //三次元ベクトルの計算
 
 
@@ -172,12 +173,15 @@ Matrix4x4 Rotation(Vector3 angle);//不安
 /// <param name="m">行列</param>
 Matrix4x4 Translation(Vector3 pos);
 
-/// <summary>
-/// 単位行列
-/// </summary>
-/// <returns></returns>
-Matrix4x4 MakeIdentity4x4();
+Vector3 MakeWorldPos(PolarCoordinates pos);
 
+Matrix4x4 MakeLookAtMatrix(
+    const Vector3& eye,     // カメラの位置
+    const Vector3& target,  // 見たい場所
+    const Vector3& up       // 上方向ベクトル（たいてい {0,1,0}）
+);
+
+Matrix4x4 IdentityMatrix();
 
 /// <summary>
 /// この関数は、アフィン行列を作成します。
@@ -187,6 +191,9 @@ Matrix4x4 MakeIdentity4x4();
 /// <param name="angle">回転角度</param>
 /// <returns>アフィン行列</returns>
 Matrix4x4 MakeAffineMatrix(Vector3 pos, Vector3 scale, Vector3 angle);
+
+
+Matrix4x4 MakeAffineMatrix(Matrix4x4 translationMatrix, Vector3 scale, Matrix4x4 rotationMatrix);
 
 /// <summary>
 /// この関数は、正射影行列を作成します。

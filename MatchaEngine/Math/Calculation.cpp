@@ -311,6 +311,53 @@ Matrix4x4 Translation(Vector3 pos)
 	return result;
 }
 
+
+Vector3 MakeWorldPos(PolarCoordinates pos) {
+	float pai = 3.141592f;
+	Vector3 offset;
+	offset.x = pos.radius * sinf(pos.phi* pai) * cosf(pos.theta * pai);
+	offset.y = pos.radius * cosf(pos.phi* pai);
+	offset.z = pos.radius * sinf(pos.phi * pai) * sinf(pos.theta * pai);
+	
+	Vector3 worldPos;
+	worldPos.x = pos.offset.x + offset.x;
+	worldPos.y = pos.offset.y + offset.y;
+	worldPos.z = pos.offset.z + offset.z;
+	return worldPos;
+}
+
+
+Matrix4x4 MakeLookAtMatrix(const Vector3& eye, const Vector3& target, const Vector3& up)
+{
+	Vector3 zaxis = Normalize(target - eye);        // 前方向（カメラの向き）
+	Vector3 xaxis = Normalize(Cross(up, zaxis));    // 右方向
+	Vector3 yaxis = Cross(zaxis, xaxis);            // 上方向
+
+	Matrix4x4 result = IdentityMatrix();
+
+	result.m[0][0] = xaxis.x;
+	result.m[1][0] = xaxis.y;
+	result.m[2][0] = xaxis.z;
+	result.m[3][0] = -Dot(xaxis, eye);
+
+	result.m[0][1] = yaxis.x;
+	result.m[1][1] = yaxis.y;
+	result.m[2][1] = yaxis.z;
+	result.m[3][1] = -Dot(yaxis, eye);
+
+	result.m[0][2] = -zaxis.x;
+	result.m[1][2] = -zaxis.y;
+	result.m[2][2] = -zaxis.z;
+	result.m[3][2] = Dot(zaxis, eye);
+
+	result.m[0][3] = 0.0f;
+	result.m[1][3] = 0.0f;
+	result.m[2][3] = 0.0f;
+	result.m[3][3] = 1.0f;
+
+	return result;
+}
+
 Matrix4x4 IdentityMatrix()
 {
 	Matrix4x4 m = {
@@ -321,12 +368,39 @@ Matrix4x4 IdentityMatrix()
 	return m;
 }
 
+
+
 Matrix4x4 MakeAffineMatrix(Vector3 pos, Vector3 scale, Vector3 angle)
 {
 	Matrix4x4 result;
 	Matrix4x4 scaleMatrix = Scale(scale);
 	Matrix4x4 rotationMatrix = Rotation(angle);
 	Matrix4x4 translationMatrix = Translation(pos);
+
+	result.m[0][0] = scaleMatrix.m[0][0] * rotationMatrix.m[0][0];
+	result.m[0][1] = scaleMatrix.m[0][0] * rotationMatrix.m[0][1];
+	result.m[0][2] = scaleMatrix.m[0][0] * rotationMatrix.m[0][2];
+
+	result.m[1][0] = scaleMatrix.m[1][1] * rotationMatrix.m[1][0];
+	result.m[1][1] = scaleMatrix.m[1][1] * rotationMatrix.m[1][1];
+	result.m[1][2] = scaleMatrix.m[1][1] * rotationMatrix.m[1][2];
+
+	result.m[2][0] = scaleMatrix.m[2][2] * rotationMatrix.m[2][0];
+	result.m[2][1] = scaleMatrix.m[2][2] * rotationMatrix.m[2][1];
+	result.m[2][2] = scaleMatrix.m[2][2] * rotationMatrix.m[2][2];
+
+	result.m[3][0] = translationMatrix.m[3][0];
+	result.m[3][1] = translationMatrix.m[3][1];
+	result.m[3][2] = translationMatrix.m[3][2];
+	result.m[3][3] = 1.0f;
+
+	return result;
+}
+
+Matrix4x4 MakeAffineMatrix(Matrix4x4 translationMatrix, Vector3 scale, Matrix4x4 rotationMatrix)
+{
+	Matrix4x4 result;
+	Matrix4x4 scaleMatrix = Scale(scale);
 
 	result.m[0][0] = scaleMatrix.m[0][0] * rotationMatrix.m[0][0];
 	result.m[0][1] = scaleMatrix.m[0][0] * rotationMatrix.m[0][1];

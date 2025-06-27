@@ -65,7 +65,7 @@ void Draw::DrawTriangle(Transform transform,
 	//
 	wvpResource->Map(0, nullptr, reinterpret_cast<void**>(&wvpData));
 	//
-	*wvpData = camera.MakeWorldViewProjectionMatrix(transform, cameraTransform);
+	//*wvpData = camera.MakeWorldViewProjectionMatrix(transform, cameraTransform);
 
 	
 

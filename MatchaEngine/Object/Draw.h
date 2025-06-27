@@ -3,7 +3,6 @@
 #include "Math/Calculation.h"  
 #include <d3d12.h>  
 #include <cstdint>  
-#include "Camera.h"
 #include "Model.h"
 
 class Draw {
@@ -15,8 +14,7 @@ private:
 	ID3D12Resource* wvpResource;
 	Matrix4x4* wvpData;
 
-	Camera camera;
-
+	
 
 public:
 

@@ -33,7 +33,6 @@ extern IMGUI_IMPL_API LRESULT ImGui_ImplWin32_WndProcHandler(HWND hWnd, UINT msg
 #include "MatchaEngine/Resource/Audio.h"
 #include "MatchaEngine/Common/GraphicsDevice.h"
 #include "Common/WindowConfig.h"
-#include "Object/Camera.h"
 #include "Object/Draw.h"
 #include "Common/Input.h"
 #include "Object/DebugCamera.h"
@@ -466,7 +465,6 @@ int WINAPI WinMain(HINSTANCE, HINSTANCE, LPSTR, int) {
 	std::unique_ptr<DepthStencil> depthStencil = std::make_unique<DepthStencil>();
 	std::unique_ptr<Matrial> matrial = std::make_unique<Matrial>();
 	std::unique_ptr<Matrial> spriteMatrial = std::make_unique<Matrial>();
-	Camera camera;
 	Draw draw;
 
 
@@ -522,7 +520,17 @@ int WINAPI WinMain(HINSTANCE, HINSTANCE, LPSTR, int) {
 	descriptorHeap.get()->CreateHeap(graphics.get()->GetDevice());
 	renderTargetView.get()->CreateRenderTargetView(graphics.get()->GetDevice(), swapChain.get()->GetSwapChainResources(0), swapChain.get()->GetSwapChainResources(1), descriptorHeap.get()->GetRtvDescriptorHeap());
 
-	gpuSyncManager.Initialize(graphics.get()->GetDevice());
+	
+	//初期値0でFenceを作る
+	Microsoft::WRL::ComPtr<ID3D12Fence> fence = nullptr;
+	uint64_t fenceValue = 0;
+	hr = graphics.get()->GetDevice()->CreateFence(fenceValue, D3D12_FENCE_FLAG_NONE, IID_PPV_ARGS(&fence));
+	assert(SUCCEEDED(hr));
+
+	//FenceのSignalを待つためのイベントを作成する
+	HANDLE fenceEvent = CreateEvent(NULL, FALSE, FALSE, NULL);
+	assert(fenceEvent != nullptr);
+
 
 	depthStencil->CreateDepthStencil(graphics.get()->GetDevice(), kClientWidth, kClientHeight);
 
@@ -986,7 +994,7 @@ int WINAPI WinMain(HINSTANCE, HINSTANCE, LPSTR, int) {
 		}
 		else {
 
-			input->Updata();
+			
 
 			
 
@@ -1061,16 +1069,17 @@ int WINAPI WinMain(HINSTANCE, HINSTANCE, LPSTR, int) {
 			ImGui::Text("x:LEFT,RIGHT\ny:UP,DOEN\nz:QE\n");
 
 
-			
+			input->Updata();
 
 			//transformShpere.rotate.y += 0.1f;
 
 
 			//*wvpData = camera.MakeWorldViewProjectionMatrix(transform, camraTransform);
 			//*transformationMatrixDataSprite = camera.MakeWorldViewProjectionMatrix(transformSprite, camraTransform);
-			debudCamera->Update(*input);
-
+			debudCamera->Update(input);
 			Matrix4x4 viewMatrix = debudCamera->GetViewMatrix();
+			
+			//Matrix4x4 viewMatrix = Inverse(MakeAffineMatrix(camraTransform.translate, camraTransform.scale, camraTransform.rotate));
 			Matrix4x4 projectionMatri = MakePerspectiveFovMatrix(0.45f, float(kClientWidth) / float(kClientHeight), 0.1f, 100.0f);
 
 			Matrix4x4 worldMatrixObj = MakeAffineMatrix(transformObj.translate, transformObj.scale, transformObj.rotate);
@@ -1187,9 +1196,15 @@ int WINAPI WinMain(HINSTANCE, HINSTANCE, LPSTR, int) {
 
 			
 
-			gpuSyncManager.Signal(command.get()->GetCommandQueue());
+			fenceValue++;
+			HRESULT hr = command.get()->GetCommandQueue()->Signal(fence.Get(), fenceValue);
+			assert(SUCCEEDED(hr));
 
-			gpuSyncManager.WaitForGpu();
+			if (fence->GetCompletedValue() < fenceValue) {
+				HRESULT hr = fence->SetEventOnCompletion(fenceValue, fenceEvent);
+				assert(SUCCEEDED(hr));
+				WaitForSingleObject(fenceEvent, INFINITE);
+			}
 
 
 			//次のフレーム用のコマンドを準備

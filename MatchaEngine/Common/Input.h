@@ -54,8 +54,8 @@ public:
 	//離してる
 	bool FreeMouse(uint32_t bottom);
 	//マウスの移動
-	Vector3 GetMouseXDelta() { return Vector3(mouseState.lX, mouseState.lY,0); }
-	float GetMouseWheelDelta() { return mouseState.lZ; }
+	Vector3 GetMouseDelta() { return Vector3(mouseState.lX, mouseState.lY,0); }
+	int GetMouseWheel() { return mouseState.lZ; }
 	
 
 	BYTE GetKey(int keyNum) { return key_[keyNum]; }
