@@ -39,33 +39,9 @@ void Model::CreateWVP(ID3D12Device* device)
 	//書き込むためのアドレスを取得
 	wvpDataResource_->Map(0, nullptr, reinterpret_cast<void**>(&wvpData_));
 	//単位行列をかきこんでおく
-	wvpData_->WVP = Identity();
-	wvpData_->World = Identity();
+	wvpData_->WVP = IdentityMatrix();
+	wvpData_->World = IdentityMatrix();
 }
-
-//void Model::SetTexture(ID3D12Device* device)
-//{
-//	//二枚目のTextureを読み込む
-//	DirectX::ScratchImage mapImages = LoadTexture(modelData_.material.textureDilePath);
-//	const DirectX::TexMetadata& metaData = mapImages.GetMetadata();
-//	Microsoft::WRL::ComPtr<ID3D12Resource> textureResource = CreateTextureResource(device, metaData);
-//	Microsoft::WRL::ComPtr<ID3D12Resource> intermediateResource = UploadTextureData(textureResource.Get(), mapImages, device, command.get()->GetCommandList());
-//
-//
-//	//metaDataを基にSRVの設定
-//	D3D12_SHADER_RESOURCE_VIEW_DESC srvDesc{};
-//	srvDesc.Format = metaData.format;
-//	srvDesc.Shader4ComponentMapping = D3D12_DEFAULT_SHADER_4_COMPONENT_MAPPING;
-//	srvDesc.ViewDimension = D3D12_SRV_DIMENSION_TEXTURE2D;//2Dテクスチャ
-//	srvDesc.Texture2D.MipLevels = UINT(metaData.mipLevels);
-//
-//	//SRVを作成するDescriptorHeapの場所を決める
-//	D3D12_CPU_DESCRIPTOR_HANDLE textureSrvHandleCPU = GetCPUDescriptorHandle(descriptorHeap.get()->GetSrvDescriptorHeap(), descriptorHeap.get()->GetDescriptorSizeSRV(), 1);
-//	D3D12_GPU_DESCRIPTOR_HANDLE textureSrvHandleGPU = GetGPUDescriptorHandle(descriptorHeap.get()->GetSrvDescriptorHeap(), descriptorHeap.get()->GetDescriptorSizeSRV(), 1);
-//	
-//	device->CreateShaderResourceView(textureResource.Get(), &srvDesc, textureSrvHandleCPU);
-//
-//}
 
 void Model::CreateModel(ID3D12Device* device)
 {
@@ -79,7 +55,7 @@ void Model::SetWvp(Transform camera)
 	Matrix4x4 viewMatrix = Inverse(cameraMatrix);
 	Matrix4x4 projectionMatri = MakePerspectiveFovMatrix(0.45f, float(kClientWidth) / float(kClientHeight), 0.1f, 100.0f);
 	Matrix4x4 worldMatrixObj = MakeAffineMatrix(transform_.translate, transform_.scale, transform_.rotate);
-	Matrix4x4 worldViewProjectionMatrixObj = Multiply(worldMatrixObj, Multiply(viewMatrix, projectionMatri));
+	Matrix4x4 worldViewProjectionMatrixObj = MultiplyMatrix4x4(worldMatrixObj, MultiplyMatrix4x4(viewMatrix, projectionMatri));
 	*wvpData_ = { worldViewProjectionMatrixObj,worldMatrixObj };
 }
 
