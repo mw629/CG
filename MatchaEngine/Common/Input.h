@@ -2,6 +2,7 @@
 #define DIRECTINPUT_VERSION 0x0800
 #include <dinput.h>
 #include <cstdint>
+#include "VariableTypes.h"
 
 #pragma comment(lib,"dinput8.lib")
 #pragma comment(lib,"dxguid.lib")
@@ -45,16 +46,15 @@ public:
 	bool FreeKey(uint32_t key);
 
 	//押して瞬間
-	bool PushMouse(uint32_t Key);
+	bool PushMouse(uint32_t bottom);
 	//押している
-	bool PressMouse(uint32_t key);
+	bool PressMouse(uint32_t bottom);
 	//離した瞬間
-	bool ReleaseMouse(uint32_t key);
+	bool ReleaseMouse(uint32_t bottom);
 	//離してる
-	bool FreeMouse(uint32_t key);
+	bool FreeMouse(uint32_t bottom);
 	//マウスの移動
-	float GetMouseXDelta() { return mouseState.lX; }
-	float GetMouseYDelta() { return mouseState.lY; }
+	Vector3 GetMouseXDelta() { return Vector3(mouseState.lX, mouseState.lY,0); }
 	float GetMouseWheelDelta() { return mouseState.lZ; }
 	
 
