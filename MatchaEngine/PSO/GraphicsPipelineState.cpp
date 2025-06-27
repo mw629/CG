@@ -71,7 +71,7 @@ void GraphicsPipelineState::CreatePSO(std::ostream& os, ID3D12Device* device)
 
 	//実際に生成
 	Microsoft::WRL::ComPtr<ID3D12PipelineState> graphicsPipelineState = nullptr;
-	hr = graphics.get()->GetDevice()->CreateGraphicsPipelineState(&graphicsPipelineStateDesc,
+	hr_ = device->CreateGraphicsPipelineState(&graphicsPipelineStateDesc,
 		IID_PPV_ARGS(&graphicsPipelineState));
-	assert(SUCCEEDED(hr));
+	assert(SUCCEEDED(hr_));
 }

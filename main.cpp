@@ -43,7 +43,7 @@ extern IMGUI_IMPL_API LRESULT ImGui_ImplWin32_WndProcHandler(HWND hWnd, UINT msg
 #include "RenderTargetView.h"
 #include "DepthStencil.h"
 #include "Matrial.h"
-
+#include "GpuSyncManager.h"
 //PSO
 
 #include "PSO/DirectXShaderCompiler.h"
@@ -55,6 +55,7 @@ extern IMGUI_IMPL_API LRESULT ImGui_ImplWin32_WndProcHandler(HWND hWnd, UINT msg
 #include "PSO/ShaderCompile.h"
 #include "PSO/DepthStencilState.h"
 #include <PSO/Sampler.h>
+#include "ViewportScissor.h"
 
 #pragma comment(lib,"d3d12.lib")
 #pragma comment(lib,"dxgi.lib")
@@ -456,6 +457,7 @@ int WINAPI WinMain(HINSTANCE, HINSTANCE, LPSTR, int) {
 	std::unique_ptr<SwapChain> swapChain = std::make_unique<SwapChain>();
 	std::unique_ptr<DescriptorHeap> descriptorHeap = std::make_unique<DescriptorHeap>(graphics.get()->GetDevice());
 	std::unique_ptr<RenderTargetView> renderTargetView = std::make_unique<RenderTargetView>();
+	std::unique_ptr<ViewportScissor> viewportScissor = std::make_unique<ViewportScissor>(kClientWidth,kClientHeight);
 	//入力
 	Input* input = new Input;
 
@@ -467,6 +469,9 @@ int WINAPI WinMain(HINSTANCE, HINSTANCE, LPSTR, int) {
 	Camera camera;
 	Draw draw;
 
+
+	//フェンスやイベント、シグナル
+	GpuSyncManager gpuSyncManager;
 
 	//ウィンドウサイズの設定//
 	window.DrawWindow(kClientWidth, kClientHeight);
@@ -517,15 +522,7 @@ int WINAPI WinMain(HINSTANCE, HINSTANCE, LPSTR, int) {
 	descriptorHeap.get()->CreateHeap(graphics.get()->GetDevice());
 	renderTargetView.get()->CreateRenderTargetView(graphics.get()->GetDevice(), swapChain.get()->GetSwapChainResources(0), swapChain.get()->GetSwapChainResources(1), descriptorHeap.get()->GetRtvDescriptorHeap());
 
-	//初期値0でFenceを作る
-	Microsoft::WRL::ComPtr<ID3D12Fence> fence = nullptr;
-	uint64_t fenceValue = 0;
-	hr = graphics.get()->GetDevice()->CreateFence(fenceValue, D3D12_FENCE_FLAG_NONE, IID_PPV_ARGS(&fence));
-	assert(SUCCEEDED(hr));
-
-	//FenceのSignalを待つためのイベントを作成する
-	HANDLE fenceEvent = CreateEvent(NULL, FALSE, FALSE, NULL);
-	assert(fenceEvent != nullptr);
+	gpuSyncManager.Initialize(graphics.get()->GetDevice());
 
 	depthStencil->CreateDepthStencil(graphics.get()->GetDevice(), kClientWidth, kClientHeight);
 
@@ -618,7 +615,6 @@ int WINAPI WinMain(HINSTANCE, HINSTANCE, LPSTR, int) {
 
 	//VertexResourceを生成する//
 	Microsoft::WRL::ComPtr<ID3D12Resource> vertexResource = GraphicsDevice::CreateBufferResource(graphics.get()->GetDevice(), sizeof(VertexData) * 6);
-
 
 	//VertexxBuffViewを作成する//
 
@@ -904,12 +900,7 @@ int WINAPI WinMain(HINSTANCE, HINSTANCE, LPSTR, int) {
 	const DirectX::TexMetadata& metaData = mipImages.GetMetadata();
 	Microsoft::WRL::ComPtr<ID3D12Resource> textureResource = CreateTextureResource(graphics.get()->GetDevice(), metaData);
 	Microsoft::WRL::ComPtr<ID3D12Resource> intermediateResource = UploadTextureData(textureResource.Get(), mipImages, graphics.get()->GetDevice(), command.get()->GetCommandList());
-	//二枚目のTextureを読み込む
-	DirectX::ScratchImage mapImages2 = LoadTexture(modelData.material.textureDilePath);
-	const DirectX::TexMetadata& metaData2 = mapImages2.GetMetadata();
-	Microsoft::WRL::ComPtr<ID3D12Resource> textureResource2 = CreateTextureResource(graphics.get()->GetDevice(), metaData2);
-	Microsoft::WRL::ComPtr<ID3D12Resource> intermediateResource2 = UploadTextureData(textureResource2.Get(), mapImages2, graphics.get()->GetDevice(), command.get()->GetCommandList());
-
+	
 	//実際にShaderResourceView
 
 	//meteDataを基にSRVの設定
@@ -918,6 +909,19 @@ int WINAPI WinMain(HINSTANCE, HINSTANCE, LPSTR, int) {
 	srvDesc.Shader4ComponentMapping = D3D12_DEFAULT_SHADER_4_COMPONENT_MAPPING;
 	srvDesc.ViewDimension = D3D12_SRV_DIMENSION_TEXTURE2D;//2Dテクスチャ
 	srvDesc.Texture2D.MipLevels = UINT(metaData.mipLevels);
+
+	//SRVを作成するDescriptorHeapの場所を決める
+	D3D12_CPU_DESCRIPTOR_HANDLE textureSrvHandleCPU = GetCPUDescriptorHandle(descriptorHeap.get()->GetSrvDescriptorHeap(), descriptorHeap.get()->GetDescriptorSizeSRV(), 1);
+	D3D12_GPU_DESCRIPTOR_HANDLE textureSrvHandleGPU = GetGPUDescriptorHandle(descriptorHeap.get()->GetSrvDescriptorHeap(), descriptorHeap.get()->GetDescriptorSizeSRV(), 1);
+
+	graphics.get()->GetDevice()->CreateShaderResourceView(textureResource.Get(), &srvDesc, textureSrvHandleCPU);
+
+	//二枚目のTextureを読み込む
+	DirectX::ScratchImage mapImages2 = LoadTexture(modelData.material.textureDilePath);
+	const DirectX::TexMetadata& metaData2 = mapImages2.GetMetadata();
+	Microsoft::WRL::ComPtr<ID3D12Resource> textureResource2 = CreateTextureResource(graphics.get()->GetDevice(), metaData2);
+	Microsoft::WRL::ComPtr<ID3D12Resource> intermediateResource2 = UploadTextureData(textureResource2.Get(), mapImages2, graphics.get()->GetDevice(), command.get()->GetCommandList());
+
 	//metaDataを基にSRVの設定
 	D3D12_SHADER_RESOURCE_VIEW_DESC srvDesc2{};
 	srvDesc2.Format = metaData2.format;
@@ -925,37 +929,21 @@ int WINAPI WinMain(HINSTANCE, HINSTANCE, LPSTR, int) {
 	srvDesc2.ViewDimension = D3D12_SRV_DIMENSION_TEXTURE2D;//2Dテクスチャ
 	srvDesc2.Texture2D.MipLevels = UINT(metaData2.mipLevels);
 
-
-	//SRVを作成するDescriptorHeapの場所を決める
-	D3D12_CPU_DESCRIPTOR_HANDLE textureSrvHandleCPU = GetCPUDescriptorHandle(descriptorHeap.get()->GetSrvDescriptorHeap(), descriptorHeap.get()->GetDescriptorSizeSRV(), 1);
-	D3D12_GPU_DESCRIPTOR_HANDLE textureSrvHandleGPU = GetGPUDescriptorHandle(descriptorHeap.get()->GetSrvDescriptorHeap(), descriptorHeap.get()->GetDescriptorSizeSRV(), 1);
 	//SRVを作成するDescriptorHeapの場所を決める
 	D3D12_CPU_DESCRIPTOR_HANDLE textureSrvHandleCPU2 = GetCPUDescriptorHandle(descriptorHeap.get()->GetSrvDescriptorHeap(), descriptorHeap.get()->GetDescriptorSizeSRV(), 2);
 	D3D12_GPU_DESCRIPTOR_HANDLE textureSrvHandleGPU2 = GetGPUDescriptorHandle(descriptorHeap.get()->GetSrvDescriptorHeap(), descriptorHeap.get()->GetDescriptorSizeSRV(), 2);
 
-	graphics.get()->GetDevice()->CreateShaderResourceView(textureResource.Get(), &srvDesc, textureSrvHandleCPU);
+	
 	graphics.get()->GetDevice()->CreateShaderResourceView(textureResource2.Get(), &srvDesc2, textureSrvHandleCPU2);
 
 
 	//ViewportとScissor（シザー）//
 
 	//ビューポート
-	D3D12_VIEWPORT viewport{};
-	//クライアント領域のサイズと一緒にして画面全体に表示
-	viewport.Width = kClientWidth;
-	viewport.Height = kClientHeight;
-	viewport.TopLeftX = 0.0f;
-	viewport.TopLeftY = 0.0f;
-	viewport.MinDepth = 0.0f;
-	viewport.MaxDepth = 1.0f;
-
+	viewportScissor.get()->CreateViewPort();
 	//シーザー矩形
-	D3D12_RECT scissorRect{};
-	//基本的にビューポートと同じ矩形が構成されるようにする
-	scissorRect.left = 0;
-	scissorRect.right = kClientWidth;
-	scissorRect.top = 0;
-	scissorRect.bottom = kClientHeight;
+	viewportScissor.get()->CreateSxissor();
+	
 
 
 	float rdius = 1.0f;
@@ -1011,7 +999,6 @@ int WINAPI WinMain(HINSTANCE, HINSTANCE, LPSTR, int) {
 
 		   //これから書き込むバックバッファのインデックスを取得
 			UINT backBufferIndex = swapChain.get()->GetSwapChain()->GetCurrentBackBufferIndex();
-
 			//TransitionBarrierを張る//
 			D3D12_RESOURCE_BARRIER barrier{};
 			//今回バリアはTransition
@@ -1084,8 +1071,6 @@ int WINAPI WinMain(HINSTANCE, HINSTANCE, LPSTR, int) {
 			debudCamera->Update(*input);
 
 			Matrix4x4 viewMatrix = debudCamera->GetViewMatrix();
-
-
 			Matrix4x4 projectionMatri = MakePerspectiveFovMatrix(0.45f, float(kClientWidth) / float(kClientHeight), 0.1f, 100.0f);
 
 			Matrix4x4 worldMatrixObj = MakeAffineMatrix(transformObj.translate, transformObj.scale, transformObj.rotate);
@@ -1105,6 +1090,9 @@ int WINAPI WinMain(HINSTANCE, HINSTANCE, LPSTR, int) {
 			uvTransformMatrix = MultiplyMatrix4x4(uvTransformMatrix, Rotation(uvTransformSprite.rotate));
 			uvTransformMatrix = MultiplyMatrix4x4(uvTransformMatrix, Translation(uvTransformSprite.translate));
 			spriteMatrial.get()->GetMaterialData()->uvTransform = uvTransformMatrix;
+			//ImGuiの内部コマンドを生成
+			ImGui::Render();
+
 
 			//描画先のRTVを設定する
 			command.get()->GetCommandList()->OMSetRenderTargets(1, renderTargetView.get()->GetRtvHandles(backBufferIndex), false, nullptr);
@@ -1120,18 +1108,13 @@ int WINAPI WinMain(HINSTANCE, HINSTANCE, LPSTR, int) {
 			command.get()->GetCommandList()->ClearDepthStencilView(dsvHandle, D3D12_CLEAR_FLAG_DEPTH, 1.0f, 0, 0, nullptr);
 
 
-			//ImGuiの内部コマンドを生成
-			ImGui::Render();
+			
 
 
 			//コマンドを積む//
 
-
-
 			ID3D12DescriptorHeap* descriptorHeeps[] = { descriptorHeap.get()->GetSrvDescriptorHeap() };
 			command.get()->GetCommandList()->SetDescriptorHeaps(1, descriptorHeeps);
-
-
 
 			command.get()->GetCommandList()->SetPipelineState(graphicsPipelineState.Get());//PSOを設定
 			command.get()->GetCommandList()->IASetVertexBuffers(0, 1, &vertexBufferView);//VBVを設定
@@ -1140,8 +1123,8 @@ int WINAPI WinMain(HINSTANCE, HINSTANCE, LPSTR, int) {
 			command.get()->GetCommandList()->IASetIndexBuffer(&indexBufferView);//IBVを設定
 
 
-			command.get()->GetCommandList()->RSSetViewports(1, &viewport);//Viewportを設定
-			command.get()->GetCommandList()->RSSetScissorRects(1, &scissorRect);//Sxirssorを設定
+			command.get()->GetCommandList()->RSSetViewports(1, viewportScissor.get()->GetViewport());//Viewportを設定
+			command.get()->GetCommandList()->RSSetScissorRects(1,viewportScissor.get()->GetScissorRect());//Sxirssorを設定
 			//RootSignatureを設定。POSに設定しているけど別途設定が必要
 			command.get()->GetCommandList()->SetGraphicsRootSignature(rootSignature.get()->GetRootSignature());
 			command.get()->GetCommandList()->SetGraphicsRootConstantBufferView(3, directinalLightResource->GetGPUVirtualAddress());
@@ -1202,19 +1185,13 @@ int WINAPI WinMain(HINSTANCE, HINSTANCE, LPSTR, int) {
 			//GPUとOSに画面の交換を行うよう通知する
 			swapChain.get()->GetSwapChain()->Present(1, 0);
 
-			//GPUにSignalを送る//
+			
 
-			//Fenceの値を更新
-			fenceValue++;
-			hr = command.get()->GetCommandQueue()->Signal(fence.Get(), fenceValue);
-			assert(SUCCEEDED(hr));
+			gpuSyncManager.Signal(command.get()->GetCommandQueue());
 
-			//Fenceの値が更新されるまで待つ
-			if (fence->GetCompletedValue() < fenceValue) {
-				hr = fence->SetEventOnCompletion(fenceValue, fenceEvent);
-				assert(SUCCEEDED(hr));
-				WaitForSingleObject(fenceEvent, INFINITE);
-			}
+			gpuSyncManager.WaitForGpu();
+
+
 			//次のフレーム用のコマンドを準備
 			hr = command.get()->GetCommandAllocator()->Reset();
 			assert(SUCCEEDED(hr));

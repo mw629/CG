@@ -92,6 +92,7 @@ copy "$(WindowsSdkDir)bin\$(TargetPlatformVersion)\x64\dxil.dll" "$(TargetDir)dx
   <ItemGroup>
     <ClCompile Include="DepthStencil.cpp" />
     <ClCompile Include="DescriptorHeap.cpp" />
+    <ClCompile Include="GpuSyncManager.cpp" />
     <ClCompile Include="MatchaEngine\Object\DebugCamera.cpp" />
     <ClCompile Include="MatchaEngine\Resource\Audio.cpp" />
     <ClCompile Include="MatchaEngine\Common\Input.cpp" />
@@ -121,9 +122,11 @@ copy "$(WindowsSdkDir)bin\$(TargetPlatformVersion)\x64\dxil.dll" "$(TargetDir)dx
     <ClCompile Include="MatchaEngine\PSO\ShaderCompile.cpp" />
     <ClCompile Include="MatchaEngine\Common\WindowConfig.cpp" />
     <ClCompile Include="Matrial.cpp" />
+    <ClCompile Include="MatchaEngine\Object\Model.cpp" />
     <ClCompile Include="RenderTargetView.cpp" />
     <ClCompile Include="MatchaEngine\PSO\Sampler.cpp" />
     <ClCompile Include="SwapChain.cpp" />
+    <ClCompile Include="ViewportScissor.cpp" />
   </ItemGroup>
   <ItemGroup>
     <FxCompile Include="Object3d.PS.hlsl">
@@ -140,6 +143,7 @@ copy "$(WindowsSdkDir)bin\$(TargetPlatformVersion)\x64\dxil.dll" "$(TargetDir)dx
   <ItemGroup>
     <ClInclude Include="DepthStencil.h" />
     <ClInclude Include="DescriptorHeap.h" />
+    <ClInclude Include="GpuSyncManager.h" />
     <ClInclude Include="MatchaEngine\Object\DebugCamera.h" />
     <ClInclude Include="MatchaEngine\Resource\Audio.h" />
     <ClInclude Include="MatchaEngine\Common\Input.h" />
@@ -170,9 +174,11 @@ copy "$(WindowsSdkDir)bin\$(TargetPlatformVersion)\x64\dxil.dll" "$(TargetDir)dx
     <ClInclude Include="MatchaEngine\Common\VariableTypes.h" />
     <ClInclude Include="MatchaEngine\Common\WindowConfig.h" />
     <ClInclude Include="Matrial.h" />
+    <ClInclude Include="MatchaEngine\Object\Model.h" />
     <ClInclude Include="RenderTargetView.h" />
     <ClInclude Include="MatchaEngine\PSO\Sampler.h" />
     <ClInclude Include="SwapChain.h" />
+    <ClInclude Include="ViewportScissor.h" />
   </ItemGroup>
   <ItemGroup>
     <Text Include="externals\imgui\LICENSE.txt" />

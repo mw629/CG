@@ -4,6 +4,7 @@
 #include <d3d12.h>  
 #include <cstdint>  
 #include "Camera.h"
+#include "Model.h"
 
 class Draw {
 private:
@@ -30,4 +31,7 @@ public:
 		ID3D12GraphicsCommandList* commandList,
 		ID3D12Resource* materialResource,
 		D3D12_GPU_DESCRIPTOR_HANDLE textureSrvHandleGPU);
+
+	void DrawObj();
+
 };
