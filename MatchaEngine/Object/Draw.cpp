@@ -65,7 +65,7 @@ void Draw::DrawTriangle(Transform transform,
 	//
 	wvpResource->Map(0, nullptr, reinterpret_cast<void**>(&wvpData));
 	//
-	*wvpData = camera.MakeWorldViewProjectionMatrix(transform, cameraTransform);
+	//*wvpData = camera.MakeWorldViewProjectionMatrix(transform, cameraTransform);
 
 	
 
@@ -77,4 +77,14 @@ void Draw::DrawTriangle(Transform transform,
 
 	//描画！（DrawCall/ドローコール）。3頂点で1つのインスタンス。インスタンスについては今後
 	commandList->DrawInstanced(3, 1, 0, 0);
+}
+
+void Draw::DrawObj()
+{
+	//command.get()->GetCommandList()->IASetVertexBuffers(0, 1, &vertexBufferViewObj);//VBVを設定
+	//command.get()->GetCommandList()->SetGraphicsRootConstantBufferView(0, spriteMatrial.get()->GetMaterialResource()->GetGPUVirtualAddress());
+	//command.get()->GetCommandList()->SetGraphicsRootConstantBufferView(1, transformationMatrixResourceObj->GetGPUVirtualAddress());
+	//command.get()->GetCommandList()->SetGraphicsRootDescriptorTable(2, textureSrvHandleGPU);
+
+	//command.get()->GetCommandList()->DrawInstanced(UINT(modelData.vertices.size()), 1, 0, 0);
 }

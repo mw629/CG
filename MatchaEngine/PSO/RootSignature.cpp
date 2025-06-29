@@ -4,11 +4,17 @@
 
 
 
-void RootSignature::CreateRootSignature(std::ostream& os, Microsoft::WRL::ComPtr <ID3D12Device> device)
+RootSignature::RootSignature()
 {
-
 	descriptionRootSignature_.Flags =
 		D3D12_ROOT_SIGNATURE_FLAG_ALLOW_INPUT_ASSEMBLER_INPUT_LAYOUT;
+
+}
+
+void RootSignature::CreateRootSignature(std::ostream& os, ID3D12Device* device)
+{
+
+	
 	//シリアライズしてバイナリにする
 	hr_ = D3D12SerializeRootSignature(&descriptionRootSignature_,
 		D3D_ROOT_SIGNATURE_VERSION_1, &signatureBlob_, &errorBlob_);

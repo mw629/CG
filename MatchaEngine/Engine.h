@@ -13,6 +13,11 @@ public:
 	~Engine();
 	Engine();
 
+	void Setting();
+
+	void PreDraw();
+
+	void PostDraw();
 
 
 };

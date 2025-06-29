@@ -1,40 +1,26 @@
 #pragma once
-#include "../Common/VariableTypes.h"
-#include "../Common/Input.h"
+#include "Common/VariableTypes.h"
+#include "Common/Input.h"
 
-class DebugCamera
-{
+
+class DebugCamera {
 private:
+    Vector3 eye_;
+    Vector3 target_;
+    Vector3 up_;
 
-	Vector3 translation_ = { 0,0,-50 };
-	Vector3 rotation_ = { 0,0,0 };
+    Vector2i mousePrevPos_;
+    bool isMiddleMouseButtonPressed_;
 
-	Matrix4x4 viewMatrix_;//ビュー行列
-	Matrix4x4 ProjectionMatrix_;//射影行列
+    float radius_;
+    float phi_;
+    float theta_;
 
-	float fovY = 0.45f;
-	float aspect = 1280.0f / 720.0f;
-	float zn = 0.1f;
-	float zf = 100.0f;
-
-	Transform camera_ ;
-	Matrix4x4 cameraMatrix_;
-
-	Matrix4x4 matRot_;
-
-	float speed = 0.1f;
-	float angle = 0.01f;
+    Matrix4x4 viewMatrix_;
 
 public:
-
-	void Initialize();
-
-	void CameraMove(Input input);
-
-	void Update(Input input);
-
-	
-	Matrix4x4 GetViewMatrix() { return viewMatrix_; }
-	Transform GetCamera() { return camera_; }
+    void Initialize();
+    void Update(Input* input);
+    Matrix4x4 GetViewMatrix() { return viewMatrix_; }
+    Vector3 GetTarget() const { return target_; }
 };
-
