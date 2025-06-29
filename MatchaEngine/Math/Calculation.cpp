@@ -44,7 +44,7 @@ Vector3 ScalarMultiply(Vector3 v, float s)
 	return result;
 }
 
-float Lengeh(Vector3 v)
+float Length(Vector3 v)
 {
 	float result;
 	result = static_cast<float>(sqrt(v.x * v.x + v.y * v.y + v.z * v.z));
@@ -54,10 +54,10 @@ float Lengeh(Vector3 v)
 Vector3 Normalize(Vector3 v)
 {
 	Vector3 result{};
-	if (Lengeh(v) != 0) {
-		result.x = v.x / Lengeh(v);
-		result.y = v.y / Lengeh(v);
-		result.z = v.z / Lengeh(v);
+	if (Length(v) != 0) {
+		result.x = v.x / Length(v);
+		result.y = v.y / Length(v);
+		result.z = v.z / Length(v);
 	}
 	return result;
 }
@@ -327,14 +327,7 @@ Vector3 MakeWorldPos(PolarCoordinates pos) {
 	return worldPos;
 }
 
-Vector3 MakeWorldROteta(PolarCoordinates pos)
-{
-	float pai = 3.141592f;
-	Vector3 roteta;
-	roteta.x =sinf(pos.theta * pai) * cosf(pos.theta * pai);
-	roteta.y =sinf(pos.theta * pai) * sinf(pos.theta * pai);
-	roteta.z =cosf(pos.theta * pai);
-}
+
 
 
 Matrix4x4 MakeLookAtMatrix(const Vector3& eye, const Vector3& target, const Vector3& up)
@@ -469,3 +462,21 @@ Matrix4x4 MakeViewPortMatrix(float width, float height, float left, float top, f
 	return result;
 }
 
+Matrix4x4 MakeLookAtLH(const Vector3& eye, const Vector3& target, const Vector3& up){
+	Vector3 zAxis = Normalize(target - eye);
+	Vector3 xAxis = Normalize(Cross(up, zAxis));
+	Vector3 yAxis = Cross(zAxis, xAxis);
+
+	Matrix4x4 result; 
+
+	result.m[0][0] = xAxis.x;      result.m[0][1] = yAxis.x;      result.m[0][2] = zAxis.x;      result.m[0][3] = 0.0f;
+	result.m[1][0] = xAxis.y;      result.m[1][1] = yAxis.y;      result.m[1][2] = zAxis.y;      result.m[1][3] = 0.0f;
+	result.m[2][0] = xAxis.z;      result.m[2][1] = yAxis.z;      result.m[2][2] = zAxis.z;      result.m[2][3] = 0.0f;
+
+	result.m[3][0] = -Dot(xAxis, eye);
+	result.m[3][1] = -Dot(yAxis, eye);
+	result.m[3][2] = -Dot(zAxis, eye);
+	result.m[3][3] = 1.0f;
+
+	return result;
+}

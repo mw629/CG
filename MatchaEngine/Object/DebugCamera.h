@@ -2,25 +2,25 @@
 #include "Common/VariableTypes.h"
 #include "Common/Input.h"
 
-class DebugCamera
-{
+
+class DebugCamera {
 private:
-	PolarCoordinates pos_;
-	Transform camera_;
+    Vector3 eye_;
+    Vector3 target_;
+    Vector3 up_;
 
-	Matrix4x4 cameraMatrix;
-	Matrix4x4 viewMatrix_;
+    Vector2i mousePrevPos_;
+    bool isMiddleMouseButtonPressed_;
 
-	
+    float radius_;
+    float phi_;
+    float theta_;
+
+    Matrix4x4 viewMatrix_;
 
 public:
-
-	void Initialize();
-
-	void Update(Input* input);
-
-
-	Matrix4x4 GetViewMatrix() {return viewMatrix_;}
-
+    void Initialize();
+    void Update(Input* input);
+    Matrix4x4 GetViewMatrix() { return viewMatrix_; }
+    Vector3 GetTarget() const { return target_; }
 };
-
