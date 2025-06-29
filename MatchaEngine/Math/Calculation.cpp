@@ -315,15 +315,25 @@ Matrix4x4 Translation(Vector3 pos)
 Vector3 MakeWorldPos(PolarCoordinates pos) {
 	float pai = 3.141592f;
 	Vector3 offset;
-	offset.x = pos.radius * sinf(pos.phi* pai) * cosf(pos.theta * pai);
-	offset.y = pos.radius * cosf(pos.phi* pai);
-	offset.z = pos.radius * sinf(pos.phi * pai) * sinf(pos.theta * pai);
+	offset.x = pos.radius * sinf(pos.theta * pai) * cosf(pos.theta * pai);
+	offset.y = pos.radius * sinf(pos.theta * pai) * sinf(pos.theta * pai);
+	offset.z = pos.radius * cosf(pos.theta * pai);
 	
 	Vector3 worldPos;
 	worldPos.x = pos.offset.x + offset.x;
 	worldPos.y = pos.offset.y + offset.y;
 	worldPos.z = pos.offset.z + offset.z;
+
 	return worldPos;
+}
+
+Vector3 MakeWorldROteta(PolarCoordinates pos)
+{
+	float pai = 3.141592f;
+	Vector3 roteta;
+	roteta.x =sinf(pos.theta * pai) * cosf(pos.theta * pai);
+	roteta.y =sinf(pos.theta * pai) * sinf(pos.theta * pai);
+	roteta.z =cosf(pos.theta * pai);
 }
 
 

@@ -46,13 +46,13 @@ public:
 	bool FreeKey(uint32_t key);
 
 	//押して瞬間
-	bool PushMouse(uint32_t bottom);
+	bool PushMouse(uint32_t Key);
 	//押している
-	bool PressMouse(uint32_t bottom);
+	bool PressMouse(uint32_t key);
 	//離した瞬間
-	bool ReleaseMouse(uint32_t bottom);
+	bool ReleaseMouse(uint32_t key);
 	//離してる
-	bool FreeMouse(uint32_t bottom);
+	bool FreeMouse(uint32_t key);
 	//マウスの移動
 	Vector3 GetMouseDelta() { return Vector3(mouseState.lX, mouseState.lY,0); }
 	int GetMouseWheel() { return mouseState.lZ; }

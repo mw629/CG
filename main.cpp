@@ -953,6 +953,9 @@ int WINAPI WinMain(HINSTANCE, HINSTANCE, LPSTR, int) {
 	viewportScissor.get()->CreateSxissor();
 	
 
+	Matrix4x4 viewMatrix;
+
+	bool debugCameraFlag;
 
 	float rdius = 1.0f;
 	bool useMonsterBall = true;
@@ -963,7 +966,7 @@ int WINAPI WinMain(HINSTANCE, HINSTANCE, LPSTR, int) {
 	Transform transformObj{ {1.0f,1.0f,1.0f},{0.0f,0.0f,0.0f},{0.0f,0.0f,1.0f} };
 
 	Transform uvTransformSprite{ {1.0f,1.0f,1.0f},{0.0f,0.0f,0.0f},{0.0f,0.0f,0.0f} };
-
+	
 	Audio* audio = new Audio;
 	int BGMHandle;
 	audio->Initialize();
@@ -996,7 +999,6 @@ int WINAPI WinMain(HINSTANCE, HINSTANCE, LPSTR, int) {
 
 			
 
-			
 
 			ImGui_ImplDX12_NewFrame();
 			ImGui_ImplWin32_NewFrame();
@@ -1029,7 +1031,8 @@ int WINAPI WinMain(HINSTANCE, HINSTANCE, LPSTR, int) {
 
 			//開発用UIの処理。実際に開発用UIを出す場合はここをゲ0無固有の処理に置き換える
 			ImGui::Checkbox("useMonsterBall", &useMonsterBall);
-			//ImGui::ShowDemoWindow();
+			ImGui::Checkbox("debugCameraFlag", &debugCameraFlag);
+			//ImGui::ShowDemoWindow();debugCameraFlag
 
 			if (ImGui::CollapsingHeader("Camera")) {
 				ImGui::DragFloat3("camraTranslate", &camraTransform.translate.x, 0.01f);
@@ -1071,14 +1074,15 @@ int WINAPI WinMain(HINSTANCE, HINSTANCE, LPSTR, int) {
 
 			input->Updata();
 
-			//transformShpere.rotate.y += 0.1f;
-
-
-			//*wvpData = camera.MakeWorldViewProjectionMatrix(transform, camraTransform);
-			//*transformationMatrixDataSprite = camera.MakeWorldViewProjectionMatrix(transformSprite, camraTransform);
-			debudCamera->Update(input);
-			Matrix4x4 viewMatrix = debudCamera->GetViewMatrix();
-			
+			if (debugCameraFlag) {
+				debudCamera->Update(input);
+				viewMatrix = debudCamera->GetViewMatrix();
+			}
+			else
+			{
+				Matrix4x4 cameraMatrix= MakeAffineMatrix(camraTransform.translate, camraTransform.scale, camraTransform.rotate);;
+				viewMatrix = Inverse(cameraMatrix);
+			}
 			//Matrix4x4 viewMatrix = Inverse(MakeAffineMatrix(camraTransform.translate, camraTransform.scale, camraTransform.rotate));
 			Matrix4x4 projectionMatri = MakePerspectiveFovMatrix(0.45f, float(kClientWidth) / float(kClientHeight), 0.1f, 100.0f);
 

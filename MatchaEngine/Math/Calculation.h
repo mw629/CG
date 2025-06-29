@@ -175,6 +175,8 @@ Matrix4x4 Translation(Vector3 pos);
 
 Vector3 MakeWorldPos(PolarCoordinates pos);
 
+Vector3 MakeWorldROteta(PolarCoordinates pos);
+
 Matrix4x4 MakeLookAtMatrix(
     const Vector3& eye,     // カメラの位置
     const Vector3& target,  // 見たい場所
