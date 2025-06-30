@@ -12,24 +12,37 @@
 
 class GraphicsPipelineState {
 private:
-	DirectXShaderCompiler directXShaderCompiler;
-	std::unique_ptr<RootSignature> rootSignature = std::make_unique<RootSignature>();
-	std::unique_ptr<RootParameter> rootParameter = std::make_unique<RootParameter>();
-	std::unique_ptr<Sampler> sampler = std::make_unique<Sampler>();
-	std::unique_ptr<InputLayout> inputLayout = std::make_unique<InputLayout>();
-	std::unique_ptr<BlendState> blendState = std::make_unique<BlendState>();
-	std::unique_ptr<RasterizerState> rasterizerState = std::make_unique<RasterizerState>();
-	std::unique_ptr<ShaderCompile> shaderCompile = std::make_unique<ShaderCompile>();
-	std::unique_ptr<DepthStencilState> depthStencilState = std::make_unique<DepthStencilState>();
+	DirectXShaderCompiler directXShaderCompiler_;
+	RootSignature* rootSignature_;
+	RootParameter* rootParameter_;
+	Sampler* sampler_;
+	InputLayout* inputLayout_;
+	BlendState* blendState_;
+	RasterizerState* rasterizerState_;
+	ShaderCompile* shaderCompile_;
+	DepthStencilState* depthStencilState_;
 
 	D3D12_GRAPHICS_PIPELINE_STATE_DESC graphicsPipelineStateDesc_{};
-
+	Microsoft::WRL::ComPtr<ID3D12PipelineState> graphicsPipelineState_ = nullptr;
 
 	HRESULT hr_;
 
 public:
-	
-	void PSOSetting(std::ostream& os, ID3D12Device* device);
+
+
+	void PSOSetting(
+		DirectXShaderCompiler directXShaderCompiler,
+		RootSignature* rootSignature,
+		RootParameter* rootParameter,
+		Sampler* sampler,
+		InputLayout* inputLayout,
+		BlendState* blendState,
+		RasterizerState* rasterizerState,
+		ShaderCompile* shaderCompile,
+		DepthStencilState* depthStencilState);
 
 	void CreatePSO(std::ostream& os, ID3D12Device* device);
+
+	D3D12_GRAPHICS_PIPELINE_STATE_DESC GetGraphicsPipelineStateDesc() { return graphicsPipelineStateDesc_; }
+	ID3D12PipelineState* GetGraphicsPipelineState() { return graphicsPipelineState_.Get(); }
 };

@@ -45,6 +45,7 @@ extern IMGUI_IMPL_API LRESULT ImGui_ImplWin32_WndProcHandler(HWND hWnd, UINT msg
 #include "GameObjects/DebugCamera.h"
 #include "GameObjects/Draw.h"
 #include "GameObjects/Matrial.h"
+#include "ViewportScissor.h"
 //PSO
 
 #include "PSO/DirectXShaderCompiler.h"
@@ -56,7 +57,7 @@ extern IMGUI_IMPL_API LRESULT ImGui_ImplWin32_WndProcHandler(HWND hWnd, UINT msg
 #include "PSO/ShaderCompile.h"
 #include "PSO/DepthStencilState.h"
 #include <PSO/Sampler.h>
-#include "ViewportScissor.h"
+#include <PSO/GraphicsPipelineState.h>
 
 #pragma comment(lib,"d3d12.lib")
 #pragma comment(lib,"dxgi.lib")
@@ -380,7 +381,8 @@ int WINAPI WinMain(HINSTANCE, HINSTANCE, LPSTR, int) {
 	std::unique_ptr<RasterizerState> rasterizerState = std::make_unique<RasterizerState>();
 	std::unique_ptr<ShaderCompile> shaderCompile = std::make_unique<ShaderCompile>();
 	std::unique_ptr<DepthStencilState> depthStencilState = std::make_unique<DepthStencilState>();
-
+	std::unique_ptr<GraphicsPipelineState> graphicsPipelineState = std::make_unique<GraphicsPipelineState>();
+	
 	//DXCの初期化//
 	directXShaderCompiler.CreateDXC();
 
@@ -416,37 +418,9 @@ int WINAPI WinMain(HINSTANCE, HINSTANCE, LPSTR, int) {
 	depthStencilState->CreateDepthStencilState();
 
 
-	//PSOを生成する//
-
-	D3D12_GRAPHICS_PIPELINE_STATE_DESC graphicsPipelineStateDesc{};
-	graphicsPipelineStateDesc.pRootSignature = rootSignature.get()->GetRootSignature();//RootSignature
-	graphicsPipelineStateDesc.InputLayout = inputLayout.get()->GetInputLayoutDesc();//InputLayout
-	graphicsPipelineStateDesc.VS = { shaderCompile.get()->GetVertexShaderBlob()->GetBufferPointer(),
-	 shaderCompile.get()->GetVertexShaderBlob()->GetBufferSize() };//VertexShader
-	graphicsPipelineStateDesc.PS = { shaderCompile.get()->GetPixelShaderBlob()->GetBufferPointer(),
-	shaderCompile.get()->GetPixelShaderBlob()->GetBufferSize() };//PixelShader
-	graphicsPipelineStateDesc.BlendState = blendState.get()->GetBlendDesc();//BlenderState
-	graphicsPipelineStateDesc.RasterizerState = rasterizerState.get()->GetRasterizerDesc();//RasterizerState
-	//書き込むRTVの情報
-	graphicsPipelineStateDesc.NumRenderTargets = 1;
-	graphicsPipelineStateDesc.RTVFormats[0] = DXGI_FORMAT_R8G8B8A8_UNORM_SRGB;
-	//利用するトポロジ（形状）のタイプ。三角形
-	graphicsPipelineStateDesc.PrimitiveTopologyType =
-		D3D12_PRIMITIVE_TOPOLOGY_TYPE_TRIANGLE;
-	//どのように画面に色を打ち込むのかの設定(気にしなくていい)
-	graphicsPipelineStateDesc.SampleDesc.Count = 1;
-	graphicsPipelineStateDesc.SampleMask = D3D12_DEFAULT_SAMPLE_MASK;
-
-	//作成したらPSOに代入、DSCのFormatを設定する//
-	graphicsPipelineStateDesc.DepthStencilState = depthStencilState.get()->GetDepthStencilDesc();
-	graphicsPipelineStateDesc.DSVFormat = DXGI_FORMAT_D24_UNORM_S8_UINT;
-
-	//実際に生成
-	Microsoft::WRL::ComPtr<ID3D12PipelineState> graphicsPipelineState = nullptr;
-	hr = graphics.get()->GetDevice()->CreateGraphicsPipelineState(&graphicsPipelineStateDesc,
-		IID_PPV_ARGS(&graphicsPipelineState));
-	assert(SUCCEEDED(hr));
-
+	graphicsPipelineState->PSOSetting(directXShaderCompiler, rootSignature.get(), rootParameter.get(),
+		sampler.get(), inputLayout.get(), blendState.get(), rasterizerState.get(), shaderCompile.get(), depthStencilState.get());
+	graphicsPipelineState->CreatePSO(logStream, graphics.get()->GetDevice());
 
 
 
@@ -959,7 +933,7 @@ int WINAPI WinMain(HINSTANCE, HINSTANCE, LPSTR, int) {
 			ID3D12DescriptorHeap* descriptorHeeps[] = { descriptorHeap.get()->GetSrvDescriptorHeap() };
 			command.get()->GetCommandList()->SetDescriptorHeaps(1, descriptorHeeps);
 
-			command.get()->GetCommandList()->SetPipelineState(graphicsPipelineState.Get());//PSOを設定
+			command.get()->GetCommandList()->SetPipelineState(graphicsPipelineState.get()->GetGraphicsPipelineState());//PSOを設定
 			command.get()->GetCommandList()->IASetVertexBuffers(0, 1, &vertexBufferView);//VBVを設定
 			//形状を設定。PSOに設定しているものとはまた別。同じものを設定すると考えておけばいい
 			command.get()->GetCommandList()->IASetPrimitiveTopology(D3D_PRIMITIVE_TOPOLOGY_TRIANGLELIST);
