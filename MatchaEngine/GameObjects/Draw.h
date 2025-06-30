@@ -30,6 +30,6 @@ public:
 		ID3D12Resource* materialResource,
 		D3D12_GPU_DESCRIPTOR_HANDLE textureSrvHandleGPU);
 
-	void DrawObj();
+	void DrawObj(ID3D12GraphicsCommandList* commandList, Model* model);
 
 };

@@ -29,20 +29,22 @@
 
 extern IMGUI_IMPL_API LRESULT ImGui_ImplWin32_WndProcHandler(HWND hWnd, UINT msg, WPARAM wParam, LPARAM lParam);
 
-#include "Math/Calculation.h"//MTで作った
+
 #include "MatchaEngine/Resource/Audio.h"
-#include "MatchaEngine/Common/GraphicsDevice.h"
-#include "Common/WindowConfig.h"
-#include "Object/Draw.h"
+#include "MatchaEngine/Resource/Load.h"
+#include "Common/GraphicsDevice.h"
+#include "Common/CommandContext.h"
 #include "Common/Input.h"
-#include "Object/DebugCamera.h"
-#include "Common/CommandContext .h"
-#include "SwapChain.h"
-#include "DescriptorHeap.h"
-#include "RenderTargetView.h"
-#include "DepthStencil.h"
-#include "Matrial.h"
+#include "Common/WindowConfig.h"
 #include "GpuSyncManager.h"
+#include "DescriptorHeap.h"
+#include "DepthStencil.h"
+#include "RenderTargetView.h"
+#include "SwapChain.h"
+#include "Math/Calculation.h" 
+#include "GameObjects/DebugCamera.h"
+#include "GameObjects/Draw.h"
+#include "GameObjects/Matrial.h"
 //PSO
 
 #include "PSO/DirectXShaderCompiler.h"
@@ -191,83 +193,6 @@ Microsoft::WRL::ComPtr<ID3D12DescriptorHeap> CreateDescriptorHeep(
 }
 
 
-DirectX::ScratchImage LoadTexture(const std::string& filePath) {
-
-	//テクスチャファイルを読み込んでプログラムで扱えるようにする
-	DirectX::ScratchImage image{};
-	std::wstring filePathW = ConvertString(filePath);
-	HRESULT hr = DirectX::LoadFromWICFile(filePathW.c_str(), DirectX::WIC_FLAGS_FORCE_SRGB, nullptr, image);
-	assert(SUCCEEDED(hr));
-
-	//ミニマップの作成
-	DirectX::ScratchImage mipImages{};
-	hr = DirectX::GenerateMipMaps(image.GetImages(), image.GetImageCount(), image.GetMetadata(), DirectX::TEX_FILTER_SRGB, 0, mipImages);
-	assert(SUCCEEDED(hr));
-
-	//ミニマップ付きのデータを返す
-	return mipImages;
-}
-
-Microsoft::WRL::ComPtr<ID3D12Resource> CreateTextureResource(ID3D12Device* device, const DirectX::TexMetadata& metadata)
-{
-
-	//metadataを基にResorceの設定
-
-	D3D12_RESOURCE_DESC resourceDesc{};
-	resourceDesc.Width = UINT(metadata.width);//Textureの幅
-	resourceDesc.Height = UINT(metadata.height);//Textureの縦
-	resourceDesc.MipLevels = UINT16(metadata.mipLevels);//mipmapの数
-	resourceDesc.DepthOrArraySize = UINT16(metadata.arraySize);;//奥行き or 配列Textureの配列数
-	resourceDesc.Format = metadata.format;//TextureのFormat
-	resourceDesc.SampleDesc.Count = 1;//サンプリングカウント。１固定。
-	resourceDesc.Dimension = D3D12_RESOURCE_DIMENSION(metadata.dimension);//Textureの次元数。普段使っているのは二次元
-
-	//利用するHeapの設定
-
-	D3D12_HEAP_PROPERTIES heapProperties{};
-	heapProperties.Type = D3D12_HEAP_TYPE_DEFAULT;//細かい設定を行う
-
-
-	//Resourceを作成
-
-	Microsoft::WRL::ComPtr<ID3D12Resource> resource = nullptr;
-	HRESULT hr = device->CreateCommittedResource(
-		&heapProperties,//Heapの設定
-		D3D12_HEAP_FLAG_NONE,//Heapの特殊な設定。特になし
-		&resourceDesc,//Resourceの設定
-		D3D12_RESOURCE_STATE_COPY_DEST,//データ転送される設定
-		nullptr,//Clear最適値。使わないのでnullptr
-		IID_PPV_ARGS(&resource));
-	assert(SUCCEEDED(hr));
-	return resource;
-}
-
-[[nodiscard]]
-Microsoft::WRL::ComPtr<ID3D12Resource> UploadTextureData(ID3D12Resource* texture, const DirectX::ScratchImage& mipImages, ID3D12Device* device, ID3D12GraphicsCommandList* commandList)
-{
-	std::vector<D3D12_SUBRESOURCE_DATA> subresources;
-
-	DirectX::PrepareUpload(device, mipImages.GetImages(), mipImages.GetImageCount(), mipImages.GetMetadata(), subresources);
-	uint64_t intermediateSize = GetRequiredIntermediateSize(texture, 0, UINT(subresources.size()));
-	Microsoft::WRL::ComPtr<ID3D12Resource> intermediateResource = GraphicsDevice::CreateBufferResource(device, intermediateSize);
-
-	UpdateSubresources(commandList, texture, intermediateResource.Get(), 0, 0, UINT(subresources.size()), subresources.data());
-
-
-	//Tetureへの転送後は利用できるよう。D3D12_RESOURCE_STATE_COPY_DESTからD3D12_RESOURCE_STATE_GENERIC_READへResourceStateを変更する
-	D3D12_RESOURCE_BARRIER barrier{};
-	barrier.Type = D3D12_RESOURCE_BARRIER_TYPE_TRANSITION;
-	barrier.Flags = D3D12_RESOURCE_BARRIER_FLAG_NONE;
-	barrier.Transition.pResource = texture;
-	barrier.Transition.Subresource = D3D12_RESOURCE_BARRIER_ALL_SUBRESOURCES;
-	barrier.Transition.StateBefore = D3D12_RESOURCE_STATE_COPY_DEST;
-	barrier.Transition.StateAfter = D3D12_RESOURCE_STATE_GENERIC_READ;
-	commandList->ResourceBarrier(1, &barrier);
-
-	return intermediateResource;
-
-}
-
 Microsoft::WRL::ComPtr<ID3D12Resource> CreateDepthStencilTextureResource(ID3D12Device* device, int32_t width, int32_t height) {
 
 	//生成するResourceの設定
@@ -317,101 +242,6 @@ D3D12_GPU_DESCRIPTOR_HANDLE GetGPUDescriptorHandle(ID3D12DescriptorHeap* descrip
 	return handleGPU;
 }
 
-MaterialData LoadMaterialTemplateFile(const std::string& directoryPath, const std::string& filename) {
-	MaterialData materiaData;//構築するMaterialData
-	std::string line;//ファイルから読んだ一行を格納する
-	std::ifstream file(directoryPath + "/" + filename);//ファイルを開く
-	assert(file.is_open());
-
-	while (std::getline(file, line))
-	{
-		std::string identifier;
-		std::istringstream s(line);
-		s >> identifier;
-
-		//identifierに応じた処理
-		if (identifier == "map_Kd") {
-			std::string textureFilename;
-			s >> textureFilename;
-			//連結してファイルパス
-			materiaData.textureDilePath = directoryPath + "/" + textureFilename;
-		}
-	}
-	return materiaData;
-}
-
-ModelData LoadObjFile(const std::string& directoryPath, const std::string& filename)
-{
-	ModelData modelData;
-	std::vector<Vector4> positions;//位置
-	std::vector<Vector3> normals;//法線
-	std::vector<Vector2> texcoords;//テクスチャ座標
-	std::string line;//1行分の文字列を入れる変数
-	VertexData Triangle[3]{};
-
-	std::ifstream file(directoryPath + "/" + filename);//ファイルを開く
-	assert(file.is_open());
-
-	while (std::getline(file, line))
-	{
-		std::string identifier;
-		std::istringstream s(line);
-		s >> identifier;
-
-		if (identifier == "v") {
-			Vector4 position;
-			s >> position.x >> position.y >> position.z;
-			position.w = 1.0f;
-			position.x *= -1.0f;
-			positions.push_back(position);
-		}
-		else if (identifier == "vt") {
-			Vector2 texcoord;
-			s >> texcoord.x >> texcoord.y;
-			texcoord.y = 1.0f - texcoord.y;
-			texcoords.push_back(texcoord);
-		}
-		else if (identifier == "vn") {
-			Vector3 normal;
-			s >> normal.x >> normal.y >> normal.z;
-			normal.x *= -1.0f;
-			normals.push_back(normal);
-		}
-		else if (identifier == "f") {
-			//面は三角形限定。そのほか未対応
-			for (int32_t faceVertex = 0; faceVertex < 3; ++faceVertex) {
-				std::string vertexDefinition;
-				s >> vertexDefinition;
-				//頂点の要素へのIndexは「位置/UV/法線」で格納されてるので、分解してIndexを取得する
-				std::istringstream v(vertexDefinition);
-				uint32_t elementIndices[3];
-				for (int32_t element = 0; element < 3; ++element) {
-					std::string index;
-					std::getline(v, index, '/');//区切りでインデックスを読んでいく
-					elementIndices[element] = std::stoi(index);
-				}
-
-				Vector4 position = positions[elementIndices[0] - 1];
-				Vector2 texcoord = texcoords[elementIndices[1] - 1];
-				Vector3 normal = normals[elementIndices[2] - 1];
-				Triangle[faceVertex] = { position ,texcoord ,normal };
-
-			}
-			modelData.vertices.push_back(Triangle[2]);
-			modelData.vertices.push_back(Triangle[1]);
-			modelData.vertices.push_back(Triangle[0]);
-		}
-		else if (identifier == "mtllib") {
-			//makterialTemplateLibraryファイルの名前を取得する
-			std::string materiaFilename;
-			s >> materiaFilename;
-			//基本的にobjファイルと同一改装にmtlは存在させるので、ディレクトリ名とファイル名を渡す 
-			modelData.material = LoadMaterialTemplateFile(directoryPath, materiaFilename);
-		}
-	}
-	return modelData;
-
-}
 
 ///-------------------------------------------
 ///WinMain
@@ -456,7 +286,7 @@ int WINAPI WinMain(HINSTANCE, HINSTANCE, LPSTR, int) {
 	std::unique_ptr<SwapChain> swapChain = std::make_unique<SwapChain>();
 	std::unique_ptr<DescriptorHeap> descriptorHeap = std::make_unique<DescriptorHeap>(graphics.get()->GetDevice());
 	std::unique_ptr<RenderTargetView> renderTargetView = std::make_unique<RenderTargetView>();
-	std::unique_ptr<ViewportScissor> viewportScissor = std::make_unique<ViewportScissor>(kClientWidth,kClientHeight);
+	std::unique_ptr<ViewportScissor> viewportScissor = std::make_unique<ViewportScissor>(kClientWidth, kClientHeight);
 	//入力
 	Input* input = new Input;
 
@@ -520,7 +350,7 @@ int WINAPI WinMain(HINSTANCE, HINSTANCE, LPSTR, int) {
 	descriptorHeap.get()->CreateHeap(graphics.get()->GetDevice());
 	renderTargetView.get()->CreateRenderTargetView(graphics.get()->GetDevice(), swapChain.get()->GetSwapChainResources(0), swapChain.get()->GetSwapChainResources(1), descriptorHeap.get()->GetRtvDescriptorHeap());
 
-	
+
 	//初期値0でFenceを作る
 	Microsoft::WRL::ComPtr<ID3D12Fence> fence = nullptr;
 	uint64_t fenceValue = 0;
@@ -908,7 +738,7 @@ int WINAPI WinMain(HINSTANCE, HINSTANCE, LPSTR, int) {
 	const DirectX::TexMetadata& metaData = mipImages.GetMetadata();
 	Microsoft::WRL::ComPtr<ID3D12Resource> textureResource = CreateTextureResource(graphics.get()->GetDevice(), metaData);
 	Microsoft::WRL::ComPtr<ID3D12Resource> intermediateResource = UploadTextureData(textureResource.Get(), mipImages, graphics.get()->GetDevice(), command.get()->GetCommandList());
-	
+
 	//実際にShaderResourceView
 
 	//meteDataを基にSRVの設定
@@ -941,7 +771,7 @@ int WINAPI WinMain(HINSTANCE, HINSTANCE, LPSTR, int) {
 	D3D12_CPU_DESCRIPTOR_HANDLE textureSrvHandleCPU2 = GetCPUDescriptorHandle(descriptorHeap.get()->GetSrvDescriptorHeap(), descriptorHeap.get()->GetDescriptorSizeSRV(), 2);
 	D3D12_GPU_DESCRIPTOR_HANDLE textureSrvHandleGPU2 = GetGPUDescriptorHandle(descriptorHeap.get()->GetSrvDescriptorHeap(), descriptorHeap.get()->GetDescriptorSizeSRV(), 2);
 
-	
+
 	graphics.get()->GetDevice()->CreateShaderResourceView(textureResource2.Get(), &srvDesc2, textureSrvHandleCPU2);
 
 
@@ -951,11 +781,11 @@ int WINAPI WinMain(HINSTANCE, HINSTANCE, LPSTR, int) {
 	viewportScissor.get()->CreateViewPort();
 	//シーザー矩形
 	viewportScissor.get()->CreateSxissor();
-	
+
 
 	Matrix4x4 viewMatrix;
 
-	bool debugCameraFlag;
+	bool debugCameraFlag = false;
 
 	float rdius = 1.0f;
 	bool useMonsterBall = true;
@@ -966,7 +796,7 @@ int WINAPI WinMain(HINSTANCE, HINSTANCE, LPSTR, int) {
 	Transform transformObj{ {1.0f,1.0f,1.0f},{0.0f,0.0f,0.0f},{0.0f,0.0f,1.0f} };
 
 	Transform uvTransformSprite{ {1.0f,1.0f,1.0f},{0.0f,0.0f,0.0f},{0.0f,0.0f,0.0f} };
-	
+
 	Audio* audio = new Audio;
 	int BGMHandle;
 	audio->Initialize();
@@ -997,7 +827,7 @@ int WINAPI WinMain(HINSTANCE, HINSTANCE, LPSTR, int) {
 		}
 		else {
 
-			
+
 
 
 			ImGui_ImplDX12_NewFrame();
@@ -1080,7 +910,7 @@ int WINAPI WinMain(HINSTANCE, HINSTANCE, LPSTR, int) {
 			}
 			else
 			{
-				Matrix4x4 cameraMatrix= MakeAffineMatrix(camraTransform.translate, camraTransform.scale, camraTransform.rotate);;
+				Matrix4x4 cameraMatrix = MakeAffineMatrix(camraTransform.translate, camraTransform.scale, camraTransform.rotate);;
 				viewMatrix = Inverse(cameraMatrix);
 			}
 			//Matrix4x4 viewMatrix = Inverse(MakeAffineMatrix(camraTransform.translate, camraTransform.scale, camraTransform.rotate));
@@ -1121,7 +951,7 @@ int WINAPI WinMain(HINSTANCE, HINSTANCE, LPSTR, int) {
 			command.get()->GetCommandList()->ClearDepthStencilView(dsvHandle, D3D12_CLEAR_FLAG_DEPTH, 1.0f, 0, 0, nullptr);
 
 
-			
+
 
 
 			//コマンドを積む//
@@ -1137,7 +967,7 @@ int WINAPI WinMain(HINSTANCE, HINSTANCE, LPSTR, int) {
 
 
 			command.get()->GetCommandList()->RSSetViewports(1, viewportScissor.get()->GetViewport());//Viewportを設定
-			command.get()->GetCommandList()->RSSetScissorRects(1,viewportScissor.get()->GetScissorRect());//Sxirssorを設定
+			command.get()->GetCommandList()->RSSetScissorRects(1, viewportScissor.get()->GetScissorRect());//Sxirssorを設定
 			//RootSignatureを設定。POSに設定しているけど別途設定が必要
 			command.get()->GetCommandList()->SetGraphicsRootSignature(rootSignature.get()->GetRootSignature());
 			command.get()->GetCommandList()->SetGraphicsRootConstantBufferView(3, directinalLightResource->GetGPUVirtualAddress());
@@ -1198,7 +1028,7 @@ int WINAPI WinMain(HINSTANCE, HINSTANCE, LPSTR, int) {
 			//GPUとOSに画面の交換を行うよう通知する
 			swapChain.get()->GetSwapChain()->Present(1, 0);
 
-			
+
 
 			fenceValue++;
 			HRESULT hr = command.get()->GetCommandQueue()->Signal(fence.Get(), fenceValue);

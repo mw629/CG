@@ -7,10 +7,11 @@
 
 
 
-Model::Model(ModelData modelData)
+Model::Model(ModelData modelData, Matrial matrial)
 {
 	transform_ = {};
 	modelData_ = modelData;
+	matrial_ = matrial;
 }
 
 

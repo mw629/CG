@@ -79,12 +79,12 @@ void Draw::DrawTriangle(Transform transform,
 	commandList->DrawInstanced(3, 1, 0, 0);
 }
 
-void Draw::DrawObj()
+void Draw::DrawObj(ID3D12GraphicsCommandList* commandList,Model *model)
 {
-	//command.get()->GetCommandList()->IASetVertexBuffers(0, 1, &vertexBufferViewObj);//VBVを設定
-	//command.get()->GetCommandList()->SetGraphicsRootConstantBufferView(0, spriteMatrial.get()->GetMaterialResource()->GetGPUVirtualAddress());
-	//command.get()->GetCommandList()->SetGraphicsRootConstantBufferView(1, transformationMatrixResourceObj->GetGPUVirtualAddress());
-	//command.get()->GetCommandList()->SetGraphicsRootDescriptorTable(2, textureSrvHandleGPU);
+	commandList->IASetVertexBuffers(0, 1, model->GetVertexBufferView());//VBVを設定
+	commandList->SetGraphicsRootConstantBufferView(0, model->GetMatrial().GetMaterialResource()->GetGPUVirtualAddress());
+	commandList->SetGraphicsRootConstantBufferView(1, model->GetWvpDataResource()->GetGPUVirtualAddress());
+	//commandList->SetGraphicsRootDescriptorTable(2, textureSrvHandleGPU);
 
-	//command.get()->GetCommandList()->DrawInstanced(UINT(modelData.vertices.size()), 1, 0, 0);
+	commandList->DrawInstanced(UINT(model->GetModelData().vertices.size()), 1, 0, 0);
 }

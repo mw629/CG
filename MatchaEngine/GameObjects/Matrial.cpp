@@ -1,6 +1,6 @@
 #include "Matrial.h"
-#include "MatchaEngine/Common/GraphicsDevice.h"
-#include "MatchaEngine/Math/Calculation.h"
+#include "Common/GraphicsDevice.h"
+#include "Math/Calculation.h"
 
 void Matrial::CreateMatrial(ID3D12Device* device,bool Lighting)
 {

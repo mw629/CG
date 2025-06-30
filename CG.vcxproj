@@ -93,15 +93,15 @@ copy "$(WindowsSdkDir)bin\$(TargetPlatformVersion)\x64\dxil.dll" "$(TargetDir)dx
     <ClCompile Include="DepthStencil.cpp" />
     <ClCompile Include="DescriptorHeap.cpp" />
     <ClCompile Include="GpuSyncManager.cpp" />
-    <ClCompile Include="MatchaEngine\Object\DebugCamera.cpp" />
+    <ClCompile Include="MatchaEngine\GameObjects\DebugCamera.cpp" />
     <ClCompile Include="MatchaEngine\Resource\Audio.cpp" />
     <ClCompile Include="MatchaEngine\Common\Input.cpp" />
     <ClCompile Include="MatchaEngine\Engine.cpp" />
     <ClCompile Include="MatchaEngine\PSO\BlendState.cpp" />
     <ClCompile Include="MatchaEngine\Math\Calculation.cpp" />
-    <ClCompile Include="MatchaEngine\Common\CommandContext .cpp" />
+    <ClCompile Include="MatchaEngine\Common\CommandContext.cpp" />
     <ClCompile Include="MatchaEngine\PSO\DepthStencilState.cpp" />
-    <ClCompile Include="MatchaEngine\Object\Draw.cpp" />
+    <ClCompile Include="MatchaEngine\GameObjects\Draw.cpp" />
     <ClCompile Include="MatchaEngine\PSO\DirectXShaderCompiler.cpp" />
     <ClCompile Include="externals\imgui\imgui.cpp" />
     <ClCompile Include="externals\imgui\imgui_demo.cpp" />
@@ -120,11 +120,12 @@ copy "$(WindowsSdkDir)bin\$(TargetPlatformVersion)\x64\dxil.dll" "$(TargetDir)dx
     <ClCompile Include="MatchaEngine\PSO\RootSignature.cpp" />
     <ClCompile Include="MatchaEngine\PSO\ShaderCompile.cpp" />
     <ClCompile Include="MatchaEngine\Common\WindowConfig.cpp" />
-    <ClCompile Include="Matrial.cpp" />
-    <ClCompile Include="MatchaEngine\Object\Model.cpp" />
+    <ClCompile Include="MatchaEngine\GameObjects\Matrial.cpp" />
+    <ClCompile Include="MatchaEngine\GameObjects\Model.cpp" />
     <ClCompile Include="RenderTargetView.cpp" />
     <ClCompile Include="MatchaEngine\PSO\Sampler.cpp" />
     <ClCompile Include="SwapChain.cpp" />
+    <ClCompile Include="MatchaEngine\Resource\Texture.cpp" />
     <ClCompile Include="ViewportScissor.cpp" />
   </ItemGroup>
   <ItemGroup>
@@ -144,15 +145,15 @@ copy "$(WindowsSdkDir)bin\$(TargetPlatformVersion)\x64\dxil.dll" "$(TargetDir)dx
     <ClInclude Include="DescriptorHeap.h" />
     <ClInclude Include="GpuSyncManager.h" />
     <ClInclude Include="MatchaEngine\Resource\Load.h" />
-    <ClInclude Include="MatchaEngine\Object\DebugCamera.h" />
+    <ClInclude Include="MatchaEngine\GameObjects\DebugCamera.h" />
     <ClInclude Include="MatchaEngine\Resource\Audio.h" />
     <ClInclude Include="MatchaEngine\Common\Input.h" />
     <ClInclude Include="MatchaEngine\Engine.h" />
     <ClInclude Include="MatchaEngine\PSO\BlendState.h" />
     <ClInclude Include="MatchaEngine\Math\Calculation.h" />
-    <ClInclude Include="MatchaEngine\Common\CommandContext .h" />
+    <ClInclude Include="MatchaEngine\Common\CommandContext.h" />
     <ClInclude Include="MatchaEngine\PSO\DepthStencilState.h" />
-    <ClInclude Include="MatchaEngine\Object\Draw.h" />
+    <ClInclude Include="MatchaEngine\GameObjects\Draw.h" />
     <ClInclude Include="MatchaEngine\PSO\DirectXShaderCompiler.h" />
     <ClInclude Include="externals\imgui\imconfig.h" />
     <ClInclude Include="externals\imgui\imgui.h" />
@@ -172,11 +173,12 @@ copy "$(WindowsSdkDir)bin\$(TargetPlatformVersion)\x64\dxil.dll" "$(TargetDir)dx
     <ClInclude Include="MatchaEngine\PSO\ShaderCompile.h" />
     <ClInclude Include="MatchaEngine\Common\VariableTypes.h" />
     <ClInclude Include="MatchaEngine\Common\WindowConfig.h" />
-    <ClInclude Include="Matrial.h" />
-    <ClInclude Include="MatchaEngine\Object\Model.h" />
+    <ClInclude Include="MatchaEngine\GameObjects\Matrial.h" />
+    <ClInclude Include="MatchaEngine\GameObjects\Model.h" />
     <ClInclude Include="RenderTargetView.h" />
     <ClInclude Include="MatchaEngine\PSO\Sampler.h" />
     <ClInclude Include="SwapChain.h" />
+    <ClInclude Include="MatchaEngine\Resource\Texture.h" />
     <ClInclude Include="ViewportScissor.h" />
   </ItemGroup>
   <ItemGroup>
