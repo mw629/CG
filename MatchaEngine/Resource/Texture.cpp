@@ -1,32 +1,46 @@
 #include "Texture.h"
 #include "Load.h"
 
-void Texture::Initalize(GraphicsDevice* graphicsDevice)
+
+
+
+void Texture::Initalize(ID3D12Device* device, ID3D12GraphicsCommandList* commandList, DescriptorHeap* descriptorHeap, TextureLoader* textureLoader)
 {
-	graphicsDevice_=graphicsDevice;
+	device_ = device;
+	commandList_ = commandList;
+	textureLoader_ = textureLoader;
+	descriptorHeap_ = descriptorHeap;
 }
 
-void Texture::CreateTexture()
-{ 
-	////Textureを読み込んで転送する//
-	//mipImages = LoadTexture("resources/uvChecker.png");
-	//metaData = mipImages.GetMetadata();
-	//Microsoft::WRL::ComPtr<ID3D12Resource> textureResource = CreateTextureResource(graphicsDevice_->GetDevice(), metaData);
-	//Microsoft::WRL::ComPtr<ID3D12Resource> intermediateResource = UploadTextureData(textureResource.Get(), mipImages, graphicsDevice_->GetDevice(), command.get()->GetCommandList());
+void Texture::CreateTexture(const std::string& filePath)
+{
+	//Textureを読み込んで転送する//
+	DirectX::ScratchImage mipImages = LoadTexture(filePath);
 
-	////実際にShaderResourceView
+	if (textureLoader_->CheckFilePath(filePath)) {
+		return;
+	}
 
-	////meteDataを基にSRVの設定
-	//srvDesc.Format = metaData.format;
-	//srvDesc.Shader4ComponentMapping = D3D12_DEFAULT_SHADER_4_COMPONENT_MAPPING;
-	//srvDesc.ViewDimension = D3D12_SRV_DIMENSION_TEXTURE2D;//2Dテクスチャ
-	//srvDesc.Texture2D.MipLevels = UINT(metaData.mipLevels);
+	const DirectX::TexMetadata& metaData = mipImages.GetMetadata();
+	ID3D12Resource* textureResource = CreateTextureResource(device_, metaData);
+	ID3D12Resource* intermediateResource = UploadTextureData(textureResource, mipImages, device_, commandList_);
 
-	////SRVを作成するDescriptorHeapの場所を決める
-	//textureSrvHandleCPU = GetCPUDescriptorHandle(descriptorHeap.get()->GetSrvDescriptorHeap(), descriptorHeap.get()->GetDescriptorSizeSRV(), 1);
-	//textureSrvHandleGPU = GetGPUDescriptorHandle(descriptorHeap.get()->GetSrvDescriptorHeap(), descriptorHeap.get()->GetDescriptorSizeSRV(), 1);
+	//実際にShaderResourceView
 
-	//graphicsDevice_->GetDevice()->CreateShaderResourceView(textureResource.Get(), &srvDesc, textureSrvHandleCPU);
+	//meteDataを基にSRVの設定
+	D3D12_SHADER_RESOURCE_VIEW_DESC srvDesc{};
+	srvDesc.Format = metaData.format;
+	srvDesc.Shader4ComponentMapping = D3D12_DEFAULT_SHADER_4_COMPONENT_MAPPING;
+	srvDesc.ViewDimension = D3D12_SRV_DIMENSION_TEXTURE2D;//2Dテクスチャ
+	srvDesc.Texture2D.MipLevels = UINT(metaData.mipLevels);
+
+	//SRVを作成するDescriptorHeapの場所を決める
+	D3D12_CPU_DESCRIPTOR_HANDLE textureSrvHandleCPU = GetCPUDescriptorHandle(descriptorHeap_->GetSrvDescriptorHeap(), descriptorHeap_->GetDescriptorSizeSRV(), textureLoader_->GetLastIndex() + 1);
+	D3D12_GPU_DESCRIPTOR_HANDLE textureSrvHandleGPU = GetGPUDescriptorHandle(descriptorHeap_->GetSrvDescriptorHeap(), descriptorHeap_->GetDescriptorSizeSRV(), textureLoader_->GetLastIndex() + 1);
+
+	textureLoader_->StockTextureData(filePath, textureSrvHandleCPU, textureSrvHandleGPU);
+
+	device_->CreateShaderResourceView(textureResource, &srvDesc, textureSrvHandleCPU);
 }
 
 

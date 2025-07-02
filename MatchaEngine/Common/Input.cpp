@@ -51,7 +51,7 @@ void Input::Updata()
 	keyboard->Acquire();
 	keyboard->GetDeviceState(sizeof(key_), key_);
 	//マウスの取得
-	std::memcpy(&prevMouseState,&mouseState, sizeof(key_));
+	std::memcpy(&prevMouseState,&mouseState, sizeof(mouseState));
 	mouse->Acquire();
 	mouse->GetDeviceState(sizeof(DIMOUSESTATE), &mouseState);
 }

@@ -4,26 +4,20 @@
 #include <wrl.h>
 
 #include "../Common/GraphicsDevice.h"
+#include "TextureLoader.h"
+#include "../../DescriptorHeap.h"
 
 class Texture
 {
 private:
 
-	GraphicsDevice* graphicsDevice_;
-
-	DirectX::ScratchImage mipImages;
-	DirectX::TexMetadata& metaData;
-
-	Microsoft::WRL::ComPtr<ID3D12Resource> textureResource;
-	Microsoft::WRL::ComPtr<ID3D12Resource> intermediateResource;
-
-	D3D12_SHADER_RESOURCE_VIEW_DESC srvDesc{};
-
-	D3D12_CPU_DESCRIPTOR_HANDLE textureSrvHandleCPU;
-	D3D12_GPU_DESCRIPTOR_HANDLE textureSrvHandleGPU;
+	ID3D12Device* device_;
+	TextureLoader* textureLoader_;
+	DescriptorHeap* descriptorHeap_;
+	ID3D12GraphicsCommandList* commandList_;
 
 public:
-	void Initalize(GraphicsDevice* graphicsDevice);
+	void Initalize(ID3D12Device* graphicsDevice, ID3D12GraphicsCommandList* commandList, DescriptorHeap *descriptorHeap, TextureLoader* textureLoader);
 
-	void CreateTexture();
+	void CreateTexture(const std::string& filePath);
 };

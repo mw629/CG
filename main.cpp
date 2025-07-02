@@ -32,6 +32,8 @@ extern IMGUI_IMPL_API LRESULT ImGui_ImplWin32_WndProcHandler(HWND hWnd, UINT msg
 
 #include "MatchaEngine/Resource/Audio.h"
 #include "MatchaEngine/Resource/Load.h"
+#include "MatchaEngine/Resource/Texture.h"
+#include "MatchaEngine/Resource/TextureLoader.h"
 #include "Common/GraphicsDevice.h"
 #include "Common/CommandContext.h"
 #include "Common/Input.h"
@@ -46,6 +48,7 @@ extern IMGUI_IMPL_API LRESULT ImGui_ImplWin32_WndProcHandler(HWND hWnd, UINT msg
 #include "GameObjects/Draw.h"
 #include "GameObjects/Matrial.h"
 #include "ViewportScissor.h"
+#include "DirectinalLight.h"
 //PSO
 
 #include "PSO/DirectXShaderCompiler.h"
@@ -229,19 +232,7 @@ Microsoft::WRL::ComPtr<ID3D12Resource> CreateDepthStencilTextureResource(ID3D12D
 	return resource;
 }
 
-D3D12_CPU_DESCRIPTOR_HANDLE GetCPUDescriptorHandle(ID3D12DescriptorHeap* descriptorHeap, uint32_t descriprtorSize, uint32_t index) {
 
-	D3D12_CPU_DESCRIPTOR_HANDLE handleCPU = descriptorHeap->GetCPUDescriptorHandleForHeapStart();
-	handleCPU.ptr += (descriprtorSize * index);
-	return handleCPU;
-}
-
-D3D12_GPU_DESCRIPTOR_HANDLE GetGPUDescriptorHandle(ID3D12DescriptorHeap* descriptorHeap, uint32_t descriprtorSize, uint32_t index) {
-
-	D3D12_GPU_DESCRIPTOR_HANDLE handleGPU = descriptorHeap->GetGPUDescriptorHandleForHeapStart();
-	handleGPU.ptr += (descriprtorSize * index);
-	return handleGPU;
-}
 
 
 ///-------------------------------------------
@@ -694,60 +685,16 @@ int WINAPI WinMain(HINSTANCE, HINSTANCE, LPSTR, int) {
 	transformationMatrixDataShpere->WVP = IdentityMatrix();
 	transformationMatrixDataShpere->World = IdentityMatrix();
 
-	Microsoft::WRL::ComPtr<ID3D12Resource> directinalLightResource = GraphicsDevice::CreateBufferResource(graphics.get()->GetDevice(), sizeof(DirectionalLight));
+	std::unique_ptr<DirectinalLight> directinalLight = std::make_unique<DirectinalLight>();
+	directinalLight->CreateDirectinalLight(graphics.get()->GetDevice());
 
-	DirectionalLight* directinalLightData = nullptr;
+	std::unique_ptr<Texture> texture = std::make_unique<Texture>();
+	std::unique_ptr<TextureLoader> textureLoader = std::make_unique<TextureLoader>();
+	texture->Initalize(graphics.get()->GetDevice(),command.get()->GetCommandList(),descriptorHeap.get(), textureLoader.get());
 
-	directinalLightResource->Map(0, nullptr, reinterpret_cast<void**>(&directinalLightData));
+	texture->CreateTexture("resources/uvChecker.png");
 
-	directinalLightData->color = { 1.0f,1.0f,1.0f,1.0f };
-	directinalLightData->direction = { 0.0f,-1.0f,0.0f };
-	directinalLightData->intensity = 1.0f;
-
-
-
-
-	//Textureを読み込んで転送する//
-	DirectX::ScratchImage mipImages = LoadTexture("resources/uvChecker.png");
-	const DirectX::TexMetadata& metaData = mipImages.GetMetadata();
-	Microsoft::WRL::ComPtr<ID3D12Resource> textureResource = CreateTextureResource(graphics.get()->GetDevice(), metaData);
-	Microsoft::WRL::ComPtr<ID3D12Resource> intermediateResource = UploadTextureData(textureResource.Get(), mipImages, graphics.get()->GetDevice(), command.get()->GetCommandList());
-
-	//実際にShaderResourceView
-
-	//meteDataを基にSRVの設定
-	D3D12_SHADER_RESOURCE_VIEW_DESC srvDesc{};
-	srvDesc.Format = metaData.format;
-	srvDesc.Shader4ComponentMapping = D3D12_DEFAULT_SHADER_4_COMPONENT_MAPPING;
-	srvDesc.ViewDimension = D3D12_SRV_DIMENSION_TEXTURE2D;//2Dテクスチャ
-	srvDesc.Texture2D.MipLevels = UINT(metaData.mipLevels);
-
-	//SRVを作成するDescriptorHeapの場所を決める
-	D3D12_CPU_DESCRIPTOR_HANDLE textureSrvHandleCPU = GetCPUDescriptorHandle(descriptorHeap.get()->GetSrvDescriptorHeap(), descriptorHeap.get()->GetDescriptorSizeSRV(), 1);
-	D3D12_GPU_DESCRIPTOR_HANDLE textureSrvHandleGPU = GetGPUDescriptorHandle(descriptorHeap.get()->GetSrvDescriptorHeap(), descriptorHeap.get()->GetDescriptorSizeSRV(), 1);
-
-	graphics.get()->GetDevice()->CreateShaderResourceView(textureResource.Get(), &srvDesc, textureSrvHandleCPU);
-
-	//二枚目のTextureを読み込む
-	DirectX::ScratchImage mapImages2 = LoadTexture(modelData.material.textureDilePath);
-	const DirectX::TexMetadata& metaData2 = mapImages2.GetMetadata();
-	Microsoft::WRL::ComPtr<ID3D12Resource> textureResource2 = CreateTextureResource(graphics.get()->GetDevice(), metaData2);
-	Microsoft::WRL::ComPtr<ID3D12Resource> intermediateResource2 = UploadTextureData(textureResource2.Get(), mapImages2, graphics.get()->GetDevice(), command.get()->GetCommandList());
-
-	//metaDataを基にSRVの設定
-	D3D12_SHADER_RESOURCE_VIEW_DESC srvDesc2{};
-	srvDesc2.Format = metaData2.format;
-	srvDesc2.Shader4ComponentMapping = D3D12_DEFAULT_SHADER_4_COMPONENT_MAPPING;
-	srvDesc2.ViewDimension = D3D12_SRV_DIMENSION_TEXTURE2D;//2Dテクスチャ
-	srvDesc2.Texture2D.MipLevels = UINT(metaData2.mipLevels);
-
-	//SRVを作成するDescriptorHeapの場所を決める
-	D3D12_CPU_DESCRIPTOR_HANDLE textureSrvHandleCPU2 = GetCPUDescriptorHandle(descriptorHeap.get()->GetSrvDescriptorHeap(), descriptorHeap.get()->GetDescriptorSizeSRV(), 2);
-	D3D12_GPU_DESCRIPTOR_HANDLE textureSrvHandleGPU2 = GetGPUDescriptorHandle(descriptorHeap.get()->GetSrvDescriptorHeap(), descriptorHeap.get()->GetDescriptorSizeSRV(), 2);
-
-
-	graphics.get()->GetDevice()->CreateShaderResourceView(textureResource2.Get(), &srvDesc2, textureSrvHandleCPU2);
-
+	texture->CreateTexture("resources/nightSky.png");
 
 	//ViewportとScissor（シザー）//
 
@@ -838,6 +785,8 @@ int WINAPI WinMain(HINSTANCE, HINSTANCE, LPSTR, int) {
 			ImGui::Checkbox("debugCameraFlag", &debugCameraFlag);
 			//ImGui::ShowDemoWindow();debugCameraFlag
 
+			textureLoader.get()->Draw();
+
 			if (ImGui::CollapsingHeader("Camera")) {
 				ImGui::DragFloat3("camraTranslate", &camraTransform.translate.x, 0.01f);
 				ImGui::DragFloat3("camraRotate", &camraTransform.rotate.x, 0.01f);
@@ -858,22 +807,13 @@ int WINAPI WinMain(HINSTANCE, HINSTANCE, LPSTR, int) {
 				ImGui::DragFloat3("RotateObj", &transformObj.rotate.x, 0.01f);
 				ImGui::DragFloat3("ScaleObj", &transformObj.scale.x, 0.01f);
 			}
-			if (ImGui::CollapsingHeader("Light"))
-			{
-				ImGui::DragFloat4("directinalLightData.Color", &directinalLightData->color.x, 0.01f);
-				ImGui::DragFloat3("directinalLightData.Direction", &directinalLightData->direction.x, 0.01f);
-				ImGui::DragFloat("directinalLightData.intensity", &directinalLightData->intensity, 0.01f);
-			}
 			if (ImGui::CollapsingHeader("SpriteUV"))
 			{
 				ImGui::DragFloat2("TranslateSpriteUV", &uvTransformSprite.translate.x, 0.01f, -10.0f, 10.0f);
 				ImGui::DragFloat2("ScaleSpriteUV", &uvTransformSprite.scale.x, 0.01f, -10.0f, 10.0f);
 				ImGui::SliderAngle("RotateSpriteUV", &uvTransformSprite.rotate.z);
 			}
-			ImGui::Text("move");
-			ImGui::Text("x:AD\ny:WS\nz:SHIFT + WS\n");
-			ImGui::Text("rotate");
-			ImGui::Text("x:LEFT,RIGHT\ny:UP,DOEN\nz:QE\n");
+			
 
 
 			input->Updata();
@@ -911,19 +851,9 @@ int WINAPI WinMain(HINSTANCE, HINSTANCE, LPSTR, int) {
 			ImGui::Render();
 
 
-			//描画先のRTVを設定する
-			command.get()->GetCommandList()->OMSetRenderTargets(1, renderTargetView.get()->GetRtvHandles(backBufferIndex), false, nullptr);
-
-			//指定した色で画面全体をクリアする
-			float clearColor[] = { 0.1f,0.25f,0.5f,1.0f };//青っぽい色。RGBAの順
-			command.get()->GetCommandList()->ClearRenderTargetView(*renderTargetView.get()->GetRtvHandles(backBufferIndex), clearColor, 0, nullptr);
-
+			renderTargetView.get()->SetAndClear(command.get()->GetCommandList(), backBufferIndex);
 			//DSVを設定する
-			D3D12_CPU_DESCRIPTOR_HANDLE dsvHandle = depthStencil.get()->GetDsvDescriptorHeap()->GetCPUDescriptorHandleForHeapStart();
-			command.get()->GetCommandList()->OMSetRenderTargets(1, renderTargetView.get()->GetRtvHandles(backBufferIndex), false, &dsvHandle);
-
-			command.get()->GetCommandList()->ClearDepthStencilView(dsvHandle, D3D12_CLEAR_FLAG_DEPTH, 1.0f, 0, 0, nullptr);
-
+			depthStencil->SetDSV(command.get()->GetCommandList(), renderTargetView.get()->GetRtvHandles(backBufferIndex));
 
 
 
@@ -944,36 +874,37 @@ int WINAPI WinMain(HINSTANCE, HINSTANCE, LPSTR, int) {
 			command.get()->GetCommandList()->RSSetScissorRects(1, viewportScissor.get()->GetScissorRect());//Sxirssorを設定
 			//RootSignatureを設定。POSに設定しているけど別途設定が必要
 			command.get()->GetCommandList()->SetGraphicsRootSignature(rootSignature.get()->GetRootSignature());
-			command.get()->GetCommandList()->SetGraphicsRootConstantBufferView(3, directinalLightResource->GetGPUVirtualAddress());
+			command.get()->GetCommandList()->SetGraphicsRootConstantBufferView(3, directinalLight.get()->GetDirectinalLightResource()->GetGPUVirtualAddress());
 
-			//スプライトの描画	
-			command.get()->GetCommandList()->IASetVertexBuffers(0, 1, &vertexBufferViewSprite);//VBVを設定
-			command.get()->GetCommandList()->SetGraphicsRootConstantBufferView(0, spriteMatrial.get()->GetMaterialResource()->GetGPUVirtualAddress());
-			command.get()->GetCommandList()->SetGraphicsRootConstantBufferView(1, transformationMatrixResourceSprite->GetGPUVirtualAddress());
-			command.get()->GetCommandList()->SetGraphicsRootDescriptorTable(2, textureSrvHandleGPU);
+			////スプライトの描画	
+			//command.get()->GetCommandList()->IASetVertexBuffers(0, 1, &vertexBufferViewSprite);//VBVを設定
+			//command.get()->GetCommandList()->SetGraphicsRootConstantBufferView(0, spriteMatrial.get()->GetMaterialResource()->GetGPUVirtualAddress());
+			//command.get()->GetCommandList()->SetGraphicsRootConstantBufferView(1, transformationMatrixResourceSprite->GetGPUVirtualAddress());
+			//command.get()->GetCommandList()->SetGraphicsRootDescriptorTable(2, textureSrvHandleGPU);
 
-			//commandList->DrawIndexedInstanced(6, 1, 0, 0, 0);
+			////commandList->DrawIndexedInstanced(6, 1, 0, 0, 0);
 
+		
+			////球の描画
+			//command.get()->GetCommandList()->IASetVertexBuffers(0, 1, &vertexBufferViewShpere);//VBVを設定
+			//command.get()->GetCommandList()->SetGraphicsRootConstantBufferView(0, spriteMatrial.get()->GetMaterialResource()->GetGPUVirtualAddress());
+			//command.get()->GetCommandList()->SetGraphicsRootConstantBufferView(1, transformationMatrixResourceShpere->GetGPUVirtualAddress());
+			//if (!useMonsterBall) {
+			//	command.get()->GetCommandList()->SetGraphicsRootDescriptorTable(2, textureSrvHandleGPU);
+			//}
+			//else {
+			//	command.get()->GetCommandList()->SetGraphicsRootDescriptorTable(2, textureSrvHandleGPU2);
+			//}
+			////描画
+			////commandList->DrawInstanced(kSubdivision * kSubdivision * 6, 1, 0, 0);
+			//	
 			//objectの描画
 			command.get()->GetCommandList()->IASetVertexBuffers(0, 1, &vertexBufferViewObj);//VBVを設定
 			command.get()->GetCommandList()->SetGraphicsRootConstantBufferView(0, spriteMatrial.get()->GetMaterialResource()->GetGPUVirtualAddress());
 			command.get()->GetCommandList()->SetGraphicsRootConstantBufferView(1, transformationMatrixResourceObj->GetGPUVirtualAddress());
-			command.get()->GetCommandList()->SetGraphicsRootDescriptorTable(2, textureSrvHandleGPU);
+			command.get()->GetCommandList()->SetGraphicsRootDescriptorTable(2,textureLoader.get()->GetTexture(1));
 
 			command.get()->GetCommandList()->DrawInstanced(UINT(modelData.vertices.size()), 1, 0, 0);
-
-			//球の描画
-			command.get()->GetCommandList()->IASetVertexBuffers(0, 1, &vertexBufferViewShpere);//VBVを設定
-			command.get()->GetCommandList()->SetGraphicsRootConstantBufferView(0, spriteMatrial.get()->GetMaterialResource()->GetGPUVirtualAddress());
-			command.get()->GetCommandList()->SetGraphicsRootConstantBufferView(1, transformationMatrixResourceShpere->GetGPUVirtualAddress());
-			if (!useMonsterBall) {
-				command.get()->GetCommandList()->SetGraphicsRootDescriptorTable(2, textureSrvHandleGPU);
-			}
-			else {
-				command.get()->GetCommandList()->SetGraphicsRootDescriptorTable(2, textureSrvHandleGPU2);
-			}
-			//描画
-			//commandList->DrawInstanced(kSubdivision * kSubdivision * 6, 1, 0, 0);
 
 
 			//ImGuiの描画コマンド
