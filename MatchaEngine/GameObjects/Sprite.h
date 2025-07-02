@@ -1,0 +1,35 @@
+#pragma once
+#include <wrl.h>
+#include <d3d12.h>
+#include "../Common/VariableTypes.h"
+
+class Sprite
+{
+private:
+
+	Transform transform_;
+
+
+	Microsoft::WRL::ComPtr<ID3D12Resource> vertexResource_;
+	D3D12_VERTEX_BUFFER_VIEW vertexBufferView_{};
+	VertexData* vertexData_ = nullptr;
+
+	Microsoft::WRL::ComPtr<ID3D12Resource> wvpResource_;
+	TransformationMatrix* wvpData_ = nullptr;
+
+public:
+	Sprite();
+
+	void CreateVertexData(ID3D12Device* device);
+
+	void CreateWVP(ID3D12Device* device);
+
+	void SetWvp();
+
+	void SetTrandform(Transform transform);
+
+
+	D3D12_VERTEX_BUFFER_VIEW* GetVertexBufferView() { return &vertexBufferView_; }
+	ID3D12Resource* GetVertexResource() { return vertexResource_.Get(); }
+};
+

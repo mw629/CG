@@ -7,11 +7,14 @@
 
 
 
-Model::Model(ModelData modelData, Matrial matrial)
+
+
+void Model::Initialize(ModelData modelData,Matrial* matrial,D3D12_GPU_DESCRIPTOR_HANDLE textureSrvHandleGPU)
 {
 	transform_ = {};
 	modelData_ = modelData;
 	matrial_ = matrial;
+	textureSrvHandleGPU_ = textureSrvHandleGPU;
 }
 
 

@@ -8,6 +8,8 @@
 class Draw {
 private:
 
+	ID3D12GraphicsCommandList* commandList_;
+
 	ID3D12Resource* vertexResource;
 	D3D12_VERTEX_BUFFER_VIEW vertexBufferView{};
 	VertexData* vertexData = nullptr;
@@ -15,21 +17,22 @@ private:
 	Matrix4x4* wvpData;
 
 	
+	//インデックスバッファ用
+	Microsoft::WRL::ComPtr<ID3D12Resource> indexResource_;
+	D3D12_INDEX_BUFFER_VIEW indexBufferView_{};
+	uint32_t* indexData_ = nullptr;
 
 public:
 
-	Draw();
+	Draw(ID3D12GraphicsCommandList* commandList);
 	~Draw();
 
 	void Initialize();
 
-	void DrawTriangle(Transform transform,
-		Transform cameraTransform,
-		ID3D12Device* device,
-		ID3D12GraphicsCommandList* commandList,
-		ID3D12Resource* materialResource,
-		D3D12_GPU_DESCRIPTOR_HANDLE textureSrvHandleGPU);
+	void CreateIndexBuffer(ID3D12Device* device);
 
-	void DrawObj(ID3D12GraphicsCommandList* commandList, Model* model);
+	void DrawObj(Model* model);
+
+	D3D12_INDEX_BUFFER_VIEW* GetIndexBufferView() { return &indexBufferView_; }
 
 };

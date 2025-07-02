@@ -3,8 +3,9 @@
 #include <cassert>
 
 
-Draw::Draw()
+Draw::Draw(ID3D12GraphicsCommandList* commandList)
 {
+	commandList_ = commandList;
 }
 
 Draw::~Draw()
@@ -17,74 +18,31 @@ void Draw::Initialize()
 	
 }
 
-void Draw::DrawTriangle(Transform transform,
-	Transform cameraTransform,
-	ID3D12Device* device, 
-	ID3D12GraphicsCommandList* commandList,
-	ID3D12Resource* materialResource,
-	D3D12_GPU_DESCRIPTOR_HANDLE textureSrvHandleGPU)
+void Draw::CreateIndexBuffer(ID3D12Device* device)
 {
+	indexResource_ = GraphicsDevice::CreateBufferResource(device, sizeof(uint32_t) * 6); ;
 
-	// VertexResourceを生成する//
-	vertexResource = GraphicsDevice::CreateBufferResource(device, sizeof(VertexData) * 3);
+	indexBufferView_.BufferLocation = indexResource_->GetGPUVirtualAddress();
+	indexBufferView_.SizeInBytes = sizeof(uint32_t) * 6;
+	indexBufferView_.Format = DXGI_FORMAT_R32_UINT;
 
+	indexResource_->Map(0, nullptr, reinterpret_cast<void**>(&indexData_));
 
-	//VertexxBuffViewを作成する//
-
-	//頂点バッファビューを作成する
-	vertexBufferView;
-	//リソースの先頭のアドレスから使う
-	vertexBufferView.BufferLocation = vertexResource->GetGPUVirtualAddress();
-	//使用するリソースのサイズは頂点3つ分のサイズ
-	vertexBufferView.SizeInBytes = sizeof(VertexData) * 3;
-	//1頂点当たりのサイズ
-	vertexBufferView.StrideInBytes = sizeof(VertexData);
-
-	//頂点リソースにデータを書き込む
-	vertexData = nullptr;
-	//書き込むためのアドレスを取得
-	vertexResource->Map(0, nullptr, reinterpret_cast<void**>(&vertexData));
-
-	//Resouceにデータを書き込む//
-
-	//左下
-	vertexData[0].position = { -0.5f,-0.5f,0.0f,1.0f };
-	vertexData[0].texcoord = { 0.0f,1.0f };
-	//上
-	vertexData[1].position = { 0.0f,0.5f,0.0f,1.0f };
-	vertexData[1].texcoord = { 0.5f,0.0f };
-	//右下
-	vertexData[2].position = { 0.5f,-0.5f,0.0f,1.0f };
-	vertexData[2].texcoord = { 1.0f,1.0f };
-
-
-	//WVP用のリソースを作る
-	wvpResource = GraphicsDevice::CreateBufferResource(device, sizeof(Matrix4x4));
-	//
-	wvpData = nullptr;
-	//
-	wvpResource->Map(0, nullptr, reinterpret_cast<void**>(&wvpData));
-	//
-	//*wvpData = camera.MakeWorldViewProjectionMatrix(transform, cameraTransform);
-
-	
-
-	//マテリアルCBufferの場所を設定
-	commandList->SetGraphicsRootConstantBufferView(0, materialResource->GetGPUVirtualAddress());
-	commandList->SetGraphicsRootConstantBufferView(1, wvpResource->GetGPUVirtualAddress());
-
-	commandList->SetGraphicsRootDescriptorTable(2, textureSrvHandleGPU);
-
-	//描画！（DrawCall/ドローコール）。3頂点で1つのインスタンス。インスタンスについては今後
-	commandList->DrawInstanced(3, 1, 0, 0);
+	indexData_[0] = 0;
+	indexData_[1] = 1;
+	indexData_[2] = 2;
+	indexData_[3] = 1;
+	indexData_[4] = 3;
+	indexData_[5] = 2;
 }
 
-void Draw::DrawObj(ID3D12GraphicsCommandList* commandList,Model *model)
+void Draw::DrawObj(Model* model)
 {
-	commandList->IASetVertexBuffers(0, 1, model->GetVertexBufferView());//VBVを設定
-	commandList->SetGraphicsRootConstantBufferView(0, model->GetMatrial().GetMaterialResource()->GetGPUVirtualAddress());
-	commandList->SetGraphicsRootConstantBufferView(1, model->GetWvpDataResource()->GetGPUVirtualAddress());
-	//commandList->SetGraphicsRootDescriptorTable(2, textureSrvHandleGPU);
+	//objectの描画
+	commandList_->IASetVertexBuffers(0, 1, model->GetVertexBufferView());//VBVを設定
+	commandList_->SetGraphicsRootConstantBufferView(0, model->GetMatrial()->GetMaterialResource()->GetGPUVirtualAddress());
+	commandList_->SetGraphicsRootConstantBufferView(1, model->GetWvpDataResource()->GetGPUVirtualAddress());
+	commandList_->SetGraphicsRootDescriptorTable(2, model->GetTextureSrvHandleGPU());
 
-	commandList->DrawInstanced(UINT(model->GetModelData().vertices.size()), 1, 0, 0);
+	commandList_->DrawInstanced(UINT(model->GetModelData().vertices.size()), 1, 0, 0);
 }

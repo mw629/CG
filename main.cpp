@@ -62,6 +62,7 @@ extern IMGUI_IMPL_API LRESULT ImGui_ImplWin32_WndProcHandler(HWND hWnd, UINT msg
 #include "PSO/DepthStencilState.h"
 #include <PSO/Sampler.h>
 #include <PSO/GraphicsPipelineState.h>
+#include <GameObjects/Sprite.h>
 
 #pragma comment(lib,"d3d12.lib")
 #pragma comment(lib,"dxgi.lib")
@@ -288,15 +289,17 @@ int WINAPI WinMain(HINSTANCE, HINSTANCE, LPSTR, int) {
 	std::unique_ptr<DepthStencil> depthStencil = std::make_unique<DepthStencil>();
 	std::unique_ptr<Matrial> matrial = std::make_unique<Matrial>();
 	std::unique_ptr<Matrial> spriteMatrial = std::make_unique<Matrial>();
-	Draw draw;
-
+	std::unique_ptr<Matrial> objMatrial = std::make_unique<Matrial>();
+	std::unique_ptr<Draw> draw = std::make_unique<Draw>(command.get()->GetCommandList());
+	
+	
 
 	//フェンスやイベント、シグナル
 	GpuSyncManager gpuSyncManager;
 
 	//バリア
 	std::unique_ptr<ResourceBarrierHelper> resourceBarrierHelper = std::make_unique<ResourceBarrierHelper>();
-	
+
 
 	//ウィンドウサイズの設定//
 	window.DrawWindow(kClientWidth, kClientHeight);
@@ -365,7 +368,7 @@ int WINAPI WinMain(HINSTANCE, HINSTANCE, LPSTR, int) {
 
 	matrial->CreateMatrial(graphics->GetDevice(), false);
 	spriteMatrial->CreateMatrial(graphics->GetDevice(), false);
-
+	objMatrial->CreateMatrial(graphics->GetDevice(), false);
 	//PSO
 
 	DirectXShaderCompiler directXShaderCompiler;
@@ -378,7 +381,7 @@ int WINAPI WinMain(HINSTANCE, HINSTANCE, LPSTR, int) {
 	std::unique_ptr<ShaderCompile> shaderCompile = std::make_unique<ShaderCompile>();
 	std::unique_ptr<DepthStencilState> depthStencilState = std::make_unique<DepthStencilState>();
 	std::unique_ptr<GraphicsPipelineState> graphicsPipelineState = std::make_unique<GraphicsPipelineState>();
-	
+
 	//DXCの初期化//
 	directXShaderCompiler.CreateDXC();
 
@@ -478,101 +481,31 @@ int WINAPI WinMain(HINSTANCE, HINSTANCE, LPSTR, int) {
 	wvpData->WVP = IdentityMatrix();
 	wvpData->World = IdentityMatrix();
 
+
+	std::unique_ptr<Texture> texture = std::make_unique<Texture>();
+	std::unique_ptr<TextureLoader> textureLoader = std::make_unique<TextureLoader>();
+	texture->Initalize(graphics.get()->GetDevice(), command.get()->GetCommandList(), descriptorHeap.get(), textureLoader.get());
+
+	texture->CreateTexture("resources/uvChecker.png");
+
+	texture->CreateTexture("resources/nightSky.png");
+
+
 	//Sprote用の頂点リソースを作る//
-
-	Microsoft::WRL::ComPtr<ID3D12Resource> vertexResourceSprite = GraphicsDevice::CreateBufferResource(graphics.get()->GetDevice(), sizeof(VertexData) * 6);
-
-	//頂点バッファービューを作成する
-	D3D12_VERTEX_BUFFER_VIEW vertexBufferViewSprite{};
-	//リソースの先頭アドレスから使う
-	vertexBufferViewSprite.BufferLocation = vertexResourceSprite->GetGPUVirtualAddress();
-	//使用するリソースのサイズは頂点6つ分のサイズ
-	vertexBufferViewSprite.SizeInBytes = sizeof(VertexData) * 6;
-	//1頂点当たりのサイズ
-	vertexBufferViewSprite.StrideInBytes = sizeof(VertexData);
-
-
-
-	//頂点データを設定する//
-
-	VertexData* vertexDataSprite = nullptr;
-	vertexResourceSprite->Map(0, nullptr, reinterpret_cast<void**>(&vertexDataSprite));
-	//１枚目の三角形
-	vertexDataSprite[0].position = { 0.0f,360.0f,0.0f,1.0f };//左下
-	vertexDataSprite[0].texcoord = { 0.0f,1.0f };
-	vertexDataSprite[1].position = { 0.0f,0.0f,0.0f,1.0f };//左上
-	vertexDataSprite[1].texcoord = { 0.0f,0.0f };
-	vertexDataSprite[2].position = { 640.0f,360.0f,0.0f,1.0f };//右下
-	vertexDataSprite[2].texcoord = { 1.0f,1.0f };
-	//2枚目の三角形
-	vertexDataSprite[3].position = { 640.0f,0.0f,0.0f,1.0f };//右上
-	vertexDataSprite[3].texcoord = { 1.0f,0.0f };
-
-	Microsoft::WRL::ComPtr<ID3D12Resource> indexResource = GraphicsDevice::CreateBufferResource(graphics.get()->GetDevice(), sizeof(uint32_t) * 6); ;
-
-	D3D12_INDEX_BUFFER_VIEW indexBufferView{};
-	indexBufferView.BufferLocation = indexResource->GetGPUVirtualAddress();
-	indexBufferView.SizeInBytes = sizeof(uint32_t) * 6;
-	indexBufferView.Format = DXGI_FORMAT_R32_UINT;
-
-	uint32_t* indexData = nullptr;
-	indexResource->Map(0, nullptr, reinterpret_cast<void**>(&indexData));
-
-	indexData[0] = 0;
-	indexData[1] = 1;
-	indexData[2] = 2;
-	indexData[3] = 1;
-	indexData[4] = 3;
-	indexData[5] = 2;
-
-
-
-	//Sprite用ののTransformationMatrix用のリソースを作る。Matrix4x41つ分のサイズを用意する
-	Microsoft::WRL::ComPtr<ID3D12Resource> transformationMatrixResourceSprite = GraphicsDevice::CreateBufferResource(graphics.get()->GetDevice(), sizeof(TransformationMatrix));
-	//データを書き込む
-	TransformationMatrix* transformationMatrixDataSprite = nullptr;
-	//書き込むためのアドレスを取得
-	transformationMatrixResourceSprite->Map(0, nullptr, reinterpret_cast<void**>(&transformationMatrixDataSprite));
-	//単位行列をかきこんでおく
-	transformationMatrixDataSprite->World = IdentityMatrix();
-	transformationMatrixDataSprite->WVP = IdentityMatrix();
-
-
-
-	//Objectの描画//
+	std::unique_ptr<Sprite> sprite = std::make_unique<Sprite>();
+	sprite.get()->CreateVertexData(graphics.get()->GetDevice());
+	draw->CreateIndexBuffer(graphics.get()->GetDevice());
+	sprite.get()->CreateWVP(graphics.get()->GetDevice());
+	Transform spriteTransform = { {1.0f, 1.0f, 1.0f}, { 0.0f,0.0f,0.0f }, { 0.0f,0.0f,0.0f } };
 
 	ModelData modelData = LoadObjFile("resources/obj", "axis.obj");
+	std::unique_ptr<Model> model = std::make_unique<Model>();
+	model.get()->Initialize(modelData, objMatrial.get(),textureLoader.get()->GetTexture(1));
+	model.get()->CreateModel(graphics.get()->GetDevice());
+	Transform objTransform = { {1.0f, 1.0f, 1.0f}, { 0.0f,0.0f,0.0f }, { 0.0f,0.0f,0.0f } };
+	
 
-	//頂点リソースを作る
-	Microsoft::WRL::ComPtr<ID3D12Resource> vertexResourceObj = GraphicsDevice::CreateBufferResource(graphics.get()->GetDevice(), sizeof(VertexData) * modelData.vertices.size());
-	//頂点バッファービューを作成する
-	D3D12_VERTEX_BUFFER_VIEW vertexBufferViewObj{};
-	//リソースの先頭アドレスから使う
-	vertexBufferViewObj.BufferLocation = vertexResourceObj->GetGPUVirtualAddress();
-	//使用するリソースのサイズは頂点6つ分のサイズ
-	vertexBufferViewObj.SizeInBytes = sizeof(VertexData) * modelData.vertices.size();
-	//1頂点当たりのサイズ
-	vertexBufferViewObj.StrideInBytes = sizeof(VertexData);
-
-	//頂点リソースにデータを書き込む
-	VertexData* vertexDataObj = nullptr;
-	vertexResourceObj->Map(0, nullptr, reinterpret_cast<void**>(&vertexDataObj));
-	std::memcpy(vertexDataObj, modelData.vertices.data(), sizeof(VertexData) * modelData.vertices.size());
-
-
-	//Sprite用ののTransformationMatrix用のリソースを作る。Matrix4x41つ分のサイズを用意する
-	Microsoft::WRL::ComPtr<ID3D12Resource> transformationMatrixResourceObj = GraphicsDevice::CreateBufferResource(graphics.get()->GetDevice(), sizeof(TransformationMatrix));
-	//データを書き込む
-	TransformationMatrix* transformationMatrixDataObj = nullptr;
-	//書き込むためのアドレスを取得
-	transformationMatrixResourceObj->Map(0, nullptr, reinterpret_cast<void**>(&transformationMatrixDataObj));
-	//単位行列をかきこんでおく
-	transformationMatrixDataObj->WVP = IdentityMatrix();
-	transformationMatrixDataObj->World = IdentityMatrix();
-
-
-
-
+#pragma region 球円の描画
 	//球円の描画//
 
 
@@ -690,16 +623,12 @@ int WINAPI WinMain(HINSTANCE, HINSTANCE, LPSTR, int) {
 	transformationMatrixDataShpere->WVP = IdentityMatrix();
 	transformationMatrixDataShpere->World = IdentityMatrix();
 
+#pragma endregion
+
 	std::unique_ptr<DirectinalLight> directinalLight = std::make_unique<DirectinalLight>();
 	directinalLight->CreateDirectinalLight(graphics.get()->GetDevice());
 
-	std::unique_ptr<Texture> texture = std::make_unique<Texture>();
-	std::unique_ptr<TextureLoader> textureLoader = std::make_unique<TextureLoader>();
-	texture->Initalize(graphics.get()->GetDevice(),command.get()->GetCommandList(),descriptorHeap.get(), textureLoader.get());
-
-	texture->CreateTexture("resources/uvChecker.png");
-
-	texture->CreateTexture("resources/nightSky.png");
+	
 
 	//ViewportとScissor（シザー）//
 
@@ -717,7 +646,7 @@ int WINAPI WinMain(HINSTANCE, HINSTANCE, LPSTR, int) {
 	bool useMonsterBall = true;
 
 	Transform camraTransform{ {1.0f,1.0f,1.0f},{0.0f,0.0f,0.0f},{0.0f,0.0f,-5.0f} };
-	Transform transformSprite{ {1.0f,1.0f,1.0f},{0.0f,0.0f,0.0f},{0.0f,0.0f,0.0f} };
+
 	Transform transformShpere{ ScalarMultiply({1.0f,180.0f,1.0f},rdius),{0.0f,0.0f,0.0f},{0.0f,0.0f,0.0f} };
 	Transform transformObj{ {1.0f,1.0f,1.0f},{0.0f,0.0f,0.0f},{0.0f,0.0f,1.0f} };
 
@@ -763,7 +692,7 @@ int WINAPI WinMain(HINSTANCE, HINSTANCE, LPSTR, int) {
 
 			//コマンドを積み込んで確定させる//
 
-			resourceBarrierHelper->Transition(command.get()->GetCommandList(),swapChain.get());
+			resourceBarrierHelper->Transition(command.get()->GetCommandList(), swapChain.get());
 
 
 			//ゲーム処理
@@ -783,9 +712,9 @@ int WINAPI WinMain(HINSTANCE, HINSTANCE, LPSTR, int) {
 				ImGui::DragFloat3("camraScale", &camraTransform.scale.x, 0.01f);
 			}
 			if (ImGui::CollapsingHeader("Sprite")) {
-				ImGui::DragFloat3("TranslateSprite", &transformSprite.translate.x, 0.01f);
-				ImGui::DragFloat3("RotateSprite", &transformSprite.rotate.x, 0.01f);
-				ImGui::DragFloat3("ScaleSprite", &transformSprite.scale.x, 0.01f);
+				ImGui::DragFloat3("TranslateSprite", &spriteTransform.translate.x, 0.01f);
+				ImGui::DragFloat3("RotateSprite", &spriteTransform.rotate.x, 0.01f);
+				ImGui::DragFloat3("ScaleSprite", &spriteTransform.scale.x, 0.01f);
 			}
 			if (ImGui::CollapsingHeader("Shpere")) {
 				ImGui::DragFloat3("TranslateShpere", &transformShpere.translate.x, 0.01f);
@@ -803,7 +732,7 @@ int WINAPI WinMain(HINSTANCE, HINSTANCE, LPSTR, int) {
 				ImGui::DragFloat2("ScaleSpriteUV", &uvTransformSprite.scale.x, 0.01f, -10.0f, 10.0f);
 				ImGui::SliderAngle("RotateSpriteUV", &uvTransformSprite.rotate.z);
 			}
-			
+
 
 
 			input->Updata();
@@ -820,13 +749,11 @@ int WINAPI WinMain(HINSTANCE, HINSTANCE, LPSTR, int) {
 			//Matrix4x4 viewMatrix = Inverse(MakeAffineMatrix(camraTransform.translate, camraTransform.scale, camraTransform.rotate));
 			Matrix4x4 projectionMatri = MakePerspectiveFovMatrix(0.45f, float(kClientWidth) / float(kClientHeight), 0.1f, 100.0f);
 
-			Matrix4x4 worldMatrixObj = MakeAffineMatrix(transformObj.translate, transformObj.scale, transformObj.rotate);
-			Matrix4x4 worldViewProjectionMatrixObj = MultiplyMatrix4x4(worldMatrixObj, MultiplyMatrix4x4(viewMatrix, projectionMatri));
-			*transformationMatrixDataObj = { worldViewProjectionMatrixObj,worldMatrixObj };
+			model.get()->SetTransform(objTransform);
+			model.get()->SetWvp(camraTransform);
 
-			Matrix4x4 worldMatrixSprite = MakeAffineMatrix(transformSprite.translate, transformSprite.scale, transformSprite.rotate);
-			Matrix4x4 worldViewProjectionMatrixSprite = MultiplyMatrix4x4(worldMatrixSprite, MultiplyMatrix4x4(viewMatrix, projectionMatri));
-			*transformationMatrixDataSprite = { worldViewProjectionMatrixSprite,worldMatrixSprite };
+			sprite.get()->SetTrandform(spriteTransform);
+			sprite.get()->SetWvp();
 
 			Matrix4x4 worldMatrixShpere = MakeAffineMatrix(transformShpere.translate, transformShpere.scale, transformShpere.rotate);
 			Matrix4x4 worldViewProjectionMatrixShpere = MultiplyMatrix4x4(worldMatrixShpere, MultiplyMatrix4x4(viewMatrix, projectionMatri));
@@ -857,7 +784,7 @@ int WINAPI WinMain(HINSTANCE, HINSTANCE, LPSTR, int) {
 			command.get()->GetCommandList()->IASetVertexBuffers(0, 1, &vertexBufferView);//VBVを設定
 			//形状を設定。PSOに設定しているものとはまた別。同じものを設定すると考えておけばいい
 			command.get()->GetCommandList()->IASetPrimitiveTopology(D3D_PRIMITIVE_TOPOLOGY_TRIANGLELIST);
-			command.get()->GetCommandList()->IASetIndexBuffer(&indexBufferView);//IBVを設定
+			command.get()->GetCommandList()->IASetIndexBuffer(draw->GetIndexBufferView());//IBVを設定
 
 
 			command.get()->GetCommandList()->RSSetViewports(1, viewportScissor.get()->GetViewport());//Viewportを設定
@@ -866,15 +793,15 @@ int WINAPI WinMain(HINSTANCE, HINSTANCE, LPSTR, int) {
 			command.get()->GetCommandList()->SetGraphicsRootSignature(rootSignature.get()->GetRootSignature());
 			command.get()->GetCommandList()->SetGraphicsRootConstantBufferView(3, directinalLight.get()->GetDirectinalLightResource()->GetGPUVirtualAddress());
 
-			////スプライトの描画	
-			//command.get()->GetCommandList()->IASetVertexBuffers(0, 1, &vertexBufferViewSprite);//VBVを設定
-			//command.get()->GetCommandList()->SetGraphicsRootConstantBufferView(0, spriteMatrial.get()->GetMaterialResource()->GetGPUVirtualAddress());
-			//command.get()->GetCommandList()->SetGraphicsRootConstantBufferView(1, transformationMatrixResourceSprite->GetGPUVirtualAddress());
-			//command.get()->GetCommandList()->SetGraphicsRootDescriptorTable(2, textureSrvHandleGPU);
+			//スプライトの描画	
+			command.get()->GetCommandList()->IASetVertexBuffers(0, 1, sprite.get()->GetVertexBufferView());//VBVを設定
+			command.get()->GetCommandList()->SetGraphicsRootConstantBufferView(0, spriteMatrial.get()->GetMaterialResource()->GetGPUVirtualAddress());
+			command.get()->GetCommandList()->SetGraphicsRootConstantBufferView(1, sprite.get()->GetVertexResource()->GetGPUVirtualAddress());
+			command.get()->GetCommandList()->SetGraphicsRootDescriptorTable(2, textureLoader.get()->GetTexture(1));
 
-			////commandList->DrawIndexedInstanced(6, 1, 0, 0, 0);
+			command.get()->GetCommandList()->DrawIndexedInstanced(6, 1, 0, 0, 0);
 
-		
+
 			////球の描画
 			//command.get()->GetCommandList()->IASetVertexBuffers(0, 1, &vertexBufferViewShpere);//VBVを設定
 			//command.get()->GetCommandList()->SetGraphicsRootConstantBufferView(0, spriteMatrial.get()->GetMaterialResource()->GetGPUVirtualAddress());
@@ -888,14 +815,9 @@ int WINAPI WinMain(HINSTANCE, HINSTANCE, LPSTR, int) {
 			////描画
 			////commandList->DrawInstanced(kSubdivision * kSubdivision * 6, 1, 0, 0);
 			//	
+			
 			//objectの描画
-			command.get()->GetCommandList()->IASetVertexBuffers(0, 1, &vertexBufferViewObj);//VBVを設定
-			command.get()->GetCommandList()->SetGraphicsRootConstantBufferView(0, spriteMatrial.get()->GetMaterialResource()->GetGPUVirtualAddress());
-			command.get()->GetCommandList()->SetGraphicsRootConstantBufferView(1, transformationMatrixResourceObj->GetGPUVirtualAddress());
-			command.get()->GetCommandList()->SetGraphicsRootDescriptorTable(2,textureLoader.get()->GetTexture(1));
-
-			command.get()->GetCommandList()->DrawInstanced(UINT(modelData.vertices.size()), 1, 0, 0);
-
+			draw->DrawObj(model.get());
 
 			//ImGuiの描画コマンド
 			ImGui_ImplDX12_RenderDrawData(ImGui::GetDrawData(), command.get()->GetCommandList());
@@ -905,7 +827,7 @@ int WINAPI WinMain(HINSTANCE, HINSTANCE, LPSTR, int) {
 			//今回RenderTargetからPresentにする
 			resourceBarrierHelper->TransitionToPresent(command.get()->GetCommandList());
 			//TransitionBarrierを張る
-			
+
 
 
 			//コマンドリストの内容を確定させる。すべてのコマンドを積んでからCloseすること

@@ -95,6 +95,7 @@ copy "$(WindowsSdkDir)bin\$(TargetPlatformVersion)\x64\dxil.dll" "$(TargetDir)dx
     <ClCompile Include="DirectinalLight.cpp" />
     <ClCompile Include="GpuSyncManager.cpp" />
     <ClCompile Include="MatchaEngine\GameObjects\DebugCamera.cpp" />
+    <ClCompile Include="MatchaEngine\GameObjects\Sprite.cpp" />
     <ClCompile Include="MatchaEngine\Resource\Audio.cpp" />
     <ClCompile Include="MatchaEngine\Common\Input.cpp" />
     <ClCompile Include="MatchaEngine\Engine.cpp" />
@@ -149,6 +150,7 @@ copy "$(WindowsSdkDir)bin\$(TargetPlatformVersion)\x64\dxil.dll" "$(TargetDir)dx
     <ClInclude Include="DescriptorHeap.h" />
     <ClInclude Include="DirectinalLight.h" />
     <ClInclude Include="GpuSyncManager.h" />
+    <ClInclude Include="MatchaEngine\GameObjects\Sprite.h" />
     <ClInclude Include="MatchaEngine\Resource\Load.h" />
     <ClInclude Include="MatchaEngine\GameObjects\DebugCamera.h" />
     <ClInclude Include="MatchaEngine\Resource\Audio.h" />
