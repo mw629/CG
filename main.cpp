@@ -49,6 +49,7 @@ extern IMGUI_IMPL_API LRESULT ImGui_ImplWin32_WndProcHandler(HWND hWnd, UINT msg
 #include "GameObjects/Matrial.h"
 #include "ViewportScissor.h"
 #include "DirectinalLight.h"
+#include "ResourceBarrierHelper.h"
 //PSO
 
 #include "PSO/DirectXShaderCompiler.h"
@@ -292,6 +293,10 @@ int WINAPI WinMain(HINSTANCE, HINSTANCE, LPSTR, int) {
 
 	//フェンスやイベント、シグナル
 	GpuSyncManager gpuSyncManager;
+
+	//バリア
+	std::unique_ptr<ResourceBarrierHelper> resourceBarrierHelper = std::make_unique<ResourceBarrierHelper>();
+	
 
 	//ウィンドウサイズの設定//
 	window.DrawWindow(kClientWidth, kClientHeight);
@@ -758,22 +763,7 @@ int WINAPI WinMain(HINSTANCE, HINSTANCE, LPSTR, int) {
 
 			//コマンドを積み込んで確定させる//
 
-		   //これから書き込むバックバッファのインデックスを取得
-			UINT backBufferIndex = swapChain.get()->GetSwapChain()->GetCurrentBackBufferIndex();
-			//TransitionBarrierを張る//
-			D3D12_RESOURCE_BARRIER barrier{};
-			//今回バリアはTransition
-			barrier.Type = D3D12_RESOURCE_BARRIER_TYPE_TRANSITION;
-			//Noneにしておく
-			barrier.Flags = D3D12_RESOURCE_BARRIER_FLAG_NONE;
-			//バリアを張る対象のリソース。現在のバックバッファに対して行う
-			barrier.Transition.pResource = swapChain.get()->GetSwapChainResources(backBufferIndex);
-			//遷移前（現在）のResouce
-			barrier.Transition.StateBefore = D3D12_RESOURCE_STATE_PRESENT;
-			//遷移後のResouce
-			barrier.Transition.StateAfter = D3D12_RESOURCE_STATE_RENDER_TARGET;
-			//TransitionBarrierを張る
-			command.get()->GetCommandList()->ResourceBarrier(1, &barrier);
+			resourceBarrierHelper->Transition(command.get()->GetCommandList(),swapChain.get());
 
 
 			//ゲーム処理
@@ -851,9 +841,9 @@ int WINAPI WinMain(HINSTANCE, HINSTANCE, LPSTR, int) {
 			ImGui::Render();
 
 
-			renderTargetView.get()->SetAndClear(command.get()->GetCommandList(), backBufferIndex);
+			renderTargetView.get()->SetAndClear(command.get()->GetCommandList(), swapChain.get()->GetSwapChain()->GetCurrentBackBufferIndex());
 			//DSVを設定する
-			depthStencil->SetDSV(command.get()->GetCommandList(), renderTargetView.get()->GetRtvHandles(backBufferIndex));
+			depthStencil->SetDSV(command.get()->GetCommandList(), renderTargetView.get()->GetRtvHandles(swapChain.get()->GetSwapChain()->GetCurrentBackBufferIndex()));
 
 
 
@@ -913,10 +903,9 @@ int WINAPI WinMain(HINSTANCE, HINSTANCE, LPSTR, int) {
 
 			//画面に描く処理はすべて終わり、画面に映すので、状態を遷移
 			//今回RenderTargetからPresentにする
-			barrier.Transition.StateBefore = D3D12_RESOURCE_STATE_RENDER_TARGET;
-			barrier.Transition.StateAfter = D3D12_RESOURCE_STATE_PRESENT;
+			resourceBarrierHelper->TransitionToPresent(command.get()->GetCommandList());
 			//TransitionBarrierを張る
-			command.get()->GetCommandList()->ResourceBarrier(1, &barrier);
+			
 
 
 			//コマンドリストの内容を確定させる。すべてのコマンドを積んでからCloseすること
