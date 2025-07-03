@@ -41,3 +41,14 @@ void Draw::DrawSprite(Sprite* sprite)
 	
 	commandList_->DrawIndexedInstanced(6, 1, 0, 0, 0);
 }
+
+void Draw::DrawShpere(Shpere* shpere)
+{
+	//commandList_->IASetIndexBuffer(shpere->GetIndexBufferView());//IBVを設定
+	commandList_->IASetVertexBuffers(0, 1, shpere->GetVertexBufferView());//VBVを設定
+	commandList_->SetGraphicsRootConstantBufferView(0, shpere->GetMatrial()->GetMaterialResource()->GetGPUVirtualAddress());
+	commandList_->SetGraphicsRootConstantBufferView(1, shpere->GetVertexResource()->GetGPUVirtualAddress());
+	commandList_->SetGraphicsRootDescriptorTable(2, shpere->GetTextureSrvHandleGPU());
+	commandList_->DrawInstanced(pow(shpere->GetSubdivision(), 2) * 6, 1, 0, 0);
+}
+	

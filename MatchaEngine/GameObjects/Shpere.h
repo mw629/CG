@@ -12,6 +12,8 @@ private:
 	Matrial* matrial_;
 	D3D12_GPU_DESCRIPTOR_HANDLE textureSrvHandleGPU_;
 
+	uint32_t kSubdivision_ = 16;
+
 	Microsoft::WRL::ComPtr<ID3D12Resource> vertexResource_;
 	D3D12_VERTEX_BUFFER_VIEW vertexBufferView_{};
 	VertexData* vertexData_ = nullptr;
@@ -36,7 +38,7 @@ public:
 
 	void CreateSprite(ID3D12Device* device);
 
-	void SetWvp();
+	void SetWvp(Matrix4x4 viewMatrix);
 
 	void SetTrandform(Transform transform);
 
@@ -48,6 +50,8 @@ public:
 
 	Matrial* GetMatrial() { return matrial_; }
 	D3D12_GPU_DESCRIPTOR_HANDLE GetTextureSrvHandleGPU() { return textureSrvHandleGPU_; }
+
+	uint32_t GetSubdivision() { return kSubdivision_; }
 
 };
 

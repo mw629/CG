@@ -481,18 +481,24 @@ int WINAPI WinMain(HINSTANCE, HINSTANCE, LPSTR, int) {
 	wvpData->WVP = IdentityMatrix();
 	wvpData->World = IdentityMatrix();
 
-
+	//テクスチャの作成
 	std::unique_ptr<Texture> texture = std::make_unique<Texture>();
 	std::unique_ptr<TextureLoader> textureLoader = std::make_unique<TextureLoader>();
 	texture->Initalize(graphics.get()->GetDevice(), command.get()->GetCommandList(), descriptorHeap.get(), textureLoader.get());
 	texture->CreateTexture("resources/uvChecker.png");
 	texture->CreateTexture("resources/nightSky.png");
-	//Sprote用の頂点リソースを作る//
+	
+	//スプライト作成
 	std::unique_ptr<Sprite> sprite = std::make_unique<Sprite>();
 	sprite.get()->Initialize(spriteMatrial.get(), textureLoader.get()->GetTexture(1));
 	sprite.get()->CreateSprite(graphics.get()->GetDevice());
 	Transform spriteTransform = { {1.0f, 1.0f, 1.0f}, { 0.0f,0.0f,0.0f }, { 0.0f,0.0f,0.0f } };
-
+	//球の作成
+	std::unique_ptr<Shpere> shpere = std::make_unique<Shpere>();
+	shpere.get()->Initialize(spriteMatrial.get(), textureLoader.get()->GetTexture(0));
+	shpere.get()->CreateSprite(graphics.get()->GetDevice());
+	Transform shpereTransform = { {1.0f, 1.0f, 1.0f}, { 0.0f,0.0f,0.0f }, { 0.0f,0.0f,0.0f } };
+	//モデルの作成
 	ModelData modelData = LoadObjFile("resources/obj", "axis.obj");
 	std::unique_ptr<Model> model = std::make_unique<Model>();
 	model.get()->Initialize(modelData, objMatrial.get(),textureLoader.get()->GetTexture(1));
@@ -500,12 +506,6 @@ int WINAPI WinMain(HINSTANCE, HINSTANCE, LPSTR, int) {
 	Transform objTransform = { {1.0f, 1.0f, 1.0f}, { 0.0f,0.0f,0.0f }, { 0.0f,0.0f,0.0f } };
 	
 
-#pragma region 球円の描画
-	//球円の描画//
-
-
-
-#pragma endregion
 
 	std::unique_ptr<DirectinalLight> directinalLight = std::make_unique<DirectinalLight>();
 	directinalLight->CreateDirectinalLight(graphics.get()->GetDevice());
@@ -528,9 +528,6 @@ int WINAPI WinMain(HINSTANCE, HINSTANCE, LPSTR, int) {
 	bool useMonsterBall = true;
 
 	Transform camraTransform{ {1.0f,1.0f,1.0f},{0.0f,0.0f,0.0f},{0.0f,0.0f,-5.0f} };
-
-	Transform transformShpere{ ScalarMultiply({1.0f,180.0f,1.0f},rdius),{0.0f,0.0f,0.0f},{0.0f,0.0f,0.0f} };
-	Transform transformObj{ {1.0f,1.0f,1.0f},{0.0f,0.0f,0.0f},{0.0f,0.0f,1.0f} };
 
 	Transform uvTransformSprite{ {1.0f,1.0f,1.0f},{0.0f,0.0f,0.0f},{0.0f,0.0f,0.0f} };
 
@@ -563,10 +560,6 @@ int WINAPI WinMain(HINSTANCE, HINSTANCE, LPSTR, int) {
 			DispatchMessage(&msg);
 		}
 		else {
-
-
-
-
 			ImGui_ImplDX12_NewFrame();
 			ImGui_ImplWin32_NewFrame();
 			ImGui::NewFrame();
@@ -594,19 +587,14 @@ int WINAPI WinMain(HINSTANCE, HINSTANCE, LPSTR, int) {
 				ImGui::DragFloat3("camraScale", &camraTransform.scale.x, 0.01f);
 			}
 			if (ImGui::CollapsingHeader("Sprite")) {
-				ImGui::DragFloat3("TranslateSprite", &spriteTransform.translate.x, 0.01f);
+				ImGui::DragFloat3("TranslateSprite", &spriteTransform.translate.x, 1.0f);
 				ImGui::DragFloat3("RotateSprite", &spriteTransform.rotate.x, 0.01f);
 				ImGui::DragFloat3("ScaleSprite", &spriteTransform.scale.x, 0.01f);
 			}
 			if (ImGui::CollapsingHeader("Shpere")) {
-				ImGui::DragFloat3("TranslateShpere", &transformShpere.translate.x, 0.01f);
-				ImGui::DragFloat3("RotateShpere", &transformShpere.rotate.x, 0.01f);
-				ImGui::DragFloat3("ScaleShpere", &transformShpere.scale.x, 0.01f);
-			}
-			if (ImGui::CollapsingHeader("Obj")) {
-				ImGui::DragFloat3("TranslateObj", &transformObj.translate.x, 0.01f);
-				ImGui::DragFloat3("RotateObj", &transformObj.rotate.x, 0.01f);
-				ImGui::DragFloat3("ScaleObj", &transformObj.scale.x, 0.01f);
+				ImGui::DragFloat3("TranslateShpere", &shpereTransform.translate.x, 0.01f);
+				ImGui::DragFloat3("RotateShpere", &shpereTransform.rotate.x, 0.01f);
+				ImGui::DragFloat3("ScaleShpere", &shpereTransform.scale.x, 0.01f);
 			}
 			if (ImGui::CollapsingHeader("SpriteUV"))
 			{
@@ -628,14 +616,17 @@ int WINAPI WinMain(HINSTANCE, HINSTANCE, LPSTR, int) {
 				Matrix4x4 cameraMatrix = MakeAffineMatrix(camraTransform.translate, camraTransform.scale, camraTransform.rotate);;
 				viewMatrix = Inverse(cameraMatrix);
 			}
-			//Matrix4x4 viewMatrix = Inverse(MakeAffineMatrix(camraTransform.translate, camraTransform.scale, camraTransform.rotate));
-			Matrix4x4 projectionMatri = MakePerspectiveFovMatrix(0.45f, float(kClientWidth) / float(kClientHeight), 0.1f, 100.0f);
+		
+			sprite.get()->SetTrandform(spriteTransform);
+			sprite.get()->SetWvp();
+
+			shpere.get()->SetTrandform(shpereTransform);
+			shpere.get()->SetWvp(viewMatrix);
 
 			model.get()->SetTransform(objTransform);
 			model.get()->SetWvp(viewMatrix);
 
-			sprite.get()->SetTrandform(spriteTransform);
-			sprite.get()->SetWvp();
+			
 
 		
 
@@ -663,35 +654,19 @@ int WINAPI WinMain(HINSTANCE, HINSTANCE, LPSTR, int) {
 			command.get()->GetCommandList()->IASetVertexBuffers(0, 1, &vertexBufferView);//VBVを設定
 			//形状を設定。PSOに設定しているものとはまた別。同じものを設定すると考えておけばいい
 			command.get()->GetCommandList()->IASetPrimitiveTopology(D3D_PRIMITIVE_TOPOLOGY_TRIANGLELIST);
-			
-
-
 			command.get()->GetCommandList()->RSSetViewports(1, viewportScissor.get()->GetViewport());//Viewportを設定
 			command.get()->GetCommandList()->RSSetScissorRects(1, viewportScissor.get()->GetScissorRect());//Sxirssorを設定
 			//RootSignatureを設定。POSに設定しているけど別途設定が必要
 			command.get()->GetCommandList()->SetGraphicsRootSignature(rootSignature.get()->GetRootSignature());
 			command.get()->GetCommandList()->SetGraphicsRootConstantBufferView(3, directinalLight.get()->GetDirectinalLightResource()->GetGPUVirtualAddress());
 
-			//スプライトの描画	
-			draw.get()->DrawSprite(sprite.get());
-			
 
-			////球の描画
-			//command.get()->GetCommandList()->IASetVertexBuffers(0, 1, &vertexBufferViewShpere);//VBVを設定
-			//command.get()->GetCommandList()->SetGraphicsRootConstantBufferView(0, spriteMatrial.get()->GetMaterialResource()->GetGPUVirtualAddress());
-			//command.get()->GetCommandList()->SetGraphicsRootConstantBufferView(1, transformationMatrixResourceShpere->GetGPUVirtualAddress());
-			//if (!useMonsterBall) {
-			//	command.get()->GetCommandList()->SetGraphicsRootDescriptorTable(2, textureSrvHandleGPU);
-			//}
-			//else {
-			//	command.get()->GetCommandList()->SetGraphicsRootDescriptorTable(2, textureSrvHandleGPU2);
-			//}
-			////描画
-			////commandList->DrawInstanced(kSubdivision * kSubdivision * 6, 1, 0, 0);
-			//	
-			
+			//スプライトの描画	
+			//draw.get()->DrawSprite(sprite.get());
+			//球の描画
+			draw.get()->DrawShpere(shpere.get());	
 			//objectの描画
-			draw->DrawObj(model.get());
+			//draw->DrawObj(model.get());
 
 			//ImGuiの描画コマンド
 			ImGui_ImplDX12_RenderDrawData(ImGui::GetDrawData(), command.get()->GetCommandList());

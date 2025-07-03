@@ -19,36 +19,35 @@ void Shpere::CreateVertexData(ID3D12Device* device)
 {
 
 	float pi = 3.14f;
-	uint32_t kSubdivision = 16;
+	
 
 	//Shpere用の頂点リソースを作る//
 
-	Microsoft::WRL::ComPtr<ID3D12Resource> vertexResourceShpere = GraphicsDevice::CreateBufferResource(device, sizeof(VertexData) * (kSubdivision * kSubdivision) * 6);
+	vertexResource_ = GraphicsDevice::CreateBufferResource(device, sizeof(VertexData) * (kSubdivision_ * kSubdivision_) * 6);
 
 	//頂点バッファービューを作成する
-	D3D12_VERTEX_BUFFER_VIEW vertexBufferViewShpere{};
+	
 	//リソースの先頭アドレスから使う
-	vertexBufferViewShpere.BufferLocation = vertexResourceShpere->GetGPUVirtualAddress();
+	vertexBufferView_.BufferLocation = vertexResource_->GetGPUVirtualAddress();
 	//使用するリソースのサイズは頂点6つ分のサイズ
-	vertexBufferViewShpere.SizeInBytes = sizeof(VertexData) * (kSubdivision * kSubdivision) * 6;
+	vertexBufferView_.SizeInBytes = sizeof(VertexData) * (kSubdivision_ * kSubdivision_) * 6;
 	//1頂点当たりのサイズ
-	vertexBufferViewShpere.StrideInBytes = sizeof(VertexData);
+	vertexBufferView_.StrideInBytes = sizeof(VertexData);
 
 	//頂点データを設定する//
 
-	VertexData* vertexDataShpere = nullptr;
-	vertexResourceShpere->Map(0, nullptr, reinterpret_cast<void**>(&vertexDataShpere));
+	vertexResource_->Map(0, nullptr, reinterpret_cast<void**>(&vertexData_));
 
 	//経度分割1つ分の角度φd
-	const float kLonEvery = pi * 2.0f / float(kSubdivision);
+	const float kLonEvery = pi * 2.0f / float(kSubdivision_);
 	//緯度分割1つ分の角度Θd
-	const float kLatEvery = pi / float(kSubdivision);
+	const float kLatEvery = pi / float(kSubdivision_);
 	//緯度の方向に分割	
-	for (uint32_t latIndex = 0; latIndex < kSubdivision; ++latIndex) {
+	for (uint32_t latIndex = 0; latIndex < kSubdivision_; ++latIndex) {
 		float lat = -pi / 2.0f + kLatEvery * latIndex;//Θ
 		//経度方向に分割しながら線を描く
-		for (uint32_t lonIndex = 0; lonIndex < kSubdivision; ++lonIndex) {
-			uint32_t startIndex = (latIndex * kSubdivision + lonIndex) * 6;
+		for (uint32_t lonIndex = 0; lonIndex < kSubdivision_; ++lonIndex) {
+			uint32_t startIndex = (latIndex * kSubdivision_ + lonIndex) * 6;
 			float lon = lonIndex * kLonEvery;
 
 			//一つ目の三角形
@@ -87,20 +86,20 @@ void Shpere::CreateVertexData(ID3D12Device* device)
 			//texcoord
 
 			a.texcoord = {
-				float(lonIndex) / float(kSubdivision),
-				 float(latIndex) / float(kSubdivision) };
+				float(lonIndex) / float(kSubdivision_),
+				 float(latIndex) / float(kSubdivision_) };
 
 			b.texcoord = {
-				float(lonIndex) / float(kSubdivision),
-				 float(latIndex + 1) / float(kSubdivision) };
+				float(lonIndex) / float(kSubdivision_),
+				 float(latIndex + 1) / float(kSubdivision_) };
 
 			c.texcoord = {
-				float(lonIndex + 1) / float(kSubdivision),
-				 float(latIndex) / float(kSubdivision) };
+				float(lonIndex + 1) / float(kSubdivision_),
+				 float(latIndex) / float(kSubdivision_) };
 
 			d.texcoord = {
-				float(lonIndex + 1) / float(kSubdivision),
-				 float(latIndex + 1) / float(kSubdivision) };
+				float(lonIndex + 1) / float(kSubdivision_),
+				 float(latIndex + 1) / float(kSubdivision_) };
 
 			//法線ベクトルを計算する
 
@@ -111,13 +110,13 @@ void Shpere::CreateVertexData(ID3D12Device* device)
 
 
 			//頂点にデータを入力する。基準点a
-			vertexDataShpere[startIndex] = a;
-			vertexDataShpere[startIndex + 1] = c;
-			vertexDataShpere[startIndex + 2] = b;
+			vertexData_[startIndex] = a;
+			vertexData_[startIndex + 1] = c;
+			vertexData_[startIndex + 2] = b;
 			//二つ目の三角形
-			vertexDataShpere[startIndex + 3] = b;
-			vertexDataShpere[startIndex + 4] = c;
-			vertexDataShpere[startIndex + 5] = d;
+			vertexData_[startIndex + 3] = b;
+			vertexData_[startIndex + 4] = c;
+			vertexData_[startIndex + 5] = d;
 
 		}
 	}
@@ -162,14 +161,15 @@ void Shpere::CreateWVP(ID3D12Device* device)
 void Shpere::CreateSprite(ID3D12Device* device)
 {
 	CreateVertexData(device);
-	CreateIndexResource(device);
+	//CreateIndexResource(device);
 	CreateWVP(device);
 }
 
-void Shpere::SetWvp()
+void Shpere::SetWvp(Matrix4x4 viewMatrix)
 {
+	Matrix4x4 projectionMatri = MakePerspectiveFovMatrix(0.45f, float(1280) / float(720), 0.1f, 100.0f);
 	Matrix4x4 worldMatrix = MakeAffineMatrix(transform_.translate, transform_.scale, transform_.rotate);
-	Matrix4x4 worldViewProjectionMatrix = MultiplyMatrix4x4(worldMatrix, MultiplyMatrix4x4(IdentityMatrix(), MakeOrthographicMatrix(0, float(1280), 0, float(720), 0.0f, 100.0f)));
+	Matrix4x4 worldViewProjectionMatrix = MultiplyMatrix4x4(worldMatrix, MultiplyMatrix4x4(viewMatrix, projectionMatri));
 	*wvpData_ = { worldViewProjectionMatrix,worldMatrix };
 }
 
