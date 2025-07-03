@@ -36,7 +36,7 @@ public:
 	void CreateWVP(ID3D12Device* device);
 
 	
-	void SetWvp(Transform camera);
+	void SetWvp(Matrix4x4 viewMatrix);
 	void SetTransform(Transform transform);
 
 	void CreateModel(ID3D12Device* device);

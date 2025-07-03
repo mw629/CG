@@ -493,9 +493,7 @@ int WINAPI WinMain(HINSTANCE, HINSTANCE, LPSTR, int) {
 
 	//Sprote用の頂点リソースを作る//
 	std::unique_ptr<Sprite> sprite = std::make_unique<Sprite>();
-	sprite.get()->CreateVertexData(graphics.get()->GetDevice());
-	draw->CreateIndexBuffer(graphics.get()->GetDevice());
-	sprite.get()->CreateWVP(graphics.get()->GetDevice());
+	sprite.get()->CreateSprite(graphics.get()->GetDevice());
 	Transform spriteTransform = { {1.0f, 1.0f, 1.0f}, { 0.0f,0.0f,0.0f }, { 0.0f,0.0f,0.0f } };
 
 	ModelData modelData = LoadObjFile("resources/obj", "axis.obj");
@@ -750,7 +748,7 @@ int WINAPI WinMain(HINSTANCE, HINSTANCE, LPSTR, int) {
 			Matrix4x4 projectionMatri = MakePerspectiveFovMatrix(0.45f, float(kClientWidth) / float(kClientHeight), 0.1f, 100.0f);
 
 			model.get()->SetTransform(objTransform);
-			model.get()->SetWvp(camraTransform);
+			model.get()->SetWvp(viewMatrix);
 
 			sprite.get()->SetTrandform(spriteTransform);
 			sprite.get()->SetWvp();
@@ -784,7 +782,7 @@ int WINAPI WinMain(HINSTANCE, HINSTANCE, LPSTR, int) {
 			command.get()->GetCommandList()->IASetVertexBuffers(0, 1, &vertexBufferView);//VBVを設定
 			//形状を設定。PSOに設定しているものとはまた別。同じものを設定すると考えておけばいい
 			command.get()->GetCommandList()->IASetPrimitiveTopology(D3D_PRIMITIVE_TOPOLOGY_TRIANGLELIST);
-			command.get()->GetCommandList()->IASetIndexBuffer(draw->GetIndexBufferView());//IBVを設定
+			//command.get()->GetCommandList()->IASetIndexBuffer(sprite->GetIndexBufferView());//IBVを設定
 
 
 			command.get()->GetCommandList()->RSSetViewports(1, viewportScissor.get()->GetViewport());//Viewportを設定
@@ -799,8 +797,8 @@ int WINAPI WinMain(HINSTANCE, HINSTANCE, LPSTR, int) {
 			command.get()->GetCommandList()->SetGraphicsRootConstantBufferView(1, sprite.get()->GetVertexResource()->GetGPUVirtualAddress());
 			command.get()->GetCommandList()->SetGraphicsRootDescriptorTable(2, textureLoader.get()->GetTexture(1));
 
-			command.get()->GetCommandList()->DrawIndexedInstanced(6, 1, 0, 0, 0);
-
+			//command.get()->GetCommandList()->DrawIndexedInstanced(6, 1, 0, 0, 0);
+			command.get()->GetCommandList()->DrawInstanced(6, 1, 0, 0);
 
 			////球の描画
 			//command.get()->GetCommandList()->IASetVertexBuffers(0, 1, &vertexBufferViewShpere);//VBVを設定

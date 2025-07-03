@@ -11,7 +11,6 @@ Sprite::Sprite()
 void Sprite::CreateVertexData(ID3D12Device* device)
 {
 	//Sprote用の頂点リソースを作る//
-
 	vertexResource_ = GraphicsDevice::CreateBufferResource(device, sizeof(VertexData) * 6);
 	//リソースの先頭アドレスから使う
 	vertexBufferView_.BufferLocation = vertexResource_->GetGPUVirtualAddress();
@@ -20,9 +19,7 @@ void Sprite::CreateVertexData(ID3D12Device* device)
 	//1頂点当たりのサイズ
 	vertexBufferView_.StrideInBytes = sizeof(VertexData);
 
-
-	//頂点データを設定する//
-	
+	//頂点データを設定する//	
 	vertexResource_->Map(0, nullptr, reinterpret_cast<void**>(&vertexData_));
 	//１枚目の三角形
 	vertexData_[0].position = { 0.0f,360.0f,0.0f,1.0f };//左下
@@ -35,21 +32,32 @@ void Sprite::CreateVertexData(ID3D12Device* device)
 	vertexData_[3].position = { 640.0f,0.0f,0.0f,1.0f };//右上
 	vertexData_[3].texcoord = { 1.0f,0.0f };
 
-	
+	/*indexResource_ = GraphicsDevice::CreateBufferResource(device, sizeof(uint32_t) * 6); ;
+
+	indexBufferView_.BufferLocation = indexResource_->GetGPUVirtualAddress();
+	indexBufferView_.SizeInBytes = sizeof(uint32_t) * 6;
+	indexBufferView_.Format = DXGI_FORMAT_R32_UINT;
+
+	indexResource_->Map(0, nullptr, reinterpret_cast<void**>(&indexData_));
+
+	indexData_[0] = 0;
+	indexData_[1] = 1;
+	indexData_[2] = 2;
+	indexData_[3] = 1;
+	indexData_[4] = 3;
+	indexData_[5] = 2;*/
+
 }
 
 void Sprite::CreateWVP(ID3D12Device* device)
 {
 	//Sprite用ののTransformationMatrix用のリソースを作る。Matrix4x41つ分のサイズを用意する
 	wvpResource_ = GraphicsDevice::CreateBufferResource(device, sizeof(TransformationMatrix));
-	//データを書き込む
-	
 	//書き込むためのアドレスを取得
 	wvpResource_->Map(0, nullptr, reinterpret_cast<void**>(&wvpData_));
 	//単位行列をかきこんでおく
 	wvpData_->World = IdentityMatrix();
 	wvpData_->WVP = IdentityMatrix();
-
 }
 
 void Sprite::CreateSprite(ID3D12Device* device)

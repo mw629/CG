@@ -17,10 +17,7 @@ private:
 	Matrix4x4* wvpData;
 
 	
-	//インデックスバッファ用
-	Microsoft::WRL::ComPtr<ID3D12Resource> indexResource_;
-	D3D12_INDEX_BUFFER_VIEW indexBufferView_{};
-	uint32_t* indexData_ = nullptr;
+
 
 public:
 
@@ -29,10 +26,7 @@ public:
 
 	void Initialize();
 
-	void CreateIndexBuffer(ID3D12Device* device);
-
 	void DrawObj(Model* model);
 
-	D3D12_INDEX_BUFFER_VIEW* GetIndexBufferView() { return &indexBufferView_; }
-
+	
 };
