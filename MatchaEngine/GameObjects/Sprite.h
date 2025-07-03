@@ -9,18 +9,19 @@ private:
 
 	Transform transform_;
 
+	D3D12_VERTEX_BUFFER_VIEW vertexBufferViewSprite{};
 
-	Microsoft::WRL::ComPtr<ID3D12Resource> vertexResource_;
-	D3D12_VERTEX_BUFFER_VIEW vertexBufferView_{};
-	VertexData* vertexData_ = nullptr;
+	//Microsoft::WRL::ComPtr<ID3D12Resource> vertexResource_;
+	//D3D12_VERTEX_BUFFER_VIEW vertexBufferView_{};
+	//VertexData* vertexData_ = nullptr;
 
-	Microsoft::WRL::ComPtr<ID3D12Resource> wvpResource_;
-	TransformationMatrix* wvpData_ = nullptr;
+	//Microsoft::WRL::ComPtr<ID3D12Resource> wvpResource_;
+	//TransformationMatrix* wvpData_ = nullptr;
 
-	//インデックスバッファ用
-	Microsoft::WRL::ComPtr<ID3D12Resource> indexResource_;
-	D3D12_INDEX_BUFFER_VIEW indexBufferView_{};
-	uint32_t* indexData_ = nullptr;
+	////インデックスバッファ用
+	//Microsoft::WRL::ComPtr<ID3D12Resource> indexResource_;
+	//D3D12_INDEX_BUFFER_VIEW indexBufferView_{};
+	//uint32_t* indexData_ = nullptr;
 
 public:
 	Sprite();
