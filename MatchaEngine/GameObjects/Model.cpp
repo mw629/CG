@@ -7,10 +7,14 @@
 
 
 
-Model::Model(ModelData modelData)
+
+
+void Model::Initialize(ModelData modelData,Matrial* matrial,D3D12_GPU_DESCRIPTOR_HANDLE textureSrvHandleGPU)
 {
 	transform_ = {};
 	modelData_ = modelData;
+	matrial_ = matrial;
+	textureSrvHandleGPU_ = textureSrvHandleGPU;
 }
 
 
@@ -49,10 +53,8 @@ void Model::CreateModel(ID3D12Device* device)
 	CreateWVP(device);
 }
 
-void Model::SetWvp(Transform camera)
+void Model::SetWvp(Matrix4x4 viewMatrix)
 {
-	Matrix4x4 cameraMatrix = MakeAffineMatrix(camera.translate, camera.scale, camera.rotate);
-	Matrix4x4 viewMatrix = Inverse(cameraMatrix);
 	Matrix4x4 projectionMatri = MakePerspectiveFovMatrix(0.45f, float(kClientWidth) / float(kClientHeight), 0.1f, 100.0f);
 	Matrix4x4 worldMatrixObj = MakeAffineMatrix(transform_.translate, transform_.scale, transform_.rotate);
 	Matrix4x4 worldViewProjectionMatrixObj = MultiplyMatrix4x4(worldMatrixObj, MultiplyMatrix4x4(viewMatrix, projectionMatri));

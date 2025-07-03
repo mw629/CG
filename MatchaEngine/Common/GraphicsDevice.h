@@ -55,8 +55,6 @@ public:
 
 	IDXGIFactory7 *GetDxgiFactory() {return dxgiFactory_.Get();}  
 	IDXGIAdapter4 *GetUseAdapter() { return useAdapter_.Get(); }
-	ID3D12Device *GetDevice() {
-		return device_.Get();
-	}
+	ID3D12Device *GetDevice() {return device_.Get();}
 
 };

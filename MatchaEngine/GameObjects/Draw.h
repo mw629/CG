@@ -4,9 +4,12 @@
 #include <d3d12.h>  
 #include <cstdint>  
 #include "Model.h"
+#include "Sprite.h"
 
 class Draw {
 private:
+
+	ID3D12GraphicsCommandList* commandList_;
 
 	ID3D12Resource* vertexResource;
 	D3D12_VERTEX_BUFFER_VIEW vertexBufferView{};
@@ -16,20 +19,16 @@ private:
 
 	
 
+
 public:
 
-	Draw();
+	Draw(ID3D12GraphicsCommandList* commandList);
 	~Draw();
 
 	void Initialize();
 
-	void DrawTriangle(Transform transform,
-		Transform cameraTransform,
-		ID3D12Device* device,
-		ID3D12GraphicsCommandList* commandList,
-		ID3D12Resource* materialResource,
-		D3D12_GPU_DESCRIPTOR_HANDLE textureSrvHandleGPU);
+	void DrawObj(Model* model);
 
-	void DrawObj();
-
+	void DrawSprite(Sprite* sprite);
+	
 };

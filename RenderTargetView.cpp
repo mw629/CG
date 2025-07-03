@@ -1,6 +1,14 @@
 #include "RenderTargetView.h"
 #include <array>
 
+RenderTargetView::RenderTargetView()
+{
+	clearColor[0] = 0.1f;
+	clearColor[1] = 0.25f;
+	clearColor[2] = 0.5f;
+	clearColor[3] = 1.0f;//青っぽい色。RGBAの順
+}
+
 void RenderTargetView::CreateRenderTargetView(ID3D12Device *device,ID3D12Resource* swapChainResources0, ID3D12Resource* swapChainResources1, ID3D12DescriptorHeap* rtvDescriptorHeap)
 {
 	//RTVの設定
@@ -16,4 +24,12 @@ void RenderTargetView::CreateRenderTargetView(ID3D12Device *device,ID3D12Resourc
 	//2つ目を作る
 	device->CreateRenderTargetView(swapChainResources1, &rtvDesc_, rtvHandles_[1]);
 
+}
+
+void RenderTargetView::SetAndClear(ID3D12GraphicsCommandList* commandList, UINT backBufferIndex)
+{
+	//描画先のRTVを設定する
+	commandList->OMSetRenderTargets(1, &rtvHandles_[backBufferIndex], false, nullptr);
+	//指定した色で画面全体をクリアする
+	commandList->ClearRenderTargetView(rtvHandles_[backBufferIndex], clearColor, 0, nullptr);
 }

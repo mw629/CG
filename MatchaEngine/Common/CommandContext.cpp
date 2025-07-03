@@ -1,4 +1,4 @@
-#include "CommandContext .h"
+#include "CommandContext.h"
 #include <cassert>
 
 CommandContext::~CommandContext()
