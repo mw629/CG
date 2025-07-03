@@ -57,11 +57,10 @@ void Sprite::CreateWVP(ID3D12Device* device)
 void Sprite::SetWvp()
 {
 	Matrix4x4 viewMatrix = IdentityMatrix();
-	Matrix4x4 projectionMatri = MakeOrthographicMatrix(0.0f, 1280.0f, 0.0f, 720.0f, 0.0f, 1.0f);
-	Matrix4x4 worldMatrixSprite = MakeAffineMatrix(transform_.translate, transform_.scale, transform_.rotate);
-	Matrix4x4 worldViewProjectionMatrixSprite = MultiplyMatrix4x4(worldMatrixSprite, MultiplyMatrix4x4(viewMatrix, projectionMatri));
-	*wvpData_ = { worldViewProjectionMatrixSprite,worldMatrixSprite };
-
+	Matrix4x4 projectionMatri = MakeOrthographicMatrix(0, float(1280), 0, float(720), 0.0f, 100.0f);
+	Matrix4x4 worldMatrix = MakeAffineMatrix(transform_.translate, transform_.scale, transform_.rotate);
+	Matrix4x4 worldViewProjectionMatrix = MultiplyMatrix4x4(worldMatrix, MultiplyMatrix4x4(viewMatrix, projectionMatri));
+	*wvpData_ = { worldViewProjectionMatrix,worldMatrix };
 }
 
 void Sprite::SetTrandform(Transform transform)
