@@ -30,7 +30,7 @@ public:
 
 
 
-	void Initialize(ModelData modelData, Matrial* matrial, D3D12_GPU_DESCRIPTOR_HANDLE textureSrvHandleGPU_);
+	void Initialize(ModelData modelData, Matrial* matrial, D3D12_GPU_DESCRIPTOR_HANDLE textureSrvHandleGPU);
 
 	void CreateVertexData(ID3D12Device* device);
 	void CreateWVP(ID3D12Device* device);

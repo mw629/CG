@@ -485,14 +485,11 @@ int WINAPI WinMain(HINSTANCE, HINSTANCE, LPSTR, int) {
 	std::unique_ptr<Texture> texture = std::make_unique<Texture>();
 	std::unique_ptr<TextureLoader> textureLoader = std::make_unique<TextureLoader>();
 	texture->Initalize(graphics.get()->GetDevice(), command.get()->GetCommandList(), descriptorHeap.get(), textureLoader.get());
-
 	texture->CreateTexture("resources/uvChecker.png");
-
 	texture->CreateTexture("resources/nightSky.png");
-
-
 	//Sprote用の頂点リソースを作る//
 	std::unique_ptr<Sprite> sprite = std::make_unique<Sprite>();
+	sprite.get()->Initialize(spriteMatrial.get(), textureLoader.get()->GetTexture(1));
 	sprite.get()->CreateSprite(graphics.get()->GetDevice());
 	Transform spriteTransform = { {1.0f, 1.0f, 1.0f}, { 0.0f,0.0f,0.0f }, { 0.0f,0.0f,0.0f } };
 
@@ -507,119 +504,6 @@ int WINAPI WinMain(HINSTANCE, HINSTANCE, LPSTR, int) {
 	//球円の描画//
 
 
-	float pi = 3.14f;
-	uint32_t kSubdivision = 16;
-
-	//Shpere用の頂点リソースを作る//
-
-	Microsoft::WRL::ComPtr<ID3D12Resource> vertexResourceShpere = GraphicsDevice::CreateBufferResource(graphics.get()->GetDevice(), sizeof(VertexData) * (kSubdivision * kSubdivision) * 6);
-
-	//頂点バッファービューを作成する
-	D3D12_VERTEX_BUFFER_VIEW vertexBufferViewShpere{};
-	//リソースの先頭アドレスから使う
-	vertexBufferViewShpere.BufferLocation = vertexResourceShpere->GetGPUVirtualAddress();
-	//使用するリソースのサイズは頂点6つ分のサイズ
-	vertexBufferViewShpere.SizeInBytes = sizeof(VertexData) * (kSubdivision * kSubdivision) * 6;
-	//1頂点当たりのサイズ
-	vertexBufferViewShpere.StrideInBytes = sizeof(VertexData);
-
-	//頂点データを設定する//
-
-	VertexData* vertexDataShpere = nullptr;
-	vertexResourceShpere->Map(0, nullptr, reinterpret_cast<void**>(&vertexDataShpere));
-
-	//経度分割1つ分の角度φd
-	const float kLonEvery = pi * 2.0f / float(kSubdivision);
-	//緯度分割1つ分の角度Θd
-	const float kLatEvery = pi / float(kSubdivision);
-	//緯度の方向に分割	
-	for (uint32_t latIndex = 0; latIndex < kSubdivision; ++latIndex) {
-		float lat = -pi / 2.0f + kLatEvery * latIndex;//Θ
-		//経度方向に分割しながら線を描く
-		for (uint32_t lonIndex = 0; lonIndex < kSubdivision; ++lonIndex) {
-			uint32_t startIndex = (latIndex * kSubdivision + lonIndex) * 6;
-			float lon = lonIndex * kLonEvery;
-
-			//一つ目の三角形
-
-			VertexData a;
-			VertexData b;
-			VertexData c;
-			VertexData d;
-
-			//position
-
-			a.position = {
-				cos(lat) * cos(lon),
-				sin(lat),
-				cos(lat) * sin(lon),
-				1.0f };
-
-			b.position = {
-				cos(lat + kLatEvery) * cos(lon),
-				sin(lat + kLatEvery),
-				cos(lat + kLatEvery) * sin(lon) ,
-				1.0f };
-
-			c.position = {
-				cos(lat) * cos(lon + kLonEvery),
-				sin(lat),
-				cos(lat) * sin(lon + kLonEvery),
-				1.0f };
-
-			d.position = {
-				cos(lat + kLatEvery) * cos(lon + kLonEvery),
-				sin(lat + kLatEvery),
-				cos(lat + kLatEvery) * sin(lon + kLonEvery),
-				1.0f };
-
-			//texcoord
-
-			a.texcoord = {
-				float(lonIndex) / float(kSubdivision),
-				 float(latIndex) / float(kSubdivision) };
-
-			b.texcoord = {
-				float(lonIndex) / float(kSubdivision),
-				 float(latIndex + 1) / float(kSubdivision) };
-
-			c.texcoord = {
-				float(lonIndex + 1) / float(kSubdivision),
-				 float(latIndex) / float(kSubdivision) };
-
-			d.texcoord = {
-				float(lonIndex + 1) / float(kSubdivision),
-				 float(latIndex + 1) / float(kSubdivision) };
-
-			//法線ベクトルを計算する
-
-			a.normal = Vector3(a.position.x, a.position.y, a.position.z);
-			b.normal = Vector3(b.position.x, b.position.y, b.position.z);
-			c.normal = Vector3(c.position.x, c.position.y, c.position.z);
-			d.normal = Vector3(d.position.x, d.position.y, d.position.z);
-
-
-			//頂点にデータを入力する。基準点a
-			vertexDataShpere[startIndex] = a;
-			vertexDataShpere[startIndex + 1] = c;
-			vertexDataShpere[startIndex + 2] = b;
-			//二つ目の三角形
-			vertexDataShpere[startIndex + 3] = b;
-			vertexDataShpere[startIndex + 4] = c;
-			vertexDataShpere[startIndex + 5] = d;
-
-		}
-	}
-
-	//Sprite用ののTransformationMatrix用のリソースを作る。Matrix4x41つ分のサイズを用意する
-	Microsoft::WRL::ComPtr<ID3D12Resource> transformationMatrixResourceShpere = GraphicsDevice::CreateBufferResource(graphics.get()->GetDevice(), sizeof(TransformationMatrix));
-	//データを書き込む
-	TransformationMatrix* transformationMatrixDataShpere = nullptr;
-	//書き込むためのアドレスを取得
-	transformationMatrixResourceShpere->Map(0, nullptr, reinterpret_cast<void**>(&transformationMatrixDataShpere));
-	//単位行列をかきこんでおく
-	transformationMatrixDataShpere->WVP = IdentityMatrix();
-	transformationMatrixDataShpere->World = IdentityMatrix();
 
 #pragma endregion
 
@@ -753,10 +637,7 @@ int WINAPI WinMain(HINSTANCE, HINSTANCE, LPSTR, int) {
 			sprite.get()->SetTrandform(spriteTransform);
 			sprite.get()->SetWvp();
 
-			Matrix4x4 worldMatrixShpere = MakeAffineMatrix(transformShpere.translate, transformShpere.scale, transformShpere.rotate);
-			Matrix4x4 worldViewProjectionMatrixShpere = MultiplyMatrix4x4(worldMatrixShpere, MultiplyMatrix4x4(viewMatrix, projectionMatri));
-			*transformationMatrixDataShpere = { worldViewProjectionMatrixShpere,worldMatrixShpere };
-
+		
 
 			Matrix4x4 uvTransformMatrix = Scale(uvTransformSprite.scale);
 			uvTransformMatrix = MultiplyMatrix4x4(uvTransformMatrix, Rotation(uvTransformSprite.rotate));
@@ -782,7 +663,7 @@ int WINAPI WinMain(HINSTANCE, HINSTANCE, LPSTR, int) {
 			command.get()->GetCommandList()->IASetVertexBuffers(0, 1, &vertexBufferView);//VBVを設定
 			//形状を設定。PSOに設定しているものとはまた別。同じものを設定すると考えておけばいい
 			command.get()->GetCommandList()->IASetPrimitiveTopology(D3D_PRIMITIVE_TOPOLOGY_TRIANGLELIST);
-			//command.get()->GetCommandList()->IASetIndexBuffer(sprite->GetIndexBufferView());//IBVを設定
+			
 
 
 			command.get()->GetCommandList()->RSSetViewports(1, viewportScissor.get()->GetViewport());//Viewportを設定
@@ -792,13 +673,8 @@ int WINAPI WinMain(HINSTANCE, HINSTANCE, LPSTR, int) {
 			command.get()->GetCommandList()->SetGraphicsRootConstantBufferView(3, directinalLight.get()->GetDirectinalLightResource()->GetGPUVirtualAddress());
 
 			//スプライトの描画	
-			command.get()->GetCommandList()->IASetVertexBuffers(0, 1, sprite.get()->GetVertexBufferView());//VBVを設定
-			command.get()->GetCommandList()->SetGraphicsRootConstantBufferView(0, spriteMatrial.get()->GetMaterialResource()->GetGPUVirtualAddress());
-			command.get()->GetCommandList()->SetGraphicsRootConstantBufferView(1, sprite.get()->GetVertexResource()->GetGPUVirtualAddress());
-			command.get()->GetCommandList()->SetGraphicsRootDescriptorTable(2, textureLoader.get()->GetTexture(1));
-
-			//command.get()->GetCommandList()->DrawIndexedInstanced(6, 1, 0, 0, 0);
-			command.get()->GetCommandList()->DrawInstanced(6, 1, 0, 0);
+			draw.get()->DrawSprite(sprite.get());
+			
 
 			////球の描画
 			//command.get()->GetCommandList()->IASetVertexBuffers(0, 1, &vertexBufferViewShpere);//VBVを設定

@@ -4,6 +4,7 @@
 #include <d3d12.h>  
 #include <cstdint>  
 #include "Model.h"
+#include "Sprite.h"
 
 class Draw {
 private:
@@ -28,5 +29,6 @@ public:
 
 	void DrawObj(Model* model);
 
+	void DrawSprite(Sprite* sprite);
 	
 };
