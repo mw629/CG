@@ -24,6 +24,8 @@ public:
 
 	void CreateWVP(ID3D12Device* device);
 
+	void CreateSprite(ID3D12Device* device);
+
 	void SetWvp();
 
 	void SetTrandform(Transform transform);

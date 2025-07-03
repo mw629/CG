@@ -13,9 +13,6 @@ void Sprite::CreateVertexData(ID3D12Device* device)
 	//Sprote用の頂点リソースを作る//
 
 	vertexResource_ = GraphicsDevice::CreateBufferResource(device, sizeof(VertexData) * 6);
-
-	//頂点バッファービューを作成する
-	
 	//リソースの先頭アドレスから使う
 	vertexBufferView_.BufferLocation = vertexResource_->GetGPUVirtualAddress();
 	//使用するリソースのサイズは頂点6つ分のサイズ
@@ -52,6 +49,13 @@ void Sprite::CreateWVP(ID3D12Device* device)
 	//単位行列をかきこんでおく
 	wvpData_->World = IdentityMatrix();
 	wvpData_->WVP = IdentityMatrix();
+
+}
+
+void Sprite::CreateSprite(ID3D12Device* device)
+{
+	CreateVertexData(device);
+	CreateWVP(device);
 }
 
 void Sprite::SetWvp()
