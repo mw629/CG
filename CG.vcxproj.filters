@@ -147,7 +147,7 @@
     <ClCompile Include="MatchaEngine\GameObjects\Sprite.cpp">
       <Filter>ソース ファイル</Filter>
     </ClCompile>
-    <ClCompile Include="MatchaEngine\GameObjects\Shpere.cpp">
+    <ClCompile Include="MatchaEngine\GameObjects\Sphere.cpp">
       <Filter>ソース ファイル</Filter>
     </ClCompile>
   </ItemGroup>
@@ -285,7 +285,7 @@
     <ClInclude Include="MatchaEngine\GameObjects\Sprite.h">
       <Filter>ヘッダー ファイル</Filter>
     </ClInclude>
-    <ClInclude Include="MatchaEngine\GameObjects\Shpere.h">
+    <ClInclude Include="MatchaEngine\GameObjects\Sphere.h">
       <Filter>ヘッダー ファイル</Filter>
     </ClInclude>
   </ItemGroup>

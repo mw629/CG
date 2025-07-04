@@ -1,21 +1,21 @@
-#include "Shpere.h"
+#include "Sphere.h"
 #include <Common/GraphicsDevice.h>
 #include <Common/VariableTypes.h>
 #include <Math/Calculation.h>
 
-Shpere::Shpere()
+Sphere::Sphere()
 {
 	transform_ = { {1.0f,1.0f,1.0f},{0.0f,0.0f,0.0f},{0.0f,0.0f,0.0f} };
 }
 
 
-void Shpere::Initialize(Matrial* matrial, D3D12_GPU_DESCRIPTOR_HANDLE textureSrvHandleGPU)
+void Sphere::Initialize(Matrial* matrial, D3D12_GPU_DESCRIPTOR_HANDLE textureSrvHandleGPU)
 {
 	matrial_ = matrial;
 	textureSrvHandleGPU_ = textureSrvHandleGPU;
 }
 
-void Shpere::CreateVertexData(ID3D12Device* device)
+void Sphere::CreateVertexData(ID3D12Device* device)
 {
 
 	float pi = 3.14f;
@@ -124,7 +124,7 @@ void Shpere::CreateVertexData(ID3D12Device* device)
 
 }
 
-void Shpere::CreateIndexResource(ID3D12Device* device)
+void Sphere::CreateIndexResource(ID3D12Device* device)
 {
 	indexResource_ = GraphicsDevice::CreateBufferResource(device, sizeof(uint32_t) * 6); ;
 
@@ -144,7 +144,7 @@ void Shpere::CreateIndexResource(ID3D12Device* device)
 
 }
 
-void Shpere::CreateWVP(ID3D12Device* device)
+void Sphere::CreateWVP(ID3D12Device* device)
 {
 
 	//Sprite用ののTransformationMatrix用のリソースを作る。Matrix4x41つ分のサイズを用意する
@@ -158,14 +158,14 @@ void Shpere::CreateWVP(ID3D12Device* device)
 	wvpData_->WVP = IdentityMatrix();
 }
 
-void Shpere::CreateSprite(ID3D12Device* device)
+void Sphere::CreateSprite(ID3D12Device* device)
 {
 	CreateVertexData(device);
 	//CreateIndexResource(device);
 	CreateWVP(device);
 }
 
-void Shpere::SetWvp(Matrix4x4 viewMatrix)
+void Sphere::SetWvp(Matrix4x4 viewMatrix)
 {
 	Matrix4x4 projectionMatri = MakePerspectiveFovMatrix(0.45f, float(1280) / float(720), 0.1f, 100.0f);
 	Matrix4x4 worldMatrix = MakeAffineMatrix(transform_.translate, transform_.scale, transform_.rotate);
@@ -173,7 +173,7 @@ void Shpere::SetWvp(Matrix4x4 viewMatrix)
 	*wvpData_ = { worldViewProjectionMatrix,worldMatrix };
 }
 
-void Shpere::SetTrandform(Transform transform)
+void Sphere::SetTrandform(Transform transform)
 {
 	transform_.translate = transform.translate;
 	transform_.scale = transform.scale;

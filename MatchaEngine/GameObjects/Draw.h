@@ -5,7 +5,7 @@
 #include <cstdint>  
 #include "Model.h"
 #include "Sprite.h"
-#include "Shpere.h"
+#include "Sphere.h"
 
 class Draw {
 private:
@@ -32,6 +32,6 @@ public:
 
 	void DrawSprite(Sprite* sprite);
 
-	void DrawShpere(Shpere* shpere);
+	void DrawShpere(Sphere* sphere);
 	
 };

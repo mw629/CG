@@ -5,7 +5,7 @@
 #include <d3dx12.h>
 
 
-class Shpere
+class Sphere
 {
 private:
 	Transform transform_;
@@ -26,7 +26,7 @@ private:
 	Microsoft::WRL::ComPtr<ID3D12Resource> wvpResource_;
 	TransformationMatrix* wvpData_;
 public:
-	Shpere();
+	Sphere();
 
 	void Initialize(Matrial* matrial, D3D12_GPU_DESCRIPTOR_HANDLE textureSrvHandleGPU);
 

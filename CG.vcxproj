@@ -130,7 +130,7 @@ copy "$(WindowsSdkDir)bin\$(TargetPlatformVersion)\x64\dxil.dll" "$(TargetDir)dx
     <ClCompile Include="RenderTargetView.cpp" />
     <ClCompile Include="MatchaEngine\PSO\Sampler.cpp" />
     <ClCompile Include="ResourceBarrierHelper.cpp" />
-    <ClCompile Include="MatchaEngine\GameObjects\Shpere.cpp" />
+    <ClCompile Include="MatchaEngine\GameObjects\Sphere.cpp" />
     <ClCompile Include="SwapChain.cpp" />
     <ClCompile Include="MatchaEngine\Resource\Texture.cpp" />
     <ClCompile Include="ViewportScissor.cpp" />
@@ -190,7 +190,7 @@ copy "$(WindowsSdkDir)bin\$(TargetPlatformVersion)\x64\dxil.dll" "$(TargetDir)dx
     <ClInclude Include="RenderTargetView.h" />
     <ClInclude Include="MatchaEngine\PSO\Sampler.h" />
     <ClInclude Include="ResourceBarrierHelper.h" />
-    <ClInclude Include="MatchaEngine\GameObjects\Shpere.h" />
+    <ClInclude Include="MatchaEngine\GameObjects\Sphere.h" />
     <ClInclude Include="SwapChain.h" />
     <ClInclude Include="MatchaEngine\Resource\Texture.h" />
     <ClInclude Include="ViewportScissor.h" />

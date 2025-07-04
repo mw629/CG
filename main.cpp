@@ -494,9 +494,9 @@ int WINAPI WinMain(HINSTANCE, HINSTANCE, LPSTR, int) {
 	sprite.get()->CreateSprite(graphics.get()->GetDevice());
 	Transform spriteTransform = { {1.0f, 1.0f, 1.0f}, { 0.0f,0.0f,0.0f }, { 0.0f,0.0f,0.0f } };
 	//球の作成
-	std::unique_ptr<Shpere> shpere = std::make_unique<Shpere>();
-	shpere.get()->Initialize(spriteMatrial.get(), textureLoader.get()->GetTexture(0));
-	shpere.get()->CreateSprite(graphics.get()->GetDevice());
+	std::unique_ptr<Sphere> sphere = std::make_unique<Sphere>();
+	sphere.get()->Initialize(spriteMatrial.get(), textureLoader.get()->GetTexture(0));
+	sphere.get()->CreateSprite(graphics.get()->GetDevice());
 	Transform shpereTransform = { {1.0f, 1.0f, 1.0f}, { 0.0f,0.0f,0.0f }, { 0.0f,0.0f,0.0f } };
 	//モデルの作成
 	ModelData modelData = LoadObjFile("resources/obj", "axis.obj");
@@ -620,8 +620,8 @@ int WINAPI WinMain(HINSTANCE, HINSTANCE, LPSTR, int) {
 			sprite.get()->SetTrandform(spriteTransform);
 			sprite.get()->SetWvp();
 
-			shpere.get()->SetTrandform(shpereTransform);
-			shpere.get()->SetWvp(viewMatrix);
+			sphere.get()->SetTrandform(shpereTransform);
+			sphere.get()->SetWvp(viewMatrix);
 
 			model.get()->SetTransform(objTransform);
 			model.get()->SetWvp(viewMatrix);
@@ -664,7 +664,7 @@ int WINAPI WinMain(HINSTANCE, HINSTANCE, LPSTR, int) {
 			//スプライトの描画	
 			//draw.get()->DrawSprite(sprite.get());
 			//球の描画
-			draw.get()->DrawShpere(shpere.get());	
+			draw.get()->DrawShpere(sphere.get());
 			//objectの描画
 			//draw->DrawObj(model.get());
 
