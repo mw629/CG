@@ -98,12 +98,10 @@ int WINAPI WinMain(HINSTANCE, HINSTANCE, LPSTR, int) {
 	//描画
 	DebugCamera* debudCamera = new DebugCamera;
 	std::unique_ptr<DepthStencil> depthStencil = std::make_unique<DepthStencil>();
-	std::unique_ptr<MaterialFactory> matrial = std::make_unique<MaterialFactory>();
-	std::unique_ptr<MaterialFactory> spriteMatrial = std::make_unique<MaterialFactory>();
-	std::unique_ptr<MaterialFactory> objMatrial = std::make_unique<MaterialFactory>();
+
 	std::unique_ptr<Draw> draw = std::make_unique<Draw>(command.get()->GetCommandList());
-	
-	
+
+
 
 	//フェンスやイベント、シグナル
 	GpuSyncManager gpuSyncManager;
@@ -175,11 +173,6 @@ int WINAPI WinMain(HINSTANCE, HINSTANCE, LPSTR, int) {
 
 	depthStencil->CreateDepthStencil(graphics.get()->GetDevice(), kClientWidth, kClientHeight);
 
-	//Material用のResourceを作る//
-
-	matrial->CreateMatrial(graphics->GetDevice(), false);
-	spriteMatrial->CreateMatrial(graphics->GetDevice(), false);
-	objMatrial->CreateMatrial(graphics->GetDevice(), false);
 	//PSO
 
 	DirectXShaderCompiler directXShaderCompiler;
@@ -233,86 +226,45 @@ int WINAPI WinMain(HINSTANCE, HINSTANCE, LPSTR, int) {
 	graphicsPipelineState->CreatePSO(logStream, graphics.get()->GetDevice());
 
 
-
-
-	//VertexResourceを生成する//
-	Microsoft::WRL::ComPtr<ID3D12Resource> vertexResource = GraphicsDevice::CreateBufferResource(graphics.get()->GetDevice(), sizeof(VertexData) * 6);
-
-	//VertexxBuffViewを作成する//
-
-	//頂点バッファビューを作成する
-	D3D12_VERTEX_BUFFER_VIEW vertexBufferView{};
-	//リソースの先頭のアドレスから使う
-	vertexBufferView.BufferLocation = vertexResource->GetGPUVirtualAddress();
-	//使用するリソースのサイズは頂点3つ分のサイズ
-	vertexBufferView.SizeInBytes = sizeof(VertexData) * 6;
-	//1頂点当たりのサイズ
-	vertexBufferView.StrideInBytes = sizeof(VertexData);
-
-
-
-	//Resouceにデータを書き込む//
-
-	//頂点リソースにデータを書き込む
-	VertexData* vertexData = nullptr;
-	//書き込むためのアドレスを取得
-	vertexResource->Map(0, nullptr, reinterpret_cast<void**>(&vertexData));
-
-
-	//1枚目
-
-	//左下
-	vertexData[0].position = { -0.1f,-0.1f,0.0f,1.0f };
-	vertexData[0].texcoord = { 0.0f,1.0f };
-	//上
-	vertexData[1].position = { 0.0f,0.1f,0.0f,1.0f };
-	vertexData[1].texcoord = { 0.5f,0.0f };
-	//右下
-	vertexData[2].position = { 0.1f,-0.1f,0.0f,1.0f };
-	vertexData[2].texcoord = { 1.0f,1.0f };
-
-	//2枚
-	//左下
-	vertexData[3].position = { -0.5f,-0.5f,0.5f,1.0f };
-	vertexData[3].texcoord = { 0.0f,1.0f };
-	//上
-	vertexData[4].position = { 0.0f,0.0f,0.0f,1.0f };
-	vertexData[4].texcoord = { 0.5f,0.0f };
-	//右下
-	vertexData[5].position = { 0.5f,-0.5f,-0.5f,1.0f };
-	vertexData[5].texcoord = { 1.0f,1.0f };
-
-	//WVP用のリソースを作る
-	Microsoft::WRL::ComPtr<ID3D12Resource> wvpResource = GraphicsDevice::CreateBufferResource(graphics.get()->GetDevice(), sizeof(TransformationMatrix));
-	//
-	TransformationMatrix* wvpData = nullptr;
-	//
-	wvpResource->Map(0, nullptr, reinterpret_cast<void**>(&wvpData));
-	//
-	wvpData->WVP = IdentityMatrix();
-	wvpData->World = IdentityMatrix();
-
+	//Material用のResourceを作る//
+	std::unique_ptr<MaterialFactory> triangleMaterial = std::make_unique<MaterialFactory>();
+	std::unique_ptr<MaterialFactory> material = std::make_unique<MaterialFactory>();
+	std::unique_ptr<MaterialFactory> spriteMaterial = std::make_unique<MaterialFactory>();
+	std::unique_ptr<MaterialFactory> objMaterial = std::make_unique<MaterialFactory>();
+	triangleMaterial->CreateMatrial(graphics->GetDevice(), false);
+	material->CreateMatrial(graphics->GetDevice(), false);
+	spriteMaterial->CreateMatrial(graphics->GetDevice(), false);
+	objMaterial->CreateMatrial(graphics->GetDevice(), false);
 	//テクスチャの作成
 	std::unique_ptr<Texture> texture = std::make_unique<Texture>();
 	std::unique_ptr<TextureLoader> textureLoader = std::make_unique<TextureLoader>();
 	texture->Initalize(graphics.get()->GetDevice(), command.get()->GetCommandList(), descriptorHeap.get(), textureLoader.get());
 	texture->CreateTexture("resources/uvChecker.png");
 	texture->CreateTexture("resources/nightSky.png");
-	
+	//三角形の作成
+	std::unique_ptr<Triangle> triangle = std::make_unique<Triangle>();
+	triangle.get()->Initialize(triangleMaterial.get(), textureLoader.get()->GetTexture(1));
+	triangle.get()->CreateTriangle(graphics.get()->GetDevice());
+	Transform triangleTransform = { {1.0f, 1.0f, 1.0f}, { 0.0f,0.0f,0.0f }, { 0.0f,0.0f,0.0f } };
+	Vector4 vertex[3] = {
+	{ -0.1f, -0.1f, 0.0f, 1.0f },
+	{ 0.0f, 0.1f, 0.0f, 1.0f },
+	{ 0.1f, -0.1f, 0.0f, 1.0f }
+	};
 	//スプライト作成
 	std::unique_ptr<Sprite> sprite = std::make_unique<Sprite>();
-	sprite.get()->Initialize(spriteMatrial.get(), textureLoader.get()->GetTexture(1));
+	sprite.get()->Initialize(spriteMaterial.get(), textureLoader.get()->GetTexture(1));
 	sprite.get()->CreateSprite(graphics.get()->GetDevice());
 	Transform spriteTransform = { {1.0f, 1.0f, 1.0f}, { 0.0f,0.0f,0.0f }, { 0.0f,0.0f,0.0f } };
 	//球の作成
 	std::unique_ptr<Sphere> sphere = std::make_unique<Sphere>();
-	sphere.get()->Initialize(spriteMatrial.get(), textureLoader.get()->GetTexture(0));
+	sphere.get()->Initialize(spriteMaterial.get(), textureLoader.get()->GetTexture(0));
 	sphere.get()->CreateSprite(graphics.get()->GetDevice());
 	Transform shpereTransform = { {1.0f, 1.0f, 1.0f}, { 0.0f,0.0f,0.0f }, { 0.0f,0.0f,0.0f } };
 	//モデルの作成
 	ModelData modelData = LoadObjFile("resources/obj", "axis.obj");
 	std::unique_ptr<Model> model = std::make_unique<Model>();
-	model.get()->Initialize(modelData, objMatrial.get(),textureLoader.get()->GetTexture(1));
+	model.get()->Initialize(modelData, objMaterial.get(),textureLoader.get()->GetTexture(1));
 	model.get()->CreateModel(graphics.get()->GetDevice());
 	Transform objTransform = { {1.0f, 1.0f, 1.0f}, { 0.0f,0.0f,0.0f }, { 0.0f,0.0f,0.0f } };
 	
@@ -397,15 +349,15 @@ int WINAPI WinMain(HINSTANCE, HINSTANCE, LPSTR, int) {
 				ImGui::DragFloat3("camraRotate", &camraTransform.rotate.x, 0.01f);
 				ImGui::DragFloat3("camraScale", &camraTransform.scale.x, 0.01f);
 			}
-			if (ImGui::CollapsingHeader("Sprite")) {
-				ImGui::DragFloat3("TranslateSprite", &spriteTransform.translate.x, 1.0f);
-				ImGui::DragFloat3("RotateSprite", &spriteTransform.rotate.x, 0.01f);
-				ImGui::DragFloat3("ScaleSprite", &spriteTransform.scale.x, 0.01f);
+			if (ImGui::CollapsingHeader("Triangle")) {
+				ImGui::DragFloat3("TranslateTriangle", &triangleTransform.translate.x, 1.0f);
+				ImGui::DragFloat3("RotateTriangle", &triangleTransform.rotate.x, 0.01f);
+				ImGui::DragFloat3("ScaleTriangle", &triangleTransform.scale.x, 0.01f);
 			}
-			if (ImGui::CollapsingHeader("Shpere")) {
-				ImGui::DragFloat3("TranslateShpere", &shpereTransform.translate.x, 0.01f);
-				ImGui::DragFloat3("RotateShpere", &shpereTransform.rotate.x, 0.01f);
-				ImGui::DragFloat3("ScaleShpere", &shpereTransform.scale.x, 0.01f);
+			if (ImGui::CollapsingHeader("vertex")) {
+				ImGui::DragFloat3("vertex 0", &vertex[0].x, 0.01f);
+				ImGui::DragFloat3("vertex 1", &vertex[1].x, 0.01f);
+				ImGui::DragFloat3("vertex 2", &vertex[2].x, 0.01f);
 			}
 			if (ImGui::CollapsingHeader("SpriteUV"))
 			{
@@ -428,6 +380,11 @@ int WINAPI WinMain(HINSTANCE, HINSTANCE, LPSTR, int) {
 				viewMatrix = Inverse(cameraMatrix);
 			}
 		
+			triangle.get()->SetVertex(vertex);
+			triangle.get()->SetShape();
+			triangle.get()->SetTrandform(triangleTransform);
+			triangle.get()->SetWvp(viewMatrix);
+
 			sprite.get()->SetTrandform(spriteTransform);
 			sprite.get()->SetWvp();
 
@@ -444,7 +401,7 @@ int WINAPI WinMain(HINSTANCE, HINSTANCE, LPSTR, int) {
 			Matrix4x4 uvTransformMatrix = Scale(uvTransformSprite.scale);
 			uvTransformMatrix = MultiplyMatrix4x4(uvTransformMatrix, Rotation(uvTransformSprite.rotate));
 			uvTransformMatrix = MultiplyMatrix4x4(uvTransformMatrix, Translation(uvTransformSprite.translate));
-			spriteMatrial.get()->GetMaterialData()->uvTransform = uvTransformMatrix;
+			spriteMaterial.get()->GetMaterialData()->uvTransform = uvTransformMatrix;
 			//ImGuiの内部コマンドを生成
 			ImGui::Render();
 
@@ -460,9 +417,7 @@ int WINAPI WinMain(HINSTANCE, HINSTANCE, LPSTR, int) {
 
 			ID3D12DescriptorHeap* descriptorHeeps[] = { descriptorHeap.get()->GetSrvDescriptorHeap() };
 			command.get()->GetCommandList()->SetDescriptorHeaps(1, descriptorHeeps);
-
 			command.get()->GetCommandList()->SetPipelineState(graphicsPipelineState.get()->GetGraphicsPipelineState());//PSOを設定
-			command.get()->GetCommandList()->IASetVertexBuffers(0, 1, &vertexBufferView);//VBVを設定
 			//形状を設定。PSOに設定しているものとはまた別。同じものを設定すると考えておけばいい
 			command.get()->GetCommandList()->IASetPrimitiveTopology(D3D_PRIMITIVE_TOPOLOGY_TRIANGLELIST);
 			command.get()->GetCommandList()->RSSetViewports(1, viewportScissor.get()->GetViewport());//Viewportを設定
@@ -471,11 +426,12 @@ int WINAPI WinMain(HINSTANCE, HINSTANCE, LPSTR, int) {
 			command.get()->GetCommandList()->SetGraphicsRootSignature(rootSignature.get()->GetRootSignature());
 			command.get()->GetCommandList()->SetGraphicsRootConstantBufferView(3, directinalLight.get()->GetDirectinalLightResource()->GetGPUVirtualAddress());
 
-
+			//三角形の描画
+			draw.get()->DrawTriangle(triangle.get());
 			//スプライトの描画	
 			//draw.get()->DrawSprite(sprite.get());
 			//球の描画
-			draw.get()->DrawShpere(sphere.get());
+			//draw.get()->DrawShpere(sphere.get());
 			//objectの描画
 			//draw->DrawObj(model.get());
 

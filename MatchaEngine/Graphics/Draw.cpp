@@ -51,4 +51,13 @@ void Draw::DrawShpere(Sphere* sphere)
 	commandList_->SetGraphicsRootDescriptorTable(2, sphere->GetTextureSrvHandleGPU());
 	commandList_->DrawInstanced(pow(sphere->GetSubdivision(), 2) * 6, 1, 0, 0);
 }
+
+void Draw::DrawTriangle(Triangle* triangle)
+{
+	commandList_->IASetVertexBuffers(0, 1, triangle->GetVertexBufferView());//VBVを設定
+	commandList_->SetGraphicsRootConstantBufferView(0, triangle->GetMatrial()->GetMaterialResource()->GetGPUVirtualAddress());
+	commandList_->SetGraphicsRootConstantBufferView(1, triangle->GetVertexResource()->GetGPUVirtualAddress());
+	commandList_->SetGraphicsRootDescriptorTable(2, triangle->GetTextureSrvHandleGPU());
+	commandList_->DrawInstanced(3, 1, 0, 0);
+}
 	
