@@ -1,7 +1,7 @@
 #pragma once
 #include <wrl.h>
-#include "../Common/VariableTypes.h"
-#include "Matrial.h"
+#include "../Core/VariableTypes.h"
+#include "MaterialFactory.h"
 #include <d3dx12.h>
 
 
@@ -9,7 +9,7 @@ class Sphere
 {
 private:
 	Transform transform_;
-	Matrial* matrial_;
+	MaterialFactory* material_;
 	D3D12_GPU_DESCRIPTOR_HANDLE textureSrvHandleGPU_;
 
 	uint32_t kSubdivision_ = 16;
@@ -28,7 +28,7 @@ private:
 public:
 	Sphere();
 
-	void Initialize(Matrial* matrial, D3D12_GPU_DESCRIPTOR_HANDLE textureSrvHandleGPU);
+	void Initialize(MaterialFactory* material, D3D12_GPU_DESCRIPTOR_HANDLE textureSrvHandleGPU);
 
 	void CreateVertexData(ID3D12Device* device);
 
@@ -48,7 +48,7 @@ public:
 	D3D12_INDEX_BUFFER_VIEW* GetIndexBufferView() { return &indexBufferView_; }
 
 
-	Matrial* GetMatrial() { return matrial_; }
+	MaterialFactory* GetMatrial() { return material_; }
 	D3D12_GPU_DESCRIPTOR_HANDLE GetTextureSrvHandleGPU() { return textureSrvHandleGPU_; }
 
 	uint32_t GetSubdivision() { return kSubdivision_; }

@@ -1,5 +1,5 @@
 #include "GraphicsDevice.h"
-#include "LogHandler.h"
+#include "../Core/LogHandler.h"
 
 
 

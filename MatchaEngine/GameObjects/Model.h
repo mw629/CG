@@ -1,9 +1,9 @@
 #pragma once
 #include <wrl.h>
 #include <d3dx12.h>
-#include "Common/VariableTypes.h"
+#include "Core/VariableTypes.h"
 #include "Resource/Texture.h"
-#include "Matrial.h"
+#include "MaterialFactory.h"
 
 
 class Model
@@ -11,7 +11,7 @@ class Model
 private:
 	ModelData modelData_;
 	Transform transform_;
-	Matrial* matrial_;
+	MaterialFactory* material_;
 	D3D12_GPU_DESCRIPTOR_HANDLE textureSrvHandleGPU_;
 
 
@@ -30,7 +30,7 @@ public:
 
 
 
-	void Initialize(ModelData modelData, Matrial* matrial, D3D12_GPU_DESCRIPTOR_HANDLE textureSrvHandleGPU);
+	void Initialize(ModelData modelData, MaterialFactory* matrial, D3D12_GPU_DESCRIPTOR_HANDLE textureSrvHandleGPU);
 
 	void CreateVertexData(ID3D12Device* device);
 	void CreateWVP(ID3D12Device* device);
@@ -51,7 +51,7 @@ public:
 	Transform GetTransform() { return transform_; }
 	
 	ModelData GetModelData() { return modelData_; }
-	Matrial* GetMatrial() { return matrial_; }
+	MaterialFactory* GetMatrial() { return material_; }
 	D3D12_GPU_DESCRIPTOR_HANDLE GetTextureSrvHandleGPU() { return textureSrvHandleGPU_; }
 
 

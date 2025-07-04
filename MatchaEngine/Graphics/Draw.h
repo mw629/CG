@@ -1,11 +1,11 @@
 #pragma once  
-#include "Common/VariableTypes.h"  
+#include "../Core/VariableTypes.h"  
 #include "Math/Calculation.h"  
 #include <d3d12.h>  
 #include <cstdint>  
-#include "Model.h"
-#include "Sprite.h"
-#include "Sphere.h"
+#include "../GameObjects/Model.h"
+#include "../GameObjects/Sprite.h"
+#include "../GameObjects/Sphere.h"
 
 class Draw {
 private:

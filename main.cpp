@@ -17,9 +17,6 @@
 #include <wrl.h> 
 #include <xaudio2.h>
 
-
-#include "Common/LogHandler.h"
-
 #include "externals/DirectXTex/DirectXTex.h"
 #include "externals/imgui/imgui.h"
 #include "externals/imgui/imgui_impl_dx12.h"
@@ -30,39 +27,8 @@
 extern IMGUI_IMPL_API LRESULT ImGui_ImplWin32_WndProcHandler(HWND hWnd, UINT msg, WPARAM wParam, LPARAM lParam);
 
 
-#include "MatchaEngine/Resource/Audio.h"
-#include "MatchaEngine/Resource/Load.h"
-#include "MatchaEngine/Resource/Texture.h"
-#include "MatchaEngine/Resource/TextureLoader.h"
-#include "Common/GraphicsDevice.h"
-#include "Common/CommandContext.h"
-#include "Common/Input.h"
-#include "Common/WindowConfig.h"
-#include "GpuSyncManager.h"
-#include "DescriptorHeap.h"
-#include "DepthStencil.h"
-#include "RenderTargetView.h"
-#include "SwapChain.h"
-#include "Math/Calculation.h" 
-#include "GameObjects/DebugCamera.h"
-#include "GameObjects/Draw.h"
-#include "GameObjects/Matrial.h"
-#include "ViewportScissor.h"
-#include "DirectinalLight.h"
-#include "ResourceBarrierHelper.h"
-//PSO
+#include "MatchaEngine/Engine.h"
 
-#include "PSO/DirectXShaderCompiler.h"
-#include "PSO/RootSignature.h"
-#include "PSO/RootParameter.h"
-#include "PSO/InputLayout.h"
-#include "PSO/BlendState.h"
-#include "PSO/RasterizerState.h"
-#include "PSO/ShaderCompile.h"
-#include "PSO/DepthStencilState.h"
-#include <PSO/Sampler.h>
-#include <PSO/GraphicsPipelineState.h>
-#include <GameObjects/Sprite.h>
 
 #pragma comment(lib,"d3d12.lib")
 #pragma comment(lib,"dxgi.lib")
@@ -78,161 +44,6 @@ extern IMGUI_IMPL_API LRESULT ImGui_ImplWin32_WndProcHandler(HWND hWnd, UINT msg
 
 ///クラス///
 
-
-//CrashHandlerの登録//
-
-static LONG WINAPI ExportDump(EXCEPTION_POINTERS* exception) {
-	//Dumpを出力する//
-
-	SYSTEMTIME time;
-	GetLocalTime(&time);
-	wchar_t filePath[MAX_PATH] = { 0 };
-	CreateDirectory(L"./Dump", nullptr);
-	StringCchPrintf(filePath, MAX_PATH, L"./Dump/%04d-%02d%02d-%02d%02d.dmp", time.wYear, time.wMonth, time.wDay, time.wHour, time.wMinute);
-	HANDLE dumpFileHandle = CreateFile(filePath, GENERIC_READ | GENERIC_WRITE, FILE_SHARE_WRITE | FILE_SHARE_READ, 0, CREATE_ALWAYS, 0, 0);
-	//preocessID(このexeのID)とクラッシュ(例外)の発生したthreadIDを取得
-	DWORD processId = GetCurrentProcessId();
-	DWORD threadId = GetCurrentThreadId();
-	//設定情報を入力
-	_MINIDUMP_EXCEPTION_INFORMATION minidumpInformation{ 0 };
-	minidumpInformation.ThreadId = threadId;
-	minidumpInformation.ExceptionPointers = exception;
-	minidumpInformation.ClientPointers = TRUE;
-	//Dumpを出力。MiniDumpNormalは最低限の情報を出力するフラグ
-	MiniDumpWriteDump(GetCurrentProcess(), processId, dumpFileHandle, MiniDumpNormal, &minidumpInformation, nullptr, nullptr);
-	//他に関連付けられているSEH例外ハンドルがあれば実行。通常のプロセスを終了する。
-
-	return EXCEPTION_EXECUTE_HANDLER;
-}
-
-
-//CompileShader関数//
-Microsoft::WRL::ComPtr<IDxcBlob> CompileShader(
-	//ログ用
-	std::ostream& os,
-	//CompilerするShaderファイルのパス
-	const std::wstring& filePath,
-	//Compilerに使用するProfile
-	const wchar_t* profile,
-	//初期化で生成したもの3つ
-	Microsoft::WRL::ComPtr<IDxcUtils> dxcUtils,
-	Microsoft::WRL::ComPtr<IDxcCompiler3> dxcCompiler,
-	Microsoft::WRL::ComPtr<IDxcIncludeHandler> includeHandler)
-{
-	//hldlファイルを読み込む//
-
-	//これからシェーダーをコンパイルする旨をログに出す
-	Log(os, ConvertString(std::format(L"Begin CompileShader,path:{},profile:{}\n", filePath, profile)));
-	//hlslファイルを読む
-	Microsoft::WRL::ComPtr<IDxcBlobEncoding> shaderSource = nullptr;
-	HRESULT hr = dxcUtils->LoadFile(filePath.c_str(), nullptr, &shaderSource);
-	//読めなかったら止める
-	assert(SUCCEEDED(hr));
-	//読み込んだファイルの内容を設定する
-	DxcBuffer shaderSourceBuffer;
-	shaderSourceBuffer.Ptr = shaderSource->GetBufferPointer();
-	shaderSourceBuffer.Size = shaderSource->GetBufferSize();
-	shaderSourceBuffer.Encoding = DXC_CP_UTF8;//UTF8の文字コードであることを通知
-
-	//Compilする//
-
-	LPCWSTR arguments[] = {
-		filePath.c_str(),//コンパイル対象のhlslファイル名
-		L"-E",L"main",//エントリーポイントの指定。基本的にmain以外にはしない
-		L"-T",profile,//ShaderProfileの設定
-		L"-Zi",L"-Qembed_debug",//デバッグ用の情報埋め込み
-		L"-Od",//最適化を外しておく
-		L"-Zpr"//メモリレイアウトは最優先
-	};
-	//実際にShaderをコンパイルする
-	Microsoft::WRL::ComPtr<IDxcResult> shaderResult = nullptr;
-	hr = dxcCompiler->Compile(
-		&shaderSourceBuffer,//読み込んだファイル
-		arguments,//コンパイルオプション
-		_countof(arguments),//コンパイルオプションの数
-		includeHandler.Get(),//includeが含まれた諸々
-		IID_PPV_ARGS(&shaderResult)//コンパイル結果
-	);
-	//コンパイルエラーではなくdxcが起動できないなど致命的な結果
-	assert(SUCCEEDED(hr));
-
-	//警告・エラーが出ていないか確認する//
-
-	//警告・エラーが出てきたらログを出して止める
-	Microsoft::WRL::ComPtr<IDxcBlobUtf8> shaderError = nullptr;
-	shaderResult->GetOutput(DXC_OUT_ERRORS, IID_PPV_ARGS(&shaderError), nullptr);
-	if (shaderError != nullptr && shaderError->GetStringLength() != 0) {
-		Log(os, shaderError->GetStringPointer());
-		//警告・エラーダメゼッタイ
-		assert(false);
-	}
-
-	//Compile結果を受け取って返す//
-
-	//コンパイル結果から実行用のバイナリ部分を取得
-	Microsoft::WRL::ComPtr<IDxcBlob> shaderBlob = nullptr;
-	hr = shaderResult->GetOutput(DXC_OUT_OBJECT, IID_PPV_ARGS(&shaderBlob), nullptr);
-	assert(SUCCEEDED(hr));
-	//成功したログを出す
-	Log(os, ConvertString(std::format(L"Compile Succeeded,path:{},profile:{}\n", filePath, profile)));
-	//もう使わないリソースを解放 (ComPtrが自動で解放するので不要)
-	//shaderSource->Release();
-	//shaderResult->Release();
-	//実行用のバイナリを返却
-	return shaderBlob;
-}
-
-
-Microsoft::WRL::ComPtr<ID3D12DescriptorHeap> CreateDescriptorHeep(
-	ID3D12Device* device, D3D12_DESCRIPTOR_HEAP_TYPE heapType, UINT numDesxriptors, bool shaderVisible)
-{
-	//ディスクリプタヒープの生成
-	Microsoft::WRL::ComPtr<ID3D12DescriptorHeap> descriptorHeap = nullptr;
-	D3D12_DESCRIPTOR_HEAP_DESC descriptorHeapDesc{};
-	descriptorHeapDesc.Type = heapType;//レンダーターゲットビュー用
-	descriptorHeapDesc.NumDescriptors = numDesxriptors;//ダブルバッファ用に2つ。多くても別に構わない
-	descriptorHeapDesc.Flags = shaderVisible ? D3D12_DESCRIPTOR_HEAP_FLAG_SHADER_VISIBLE : D3D12_DESCRIPTOR_HEAP_FLAG_NONE;
-	HRESULT hr = device->CreateDescriptorHeap(&descriptorHeapDesc, IID_PPV_ARGS(&descriptorHeap));
-	//ディスクリプタヒープが作れなかったので起動できない
-	assert(SUCCEEDED(hr));
-	return descriptorHeap;
-}
-
-
-Microsoft::WRL::ComPtr<ID3D12Resource> CreateDepthStencilTextureResource(ID3D12Device* device, int32_t width, int32_t height) {
-
-	//生成するResourceの設定
-	D3D12_RESOURCE_DESC resourceDesc{};
-	resourceDesc.Width = width;//Textureの幅
-	resourceDesc.Height = height;//Textureの高さ
-	resourceDesc.MipLevels = 1;//mipmapの数
-	resourceDesc.DepthOrArraySize = 1;//奥行き or 配列Textureの配列数
-	resourceDesc.Format = DXGI_FORMAT_D24_UNORM_S8_UINT;//DepthStencilとして利用可能なフォーマット
-	resourceDesc.SampleDesc.Count = 1;//サンプリングカウント、1固定
-	resourceDesc.Dimension = D3D12_RESOURCE_DIMENSION_TEXTURE2D;//2次元
-	resourceDesc.Flags = D3D12_RESOURCE_FLAG_ALLOW_DEPTH_STENCIL;//DepthStencilとして使う通知
-
-	//利用するHeapの設定
-	D3D12_HEAP_PROPERTIES heapProperties{};
-	heapProperties.Type = D3D12_HEAP_TYPE_DEFAULT;//VRAM上に作る
-
-	//深度地のクリア設定
-	D3D12_CLEAR_VALUE depthClearValue{};
-	depthClearValue.DepthStencil.Depth = 1.0f;//1.0f(最大値)でクリア
-	depthClearValue.Format = DXGI_FORMAT_D24_UNORM_S8_UINT;
-
-	Microsoft::WRL::ComPtr<ID3D12Resource> resource = nullptr;
-	HRESULT hr = device->CreateCommittedResource(
-		&heapProperties,//Heapの設定
-		D3D12_HEAP_FLAG_NONE,//Heapの特殊な設定、特になし
-		&resourceDesc,//Resourceの設定
-		D3D12_RESOURCE_STATE_DEPTH_WRITE,//深度地を書き込む状態にしておく
-		&depthClearValue,//Clear最適地
-		IID_PPV_ARGS(&resource));
-	assert(SUCCEEDED(hr));
-
-	return resource;
-}
 
 
 
@@ -287,9 +98,9 @@ int WINAPI WinMain(HINSTANCE, HINSTANCE, LPSTR, int) {
 	//描画
 	DebugCamera* debudCamera = new DebugCamera;
 	std::unique_ptr<DepthStencil> depthStencil = std::make_unique<DepthStencil>();
-	std::unique_ptr<Matrial> matrial = std::make_unique<Matrial>();
-	std::unique_ptr<Matrial> spriteMatrial = std::make_unique<Matrial>();
-	std::unique_ptr<Matrial> objMatrial = std::make_unique<Matrial>();
+	std::unique_ptr<MaterialFactory> matrial = std::make_unique<MaterialFactory>();
+	std::unique_ptr<MaterialFactory> spriteMatrial = std::make_unique<MaterialFactory>();
+	std::unique_ptr<MaterialFactory> objMatrial = std::make_unique<MaterialFactory>();
 	std::unique_ptr<Draw> draw = std::make_unique<Draw>(command.get()->GetCommandList());
 	
 	

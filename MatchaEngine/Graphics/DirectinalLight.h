@@ -1,7 +1,7 @@
 #pragma once
 #include <wrl.h>
 #include <d3dx12.h>
-#include "Common/VariableTypes.h"
+#include "Core/VariableTypes.h"
 
 class DirectinalLight
 {

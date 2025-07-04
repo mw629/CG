@@ -1,7 +1,7 @@
 #include "Sprite.h"
-#include <Common/GraphicsDevice.h>
-#include <Common/VariableTypes.h>
-#include <Math/Calculation.h>
+#include "Graphics/GraphicsDevice.h"
+#include "Core/VariableTypes.h"
+#include "Math/Calculation.h"
 
 
 Sprite::Sprite()
@@ -9,9 +9,9 @@ Sprite::Sprite()
 	transform_ = { {1.0f,1.0f,1.0f},{0.0f,0.0f,0.0f},{0.0f,0.0f,0.0f} };
 }
 
-void Sprite::Initialize(Matrial* matrial, D3D12_GPU_DESCRIPTOR_HANDLE textureSrvHandleGPU)
+void Sprite::Initialize(MaterialFactory* material, D3D12_GPU_DESCRIPTOR_HANDLE textureSrvHandleGPU)
 {
-	matrial_ = matrial;
+	material_ = material;
 	textureSrvHandleGPU_ = textureSrvHandleGPU;
 }
 

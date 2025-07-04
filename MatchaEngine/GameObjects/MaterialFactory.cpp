@@ -1,8 +1,8 @@
-#include "MaterialData.h"
-#include "Common/GraphicsDevice.h"
+#include "MaterialFactory.h"
+#include "Graphics/GraphicsDevice.h"
 #include "Math/Calculation.h"
 
-void MaterialData::CreateMaterial(ID3D12Device* device,bool Lighting)
+void MaterialFactory::CreateMatrial(ID3D12Device* device,bool Lighting)
 {
 	//マテリアル用のリソースを作る。今回はcolor1つ分のサイズを用意する
 	materialResource_ = GraphicsDevice::CreateBufferResource(device, sizeof(Material));

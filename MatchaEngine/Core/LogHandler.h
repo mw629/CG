@@ -4,6 +4,11 @@
 #include <filesystem>
 #include <dxgidebug.h>
 
+#include <dbgHelp.h>
+#include <strsafe.h>
+
+#pragma comment(lib,"dbgHelp.lib")
+
 
 //現在時刻を取得する
 std::ofstream CurrentTimestamp();
@@ -15,3 +20,6 @@ std::wstring ConvertString(const std::string& str);
 
 //ログを出す
 void Log(std::ostream& os, const std::string& message);
+
+//CrashHandlerの登録//
+LONG WINAPI ExportDump(EXCEPTION_POINTERS* exception);

@@ -1,7 +1,7 @@
 #include "Load.h"
-#include "Common/GraphicsDevice.h"
+#include "Graphics/GraphicsDevice.h"
 #include "Math/Calculation.h"
-#include "../Common/LogHandler.h"
+#include "Core/LogHandler.h"
 #include <fstream>
 #include <sstream>
 #include <d3dx12.h>

@@ -1,7 +1,7 @@
 #include "Sphere.h"
-#include <Common/GraphicsDevice.h>
-#include <Common/VariableTypes.h>
-#include <Math/Calculation.h>
+#include "Graphics/GraphicsDevice.h"
+#include "Core/VariableTypes.h"
+#include "Math/Calculation.h"
 
 Sphere::Sphere()
 {
@@ -9,9 +9,9 @@ Sphere::Sphere()
 }
 
 
-void Sphere::Initialize(Matrial* matrial, D3D12_GPU_DESCRIPTOR_HANDLE textureSrvHandleGPU)
+void Sphere::Initialize(MaterialFactory* material, D3D12_GPU_DESCRIPTOR_HANDLE textureSrvHandleGPU)
 {
-	matrial_ = matrial;
+	material_ = material;
 	textureSrvHandleGPU_ = textureSrvHandleGPU;
 }
 
@@ -85,19 +85,19 @@ void Sphere::CreateVertexData(ID3D12Device* device)
 
 			//texcoord
 			a.texcoord = {
-			1.0f - float(lonIndex) / float(kSubdivision_),
+			float(lonIndex) / float(kSubdivision_),
 			1.0f - float(latIndex) / float(kSubdivision_) };
 
 			b.texcoord = {
-				1.0f - float(lonIndex) / float(kSubdivision_),
+				float(lonIndex) / float(kSubdivision_),
 				1.0f - float(latIndex + 1) / float(kSubdivision_) };
 
 			c.texcoord = {
-				1.0f - float(lonIndex + 1) / float(kSubdivision_),
+				float(lonIndex + 1) / float(kSubdivision_),
 				1.0f - float(latIndex) / float(kSubdivision_) };
 
 			d.texcoord = {
-				1.0f - float(lonIndex + 1) / float(kSubdivision_),
+				float(lonIndex + 1) / float(kSubdivision_),
 				1.0f - float(latIndex + 1) / float(kSubdivision_) };
 
 			//法線ベクトルを計算する
@@ -109,13 +109,13 @@ void Sphere::CreateVertexData(ID3D12Device* device)
 
 
 			//頂点にデータを入力する。基準点a
-			vertexData_[startIndex] = a;
+			vertexData_[startIndex] = b;
 			vertexData_[startIndex + 1] = c;
-			vertexData_[startIndex + 2] = b;
+			vertexData_[startIndex + 2] = a;
 			//二つ目の三角形
-			vertexData_[startIndex + 3] = b;
+			vertexData_[startIndex + 3] = d;
 			vertexData_[startIndex + 4] = c;
-			vertexData_[startIndex + 5] = d;
+			vertexData_[startIndex + 5] = b;
 
 
 		}

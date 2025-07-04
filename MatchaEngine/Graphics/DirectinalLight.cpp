@@ -1,5 +1,5 @@
 #include "DirectinalLight.h"
-#include "MatchaEngine/Common/GraphicsDevice.h"
+#include "Graphics/GraphicsDevice.h"
 
 void DirectinalLight::CreateDirectinalLight(ID3D12Device *device)
 {

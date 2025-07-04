@@ -1,5 +1,5 @@
 #pragma once
-#include "Common/GraphicsDevice.h"
+#include "Graphics/GraphicsDevice.h"
 #include "Math/Calculation.h"
 #include <fstream>
 #include <sstream>

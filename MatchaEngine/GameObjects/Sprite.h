@@ -1,15 +1,15 @@
 #pragma once
 #include <wrl.h>
 #include <d3d12.h>
-#include "../Common/VariableTypes.h"
-#include "Matrial.h"
+#include "Core/VariableTypes.h"
+#include "../GameObjects/MaterialFactory.h"
 
 class Sprite
 {
 private:
 
 	Transform transform_;
-	Matrial* matrial_;
+	MaterialFactory* material_;
 	D3D12_GPU_DESCRIPTOR_HANDLE textureSrvHandleGPU_;
 
 	Microsoft::WRL::ComPtr<ID3D12Resource> vertexResource_;
@@ -32,7 +32,7 @@ private:
 public:
 	Sprite();
 
-	void Initialize(Matrial* matrial, D3D12_GPU_DESCRIPTOR_HANDLE textureSrvHandleGPU);
+	void Initialize(MaterialFactory* matrial, D3D12_GPU_DESCRIPTOR_HANDLE textureSrvHandleGPU);
 
 	void CreateVertexData(ID3D12Device* device);
 
@@ -52,7 +52,7 @@ public:
 	D3D12_INDEX_BUFFER_VIEW* GetIndexBufferView() { return &indexBufferView_; }
 
 	
-	Matrial* GetMatrial() { return matrial_; }
+	MaterialFactory* GetMatrial() { return material_; }
 	D3D12_GPU_DESCRIPTOR_HANDLE GetTextureSrvHandleGPU() { return textureSrvHandleGPU_; }
 
 };

@@ -1,6 +1,6 @@
 #pragma once
-#include "Common/VariableTypes.h"
-#include "Common/Input.h"
+#include "../Core/VariableTypes.h"
+#include "../Input/Input.h"
 
 
 class DebugCamera {

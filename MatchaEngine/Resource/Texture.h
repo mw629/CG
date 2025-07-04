@@ -3,9 +3,9 @@
 #include <DirectXTex.h>
 #include <wrl.h>
 
-#include "../Common/GraphicsDevice.h"
+#include "../Graphics/GraphicsDevice.h"
 #include "TextureLoader.h"
-#include "../../DescriptorHeap.h"
+#include "../Graphics/DescriptorHeap.h"
 
 class Texture
 {

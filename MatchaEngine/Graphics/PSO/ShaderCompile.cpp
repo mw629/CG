@@ -1,7 +1,7 @@
 #include "ShaderCompile.h"
 #include <cassert>
 
-#include "../Common/LogHandler.h"
+#include "Core/LogHandler.h"
 
 Microsoft::WRL::ComPtr<IDxcBlob> ShaderCompile::CompileShader(std::ostream& os, 
 	const std::wstring& filePath, 
@@ -81,11 +81,11 @@ void ShaderCompile::CreateShaderCompile(std::ostream& os,
 	Microsoft::WRL::ComPtr<IDxcIncludeHandler> includeHandler)
 {
 	//Shaderをコンパイルする
-	vertexShaderBlob_ = CompileShader(os, L"Object3D.VS.hlsl",
+	vertexShaderBlob_ = CompileShader(os, L"MatchaEngine/Graphics/Shader/Object3D.VS.hlsl",
 		L"vs_6_0", dxcUtils, dxcCompiler, includeHandler);
 	assert(vertexShaderBlob_ != nullptr);
 
-	pixelShaderBlob_ = CompileShader(os, L"Object3D.PS.hlsl",
+	pixelShaderBlob_ = CompileShader(os, L"MatchaEngine/Graphics/Shader/Object3D.PS.hlsl",
 		L"ps_6_0", dxcUtils, dxcCompiler, includeHandler);
 	assert(pixelShaderBlob_ != nullptr);
 }

@@ -1,5 +1,5 @@
 #include "Draw.h"
-#include "Common/GraphicsDevice.h"
+#include "Graphics/GraphicsDevice.h"
 #include <cassert>
 
 

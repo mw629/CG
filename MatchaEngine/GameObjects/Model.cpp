@@ -1,5 +1,5 @@
 #include "Model.h"
-#include "Common/GraphicsDevice.h"
+#include "Graphics/GraphicsDevice.h"
 #include "Math/Calculation.h"
 #include "Resource/Load.h"
 #include <fstream>
@@ -9,11 +9,11 @@
 
 
 
-void Model::Initialize(ModelData modelData,Matrial* matrial,D3D12_GPU_DESCRIPTOR_HANDLE textureSrvHandleGPU)
+void Model::Initialize(ModelData modelData, MaterialFactory* material,D3D12_GPU_DESCRIPTOR_HANDLE textureSrvHandleGPU)
 {
 	transform_ = {};
 	modelData_ = modelData;
-	matrial_ = matrial;
+	material_ = material;
 	textureSrvHandleGPU_ = textureSrvHandleGPU;
 }
 

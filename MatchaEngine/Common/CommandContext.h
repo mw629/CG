@@ -1,7 +1,7 @@
 #pragma once
 #include <d3d12.h>
 #include <wrl.h>
-#include "GraphicsDevice.h"
+#include "../Graphics/GraphicsDevice.h"
 
 class CommandContext
 {
