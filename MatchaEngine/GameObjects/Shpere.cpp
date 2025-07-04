@@ -19,14 +19,14 @@ void Shpere::CreateVertexData(ID3D12Device* device)
 {
 
 	float pi = 3.14f;
-	
+
 
 	//Shpere用の頂点リソースを作る//
 
 	vertexResource_ = GraphicsDevice::CreateBufferResource(device, sizeof(VertexData) * (kSubdivision_ * kSubdivision_) * 6);
 
 	//頂点バッファービューを作成する
-	
+
 	//リソースの先頭アドレスから使う
 	vertexBufferView_.BufferLocation = vertexResource_->GetGPUVirtualAddress();
 	//使用するリソースのサイズは頂点6つ分のサイズ
@@ -84,22 +84,21 @@ void Shpere::CreateVertexData(ID3D12Device* device)
 				1.0f };
 
 			//texcoord
-
 			a.texcoord = {
-				float(lonIndex) / float(kSubdivision_),
-				 float(latIndex) / float(kSubdivision_) };
+			1.0f - float(lonIndex) / float(kSubdivision_),
+			1.0f - float(latIndex) / float(kSubdivision_) };
 
 			b.texcoord = {
-				float(lonIndex) / float(kSubdivision_),
-				 float(latIndex + 1) / float(kSubdivision_) };
+				1.0f - float(lonIndex) / float(kSubdivision_),
+				1.0f - float(latIndex + 1) / float(kSubdivision_) };
 
 			c.texcoord = {
-				float(lonIndex + 1) / float(kSubdivision_),
-				 float(latIndex) / float(kSubdivision_) };
+				1.0f - float(lonIndex + 1) / float(kSubdivision_),
+				1.0f - float(latIndex) / float(kSubdivision_) };
 
 			d.texcoord = {
-				float(lonIndex + 1) / float(kSubdivision_),
-				 float(latIndex + 1) / float(kSubdivision_) };
+				1.0f - float(lonIndex + 1) / float(kSubdivision_),
+				1.0f - float(latIndex + 1) / float(kSubdivision_) };
 
 			//法線ベクトルを計算する
 
@@ -118,10 +117,11 @@ void Shpere::CreateVertexData(ID3D12Device* device)
 			vertexData_[startIndex + 4] = c;
 			vertexData_[startIndex + 5] = d;
 
+
 		}
 	}
 
-	
+
 }
 
 void Shpere::CreateIndexResource(ID3D12Device* device)
