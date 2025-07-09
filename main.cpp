@@ -86,20 +86,20 @@ int WINAPI WinMain(HINSTANCE, HINSTANCE, LPSTR, int) {
 
 	//設定
 	WindowConfig window;
-	std::unique_ptr<GraphicsDevice> graphics = std::make_unique<GraphicsDevice>(logStream);
-	std::unique_ptr<CommandContext> command = std::make_unique<CommandContext>(graphics.get()->GetDevice());
-	std::unique_ptr<SwapChain> swapChain = std::make_unique<SwapChain>();
-	std::unique_ptr<DescriptorHeap> descriptorHeap = std::make_unique<DescriptorHeap>(graphics.get()->GetDevice());
-	std::unique_ptr<RenderTargetView> renderTargetView = std::make_unique<RenderTargetView>();
-	std::unique_ptr<ViewportScissor> viewportScissor = std::make_unique<ViewportScissor>(kClientWidth, kClientHeight);
+	GraphicsDevice* graphics = new GraphicsDevice(logStream);
+	CommandContext* command = new CommandContext(graphics->GetDevice());
+	SwapChain* swapChain = new SwapChain();
+	DescriptorHeap* descriptorHeap = new DescriptorHeap(graphics->GetDevice());
+	RenderTargetView* renderTargetView = new RenderTargetView();
+	ViewportScissor* viewportScissor = new ViewportScissor(kClientWidth, kClientHeight);
 	//入力
 	Input* input = new Input;
 
 	//描画
 	DebugCamera* debudCamera = new DebugCamera;
-	std::unique_ptr<DepthStencil> depthStencil = std::make_unique<DepthStencil>();
+	DepthStencil* depthStencil = new DepthStencil();
 
-	std::unique_ptr<Draw> draw = std::make_unique<Draw>(command.get()->GetCommandList());
+	Draw* draw = new Draw(command->GetCommandList());
 
 
 
@@ -107,7 +107,7 @@ int WINAPI WinMain(HINSTANCE, HINSTANCE, LPSTR, int) {
 	GpuSyncManager gpuSyncManager;
 
 	//バリア
-	std::unique_ptr<ResourceBarrierHelper> resourceBarrierHelper = std::make_unique<ResourceBarrierHelper>();
+	ResourceBarrierHelper* resourceBarrierHelper = new ResourceBarrierHelper();
 
 
 	//ウィンドウサイズの設定//
@@ -121,8 +121,8 @@ int WINAPI WinMain(HINSTANCE, HINSTANCE, LPSTR, int) {
 	//エラー・警告、即ちに停止//
 
 #ifdef _DEBUG
-	Microsoft::WRL::ComPtr<ID3D12InfoQueue> infoQueue = nullptr;
-	if (SUCCEEDED(graphics.get()->GetDevice()->QueryInterface(IID_PPV_ARGS(&infoQueue)))) {
+	ID3D12InfoQueue* infoQueue = nullptr;
+	if (SUCCEEDED(graphics->GetDevice()->QueryInterface(IID_PPV_ARGS(&infoQueue)))) {
 		//やばいエラー時に止まる
 		infoQueue->SetBreakOnSeverity(D3D12_MESSAGE_SEVERITY_CORRUPTION, true);
 		//エラー時に止まる
@@ -155,15 +155,15 @@ int WINAPI WinMain(HINSTANCE, HINSTANCE, LPSTR, int) {
 #endif
 
 
-	swapChain.get()->CreateSwapChain(graphics.get()->GetDxgiFactory(), command.get()->GetCommandQueue(), window.GetHwnd(), kClientWidth, kClientHeight);
-	descriptorHeap.get()->CreateHeap(graphics.get()->GetDevice());
-	renderTargetView.get()->CreateRenderTargetView(graphics.get()->GetDevice(), swapChain.get()->GetSwapChainResources(0), swapChain.get()->GetSwapChainResources(1), descriptorHeap.get()->GetRtvDescriptorHeap());
+	swapChain->CreateSwapChain(graphics->GetDxgiFactory(), command->GetCommandQueue(), window.GetHwnd(), kClientWidth, kClientHeight);
+	descriptorHeap->CreateHeap(graphics->GetDevice());
+	renderTargetView->CreateRenderTargetView(graphics->GetDevice(), swapChain->GetSwapChainResources(0), swapChain->GetSwapChainResources(1), descriptorHeap->GetRtvDescriptorHeap());
 
 
 	//初期値0でFenceを作る
-	Microsoft::WRL::ComPtr<ID3D12Fence> fence = nullptr;
+	ID3D12Fence* fence = nullptr;
 	uint64_t fenceValue = 0;
-	hr = graphics.get()->GetDevice()->CreateFence(fenceValue, D3D12_FENCE_FLAG_NONE, IID_PPV_ARGS(&fence));
+	hr = graphics->GetDevice()->CreateFence(fenceValue, D3D12_FENCE_FLAG_NONE, IID_PPV_ARGS(&fence));
 	assert(SUCCEEDED(hr));
 
 	//FenceのSignalを待つためのイベントを作成する
@@ -171,33 +171,33 @@ int WINAPI WinMain(HINSTANCE, HINSTANCE, LPSTR, int) {
 	assert(fenceEvent != nullptr);
 
 
-	depthStencil->CreateDepthStencil(graphics.get()->GetDevice(), kClientWidth, kClientHeight);
+	depthStencil->CreateDepthStencil(graphics->GetDevice(), kClientWidth, kClientHeight);
 
 	//PSO
 
 	DirectXShaderCompiler directXShaderCompiler;
-	std::unique_ptr<RootSignature> rootSignature = std::make_unique<RootSignature>();
-	std::unique_ptr<RootParameter> rootParameter = std::make_unique<RootParameter>();
-	std::unique_ptr<Sampler> sampler = std::make_unique<Sampler>();
-	std::unique_ptr<InputLayout> inputLayout = std::make_unique<InputLayout>();
-	std::unique_ptr<BlendState> blendState = std::make_unique<BlendState>();
-	std::unique_ptr<RasterizerState> rasterizerState = std::make_unique<RasterizerState>();
-	std::unique_ptr<ShaderCompile> shaderCompile = std::make_unique<ShaderCompile>();
-	std::unique_ptr<DepthStencilState> depthStencilState = std::make_unique<DepthStencilState>();
-	std::unique_ptr<GraphicsPipelineState> graphicsPipelineState = std::make_unique<GraphicsPipelineState>();
+	RootSignature* rootSignature = new RootSignature();
+	RootParameter* rootParameter = new RootParameter();
+	Sampler* sampler = new Sampler();
+	InputLayout* inputLayout = new InputLayout();
+	BlendState* blendState = new BlendState();
+	RasterizerState* rasterizerState = new RasterizerState();
+	ShaderCompile* shaderCompile = new ShaderCompile();
+	DepthStencilState* depthStencilState = new DepthStencilState();
+	GraphicsPipelineState* graphicsPipelineState = new GraphicsPipelineState();
 
 	//DXCの初期化//
 	directXShaderCompiler.CreateDXC();
 
 	//DescriptorRange//
 	//RootParameter//
-	rootParameter->CreateRootParameter(rootSignature.get()->GetDescriptionRootSignature());
+	rootParameter->CreateRootParameter(rootSignature->GetDescriptionRootSignature());
 
 	//Samplerの設定//
-	sampler->CreateSampler(rootSignature.get()->GetDescriptionRootSignature());
+	sampler->CreateSampler(rootSignature->GetDescriptionRootSignature());
 
 	//シリアライズしてバイナリする
-	rootSignature->CreateRootSignature(logStream, graphics.get()->GetDevice());
+	rootSignature->CreateRootSignature(logStream, graphics->GetDevice());
 
 	//InputLayoutの設定を行う//
 
@@ -221,30 +221,30 @@ int WINAPI WinMain(HINSTANCE, HINSTANCE, LPSTR, int) {
 	depthStencilState->CreateDepthStencilState();
 
 
-	graphicsPipelineState->PSOSetting(directXShaderCompiler, rootSignature.get(), rootParameter.get(),
-		sampler.get(), inputLayout.get(), blendState.get(), rasterizerState.get(), shaderCompile.get(), depthStencilState.get());
-	graphicsPipelineState->CreatePSO(logStream, graphics.get()->GetDevice());
+	graphicsPipelineState->PSOSetting(directXShaderCompiler, rootSignature, rootParameter,
+		sampler, inputLayout, blendState, rasterizerState, shaderCompile, depthStencilState);
+	graphicsPipelineState->CreatePSO(logStream, graphics->GetDevice());
 
 
 	//Material用のResourceを作る//
-	std::unique_ptr<MaterialFactory> triangleMaterial = std::make_unique<MaterialFactory>();
-	std::unique_ptr<MaterialFactory> material = std::make_unique<MaterialFactory>();
-	std::unique_ptr<MaterialFactory> spriteMaterial = std::make_unique<MaterialFactory>();
-	std::unique_ptr<MaterialFactory> objMaterial = std::make_unique<MaterialFactory>();
+	MaterialFactory* triangleMaterial = new MaterialFactory();
+	MaterialFactory* material = new MaterialFactory();
+	MaterialFactory* spriteMaterial = new MaterialFactory();
+	MaterialFactory* objMaterial = new MaterialFactory();
 	triangleMaterial->CreateMatrial(graphics->GetDevice(), false);
 	material->CreateMatrial(graphics->GetDevice(), false);
 	spriteMaterial->CreateMatrial(graphics->GetDevice(), false);
 	objMaterial->CreateMatrial(graphics->GetDevice(), false);
 	//テクスチャの作成
-	std::unique_ptr<Texture> texture = std::make_unique<Texture>();
-	std::unique_ptr<TextureLoader> textureLoader = std::make_unique<TextureLoader>();
-	texture->Initalize(graphics.get()->GetDevice(), command.get()->GetCommandList(), descriptorHeap.get(), textureLoader.get());
+	Texture* texture = new Texture();
+	TextureLoader* textureLoader = new TextureLoader();
+	texture->Initalize(graphics->GetDevice(), command->GetCommandList(), descriptorHeap, textureLoader);
 	texture->CreateTexture("resources/uvChecker.png");
 	texture->CreateTexture("resources/nightSky.png");
 	//三角形の作成
-	std::unique_ptr<Triangle> triangle = std::make_unique<Triangle>();
-	triangle.get()->Initialize(triangleMaterial.get(), textureLoader.get()->GetTexture(1));
-	triangle.get()->CreateTriangle(graphics.get()->GetDevice());
+	Triangle* triangle = new Triangle();
+	triangle->Initialize(triangleMaterial, textureLoader->GetTexture(1));
+	triangle->CreateTriangle(graphics->GetDevice());
 	Transform triangleTransform = { {1.0f, 1.0f, 1.0f}, { 0.0f,0.0f,0.0f }, { 0.0f,0.0f,0.0f } };
 	Vector4 vertex[3] = {
 	{ -0.1f, -0.1f, 0.0f, 1.0f },
@@ -252,42 +252,42 @@ int WINAPI WinMain(HINSTANCE, HINSTANCE, LPSTR, int) {
 	{ 0.1f, -0.1f, 0.0f, 1.0f }
 	};
 	//スプライト作成
-	std::unique_ptr<Sprite> sprite = std::make_unique<Sprite>();
-	sprite.get()->Initialize(spriteMaterial.get(), textureLoader.get()->GetTexture(1));
-	sprite.get()->CreateSprite(graphics.get()->GetDevice());
+	Sprite* sprite = new Sprite();
+	sprite->Initialize(spriteMaterial, textureLoader->GetTexture(1));
+	sprite->CreateSprite(graphics->GetDevice());
 	Transform spriteTransform = { {1.0f, 1.0f, 1.0f}, { 0.0f,0.0f,0.0f }, { 0.0f,0.0f,0.0f } };
 	//球の作成
-	std::unique_ptr<Sphere> sphere = std::make_unique<Sphere>();
-	sphere.get()->Initialize(spriteMaterial.get(), textureLoader.get()->GetTexture(0));
-	sphere.get()->CreateSprite(graphics.get()->GetDevice());
+	Sphere* sphere = new Sphere();
+	sphere->Initialize(spriteMaterial, textureLoader->GetTexture(0));
+	sphere->CreateSprite(graphics->GetDevice());
 	Transform shpereTransform = { {1.0f, 1.0f, 1.0f}, { 0.0f,0.0f,0.0f }, { 0.0f,0.0f,0.0f } };
 	//モデルの作成
 	ModelData modelData = LoadObjFile("resources/obj", "axis.obj");
-	std::unique_ptr<Model> model = std::make_unique<Model>();
-	model.get()->Initialize(modelData, objMaterial.get(),textureLoader.get()->GetTexture(1));
-	model.get()->CreateModel(graphics.get()->GetDevice());
+	Model* model = new Model();
+	model->Initialize(modelData, objMaterial, textureLoader->GetTexture(1));
+	model->CreateModel(graphics->GetDevice());
 	Transform objTransform = { {1.0f, 1.0f, 1.0f}, { 0.0f,0.0f,0.0f }, { 0.0f,0.0f,0.0f } };
-	
 
 
-	std::unique_ptr<DirectinalLight> directinalLight = std::make_unique<DirectinalLight>();
-	directinalLight->CreateDirectinalLight(graphics.get()->GetDevice());
 
-	
+	DirectinalLight* directinalLight = new DirectinalLight();
+	directinalLight->CreateDirectinalLight(graphics->GetDevice());
+
+
 
 	//ViewportとScissor（シザー）//
 
 	//ビューポート
-	viewportScissor.get()->CreateViewPort();
+	viewportScissor->CreateViewPort();
 	//シーザー矩形
-	viewportScissor.get()->CreateSxissor();
+	viewportScissor->CreateSxissor();
 
 
 	Matrix4x4 viewMatrix;
 
 	bool debugCameraFlag = false;
 
-	
+
 	bool useMonsterBall = true;
 
 	Transform camraTransform{ {1.0f,1.0f,1.0f},{0.0f,0.0f,0.0f},{0.0f,0.0f,-5.0f} };
@@ -305,12 +305,12 @@ int WINAPI WinMain(HINSTANCE, HINSTANCE, LPSTR, int) {
 	ImGui::CreateContext();
 	ImGui::StyleColorsDark();
 	ImGui_ImplWin32_Init(window.GetHwnd());
-	ImGui_ImplDX12_Init(graphics.get()->GetDevice(),
-		swapChain.get()->GetSwapChainDesc().BufferCount,
-		renderTargetView.get()->GetRtvDesc().Format,
-		descriptorHeap.get()->GetSrvDescriptorHeap(),
-		descriptorHeap.get()->GetSrvDescriptorHeap()->GetCPUDescriptorHandleForHeapStart(),
-		descriptorHeap.get()->GetSrvDescriptorHeap()->GetGPUDescriptorHandleForHeapStart());
+	ImGui_ImplDX12_Init(graphics->GetDevice(),
+		swapChain->GetSwapChainDesc().BufferCount,
+		renderTargetView->GetRtvDesc().Format,
+		descriptorHeap->GetSrvDescriptorHeap(),
+		descriptorHeap->GetSrvDescriptorHeap()->GetCPUDescriptorHandleForHeapStart(),
+		descriptorHeap->GetSrvDescriptorHeap()->GetGPUDescriptorHandleForHeapStart());
 
 	//メインループ//
 
@@ -330,7 +330,7 @@ int WINAPI WinMain(HINSTANCE, HINSTANCE, LPSTR, int) {
 
 			//コマンドを積み込んで確定させる//
 
-			resourceBarrierHelper->Transition(command.get()->GetCommandList(), swapChain.get());
+			resourceBarrierHelper->Transition(command->GetCommandList(), swapChain);
 
 
 			//ゲーム処理
@@ -342,7 +342,7 @@ int WINAPI WinMain(HINSTANCE, HINSTANCE, LPSTR, int) {
 			ImGui::Checkbox("debugCameraFlag", &debugCameraFlag);
 			//ImGui::ShowDemoWindow();debugCameraFlag
 
-			textureLoader.get()->Draw();
+			textureLoader->Draw();
 
 			if (ImGui::CollapsingHeader("Camera")) {
 				ImGui::DragFloat3("camraTranslate", &camraTransform.translate.x, 0.01f);
@@ -379,55 +379,55 @@ int WINAPI WinMain(HINSTANCE, HINSTANCE, LPSTR, int) {
 				Matrix4x4 cameraMatrix = MakeAffineMatrix(camraTransform.translate, camraTransform.scale, camraTransform.rotate);;
 				viewMatrix = Inverse(cameraMatrix);
 			}
+
+			triangle->SetVertex(vertex);
+			triangle->SetShape();
+			triangle->SetTrandform(triangleTransform);
+			triangle->SetWvp(viewMatrix);
+
+			sprite->SetTrandform(spriteTransform);
+			sprite->SetWvp();
 		
-			triangle.get()->SetVertex(vertex);
-			triangle.get()->SetShape();
-			triangle.get()->SetTrandform(triangleTransform);
-			triangle.get()->SetWvp(viewMatrix);
+			sphere->SetTrandform(shpereTransform);
+			sphere->SetWvp(viewMatrix);
 
-			sprite.get()->SetTrandform(spriteTransform);
-			sprite.get()->SetWvp();
+			model->SetTransform(objTransform);
+			model->SetWvp(viewMatrix);
 
-			sphere.get()->SetTrandform(shpereTransform);
-			sphere.get()->SetWvp(viewMatrix);
 
-			model.get()->SetTransform(objTransform);
-			model.get()->SetWvp(viewMatrix);
 
-			
 
-		
 
 			Matrix4x4 uvTransformMatrix = Scale(uvTransformSprite.scale);
 			uvTransformMatrix = MultiplyMatrix4x4(uvTransformMatrix, Rotation(uvTransformSprite.rotate));
 			uvTransformMatrix = MultiplyMatrix4x4(uvTransformMatrix, Translation(uvTransformSprite.translate));
-			spriteMaterial.get()->GetMaterialData()->uvTransform = uvTransformMatrix;
+			spriteMaterial->GetMaterialData()->uvTransform = uvTransformMatrix;
 			//ImGuiの内部コマンドを生成
 			ImGui::Render();
 
 
-			renderTargetView.get()->SetAndClear(command.get()->GetCommandList(), swapChain.get()->GetSwapChain()->GetCurrentBackBufferIndex());
+			renderTargetView->SetAndClear(command->GetCommandList(), swapChain->GetSwapChain()->GetCurrentBackBufferIndex());
 			//DSVを設定する
-			depthStencil->SetDSV(command.get()->GetCommandList(), renderTargetView.get()->GetRtvHandles(swapChain.get()->GetSwapChain()->GetCurrentBackBufferIndex()));
+			depthStencil->SetDSV(command->GetCommandList(), renderTargetView->GetRtvHandles(swapChain->GetSwapChain()->GetCurrentBackBufferIndex()));
 
 
 
 
 			//コマンドを積む//
 
-			ID3D12DescriptorHeap* descriptorHeeps[] = { descriptorHeap.get()->GetSrvDescriptorHeap() };
-			command.get()->GetCommandList()->SetDescriptorHeaps(1, descriptorHeeps);
-			command.get()->GetCommandList()->SetPipelineState(graphicsPipelineState.get()->GetGraphicsPipelineState());//PSOを設定
+			ID3D12DescriptorHeap* descriptorHeeps[] = { descriptorHeap->GetSrvDescriptorHeap() };
+			command->GetCommandList()->SetDescriptorHeaps(1, descriptorHeeps);
+			command->GetCommandList()->SetPipelineState(graphicsPipelineState->GetGraphicsPipelineState());//PSOを設定
 			//形状を設定。PSOに設定しているものとはまた別。同じものを設定すると考えておけばいい
-			command.get()->GetCommandList()->IASetPrimitiveTopology(D3D_PRIMITIVE_TOPOLOGY_TRIANGLELIST);
-			command.get()->GetCommandList()->RSSetViewports(1, viewportScissor.get()->GetViewport());//Viewportを設定
-			command.get()->GetCommandList()->RSSetScissorRects(1, viewportScissor.get()->GetScissorRect());//Sxirssorを設定
+			command->GetCommandList()->IASetPrimitiveTopology(D3D_PRIMITIVE_TOPOLOGY_TRIANGLELIST);
+			command->GetCommandList()->RSSetViewports(1, viewportScissor->GetViewport());//Viewportを設定
+			command->GetCommandList()->RSSetScissorRects(1, viewportScissor->GetScissorRect());//Sxirssorを設定
 			//RootSignatureを設定。POSに設定しているけど別途設定が必要
-			command.get()->GetCommandList()->SetGraphicsRootSignature(rootSignature.get()->GetRootSignature());
-			command.get()->GetCommandList()->SetGraphicsRootConstantBufferView(3, directinalLight.get()->GetDirectinalLightResource()->GetGPUVirtualAddress());
+			command->GetCommandList()->SetGraphicsRootSignature(rootSignature->GetRootSignature());
+			command->GetCommandList()->SetGraphicsRootConstantBufferView(3, directinalLight->GetDirectinalLightResource()->GetGPUVirtualAddress());
 
 			//三角形の描画
-			draw.get()->DrawTriangle(triangle.get());
+			draw->DrawTriangle(triangle);
 			//スプライトの描画	
 			//draw.get()->DrawSprite(sprite.get());
 			//球の描画
@@ -436,18 +436,18 @@ int WINAPI WinMain(HINSTANCE, HINSTANCE, LPSTR, int) {
 			//draw->DrawObj(model.get());
 
 			//ImGuiの描画コマンド
-			ImGui_ImplDX12_RenderDrawData(ImGui::GetDrawData(), command.get()->GetCommandList());
+			ImGui_ImplDX12_RenderDrawData(ImGui::GetDrawData(), command->GetCommandList());
 
 
 			//画面に描く処理はすべて終わり、画面に映すので、状態を遷移
 			//今回RenderTargetからPresentにする
-			resourceBarrierHelper->TransitionToPresent(command.get()->GetCommandList());
+			resourceBarrierHelper->TransitionToPresent(command->GetCommandList());
 			//TransitionBarrierを張る
 
 
 
 			//コマンドリストの内容を確定させる。すべてのコマンドを積んでからCloseすること
-			hr = command.get()->GetCommandList()->Close();
+			hr = command->GetCommandList()->Close();
 			assert(SUCCEEDED(hr));
 
 
@@ -455,15 +455,15 @@ int WINAPI WinMain(HINSTANCE, HINSTANCE, LPSTR, int) {
 
 
 			//GPU2コマンドリストの実行を行わせる
-			ID3D12CommandList* commandLists[] = { command.get()->GetCommandList() };
-			command.get()->GetCommandQueue()->ExecuteCommandLists(1, commandLists);
+			ID3D12CommandList* commandLists[] = { command->GetCommandList() };
+			command->GetCommandQueue()->ExecuteCommandLists(1, commandLists);
 			//GPUとOSに画面の交換を行うよう通知する
-			swapChain.get()->GetSwapChain()->Present(1, 0);
+			swapChain->GetSwapChain()->Present(1, 0);
 
 
 
 			fenceValue++;
-			HRESULT hr = command.get()->GetCommandQueue()->Signal(fence.Get(), fenceValue);
+			HRESULT hr = command->GetCommandQueue()->Signal(fence, fenceValue);
 			assert(SUCCEEDED(hr));
 
 			if (fence->GetCompletedValue() < fenceValue) {
@@ -474,9 +474,9 @@ int WINAPI WinMain(HINSTANCE, HINSTANCE, LPSTR, int) {
 
 
 			//次のフレーム用のコマンドを準備
-			hr = command.get()->GetCommandAllocator()->Reset();
+			hr = command->GetCommandAllocator()->Reset();
 			assert(SUCCEEDED(hr));
-			hr = command.get()->GetCommandList()->Reset(command.get()->GetCommandAllocator(), nullptr);
+			hr = command->GetCommandList()->Reset(command->GetCommandAllocator(), nullptr);
 			assert(SUCCEEDED(hr));
 		}
 	}
@@ -492,8 +492,52 @@ int WINAPI WinMain(HINSTANCE, HINSTANCE, LPSTR, int) {
 	//ウィンドウを閉じる
 	CloseWindow(window.GetHwnd());
 
+	delete model;
+	delete sphere;
+	delete sprite;
+	delete triangle;
+	delete textureLoader;
+	delete texture;
+	delete objMaterial;
+	delete spriteMaterial;
+	delete material;
+	delete triangleMaterial;
+	delete graphicsPipelineState;
+	delete depthStencilState;
+	delete shaderCompile;
+	delete rasterizerState;
+	delete blendState;
+	delete inputLayout;
+	delete sampler;
+	delete rootParameter;
+	delete rootSignature;
+	delete directinalLight;
+	delete depthStencil;
+
+	if (fenceEvent) {
+		CloseHandle(fenceEvent);
+		fenceEvent = nullptr;
+	}
+	if (fence) {
+		fence->Release();
+		fence = nullptr;
+	}
+
+	delete resourceBarrierHelper;
+	delete draw;
+	delete debudCamera;
+	delete input;
+	delete viewportScissor;
+	delete renderTargetView;
+	delete descriptorHeap;
+	delete swapChain;
+	delete command;
+	delete audio; 
+	delete graphics;
+
 	//COMの終了処理
 	CoUninitialize();
+
 
 
 	return 0;
