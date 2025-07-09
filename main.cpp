@@ -73,8 +73,6 @@ int WINAPI WinMain(HINSTANCE, HINSTANCE, LPSTR, int) {
 	}
 #endif  
 
-
-
 	//クライアント領域のサイズ
 	const int32_t kClientWidth = 1280;
 	const int32_t kClientHeight = 720;
@@ -83,7 +81,6 @@ int WINAPI WinMain(HINSTANCE, HINSTANCE, LPSTR, int) {
 	HRESULT hr;
 
 	///クラス宣言///
-
 	//設定
 	WindowConfig window;
 	GraphicsDevice* graphics = new GraphicsDevice(logStream);
@@ -101,14 +98,11 @@ int WINAPI WinMain(HINSTANCE, HINSTANCE, LPSTR, int) {
 
 	Draw* draw = new Draw(command->GetCommandList());
 
-
-
 	//フェンスやイベント、シグナル
 	GpuSyncManager gpuSyncManager;
 
 	//バリア
 	ResourceBarrierHelper* resourceBarrierHelper = new ResourceBarrierHelper();
-
 
 	//ウィンドウサイズの設定//
 	window.DrawWindow(kClientWidth, kClientHeight);
@@ -117,9 +111,7 @@ int WINAPI WinMain(HINSTANCE, HINSTANCE, LPSTR, int) {
 	//デバックカメラの初期化
 	debudCamera->Initialize();
 
-
 	//エラー・警告、即ちに停止//
-
 #ifdef _DEBUG
 	ID3D12InfoQueue* infoQueue = nullptr;
 	if (SUCCEEDED(graphics->GetDevice()->QueryInterface(IID_PPV_ARGS(&infoQueue)))) {
@@ -128,11 +120,9 @@ int WINAPI WinMain(HINSTANCE, HINSTANCE, LPSTR, int) {
 		//エラー時に止まる
 		infoQueue->SetBreakOnSeverity(D3D12_MESSAGE_SEVERITY_ERROR, true);
 		//警告時に止まる
-		//infoQueue->SetBreakOnSeverity(D3D12_MESSAGE_SEVERITY_WARNING, true);
-
+		infoQueue->SetBreakOnSeverity(D3D12_MESSAGE_SEVERITY_WARNING, true);
 
 		//エラーと警告の抑制//
-
 		//抑制するメッセージのID
 		D3D12_MESSAGE_ID denyIds[] = {
 			//Windows11でのDXGIデバッグレイヤーとDX12デバッグレイヤーの相互作用バグによるエラーメッセージ
@@ -538,7 +528,14 @@ int WINAPI WinMain(HINSTANCE, HINSTANCE, LPSTR, int) {
 	//COMの終了処理
 	CoUninitialize();
 
-
+#ifdef _DEBUG
+	IDXGIDebug1* debug;
+	if (SUCCEEDED(DXGIGetDebugInterface1(0, IID_PPV_ARGS(&debug)))){
+		debug->ReportLiveObjects(DXGI_DEBUG_ALL, DXGI_DEBUG_RLO_ALL);
+		debug->ReportLiveObjects(DXGI_DEBUG_APP, DXGI_DEBUG_RLO_ALL);
+		debug->ReportLiveObjects(DXGI_DEBUG_D3D12, DXGI_DEBUG_RLO_ALL);
+	}
+#endif // _DEBUG
 
 	return 0;
 }
