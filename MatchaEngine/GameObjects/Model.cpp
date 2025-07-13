@@ -9,6 +9,20 @@
 
 
 
+Model::~Model()
+{
+	// MapしたポインタをUnmapする
+	if (vertexData_) {
+		vertexResource_->Unmap(0, nullptr);
+	}
+	if (wvpData_) {
+		wvpDataResource_->Unmap(0, nullptr);
+	}
+	// ComPtrは自動的に解放される
+	vertexResource_.Reset();
+	wvpDataResource_.Reset();
+}
+
 void Model::Initialize(ModelData modelData, MaterialFactory* material,D3D12_GPU_DESCRIPTOR_HANDLE textureSrvHandleGPU)
 {
 	transform_ = {};

@@ -2,6 +2,11 @@
 #include <cassert>
 
 
+DepthStencil::~DepthStencil()
+{
+	depthStencilResource_.Reset();
+}
+
 Microsoft::WRL::ComPtr<ID3D12DescriptorHeap> DepthStencil::CreateDescriptorHeep(
 	ID3D12Device* device, D3D12_DESCRIPTOR_HEAP_TYPE heapType, UINT numDesxriptors, bool shaderVisible)
 {
@@ -13,12 +18,12 @@ Microsoft::WRL::ComPtr<ID3D12DescriptorHeap> DepthStencil::CreateDescriptorHeep(
 	descriptorHeapDesc.Flags = shaderVisible ? D3D12_DESCRIPTOR_HEAP_FLAG_SHADER_VISIBLE : D3D12_DESCRIPTOR_HEAP_FLAG_NONE;
 	HRESULT hr = device->CreateDescriptorHeap(&descriptorHeapDesc, IID_PPV_ARGS(&descriptorHeap));
 	//ディスクリプタヒープが作れなかったので起動できない
-	assert(SUCCEEDED(hr));//???
+	assert(SUCCEEDED(hr));//
 	return descriptorHeap;
 }
 
 
-ID3D12Resource* DepthStencil::CreateDepthStencilTextureResource(ID3D12Device* device, int32_t width, int32_t height) {
+Microsoft::WRL::ComPtr<ID3D12Resource> DepthStencil::CreateDepthStencilTextureResource(ID3D12Device* device, int32_t width, int32_t height) {
 
 	//生成するResourceの設定
 	D3D12_RESOURCE_DESC resourceDesc{};
@@ -49,13 +54,13 @@ ID3D12Resource* DepthStencil::CreateDepthStencilTextureResource(ID3D12Device* de
 		&depthClearValue,//Clear最適地
 		IID_PPV_ARGS(&resource));
 	assert(SUCCEEDED(hr));
-
-
+	
 	return resource;
 }
 
 void DepthStencil::CreateDepthStencil(ID3D12Device* device, int32_t width, int32_t height)
 {
+
 	depthStencilResource_ = CreateDepthStencilTextureResource(device, width, height);
 
 	dsvDescriptorHeap_ = CreateDescriptorHeep(device, D3D12_DESCRIPTOR_HEAP_TYPE_DSV, 1, false);
@@ -64,8 +69,8 @@ void DepthStencil::CreateDepthStencil(ID3D12Device* device, int32_t width, int32
 	dsvDesc.Format = DXGI_FORMAT_D24_UNORM_S8_UINT;//format。基本的にresourceに合わせる
 	dsvDesc.ViewDimension = D3D12_DSV_DIMENSION_TEXTURE2D;//2dTexture
 
-	device->CreateDepthStencilView(depthStencilResource_.Get(), &dsvDesc, dsvDescriptorHeap_->GetCPUDescriptorHandleForHeapStart());
-
+	device->CreateDepthStencilView(depthStencilResource_.Get(), &dsvDesc, dsvDescriptorHeap_.Get()->GetCPUDescriptorHandleForHeapStart());
+	
 }
 
 void DepthStencil::SetDSV(ID3D12GraphicsCommandList* commandList, D3D12_CPU_DESCRIPTOR_HANDLE* RtvHandles)
@@ -75,5 +80,6 @@ void DepthStencil::SetDSV(ID3D12GraphicsCommandList* commandList, D3D12_CPU_DESC
 	commandList->OMSetRenderTargets(1, RtvHandles, false, &dsvHandle);
 
 	commandList->ClearDepthStencilView(dsvHandle, D3D12_CLEAR_FLAG_DEPTH, 1.0f, 0, 0, nullptr);
+
 
 }

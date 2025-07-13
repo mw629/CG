@@ -27,7 +27,7 @@ private:
 	int kClientHeight = 720;
 
 public:
-
+	~Model();
 
 
 	void Initialize(ModelData modelData, MaterialFactory* matrial, D3D12_GPU_DESCRIPTOR_HANDLE textureSrvHandleGPU);

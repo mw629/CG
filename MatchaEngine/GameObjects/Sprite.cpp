@@ -9,6 +9,24 @@ Sprite::Sprite()
 	transform_ = { {1.0f,1.0f,1.0f},{0.0f,0.0f,0.0f},{0.0f,0.0f,0.0f} };
 }
 
+Sprite::~Sprite()
+{
+	// MapしたポインタをUnmapする
+	if (vertexData_) {
+		vertexResource_->Unmap(0, nullptr);
+	}
+	if (indexData_) {
+		indexResource_->Unmap(0, nullptr);
+	}
+	if (wvpData_) {
+		wvpResource_->Unmap(0, nullptr);
+	}
+	// ComPtrは自動的に解放される
+	vertexResource_.Reset();
+	indexResource_.Reset();
+	wvpResource_.Reset();
+}
+
 void Sprite::Initialize(MaterialFactory* material, D3D12_GPU_DESCRIPTOR_HANDLE textureSrvHandleGPU)
 {
 	material_ = material;

@@ -27,6 +27,7 @@ private:
 	
 public:
 	Sprite();
+	~Sprite();
 
 	void Initialize(MaterialFactory* material, D3D12_GPU_DESCRIPTOR_HANDLE textureSrvHandleGPU);
 

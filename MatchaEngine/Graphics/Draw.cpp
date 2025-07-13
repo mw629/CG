@@ -10,7 +10,7 @@ Draw::Draw(ID3D12GraphicsCommandList* commandList)
 
 Draw::~Draw()
 {
-	Initialize();
+	
 }
 
 void Draw::Initialize()

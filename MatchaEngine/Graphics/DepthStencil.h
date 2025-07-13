@@ -12,12 +12,13 @@ private:
 	D3D12_CPU_DESCRIPTOR_HANDLE dsvHandle;
 
 public:
+	~DepthStencil();
 
 	Microsoft::WRL::ComPtr<ID3D12DescriptorHeap> CreateDescriptorHeep(
 		ID3D12Device* device, D3D12_DESCRIPTOR_HEAP_TYPE heapType, UINT numDesxriptors, bool shaderVisible);
 
 
-	ID3D12Resource* CreateDepthStencilTextureResource(ID3D12Device* device, int32_t width, int32_t height);
+	Microsoft::WRL::ComPtr<ID3D12Resource> CreateDepthStencilTextureResource(ID3D12Device* device, int32_t width, int32_t height);
 
 	void CreateDepthStencil(ID3D12Device* device, int32_t width, int32_t height);
 

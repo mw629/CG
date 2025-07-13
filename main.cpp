@@ -17,11 +17,28 @@
 #include <wrl.h> 
 #include <xaudio2.h>
 
+#include <memory> // For std::unique_ptr
+
 #include "externals/DirectXTex/DirectXTex.h"
 #include "externals/imgui/imgui.h"
 #include "externals/imgui/imgui_impl_dx12.h"
 #include "externals/imgui/imgui_impl_win32.h"
 #include "externals/DirectXTex/d3dx12.h"
+
+struct Debug {
+	~Debug() {
+		IDXGIDebug1* debug;
+		if (SUCCEEDED(DXGIGetDebugInterface1(0, IID_PPV_ARGS(&debug)))) {
+			debug->ReportLiveObjects(DXGI_DEBUG_ALL, DXGI_DEBUG_RLO_ALL);
+			debug->ReportLiveObjects(DXGI_DEBUG_APP, DXGI_DEBUG_RLO_ALL);
+			debug->ReportLiveObjects(DXGI_DEBUG_D3D12, DXGI_DEBUG_RLO_ALL);
+		}
+	}
+};
+
+#ifdef _DEBUG
+std::unique_ptr<Debug> leakChacker = std::make_unique<Debug>();
+#endif // _DEBUG
 
 
 extern IMGUI_IMPL_API LRESULT ImGui_ImplWin32_WndProcHandler(HWND hWnd, UINT msg, WPARAM wParam, LPARAM lParam);
@@ -55,6 +72,9 @@ extern IMGUI_IMPL_API LRESULT ImGui_ImplWin32_WndProcHandler(HWND hWnd, UINT msg
 //Windowsアプリでのエントリーポイント(main関数)
 int WINAPI WinMain(HINSTANCE, HINSTANCE, LPSTR, int) {
 
+
+	//std::unique_ptr<D3DResourceLeakChacker> leakChacker = std::make_unique<D3DResourceLeakChacker>(logStream);
+
 	//COMの初期化
 	CoInitializeEx(0, COINIT_MULTITHREADED);
 
@@ -83,26 +103,26 @@ int WINAPI WinMain(HINSTANCE, HINSTANCE, LPSTR, int) {
 	///クラス宣言///
 	//設定
 	WindowConfig window;
-	GraphicsDevice* graphics = new GraphicsDevice(logStream);
-	CommandContext* command = new CommandContext(graphics->GetDevice());
-	SwapChain* swapChain = new SwapChain();
-	DescriptorHeap* descriptorHeap = new DescriptorHeap(graphics->GetDevice());
-	RenderTargetView* renderTargetView = new RenderTargetView();
-	ViewportScissor* viewportScissor = new ViewportScissor(kClientWidth, kClientHeight);
+	std::unique_ptr<GraphicsDevice> graphics = std::make_unique<GraphicsDevice>(logStream);
+	std::unique_ptr<CommandContext> command = std::make_unique<CommandContext>(graphics->GetDevice());
+	std::unique_ptr<SwapChain> swapChain = std::make_unique<SwapChain>();
+	std::unique_ptr<DescriptorHeap> descriptorHeap = std::make_unique<DescriptorHeap>(graphics->GetDevice());
+	std::unique_ptr<RenderTargetView> renderTargetView = std::make_unique<RenderTargetView>();
+	std::unique_ptr<ViewportScissor> viewportScissor = std::make_unique<ViewportScissor>(kClientWidth, kClientHeight);
 	//入力
-	Input* input = new Input;
+	std::unique_ptr<Input> input = std::make_unique<Input>();
 
 	//描画
-	DebugCamera* debudCamera = new DebugCamera;
-	DepthStencil* depthStencil = new DepthStencil();
+	std::unique_ptr<DebugCamera> debudCamera = std::make_unique<DebugCamera>();
+	std::unique_ptr<DepthStencil> depthStencil = std::make_unique<DepthStencil>();
 
-	Draw* draw = new Draw(command->GetCommandList());
+	std::unique_ptr<Draw> draw = std::make_unique<Draw>(command->GetCommandList());
 
 	//フェンスやイベント、シグナル
 	GpuSyncManager gpuSyncManager;
 
 	//バリア
-	ResourceBarrierHelper* resourceBarrierHelper = new ResourceBarrierHelper();
+	std::unique_ptr<ResourceBarrierHelper> resourceBarrierHelper = std::make_unique<ResourceBarrierHelper>();
 
 	//ウィンドウサイズの設定//
 	window.DrawWindow(kClientWidth, kClientHeight);
@@ -120,7 +140,7 @@ int WINAPI WinMain(HINSTANCE, HINSTANCE, LPSTR, int) {
 		//エラー時に止まる
 		infoQueue->SetBreakOnSeverity(D3D12_MESSAGE_SEVERITY_ERROR, true);
 		//警告時に止まる
-		infoQueue->SetBreakOnSeverity(D3D12_MESSAGE_SEVERITY_WARNING, true);
+		//infoQueue->SetBreakOnSeverity(D3D12_MESSAGE_SEVERITY_WARNING, true);
 
 		//エラーと警告の抑制//
 		//抑制するメッセージのID
@@ -138,9 +158,7 @@ int WINAPI WinMain(HINSTANCE, HINSTANCE, LPSTR, int) {
 		//指定したメッセージの表示を抑制
 		infoQueue->PushStorageFilter(&filter);
 
-
-		//解放 (ComPtrが自動で解放するので不要)
-		//infoQueue->Release();
+		infoQueue->Release();
 	}
 #endif
 
@@ -166,15 +184,15 @@ int WINAPI WinMain(HINSTANCE, HINSTANCE, LPSTR, int) {
 	//PSO
 
 	DirectXShaderCompiler directXShaderCompiler;
-	RootSignature* rootSignature = new RootSignature();
-	RootParameter* rootParameter = new RootParameter();
-	Sampler* sampler = new Sampler();
-	InputLayout* inputLayout = new InputLayout();
-	BlendState* blendState = new BlendState();
-	RasterizerState* rasterizerState = new RasterizerState();
-	ShaderCompile* shaderCompile = new ShaderCompile();
-	DepthStencilState* depthStencilState = new DepthStencilState();
-	GraphicsPipelineState* graphicsPipelineState = new GraphicsPipelineState();
+	std::unique_ptr<RootSignature> rootSignature = std::make_unique<RootSignature>();
+	std::unique_ptr<RootParameter> rootParameter = std::make_unique<RootParameter>();
+	std::unique_ptr<Sampler> sampler = std::make_unique<Sampler>();
+	std::unique_ptr<InputLayout> inputLayout = std::make_unique<InputLayout>();
+	std::unique_ptr<BlendState> blendState = std::make_unique<BlendState>();
+	std::unique_ptr<RasterizerState> rasterizerState = std::make_unique<RasterizerState>();
+	std::unique_ptr<ShaderCompile> shaderCompile = std::make_unique<ShaderCompile>();
+	std::unique_ptr<DepthStencilState> depthStencilState = std::make_unique<DepthStencilState>();
+	std::unique_ptr<GraphicsPipelineState> graphicsPipelineState = std::make_unique<GraphicsPipelineState>();
 
 	//DXCの初期化//
 	directXShaderCompiler.CreateDXC();
@@ -211,29 +229,29 @@ int WINAPI WinMain(HINSTANCE, HINSTANCE, LPSTR, int) {
 	depthStencilState->CreateDepthStencilState();
 
 
-	graphicsPipelineState->PSOSetting(directXShaderCompiler, rootSignature, rootParameter,
-		sampler, inputLayout, blendState, rasterizerState, shaderCompile, depthStencilState);
+	graphicsPipelineState->PSOSetting(directXShaderCompiler, rootSignature.get(), rootParameter.get(),
+		sampler.get(), inputLayout.get(), blendState.get(), rasterizerState.get(), shaderCompile.get(), depthStencilState.get());
 	graphicsPipelineState->CreatePSO(logStream, graphics->GetDevice());
 
 
 	//Material用のResourceを作る//
-	MaterialFactory* triangleMaterial = new MaterialFactory();
-	MaterialFactory* material = new MaterialFactory();
-	MaterialFactory* spriteMaterial = new MaterialFactory();
-	MaterialFactory* objMaterial = new MaterialFactory();
-	triangleMaterial->CreateMatrial(graphics->GetDevice(), false);
+	std::unique_ptr<MaterialFactory> material = std::make_unique<MaterialFactory>();
+	std::unique_ptr<MaterialFactory> triangleMaterial = std::make_unique<MaterialFactory>();
+	std::unique_ptr<MaterialFactory> spriteMaterial = std::make_unique<MaterialFactory>();
+	std::unique_ptr<MaterialFactory> objMaterial = std::make_unique<MaterialFactory>();
 	material->CreateMatrial(graphics->GetDevice(), false);
+	triangleMaterial->CreateMatrial(graphics->GetDevice(), false);
 	spriteMaterial->CreateMatrial(graphics->GetDevice(), false);
 	objMaterial->CreateMatrial(graphics->GetDevice(), false);
 	//テクスチャの作成
-	Texture* texture = new Texture();
-	TextureLoader* textureLoader = new TextureLoader();
-	texture->Initalize(graphics->GetDevice(), command->GetCommandList(), descriptorHeap, textureLoader);
+	std::unique_ptr<Texture> texture = std::make_unique<Texture>();
+	std::unique_ptr<TextureLoader> textureLoader = std::make_unique<TextureLoader>();
+	texture->Initalize(graphics->GetDevice(), command->GetCommandList(), descriptorHeap.get(), textureLoader.get());
 	texture->CreateTexture("resources/uvChecker.png");
 	texture->CreateTexture("resources/nightSky.png");
 	//三角形の作成
-	Triangle* triangle = new Triangle();
-	triangle->Initialize(triangleMaterial, textureLoader->GetTexture(1));
+	std::unique_ptr<Triangle> triangle = std::make_unique<Triangle>();
+	triangle->Initialize(material.get(), textureLoader->GetTexture(0));
 	triangle->CreateTriangle(graphics->GetDevice());
 	Transform triangleTransform = { {1.0f, 1.0f, 1.0f}, { 0.0f,0.0f,0.0f }, { 0.0f,0.0f,0.0f } };
 	Vector4 vertex[3] = {
@@ -242,25 +260,25 @@ int WINAPI WinMain(HINSTANCE, HINSTANCE, LPSTR, int) {
 	{ 0.1f, -0.1f, 0.0f, 1.0f }
 	};
 	//スプライト作成
-	Sprite* sprite = new Sprite();
-	sprite->Initialize(spriteMaterial, textureLoader->GetTexture(1));
+	std::unique_ptr<Sprite> sprite = std::make_unique<Sprite>();
+	sprite->Initialize(material.get(), textureLoader->GetTexture(0));
 	sprite->CreateSprite(graphics->GetDevice());
 	Transform spriteTransform = { {1.0f, 1.0f, 1.0f}, { 0.0f,0.0f,0.0f }, { 0.0f,0.0f,0.0f } };
 	//球の作成
-	Sphere* sphere = new Sphere();
-	sphere->Initialize(spriteMaterial, textureLoader->GetTexture(0));
+	std::unique_ptr<Sphere> sphere = std::make_unique<Sphere>();
+	sphere->Initialize(material.get(), textureLoader->GetTexture(0));
 	sphere->CreateSprite(graphics->GetDevice());
 	Transform shpereTransform = { {1.0f, 1.0f, 1.0f}, { 0.0f,0.0f,0.0f }, { 0.0f,0.0f,0.0f } };
 	//モデルの作成
 	ModelData modelData = LoadObjFile("resources/obj", "axis.obj");
-	Model* model = new Model();
-	model->Initialize(modelData, objMaterial, textureLoader->GetTexture(1));
+	std::unique_ptr<Model> model = std::make_unique<Model>();
+	model->Initialize(modelData, material.get(), textureLoader->GetTexture(0));
 	model->CreateModel(graphics->GetDevice());
 	Transform objTransform = { {1.0f, 1.0f, 1.0f}, { 0.0f,0.0f,0.0f }, { 0.0f,0.0f,0.0f } };
 
 
 
-	DirectinalLight* directinalLight = new DirectinalLight();
+	std::unique_ptr<DirectinalLight> directinalLight = std::make_unique<DirectinalLight>();
 	directinalLight->CreateDirectinalLight(graphics->GetDevice());
 
 
@@ -284,7 +302,7 @@ int WINAPI WinMain(HINSTANCE, HINSTANCE, LPSTR, int) {
 
 	Transform uvTransformSprite{ {1.0f,1.0f,1.0f},{0.0f,0.0f,0.0f},{0.0f,0.0f,0.0f} };
 
-	Audio* audio = new Audio;
+	std::unique_ptr<Audio> audio = std::make_unique<Audio>();
 	int BGMHandle;
 	audio->Initialize();
 	BGMHandle = audio->Load("resources/Audio/BGM/sweet_pop.mp3");
@@ -320,7 +338,7 @@ int WINAPI WinMain(HINSTANCE, HINSTANCE, LPSTR, int) {
 
 			//コマンドを積み込んで確定させる//
 
-			resourceBarrierHelper->Transition(command->GetCommandList(), swapChain);
+			resourceBarrierHelper->Transition(command->GetCommandList(), swapChain.get());
 
 
 			//ゲーム処理
@@ -330,7 +348,7 @@ int WINAPI WinMain(HINSTANCE, HINSTANCE, LPSTR, int) {
 			//開発用UIの処理。実際に開発用UIを出す場合はここをゲ0無固有の処理に置き換える
 			ImGui::Checkbox("useMonsterBall", &useMonsterBall);
 			ImGui::Checkbox("debugCameraFlag", &debugCameraFlag);
-			//ImGui::ShowDemoWindow();debugCameraFlag
+			//ImGui::ShowDemoWindow(); debugCameraFlag
 
 			textureLoader->Draw();
 
@@ -361,7 +379,7 @@ int WINAPI WinMain(HINSTANCE, HINSTANCE, LPSTR, int) {
 			input->Updata();
 
 			if (debugCameraFlag) {
-				debudCamera->Update(input);
+				debudCamera->Update(input.get());
 				viewMatrix = debudCamera->GetViewMatrix();
 			}
 			else
@@ -377,7 +395,7 @@ int WINAPI WinMain(HINSTANCE, HINSTANCE, LPSTR, int) {
 
 			sprite->SetTrandform(spriteTransform);
 			sprite->SetWvp();
-		
+
 			sphere->SetTrandform(shpereTransform);
 			sphere->SetWvp(viewMatrix);
 
@@ -391,7 +409,7 @@ int WINAPI WinMain(HINSTANCE, HINSTANCE, LPSTR, int) {
 			Matrix4x4 uvTransformMatrix = Scale(uvTransformSprite.scale);
 			uvTransformMatrix = MultiplyMatrix4x4(uvTransformMatrix, Rotation(uvTransformSprite.rotate));
 			uvTransformMatrix = MultiplyMatrix4x4(uvTransformMatrix, Translation(uvTransformSprite.translate));
-			spriteMaterial->GetMaterialData()->uvTransform = uvTransformMatrix;
+			//spriteMaterial->GetMaterialData()->uvTransform = uvTransformMatrix;
 			//ImGuiの内部コマンドを生成
 			ImGui::Render();
 
@@ -399,8 +417,6 @@ int WINAPI WinMain(HINSTANCE, HINSTANCE, LPSTR, int) {
 			renderTargetView->SetAndClear(command->GetCommandList(), swapChain->GetSwapChain()->GetCurrentBackBufferIndex());
 			//DSVを設定する
 			depthStencil->SetDSV(command->GetCommandList(), renderTargetView->GetRtvHandles(swapChain->GetSwapChain()->GetCurrentBackBufferIndex()));
-
-
 
 
 			//コマンドを積む//
@@ -417,13 +433,13 @@ int WINAPI WinMain(HINSTANCE, HINSTANCE, LPSTR, int) {
 			command->GetCommandList()->SetGraphicsRootConstantBufferView(3, directinalLight->GetDirectinalLightResource()->GetGPUVirtualAddress());
 
 			//三角形の描画
-			draw->DrawTriangle(triangle);
+			draw->DrawTriangle(triangle.get());
 			//スプライトの描画	
-			//draw.get()->DrawSprite(sprite.get());
+			draw.get()->DrawSprite(sprite.get());
 			//球の描画
-			//draw.get()->DrawShpere(sphere.get());
+			draw.get()->DrawShpere(sphere.get());
 			//objectの描画
-			//draw->DrawObj(model.get());
+			draw->DrawObj(model.get());
 
 			//ImGuiの描画コマンド
 			ImGui_ImplDX12_RenderDrawData(ImGui::GetDrawData(), command->GetCommandList());
@@ -433,7 +449,6 @@ int WINAPI WinMain(HINSTANCE, HINSTANCE, LPSTR, int) {
 			//今回RenderTargetからPresentにする
 			resourceBarrierHelper->TransitionToPresent(command->GetCommandList());
 			//TransitionBarrierを張る
-
 
 
 			//コマンドリストの内容を確定させる。すべてのコマンドを積んでからCloseすること
@@ -453,11 +468,11 @@ int WINAPI WinMain(HINSTANCE, HINSTANCE, LPSTR, int) {
 
 
 			fenceValue++;
-			HRESULT hr = command->GetCommandQueue()->Signal(fence, fenceValue);
+			hr = command->GetCommandQueue()->Signal(fence, fenceValue);
 			assert(SUCCEEDED(hr));
 
 			if (fence->GetCompletedValue() < fenceValue) {
-				HRESULT hr = fence->SetEventOnCompletion(fenceValue, fenceEvent);
+				hr = fence->SetEventOnCompletion(fenceValue, fenceEvent);
 				assert(SUCCEEDED(hr));
 				WaitForSingleObject(fenceEvent, INFINITE);
 			}
@@ -482,27 +497,6 @@ int WINAPI WinMain(HINSTANCE, HINSTANCE, LPSTR, int) {
 	//ウィンドウを閉じる
 	CloseWindow(window.GetHwnd());
 
-	delete model;
-	delete sphere;
-	delete sprite;
-	delete triangle;
-	delete textureLoader;
-	delete texture;
-	delete objMaterial;
-	delete spriteMaterial;
-	delete material;
-	delete triangleMaterial;
-	delete graphicsPipelineState;
-	delete depthStencilState;
-	delete shaderCompile;
-	delete rasterizerState;
-	delete blendState;
-	delete inputLayout;
-	delete sampler;
-	delete rootParameter;
-	delete rootSignature;
-	delete directinalLight;
-	delete depthStencil;
 
 	if (fenceEvent) {
 		CloseHandle(fenceEvent);
@@ -512,30 +506,13 @@ int WINAPI WinMain(HINSTANCE, HINSTANCE, LPSTR, int) {
 		fence->Release();
 		fence = nullptr;
 	}
-
-	delete resourceBarrierHelper;
-	delete draw;
-	delete debudCamera;
-	delete input;
-	delete viewportScissor;
-	delete renderTargetView;
-	delete descriptorHeap;
-	delete swapChain;
-	delete command;
-	delete audio; 
-	delete graphics;
+	
+	depthStencil.reset();
 
 	//COMの終了処理
 	CoUninitialize();
 
-#ifdef _DEBUG
-	IDXGIDebug1* debug;
-	if (SUCCEEDED(DXGIGetDebugInterface1(0, IID_PPV_ARGS(&debug)))){
-		debug->ReportLiveObjects(DXGI_DEBUG_ALL, DXGI_DEBUG_RLO_ALL);
-		debug->ReportLiveObjects(DXGI_DEBUG_APP, DXGI_DEBUG_RLO_ALL);
-		debug->ReportLiveObjects(DXGI_DEBUG_D3D12, DXGI_DEBUG_RLO_ALL);
-	}
-#endif // _DEBUG
+
 
 	return 0;
 }

@@ -8,6 +8,24 @@ Sphere::Sphere()
 	transform_ = { {1.0f,1.0f,1.0f},{0.0f,0.0f,0.0f},{0.0f,0.0f,0.0f} };
 }
 
+Sphere::~Sphere()
+{
+	if (vertexData_) { // vertexData_がnullptrでないか確認
+		vertexResource_->Unmap(0, nullptr);
+	}
+	if (indexData_) { // indexData_がnullptrでないか確認
+		indexResource_->Unmap(0, nullptr);
+	}
+	if (wvpData_) { // wvpData_がnullptrでないか確認
+		wvpResource_->Unmap(0, nullptr);
+	}
+	// ComPtrはスコープを抜けるときに自動的に解放されますが、
+	// 明示的にReset()を呼ぶことで早期に解放できます（必須ではないが安全策）
+	vertexResource_.Reset();
+	indexResource_.Reset();
+	wvpResource_.Reset();
+}
+
 
 void Sphere::Initialize(MaterialFactory* material, D3D12_GPU_DESCRIPTOR_HANDLE textureSrvHandleGPU)
 {

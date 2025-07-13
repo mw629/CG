@@ -62,18 +62,60 @@
 class Engine
 {
 private:
+
+	HRESULT hr_;
+
+	int32_t kClientWidth_;
+	int32_t kClientHeight_;
+
 	std::ofstream logStream;
-	GraphicsDevice* graphicsDevice;
+
+	WindowConfig window;
+
+	std::unique_ptr<GraphicsDevice> graphics;
+	std::unique_ptr<CommandContext> command;
+	std::unique_ptr<SwapChain> swapChain;
+	std::unique_ptr<DescriptorHeap> descriptorHeap;
+	std::unique_ptr<RenderTargetView> renderTargetView;
+	std::unique_ptr<ViewportScissor> viewportScissor;
+
+	std::unique_ptr<Input> input;
+
+	std::unique_ptr<DebugCamera> debudCamera;
+	std::unique_ptr<DepthStencil> depthStencil;
+
+	std::unique_ptr<Draw> draw;
+
+	GpuSyncManager gpuSyncManager;
+
+	std::unique_ptr<ResourceBarrierHelper> resourceBarrierHelper;
+
+	DirectXShaderCompiler directXShaderCompiler;
+	std::unique_ptr<RootSignature> rootSignature;
+	std::unique_ptr<RootParameter> rootParameter;
+	std::unique_ptr<Sampler> sampler;
+	std::unique_ptr<InputLayout> inputLayout;
+	std::unique_ptr<BlendState> blendState;
+	std::unique_ptr<RasterizerState> rasterizerState;
+	std::unique_ptr<ShaderCompile> shaderCompile;
+	std::unique_ptr<DepthStencilState> depthStencilState;
+	std::unique_ptr<GraphicsPipelineState> graphicsPipelineState;
+
+
+	std::unique_ptr<DirectinalLight> directinalLight;
+
 public:
 
 	~Engine();
-	Engine();
+	Engine(int32_t kClientWidth, int32_t kClientHeight);
 
 	void Setting();
 
 	void PreDraw();
 
 	void PostDraw();
+
+	void EndFrame();
 
 
 };
