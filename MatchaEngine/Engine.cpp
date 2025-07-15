@@ -205,8 +205,8 @@ void Engine::EndFrame()
 
 
 	//次のフレーム用のコマンドを準備
-	hr = command->GetCommandAllocator()->Reset();
-	assert(SUCCEEDED(hr));
-	hr = command->GetCommandList()->Reset(command->GetCommandAllocator(), nullptr);
-	assert(SUCCEEDED(hr));
+	hr_ = command->GetCommandAllocator()->Reset();
+	assert(SUCCEEDED(hr_));
+	hr_ = command->GetCommandList()->Reset(command->GetCommandAllocator(), nullptr);
+	assert(SUCCEEDED(hr_));
 }
