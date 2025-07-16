@@ -465,8 +465,8 @@ int WINAPI WinMain(HINSTANCE, HINSTANCE, LPSTR, int) {
 			command->GetCommandList()->SetGraphicsRootSignature(linerootSignature->GetRootSignature());
 			
 
-			draw.get()->DrawLine(line.get());
-			//draw.get()->DrawGrid(grid.get());
+			//draw.get()->DrawLine(line.get());
+			draw.get()->DrawGrid(grid.get());
 			//三角形の描画
 			//draw->DrawTriangle(triangle.get());
 			//スプライトの描画	
