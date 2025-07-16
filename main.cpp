@@ -449,7 +449,7 @@ int WINAPI WinMain(HINSTANCE, HINSTANCE, LPSTR, int) {
 
 			ID3D12DescriptorHeap* descriptorHeeps[] = { descriptorHeap->GetSrvDescriptorHeap() };
 			command->GetCommandList()->SetDescriptorHeaps(1, descriptorHeeps);
-			command->GetCommandList()->SetPipelineState(graphicsPipeState->GetGraphicsPipelineState());//PSOを設定
+			//command->GetCommandList()->SetPipelineState(graphicsPipeState->GetGraphicsPipelineState());//PSOを設定
 			//形状を設定。PSOに設定しているものとはまた別。同じものを設定すると考えておけばいい
 			command->GetCommandList()->IASetPrimitiveTopology(D3D_PRIMITIVE_TOPOLOGY_TRIANGLELIST);
 			command->GetCommandList()->RSSetViewports(1, viewportScissor->GetViewport());//Viewportを設定
