@@ -7,3 +7,5 @@ void RasterizerState::CreateRasterizerState()
 	//三角形の中を塗りつぶす
 	rasterizerDesc_.FillMode = D3D12_FILL_MODE_SOLID;
 }
+
+

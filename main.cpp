@@ -181,8 +181,9 @@ int WINAPI WinMain(HINSTANCE, HINSTANCE, LPSTR, int) {
 
 	depthStencil->CreateDepthStencil(graphics->GetDevice(), kClientWidth, kClientHeight);
 
-	//PSO
-
+	//----------------
+	// PSO
+	//----------------
 	DirectXShaderCompiler directXShaderCompiler;
 	std::unique_ptr<RootSignature> rootSignature = std::make_unique<RootSignature>();
 	std::unique_ptr<RootParameter> rootParameter = std::make_unique<RootParameter>();
@@ -192,46 +193,51 @@ int WINAPI WinMain(HINSTANCE, HINSTANCE, LPSTR, int) {
 	std::unique_ptr<RasterizerState> rasterizerState = std::make_unique<RasterizerState>();
 	std::unique_ptr<ShaderCompile> shaderCompile = std::make_unique<ShaderCompile>();
 	std::unique_ptr<DepthStencilState> depthStencilState = std::make_unique<DepthStencilState>();
-	std::unique_ptr<GraphicsPipelineState> graphicsPipelineState = std::make_unique<GraphicsPipelineState>();
-
+	std::unique_ptr<GraphicsPipelineState> graphicsPipeState = std::make_unique<GraphicsPipelineState>();
 	//DXCの初期化//
 	directXShaderCompiler.CreateDXC();
-
 	//DescriptorRange//
 	//RootParameter//
 	rootParameter->CreateRootParameter(rootSignature->GetDescriptionRootSignature());
-
 	//Samplerの設定//
 	sampler->CreateSampler(rootSignature->GetDescriptionRootSignature());
-
 	//シリアライズしてバイナリする
 	rootSignature->CreateRootSignature(logStream, graphics->GetDevice());
-
 	//InputLayoutの設定を行う//
-
 	inputLayout->CreateInputLayout();
-
 	//BlendStateの設定を行う//
-
 	blendState->CreateBlendDesc();
-
 	//RasterizerStateの設定を行う//
-
 	rasterizerState->CreateRasterizerState();
-
 	//ShaderをCompileする//
-
 	shaderCompile->CreateShaderCompile(logStream, directXShaderCompiler.GetDxcUtils(), directXShaderCompiler.GetDxcCompiler(), directXShaderCompiler.GetIncludeHandler());
-
-
 	//DepthStencilStateの設定//
-
 	depthStencilState->CreateDepthStencilState();
-
-
-	graphicsPipelineState->PSOSetting(directXShaderCompiler, rootSignature.get(), rootParameter.get(),
+	//PSO
+	graphicsPipeState->PSOSetting(directXShaderCompiler, rootSignature.get(), rootParameter.get(),
 		sampler.get(), inputLayout.get(), blendState.get(), rasterizerState.get(), shaderCompile.get(), depthStencilState.get());
-	graphicsPipelineState->CreatePSO(logStream, graphics->GetDevice());
+	graphicsPipeState->CreatePSO(logStream, graphics->GetDevice());
+	
+	//----------------
+	//Line PSO
+	//----------------
+	std::unique_ptr<RootSignature> linerootSignature = std::make_unique<RootSignature>();
+	std::unique_ptr<RootParameter> linerootParameter = std::make_unique<RootParameter>();
+	std::unique_ptr<InputLayout> lineinputLayout = std::make_unique<InputLayout>();
+	std::unique_ptr<ShaderCompile> lineshaderCompile = std::make_unique<ShaderCompile>();
+	std::unique_ptr<GraphicsPipelineState> lineGraphicsPipeState = std::make_unique<GraphicsPipelineState>(); //
+	//RootParameter//
+	linerootParameter->CreateLineRootParameter(linerootSignature->GetDescriptionRootSignature());
+	//シリアライズしてバイナリする
+	linerootSignature->CreateRootSignature(logStream, graphics->GetDevice());
+	//InputLayoutの設定を行う//
+	lineinputLayout->CreateLineInputLayout();
+	//ShaderをCompileする//
+	lineshaderCompile->CreateLineShaderCompile(logStream, directXShaderCompiler.GetDxcUtils(), directXShaderCompiler.GetDxcCompiler(), directXShaderCompiler.GetIncludeHandler());
+	//PSO
+	lineGraphicsPipeState->PSOSetting(directXShaderCompiler, linerootSignature.get(), linerootParameter.get(),
+		sampler.get(), lineinputLayout.get(), blendState.get(), rasterizerState.get(), lineshaderCompile.get(), depthStencilState.get());
+	lineGraphicsPipeState->CreateLinePSO(logStream, graphics->GetDevice());
 
 
 	//Material用のResourceを作る//
@@ -249,6 +255,13 @@ int WINAPI WinMain(HINSTANCE, HINSTANCE, LPSTR, int) {
 	texture->Initalize(graphics->GetDevice(), command->GetCommandList(), descriptorHeap.get(), textureLoader.get());
 	texture->CreateTexture("resources/uvChecker.png");
 	texture->CreateTexture("resources/nightSky.png");
+	//線の描画
+	std::unique_ptr<Line> line = std::make_unique<Line>();
+	LineVertexData lineVertex[2] = { {{-1.0f,-1.0f,0.0f},{1.0f,1.0f,1.0f,1.0f} },
+		{{ 1.0f,1.0f,0.0f }, { 1.0f,1.0f,1.0f,1.0f }} };
+	Transform lineTransform = { {1.0f, 1.0f, 1.0f}, { 0.0f,0.0f,0.0f }, { 0.0f,0.0f,0.0f } };
+	line.get()->CreateLine(graphics.get()->GetDevice());
+	
 	//三角形の作成
 	std::unique_ptr<Triangle> triangle = std::make_unique<Triangle>();
 	triangle->Initialize(material.get(), textureLoader->GetTexture(0));
@@ -367,6 +380,10 @@ int WINAPI WinMain(HINSTANCE, HINSTANCE, LPSTR, int) {
 				ImGui::DragFloat3("vertex 1", &vertex[1].x, 0.01f);
 				ImGui::DragFloat3("vertex 2", &vertex[2].x, 0.01f);
 			}
+			if (ImGui::CollapsingHeader("LVertex")) {
+				ImGui::DragFloat3("Lvertex 0", &lineVertex[0].position.x, 0.01f);
+				ImGui::DragFloat3("Lvertex 1", &lineVertex[1].position.x, 0.01f);
+			}
 			if (ImGui::CollapsingHeader("SpriteUV"))
 			{
 				ImGui::DragFloat2("TranslateSpriteUV", &uvTransformSprite.translate.x, 0.01f, -10.0f, 10.0f);
@@ -392,6 +409,10 @@ int WINAPI WinMain(HINSTANCE, HINSTANCE, LPSTR, int) {
 			triangle->SetShape();
 			triangle->SetTrandform(triangleTransform);
 			triangle->SetWvp(viewMatrix);
+
+			line.get()->SetVertex(lineVertex);
+			line->SetTrandform(lineTransform);
+			line.get()->SetWvp(viewMatrix);
 
 			sprite->SetTrandform(spriteTransform);
 			sprite->SetWvp();
@@ -423,7 +444,7 @@ int WINAPI WinMain(HINSTANCE, HINSTANCE, LPSTR, int) {
 
 			ID3D12DescriptorHeap* descriptorHeeps[] = { descriptorHeap->GetSrvDescriptorHeap() };
 			command->GetCommandList()->SetDescriptorHeaps(1, descriptorHeeps);
-			command->GetCommandList()->SetPipelineState(graphicsPipelineState->GetGraphicsPipelineState());//PSOを設定
+			command->GetCommandList()->SetPipelineState(graphicsPipeState->GetGraphicsPipelineState());//PSOを設定
 			//形状を設定。PSOに設定しているものとはまた別。同じものを設定すると考えておけばいい
 			command->GetCommandList()->IASetPrimitiveTopology(D3D_PRIMITIVE_TOPOLOGY_TRIANGLELIST);
 			command->GetCommandList()->RSSetViewports(1, viewportScissor->GetViewport());//Viewportを設定
@@ -432,14 +453,26 @@ int WINAPI WinMain(HINSTANCE, HINSTANCE, LPSTR, int) {
 			command->GetCommandList()->SetGraphicsRootSignature(rootSignature->GetRootSignature());
 			command->GetCommandList()->SetGraphicsRootConstantBufferView(3, directinalLight->GetDirectinalLightResource()->GetGPUVirtualAddress());
 
+
+			command->GetCommandList()->SetPipelineState(lineGraphicsPipeState->GetGraphicsPipelineState());//PSOを設定
+			//形状を設定。PSOに設定しているものとはまた別。同じものを設定すると考えておけばいい
+			command->GetCommandList()->IASetPrimitiveTopology(D3D10_PRIMITIVE_TOPOLOGY_LINELIST);
+			command->GetCommandList()->SetGraphicsRootSignature(linerootSignature->GetRootSignature());
+			
+
+			draw.get()->DrawLine(line.get());
+
 			//三角形の描画
-			draw->DrawTriangle(triangle.get());
+			//draw->DrawTriangle(triangle.get());
 			//スプライトの描画	
-			draw.get()->DrawSprite(sprite.get());
+			//draw.get()->DrawSprite(sprite.get());
 			//球の描画
-			draw.get()->DrawShpere(sphere.get());
+			//draw.get()->DrawShpere(sphere.get());
 			//objectの描画
-			draw->DrawObj(model.get());
+			//draw->DrawObj(model.get());
+
+
+
 
 			//ImGuiの描画コマンド
 			ImGui_ImplDX12_RenderDrawData(ImGui::GetDrawData(), command->GetCommandList());

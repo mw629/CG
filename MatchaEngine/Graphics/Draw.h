@@ -7,6 +7,7 @@
 #include "../GameObjects/Sprite.h"
 #include "../GameObjects/Sphere.h"
 #include "../GameObjects/Triangle.h"
+#include "../GameObjects/Line.h"
 
 class Draw {
 private:
@@ -36,5 +37,7 @@ public:
 	void DrawShpere(Sphere* sphere);
 
 	void DrawTriangle(Triangle* triangle);
+
+	void DrawLine(Line* line);
 	
 };

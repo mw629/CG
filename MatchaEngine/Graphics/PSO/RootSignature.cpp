@@ -13,8 +13,6 @@ RootSignature::RootSignature()
 
 void RootSignature::CreateRootSignature(std::ostream& os, ID3D12Device* device)
 {
-
-	
 	//シリアライズしてバイナリにする
 	hr_ = D3D12SerializeRootSignature(&descriptionRootSignature_,
 		D3D_ROOT_SIGNATURE_VERSION_1, &signatureBlob_, &errorBlob_);
@@ -23,7 +21,6 @@ void RootSignature::CreateRootSignature(std::ostream& os, ID3D12Device* device)
 		assert(false);
 	}
 	//バイナリを元に生成
-	
 	hr_ = device->CreateRootSignature(0,
 		signatureBlob_->GetBufferPointer(), signatureBlob_->GetBufferSize(),
 		IID_PPV_ARGS(&rootSignature_));

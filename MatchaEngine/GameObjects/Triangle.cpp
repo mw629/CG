@@ -1,6 +1,7 @@
 #include "Triangle.h"
 #include "Graphics/GraphicsDevice.h"
 #include "Math/Calculation.h"
+#include "Line.h"
 
 
 Triangle::~Triangle()
@@ -64,6 +65,8 @@ void Triangle::CreateWVP(ID3D12Device* device) {
 	wvpData_->WVP = IdentityMatrix();
 	wvpData_->World = IdentityMatrix();
 }
+
+
 
 void Triangle::CreateTriangle(ID3D12Device* device)
 {

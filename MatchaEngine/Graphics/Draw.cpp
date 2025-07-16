@@ -60,4 +60,11 @@ void Draw::DrawTriangle(Triangle* triangle)
 	commandList_->SetGraphicsRootDescriptorTable(2, triangle->GetTextureSrvHandleGPU());
 	commandList_->DrawInstanced(3, 1, 0, 0);
 }
+
+void Draw::DrawLine(Line* line)
+{
+	commandList_->IASetVertexBuffers(0, 1, line->GetVertexBufferView());//VBVを設定
+	commandList_->SetGraphicsRootConstantBufferView(0, line->GetVertexResource()->GetGPUVirtualAddress());
+	commandList_->DrawInstanced(2, 1, 0, 0);
+}
 	

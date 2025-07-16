@@ -43,6 +43,9 @@ public:
 
 	void CreatePSO(std::ostream& os, ID3D12Device* device);
 
+	void CreateLinePSO(std::ostream& os, ID3D12Device* device);
+
+
 	D3D12_GRAPHICS_PIPELINE_STATE_DESC GetGraphicsPipelineStateDesc() { return graphicsPipelineStateDesc_; }
 	ID3D12PipelineState* GetGraphicsPipelineState() { return graphicsPipelineState_.Get(); }
 };

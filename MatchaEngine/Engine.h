@@ -18,6 +18,7 @@
 #include "GameObjects/Sphere.h"
 #include "GameObjects/Sprite.h"
 #include "GameObjects/Triangle.h"
+#include "GameObjects/Line.h"
 
 //Graphics
 

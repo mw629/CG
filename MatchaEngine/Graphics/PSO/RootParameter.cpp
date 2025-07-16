@@ -8,6 +8,20 @@ void RootParameter::CreateDescriptorRange()
 	descriptorRange_[0].OffsetInDescriptorsFromTableStart = D3D12_DESCRIPTOR_RANGE_OFFSET_APPEND;//Offsetを自動計算
 }
 
+void RootParameter::CreateLineRootParameter(D3D12_ROOT_SIGNATURE_DESC& descriptionRootSignature)
+{
+	CreateDescriptorRange();
+	// ルートパラメータ0: VS用WVP行列
+	lineRootParameter[0].ParameterType = D3D12_ROOT_PARAMETER_TYPE_CBV;
+	lineRootParameter[0].ShaderVisibility = D3D12_SHADER_VISIBILITY_VERTEX; // 頂点シェーダーから参照
+	lineRootParameter[0].Descriptor.ShaderRegister = 0; // HLSLのb0にバインド
+	lineRootParameter[0].Descriptor.RegisterSpace = 0;
+
+
+	descriptionRootSignature.pParameters = lineRootParameter;//ルートパラメータ配列へのポインタ
+	descriptionRootSignature.NumParameters = _countof(lineRootParameter);//配列の長さ
+}
+
 void RootParameter::CreateRootParameter(D3D12_ROOT_SIGNATURE_DESC& descriptionRootSignature)
 {
 	CreateDescriptorRange();
@@ -26,7 +40,7 @@ void RootParameter::CreateRootParameter(D3D12_ROOT_SIGNATURE_DESC& descriptionRo
 
 	rootParameter[3].ParameterType = D3D12_ROOT_PARAMETER_TYPE_CBV;//CBVを使う
 	rootParameter[3].ShaderVisibility = D3D12_SHADER_VISIBILITY_PIXEL;//VertexShaderで行う
-	rootParameter[3].Descriptor.ShaderRegister = 1;//レジスタ番号0とバインド
+	rootParameter[3].Descriptor.ShaderRegister = 1;//レジスタ番号1とバインド
 
 	descriptionRootSignature.pParameters = rootParameter;//ルートパラメータ配列へのポインタ
 	descriptionRootSignature.NumParameters = _countof(rootParameter);//配列の長さ

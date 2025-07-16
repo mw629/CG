@@ -142,11 +142,22 @@ struct TransformationMatrix
 	Matrix4x4 World;
 };
 
+struct LineTransformationMatrix
+{
+	Matrix4x4 WVP;
+};
+
+
 struct VertexData
 {
 	Vector4 position;
 	Vector2 texcoord;
 	Vector3 normal;
+};
+
+struct LineVertexData {
+	Vector3 position;
+	Vector4 color;
 };
 
 struct Material

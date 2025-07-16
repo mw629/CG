@@ -8,5 +8,6 @@ private:
 public:  
     void CreateRasterizerState();  
 
+    
     D3D12_RASTERIZER_DESC GetRasterizerDesc() { return rasterizerDesc_; };  
 };
