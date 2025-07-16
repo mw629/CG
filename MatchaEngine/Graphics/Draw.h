@@ -8,6 +8,7 @@
 #include "../GameObjects/Sphere.h"
 #include "../GameObjects/Triangle.h"
 #include "../GameObjects/Line.h"
+#include "../GameObjects/Grid.h"
 
 class Draw {
 private:
@@ -21,7 +22,6 @@ private:
 	Matrix4x4* wvpData;
 
 	
-
 
 public:
 
@@ -39,5 +39,7 @@ public:
 	void DrawTriangle(Triangle* triangle);
 
 	void DrawLine(Line* line);
+
+	void DrawGrid(Grid* grid);
 	
 };

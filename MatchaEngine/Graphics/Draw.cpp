@@ -67,4 +67,11 @@ void Draw::DrawLine(Line* line)
 	commandList_->SetGraphicsRootConstantBufferView(0, line->GetVertexResource()->GetGPUVirtualAddress());
 	commandList_->DrawInstanced(2, 1, 0, 0);
 }
+
+void Draw::DrawGrid(Grid* grid)
+{
+	commandList_->IASetVertexBuffers(0, 1, grid->GetVertexBufferView());//VBVを設定
+	commandList_->SetGraphicsRootConstantBufferView(0, grid->GetVertexResource()->GetGPUVirtualAddress());
+	commandList_->DrawInstanced(grid->GetSubdivision()*4, 1, 0, 0);
+}
 	

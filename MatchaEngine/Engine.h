@@ -19,6 +19,7 @@
 #include "GameObjects/Sprite.h"
 #include "GameObjects/Triangle.h"
 #include "GameObjects/Line.h"
+#include "GameObjects/Grid.h"
 
 //Graphics
 
