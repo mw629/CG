@@ -463,7 +463,6 @@ int WINAPI WinMain(HINSTANCE, HINSTANCE, LPSTR, int) {
 			//形状を設定。PSOに設定しているものとはまた別。同じものを設定すると考えておけばいい
 			command->GetCommandList()->IASetPrimitiveTopology(D3D10_PRIMITIVE_TOPOLOGY_LINELIST);
 			command->GetCommandList()->SetGraphicsRootSignature(linerootSignature->GetRootSignature());
-			
 
 			//draw.get()->DrawLine(line.get());
 			draw.get()->DrawGrid(grid.get());
