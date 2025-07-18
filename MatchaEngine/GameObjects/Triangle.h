@@ -5,18 +5,18 @@ class Triangle
 {
 private:
 
-	Transform transform_;
+	Transform transform_{};
 	Vector4 vertex_[3];
-	MaterialFactory* material_;
-	D3D12_GPU_DESCRIPTOR_HANDLE textureSrvHandleGPU_;
+	MaterialFactory* material_{};
+	D3D12_GPU_DESCRIPTOR_HANDLE textureSrvHandleGPU_{};
 
-	Microsoft::WRL::ComPtr<ID3D12Resource> vertexResource_;
+	Microsoft::WRL::ComPtr<ID3D12Resource> vertexResource_{};
 	D3D12_VERTEX_BUFFER_VIEW vertexBufferView_{};
 	VertexData* vertexData_ = nullptr;
 
 
-	Microsoft::WRL::ComPtr<ID3D12Resource> wvpResource_;
-	TransformationMatrix* wvpData_;
+	Microsoft::WRL::ComPtr<ID3D12Resource> wvpResource_{};
+	TransformationMatrix* wvpData_{};
 
 
 public:
@@ -40,10 +40,10 @@ public:
 
 
 	D3D12_VERTEX_BUFFER_VIEW* GetVertexBufferView() { return &vertexBufferView_; }
-	ID3D12Resource* GetVertexResource() { return wvpResource_.Get(); }
+	ID3D12Resource* GetVertexResource()const { return wvpResource_.Get(); }
 
-	MaterialFactory* GetMatrial() { return material_; }
-	D3D12_GPU_DESCRIPTOR_HANDLE GetTextureSrvHandleGPU() { return textureSrvHandleGPU_; }
+	MaterialFactory* GetMatrial()const { return material_; }
+	D3D12_GPU_DESCRIPTOR_HANDLE GetTextureSrvHandleGPU()const { return textureSrvHandleGPU_; }
 
 
 };

@@ -11,13 +11,17 @@ bool TextureLoader::CheckFilePath(const std::string& filePath)
 	return false;
 }
 
-bool TextureLoader::StockTextureData(const std::string& filePath, D3D12_CPU_DESCRIPTOR_HANDLE textureSrvHandleCPU, D3D12_GPU_DESCRIPTOR_HANDLE textureSrvHandleGPU)
+bool TextureLoader::StockTextureData(const std::string& filePath, 
+	D3D12_CPU_DESCRIPTOR_HANDLE textureSrvHandleCPU, D3D12_GPU_DESCRIPTOR_HANDLE textureSrvHandleGPU,
+	Microsoft::WRL::ComPtr<ID3D12Resource> textureResource,	Microsoft::WRL::ComPtr<ID3D12Resource> intermediateResource)
 {
     Texture tex;
 	tex.index = static_cast<int>(texture_.size());//0を基準
     tex.filePath = filePath;
     tex.textureSrvHandleCPU = textureSrvHandleCPU;
     tex.textureSrvHandleGPU = textureSrvHandleGPU;
+	tex.resource = textureResource;
+	tex.intermediateResource = intermediateResource;
 
     texture_.push_back(tex); // ベクターに追加
 

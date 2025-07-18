@@ -45,7 +45,7 @@ Microsoft::WRL::ComPtr<ID3D12Resource> DepthStencil::CreateDepthStencilTextureRe
 	depthClearValue.DepthStencil.Depth = 1.0f;//1.0f(最大値)でクリア
 	depthClearValue.Format = DXGI_FORMAT_D24_UNORM_S8_UINT;
 
-	ID3D12Resource* resource = nullptr;
+	Microsoft::WRL::ComPtr<ID3D12Resource> resource = nullptr;
 	HRESULT hr = device->CreateCommittedResource(
 		&heapProperties,//Heapの設定
 		D3D12_HEAP_FLAG_NONE,//Heapの特殊な設定、特になし

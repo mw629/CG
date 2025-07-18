@@ -7,7 +7,7 @@ private:
 	Microsoft::WRL::ComPtr<IDxcUtils> dxcUtils_ = nullptr;
 	Microsoft::WRL::ComPtr<IDxcCompiler3> dxcCompiler_ = nullptr;
 	Microsoft::WRL::ComPtr<IDxcIncludeHandler> includeHandler_ = nullptr;
-	HRESULT hr_;
+	HRESULT hr_{};
 public:
 	void CreateDXC();
 

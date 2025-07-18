@@ -22,8 +22,8 @@ void Texture::CreateTexture(const std::string& filePath)
 	}
 
 	const DirectX::TexMetadata& metaData = mipImages.GetMetadata();
-	ID3D12Resource* textureResource = CreateTextureResource(device_, metaData);
-	ID3D12Resource* intermediateResource = UploadTextureData(textureResource, mipImages, device_, commandList_);
+	Microsoft::WRL::ComPtr<ID3D12Resource>  textureResource = CreateTextureResource(device_, metaData);
+	Microsoft::WRL::ComPtr<ID3D12Resource>  intermediateResource = UploadTextureData(textureResource.Get(), mipImages, device_, commandList_);
 
 	//実際にShaderResourceView
 
@@ -38,9 +38,7 @@ void Texture::CreateTexture(const std::string& filePath)
 	D3D12_CPU_DESCRIPTOR_HANDLE textureSrvHandleCPU = GetCPUDescriptorHandle(descriptorHeap_->GetSrvDescriptorHeap(), descriptorHeap_->GetDescriptorSizeSRV(), textureLoader_->GetLastIndex() + 1);
 	D3D12_GPU_DESCRIPTOR_HANDLE textureSrvHandleGPU = GetGPUDescriptorHandle(descriptorHeap_->GetSrvDescriptorHeap(), descriptorHeap_->GetDescriptorSizeSRV(), textureLoader_->GetLastIndex() + 1);
 
-	textureLoader_->StockTextureData(filePath, textureSrvHandleCPU, textureSrvHandleGPU);
+	textureLoader_->StockTextureData(filePath, textureSrvHandleCPU, textureSrvHandleGPU, textureResource, intermediateResource);
 
-	device_->CreateShaderResourceView(textureResource, &srvDesc, textureSrvHandleCPU);
+	device_->CreateShaderResourceView(textureResource.Get(), &srvDesc, textureSrvHandleCPU);
 }
-
-

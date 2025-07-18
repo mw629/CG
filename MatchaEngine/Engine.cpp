@@ -6,7 +6,7 @@
 
 Engine::~Engine()
 {
-	
+
 }
 
 Engine::Engine(int32_t kClientWidth, int32_t kClientHeight)
@@ -46,7 +46,7 @@ void Engine::Setting()
 {
 
 	window.DrawWindow(kClientWidth_, kClientHeight_);
-	input->Initialize(window.GeWc(), window.GetHwnd());
+	input->Initialize(window.GetWc(), window.GetHwnd());
 	debudCamera->Initialize();
 
 	//エラー・警告、即ちに停止//
@@ -97,7 +97,12 @@ void Engine::Setting()
 	shaderCompile = std::make_unique<ShaderCompile>();
 	depthStencilState = std::make_unique<DepthStencilState>();
 	graphicsPipelineState = std::make_unique<GraphicsPipelineState>();
-
+	
+	linerootSignature = std::make_unique<RootSignature>();
+	linerootParameter = std::make_unique<RootParameter>();
+	lineinputLayout = std::make_unique<InputLayout>();
+	lineshaderCompile = std::make_unique<ShaderCompile>();
+	lineGraphicsPipeState = std::make_unique<GraphicsPipelineState>(); //ate;
 
 	//DXCの初期化//
 	directXShaderCompiler.CreateDXC();
@@ -137,6 +142,22 @@ void Engine::Setting()
 	graphicsPipelineState->PSOSetting(directXShaderCompiler, rootSignature.get(), rootParameter.get(),
 		sampler.get(), inputLayout.get(), blendState.get(), rasterizerState.get(), shaderCompile.get(), depthStencilState.get());
 	graphicsPipelineState->CreatePSO(logStream, graphics->GetDevice());
+
+	//Line PSO
+	 
+	//RootParameter//
+	linerootParameter->CreateLineRootParameter(linerootSignature->GetDescriptionRootSignature());
+	//シリアライズしてバイナリする
+	linerootSignature->CreateRootSignature(logStream, graphics->GetDevice());
+	//InputLayoutの設定を行う//
+	lineinputLayout->CreateLineInputLayout();
+	//ShaderをCompileする//
+	lineshaderCompile->CreateLineShaderCompile(logStream, directXShaderCompiler.GetDxcUtils(), directXShaderCompiler.GetDxcCompiler(), directXShaderCompiler.GetIncludeHandler());
+	//PSO
+	lineGraphicsPipeState->PSOSetting(directXShaderCompiler, linerootSignature.get(), linerootParameter.get(),
+		sampler.get(), lineinputLayout.get(), blendState.get(), rasterizerState.get(), lineshaderCompile.get(), depthStencilState.get());
+	lineGraphicsPipeState->CreateLinePSO(logStream, graphics->GetDevice());
+
 
 
 	directinalLight = std::make_unique<DirectinalLight>();

@@ -13,15 +13,8 @@
 class Draw {
 private:
 
-	ID3D12GraphicsCommandList* commandList_;
+	ID3D12GraphicsCommandList* commandList_{};
 
-	ID3D12Resource* vertexResource;
-	D3D12_VERTEX_BUFFER_VIEW vertexBufferView{};
-	VertexData* vertexData = nullptr;
-	ID3D12Resource* wvpResource;
-	Matrix4x4* wvpData;
-
-	
 
 public:
 

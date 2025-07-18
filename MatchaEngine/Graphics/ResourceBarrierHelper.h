@@ -4,7 +4,7 @@
 class ResourceBarrierHelper
 {
 private:
-    UINT backBufferIndex_;
+    UINT backBufferIndex_{};
     D3D12_RESOURCE_BARRIER barrier_{};    
 
 public:
@@ -12,7 +12,7 @@ public:
 
     void TransitionToPresent(ID3D12GraphicsCommandList* commandList);
 
-    UINT GetBackBufferIndex() { return  backBufferIndex_; }
-    D3D12_RESOURCE_BARRIER GetBarrier() { return barrier_; }
+    UINT GetBackBufferIndex()const { return  backBufferIndex_; }
+    D3D12_RESOURCE_BARRIER GetBarrier() const { return barrier_; }
 };
 

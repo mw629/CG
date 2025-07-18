@@ -9,5 +9,5 @@ public:
     void CreateRasterizerState();  
 
     
-    D3D12_RASTERIZER_DESC GetRasterizerDesc() { return rasterizerDesc_; };  
+    D3D12_RASTERIZER_DESC GetRasterizerDesc() const { return rasterizerDesc_; };
 };

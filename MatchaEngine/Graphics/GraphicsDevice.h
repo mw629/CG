@@ -31,7 +31,7 @@ private:
 
 public:  
 
-	static ID3D12Resource* CreateBufferResource(ID3D12Device* device, size_t sizeInBytes);  
+	static Microsoft::WRL::ComPtr<ID3D12Resource> CreateBufferResource(ID3D12Device* device, size_t sizeInBytes);
 
 	GraphicsDevice(std::ostream& os);
 

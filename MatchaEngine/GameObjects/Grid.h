@@ -18,7 +18,7 @@ private:
 
 
 	Microsoft::WRL::ComPtr<ID3D12Resource> wvpResource_;
-	LineTransformationMatrix* wvpData_;
+	LineTransformationMatrix* wvpData_=nullptr;
 
 
 public:
@@ -35,8 +35,8 @@ public:
 	void SetWvp(Matrix4x4 viewMatrix);
 
 	D3D12_VERTEX_BUFFER_VIEW* GetVertexBufferView() { return &vertexBufferView_; }
-	ID3D12Resource* GetVertexResource() { return wvpResource_.Get(); }
+	ID3D12Resource* GetVertexResource()const { return wvpResource_.Get(); }
 
-	int GetSubdivision() {return kSubdivision_;}
+	int GetSubdivision()const {return kSubdivision_;}
 
 };

@@ -8,8 +8,8 @@ class Line {
 
 private:
 
-	Transform transform_;
-	LineVertexData vertex_[2];
+	Transform transform_{};
+	LineVertexData vertex_[2]{};
 	
 	Microsoft::WRL::ComPtr<ID3D12Resource> vertexResource_;
 	D3D12_VERTEX_BUFFER_VIEW vertexBufferView_{};
@@ -17,7 +17,7 @@ private:
 
 
 	Microsoft::WRL::ComPtr<ID3D12Resource> wvpResource_;
-	LineTransformationMatrix* wvpData_;
+	LineTransformationMatrix* wvpData_=nullptr;
 
 
 public:

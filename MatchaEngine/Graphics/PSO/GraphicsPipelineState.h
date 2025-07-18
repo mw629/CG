@@ -12,15 +12,15 @@
 
 class GraphicsPipelineState {
 private:
-	DirectXShaderCompiler directXShaderCompiler_;
-	RootSignature* rootSignature_;
-	RootParameter* rootParameter_;
-	Sampler* sampler_;
-	InputLayout* inputLayout_;
-	BlendState* blendState_;
-	RasterizerState* rasterizerState_;
-	ShaderCompile* shaderCompile_;
-	DepthStencilState* depthStencilState_;
+	DirectXShaderCompiler directXShaderCompiler_{};
+	RootSignature* rootSignature_{};
+	RootParameter* rootParameter_{};
+	Sampler* sampler_{};
+	InputLayout* inputLayout_{};
+	BlendState* blendState_{};
+	RasterizerState* rasterizerState_{};
+	ShaderCompile* shaderCompile_{};
+	DepthStencilState* depthStencilState_{};
 
 	D3D12_GRAPHICS_PIPELINE_STATE_DESC graphicsPipelineStateDesc_{};
 	Microsoft::WRL::ComPtr<ID3D12PipelineState> graphicsPipelineState_ = nullptr;
@@ -46,6 +46,6 @@ public:
 	void CreateLinePSO(std::ostream& os, ID3D12Device* device);
 
 
-	D3D12_GRAPHICS_PIPELINE_STATE_DESC GetGraphicsPipelineStateDesc() { return graphicsPipelineStateDesc_; }
+	D3D12_GRAPHICS_PIPELINE_STATE_DESC GetGraphicsPipelineStateDesc()const { return graphicsPipelineStateDesc_; }
 	ID3D12PipelineState* GetGraphicsPipelineState() { return graphicsPipelineState_.Get(); }
 };
