@@ -17,7 +17,7 @@
 #include <wrl.h> 
 #include <xaudio2.h>
 
-#include <memory> // For std::unique_ptr
+#include <memory> 
 
 #include "externals/DirectXTex/DirectXTex.h"
 #include "externals/imgui/imgui.h"
@@ -76,7 +76,7 @@ int WINAPI WinMain(HINSTANCE, HINSTANCE, LPSTR, int) {
 	//std::unique_ptr<D3DResourceLeakChacker> leakChacker = std::make_unique<D3DResourceLeakChacker>(logStream);
 
 	//COMの初期化
-	CoInitializeEx(0, COINIT_MULTITHREADED);
+	HRESULT hr = CoInitializeEx(0, COINIT_MULTITHREADED);
 
 	SetUnhandledExceptionFilter(ExportDump);
 
@@ -97,9 +97,6 @@ int WINAPI WinMain(HINSTANCE, HINSTANCE, LPSTR, int) {
 	const int32_t kClientWidth = 1280;
 	const int32_t kClientHeight = 720;
 
-	//デバッグ用変数
-	HRESULT hr;
-
 	///クラス宣言///
 	//設定
 	WindowConfig window;
@@ -115,9 +112,7 @@ int WINAPI WinMain(HINSTANCE, HINSTANCE, LPSTR, int) {
 	//描画
 	std::unique_ptr<DebugCamera> debudCamera = std::make_unique<DebugCamera>();
 	std::unique_ptr<DepthStencil> depthStencil = std::make_unique<DepthStencil>();
-
-	std::unique_ptr<Draw> draw = std::make_unique<Draw>(command->GetCommandList());
-
+	std::unique_ptr<Draw> draw = std::make_unique<Draw>(command.get()->GetCommandList());
 	//フェンスやイベント、シグナル
 	GpuSyncManager gpuSyncManager;
 
@@ -127,7 +122,7 @@ int WINAPI WinMain(HINSTANCE, HINSTANCE, LPSTR, int) {
 	//ウィンドウサイズの設定//
 	window.DrawWindow(kClientWidth, kClientHeight);
 	//キーの初期化
-	input->Initialize(window.GeWc(), window.GetHwnd());
+	input->Initialize(window.GetWc(), window.GetHwnd());
 	//デバックカメラの初期化
 	debudCamera->Initialize();
 
@@ -217,7 +212,7 @@ int WINAPI WinMain(HINSTANCE, HINSTANCE, LPSTR, int) {
 	graphicsPipeState->PSOSetting(directXShaderCompiler, rootSignature.get(), rootParameter.get(),
 		sampler.get(), inputLayout.get(), blendState.get(), rasterizerState.get(), shaderCompile.get(), depthStencilState.get());
 	graphicsPipeState->CreatePSO(logStream, graphics->GetDevice());
-	
+
 	//----------------
 	//Line PSO
 	//----------------
@@ -449,14 +444,10 @@ int WINAPI WinMain(HINSTANCE, HINSTANCE, LPSTR, int) {
 
 			ID3D12DescriptorHeap* descriptorHeeps[] = { descriptorHeap->GetSrvDescriptorHeap() };
 			command->GetCommandList()->SetDescriptorHeaps(1, descriptorHeeps);
-			//command->GetCommandList()->SetPipelineState(graphicsPipeState->GetGraphicsPipelineState());//PSOを設定
-			//形状を設定。PSOに設定しているものとはまた別。同じものを設定すると考えておけばいい
-			command->GetCommandList()->IASetPrimitiveTopology(D3D_PRIMITIVE_TOPOLOGY_TRIANGLELIST);
+			
 			command->GetCommandList()->RSSetViewports(1, viewportScissor->GetViewport());//Viewportを設定
 			command->GetCommandList()->RSSetScissorRects(1, viewportScissor->GetScissorRect());//Sxirssorを設定
-			//RootSignatureを設定。POSに設定しているけど別途設定が必要
-			command->GetCommandList()->SetGraphicsRootSignature(rootSignature->GetRootSignature());
-			command->GetCommandList()->SetGraphicsRootConstantBufferView(3, directinalLight->GetDirectinalLightResource()->GetGPUVirtualAddress());
+			
 
 
 			command->GetCommandList()->SetPipelineState(lineGraphicsPipeState->GetGraphicsPipelineState());//PSOを設定
@@ -464,16 +455,26 @@ int WINAPI WinMain(HINSTANCE, HINSTANCE, LPSTR, int) {
 			command->GetCommandList()->IASetPrimitiveTopology(D3D10_PRIMITIVE_TOPOLOGY_LINELIST);
 			command->GetCommandList()->SetGraphicsRootSignature(linerootSignature->GetRootSignature());
 
-			//draw.get()->DrawLine(line.get());
+			draw.get()->DrawLine(line.get());
 			draw.get()->DrawGrid(grid.get());
+
+
+
+			command->GetCommandList()->SetPipelineState(graphicsPipeState->GetGraphicsPipelineState());//PSOを設定
+			//形状を設定。PSOに設定しているものとはまた別。同じものを設定すると考えておけばいい
+			command->GetCommandList()->IASetPrimitiveTopology(D3D_PRIMITIVE_TOPOLOGY_TRIANGLELIST);
+			//RootSignatureを設定。POSに設定しているけど別途設定が必要
+			command->GetCommandList()->SetGraphicsRootSignature(rootSignature->GetRootSignature());
+			command->GetCommandList()->SetGraphicsRootConstantBufferView(3, directinalLight->GetDirectinalLightResource()->GetGPUVirtualAddress());
+
 			//三角形の描画
-			//draw->DrawTriangle(triangle.get());
+			draw->DrawTriangle(triangle.get());
 			//スプライトの描画	
-			//draw.get()->DrawSprite(sprite.get());
+			draw.get()->DrawSprite(sprite.get());
 			//球の描画
-			//draw.get()->DrawShpere(sphere.get());
+			draw.get()->DrawShpere(sphere.get());
 			//objectの描画
-			//draw->DrawObj(model.get());
+			draw->DrawObj(model.get());
 
 
 
@@ -543,13 +544,11 @@ int WINAPI WinMain(HINSTANCE, HINSTANCE, LPSTR, int) {
 		fence->Release();
 		fence = nullptr;
 	}
-	
+
 	depthStencil.reset();
 
 	//COMの終了処理
 	CoUninitialize();
-
-
 
 	return 0;
 }

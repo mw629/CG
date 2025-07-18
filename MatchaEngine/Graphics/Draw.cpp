@@ -49,7 +49,7 @@ void Draw::DrawShpere(Sphere* sphere)
 	commandList_->SetGraphicsRootConstantBufferView(0, sphere->GetMatrial()->GetMaterialResource()->GetGPUVirtualAddress());
 	commandList_->SetGraphicsRootConstantBufferView(1, sphere->GetVertexResource()->GetGPUVirtualAddress());
 	commandList_->SetGraphicsRootDescriptorTable(2, sphere->GetTextureSrvHandleGPU());
-	commandList_->DrawInstanced(pow(sphere->GetSubdivision(), 2) * 6, 1, 0, 0);
+	commandList_->DrawInstanced(static_cast<UINT>(pow(sphere->GetSubdivision(), 2) * 6), 1, 0, 0);
 }
 
 void Draw::DrawTriangle(Triangle* triangle)

@@ -103,6 +103,11 @@ private:
 	std::unique_ptr<DepthStencilState> depthStencilState;
 	std::unique_ptr<GraphicsPipelineState> graphicsPipelineState;
 
+	std::unique_ptr<RootSignature> linerootSignature;
+	std::unique_ptr<RootParameter> linerootParameter;
+	std::unique_ptr<InputLayout> lineinputLayout;
+	std::unique_ptr<ShaderCompile> lineshaderCompile;
+	std::unique_ptr<GraphicsPipelineState> lineGraphicsPipeState;
 
 	std::unique_ptr<DirectinalLight> directinalLight;
 

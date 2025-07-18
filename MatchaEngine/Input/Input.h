@@ -10,14 +10,14 @@
 class Input  
 {  
 private:  
-	IDirectInput8* directInput_;  
-	HRESULT result;  
-	IDirectInputDevice8* keyboard;   
+	IDirectInput8* directInput_{};
+	HRESULT result{};
+	IDirectInputDevice8* keyboard{};
 	
 	BYTE key_[256] = {};  
 	BYTE prevKey_[256] = {};  
 
-	IDirectInputDevice8* mouse;  
+	IDirectInputDevice8* mouse{};
 
 	DIMOUSESTATE mouseState{};  
 	DIMOUSESTATE prevMouseState{};  
@@ -49,7 +49,7 @@ public:
 	bool FreeMouse(uint32_t key);  
 	//マウスの移動  
 	Vector2i GetMouseDelta() { return Vector2i(mouseState.lX, mouseState.lY); }  
-	int GetMouseWheel() { return mouseState.lZ; }  
+	int GetMouseWheel()const { return mouseState.lZ; }
 	
-	BYTE GetKey(int keyNum) { return key_[keyNum]; }  
+	BYTE GetKey(int keyNum)const { return key_[keyNum]; }
 };

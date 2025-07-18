@@ -9,10 +9,10 @@
 class Model
 {
 private:
-	ModelData modelData_;
-	Transform transform_;
-	MaterialFactory* material_;
-	D3D12_GPU_DESCRIPTOR_HANDLE textureSrvHandleGPU_;
+	ModelData modelData_{};
+	Transform transform_{};
+	MaterialFactory* material_{};
+	D3D12_GPU_DESCRIPTOR_HANDLE textureSrvHandleGPU_{};
 
 
 	Microsoft::WRL::ComPtr<ID3D12Resource> vertexResource_;
@@ -47,12 +47,12 @@ public:
 	void SetAlive(bool flag) { isAlive = flag; }
 
 	//getter
-	bool GetAlive() { return isAlive; }
-	Transform GetTransform() { return transform_; }
+	bool GetAlive() const { return isAlive; }
+	Transform GetTransform() const { return transform_; }
 	
 	ModelData GetModelData() { return modelData_; }
 	MaterialFactory* GetMatrial() { return material_; }
-	D3D12_GPU_DESCRIPTOR_HANDLE GetTextureSrvHandleGPU() { return textureSrvHandleGPU_; }
+	D3D12_GPU_DESCRIPTOR_HANDLE GetTextureSrvHandleGPU()const { return textureSrvHandleGPU_; }
 
 
 	D3D12_VERTEX_BUFFER_VIEW* GetVertexBufferView() { return &vertexBufferView_; }

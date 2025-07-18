@@ -8,7 +8,7 @@ class WindowConfig
 private:
 
 	WNDCLASS wc{};
-	HWND hwnd;
+	HWND hwnd{};
 
 public:
 	static LRESULT CALLBACK WindowProc(HWND hwnd, UINT msg, WPARAM wparam, LPARAM lparam);
@@ -17,9 +17,7 @@ public:
 
 	void DrawWindow(const int32_t kClientWidth, const int32_t kClientHeight);
 
-	WNDCLASS GeWc() { return wc; }
-	HWND GetHwnd() { return hwnd; }
-
-
+	WNDCLASS GetWc()const { return wc; }
+	HWND GetHwnd()const { return hwnd; }
 };
 

@@ -5,7 +5,7 @@ class GpuSyncManager
 private:
 	Microsoft::WRL::ComPtr<ID3D12Fence> fence = nullptr;
 	uint64_t fenceValue = 0;
-	HANDLE fenceEvent;
+	HANDLE fenceEvent{};
 	
 public:
 	void Initialize(ID3D12Device* device);

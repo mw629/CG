@@ -5,12 +5,10 @@
 
 
 MaterialFactory::~MaterialFactory(){
-	if (materialResource_) { // materialResource_がnullptrでないか確認
-		materialResource_->Unmap(0, nullptr); // materialData_ = nullptr; // Unmap後もnullptrにしておく
+	if (materialResource_) {
+		materialResource_->Unmap(0, nullptr);
 		materialResource_.Reset();
 	}
-	materialData_ = nullptr;
-	delete materialData_;
 }
 
 void MaterialFactory::CreateMatrial(ID3D12Device* device,bool Lighting)
