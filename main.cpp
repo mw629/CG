@@ -179,60 +179,9 @@ int WINAPI WinMain(HINSTANCE, HINSTANCE, LPSTR, int) {
 	//----------------
 	// PSO
 	//----------------
-	DirectXShaderCompiler directXShaderCompiler;
-	std::unique_ptr<RootSignature> rootSignature = std::make_unique<RootSignature>();
-	std::unique_ptr<RootParameter> rootParameter = std::make_unique<RootParameter>();
-	std::unique_ptr<Sampler> sampler = std::make_unique<Sampler>();
-	std::unique_ptr<InputLayout> inputLayout = std::make_unique<InputLayout>();
-	std::unique_ptr<BlendState> blendState = std::make_unique<BlendState>();
-	std::unique_ptr<RasterizerState> rasterizerState = std::make_unique<RasterizerState>();
-	std::unique_ptr<ShaderCompile> shaderCompile = std::make_unique<ShaderCompile>();
-	std::unique_ptr<DepthStencilState> depthStencilState = std::make_unique<DepthStencilState>();
+	
 	std::unique_ptr<GraphicsPipelineState> graphicsPipeState = std::make_unique<GraphicsPipelineState>();
-	//DXCの初期化//
-	directXShaderCompiler.CreateDXC();
-	//DescriptorRange//
-	//RootParameter//
-	rootParameter->CreateRootParameter(rootSignature->GetDescriptionRootSignature());
-	//Samplerの設定//
-	sampler->CreateSampler(rootSignature->GetDescriptionRootSignature());
-	//シリアライズしてバイナリする
-	rootSignature->CreateRootSignature(logStream, graphics->GetDevice());
-	//InputLayoutの設定を行う//
-	inputLayout->CreateInputLayout();
-	//BlendStateの設定を行う//
-	blendState->CreateBlendDesc();
-	//RasterizerStateの設定を行う//
-	rasterizerState->CreateRasterizerState();
-	//ShaderをCompileする//
-	shaderCompile->CreateShaderCompile(logStream, directXShaderCompiler.GetDxcUtils(), directXShaderCompiler.GetDxcCompiler(), directXShaderCompiler.GetIncludeHandler());
-	//DepthStencilStateの設定//
-	depthStencilState->CreateDepthStencilState();
-	//PSO
-	graphicsPipeState->PSOSetting(directXShaderCompiler, rootSignature.get(), rootParameter.get(),
-		sampler.get(), inputLayout.get(), blendState.get(), rasterizerState.get(), shaderCompile.get(), depthStencilState.get());
-	graphicsPipeState->CreatePSO(logStream, graphics->GetDevice());
-
-	//----------------
-	//Line PSO
-	//----------------
-	std::unique_ptr<RootSignature> linerootSignature = std::make_unique<RootSignature>();
-	std::unique_ptr<RootParameter> linerootParameter = std::make_unique<RootParameter>();
-	std::unique_ptr<InputLayout> lineinputLayout = std::make_unique<InputLayout>();
-	std::unique_ptr<ShaderCompile> lineshaderCompile = std::make_unique<ShaderCompile>();
-	std::unique_ptr<GraphicsPipelineState> lineGraphicsPipeState = std::make_unique<GraphicsPipelineState>(); //
-	//RootParameter//
-	linerootParameter->CreateLineRootParameter(linerootSignature->GetDescriptionRootSignature());
-	//シリアライズしてバイナリする
-	linerootSignature->CreateRootSignature(logStream, graphics->GetDevice());
-	//InputLayoutの設定を行う//
-	lineinputLayout->CreateLineInputLayout();
-	//ShaderをCompileする//
-	lineshaderCompile->CreateLineShaderCompile(logStream, directXShaderCompiler.GetDxcUtils(), directXShaderCompiler.GetDxcCompiler(), directXShaderCompiler.GetIncludeHandler());
-	//PSO
-	lineGraphicsPipeState->PSOSetting(directXShaderCompiler, linerootSignature.get(), linerootParameter.get(),
-		sampler.get(), lineinputLayout.get(), blendState.get(), rasterizerState.get(), lineshaderCompile.get(), depthStencilState.get());
-	lineGraphicsPipeState->CreateLinePSO(logStream, graphics->GetDevice());
+	graphicsPipeState.get()->CreateALLPSO(logStream, graphics.get()->GetDevice());
 
 
 	//Material用のResourceを作る//
@@ -450,10 +399,11 @@ int WINAPI WinMain(HINSTANCE, HINSTANCE, LPSTR, int) {
 			
 
 
-			command->GetCommandList()->SetPipelineState(lineGraphicsPipeState->GetGraphicsPipelineState());//PSOを設定
+			command->GetCommandList()->SetPipelineState(graphicsPipeState->GetLineGraphicsPipelineState());//PSOを設定
 			//形状を設定。PSOに設定しているものとはまた別。同じものを設定すると考えておけばいい
-			command->GetCommandList()->IASetPrimitiveTopology(D3D10_PRIMITIVE_TOPOLOGY_LINELIST);
-			command->GetCommandList()->SetGraphicsRootSignature(linerootSignature->GetRootSignature());
+			command->GetCommandList()->IASetPrimitiveTopology(D3D_PRIMITIVE_TOPOLOGY_TRIANGLELIST);
+			//RootSignatureを設定。POSに設定しているけど別途設定が必要
+			command->GetCommandList()->SetGraphicsRootSignature(graphicsPipeState.get()->GetLineRootSignature()->GetRootSignature());
 
 			draw.get()->DrawLine(line.get());
 			draw.get()->DrawGrid(grid.get());
@@ -464,7 +414,7 @@ int WINAPI WinMain(HINSTANCE, HINSTANCE, LPSTR, int) {
 			//形状を設定。PSOに設定しているものとはまた別。同じものを設定すると考えておけばいい
 			command->GetCommandList()->IASetPrimitiveTopology(D3D_PRIMITIVE_TOPOLOGY_TRIANGLELIST);
 			//RootSignatureを設定。POSに設定しているけど別途設定が必要
-			command->GetCommandList()->SetGraphicsRootSignature(rootSignature->GetRootSignature());
+			command->GetCommandList()->SetGraphicsRootSignature(graphicsPipeState.get()->GetRootSignature()->GetRootSignature());
 			command->GetCommandList()->SetGraphicsRootConstantBufferView(3, directinalLight->GetDirectinalLightResource()->GetGPUVirtualAddress());
 
 			//三角形の描画

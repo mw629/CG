@@ -1,44 +1,72 @@
 #include "GraphicsPipelineState.h"
-
+#include "../../Core/LogHandler.h"
 #include <cassert>
 
 
 
-void GraphicsPipelineState::PSOSetting(DirectXShaderCompiler directXShaderCompiler, RootSignature* rootSignature, RootParameter* rootParameter, Sampler* sampler, InputLayout* inputLayout, BlendState* blendState, RasterizerState* rasterizerState, ShaderCompile* shaderCompile, DepthStencilState* depthStencilState)
+GraphicsPipelineState::GraphicsPipelineState()
 {
+	rootSignature_ = std::make_unique<RootSignature>();
+	rootParameter_ = std::make_unique<RootParameter>();
+	sampler_ = std::make_unique<Sampler>();
+	inputLayout_ = std::make_unique<InputLayout>();
+	blendState_ = std::make_unique<BlendState>();
+	rasterizerState_ = std::make_unique<RasterizerState>();
+	shaderCompile_ = std::make_unique<ShaderCompile>();
+	depthStencilState_ = std::make_unique<DepthStencilState>();
+	
+    lineRootSignature_ = std::make_unique<RootSignature>();
+	lineRootParameter_ = std::make_unique<RootParameter>();
+	lineSampler_ = std::make_unique<Sampler>();
+	lineInputLayout_ = std::make_unique<InputLayout>();
+	lineShaderCompile_ = std::make_unique<ShaderCompile>();
+}
+
+void GraphicsPipelineState::CreateALLPSO(std::ostream& os, ID3D12Device* device)
+{
+	CreatePSO(os, device);
+	CreateLinePSO(os, device);
+}
+
+void GraphicsPipelineState::PSOSetting(std::ostream& os, ID3D12Device* device)
+{
+
+	Log(os, "///PSOの生成///\n");
 	//DXCの初期化//
-	directXShaderCompiler_ = directXShaderCompiler;
-
-	//DescriptorRange//
+	directXShaderCompiler_.CreateDXC();
+	Log(os, "DXCの初期化完了\n");
 	//RootParameter//
-	rootParameter_ = rootParameter;
-
+	rootParameter_->CreateRootParameter(rootSignature_->GetDescriptionRootSignature());
+	Log(os, "RootParameterの生成完了\n");
 	//Samplerの設定//
-	sampler_ = sampler;
-
+	sampler_->CreateSampler(rootSignature_->GetDescriptionRootSignature());
+	Log(os, "Samplerの生成完了\n");
 	//シリアライズしてバイナリする
-	rootSignature_ = rootSignature;
-
+	rootSignature_->CreateRootSignature(os, device);
+	Log(os, "RootSignatureの生成完了\n");
 	//InputLayoutの設定を行う//
-	inputLayout_ = inputLayout;
-
+	inputLayout_->CreateInputLayout();
+	Log(os, "InputLayoutの生成完了\n");
 	//BlendStateの設定を行う//
-	blendState_ = blendState;
-
+	blendState_->CreateBlendDesc();
+	Log(os, "BlendStateの生成完了\n");
 	//RasterizerStateの設定を行う//
-	rasterizerState_ = rasterizerState;
-
+	rasterizerState_->CreateRasterizerState();
+	Log(os, "RasterizerStateの生成完了\n");
 	//ShaderをCompileする//
-	shaderCompile_ = shaderCompile;
-
+	shaderCompile_->CreateShaderCompile(os, directXShaderCompiler_.GetDxcUtils(), directXShaderCompiler_.GetDxcCompiler(), directXShaderCompiler_.GetIncludeHandler());
+	Log(os, "ShaderCompileの生成完了\n");
 	//DepthStencilStateの設定//
-	depthStencilState_ = depthStencilState;
+	depthStencilState_->CreateDepthStencilState();
+	Log(os, "DepthStencilStateの生成完了\n");
+
 
 }
 
 void GraphicsPipelineState::CreatePSO(std::ostream& os, ID3D12Device* device)
 {
 	//PSOを生成する//
+	PSOSetting(os, device);
 
 	graphicsPipelineStateDesc_.pRootSignature = rootSignature_->GetRootSignature();//RootSignature
 	graphicsPipelineStateDesc_.InputLayout = inputLayout_->GetInputLayoutDesc();//InputLayout
@@ -67,22 +95,41 @@ void GraphicsPipelineState::CreatePSO(std::ostream& os, ID3D12Device* device)
 	hr_ = device->CreateGraphicsPipelineState(&graphicsPipelineStateDesc_,
 		IID_PPV_ARGS(&graphicsPipelineState_));
 	assert(SUCCEEDED(hr_));
+
+	Log(os, "///PSOの生成///\n");
+}
+
+void GraphicsPipelineState::LinePSOSetting(std::ostream& os, ID3D12Device* device)
+{
+
+	Log(os, "///Line用のPSOの生成///\n");
+	//RootParameter//
+	lineRootParameter_->CreateLineRootParameter(rootSignature_->GetDescriptionRootSignature());
+	Log(os, "Line用のRootParameterの生成完了\n");
+	//シリアライズしてバイナリする
+	lineRootSignature_->CreateRootSignature(os, device);
+	Log(os, "Line用のRootSignatureの生成完了\n");
+	//InputLayoutの設定を行う//
+	lineInputLayout_->CreateLineInputLayout();
+	Log(os, "Line用のInputLayoutの生成完了\n");
+	//ShaderをCompileする//
+	lineShaderCompile_->CreateLineShaderCompile(os, directXShaderCompiler_.GetDxcUtils(), directXShaderCompiler_.GetDxcCompiler(), directXShaderCompiler_.GetIncludeHandler());
+	Log(os, "Line用のShaderCompileの生成完了\n");
+
 }
 
 void GraphicsPipelineState::CreateLinePSO(std::ostream& os, ID3D12Device* device)
 {
 	//PSOを生成する//
-
-	graphicsPipelineStateDesc_.pRootSignature = rootSignature_->GetRootSignature();//RootSignature
-	graphicsPipelineStateDesc_.InputLayout = inputLayout_->GetLineInputLayoutDesc();//InputLayout
-	graphicsPipelineStateDesc_.VS = { shaderCompile_->GetVertexShaderBlob()->GetBufferPointer(),
-	 shaderCompile_->GetVertexShaderBlob()->GetBufferSize() };//VertexShader
-	graphicsPipelineStateDesc_.PS = { shaderCompile_->GetPixelShaderBlob()->GetBufferPointer(),
-	shaderCompile_->GetPixelShaderBlob()->GetBufferSize() };//PixelShader
+	LinePSOSetting(os,device);
+	graphicsPipelineStateDesc_.pRootSignature = lineRootSignature_->GetRootSignature();//RootSignature
+	graphicsPipelineStateDesc_.InputLayout = lineInputLayout_->GetInputLayoutDesc();//InputLayout
+	graphicsPipelineStateDesc_.VS = { lineShaderCompile_->GetVertexShaderBlob()->GetBufferPointer(),
+	 lineShaderCompile_->GetVertexShaderBlob()->GetBufferSize() };//VertexShader
+	graphicsPipelineStateDesc_.PS = { lineShaderCompile_->GetPixelShaderBlob()->GetBufferPointer(),
+	lineShaderCompile_->GetPixelShaderBlob()->GetBufferSize() };//PixelShader
 	graphicsPipelineStateDesc_.BlendState = blendState_->GetBlendDesc();//BlenderState
 	graphicsPipelineStateDesc_.RasterizerState = rasterizerState_->GetRasterizerDesc();//RasterizerState
-
-	graphicsPipelineStateDesc_.InputLayout = inputLayout_->GetInputLayoutDesc();//InputLayout
 
 	//書き込むRTVの情報
 	graphicsPipelineStateDesc_.NumRenderTargets = 1;
@@ -102,4 +149,6 @@ void GraphicsPipelineState::CreateLinePSO(std::ostream& os, ID3D12Device* device
 	hr_ = device->CreateGraphicsPipelineState(&graphicsPipelineStateDesc_,
 		IID_PPV_ARGS(&graphicsPipelineState_));
 	assert(SUCCEEDED(hr_));
+
+	Log(os, "///Line用のPSOの生成///\n");
 }

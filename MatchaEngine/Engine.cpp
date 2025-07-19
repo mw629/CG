@@ -88,76 +88,7 @@ void Engine::Setting()
 
 	depthStencil->CreateDepthStencil(graphics->GetDevice(), kClientWidth_, kClientHeight_);
 
-	rootSignature = std::make_unique<RootSignature>();
-	rootParameter = std::make_unique<RootParameter>();
-	sampler = std::make_unique<Sampler>();
-	inputLayout = std::make_unique<InputLayout>();
-	blendState = std::make_unique<BlendState>();
-	rasterizerState = std::make_unique<RasterizerState>();
-	shaderCompile = std::make_unique<ShaderCompile>();
-	depthStencilState = std::make_unique<DepthStencilState>();
-	graphicsPipelineState = std::make_unique<GraphicsPipelineState>();
-	
-	linerootSignature = std::make_unique<RootSignature>();
-	linerootParameter = std::make_unique<RootParameter>();
-	lineinputLayout = std::make_unique<InputLayout>();
-	lineshaderCompile = std::make_unique<ShaderCompile>();
-	lineGraphicsPipeState = std::make_unique<GraphicsPipelineState>(); //ate;
-
-	//DXCの初期化//
-	directXShaderCompiler.CreateDXC();
-
-	//DescriptorRange//
-	//RootParameter//
-	rootParameter->CreateRootParameter(rootSignature->GetDescriptionRootSignature());
-
-	//Samplerの設定//
-	sampler->CreateSampler(rootSignature->GetDescriptionRootSignature());
-
-	//シリアライズしてバイナリする
-	rootSignature->CreateRootSignature(logStream, graphics->GetDevice());
-
-	//InputLayoutの設定を行う//
-
-	inputLayout->CreateInputLayout();
-
-	//BlendStateの設定を行う//
-
-	blendState->CreateBlendDesc();
-
-	//RasterizerStateの設定を行う//
-
-	rasterizerState->CreateRasterizerState();
-
-	//ShaderをCompileする//
-
-	shaderCompile->CreateShaderCompile(logStream, directXShaderCompiler.GetDxcUtils(), directXShaderCompiler.GetDxcCompiler(), directXShaderCompiler.GetIncludeHandler());
-
-
-	//DepthStencilStateの設定//
-
-	depthStencilState->CreateDepthStencilState();
-
-
-	graphicsPipelineState->PSOSetting(directXShaderCompiler, rootSignature.get(), rootParameter.get(),
-		sampler.get(), inputLayout.get(), blendState.get(), rasterizerState.get(), shaderCompile.get(), depthStencilState.get());
-	graphicsPipelineState->CreatePSO(logStream, graphics->GetDevice());
-
-	//Line PSO
-	 
-	//RootParameter//
-	linerootParameter->CreateLineRootParameter(linerootSignature->GetDescriptionRootSignature());
-	//シリアライズしてバイナリする
-	linerootSignature->CreateRootSignature(logStream, graphics->GetDevice());
-	//InputLayoutの設定を行う//
-	lineinputLayout->CreateLineInputLayout();
-	//ShaderをCompileする//
-	lineshaderCompile->CreateLineShaderCompile(logStream, directXShaderCompiler.GetDxcUtils(), directXShaderCompiler.GetDxcCompiler(), directXShaderCompiler.GetIncludeHandler());
-	//PSO
-	lineGraphicsPipeState->PSOSetting(directXShaderCompiler, linerootSignature.get(), linerootParameter.get(),
-		sampler.get(), lineinputLayout.get(), blendState.get(), rasterizerState.get(), lineshaderCompile.get(), depthStencilState.get());
-	lineGraphicsPipeState->CreateLinePSO(logStream, graphics->GetDevice());
-
+		
 
 
 	directinalLight = std::make_unique<DirectinalLight>();
