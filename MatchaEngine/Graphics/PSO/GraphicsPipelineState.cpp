@@ -17,7 +17,6 @@ GraphicsPipelineState::GraphicsPipelineState()
 	
     lineRootSignature_ = std::make_unique<RootSignature>();
 	lineRootParameter_ = std::make_unique<RootParameter>();
-	lineSampler_ = std::make_unique<Sampler>();
 	lineInputLayout_ = std::make_unique<InputLayout>();
 	lineShaderCompile_ = std::make_unique<ShaderCompile>();
 }
@@ -104,7 +103,7 @@ void GraphicsPipelineState::LinePSOSetting(std::ostream& os, ID3D12Device* devic
 
 	Log(os, "///Line用のPSOの生成///\n");
 	//RootParameter//
-	lineRootParameter_->CreateLineRootParameter(rootSignature_->GetDescriptionRootSignature());
+	lineRootParameter_->CreateLineRootParameter(lineRootSignature_->GetDescriptionRootSignature());
 	Log(os, "Line用のRootParameterの生成完了\n");
 	//シリアライズしてバイナリする
 	lineRootSignature_->CreateRootSignature(os, device);
@@ -122,33 +121,35 @@ void GraphicsPipelineState::CreateLinePSO(std::ostream& os, ID3D12Device* device
 {
 	//PSOを生成する//
 	LinePSOSetting(os,device);
-	graphicsPipelineStateDesc_.pRootSignature = lineRootSignature_->GetRootSignature();//RootSignature
-	graphicsPipelineStateDesc_.InputLayout = lineInputLayout_->GetInputLayoutDesc();//InputLayout
-	graphicsPipelineStateDesc_.VS = { lineShaderCompile_->GetVertexShaderBlob()->GetBufferPointer(),
-	 lineShaderCompile_->GetVertexShaderBlob()->GetBufferSize() };//VertexShader
-	graphicsPipelineStateDesc_.PS = { lineShaderCompile_->GetPixelShaderBlob()->GetBufferPointer(),
-	lineShaderCompile_->GetPixelShaderBlob()->GetBufferSize() };//PixelShader
-	graphicsPipelineStateDesc_.BlendState = blendState_->GetBlendDesc();//BlenderState
-	graphicsPipelineStateDesc_.RasterizerState = rasterizerState_->GetRasterizerDesc();//RasterizerState
 
+	lineGraphicsPipelineStateDesc_.pRootSignature = lineRootSignature_->GetRootSignature();//RootSignature
+	lineGraphicsPipelineStateDesc_.InputLayout = lineInputLayout_->GetLineInputLayoutDesc();//InputLayout
+	lineGraphicsPipelineStateDesc_.VS = { lineShaderCompile_->GetVertexShaderBlob()->GetBufferPointer(),
+	 lineShaderCompile_->GetVertexShaderBlob()->GetBufferSize() };//VertexShader
+	lineGraphicsPipelineStateDesc_.PS = { lineShaderCompile_->GetPixelShaderBlob()->GetBufferPointer(),
+	lineShaderCompile_->GetPixelShaderBlob()->GetBufferSize() };//PixelShader
+	lineGraphicsPipelineStateDesc_.BlendState = blendState_->GetBlendDesc();//BlenderState
+	lineGraphicsPipelineStateDesc_.RasterizerState = rasterizerState_->GetRasterizerDesc();//RasterizerState
 	//書き込むRTVの情報
-	graphicsPipelineStateDesc_.NumRenderTargets = 1;
-	graphicsPipelineStateDesc_.RTVFormats[0] = DXGI_FORMAT_R8G8B8A8_UNORM_SRGB;
-	//利用するトポロジ（形状）のタイプ。
-	graphicsPipelineStateDesc_.PrimitiveTopologyType =
+	lineGraphicsPipelineStateDesc_.NumRenderTargets = 1;
+	lineGraphicsPipelineStateDesc_.RTVFormats[0] = DXGI_FORMAT_R8G8B8A8_UNORM_SRGB;
+	//利用するトポロジ（形状）のタイプ。三角形
+	lineGraphicsPipelineStateDesc_.PrimitiveTopologyType =
 		D3D12_PRIMITIVE_TOPOLOGY_TYPE_LINE;
 	//どのように画面に色を打ち込むのかの設定(気にしなくていい)
-	graphicsPipelineStateDesc_.SampleDesc.Count = 1;
-	graphicsPipelineStateDesc_.SampleMask = D3D12_DEFAULT_SAMPLE_MASK;
+	lineGraphicsPipelineStateDesc_.SampleDesc.Count = 1;
+	lineGraphicsPipelineStateDesc_.SampleMask = D3D12_DEFAULT_SAMPLE_MASK;
 
 	//作成したらPSOに代入、DSCのFormatを設定する//
-	graphicsPipelineStateDesc_.DepthStencilState = depthStencilState_->GetDepthStencilDesc();
-	graphicsPipelineStateDesc_.DSVFormat = DXGI_FORMAT_D24_UNORM_S8_UINT;
+	lineGraphicsPipelineStateDesc_.DepthStencilState = depthStencilState_->GetDepthStencilDesc();
+	lineGraphicsPipelineStateDesc_.DSVFormat = DXGI_FORMAT_D24_UNORM_S8_UINT;
 
 	//実際に生成
-	hr_ = device->CreateGraphicsPipelineState(&graphicsPipelineStateDesc_,
-		IID_PPV_ARGS(&graphicsPipelineState_));
+
+	hr_ = device->CreateGraphicsPipelineState(&lineGraphicsPipelineStateDesc_,
+		IID_PPV_ARGS(&lineGraphicsPipelineState_));
 	assert(SUCCEEDED(hr_));
+
 
 	Log(os, "///Line用のPSOの生成///\n");
 }

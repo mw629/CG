@@ -28,7 +28,6 @@ private:
 
 	std::unique_ptr<RootSignature> lineRootSignature_{};
 	std::unique_ptr<RootParameter> lineRootParameter_{};
-	std::unique_ptr<Sampler> lineSampler_{};
 	std::unique_ptr<InputLayout> lineInputLayout_{};
 	std::unique_ptr<ShaderCompile> lineShaderCompile_;
 

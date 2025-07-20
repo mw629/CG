@@ -295,11 +295,18 @@ int WINAPI WinMain(HINSTANCE, HINSTANCE, LPSTR, int) {
 			ImGui_ImplWin32_NewFrame();
 			ImGui::NewFrame();
 
-
 			//コマンドを積み込んで確定させる//
-
 			resourceBarrierHelper->Transition(command->GetCommandList(), swapChain.get());
+			renderTargetView->SetAndClear(command->GetCommandList(), swapChain->GetSwapChain()->GetCurrentBackBufferIndex());
+			//DSVを設定する
+			depthStencil->SetDSV(command->GetCommandList(), renderTargetView->GetRtvHandles(swapChain->GetSwapChain()->GetCurrentBackBufferIndex()));
+			//コマンドを積む//
 
+			ID3D12DescriptorHeap* descriptorHeeps[] = { descriptorHeap->GetSrvDescriptorHeap() };
+			command->GetCommandList()->SetDescriptorHeaps(1, descriptorHeeps);
+
+			command->GetCommandList()->RSSetViewports(1, viewportScissor->GetViewport());//Viewportを設定
+			command->GetCommandList()->RSSetScissorRects(1, viewportScissor->GetScissorRect());//Sxirssorを設定
 
 			//ゲーム処理
 
@@ -384,24 +391,11 @@ int WINAPI WinMain(HINSTANCE, HINSTANCE, LPSTR, int) {
 			ImGui::Render();
 
 
-			renderTargetView->SetAndClear(command->GetCommandList(), swapChain->GetSwapChain()->GetCurrentBackBufferIndex());
-			//DSVを設定する
-			depthStencil->SetDSV(command->GetCommandList(), renderTargetView->GetRtvHandles(swapChain->GetSwapChain()->GetCurrentBackBufferIndex()));
-
-
-			//コマンドを積む//
-
-			ID3D12DescriptorHeap* descriptorHeeps[] = { descriptorHeap->GetSrvDescriptorHeap() };
-			command->GetCommandList()->SetDescriptorHeaps(1, descriptorHeeps);
 			
-			command->GetCommandList()->RSSetViewports(1, viewportScissor->GetViewport());//Viewportを設定
-			command->GetCommandList()->RSSetScissorRects(1, viewportScissor->GetScissorRect());//Sxirssorを設定
-			
-
 
 			command->GetCommandList()->SetPipelineState(graphicsPipeState->GetLineGraphicsPipelineState());//PSOを設定
 			//形状を設定。PSOに設定しているものとはまた別。同じものを設定すると考えておけばいい
-			command->GetCommandList()->IASetPrimitiveTopology(D3D_PRIMITIVE_TOPOLOGY_TRIANGLELIST);
+			command->GetCommandList()->IASetPrimitiveTopology(D3D10_PRIMITIVE_TOPOLOGY_LINELIST);
 			//RootSignatureを設定。POSに設定しているけど別途設定が必要
 			command->GetCommandList()->SetGraphicsRootSignature(graphicsPipeState.get()->GetLineRootSignature()->GetRootSignature());
 
@@ -443,10 +437,7 @@ int WINAPI WinMain(HINSTANCE, HINSTANCE, LPSTR, int) {
 			hr = command->GetCommandList()->Close();
 			assert(SUCCEEDED(hr));
 
-
 			//コマンドをキックする//
-
-
 			//GPU2コマンドリストの実行を行わせる
 			ID3D12CommandList* commandLists[] = { command->GetCommandList() };
 			command->GetCommandQueue()->ExecuteCommandLists(1, commandLists);
