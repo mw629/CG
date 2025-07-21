@@ -29,15 +29,17 @@ public:
 	Sprite();
 	~Sprite();
 
+	static void SetDevice(ID3D12Device* device);
+
 	void Initialize(MaterialFactory* material, D3D12_GPU_DESCRIPTOR_HANDLE textureSrvHandleGPU);
 
-	void CreateVertexData(ID3D12Device* device);
+	void CreateVertexData();
 
-	void CreateIndexResource(ID3D12Device* device);
+	void CreateIndexResource();
 
-	void CreateWVP(ID3D12Device* device);
+	void CreateWVP();
 
-	void CreateSprite(ID3D12Device* device);
+	void CreateSprite();
 
 	void SetWvp();
 

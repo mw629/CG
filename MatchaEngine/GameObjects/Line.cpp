@@ -3,6 +3,17 @@
 #include "Math/Calculation.h"       // 行列計算関数 (IdentityMatrixなど)
 #include <cassert>                  // アサート用
 
+namespace {
+	ID3D12Device* device_;
+}
+
+
+void Line::SetDevice(ID3D12Device* device)
+{
+	device_ = device;
+}
+
+
 Line::~Line(){
 	// MapしたポインタをUnmapする
 	if (vertexData_) {
@@ -20,10 +31,10 @@ Line::~Line(){
 
 
 
-void Line::CreateVertexData(ID3D12Device* device)
+void Line::CreateVertexData()
 {
 	//VertexResourceを生成する//
-	vertexResource_ = GraphicsDevice::CreateBufferResource(device, sizeof(LineVertexData) * 2);
+	vertexResource_ = GraphicsDevice::CreateBufferResource(device_, sizeof(LineVertexData) * 2);
 	//頂点バッファビューを作成する
 	//リソースの先頭のアドレスから使う
 	vertexBufferView_.BufferLocation = vertexResource_->GetGPUVirtualAddress();
@@ -41,9 +52,9 @@ void Line::CreateVertexData(ID3D12Device* device)
 	vertexData_[1] = vertex_[1];
 }
 
-void Line::CreateWVP(ID3D12Device* device) {
+void Line::CreateWVP() {
 	//WVP用のリソースを作る
-	wvpResource_ = GraphicsDevice::CreateBufferResource(device, sizeof(LineTransformationMatrix));
+	wvpResource_ = GraphicsDevice::CreateBufferResource(device_, sizeof(LineTransformationMatrix));
 	//
 	wvpData_ = nullptr;
 	//
@@ -54,10 +65,10 @@ void Line::CreateWVP(ID3D12Device* device) {
 
 
 
-void Line::CreateLine(ID3D12Device* device)
+void Line::CreateLine()
 {
-	CreateVertexData(device);
-	CreateWVP(device);
+	CreateVertexData();
+	CreateWVP();
 }
 
 void Line::SetWvp(Matrix4x4 viewMatrix)

@@ -36,7 +36,8 @@ Engine::Engine(int32_t kClientWidth, int32_t kClientHeight)
 	//描画
 	debudCamera = std::make_unique<DebugCamera>();
 	depthStencil = std::make_unique<DepthStencil>();
-	draw = std::make_unique<Draw>(command->GetCommandList());
+	draw = std::make_unique<Draw>();
+	textureLoader = std::make_unique<TextureLoader>();
 	//バリア
 	resourceBarrierHelper = std::make_unique<ResourceBarrierHelper>();
 
@@ -101,12 +102,37 @@ void Engine::Setting()
 	//シーザー矩形
 	viewportScissor->CreateSxissor();
 
-	ID3D12DescriptorHeap* descriptorHeeps[] = { descriptorHeap->GetSrvDescriptorHeap() };
+	descriptorHeeps[0] = { descriptorHeap->GetSrvDescriptorHeap() };
+
+	IMGUI_CHECKVERSION();
+	ImGui::CreateContext();
+	ImGui::StyleColorsDark();
+	ImGui_ImplWin32_Init(window.GetHwnd());
+	ImGui_ImplDX12_Init(graphics->GetDevice(),
+		swapChain->GetSwapChainDesc().BufferCount,
+		renderTargetView->GetRtvDesc().Format,
+		descriptorHeap->GetSrvDescriptorHeap(),
+		descriptorHeap->GetSrvDescriptorHeap()->GetCPUDescriptorHandleForHeapStart(),
+		descriptorHeap->GetSrvDescriptorHeap()->GetGPUDescriptorHandleForHeapStart());
+
+	Draw::Initialize(command.get()->GetCommandList());
+	Texture::Initalize(graphics->GetDevice(), command->GetCommandList(), descriptorHeap.get(), textureLoader.get());
+	MaterialFactory::SetDevice(graphics.get()->GetDevice());
+	Model::SetDevice(graphics.get()->GetDevice());
+	Triangle::SetDevice(graphics.get()->GetDevice());
+	Sprite::SetDevice(graphics.get()->GetDevice());
+	Sphere::SetDevice(graphics.get()->GetDevice());
+
 }
 
 void Engine::PreDraw()
 {
-
+	command->GetCommandList()->SetPipelineState(graphicsPipelineState->GetGraphicsPipelineState());//PSOを設定
+	//形状を設定。PSOに設定しているものとはまた別。同じものを設定すると考えておけばいい
+	command->GetCommandList()->IASetPrimitiveTopology(D3D_PRIMITIVE_TOPOLOGY_TRIANGLELIST);
+	//RootSignatureを設定。POSに設定しているけど別途設定が必要
+	command->GetCommandList()->SetGraphicsRootSignature(graphicsPipelineState.get()->GetRootSignature()->GetRootSignature());
+	command->GetCommandList()->SetGraphicsRootConstantBufferView(3, directinalLight->GetDirectinalLightResource()->GetGPUVirtualAddress());
 }
 
 void Engine::PostDraw()
@@ -122,16 +148,6 @@ void Engine::LinePreDraw()
 	command.get()->GetCommandList()->SetGraphicsRootSignature(graphicsPipelineState.get()->GetLineRootSignature()->GetRootSignature());
 }
 
-void Engine::LinePostDraw()
-{
-	command->GetCommandList()->SetPipelineState(graphicsPipelineState->GetGraphicsPipelineState());//PSOを設定
-	//形状を設定。PSOに設定しているものとはまた別。同じものを設定すると考えておけばいい
-	command->GetCommandList()->IASetPrimitiveTopology(D3D_PRIMITIVE_TOPOLOGY_TRIANGLELIST);
-	//RootSignatureを設定。POSに設定しているけど別途設定が必要
-	command->GetCommandList()->SetGraphicsRootSignature(graphicsPipelineState.get()->GetRootSignature()->GetRootSignature());
-	command->GetCommandList()->SetGraphicsRootConstantBufferView(3, directinalLight->GetDirectinalLightResource()->GetGPUVirtualAddress());
-
-}
 
 void Engine::NewFrame() {
 	ImGui_ImplDX12_NewFrame();
@@ -150,6 +166,9 @@ void Engine::NewFrame() {
 
 	command->GetCommandList()->RSSetViewports(1, viewportScissor->GetViewport());//Viewportを設定
 	command->GetCommandList()->RSSetScissorRects(1, viewportScissor->GetScissorRect());//Sxirssorを設定
+
+	input.get()->Updata();
+
 }
 
 void Engine::EndFrame() {
@@ -175,5 +194,17 @@ void Engine::EndFrame() {
 	swapChain->GetSwapChain()->Present(1, 0);
 }
 
+void Engine::End() {
+	//ImGuiの終了処理
+	ImGui_ImplDX12_Shutdown();
+	ImGui_ImplWin32_Shutdown();
+	ImGui::DestroyContext();
 
+
+	//ウィンドウを閉じる
+	CloseWindow(window.GetHwnd());
+
+	//COMの終了処理
+	CoUninitialize();
+}
 

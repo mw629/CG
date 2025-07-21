@@ -12,7 +12,9 @@ private:
 public:  
     ~MaterialFactory();
 
-    void CreateMatrial(ID3D12Device* device, bool Lighting);  
+    static void SetDevice(ID3D12Device* device);
+
+    void CreateMatrial(bool Lighting);  
 
     ID3D12Resource* GetMaterialResource() { return materialResource_.Get(); }  
     Material* GetMaterialData() { return materialData_; }  

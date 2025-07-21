@@ -29,17 +29,18 @@ private:
 public:
 	~Model();
 
+	static void SetDevice(ID3D12Device* device);
 
 	void Initialize(ModelData modelData, MaterialFactory* matrial, D3D12_GPU_DESCRIPTOR_HANDLE textureSrvHandleGPU);
 
-	void CreateVertexData(ID3D12Device* device);
-	void CreateWVP(ID3D12Device* device);
+	void CreateVertexData();
+	void CreateWVP();
 
 	
 	void SetWvp(Matrix4x4 viewMatrix);
 	void SetTransform(Transform transform);
 
-	void CreateModel(ID3D12Device* device);
+	void CreateModel();
 
 
 	

@@ -22,13 +22,15 @@ private:
 public:
 	~Triangle();
 
+	static void SetDevice(ID3D12Device* device);
+
 	void Initialize(MaterialFactory* matrial, D3D12_GPU_DESCRIPTOR_HANDLE textureSrvHandleGPU);
 	
-	void CreateVertexData(ID3D12Device* device);
+	void CreateVertexData();
 
-	void CreateWVP(ID3D12Device* device);
+	void CreateWVP();
 
-	void CreateTriangle(ID3D12Device* device);
+	void CreateTriangle();
 
 	void SetWvp(Matrix4x4 viewMatrix);
 

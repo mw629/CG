@@ -87,6 +87,7 @@ private:
 	std::unique_ptr<DepthStencil> depthStencil;
 
 	std::unique_ptr<Draw> draw;
+	std::unique_ptr<TextureLoader> textureLoader;
 
 	GpuSyncManager gpuSyncManager;
 
@@ -96,6 +97,7 @@ private:
 
 	std::unique_ptr<DirectinalLight> directinalLight;
 
+	ID3D12DescriptorHeap* descriptorHeeps[1];
 	
 public:
 
@@ -110,12 +112,11 @@ public:
 
 	void LinePreDraw();
 
-	void LinePostDraw();
-
 	void NewFrame();
 
 	void EndFrame();
 
+	void End();
 
 };
 

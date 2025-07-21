@@ -18,6 +18,14 @@ Triangle::~Triangle()
 	wvpResource_.Reset();
 }
 
+namespace {
+	ID3D12Device* device_;
+}
+
+void Triangle::SetDevice(ID3D12Device* device) {
+	device_ = device;
+}
+
 void Triangle::Initialize(MaterialFactory* material, D3D12_GPU_DESCRIPTOR_HANDLE textureSrvHandleGPU) {
 	material_ = material;
 	textureSrvHandleGPU_ = textureSrvHandleGPU;
@@ -28,10 +36,10 @@ void Triangle::Initialize(MaterialFactory* material, D3D12_GPU_DESCRIPTOR_HANDLE
 
 
 
-void Triangle::CreateVertexData(ID3D12Device* device)
+void Triangle::CreateVertexData()
 {
 	//VertexResourceを生成する//
-	vertexResource_ = GraphicsDevice::CreateBufferResource(device, sizeof(VertexData) * 3);
+	vertexResource_ = GraphicsDevice::CreateBufferResource(device_, sizeof(VertexData) * 3);
 	//頂点バッファビューを作成する
 	//リソースの先頭のアドレスから使う
 	vertexBufferView_.BufferLocation = vertexResource_->GetGPUVirtualAddress();
@@ -54,9 +62,9 @@ void Triangle::CreateVertexData(ID3D12Device* device)
 	vertexData_[2].texcoord = { 1.0f,1.0f };
 }
 
-void Triangle::CreateWVP(ID3D12Device* device) {
+void Triangle::CreateWVP() {
 	//WVP用のリソースを作る
-	wvpResource_ = GraphicsDevice::CreateBufferResource(device, sizeof(TransformationMatrix));
+	wvpResource_ = GraphicsDevice::CreateBufferResource(device_, sizeof(TransformationMatrix));
 	//
 	wvpData_ = nullptr;
 	//
@@ -68,10 +76,10 @@ void Triangle::CreateWVP(ID3D12Device* device) {
 
 
 
-void Triangle::CreateTriangle(ID3D12Device* device)
+void Triangle::CreateTriangle()
 {
-	CreateVertexData(device);
-	CreateWVP(device);
+	CreateVertexData();
+	CreateWVP();
 }
 
 void Triangle::SetWvp(Matrix4x4 viewMatrix)

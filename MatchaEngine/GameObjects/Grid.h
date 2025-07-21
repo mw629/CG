@@ -25,12 +25,13 @@ public:
 
 	~Grid();
 
+	void SetDevice(ID3D12Device* device);
 
-	void CreateVertexData(ID3D12Device* device);
+	void CreateVertexData();
 
-	void CreateWVP(ID3D12Device* device);
+	void CreateWVP();
 
-	void CreateGrid(ID3D12Device* device);
+	void CreateGrid();
 
 	void SetWvp(Matrix4x4 viewMatrix);
 

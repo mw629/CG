@@ -3,6 +3,13 @@
 #include "Core/VariableTypes.h"
 #include "Math/Calculation.h"
 
+namespace {
+	ID3D12Device* device_;
+}
+
+void Sprite::SetDevice(ID3D12Device* device) {
+	device_ = device;
+}
 
 Sprite::Sprite()
 {
@@ -33,11 +40,11 @@ void Sprite::Initialize(MaterialFactory* material, D3D12_GPU_DESCRIPTOR_HANDLE t
 	textureSrvHandleGPU_ = textureSrvHandleGPU;
 }
 
-void Sprite::CreateVertexData(ID3D12Device* device)
+void Sprite::CreateVertexData()
 {
 	//Sprote用の頂点リソースを作る//
 
-	vertexResource_ = GraphicsDevice::CreateBufferResource(device, sizeof(VertexData) * 6);
+	vertexResource_ = GraphicsDevice::CreateBufferResource(device_, sizeof(VertexData) * 6);
 
 	//頂点バッファービューを作成する
 	
@@ -65,9 +72,9 @@ void Sprite::CreateVertexData(ID3D12Device* device)
 
 }
 
-void Sprite::CreateIndexResource(ID3D12Device* device)
+void Sprite::CreateIndexResource()
 {
-	indexResource_ = GraphicsDevice::CreateBufferResource(device, sizeof(uint32_t) * 6); ;
+	indexResource_ = GraphicsDevice::CreateBufferResource(device_, sizeof(uint32_t) * 6); ;
 
 
 	indexBufferView_.BufferLocation = indexResource_->GetGPUVirtualAddress();
@@ -85,11 +92,11 @@ void Sprite::CreateIndexResource(ID3D12Device* device)
 
 }
 
-void Sprite::CreateWVP(ID3D12Device* device)
+void Sprite::CreateWVP()
 {
 	
 	//Sprite用ののTransformationMatrix用のリソースを作る。Matrix4x41つ分のサイズを用意する
-	wvpResource_ = GraphicsDevice::CreateBufferResource(device, sizeof(TransformationMatrix));
+	wvpResource_ = GraphicsDevice::CreateBufferResource(device_, sizeof(TransformationMatrix));
 	//データを書き込む
 	wvpData_ = nullptr;
 	//書き込むためのアドレスを取得
@@ -99,11 +106,11 @@ void Sprite::CreateWVP(ID3D12Device* device)
 	wvpData_->WVP = IdentityMatrix();
 }
 
-void Sprite::CreateSprite(ID3D12Device* device)
+void Sprite::CreateSprite()
 {
-	CreateVertexData(device);
-	CreateIndexResource(device);
-	CreateWVP(device);
+	CreateVertexData();
+	CreateIndexResource();
+	CreateWVP();
 }
 
 void Sprite::SetWvp()
