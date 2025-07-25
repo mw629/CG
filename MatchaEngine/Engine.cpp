@@ -199,6 +199,14 @@ void Engine::EndFrame() {
 	command->GetCommandQueue()->ExecuteCommandLists(1, commandLists);
 	//GPUとOSに画面の交換を行うよう通知する
 	swapChain->GetSwapChain()->Present(1, 0);
+
+	//次のフレーム用のコマンドを準備
+	hr_ = command->GetCommandAllocator()->Reset();
+	assert(SUCCEEDED(hr_));
+	hr_ = command->GetCommandList()->Reset(command->GetCommandAllocator(), nullptr);
+	assert(SUCCEEDED(hr_));
+
+
 }
 
 void Engine::End() {
