@@ -7,7 +7,7 @@ namespace {
 	ID3D12Device* device_;
 }
 
-void SetDevice(ID3D12Device* device) {
+void MaterialFactory::SetDevice(ID3D12Device* device) {
 	device_ = device;
 }
 

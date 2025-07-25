@@ -24,7 +24,7 @@ public:
 
 	~Line();
 
-	void SetDevice(ID3D12Device* device);
+	static void SetDevice(ID3D12Device* device);
 
 	void CreateVertexData();
 

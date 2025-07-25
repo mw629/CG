@@ -11,9 +11,12 @@ Engine::~Engine()
 
 Engine::Engine(int32_t kClientWidth, int32_t kClientHeight)
 {
+	kClientWidth_ = kClientWidth;
+	kClientHeight_ = kClientHeight;
+
 	SetUnhandledExceptionFilter(ExportDump);
 	logStream = CurrentTimestamp();
-
+	
 	//DebugLayer//
 #ifdef _DEBUG
 	Microsoft::WRL::ComPtr<ID3D12Debug1> debugController = nullptr;
@@ -118,6 +121,10 @@ void Engine::Setting()
 	Draw::Initialize(command.get()->GetCommandList());
 	Texture::Initalize(graphics->GetDevice(), command->GetCommandList(), descriptorHeap.get(), textureLoader.get());
 	MaterialFactory::SetDevice(graphics.get()->GetDevice());
+
+
+	Line::SetDevice(graphics.get()->GetDevice());
+	Grid::SetDevice(graphics.get()->GetDevice());
 	Model::SetDevice(graphics.get()->GetDevice());
 	Triangle::SetDevice(graphics.get()->GetDevice());
 	Sprite::SetDevice(graphics.get()->GetDevice());
