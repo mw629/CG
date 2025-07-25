@@ -144,6 +144,12 @@ void Engine::PreDraw()
 
 void Engine::PostDraw()
 {
+	//ImGuiの描画コマンド
+	ImGui_ImplDX12_RenderDrawData(ImGui::GetDrawData(), command->GetCommandList());
+
+	//画面に描く処理はすべて終わり、画面に映すので、状態を遷移
+	//今回RenderTargetからPresentにする
+	resourceBarrierHelper->TransitionToPresent(command->GetCommandList());
 }
 
 void Engine::LinePreDraw()
@@ -179,32 +185,30 @@ void Engine::NewFrame() {
 }
 
 void Engine::EndFrame() {
-	//ImGuiの描画コマンド
-	ImGui_ImplDX12_RenderDrawData(ImGui::GetDrawData(), command->GetCommandList());
-
-
-	//画面に描く処理はすべて終わり、画面に映すので、状態を遷移
-	//今回RenderTargetからPresentにする
-	resourceBarrierHelper->TransitionToPresent(command->GetCommandList());
-	//TransitionBarrierを張る
-
-
+	
 	//コマンドリストの内容を確定させる。すべてのコマンドを積んでからCloseすること
 	hr_ = command->GetCommandList()->Close();
 	assert(SUCCEEDED(hr_));
 
+
 	//コマンドをキックする//
+
 	//GPU2コマンドリストの実行を行わせる
 	ID3D12CommandList* commandLists[] = { command->GetCommandList() };
 	command->GetCommandQueue()->ExecuteCommandLists(1, commandLists);
 	//GPUとOSに画面の交換を行うよう通知する
 	swapChain->GetSwapChain()->Present(1, 0);
 
+	gpuSyncManager.Signal(command.get()->GetCommandQueue());
+
+	gpuSyncManager.WaitForGpu();
+
 	//次のフレーム用のコマンドを準備
 	hr_ = command->GetCommandAllocator()->Reset();
 	assert(SUCCEEDED(hr_));
 	hr_ = command->GetCommandList()->Reset(command->GetCommandAllocator(), nullptr);
 	assert(SUCCEEDED(hr_));
+
 
 
 }

@@ -55,14 +55,7 @@ extern IMGUI_IMPL_API LRESULT ImGui_ImplWin32_WndProcHandler(HWND hWnd, UINT msg
 #pragma comment(lib,"xaudio2.lib")
 
 
-
-
-
-
 ///クラス///
-
-
-
 
 
 ///-------------------------------------------
@@ -250,6 +243,7 @@ int WINAPI WinMain(HINSTANCE, HINSTANCE, LPSTR, int) {
 			ImGui::Render();
 
 			engine.get()->LinePreDraw();
+
 			draw.get()->DrawLine(line.get());
 			draw.get()->DrawGrid(grid.get());
 	
@@ -264,6 +258,7 @@ int WINAPI WinMain(HINSTANCE, HINSTANCE, LPSTR, int) {
 			//objectの描画
 			draw->DrawObj(model.get());
 			
+			engine.get()->PostDraw();
 
 			engine.get()->EndFrame();
 		}
