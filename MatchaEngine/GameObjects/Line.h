@@ -24,12 +24,13 @@ public:
 
 	~Line();
 
+	static void SetDevice(ID3D12Device* device);
 
-	void CreateVertexData(ID3D12Device* device);
+	void CreateVertexData();
 
-	void CreateWVP(ID3D12Device* device);
+	void CreateWVP();
 
-	void CreateLine(ID3D12Device* device);
+	void CreateLine();
 
 	void SetWvp(Matrix4x4 viewMatrix);
 

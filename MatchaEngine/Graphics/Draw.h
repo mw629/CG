@@ -11,17 +11,9 @@
 #include "../GameObjects/Grid.h"
 
 class Draw {
-private:
-
-	ID3D12GraphicsCommandList* commandList_{};
-
-
 public:
 
-	Draw(ID3D12GraphicsCommandList* commandList);
-	~Draw();
-
-	void Initialize();
+	static void Initialize(ID3D12GraphicsCommandList* commandList);
 
 	void DrawObj(Model* model);
 

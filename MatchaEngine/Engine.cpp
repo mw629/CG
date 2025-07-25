@@ -11,9 +11,12 @@ Engine::~Engine()
 
 Engine::Engine(int32_t kClientWidth, int32_t kClientHeight)
 {
+	kClientWidth_ = kClientWidth;
+	kClientHeight_ = kClientHeight;
+
 	SetUnhandledExceptionFilter(ExportDump);
 	logStream = CurrentTimestamp();
-
+	
 	//DebugLayer//
 #ifdef _DEBUG
 	Microsoft::WRL::ComPtr<ID3D12Debug1> debugController = nullptr;
@@ -36,9 +39,12 @@ Engine::Engine(int32_t kClientWidth, int32_t kClientHeight)
 	//描画
 	debudCamera = std::make_unique<DebugCamera>();
 	depthStencil = std::make_unique<DepthStencil>();
-	draw = std::make_unique<Draw>(command->GetCommandList());
+	draw = std::make_unique<Draw>();
+	textureLoader = std::make_unique<TextureLoader>();
 	//バリア
 	resourceBarrierHelper = std::make_unique<ResourceBarrierHelper>();
+
+	graphicsPipelineState = std::make_unique<GraphicsPipelineState>();
 
 }
 
@@ -88,77 +94,8 @@ void Engine::Setting()
 
 	depthStencil->CreateDepthStencil(graphics->GetDevice(), kClientWidth_, kClientHeight_);
 
-	rootSignature = std::make_unique<RootSignature>();
-	rootParameter = std::make_unique<RootParameter>();
-	sampler = std::make_unique<Sampler>();
-	inputLayout = std::make_unique<InputLayout>();
-	blendState = std::make_unique<BlendState>();
-	rasterizerState = std::make_unique<RasterizerState>();
-	shaderCompile = std::make_unique<ShaderCompile>();
-	depthStencilState = std::make_unique<DepthStencilState>();
-	graphicsPipelineState = std::make_unique<GraphicsPipelineState>();
 	
-	linerootSignature = std::make_unique<RootSignature>();
-	linerootParameter = std::make_unique<RootParameter>();
-	lineinputLayout = std::make_unique<InputLayout>();
-	lineshaderCompile = std::make_unique<ShaderCompile>();
-	lineGraphicsPipeState = std::make_unique<GraphicsPipelineState>(); //ate;
-
-	//DXCの初期化//
-	directXShaderCompiler.CreateDXC();
-
-	//DescriptorRange//
-	//RootParameter//
-	rootParameter->CreateRootParameter(rootSignature->GetDescriptionRootSignature());
-
-	//Samplerの設定//
-	sampler->CreateSampler(rootSignature->GetDescriptionRootSignature());
-
-	//シリアライズしてバイナリする
-	rootSignature->CreateRootSignature(logStream, graphics->GetDevice());
-
-	//InputLayoutの設定を行う//
-
-	inputLayout->CreateInputLayout();
-
-	//BlendStateの設定を行う//
-
-	blendState->CreateBlendDesc();
-
-	//RasterizerStateの設定を行う//
-
-	rasterizerState->CreateRasterizerState();
-
-	//ShaderをCompileする//
-
-	shaderCompile->CreateShaderCompile(logStream, directXShaderCompiler.GetDxcUtils(), directXShaderCompiler.GetDxcCompiler(), directXShaderCompiler.GetIncludeHandler());
-
-
-	//DepthStencilStateの設定//
-
-	depthStencilState->CreateDepthStencilState();
-
-
-	graphicsPipelineState->PSOSetting(directXShaderCompiler, rootSignature.get(), rootParameter.get(),
-		sampler.get(), inputLayout.get(), blendState.get(), rasterizerState.get(), shaderCompile.get(), depthStencilState.get());
-	graphicsPipelineState->CreatePSO(logStream, graphics->GetDevice());
-
-	//Line PSO
-	 
-	//RootParameter//
-	linerootParameter->CreateLineRootParameter(linerootSignature->GetDescriptionRootSignature());
-	//シリアライズしてバイナリする
-	linerootSignature->CreateRootSignature(logStream, graphics->GetDevice());
-	//InputLayoutの設定を行う//
-	lineinputLayout->CreateLineInputLayout();
-	//ShaderをCompileする//
-	lineshaderCompile->CreateLineShaderCompile(logStream, directXShaderCompiler.GetDxcUtils(), directXShaderCompiler.GetDxcCompiler(), directXShaderCompiler.GetIncludeHandler());
-	//PSO
-	lineGraphicsPipeState->PSOSetting(directXShaderCompiler, linerootSignature.get(), linerootParameter.get(),
-		sampler.get(), lineinputLayout.get(), blendState.get(), rasterizerState.get(), lineshaderCompile.get(), depthStencilState.get());
-	lineGraphicsPipeState->CreateLinePSO(logStream, graphics->GetDevice());
-
-
+	graphicsPipelineState.get()->CreateALLPSO(logStream, graphics.get()->GetDevice());
 
 	directinalLight = std::make_unique<DirectinalLight>();
 	directinalLight->CreateDirectinalLight(graphics->GetDevice());
@@ -167,31 +104,42 @@ void Engine::Setting()
 	viewportScissor->CreateViewPort();
 	//シーザー矩形
 	viewportScissor->CreateSxissor();
+
+	descriptorHeeps[0] = { descriptorHeap->GetSrvDescriptorHeap() };
+
+	IMGUI_CHECKVERSION();
+	ImGui::CreateContext();
+	ImGui::StyleColorsDark();
+	ImGui_ImplWin32_Init(window.GetHwnd());
+	ImGui_ImplDX12_Init(graphics->GetDevice(),
+		swapChain->GetSwapChainDesc().BufferCount,
+		renderTargetView->GetRtvDesc().Format,
+		descriptorHeap->GetSrvDescriptorHeap(),
+		descriptorHeap->GetSrvDescriptorHeap()->GetCPUDescriptorHandleForHeapStart(),
+		descriptorHeap->GetSrvDescriptorHeap()->GetGPUDescriptorHandleForHeapStart());
+
+	Draw::Initialize(command.get()->GetCommandList());
+	Texture::Initalize(graphics->GetDevice(), command->GetCommandList(), descriptorHeap.get(), textureLoader.get());
+	MaterialFactory::SetDevice(graphics.get()->GetDevice());
+
+
+	Line::SetDevice(graphics.get()->GetDevice());
+	Grid::SetDevice(graphics.get()->GetDevice());
+	Model::SetDevice(graphics.get()->GetDevice());
+	Triangle::SetDevice(graphics.get()->GetDevice());
+	Sprite::SetDevice(graphics.get()->GetDevice());
+	Sphere::SetDevice(graphics.get()->GetDevice());
+
 }
 
 void Engine::PreDraw()
 {
-	//spriteMaterial->GetMaterialData()->uvTransform = uvTransformMatrix;
-	//ImGuiの内部コマンドを生成
-	ImGui::Render();
-
-	renderTargetView->SetAndClear(command->GetCommandList(), swapChain->GetSwapChain()->GetCurrentBackBufferIndex());
-	//DSVを設定する
-	depthStencil->SetDSV(command->GetCommandList(), renderTargetView->GetRtvHandles(swapChain->GetSwapChain()->GetCurrentBackBufferIndex()));
-
-	//コマンドを積む//
-
-	ID3D12DescriptorHeap* descriptorHeeps[] = { descriptorHeap->GetSrvDescriptorHeap() };
-	command->GetCommandList()->SetDescriptorHeaps(1, descriptorHeeps);
 	command->GetCommandList()->SetPipelineState(graphicsPipelineState->GetGraphicsPipelineState());//PSOを設定
 	//形状を設定。PSOに設定しているものとはまた別。同じものを設定すると考えておけばいい
 	command->GetCommandList()->IASetPrimitiveTopology(D3D_PRIMITIVE_TOPOLOGY_TRIANGLELIST);
-	command->GetCommandList()->RSSetViewports(1, viewportScissor->GetViewport());//Viewportを設定
-	command->GetCommandList()->RSSetScissorRects(1, viewportScissor->GetScissorRect());//Sxirssorを設定
 	//RootSignatureを設定。POSに設定しているけど別途設定が必要
-	command->GetCommandList()->SetGraphicsRootSignature(rootSignature->GetRootSignature());
+	command->GetCommandList()->SetGraphicsRootSignature(graphicsPipelineState.get()->GetRootSignature()->GetRootSignature());
 	command->GetCommandList()->SetGraphicsRootConstantBufferView(3, directinalLight->GetDirectinalLightResource()->GetGPUVirtualAddress());
-
 }
 
 void Engine::PostDraw()
@@ -202,15 +150,47 @@ void Engine::PostDraw()
 	//画面に描く処理はすべて終わり、画面に映すので、状態を遷移
 	//今回RenderTargetからPresentにする
 	resourceBarrierHelper->TransitionToPresent(command->GetCommandList());
-	//TransitionBarrierを張る
+}
 
+void Engine::LinePreDraw()
+{
+	command.get()->GetCommandList()->SetPipelineState(graphicsPipelineState->GetLineGraphicsPipelineState());//PSOを設定
+	//形状を設定。PSOに設定しているものとはまた別。同じものを設定すると考えておけばいい
+	command.get()->GetCommandList()->IASetPrimitiveTopology(D3D10_PRIMITIVE_TOPOLOGY_LINELIST);
+	//RootSignatureを設定。POSに設定しているけど別途設定が必要
+	command.get()->GetCommandList()->SetGraphicsRootSignature(graphicsPipelineState.get()->GetLineRootSignature()->GetRootSignature());
+}
+
+
+void Engine::NewFrame() {
+	ImGui_ImplDX12_NewFrame();
+	ImGui_ImplWin32_NewFrame();
+	ImGui::NewFrame();
+
+	//コマンドを積み込んで確定させる//
+	resourceBarrierHelper->Transition(command->GetCommandList(), swapChain.get());
+	renderTargetView->SetAndClear(command->GetCommandList(), swapChain->GetSwapChain()->GetCurrentBackBufferIndex());
+	//DSVを設定する
+	depthStencil->SetDSV(command->GetCommandList(), renderTargetView->GetRtvHandles(swapChain->GetSwapChain()->GetCurrentBackBufferIndex()));
+	//コマンドを積む//
+
+	ID3D12DescriptorHeap* descriptorHeeps[] = { descriptorHeap->GetSrvDescriptorHeap() };
+	command->GetCommandList()->SetDescriptorHeaps(1, descriptorHeeps);
+
+	command->GetCommandList()->RSSetViewports(1, viewportScissor->GetViewport());//Viewportを設定
+	command->GetCommandList()->RSSetScissorRects(1, viewportScissor->GetScissorRect());//Sxirssorを設定
+
+	input.get()->Updata();
+
+}
+
+void Engine::EndFrame() {
+	
 	//コマンドリストの内容を確定させる。すべてのコマンドを積んでからCloseすること
 	hr_ = command->GetCommandList()->Close();
 	assert(SUCCEEDED(hr_));
-}
 
-void Engine::EndFrame()
-{
+
 	//コマンドをキックする//
 
 	//GPU2コマンドリストの実行を行わせる
@@ -219,15 +199,31 @@ void Engine::EndFrame()
 	//GPUとOSに画面の交換を行うよう通知する
 	swapChain->GetSwapChain()->Present(1, 0);
 
-
-
 	gpuSyncManager.Signal(command.get()->GetCommandQueue());
-	gpuSyncManager.WaitForGpu();
 
+	gpuSyncManager.WaitForGpu();
 
 	//次のフレーム用のコマンドを準備
 	hr_ = command->GetCommandAllocator()->Reset();
 	assert(SUCCEEDED(hr_));
 	hr_ = command->GetCommandList()->Reset(command->GetCommandAllocator(), nullptr);
 	assert(SUCCEEDED(hr_));
+
+
+
 }
+
+void Engine::End() {
+	//ImGuiの終了処理
+	ImGui_ImplDX12_Shutdown();
+	ImGui_ImplWin32_Shutdown();
+	ImGui::DestroyContext();
+
+
+	//ウィンドウを閉じる
+	CloseWindow(window.GetHwnd());
+
+	//COMの終了処理
+	CoUninitialize();
+}
+

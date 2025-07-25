@@ -6,8 +6,15 @@
 #include <sstream>
 
 
+namespace {
+	ID3D12Device* device_;
+}
 
 
+void Model::SetDevice(ID3D12Device* device)
+{
+	device_ = device;
+}
 
 Model::~Model()
 {
@@ -23,6 +30,8 @@ Model::~Model()
 	wvpDataResource_.Reset();
 }
 
+
+
 void Model::Initialize(ModelData modelData, MaterialFactory* material,D3D12_GPU_DESCRIPTOR_HANDLE textureSrvHandleGPU)
 {
 	transform_ = {};
@@ -32,10 +41,10 @@ void Model::Initialize(ModelData modelData, MaterialFactory* material,D3D12_GPU_
 }
 
 
-void Model::CreateVertexData(ID3D12Device* device)
+void Model::CreateVertexData()
 {
 	//頂点リソースを作る
-	vertexResource_ = GraphicsDevice::CreateBufferResource(device, sizeof(VertexData) * modelData_.vertices.size());
+	vertexResource_ = GraphicsDevice::CreateBufferResource(device_, sizeof(VertexData) * modelData_.vertices.size());
 	//頂点バッファービューを作成する
 	//リソースの先頭アドレスから使う
 	vertexBufferView_.BufferLocation = vertexResource_->GetGPUVirtualAddress();
@@ -48,10 +57,11 @@ void Model::CreateVertexData(ID3D12Device* device)
 	std::memcpy(vertexData_, modelData_.vertices.data(), sizeof(VertexData) * modelData_.vertices.size());
 }
 
-void Model::CreateWVP(ID3D12Device* device)
+
+void Model::CreateWVP()
 {
 	//Sprite用ののTransformationMatrix用のリソースを作る。Matrix4x41つ分のサイズを用意する
-	wvpDataResource_ = GraphicsDevice::CreateBufferResource(device, sizeof(TransformationMatrix));
+	wvpDataResource_ = GraphicsDevice::CreateBufferResource(device_, sizeof(TransformationMatrix));
 	//データを書き込む
 
 	//書き込むためのアドレスを取得
@@ -61,10 +71,10 @@ void Model::CreateWVP(ID3D12Device* device)
 	wvpData_->World = IdentityMatrix();
 }
 
-void Model::CreateModel(ID3D12Device* device)
+void Model::CreateModel()
 {
-	CreateVertexData(device);
-	CreateWVP(device);
+	CreateVertexData();
+	CreateWVP();
 }
 
 void Model::SetWvp(Matrix4x4 viewMatrix)

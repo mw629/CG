@@ -34,6 +34,6 @@ void InputLayout::CreateLineInputLayout()
 	lineInputElementDescs_[1].Format = DXGI_FORMAT_R32G32B32A32_FLOAT;
 	lineInputElementDescs_[1].AlignedByteOffset = D3D12_APPEND_ALIGNED_ELEMENT;
 
-	inputLayoutDesc_.pInputElementDescs = lineInputElementDescs_;
-	inputLayoutDesc_.NumElements = _countof(lineInputElementDescs_);
+	lineInputLayoutDesc_.pInputElementDescs = lineInputElementDescs_;
+	lineInputLayoutDesc_.NumElements = _countof(lineInputElementDescs_);
 }

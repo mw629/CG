@@ -2,20 +2,13 @@
 #include "Graphics/GraphicsDevice.h"
 #include <cassert>
 
+namespace {
+	ID3D12GraphicsCommandList* commandList_{};
+}
 
-Draw::Draw(ID3D12GraphicsCommandList* commandList)
+void Draw::Initialize(ID3D12GraphicsCommandList* commandList)
 {
 	commandList_ = commandList;
-}
-
-Draw::~Draw()
-{
-	
-}
-
-void Draw::Initialize()
-{
-	
 }
 
 

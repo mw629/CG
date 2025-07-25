@@ -3,6 +3,14 @@
 #include "Math/Calculation.h"       // 行列計算関数 (IdentityMatrixなど)
 #include <cassert>                  // アサート用
 
+namespace {
+	ID3D12Device* device_;
+}
+
+void Grid::SetDevice(ID3D12Device* device) {
+	device_ = device;
+}
+
 Grid::~Grid() {
 	// MapしたポインタをUnmapする
 	if (vertexData_) {
@@ -20,10 +28,10 @@ Grid::~Grid() {
 
 
 
-void Grid::CreateVertexData(ID3D12Device* device)
+void Grid::CreateVertexData()
 {
 	//VertexResourceを生成する//
-	vertexResource_ = GraphicsDevice::CreateBufferResource(device, sizeof(LineVertexData) * kSubdivision_ * 4);
+	vertexResource_ = GraphicsDevice::CreateBufferResource(device_, sizeof(LineVertexData) * kSubdivision_ * 4);
 	//頂点バッファビューを作成する
 	//リソースの先頭のアドレスから使う
 	vertexBufferView_.BufferLocation = vertexResource_->GetGPUVirtualAddress();
@@ -68,9 +76,9 @@ void Grid::CreateVertexData(ID3D12Device* device)
 	vertexData_[kSubdivision_ * 2 + kSubdivision_ + 1].color = Vector4{ 0.8f,0,0,1.0f };
 }
 
-void Grid::CreateWVP(ID3D12Device* device) {
+void Grid::CreateWVP() {
 	//WVP用のリソースを作る
-	wvpResource_ = GraphicsDevice::CreateBufferResource(device, sizeof(LineTransformationMatrix));
+	wvpResource_ = GraphicsDevice::CreateBufferResource(device_, sizeof(LineTransformationMatrix));
 	//
 	wvpData_ = nullptr;
 	//
@@ -81,10 +89,10 @@ void Grid::CreateWVP(ID3D12Device* device) {
 
 
 
-void Grid::CreateGrid(ID3D12Device* device)
+void Grid::CreateGrid()
 {
-	CreateVertexData(device);
-	CreateWVP(device);
+	CreateVertexData();
+	CreateWVP();
 }
 
 void Grid::SetWvp(Matrix4x4 viewMatrix)
