@@ -28,16 +28,20 @@ Model::~Model()
 	// ComPtrは自動的に解放される
 	vertexResource_.Reset();
 	wvpDataResource_.Reset();
+
+	delete material_;
 }
 
 
 
-void Model::Initialize(ModelData modelData, MaterialFactory* material,D3D12_GPU_DESCRIPTOR_HANDLE textureSrvHandleGPU)
+void Model::Initialize(ModelData modelData,D3D12_GPU_DESCRIPTOR_HANDLE textureSrvHandleGPU)
 {
 	transform_ = {};
 	modelData_ = modelData;
-	material_ = material;
 	textureSrvHandleGPU_ = textureSrvHandleGPU;
+
+	material_ = new MaterialFactory();
+	material_->CreateMatrial(device_, false);
 }
 
 
@@ -77,7 +81,7 @@ void Model::CreateModel()
 	CreateWVP();
 }
 
-void Model::SetWvp(Matrix4x4 viewMatrix)
+void Model::SettingWvp(Matrix4x4 viewMatrix)
 {
 	Matrix4x4 projectionMatri = MakePerspectiveFovMatrix(0.45f, float(kClientWidth) / float(kClientHeight), 0.1f, 100.0f);
 	Matrix4x4 worldMatrixObj = MakeAffineMatrix(transform_.translate, transform_.scale, transform_.rotate);

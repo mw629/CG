@@ -31,7 +31,7 @@ public:
 
 	static void SetDevice(ID3D12Device* device);
 
-	void Initialize(MaterialFactory* material, D3D12_GPU_DESCRIPTOR_HANDLE textureSrvHandleGPU);
+	void Initialize(D3D12_GPU_DESCRIPTOR_HANDLE textureSrvHandleGPU);
 
 	void CreateVertexData();
 
@@ -41,9 +41,11 @@ public:
 
 	void CreateSprite();
 
-	void SetWvp(Matrix4x4 viewMatrix);
+	void SettingWvp(Matrix4x4 viewMatrix);
 
 	void SetTrandform(Transform transform);
+
+	void SetMaterialLighting(bool isActiv) { material_->SetMaterialLighting(isActiv); }
 
 
 	D3D12_VERTEX_BUFFER_VIEW* GetVertexBufferView() { return &vertexBufferView_; }

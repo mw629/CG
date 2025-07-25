@@ -31,13 +31,13 @@ public:
 
 	static void SetDevice(ID3D12Device* device);
 
-	void Initialize(ModelData modelData, MaterialFactory* matrial, D3D12_GPU_DESCRIPTOR_HANDLE textureSrvHandleGPU);
+	void Initialize(ModelData modelData, D3D12_GPU_DESCRIPTOR_HANDLE textureSrvHandleGPU);
 
 	void CreateVertexData();
 	void CreateWVP();
 
 	
-	void SetWvp(Matrix4x4 viewMatrix);
+	void SettingWvp(Matrix4x4 viewMatrix);
 	void SetTransform(Transform transform);
 
 	void CreateModel();
@@ -46,6 +46,7 @@ public:
 	
 	void SetPos(Vector3 velocity) { transform_.translate = velocity; }
 	void SetAlive(bool flag) { isAlive = flag; }
+	void SetMaterialLighting(bool isActiv) { material_->SetMaterialLighting(isActiv); }
 
 	//getter
 	bool GetAlive() const { return isAlive; }

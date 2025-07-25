@@ -32,7 +32,7 @@ public:
 
 	void CreateLine();
 
-	void SetWvp(Matrix4x4 viewMatrix);
+	void SettingWvp(Matrix4x4 viewMatrix);
 
 	void SetTrandform(Transform transform);
 

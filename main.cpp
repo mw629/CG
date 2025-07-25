@@ -71,15 +71,6 @@ int WINAPI WinMain(HINSTANCE, HINSTANCE, LPSTR, int) {
 
 	std::unique_ptr<Draw> draw = std::make_unique<Draw>();
 
-	//Material用のResourceを作る//
-	std::unique_ptr<MaterialFactory> material = std::make_unique<MaterialFactory>();
-	std::unique_ptr<MaterialFactory> triangleMaterial = std::make_unique<MaterialFactory>();
-	std::unique_ptr<MaterialFactory> spriteMaterial = std::make_unique<MaterialFactory>();
-	std::unique_ptr<MaterialFactory> objMaterial = std::make_unique<MaterialFactory>();
-	material->CreateMatrial(false);
-	triangleMaterial->CreateMatrial(false);
-	spriteMaterial->CreateMatrial(false);
-	objMaterial->CreateMatrial(false);
 	//テクスチャの作成
 	std::unique_ptr<Texture> texture = std::make_unique<Texture>();
 	texture->CreateTexture("resources/uvChecker.png");
@@ -96,7 +87,7 @@ int WINAPI WinMain(HINSTANCE, HINSTANCE, LPSTR, int) {
 
 	//三角形の作成
 	std::unique_ptr<Triangle> triangle = std::make_unique<Triangle>();
-	triangle->Initialize(material.get(), texture->TextureData(0));
+	triangle->Initialize(texture->TextureData(0));
 	triangle->CreateTriangle();
 	Transform triangleTransform = { {1.0f, 1.0f, 1.0f}, { 0.0f,0.0f,0.0f }, { 0.0f,0.0f,0.0f } };
 	Vector4 vertex[3] = {
@@ -106,18 +97,18 @@ int WINAPI WinMain(HINSTANCE, HINSTANCE, LPSTR, int) {
 	};
 	//スプライト作成
 	std::unique_ptr<Sprite> sprite = std::make_unique<Sprite>();
-	sprite->Initialize(material.get(), texture->TextureData(0));
+	sprite->Initialize(texture->TextureData(0));
 	sprite->CreateSprite();
 	Transform spriteTransform = { {1.0f, 1.0f, 1.0f}, { 0.0f,0.0f,0.0f }, { 0.0f,0.0f,0.0f } };
 	//球の作成
 	std::unique_ptr<Sphere> sphere = std::make_unique<Sphere>();
-	sphere->Initialize(material.get(), texture->TextureData(0));
+	sphere->Initialize(texture->TextureData(0));
 	sphere->CreateSprite();
 	Transform shpereTransform = { {1.0f, 1.0f, 1.0f}, { 0.0f,0.0f,0.0f }, { 0.0f,0.0f,0.0f } };
 	//モデルの作成
 	ModelData modelData = LoadObjFile("resources/obj", "axis.obj");
 	std::unique_ptr<Model> model = std::make_unique<Model>();
-	model->Initialize(modelData, material.get(), texture->TextureData(0));
+	model->Initialize(modelData, texture->TextureData(0));
 	model->CreateModel();
 	Transform objTransform = { {1.0f, 1.0f, 1.0f}, { 0.0f,0.0f,0.0f }, { 0.0f,0.0f,0.0f } };
 
@@ -214,22 +205,22 @@ int WINAPI WinMain(HINSTANCE, HINSTANCE, LPSTR, int) {
 			triangle->SetVertex(vertex);
 			triangle->SetShape();
 			triangle->SetTrandform(triangleTransform);
-			triangle->SetWvp(viewMatrix);
+			triangle->SettingWvp(viewMatrix);
 
 			line.get()->SetVertex(lineVertex);
 			line->SetTrandform(lineTransform);
-			line.get()->SetWvp(viewMatrix);
+			line.get()->SettingWvp(viewMatrix);
 
-			grid.get()->SetWvp(viewMatrix);
+			grid.get()->SettingWvp(viewMatrix);
 
 			sprite->SetTrandform(spriteTransform);
-			sprite->SetWvp();
+			sprite->SettingWvp();
 
 			sphere->SetTrandform(shpereTransform);
-			sphere->SetWvp(viewMatrix);
+			sphere->SettingWvp(viewMatrix);
 
 			model->SetTransform(objTransform);
-			model->SetWvp(viewMatrix);
+			model->SettingWvp(viewMatrix);
 
 
 

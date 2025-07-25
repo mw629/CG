@@ -16,6 +16,8 @@ Triangle::~Triangle()
 	// ComPtrは自動的に解放される
 	vertexResource_.Reset();
 	wvpResource_.Reset();
+	
+	delete material_;
 }
 
 namespace {
@@ -26,12 +28,15 @@ void Triangle::SetDevice(ID3D12Device* device) {
 	device_ = device;
 }
 
-void Triangle::Initialize(MaterialFactory* material, D3D12_GPU_DESCRIPTOR_HANDLE textureSrvHandleGPU) {
-	material_ = material;
+void Triangle::Initialize(D3D12_GPU_DESCRIPTOR_HANDLE textureSrvHandleGPU) { 
 	textureSrvHandleGPU_ = textureSrvHandleGPU;
 	vertex_[0] = { -0.1f,-0.1f,0.0f,1.0f };
 	vertex_[1] = { 0.0f,0.1f,0.0f,1.0f };
 	vertex_[2] = { 0.1f,-0.1f,0.0f,1.0f };
+
+	material_ = new MaterialFactory();
+	material_->CreateMatrial(device_, false);
+
 }
 
 
@@ -82,7 +87,7 @@ void Triangle::CreateTriangle()
 	CreateWVP();
 }
 
-void Triangle::SetWvp(Matrix4x4 viewMatrix)
+void Triangle::SettingWvp(Matrix4x4 viewMatrix)
 {
 	Matrix4x4 projectionMatri = MakePerspectiveFovMatrix(0.45f, float(1280) / float(720), 0.1f, 100.0f);
 	Matrix4x4 worldMatrix = MakeAffineMatrix(transform_.translate, transform_.scale, transform_.rotate);

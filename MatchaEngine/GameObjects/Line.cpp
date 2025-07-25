@@ -71,7 +71,7 @@ void Line::CreateLine()
 	CreateWVP();
 }
 
-void Line::SetWvp(Matrix4x4 viewMatrix)
+void Line::SettingWvp(Matrix4x4 viewMatrix)
 {
 	Matrix4x4 projectionMatri = MakePerspectiveFovMatrix(0.45f, float(1280) / float(720), 0.1f, 100.0f);
 	Matrix4x4 worldMatrix = MakeAffineMatrix(transform_.translate, transform_.scale, transform_.rotate);

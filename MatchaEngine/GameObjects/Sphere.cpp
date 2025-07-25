@@ -34,15 +34,19 @@ Sphere::~Sphere()
 	vertexResource_.Reset();
 	indexResource_.Reset();
 	wvpResource_.Reset();
+
+	delete material_;
 }
 
 
 
 
-void Sphere::Initialize(MaterialFactory* material, D3D12_GPU_DESCRIPTOR_HANDLE textureSrvHandleGPU)
+void Sphere::Initialize( D3D12_GPU_DESCRIPTOR_HANDLE textureSrvHandleGPU)
 {
-	material_ = material;
 	textureSrvHandleGPU_ = textureSrvHandleGPU;
+
+	material_ = new MaterialFactory();
+	material_->CreateMatrial(device_, false);
 }
 
 void Sphere::CreateVertexData()
@@ -195,7 +199,7 @@ void Sphere::CreateSprite()
 	CreateWVP();
 }
 
-void Sphere::SetWvp(Matrix4x4 viewMatrix)
+void Sphere::SettingWvp(Matrix4x4 viewMatrix)
 {
 	Matrix4x4 projectionMatri = MakePerspectiveFovMatrix(0.45f, float(1280) / float(720), 0.1f, 100.0f);
 	Matrix4x4 worldMatrix = MakeAffineMatrix(transform_.translate, transform_.scale, transform_.rotate);

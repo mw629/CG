@@ -32,12 +32,16 @@ Sprite::~Sprite()
 	vertexResource_.Reset();
 	indexResource_.Reset();
 	wvpResource_.Reset();
+
+	delete material_;
 }
 
-void Sprite::Initialize(MaterialFactory* material, D3D12_GPU_DESCRIPTOR_HANDLE textureSrvHandleGPU)
+void Sprite::Initialize(D3D12_GPU_DESCRIPTOR_HANDLE textureSrvHandleGPU)
 {
-	material_ = material;
 	textureSrvHandleGPU_ = textureSrvHandleGPU;
+
+	material_ = new MaterialFactory();
+	material_->CreateMatrial(device_, false);
 }
 
 void Sprite::CreateVertexData()
@@ -113,7 +117,7 @@ void Sprite::CreateSprite()
 	CreateWVP();
 }
 
-void Sprite::SetWvp()
+void Sprite::SettingWvp()
 {
 	Matrix4x4 worldMatrix = MakeAffineMatrix(transform_.translate, transform_.scale, transform_.rotate);
 	Matrix4x4 worldViewProjectionMatrix = MultiplyMatrix4x4(worldMatrix, MultiplyMatrix4x4(IdentityMatrix(), MakeOrthographicMatrix(0, float(1280), 0, float(720), 0.0f, 100.0f)));

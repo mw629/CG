@@ -95,7 +95,7 @@ void Grid::CreateGrid()
 	CreateWVP();
 }
 
-void Grid::SetWvp(Matrix4x4 viewMatrix)
+void Grid::SettingWvp(Matrix4x4 viewMatrix)
 {
 	Matrix4x4 projectionMatri = MakePerspectiveFovMatrix(0.45f, float(1280) / float(720), 0.1f, 100.0f);
 	Matrix4x4 worldMatrix = MakeAffineMatrix(Vector3(0, 0, 0), Vector3(1.0f, 1.0f, 1.0f), Vector3(0.0f, 0.0f, 0.0f));
