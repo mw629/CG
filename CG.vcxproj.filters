@@ -159,6 +159,9 @@
     <ClCompile Include="MatchaEngine\GameObjects\Line.cpp">
       <Filter>ソース ファイル</Filter>
     </ClCompile>
+    <ClCompile Include="MatchaEngine\Input\GamePadInput.cpp">
+      <Filter>ソース ファイル</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <FxCompile Include="MatchaEngine\Graphics\Shader\Object3d.VS.hlsl" />
@@ -306,6 +309,9 @@
       <Filter>ヘッダー ファイル</Filter>
     </ClInclude>
     <ClInclude Include="MatchaEngine\GameObjects\Line.h">
+      <Filter>ヘッダー ファイル</Filter>
+    </ClInclude>
+    <ClInclude Include="MatchaEngine\Input\GamePadInput.h">
       <Filter>ヘッダー ファイル</Filter>
     </ClInclude>
   </ItemGroup>

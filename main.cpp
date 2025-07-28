@@ -45,6 +45,7 @@ extern IMGUI_IMPL_API LRESULT ImGui_ImplWin32_WndProcHandler(HWND hWnd, UINT msg
 
 
 #include "MatchaEngine/Engine.h"
+#include "MatchaEngine/Input/GamePadInput.h"
 
 
 #pragma comment(lib,"d3d12.lib")
@@ -136,7 +137,7 @@ int WINAPI WinMain(HINSTANCE, HINSTANCE, LPSTR, int) {
 	BGMHandle = audio->Load("resources/Audio/BGM/sweet_pop.mp3");
 	audio->Play(BGMHandle, false, 1.0f);
 
-
+	GamePadInput gamepad;
 
 
 	//メインループ//
@@ -150,12 +151,15 @@ int WINAPI WinMain(HINSTANCE, HINSTANCE, LPSTR, int) {
 			DispatchMessage(&msg);
 		}
 		else {
-			
+			gamepad.Update();
+
+
+
 			engine.get()->NewFrame();
 
 			//ゲーム処理
 
-
+			gamepad.DrawImGui();
 			texture.get()->TextureList();
 
 			//開発用UIの処理。実際に開発用UIを出す場合はここをゲ0無固有の処理に置き換える
