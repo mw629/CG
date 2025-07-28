@@ -116,6 +116,8 @@ int WINAPI WinMain(HINSTANCE, HINSTANCE, LPSTR, int) {
 
 	//std::unique_ptr<DirectinalLight> directinalLight = std::make_unique<DirectinalLight>();
 	//directinalLight->CreateDirectinalLight(graphics->GetDevice());
+	std::unique_ptr<DebugCamera> debugCamera = std::make_unique<DebugCamera>();
+	debugCamera.get()->Initialize();
 
 	Matrix4x4 viewMatrix;
 
@@ -154,13 +156,12 @@ int WINAPI WinMain(HINSTANCE, HINSTANCE, LPSTR, int) {
 			//ゲーム処理
 
 
+			texture.get()->TextureList();
 
 			//開発用UIの処理。実際に開発用UIを出す場合はここをゲ0無固有の処理に置き換える
 			ImGui::Checkbox("useMonsterBall", &useMonsterBall);
 			ImGui::Checkbox("debugCameraFlag", &debugCameraFlag);
 			//ImGui::ShowDemoWindow(); debugCameraFlag
-
-			//textureLoader->Draw();
 
 			if (ImGui::CollapsingHeader("Camera")) {
 				ImGui::DragFloat3("camraTranslate", &camraTransform.translate.x, 0.01f);
@@ -189,18 +190,18 @@ int WINAPI WinMain(HINSTANCE, HINSTANCE, LPSTR, int) {
 			}
 
 
-
-
-
-			/*if (debugCameraFlag) {
-				debudCamera->Update(input.get());
-				viewMatrix = debudCamera->GetViewMatrix();
+			if (debugCameraFlag) {
+				debugCamera->Update(engine.get()->GetInput());
+				viewMatrix = debugCamera->GetViewMatrix();
 			}
 			else
-			{*/
+			{
 				Matrix4x4 cameraMatrix = MakeAffineMatrix(camraTransform.translate, camraTransform.scale, camraTransform.rotate);;
 				viewMatrix = Inverse(cameraMatrix);
-			//}
+			}
+			
+			sphere.get()->SetMaterialLighting(true);
+			model.get()->SetMaterialLighting(true);
 
 			triangle->SetVertex(vertex);
 			triangle->SetShape();
@@ -221,10 +222,6 @@ int WINAPI WinMain(HINSTANCE, HINSTANCE, LPSTR, int) {
 
 			model->SetTransform(objTransform);
 			model->SettingWvp(viewMatrix);
-
-
-
-
 
 			Matrix4x4 uvTransformMatrix = Scale(uvTransformSprite.scale);
 			uvTransformMatrix = MultiplyMatrix4x4(uvTransformMatrix, Rotation(uvTransformSprite.rotate));
@@ -254,8 +251,6 @@ int WINAPI WinMain(HINSTANCE, HINSTANCE, LPSTR, int) {
 			engine.get()->EndFrame();
 		}
 	}
-
-
 	engine.get()->End();
 
 	return 0;

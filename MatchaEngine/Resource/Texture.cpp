@@ -49,6 +49,11 @@ void Texture::CreateTexture(const std::string& filePath)
 	device_->CreateShaderResourceView(textureResource.Get(), &srvDesc, textureSrvHandleCPU);
 }
 
+void Texture::TextureList()
+{
+	textureLoader_->Draw();
+}
+
 D3D12_GPU_DESCRIPTOR_HANDLE Texture::TextureData(const std::string& filePath) {
 	return textureLoader_->GetTexture(filePath);
 }

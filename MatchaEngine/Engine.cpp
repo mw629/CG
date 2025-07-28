@@ -208,8 +208,6 @@ void Engine::EndFrame() {
 	hr_ = command->GetCommandList()->Reset(command->GetCommandAllocator(), nullptr);
 	assert(SUCCEEDED(hr_));
 
-
-
 }
 
 void Engine::End() {

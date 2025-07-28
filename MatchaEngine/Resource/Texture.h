@@ -15,6 +15,8 @@ public:
 
 	void CreateTexture(const std::string& filePath);
 
+	void TextureList();
+
 	D3D12_GPU_DESCRIPTOR_HANDLE TextureData(const std::string& filePath);
 	D3D12_GPU_DESCRIPTOR_HANDLE TextureData(int index);
 };

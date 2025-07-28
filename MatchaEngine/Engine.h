@@ -118,5 +118,7 @@ public:
 
 	void End();
 
+	Input* GetInput() { return input.get(); }
+
 };
 

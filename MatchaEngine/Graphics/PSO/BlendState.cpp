@@ -5,7 +5,7 @@ void BlendState::CreateBlendDesc()
 	//すべての色要素を書き込む
 	blendDesc_.AlphaToCoverageEnable = FALSE;
 	blendDesc_.IndependentBlendEnable = FALSE; // 複数のレンダーターゲットがある場合はTRUEに設定
-	blendDesc_.RenderTarget[0].BlendEnable = TRUE; // 最初のレンダーターゲットのブレンドを有効にする
+	blendDesc_.RenderTarget[0].BlendEnable = FALSE; // 最初のレンダーターゲットのブレンドを有効にする
 	blendDesc_.RenderTarget[0].LogicOpEnable = FALSE;
 	blendDesc_.RenderTarget[0].SrcBlend = D3D12_BLEND_SRC_ALPHA; // ソースブレンドファクター: ソースアルファ
 	blendDesc_.RenderTarget[0].DestBlend = D3D12_BLEND_INV_SRC_ALPHA; // デスティネーションブレンドファクター: 1 - ソースアルファ
