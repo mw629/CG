@@ -124,11 +124,17 @@ void Sprite::SettingWvp()
 	*wvpData_ = { worldViewProjectionMatrix,worldMatrix };
 }
 
-void Sprite::SetTrandform(Transform transform)
+void Sprite::SetSize(Vector2 leftTop, Vector2 rigthBottom)
 {
-	transform_.translate = transform.translate;
-	transform_.scale = transform.scale;
-	transform_.rotate = transform.rotate;
+	//１枚目の三角形
+	vertexData_[0].position = { leftTop.x,rigthBottom.y,0.0f,1.0f };//左下
+	vertexData_[0].texcoord = { 0.0f,1.0f };
+	vertexData_[1].position = { leftTop.x,leftTop.y,0.0f,1.0f };//左上
+	vertexData_[1].texcoord = { 0.0f,0.0f };
+	vertexData_[2].position = { rigthBottom.x,rigthBottom.y,0.0f,1.0f };//右下
+	vertexData_[2].texcoord = { 1.0f,1.0f };
+	//2枚目の三角形
+	vertexData_[3].position = { rigthBottom.x,leftTop.y,0.0f,1.0f };//右上
+	vertexData_[3].texcoord = { 1.0f,0.0f };
 }
-
 

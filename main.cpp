@@ -100,7 +100,7 @@ int WINAPI WinMain(HINSTANCE, HINSTANCE, LPSTR, int) {
 	std::unique_ptr<Sprite> sprite = std::make_unique<Sprite>();
 	sprite->Initialize(texture->TextureData(0));
 	sprite->CreateSprite();
-	Transform spriteTransform = { {1.0f, 1.0f, 1.0f}, { 0.0f,0.0f,0.0f }, { 0.0f,0.0f,0.0f } };
+	Vector2 spritePos[2] = {{0.0f,0.0f}, {100.0f,100.0f}};
 	//球の作成
 	std::unique_ptr<Sphere> sphere = std::make_unique<Sphere>();
 	sphere->Initialize(texture->TextureData(0));
@@ -124,8 +124,10 @@ int WINAPI WinMain(HINSTANCE, HINSTANCE, LPSTR, int) {
 
 	bool debugCameraFlag = false;
 
-
 	bool useMonsterBall = true;
+
+	float speed = 0.1f;
+	int timer = 0;
 
 	Transform camraTransform{ {1.0f,1.0f,1.0f},{0.0f,0.0f,0.0f},{0.0f,0.0f,-5.0f} };
 
@@ -151,6 +153,8 @@ int WINAPI WinMain(HINSTANCE, HINSTANCE, LPSTR, int) {
 			DispatchMessage(&msg);
 		}
 		else {
+			timer++;
+
 			gamepad.Update();
 
 
@@ -176,6 +180,11 @@ int WINAPI WinMain(HINSTANCE, HINSTANCE, LPSTR, int) {
 				ImGui::DragFloat3("TranslateTriangle", &triangleTransform.translate.x, 1.0f);
 				ImGui::DragFloat3("RotateTriangle", &triangleTransform.rotate.x, 0.01f);
 				ImGui::DragFloat3("ScaleTriangle", &triangleTransform.scale.x, 0.01f);
+			}
+			if (ImGui::CollapsingHeader("Sphere")) {
+				ImGui::DragFloat3("TranslateSphere", &shpereTransform.translate.x, 1.0f);
+				ImGui::DragFloat3("RotateSphere", &shpereTransform.rotate.x, 0.01f);
+				ImGui::DragFloat3("ScaleSphere", &shpereTransform.scale.x, 0.01f);
 			}
 			if (ImGui::CollapsingHeader("vertex")) {
 				ImGui::DragFloat3("vertex 0", &vertex[0].x, 0.01f);
@@ -204,6 +213,13 @@ int WINAPI WinMain(HINSTANCE, HINSTANCE, LPSTR, int) {
 				viewMatrix = Inverse(cameraMatrix);
 			}
 			
+			if (timer%120==0) {
+				speed *= -1.0f;
+			}
+			shpereTransform.translate.x+=speed;
+			shpereTransform.scale.x += speed*0.1f;
+
+
 			sphere.get()->SetMaterialLighting(true);
 			model.get()->SetMaterialLighting(true);
 
@@ -218,7 +234,7 @@ int WINAPI WinMain(HINSTANCE, HINSTANCE, LPSTR, int) {
 
 			grid.get()->SettingWvp(viewMatrix);
 
-			sprite->SetTrandform(spriteTransform);
+			sprite.get()->SetSize(spritePos[0], spritePos[1]);
 			sprite->SettingWvp();
 
 			sphere->SetTrandform(shpereTransform);
