@@ -141,6 +141,23 @@ int Audio::Play(int soundHandle, bool loop, float volume) {
     return 0; 
 }
 
+bool Audio::IsPlaying(int soundHandle)
+{
+    if (soundHandle < 0 || soundHandle >= sSoundData.size()) {
+        return false; // 範囲外なら再生してないとみなす
+    }
+
+    SoundData& data = sSoundData[soundHandle];
+
+    if (data.pSourceVoice) {
+        XAUDIO2_VOICE_STATE state{};
+        data.pSourceVoice->GetState(&state);
+        return state.BuffersQueued > 0;
+    }
+
+    return false;
+}
+
 void Audio::Stop(int soundHandle) {
     if (soundHandle < 0 || soundHandle >= sSoundData.size()) { return; }
 

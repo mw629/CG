@@ -48,6 +48,14 @@ Engine::Engine(int32_t kClientWidth, int32_t kClientHeight)
 
 }
 
+void Engine::ImGuiDraw()
+{
+	ImGui::SliderFloat4("LightColor", &light_.color.x, 0.01f, 1.0f);
+	ImGui::SliderFloat3("LightDirection", &light_.direction.x, 0.01f, 1.0f);
+	ImGui::SliderFloat("LightIntensity", &light_.intensity, 0.01f, 1.0f);
+	directinalLight.get()->SetDirectionalLight(light_);
+}
+
 void Engine::Setting()
 {
 
@@ -97,7 +105,7 @@ void Engine::Setting()
 	
 	graphicsPipelineState.get()->CreateALLPSO(logStream, graphics.get()->GetDevice());
 
-	directinalLight = std::make_unique<DirectinalLight>();
+	directinalLight = std::make_unique<DirectionalLightManager>();
 	directinalLight->CreateDirectinalLight(graphics->GetDevice());
 
 	//ビューポート
@@ -180,7 +188,6 @@ void Engine::NewFrame() {
 	command->GetCommandList()->RSSetScissorRects(1, viewportScissor->GetScissorRect());//Sxirssorを設定
 
 	input.get()->Updata();
-
 }
 
 void Engine::EndFrame() {

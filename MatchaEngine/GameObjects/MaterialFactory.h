@@ -15,6 +15,7 @@ public:
 	void CreateMatrial(ID3D12Device* device,bool Lighting);
 
 	void SetMaterialLighting(bool isActiv) { materialData_->endbleLighting = isActiv; }
+	void SetUVMaterial(Matrix4x4 UVMatrix) { materialData_->uvTransform = UVMatrix; }
 
 	ID3D12Resource* GetMaterialResource() { return materialResource_.Get(); }
 	Material* GetMaterialData() { return materialData_; }

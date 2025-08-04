@@ -50,6 +50,7 @@ public:
 
     static int Play(int soundHandle, bool loop = false, float volume = 1.0f);
 
+    bool IsPlaying(int soundHandle);
    
     static void Stop(int soundHandle);
 

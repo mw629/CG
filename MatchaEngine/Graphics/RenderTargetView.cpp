@@ -33,3 +33,10 @@ void RenderTargetView::SetAndClear(ID3D12GraphicsCommandList* commandList, UINT 
 	//指定した色で画面全体をクリアする
 	commandList->ClearRenderTargetView(rtvHandles_[backBufferIndex], clearColor, 0, nullptr);
 }
+
+void RenderTargetView::SetWindowBackColor(Vector4 color) {
+	clearColor[0] = color.x;
+	clearColor[1] = color.y;
+	clearColor[2] = color.z;
+	clearColor[3] = color.w;
+}

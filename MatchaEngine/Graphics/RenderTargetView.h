@@ -12,7 +12,7 @@ private:
 	D3D12_CPU_DESCRIPTOR_HANDLE rtvStartHandle_;
 	D3D12_CPU_DESCRIPTOR_HANDLE rtvHandles_[2];
 
-
+	Vector4 color;
 	float clearColor[4];
 
 public:
@@ -26,6 +26,7 @@ public:
 	D3D12_CPU_DESCRIPTOR_HANDLE GetRtvStartHandle_() { return rtvStartHandle_; }
 	D3D12_CPU_DESCRIPTOR_HANDLE* GetRtvHandles(int index) { return &rtvHandles_[index]; };
 
+	void SetWindowBackColor(Vector4 color);
 
 	};
 

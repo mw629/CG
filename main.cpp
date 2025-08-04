@@ -69,13 +69,15 @@ int WINAPI WinMain(HINSTANCE, HINSTANCE, LPSTR, int) {
 
 	std::unique_ptr<Engine> engine = std::make_unique<Engine>(1280, 720);
 	engine.get()->Setting();
-
+	engine.get()->SetBackColor({ 0.1f,0.1f,0.1,0.1f });
 	std::unique_ptr<Draw> draw = std::make_unique<Draw>();
 
 	//テクスチャの作成
 	std::unique_ptr<Texture> texture = std::make_unique<Texture>();
 	texture->CreateTexture("resources/uvChecker.png");
 	texture->CreateTexture("resources/nightSky.png");
+
+
 	//線の描画
 	std::unique_ptr<Line> line = std::make_unique<Line>();
 	LineVertexData lineVertex[2] = { {{-1.0f,-1.0f,0.0f},{1.0f,1.0f,1.0f,1.0f} },
@@ -100,21 +102,45 @@ int WINAPI WinMain(HINSTANCE, HINSTANCE, LPSTR, int) {
 	std::unique_ptr<Sprite> sprite = std::make_unique<Sprite>();
 	sprite->Initialize(texture->TextureData(0));
 	sprite->CreateSprite();
-	Vector2 spritePos[2] = {{0.0f,0.0f}, {100.0f,100.0f}};
+	Vector2 spritePos[2] = { {0.0f,0.0f}, {300.0,200.0f} };
+	Transform spriteTransform = { {1.0f,1.0f,1.0f},{0.0f,0.0f,0.0f},{0.0f,0.0f,0.0f} };
 	//球の作成
 	std::unique_ptr<Sphere> sphere = std::make_unique<Sphere>();
 	sphere->Initialize(texture->TextureData(0));
 	sphere->CreateSprite();
 	Transform shpereTransform = { {1.0f, 1.0f, 1.0f}, { 0.0f,0.0f,0.0f }, { 0.0f,0.0f,0.0f } };
+	//球の作成
+	std::unique_ptr<Sphere> sphere2 = std::make_unique<Sphere>();
+	sphere2->Initialize(texture->TextureData(0));
+	sphere2->CreateSprite();
+	Transform shpere2Transform = { {1.0f, 1.0f, 1.0f}, { 0.0f,0.0f,0.0f }, { -8.0f,0.0f,0.0f } };
+
 	//モデルの作成
 	ModelData modelData = LoadObjFile("resources/obj", "axis.obj");
 	std::unique_ptr<Model> model = std::make_unique<Model>();
 	model->Initialize(modelData, texture->TextureData(0));
 	model->CreateModel();
-	Transform objTransform = { {1.0f, 1.0f, 1.0f}, { 0.0f,0.0f,0.0f }, { 0.0f,0.0f,0.0f } };
-
-
-
+	Transform objTransform = { {0.5f, 0.5f, 0.5f}, { 0.0f,0.0f,0.0f }, { 0.0f,0.0f,5.0f } };
+	//モデルの作成
+	ModelData model2Data = LoadObjFile("resources/obj", "axis.obj");
+	std::unique_ptr<Model> model2 = std::make_unique<Model>();
+	model2->Initialize(model2Data, texture->TextureData(0));
+	model2->CreateModel();
+	Transform obj2Transform = { {0.5f, 0.5f, 0.5f}, { 0.0f,0.0f,0.0f }, { 0.0f,0.0f,-5.0f } };
+	//Teapot作成
+	ModelData teapotData = LoadObjFile("resources/obj", "teapot.obj");
+	texture->CreateTexture(teapotData.material.textureDilePath);
+	std::unique_ptr<Model> teapot = std::make_unique<Model>();
+	teapot->Initialize(teapotData, texture->TextureData(2));
+	teapot->CreateModel();
+	Transform teapotTransform = { {0.5f, 0.5f, 0.5f}, { 0.0f,3.14f,0.0f }, { 2.0f,0.0f,0.0f } };
+	//Bunny作成
+	ModelData bunnyData = LoadObjFile("resources/obj", "bunny.obj");
+	std::unique_ptr<Model> bunny = std::make_unique<Model>();
+	bunny->Initialize(bunnyData, texture->TextureData(0));
+	bunny->CreateModel();
+	Transform bunnyTransform = { {0.5f, 0.5f, 0.5f}, { 0.0f,3.14f,0.0f }, { 0.0f,0.0f,0.0f } };
+	
 	//std::unique_ptr<DirectinalLight> directinalLight = std::make_unique<DirectinalLight>();
 	//directinalLight->CreateDirectinalLight(graphics->GetDevice());
 	std::unique_ptr<DebugCamera> debugCamera = std::make_unique<DebugCamera>();
@@ -126,10 +152,16 @@ int WINAPI WinMain(HINSTANCE, HINSTANCE, LPSTR, int) {
 
 	bool useMonsterBall = true;
 
-	float speed = 0.1f;
+	float move = 8.0f;
+	bool trun = false;
 	int timer = 0;
 
-	Transform camraTransform{ {1.0f,1.0f,1.0f},{0.0f,0.0f,0.0f},{0.0f,0.0f,-5.0f} };
+	DirectionalLight light = {
+	{ 1.0f,1.0f,1.0f,1.0f },
+	{ 0.0f, -1.0f, 0.0f },
+	{1.0f} };
+
+	Transform camraTransform{ {1.0f,1.0f,1.0f},{0.36f,0.0f,0.0f},{0.0f,10.0f,-25.0f} };
 
 	Transform uvTransformSprite{ {1.0f,1.0f,1.0f},{0.0f,0.0f,0.0f},{0.0f,0.0f,0.0f} };
 
@@ -137,7 +169,7 @@ int WINAPI WinMain(HINSTANCE, HINSTANCE, LPSTR, int) {
 	int BGMHandle;
 	audio->Initialize();
 	BGMHandle = audio->Load("resources/Audio/BGM/sweet_pop.mp3");
-	audio->Play(BGMHandle, false, 1.0f);
+	audio->Play(BGMHandle, true, 1.0f);
 
 	GamePadInput gamepad;
 
@@ -157,7 +189,7 @@ int WINAPI WinMain(HINSTANCE, HINSTANCE, LPSTR, int) {
 
 			gamepad.Update();
 
-
+			
 
 			engine.get()->NewFrame();
 
@@ -165,6 +197,7 @@ int WINAPI WinMain(HINSTANCE, HINSTANCE, LPSTR, int) {
 
 			gamepad.DrawImGui();
 			texture.get()->TextureList();
+			engine.get()->ImGuiDraw();
 
 			//開発用UIの処理。実際に開発用UIを出す場合はここをゲ0無固有の処理に置き換える
 			ImGui::Checkbox("useMonsterBall", &useMonsterBall);
@@ -176,24 +209,10 @@ int WINAPI WinMain(HINSTANCE, HINSTANCE, LPSTR, int) {
 				ImGui::DragFloat3("camraRotate", &camraTransform.rotate.x, 0.01f);
 				ImGui::DragFloat3("camraScale", &camraTransform.scale.x, 0.01f);
 			}
-			if (ImGui::CollapsingHeader("Triangle")) {
-				ImGui::DragFloat3("TranslateTriangle", &triangleTransform.translate.x, 1.0f);
-				ImGui::DragFloat3("RotateTriangle", &triangleTransform.rotate.x, 0.01f);
-				ImGui::DragFloat3("ScaleTriangle", &triangleTransform.scale.x, 0.01f);
-			}
 			if (ImGui::CollapsingHeader("Sphere")) {
 				ImGui::DragFloat3("TranslateSphere", &shpereTransform.translate.x, 1.0f);
 				ImGui::DragFloat3("RotateSphere", &shpereTransform.rotate.x, 0.01f);
 				ImGui::DragFloat3("ScaleSphere", &shpereTransform.scale.x, 0.01f);
-			}
-			if (ImGui::CollapsingHeader("vertex")) {
-				ImGui::DragFloat3("vertex 0", &vertex[0].x, 0.01f);
-				ImGui::DragFloat3("vertex 1", &vertex[1].x, 0.01f);
-				ImGui::DragFloat3("vertex 2", &vertex[2].x, 0.01f);
-			}
-			if (ImGui::CollapsingHeader("LVertex")) {
-				ImGui::DragFloat3("Lvertex 0", &lineVertex[0].position.x, 0.01f);
-				ImGui::DragFloat3("Lvertex 1", &lineVertex[1].position.x, 0.01f);
 			}
 			if (ImGui::CollapsingHeader("SpriteUV"))
 			{
@@ -201,6 +220,14 @@ int WINAPI WinMain(HINSTANCE, HINSTANCE, LPSTR, int) {
 				ImGui::DragFloat2("ScaleSpriteUV", &uvTransformSprite.scale.x, 0.01f, -10.0f, 10.0f);
 				ImGui::SliderAngle("RotateSpriteUV", &uvTransformSprite.rotate.z);
 			}
+
+			bunnyTransform.translate.x += gamepad.GetLeftStickX() * 0.1f;
+			bunnyTransform.translate.z += gamepad.GetLeftStickY() * 0.1f;
+			if (gamepad.PressedButton(XINPUT_GAMEPAD_A)) {	bunnyTransform.translate.y -= 0.1f;}
+			if (gamepad.PressedButton(XINPUT_GAMEPAD_B)) {	bunnyTransform.translate.y += 0.1f;}
+			bunnyTransform.rotate.y -= gamepad.GetRightStickX() * 0.1f;
+			bunnyTransform.rotate.x -= gamepad.GetRightStickY() * 0.1f;
+
 
 
 			if (debugCameraFlag) {
@@ -212,16 +239,50 @@ int WINAPI WinMain(HINSTANCE, HINSTANCE, LPSTR, int) {
 				Matrix4x4 cameraMatrix = MakeAffineMatrix(camraTransform.translate, camraTransform.scale, camraTransform.rotate);;
 				viewMatrix = Inverse(cameraMatrix);
 			}
+			uvTransformSprite.translate.x += 0.01f;
 			
-			if (timer%120==0) {
-				speed *= -1.0f;
+			if (move >= 10.0f) {
+				trun = true;
 			}
-			shpereTransform.translate.x+=speed;
-			shpereTransform.scale.x += speed*0.1f;
+			else if (move <= 8.0f) {
+				trun = false;
+			}
+			if(!trun){
+				move+=0.1f;
+			} else{
+				move -= 0.1f;
+			}
+
+			shpereTransform.translate.x = move;
+			shpereTransform.scale.x = (move-7.0f)*0.5f;
+			shpereTransform.rotate.x += 0.1f;
+			spriteTransform.translate.x = move;
+			
+			
+		
 
 
-			sphere.get()->SetMaterialLighting(true);
-			model.get()->SetMaterialLighting(true);
+			if (timer >= 60) {
+				sphere2.get()->SetMaterialLighting(true);
+				light.direction.x += 1.0f / 120.0f;
+				light.direction.y += 1.0f / 120.0f;
+			}
+			if (light.direction.x >= 1.0f) {
+				light.direction.x = 1.0f;
+				light.direction.y = 1.0f;
+				light.color.x -= 1.0f / 180.0f;
+				light.color.z -= 1.0f / 180.0f;
+				if (light.color.x <= 0) {
+					light.color.x = 1.0;
+					light.color.z = 1.0;
+					light.direction.x = 0.0f;
+					light.direction.y = -1.0f;
+					timer = 0;
+				}
+			}
+
+
+			engine.get()->SetLight(light);
 
 			triangle->SetVertex(vertex);
 			triangle->SetShape();
@@ -235,13 +296,24 @@ int WINAPI WinMain(HINSTANCE, HINSTANCE, LPSTR, int) {
 			grid.get()->SettingWvp(viewMatrix);
 
 			sprite.get()->SetSize(spritePos[0], spritePos[1]);
+			sprite.get()->SetTransfotm(spriteTransform);
+			sprite.get()->SetUVTransfotm(uvTransformSprite);
 			sprite->SettingWvp();
 
 			sphere->SetTrandform(shpereTransform);
 			sphere->SettingWvp(viewMatrix);
+			sphere2->SetTrandform(shpere2Transform);
+			sphere2->SettingWvp(viewMatrix);
 
 			model->SetTransform(objTransform);
 			model->SettingWvp(viewMatrix);
+			model2->SetTransform(obj2Transform);
+			model2->SettingWvp(viewMatrix);
+			bunny->SetTransform(bunnyTransform);
+			bunny->SettingWvp(viewMatrix);
+			teapot->SetTransform(teapotTransform);
+			teapot->SettingWvp(viewMatrix); 
+
 
 			Matrix4x4 uvTransformMatrix = Scale(uvTransformSprite.scale);
 			uvTransformMatrix = MultiplyMatrix4x4(uvTransformMatrix, Rotation(uvTransformSprite.rotate));
@@ -252,21 +324,24 @@ int WINAPI WinMain(HINSTANCE, HINSTANCE, LPSTR, int) {
 
 			engine.get()->LinePreDraw();
 
-			draw.get()->DrawLine(line.get());
-			draw.get()->DrawGrid(grid.get());
-	
+			//draw.get()->DrawLine(line.get());
+			//draw.get()->DrawGrid(grid.get());
+
 			engine.get()->PreDraw();
 
-			//三角形の描画
-			draw->DrawTriangle(triangle.get());
 			//スプライトの描画	
 			draw.get()->DrawSprite(sprite.get());
 			//球の描画
 			draw.get()->DrawShpere(sphere.get());
+			//球の描画
+			draw.get()->DrawShpere(sphere2.get());
 			//objectの描画
 			draw->DrawObj(model.get());
-			
-			engine.get()->PostDraw();
+			draw->DrawObj(model2.get());
+			draw->DrawObj(bunny.get());
+			draw->DrawObj(teapot.get());
+
+			engine.get()->PostDraw(); 
 
 			engine.get()->EndFrame();
 		}

@@ -138,3 +138,14 @@ void Sprite::SetSize(Vector2 leftTop, Vector2 rigthBottom)
 	vertexData_[3].texcoord = { 1.0f,0.0f };
 }
 
+void Sprite::SetUVTransfotm(Transform transform)
+{
+	Matrix4x4 UVMatrix = MakeAffineMatrix(transform.translate, transform.scale, transform.rotate);
+	material_->SetUVMaterial(UVMatrix);
+}
+
+void Sprite::SetTransfotm(Transform transform) {
+	transform_.translate = transform.translate;
+	transform_.scale = transform.scale;
+	transform_.rotate = transform.rotate;
+}

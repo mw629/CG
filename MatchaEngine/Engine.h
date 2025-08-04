@@ -25,7 +25,7 @@
 
 #include "Graphics/DepthStencil.h"
 #include "Graphics/DescriptorHeap.h"
-#include "Graphics/DirectinalLight.h"
+#include "Graphics/DirectionalLightManager.h"
 #include "Graphics/Draw.h"
 #include "Graphics/GpuSyncManager.h"
 #include "Graphics/GraphicsDevice.h"
@@ -95,14 +95,19 @@ private:
 
 	std::unique_ptr<GraphicsPipelineState> graphicsPipelineState;
 
-	std::unique_ptr<DirectinalLight> directinalLight;
+	std::unique_ptr<DirectionalLightManager> directinalLight;
+	DirectionalLight light_ = {
+	{ 1.0f,1.0f,1.0f,1.0f },
+	{ 0.0f, -1.0f, 0.0f },
+	{1.0f}};
 
-	ID3D12DescriptorHeap* descriptorHeeps[1];
-	
+	ID3D12DescriptorHeap * descriptorHeeps[1];
+
 public:
-
 	~Engine();
 	Engine(int32_t kClientWidth, int32_t kClientHeight);
+
+	void ImGuiDraw();
 
 	void Setting();
 
@@ -119,6 +124,9 @@ public:
 	void End();
 
 	Input* GetInput() { return input.get(); }
+
+	void SetBackColor(Vector4 color) { renderTargetView.get()->SetWindowBackColor(color); }
+	void SetLight(DirectionalLight light) {light_ = light;}
 
 };
 

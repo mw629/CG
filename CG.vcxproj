@@ -96,7 +96,7 @@ copy "$(WindowsSdkDir)bin\$(TargetPlatformVersion)\x64\dxil.dll" "$(TargetDir)dx
     <ClCompile Include="MatchaEngine\GameObjects\Grid.cpp" />
     <ClCompile Include="MatchaEngine\Graphics\DepthStencil.cpp" />
     <ClCompile Include="MatchaEngine\Graphics\DescriptorHeap.cpp" />
-    <ClCompile Include="MatchaEngine\Graphics\DirectinalLight.cpp" />
+    <ClCompile Include="MatchaEngine\Graphics\DirectionalLightManager.cpp" />
     <ClCompile Include="MatchaEngine\Graphics\GpuSyncManager.cpp" />
     <ClCompile Include="MatchaEngine\GameObjects\DebugCamera.cpp" />
     <ClCompile Include="MatchaEngine\GameObjects\Sprite.cpp" />
@@ -171,7 +171,7 @@ copy "$(WindowsSdkDir)bin\$(TargetPlatformVersion)\x64\dxil.dll" "$(TargetDir)dx
     <ClInclude Include="MatchaEngine\GameObjects\Grid.h" />
     <ClInclude Include="MatchaEngine\Graphics\DepthStencil.h" />
     <ClInclude Include="MatchaEngine\Graphics\DescriptorHeap.h" />
-    <ClInclude Include="MatchaEngine\Graphics\DirectinalLight.h" />
+    <ClInclude Include="MatchaEngine\Graphics\DirectionalLightManager.h" />
     <ClInclude Include="MatchaEngine\Graphics\GpuSyncManager.h" />
     <ClInclude Include="MatchaEngine\GameObjects\Sprite.h" />
     <ClInclude Include="MatchaEngine\Resource\Load.h" />
