@@ -106,6 +106,7 @@ int WINAPI WinMain(HINSTANCE, HINSTANCE, LPSTR, int) {
 	sphere->Initialize(texture->TextureData(0));
 	sphere->CreateSprite();
 	Transform shpereTransform = { {1.0f, 1.0f, 1.0f}, { 0.0f,0.0f,0.0f }, { 0.0f,0.0f,0.0f } };
+	Vector4 Color = { 1.0f,1.0f,1.0f,1.0f };
 	//モデルの作成
 	ModelData modelData = LoadObjFile("resources/obj", "axis.obj");
 	std::unique_ptr<Model> model = std::make_unique<Model>();
@@ -126,8 +127,6 @@ int WINAPI WinMain(HINSTANCE, HINSTANCE, LPSTR, int) {
 
 	bool useMonsterBall = true;
 
-	float speed = 0.1f;
-	int timer = 0;
 
 	Transform camraTransform{ {1.0f,1.0f,1.0f},{0.0f,0.0f,0.0f},{0.0f,0.0f,-5.0f} };
 
@@ -153,7 +152,6 @@ int WINAPI WinMain(HINSTANCE, HINSTANCE, LPSTR, int) {
 			DispatchMessage(&msg);
 		}
 		else {
-			timer++;
 
 			gamepad.Update();
 
@@ -201,6 +199,7 @@ int WINAPI WinMain(HINSTANCE, HINSTANCE, LPSTR, int) {
 				ImGui::DragFloat2("ScaleSpriteUV", &uvTransformSprite.scale.x, 0.01f, -10.0f, 10.0f);
 				ImGui::SliderAngle("RotateSpriteUV", &uvTransformSprite.rotate.z);
 			}
+			ImGui::ColorEdit4("SphereCOlor", &Color.x);
 
 
 			if (debugCameraFlag) {
@@ -213,13 +212,7 @@ int WINAPI WinMain(HINSTANCE, HINSTANCE, LPSTR, int) {
 				viewMatrix = Inverse(cameraMatrix);
 			}
 			
-			if (timer%120==0) {
-				speed *= -1.0f;
-			}
-			shpereTransform.translate.x+=speed;
-			shpereTransform.scale.x += speed*0.1f;
-
-
+			
 			sphere.get()->SetMaterialLighting(true);
 			model.get()->SetMaterialLighting(true);
 
@@ -237,8 +230,11 @@ int WINAPI WinMain(HINSTANCE, HINSTANCE, LPSTR, int) {
 			sprite.get()->SetSize(spritePos[0], spritePos[1]);
 			sprite->SettingWvp();
 
+			sphere.get()->SetColor(Color);
 			sphere->SetTrandform(shpereTransform);
 			sphere->SettingWvp(viewMatrix);
+			
+
 
 			model->SetTransform(objTransform);
 			model->SettingWvp(viewMatrix);

@@ -47,6 +47,7 @@ public:
 
 	void SetMaterialLighting(bool isActiv) { material_->SetMaterialLighting(isActiv); }
 
+	void SetColor(Vector4 Color){return material_->SetColor(Color); }
 
 	D3D12_VERTEX_BUFFER_VIEW* GetVertexBufferView() { return &vertexBufferView_; }
 	ID3D12Resource* GetVertexResource() { return wvpResource_.Get(); }
