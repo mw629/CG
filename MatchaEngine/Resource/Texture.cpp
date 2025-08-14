@@ -18,13 +18,13 @@ void Texture::Initalize(ID3D12Device* device, ID3D12GraphicsCommandList* command
 	descriptorHeap_ = descriptorHeap;
 }
 
-void Texture::CreateTexture(const std::string& filePath)
+int Texture::CreateTexture(const std::string& filePath)
 {
 	//Textureを読み込んで転送する//
 	DirectX::ScratchImage mipImages = LoadTexture(filePath);
 
-	if (textureLoader_->CheckFilePath(filePath)) {
-		return;
+	if (textureLoader_->CheckFilePath(filePath) > 0) {
+		return textureLoader_->CheckFilePath(filePath);
 	}
 
 	const DirectX::TexMetadata& metaData = mipImages.GetMetadata();
@@ -47,6 +47,8 @@ void Texture::CreateTexture(const std::string& filePath)
 	textureLoader_->StockTextureData(filePath, textureSrvHandleCPU, textureSrvHandleGPU, textureResource, intermediateResource);
 
 	device_->CreateShaderResourceView(textureResource.Get(), &srvDesc, textureSrvHandleCPU);
+
+	return textureLoader_->GetLastIndex()-1;
 }
 
 void Texture::TextureList()

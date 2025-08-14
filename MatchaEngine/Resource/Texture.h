@@ -13,7 +13,7 @@ public:
  
 	static void Initalize(ID3D12Device* graphicsDevice, ID3D12GraphicsCommandList* commandList, DescriptorHeap *descriptorHeap, TextureLoader* textureLoader);
 
-	void CreateTexture(const std::string& filePath);
+	int CreateTexture(const std::string& filePath);
 
 	void TextureList();
 

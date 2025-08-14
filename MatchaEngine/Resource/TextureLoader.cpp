@@ -1,14 +1,14 @@
 #include "TextureLoader.h"
 #include "../externals/imgui/imgui.h"
 
-bool TextureLoader::CheckFilePath(const std::string& filePath)
+int TextureLoader::CheckFilePath(const std::string& filePath)
 {
 	for (int i = 0; i < texture_.size(); i++) {
 		if (texture_[i].filePath == filePath) {
-			return true;
+			return i;
 		}
 	}
-	return false;
+	return -1;
 }
 
 bool TextureLoader::StockTextureData(const std::string& filePath, 

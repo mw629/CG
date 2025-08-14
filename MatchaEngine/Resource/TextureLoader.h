@@ -1,5 +1,6 @@
 #pragma once
 #include <d3dx12.h>
+
 class TextureLoader
 {
 private:
@@ -18,7 +19,7 @@ private:
 
 public:
 
-	bool CheckFilePath(const std::string& filePath);
+	int CheckFilePath(const std::string& filePath);
 
 	bool StockTextureData(const std::string& filePath,
 		D3D12_CPU_DESCRIPTOR_HANDLE textureSrvHandleCPU,

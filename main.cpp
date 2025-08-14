@@ -74,8 +74,8 @@ int WINAPI WinMain(HINSTANCE, HINSTANCE, LPSTR, int) {
 
 	//テクスチャの作成
 	std::unique_ptr<Texture> texture = std::make_unique<Texture>();
-	texture->CreateTexture("resources/uvChecker.png");
-	texture->CreateTexture("resources/nightSky.png");
+	int a=texture->CreateTexture("resources/uvChecker.png");
+	int b=texture->CreateTexture("resources/nightSky.png");
 
 
 	//線の描画
@@ -100,18 +100,18 @@ int WINAPI WinMain(HINSTANCE, HINSTANCE, LPSTR, int) {
 	};
 	//スプライト作成
 	std::unique_ptr<Sprite> sprite = std::make_unique<Sprite>();
-	sprite->Initialize(texture->TextureData(0));
+	sprite->Initialize(texture->TextureData(a));
 	sprite->CreateSprite();
 	Vector2 spritePos[2] = { {0.0f,0.0f}, {300.0,200.0f} };
 	Transform spriteTransform = { {1.0f,1.0f,1.0f},{0.0f,0.0f,0.0f},{0.0f,0.0f,0.0f} };
 	//球の作成
 	std::unique_ptr<Sphere> sphere = std::make_unique<Sphere>();
-	sphere->Initialize(texture->TextureData(0));
+	sphere->Initialize(texture->TextureData(a));
 	sphere->CreateSprite();
 	Transform shpereTransform = { {1.0f, 1.0f, 1.0f}, { 0.0f,0.0f,0.0f }, { 0.0f,0.0f,0.0f } };
 	//球の作成
 	std::unique_ptr<Sphere> sphere2 = std::make_unique<Sphere>();
-	sphere2->Initialize(texture->TextureData(0));
+	sphere2->Initialize(texture->TextureData(a));
 	sphere2->CreateSprite();
 	Transform shpere2Transform = { {1.0f, 1.0f, 1.0f}, { 0.0f,0.0f,0.0f }, { -8.0f,0.0f,0.0f } };
 
