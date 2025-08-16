@@ -15,16 +15,16 @@ public:
 
 	static void Initialize(ID3D12GraphicsCommandList* commandList);
 
-	void DrawObj(Model* model);
+	static void DrawObj(Model* model);
 
-	void DrawSprite(Sprite* sprite);
+	static void DrawSprite(Sprite* sprite);
 
-	void DrawShpere(Sphere* sphere);
+	static void DrawShpere(Sphere* sphere);
 
-	void DrawTriangle(Triangle* triangle);
+	static void DrawTriangle(Triangle* triangle);
 
-	void DrawLine(Line* line);
+	static void DrawLine(Line* line);
 
-	void DrawGrid(Grid* grid);
+	static void DrawGrid(Grid* grid);
 	
 };

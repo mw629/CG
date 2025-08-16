@@ -248,19 +248,19 @@ int WINAPI WinMain(HINSTANCE, HINSTANCE, LPSTR, int) {
 
 			engine.get()->LinePreDraw();
 
-			draw.get()->DrawLine(line.get());
-			draw.get()->DrawGrid(grid.get());
+			Draw::DrawLine(line.get());
+			Draw::DrawGrid(grid.get());
 	
 			engine.get()->PreDraw();
 
 			//三角形の描画
-			draw->DrawTriangle(triangle.get());
+			Draw::DrawTriangle(triangle.get());
 			//スプライトの描画	
-			draw.get()->DrawSprite(sprite.get());
+			Draw::DrawSprite(sprite.get());
 			//球の描画
-			draw.get()->DrawShpere(sphere.get());
+			Draw::DrawShpere(sphere.get());
 			//objectの描画
-			draw->DrawObj(model.get());
+			Draw::DrawObj(model.get());
 			
 			engine.get()->PostDraw();
 
