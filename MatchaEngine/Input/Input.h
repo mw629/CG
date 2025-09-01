@@ -31,25 +31,29 @@ public:
 	void Updata();  
 
 	//押して瞬間  
-	bool PushKey(uint32_t Key);  
+	static bool PushKey(uint32_t Key);  
 	//押している  
-	bool PressKey(uint32_t key);  
+	static bool PressKey(uint32_t key);
 	//離した瞬間  
-	bool ReleaseKey(uint32_t key);  
+	static bool ReleaseKey(uint32_t key);
 	//離してる  
-	bool FreeKey(uint32_t key);  
+	static bool FreeKey(uint32_t key);
 
 	//押して瞬間  
-	bool PushMouse(uint32_t Key);  
+	static bool PushMouse(uint32_t Key);
 	//押している  
-	bool PressMouse(uint32_t key);  
+	static bool PressMouse(uint32_t key);
 	//離した瞬間  
-	bool ReleaseMouse(uint32_t key);  
+	static bool ReleaseMouse(uint32_t key);
 	//離してる  
-	bool FreeMouse(uint32_t key);  
+	static bool FreeMouse(uint32_t key);
+
 	//マウスの移動  
-	Vector2i GetMouseDelta() { return Vector2i(mouseState.lX, mouseState.lY); }  
-	int GetMouseWheel()const { return mouseState.lZ; }
+	static Vector2i GetMouseDelta();
+	static int GetMouseWheel();
 	
 	BYTE GetKey(int keyNum)const { return key_[keyNum]; }
+
+	void SetKey();
+
 };

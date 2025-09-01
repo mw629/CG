@@ -16,21 +16,21 @@ void DebugCamera::Initialize() {
     isMiddleMouseButtonPressed_ = false;
 }
 
-void DebugCamera::Update(Input* input) {
-    isMiddleMouseButtonPressed_ = input->PressMouse(2);
+void DebugCamera::Update() {
+    isMiddleMouseButtonPressed_ = Input::PressMouse(2);
 
-    Vector2i mouseDelta = input->GetMouseDelta();
+    Vector2i mouseDelta = Input::GetMouseDelta();
     float M_PI = 3.14f;
     float moveSpeed = 0.1f;
     float rotateSpeed = 0.005f;
     float zoomSpeed = 1.0f;
 
-    if (isMiddleMouseButtonPressed_ && !input->PressKey(DIK_LSHIFT) && !input->PressKey(DIK_LCONTROL)) {
+    if (isMiddleMouseButtonPressed_ && !Input::PressKey(DIK_LSHIFT) && !Input::PressKey(DIK_LCONTROL)) {
         phi_ -= (float)mouseDelta.y * rotateSpeed;
         theta_ += (float)mouseDelta.x * rotateSpeed;
         phi_ = std::fmaxf(-M_PI / 2.0f + 0.01f, std::fminf(M_PI / 2.0f - 0.01f, phi_));
     }
-    else if (isMiddleMouseButtonPressed_ && input->PressKey(DIK_LSHIFT)) {
+    else if (isMiddleMouseButtonPressed_ && Input::PressKey(DIK_LSHIFT)) {
         Vector3 forward = Normalize(target_ - eye_);
         Vector3 right = Normalize(Cross(up_, forward));
         Vector3 localUp = Normalize(Cross(forward, right));
@@ -44,7 +44,7 @@ void DebugCamera::Update(Input* input) {
         target_ += localUp * (float)mouseDelta.y * panFactor;
     }
 
-    float wheelDelta = (float)input->GetMouseWheel();
+    float wheelDelta = (float)Input::GetMouseWheel();
     if (wheelDelta != 0) {
         radius_ -= wheelDelta * zoomSpeed * 0.1f;
         if (radius_ < 0.1f) {
@@ -52,12 +52,12 @@ void DebugCamera::Update(Input* input) {
         }
     }
 
-    if (input->PressKey(DIK_W)) {
+    if (Input::PressKey(DIK_W)) {
         Vector3 forward = Normalize(target_ - eye_);
         eye_ += forward * moveSpeed;
         target_ += forward * moveSpeed;
     }
-    if (input->PressKey(DIK_S)) {
+    if (Input::PressKey(DIK_S)) {
         Vector3 forward = Normalize(target_ - eye_);
         eye_ -= forward * moveSpeed;
         target_ -= forward * moveSpeed;

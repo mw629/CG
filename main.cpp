@@ -203,7 +203,7 @@ int WINAPI WinMain(HINSTANCE, HINSTANCE, LPSTR, int) {
 
 
 			if (debugCameraFlag) {
-				debugCamera->Update(engine.get()->GetInput());
+				debugCamera->Update();
 				viewMatrix = debugCamera->GetViewMatrix();
 			}
 			else
