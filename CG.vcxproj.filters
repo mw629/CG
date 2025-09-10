@@ -164,10 +164,10 @@
     </ClCompile>
   </ItemGroup>
   <ItemGroup>
-    <FxCompile Include="MatchaEngine\Graphics\Shader\Object3d.VS.hlsl" />
-    <FxCompile Include="MatchaEngine\Graphics\Shader\Object3d.PS.hlsl" />
-    <FxCompile Include="MatchaEngine\Graphics\Shader\Line.VS.hlsl" />
-    <FxCompile Include="MatchaEngine\Graphics\Shader\Line.PS.hlsl" />
+    <FxCompile Include="MatchaEngine\Shader\Object3d.VS.hlsl" />
+    <FxCompile Include="MatchaEngine\Shader\Object3d.PS.hlsl" />
+    <FxCompile Include="MatchaEngine\Shader\Line.VS.hlsl" />
+    <FxCompile Include="MatchaEngine\Shader\Line.PS.hlsl" />
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="MatchaEngine\Math\Calculation.h">
@@ -321,7 +321,7 @@
     </Text>
   </ItemGroup>
   <ItemGroup>
-    <None Include="MatchaEngine\Graphics\Shader\Object3d.hlsli" />
-    <None Include="MatchaEngine\Graphics\Shader\Line.hlsli" />
+    <None Include="MatchaEngine\Shader\Object3d.hlsli" />
+    <None Include="MatchaEngine\Shader\Line.hlsli" />
   </ItemGroup>
 </Project>
