@@ -11,28 +11,20 @@
 #include "../GameObjects/Grid.h"
 
 class Draw {
-private:
-
-	ID3D12GraphicsCommandList* commandList_{};
-
-
 public:
 
-	Draw(ID3D12GraphicsCommandList* commandList);
-	~Draw();
+	static void Initialize(ID3D12GraphicsCommandList* commandList);
 
-	void Initialize();
+	static void DrawObj(Model* model);
 
-	void DrawObj(Model* model);
+	static void DrawSprite(Sprite* sprite);
 
-	void DrawSprite(Sprite* sprite);
+	static void DrawShpere(Sphere* sphere);
 
-	void DrawShpere(Sphere* sphere);
+	static void DrawTriangle(Triangle* triangle);
 
-	void DrawTriangle(Triangle* triangle);
+	static void DrawLine(Line* line);
 
-	void DrawLine(Line* line);
-
-	void DrawGrid(Grid* grid);
+	static void DrawGrid(Grid* grid);
 	
 };

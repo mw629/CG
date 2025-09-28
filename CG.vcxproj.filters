@@ -159,12 +159,15 @@
     <ClCompile Include="MatchaEngine\GameObjects\Line.cpp">
       <Filter>ソース ファイル</Filter>
     </ClCompile>
+    <ClCompile Include="MatchaEngine\Input\GamePadInput.cpp">
+      <Filter>ソース ファイル</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
-    <FxCompile Include="MatchaEngine\Graphics\Shader\Object3d.VS.hlsl" />
-    <FxCompile Include="MatchaEngine\Graphics\Shader\Object3d.PS.hlsl" />
-    <FxCompile Include="MatchaEngine\Graphics\Shader\Line.VS.hlsl" />
-    <FxCompile Include="MatchaEngine\Graphics\Shader\Line.PS.hlsl" />
+    <FxCompile Include="MatchaEngine\Shader\Object3d.VS.hlsl" />
+    <FxCompile Include="MatchaEngine\Shader\Object3d.PS.hlsl" />
+    <FxCompile Include="MatchaEngine\Shader\Line.VS.hlsl" />
+    <FxCompile Include="MatchaEngine\Shader\Line.PS.hlsl" />
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="MatchaEngine\Math\Calculation.h">
@@ -308,6 +311,9 @@
     <ClInclude Include="MatchaEngine\GameObjects\Line.h">
       <Filter>ヘッダー ファイル</Filter>
     </ClInclude>
+    <ClInclude Include="MatchaEngine\Input\GamePadInput.h">
+      <Filter>ヘッダー ファイル</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <Text Include="externals\imgui\LICENSE.txt">
@@ -315,7 +321,7 @@
     </Text>
   </ItemGroup>
   <ItemGroup>
-    <None Include="MatchaEngine\Graphics\Shader\Object3d.hlsli" />
-    <None Include="MatchaEngine\Graphics\Shader\Line.hlsli" />
+    <None Include="MatchaEngine\Shader\Object3d.hlsli" />
+    <None Include="MatchaEngine\Shader\Line.hlsli" />
   </ItemGroup>
 </Project>

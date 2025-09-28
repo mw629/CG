@@ -16,22 +16,35 @@ Triangle::~Triangle()
 	// ComPtrは自動的に解放される
 	vertexResource_.Reset();
 	wvpResource_.Reset();
+	
+	delete material_;
 }
 
-void Triangle::Initialize(MaterialFactory* material, D3D12_GPU_DESCRIPTOR_HANDLE textureSrvHandleGPU) {
-	material_ = material;
+namespace {
+	ID3D12Device* device_;
+}
+
+void Triangle::SetDevice(ID3D12Device* device) {
+	device_ = device;
+}
+
+void Triangle::Initialize(D3D12_GPU_DESCRIPTOR_HANDLE textureSrvHandleGPU) { 
 	textureSrvHandleGPU_ = textureSrvHandleGPU;
 	vertex_[0] = { -0.1f,-0.1f,0.0f,1.0f };
 	vertex_[1] = { 0.0f,0.1f,0.0f,1.0f };
 	vertex_[2] = { 0.1f,-0.1f,0.0f,1.0f };
+
+	material_ = new MaterialFactory();
+	material_->CreateMatrial(device_, false);
+
 }
 
 
 
-void Triangle::CreateVertexData(ID3D12Device* device)
+void Triangle::CreateVertexData()
 {
 	//VertexResourceを生成する//
-	vertexResource_ = GraphicsDevice::CreateBufferResource(device, sizeof(VertexData) * 3);
+	vertexResource_ = GraphicsDevice::CreateBufferResource(device_, sizeof(VertexData) * 3);
 	//頂点バッファビューを作成する
 	//リソースの先頭のアドレスから使う
 	vertexBufferView_.BufferLocation = vertexResource_->GetGPUVirtualAddress();
@@ -54,9 +67,9 @@ void Triangle::CreateVertexData(ID3D12Device* device)
 	vertexData_[2].texcoord = { 1.0f,1.0f };
 }
 
-void Triangle::CreateWVP(ID3D12Device* device) {
+void Triangle::CreateWVP() {
 	//WVP用のリソースを作る
-	wvpResource_ = GraphicsDevice::CreateBufferResource(device, sizeof(TransformationMatrix));
+	wvpResource_ = GraphicsDevice::CreateBufferResource(device_, sizeof(TransformationMatrix));
 	//
 	wvpData_ = nullptr;
 	//
@@ -68,13 +81,13 @@ void Triangle::CreateWVP(ID3D12Device* device) {
 
 
 
-void Triangle::CreateTriangle(ID3D12Device* device)
+void Triangle::CreateTriangle()
 {
-	CreateVertexData(device);
-	CreateWVP(device);
+	CreateVertexData();
+	CreateWVP();
 }
 
-void Triangle::SetWvp(Matrix4x4 viewMatrix)
+void Triangle::SettingWvp(Matrix4x4 viewMatrix)
 {
 	Matrix4x4 projectionMatri = MakePerspectiveFovMatrix(0.45f, float(1280) / float(720), 0.1f, 100.0f);
 	Matrix4x4 worldMatrix = MakeAffineMatrix(transform_.translate, transform_.scale, transform_.rotate);

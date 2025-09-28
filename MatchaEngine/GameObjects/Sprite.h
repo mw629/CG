@@ -29,20 +29,23 @@ public:
 	Sprite();
 	~Sprite();
 
-	void Initialize(MaterialFactory* material, D3D12_GPU_DESCRIPTOR_HANDLE textureSrvHandleGPU);
+	static void SetDevice(ID3D12Device* device);
 
-	void CreateVertexData(ID3D12Device* device);
+	void Initialize(D3D12_GPU_DESCRIPTOR_HANDLE textureSrvHandleGPU);
 
-	void CreateIndexResource(ID3D12Device* device);
+	void CreateVertexData();
 
-	void CreateWVP(ID3D12Device* device);
+	void CreateIndexResource();
 
-	void CreateSprite(ID3D12Device* device);
+	void CreateWVP();
 
-	void SetWvp();
+	void CreateSprite();
 
-	void SetTrandform(Transform transform);
+	void SettingWvp();
 
+	void SetSize(Vector2 leftTop, Vector2 rigthBottom);
+
+	void SetMaterialLighting(bool isActiv) { material_->SetMaterialLighting(isActiv); }
 
 	D3D12_VERTEX_BUFFER_VIEW* GetVertexBufferView() { return &vertexBufferView_; }
 	ID3D12Resource* GetVertexResource() { return wvpResource_.Get(); }

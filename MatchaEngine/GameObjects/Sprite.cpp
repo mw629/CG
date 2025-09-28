@@ -3,6 +3,13 @@
 #include "Core/VariableTypes.h"
 #include "Math/Calculation.h"
 
+namespace {
+	ID3D12Device* device_;
+}
+
+void Sprite::SetDevice(ID3D12Device* device) {
+	device_ = device;
+}
 
 Sprite::Sprite()
 {
@@ -25,19 +32,23 @@ Sprite::~Sprite()
 	vertexResource_.Reset();
 	indexResource_.Reset();
 	wvpResource_.Reset();
+
+	delete material_;
 }
 
-void Sprite::Initialize(MaterialFactory* material, D3D12_GPU_DESCRIPTOR_HANDLE textureSrvHandleGPU)
+void Sprite::Initialize(D3D12_GPU_DESCRIPTOR_HANDLE textureSrvHandleGPU)
 {
-	material_ = material;
 	textureSrvHandleGPU_ = textureSrvHandleGPU;
+
+	material_ = new MaterialFactory();
+	material_->CreateMatrial(device_, false);
 }
 
-void Sprite::CreateVertexData(ID3D12Device* device)
+void Sprite::CreateVertexData()
 {
 	//Sprote用の頂点リソースを作る//
 
-	vertexResource_ = GraphicsDevice::CreateBufferResource(device, sizeof(VertexData) * 6);
+	vertexResource_ = GraphicsDevice::CreateBufferResource(device_, sizeof(VertexData) * 6);
 
 	//頂点バッファービューを作成する
 	
@@ -65,9 +76,9 @@ void Sprite::CreateVertexData(ID3D12Device* device)
 
 }
 
-void Sprite::CreateIndexResource(ID3D12Device* device)
+void Sprite::CreateIndexResource()
 {
-	indexResource_ = GraphicsDevice::CreateBufferResource(device, sizeof(uint32_t) * 6); ;
+	indexResource_ = GraphicsDevice::CreateBufferResource(device_, sizeof(uint32_t) * 6); ;
 
 
 	indexBufferView_.BufferLocation = indexResource_->GetGPUVirtualAddress();
@@ -85,11 +96,11 @@ void Sprite::CreateIndexResource(ID3D12Device* device)
 
 }
 
-void Sprite::CreateWVP(ID3D12Device* device)
+void Sprite::CreateWVP()
 {
 	
 	//Sprite用ののTransformationMatrix用のリソースを作る。Matrix4x41つ分のサイズを用意する
-	wvpResource_ = GraphicsDevice::CreateBufferResource(device, sizeof(TransformationMatrix));
+	wvpResource_ = GraphicsDevice::CreateBufferResource(device_, sizeof(TransformationMatrix));
 	//データを書き込む
 	wvpData_ = nullptr;
 	//書き込むためのアドレスを取得
@@ -99,25 +110,31 @@ void Sprite::CreateWVP(ID3D12Device* device)
 	wvpData_->WVP = IdentityMatrix();
 }
 
-void Sprite::CreateSprite(ID3D12Device* device)
+void Sprite::CreateSprite()
 {
-	CreateVertexData(device);
-	CreateIndexResource(device);
-	CreateWVP(device);
+	CreateVertexData();
+	CreateIndexResource();
+	CreateWVP();
 }
 
-void Sprite::SetWvp()
+void Sprite::SettingWvp()
 {
 	Matrix4x4 worldMatrix = MakeAffineMatrix(transform_.translate, transform_.scale, transform_.rotate);
 	Matrix4x4 worldViewProjectionMatrix = MultiplyMatrix4x4(worldMatrix, MultiplyMatrix4x4(IdentityMatrix(), MakeOrthographicMatrix(0, float(1280), 0, float(720), 0.0f, 100.0f)));
 	*wvpData_ = { worldViewProjectionMatrix,worldMatrix };
 }
 
-void Sprite::SetTrandform(Transform transform)
+void Sprite::SetSize(Vector2 leftTop, Vector2 rigthBottom)
 {
-	transform_.translate = transform.translate;
-	transform_.scale = transform.scale;
-	transform_.rotate = transform.rotate;
+	//１枚目の三角形
+	vertexData_[0].position = { leftTop.x,rigthBottom.y,0.0f,1.0f };//左下
+	vertexData_[0].texcoord = { 0.0f,1.0f };
+	vertexData_[1].position = { leftTop.x,leftTop.y,0.0f,1.0f };//左上
+	vertexData_[1].texcoord = { 0.0f,0.0f };
+	vertexData_[2].position = { rigthBottom.x,rigthBottom.y,0.0f,1.0f };//右下
+	vertexData_[2].texcoord = { 1.0f,1.0f };
+	//2枚目の三角形
+	vertexData_[3].position = { rigthBottom.x,leftTop.y,0.0f,1.0f };//右上
+	vertexData_[3].texcoord = { 1.0f,0.0f };
 }
-
 

@@ -6,8 +6,15 @@
 #include <sstream>
 
 
+namespace {
+	ID3D12Device* device_;
+}
 
 
+void Model::SetDevice(ID3D12Device* device)
+{
+	device_ = device;
+}
 
 Model::~Model()
 {
@@ -21,21 +28,27 @@ Model::~Model()
 	// ComPtrは自動的に解放される
 	vertexResource_.Reset();
 	wvpDataResource_.Reset();
+
+	delete material_;
 }
 
-void Model::Initialize(ModelData modelData, MaterialFactory* material,D3D12_GPU_DESCRIPTOR_HANDLE textureSrvHandleGPU)
+
+
+void Model::Initialize(ModelData modelData,D3D12_GPU_DESCRIPTOR_HANDLE textureSrvHandleGPU)
 {
 	transform_ = {};
 	modelData_ = modelData;
-	material_ = material;
 	textureSrvHandleGPU_ = textureSrvHandleGPU;
+
+	material_ = new MaterialFactory();
+	material_->CreateMatrial(device_, false);
 }
 
 
-void Model::CreateVertexData(ID3D12Device* device)
+void Model::CreateVertexData()
 {
 	//頂点リソースを作る
-	vertexResource_ = GraphicsDevice::CreateBufferResource(device, sizeof(VertexData) * modelData_.vertices.size());
+	vertexResource_ = GraphicsDevice::CreateBufferResource(device_, sizeof(VertexData) * modelData_.vertices.size());
 	//頂点バッファービューを作成する
 	//リソースの先頭アドレスから使う
 	vertexBufferView_.BufferLocation = vertexResource_->GetGPUVirtualAddress();
@@ -48,10 +61,11 @@ void Model::CreateVertexData(ID3D12Device* device)
 	std::memcpy(vertexData_, modelData_.vertices.data(), sizeof(VertexData) * modelData_.vertices.size());
 }
 
-void Model::CreateWVP(ID3D12Device* device)
+
+void Model::CreateWVP()
 {
 	//Sprite用ののTransformationMatrix用のリソースを作る。Matrix4x41つ分のサイズを用意する
-	wvpDataResource_ = GraphicsDevice::CreateBufferResource(device, sizeof(TransformationMatrix));
+	wvpDataResource_ = GraphicsDevice::CreateBufferResource(device_, sizeof(TransformationMatrix));
 	//データを書き込む
 
 	//書き込むためのアドレスを取得
@@ -61,13 +75,13 @@ void Model::CreateWVP(ID3D12Device* device)
 	wvpData_->World = IdentityMatrix();
 }
 
-void Model::CreateModel(ID3D12Device* device)
+void Model::CreateModel()
 {
-	CreateVertexData(device);
-	CreateWVP(device);
+	CreateVertexData();
+	CreateWVP();
 }
 
-void Model::SetWvp(Matrix4x4 viewMatrix)
+void Model::SettingWvp(Matrix4x4 viewMatrix)
 {
 	Matrix4x4 projectionMatri = MakePerspectiveFovMatrix(0.45f, float(kClientWidth) / float(kClientHeight), 0.1f, 100.0f);
 	Matrix4x4 worldMatrixObj = MakeAffineMatrix(transform_.translate, transform_.scale, transform_.rotate);

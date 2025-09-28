@@ -20,7 +20,7 @@ private:
 
 public:
     void Initialize();
-    void Update(Input* input);
+    void Update();
     Matrix4x4 GetViewMatrix()const { return viewMatrix_; }
     Vector3 GetTarget() const { return target_; }
 };

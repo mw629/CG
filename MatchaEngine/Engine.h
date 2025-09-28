@@ -87,30 +87,18 @@ private:
 	std::unique_ptr<DepthStencil> depthStencil;
 
 	std::unique_ptr<Draw> draw;
+	std::unique_ptr<TextureLoader> textureLoader;
 
 	GpuSyncManager gpuSyncManager;
 
 	std::unique_ptr<ResourceBarrierHelper> resourceBarrierHelper;
 
-	DirectXShaderCompiler directXShaderCompiler;
-	std::unique_ptr<RootSignature> rootSignature;
-	std::unique_ptr<RootParameter> rootParameter;
-	std::unique_ptr<Sampler> sampler;
-	std::unique_ptr<InputLayout> inputLayout;
-	std::unique_ptr<BlendState> blendState;
-	std::unique_ptr<RasterizerState> rasterizerState;
-	std::unique_ptr<ShaderCompile> shaderCompile;
-	std::unique_ptr<DepthStencilState> depthStencilState;
 	std::unique_ptr<GraphicsPipelineState> graphicsPipelineState;
-
-	std::unique_ptr<RootSignature> linerootSignature;
-	std::unique_ptr<RootParameter> linerootParameter;
-	std::unique_ptr<InputLayout> lineinputLayout;
-	std::unique_ptr<ShaderCompile> lineshaderCompile;
-	std::unique_ptr<GraphicsPipelineState> lineGraphicsPipeState;
 
 	std::unique_ptr<DirectinalLight> directinalLight;
 
+	ID3D12DescriptorHeap* descriptorHeeps[1];
+	
 public:
 
 	~Engine();
@@ -122,8 +110,15 @@ public:
 
 	void PostDraw();
 
+	void LinePreDraw();
+
+	void NewFrame();
+
 	void EndFrame();
 
+	void End();
+
+	Input* GetInput() { return input.get(); }
 
 };
 

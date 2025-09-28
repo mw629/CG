@@ -29,20 +29,25 @@ public:
 	Sphere();
 	~Sphere();
 
-	void Initialize(MaterialFactory* material, D3D12_GPU_DESCRIPTOR_HANDLE textureSrvHandleGPU);
+	static void SetDevice(ID3D12Device* device);
 
-	void CreateVertexData(ID3D12Device* device);
+	void Initialize(D3D12_GPU_DESCRIPTOR_HANDLE textureSrvHandleGPU);
 
-	void CreateIndexResource(ID3D12Device* device);
+	void CreateVertexData();
 
-	void CreateWVP(ID3D12Device* device);
+	void CreateIndexResource();
 
-	void CreateSprite(ID3D12Device* device);
+	void CreateWVP();
 
-	void SetWvp(Matrix4x4 viewMatrix);
+	void CreateSprite();
+
+	void SettingWvp(Matrix4x4 viewMatrix);
 
 	void SetTrandform(Transform transform);
 
+	void SetMaterialLighting(bool isActiv) { material_->SetMaterialLighting(isActiv); }
+
+	void SetColor(Vector4 Color){return material_->SetColor(Color); }
 
 	D3D12_VERTEX_BUFFER_VIEW* GetVertexBufferView() { return &vertexBufferView_; }
 	ID3D12Resource* GetVertexResource() { return wvpResource_.Get(); }

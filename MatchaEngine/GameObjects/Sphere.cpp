@@ -3,6 +3,16 @@
 #include "Core/VariableTypes.h"
 #include "Math/Calculation.h"
 
+namespace {
+	ID3D12Device* device_;
+}
+
+
+void Sphere::SetDevice(ID3D12Device* device)
+{
+	device_ = device;
+}
+
 Sphere::Sphere()
 {
 	transform_ = { {1.0f,1.0f,1.0f},{0.0f,0.0f,0.0f},{0.0f,0.0f,0.0f} };
@@ -24,16 +34,22 @@ Sphere::~Sphere()
 	vertexResource_.Reset();
 	indexResource_.Reset();
 	wvpResource_.Reset();
+
+	delete material_;
 }
 
 
-void Sphere::Initialize(MaterialFactory* material, D3D12_GPU_DESCRIPTOR_HANDLE textureSrvHandleGPU)
+
+
+void Sphere::Initialize( D3D12_GPU_DESCRIPTOR_HANDLE textureSrvHandleGPU)
 {
-	material_ = material;
 	textureSrvHandleGPU_ = textureSrvHandleGPU;
+
+	material_ = new MaterialFactory();
+	material_->CreateMatrial(device_, false);
 }
 
-void Sphere::CreateVertexData(ID3D12Device* device)
+void Sphere::CreateVertexData()
 {
 
 	float pi = 3.14f;
@@ -41,7 +57,7 @@ void Sphere::CreateVertexData(ID3D12Device* device)
 
 	//Shpere用の頂点リソースを作る//
 
-	vertexResource_ = GraphicsDevice::CreateBufferResource(device, sizeof(VertexData) * (kSubdivision_ * kSubdivision_) * 6);
+	vertexResource_ = GraphicsDevice::CreateBufferResource(device_, sizeof(VertexData) * (kSubdivision_ * kSubdivision_) * 6);
 
 	//頂点バッファービューを作成する
 
@@ -142,9 +158,9 @@ void Sphere::CreateVertexData(ID3D12Device* device)
 
 }
 
-void Sphere::CreateIndexResource(ID3D12Device* device)
+void Sphere::CreateIndexResource()
 {
-	indexResource_ = GraphicsDevice::CreateBufferResource(device, sizeof(uint32_t) * 6); ;
+	indexResource_ = GraphicsDevice::CreateBufferResource(device_, sizeof(uint32_t) * 6); ;
 
 
 	indexBufferView_.BufferLocation = indexResource_->GetGPUVirtualAddress();
@@ -162,11 +178,11 @@ void Sphere::CreateIndexResource(ID3D12Device* device)
 
 }
 
-void Sphere::CreateWVP(ID3D12Device* device)
+void Sphere::CreateWVP()
 {
 
 	//Sprite用ののTransformationMatrix用のリソースを作る。Matrix4x41つ分のサイズを用意する
-	wvpResource_ = GraphicsDevice::CreateBufferResource(device, sizeof(TransformationMatrix));
+	wvpResource_ = GraphicsDevice::CreateBufferResource(device_, sizeof(TransformationMatrix));
 	//データを書き込む
 	wvpData_ = nullptr;
 	//書き込むためのアドレスを取得
@@ -176,14 +192,14 @@ void Sphere::CreateWVP(ID3D12Device* device)
 	wvpData_->WVP = IdentityMatrix();
 }
 
-void Sphere::CreateSprite(ID3D12Device* device)
+void Sphere::CreateSprite()
 {
-	CreateVertexData(device);
+	CreateVertexData();
 	//CreateIndexResource(device);
-	CreateWVP(device);
+	CreateWVP();
 }
 
-void Sphere::SetWvp(Matrix4x4 viewMatrix)
+void Sphere::SettingWvp(Matrix4x4 viewMatrix)
 {
 	Matrix4x4 projectionMatri = MakePerspectiveFovMatrix(0.45f, float(1280) / float(720), 0.1f, 100.0f);
 	Matrix4x4 worldMatrix = MakeAffineMatrix(transform_.translate, transform_.scale, transform_.rotate);

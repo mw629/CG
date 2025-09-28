@@ -3,7 +3,6 @@
 #include "Math/Calculation.h"
 
 
-
 MaterialFactory::~MaterialFactory(){
 	if (materialResource_) {
 		materialResource_->Unmap(0, nullptr);

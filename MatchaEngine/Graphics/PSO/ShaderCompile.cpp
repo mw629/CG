@@ -81,11 +81,11 @@ void ShaderCompile::CreateShaderCompile(std::ostream& os,
 	Microsoft::WRL::ComPtr<IDxcIncludeHandler> includeHandler)
 {
 	//Shaderをコンパイルする
-	vertexShaderBlob_ = CompileShader(os, L"MatchaEngine/Graphics/Shader/Object3D.VS.hlsl",
+	vertexShaderBlob_ = CompileShader(os, L"MatchaEngine/Shader/Object3D.VS.hlsl",
 		L"vs_6_0", dxcUtils, dxcCompiler, includeHandler);
 	assert(vertexShaderBlob_ != nullptr);
 
-	pixelShaderBlob_ = CompileShader(os, L"MatchaEngine/Graphics/Shader/Object3D.PS.hlsl",
+	pixelShaderBlob_ = CompileShader(os, L"MatchaEngine/Shader/Object3D.PS.hlsl",
 		L"ps_6_0", dxcUtils, dxcCompiler, includeHandler);
 	assert(pixelShaderBlob_ != nullptr);
 }
@@ -93,11 +93,11 @@ void ShaderCompile::CreateShaderCompile(std::ostream& os,
 void ShaderCompile::CreateLineShaderCompile(std::ostream& os, Microsoft::WRL::ComPtr<IDxcUtils> dxcUtils, Microsoft::WRL::ComPtr<IDxcCompiler3> dxcCompiler, Microsoft::WRL::ComPtr<IDxcIncludeHandler> includeHandler)
 {
 	//Shaderをコンパイルする
-	vertexShaderBlob_ = CompileShader(os, L"MatchaEngine/Graphics/Shader/Line.VS.hlsl",
+	vertexShaderBlob_ = CompileShader(os, L"MatchaEngine/Shader/Line.VS.hlsl",
 		L"vs_6_0", dxcUtils, dxcCompiler, includeHandler);
 	assert(vertexShaderBlob_ != nullptr);
 
-	pixelShaderBlob_ = CompileShader(os, L"MatchaEngine/Graphics/Shader/Line.PS.hlsl",
+	pixelShaderBlob_ = CompileShader(os, L"MatchaEngine/Shader/Line.PS.hlsl",
 		L"ps_6_0", dxcUtils, dxcCompiler, includeHandler);
 	assert(pixelShaderBlob_ != nullptr);
 }

@@ -2,20 +2,13 @@
 #include "Graphics/GraphicsDevice.h"
 #include <cassert>
 
+namespace {
+	ID3D12GraphicsCommandList* commandList_{};
+}
 
-Draw::Draw(ID3D12GraphicsCommandList* commandList)
+void Draw::Initialize(ID3D12GraphicsCommandList* commandList)
 {
 	commandList_ = commandList;
-}
-
-Draw::~Draw()
-{
-	
-}
-
-void Draw::Initialize()
-{
-	
 }
 
 
@@ -38,7 +31,7 @@ void Draw::DrawSprite(Sprite* sprite)
 	commandList_->SetGraphicsRootConstantBufferView(0, sprite->GetMatrial()->GetMaterialResource()->GetGPUVirtualAddress());
 	commandList_->SetGraphicsRootConstantBufferView(1, sprite->GetVertexResource()->GetGPUVirtualAddress());
 	commandList_->SetGraphicsRootDescriptorTable(2, sprite->GetTextureSrvHandleGPU());
-	
+
 	commandList_->DrawIndexedInstanced(6, 1, 0, 0, 0);
 }
 
@@ -61,6 +54,8 @@ void Draw::DrawTriangle(Triangle* triangle)
 	commandList_->DrawInstanced(3, 1, 0, 0);
 }
 
+
+
 void Draw::DrawLine(Line* line)
 {
 	commandList_->IASetVertexBuffers(0, 1, line->GetVertexBufferView());//VBVを設定
@@ -72,6 +67,6 @@ void Draw::DrawGrid(Grid* grid)
 {
 	commandList_->IASetVertexBuffers(0, 1, grid->GetVertexBufferView());//VBVを設定
 	commandList_->SetGraphicsRootConstantBufferView(0, grid->GetVertexResource()->GetGPUVirtualAddress());
-	commandList_->DrawInstanced(grid->GetSubdivision()*4, 1, 0, 0);
+	commandList_->DrawInstanced(grid->GetSubdivision() * 4, 1, 0, 0);
 }
-	
+

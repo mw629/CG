@@ -25,14 +25,15 @@ public:
 
 	~Grid();
 
+	static void SetDevice(ID3D12Device* device);
 
-	void CreateVertexData(ID3D12Device* device);
+	void CreateVertexData();
 
-	void CreateWVP(ID3D12Device* device);
+	void CreateWVP();
 
-	void CreateGrid(ID3D12Device* device);
+	void CreateGrid();
 
-	void SetWvp(Matrix4x4 viewMatrix);
+	void SettingWvp(Matrix4x4 viewMatrix);
 
 	D3D12_VERTEX_BUFFER_VIEW* GetVertexBufferView() { return &vertexBufferView_; }
 	ID3D12Resource* GetVertexResource()const { return wvpResource_.Get(); }

@@ -33,8 +33,8 @@ void TextureLoader::Draw() {
 		for (const auto& tex : texture_) {
 			ImGui::Text("%d | %s", tex.index, tex.filePath.c_str());
 		}
-		ImGui::End();
 	}
+	ImGui::End();
 }
 
 

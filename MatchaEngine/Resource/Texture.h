@@ -9,15 +9,14 @@
 
 class Texture
 {
-private:
-
-	ID3D12Device* device_;
-	TextureLoader* textureLoader_;
-	DescriptorHeap* descriptorHeap_;
-	ID3D12GraphicsCommandList* commandList_;
-
 public:
-	void Initalize(ID3D12Device* graphicsDevice, ID3D12GraphicsCommandList* commandList, DescriptorHeap *descriptorHeap, TextureLoader* textureLoader);
+ 
+	static void Initalize(ID3D12Device* graphicsDevice, ID3D12GraphicsCommandList* commandList, DescriptorHeap *descriptorHeap, TextureLoader* textureLoader);
 
 	void CreateTexture(const std::string& filePath);
+
+	void TextureList();
+
+	D3D12_GPU_DESCRIPTOR_HANDLE TextureData(const std::string& filePath);
+	D3D12_GPU_DESCRIPTOR_HANDLE TextureData(int index);
 };

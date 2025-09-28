@@ -2,6 +2,12 @@
 #include "Load.h"
 
 
+namespace {
+	ID3D12Device* device_;
+	ID3D12GraphicsCommandList* commandList_;
+	DescriptorHeap* descriptorHeap_;
+	TextureLoader* textureLoader_;
+}
 
 
 void Texture::Initalize(ID3D12Device* device, ID3D12GraphicsCommandList* commandList, DescriptorHeap* descriptorHeap, TextureLoader* textureLoader)
@@ -42,3 +48,16 @@ void Texture::CreateTexture(const std::string& filePath)
 
 	device_->CreateShaderResourceView(textureResource.Get(), &srvDesc, textureSrvHandleCPU);
 }
+
+void Texture::TextureList()
+{
+	textureLoader_->Draw();
+}
+
+D3D12_GPU_DESCRIPTOR_HANDLE Texture::TextureData(const std::string& filePath) {
+	return textureLoader_->GetTexture(filePath);
+}
+D3D12_GPU_DESCRIPTOR_HANDLE Texture::TextureData(int index) {
+	return textureLoader_->GetTexture(index);
+}
+

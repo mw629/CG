@@ -1,17 +1,71 @@
 #include "BlendState.h"
 
-void BlendState::CreateBlendDesc()
+D3D12_BLEND_DESC BlendState::CreateBlendDesc(BlendMode mode)
 {
-	//すべての色要素を書き込む
 	blendDesc_.AlphaToCoverageEnable = FALSE;
-	blendDesc_.IndependentBlendEnable = FALSE; // 複数のレンダーターゲットがある場合はTRUEに設定
-	blendDesc_.RenderTarget[0].BlendEnable = TRUE; // 最初のレンダーターゲットのブレンドを有効にする
-	blendDesc_.RenderTarget[0].LogicOpEnable = FALSE;
-	blendDesc_.RenderTarget[0].SrcBlend = D3D12_BLEND_SRC_ALPHA; // ソースブレンドファクター: ソースアルファ
-	blendDesc_.RenderTarget[0].DestBlend = D3D12_BLEND_INV_SRC_ALPHA; // デスティネーションブレンドファクター: 1 - ソースアルファ
-	blendDesc_.RenderTarget[0].BlendOp = D3D12_BLEND_OP_ADD; // ブレンド演算: 加算
-	blendDesc_.RenderTarget[0].SrcBlendAlpha = D3D12_BLEND_ONE; // アルファブレンドファクター 
-	blendDesc_.RenderTarget[0].DestBlendAlpha = D3D12_BLEND_ZERO; // アルファブレンドファクター 
-	blendDesc_.RenderTarget[0].BlendOpAlpha = D3D12_BLEND_OP_ADD;
-	blendDesc_.RenderTarget[0].RenderTargetWriteMask = D3D12_COLOR_WRITE_ENABLE_ALL; // すべてのカラーチャンネルが書き込まれることを確認
+	blendDesc_.IndependentBlendEnable = FALSE;
+
+	auto& rt = blendDesc_.RenderTarget[0];
+	rt.LogicOpEnable = FALSE;
+	rt.RenderTargetWriteMask = D3D12_COLOR_WRITE_ENABLE_ALL;
+
+	switch (mode)
+	{
+	case BlendMode::kBlendModeNone:
+		rt.BlendEnable = FALSE;
+		rt.SrcBlend = D3D12_BLEND_ONE;
+		rt.DestBlend = D3D12_BLEND_ZERO;
+		rt.BlendOp = D3D12_BLEND_OP_ADD;
+		break;
+
+	case BlendMode::kBlendModeNormal:
+		rt.BlendEnable = TRUE;
+		rt.SrcBlend = D3D12_BLEND_SRC_ALPHA;
+		rt.DestBlend = D3D12_BLEND_INV_SRC_ALPHA;
+		rt.BlendOp = D3D12_BLEND_OP_ADD;
+		break;
+
+	case BlendMode::kBlendModeAdd:
+		rt.BlendEnable = TRUE;
+		rt.SrcBlend = D3D12_BLEND_SRC_ALPHA;
+		rt.DestBlend = D3D12_BLEND_ONE;
+		rt.BlendOp = D3D12_BLEND_OP_ADD;
+		break;
+
+	case BlendMode::kBlendModeSubtract:
+		rt.BlendEnable = TRUE;
+		rt.SrcBlend = D3D12_BLEND_SRC_ALPHA;
+		rt.DestBlend = D3D12_BLEND_ONE;
+		rt.BlendOp = D3D12_BLEND_OP_REV_SUBTRACT;
+		break;
+
+	case BlendMode::kBlendModeMultiply:
+		rt.BlendEnable = TRUE;
+		rt.SrcBlend = D3D12_BLEND_DEST_COLOR;
+		rt.DestBlend = D3D12_BLEND_ZERO;
+		rt.BlendOp = D3D12_BLEND_OP_ADD;
+		break;
+
+	case BlendMode::kBlendModeScreen:
+		rt.BlendEnable = TRUE;
+		rt.SrcBlend = D3D12_BLEND_ONE;
+		rt.DestBlend = D3D12_BLEND_INV_SRC_COLOR;
+		rt.BlendOp = D3D12_BLEND_OP_ADD;
+		break;
+
+	default:
+		break;
+	}
+
+	// アルファブレンドの設定（たいてい同じでOK）
+	rt.SrcBlendAlpha = D3D12_BLEND_ONE;
+	rt.DestBlendAlpha = D3D12_BLEND_ZERO;
+	rt.BlendOpAlpha = D3D12_BLEND_OP_ADD;
+
+	return blendDesc_;
+
 }
+
+
+
+
