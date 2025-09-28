@@ -166,6 +166,10 @@ copy "$(WindowsSdkDir)bin\$(TargetPlatformVersion)\x64\dxil.dll" "$(TargetDir)dx
     </FxCompile>
   </ItemGroup>
   <ItemGroup>
+    <ClInclude Include="MatchaEngine\Core\VariableTypes\Matrix4x4.h" />
+    <ClInclude Include="MatchaEngine\Core\VariableTypes\Vector3.h" />
+    <ClInclude Include="MatchaEngine\Core\VariableTypes\Vector2Int.h" />
+    <ClInclude Include="MatchaEngine\Core\VariableTypes\Vector3Int.h" />
     <ClInclude Include="MatchaEngine\Input\GamePadInput.h" />
     <ClInclude Include="MatchaEngine\GameObjects\Line.h" />
     <ClInclude Include="MatchaEngine\GameObjects\Grid.h" />
@@ -214,6 +218,7 @@ copy "$(WindowsSdkDir)bin\$(TargetPlatformVersion)\x64\dxil.dll" "$(TargetDir)dx
     <ClInclude Include="MatchaEngine\Resource\Texture.h" />
     <ClInclude Include="MatchaEngine\Graphics\ViewportScissor.h" />
     <ClInclude Include="MatchaEngine\GameObjects\Triangle.h" />
+    <ClInclude Include="MatchaEngine\Core\VariableTypes\Vector2.h" />
   </ItemGroup>
   <ItemGroup>
     <Text Include="externals\imgui\LICENSE.txt" />
