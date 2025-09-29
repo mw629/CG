@@ -25,8 +25,8 @@ public:
 		return VectorInt2Int(x * other.x, y * other.y);
 	}
 
-	VectorInt2Int operator/(int scalar) const {
-		return { x / scalar, y / scalar };
+	VectorInt2Int operator*(int scalar) const {
+		return { x * scalar, y * scalar };
 	}
 
 	VectorInt2Int operator/(const VectorInt2Int& other) const {
@@ -51,8 +51,8 @@ public:
 
 
 	// 長さ
-	int Length() const {
-		return std::sqrt(x * x + y * y);
+	float Length() const {
+		return static_cast<float>(std::sqrt(x * x + y * y));
 	}
 
 	// 正規化

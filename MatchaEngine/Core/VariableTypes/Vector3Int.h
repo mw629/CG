@@ -25,8 +25,8 @@ public:
 		return Vector3Int(x * other.x, y * other.y, z * other.z);
 	}
 
-	Vector3Int operator/(int scalar) const {
-		return { x / scalar, y / scalar, z / scalar };
+	Vector3Int operator*(int scalar) const {
+		return { x * scalar, y * scalar, z * scalar };
 	}
 
 	Vector3Int operator/(const Vector3Int& other) const {
@@ -50,8 +50,8 @@ public:
 	}
 
 	// 長さ
-	int Length() const {
-		return std::sqrt(x * x + y * y + z * z);
+	float Length() const {
+		return static_cast<float>(std::sqrt(x * x + y * y));
 	}
 
 	// 正規化

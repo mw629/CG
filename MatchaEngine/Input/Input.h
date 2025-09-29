@@ -49,7 +49,7 @@ public:
 	static bool FreeMouse(uint32_t key);
 
 	//マウスの移動  
-	static Vector2i GetMouseDelta();
+	static Vector2 GetMouseDelta();
 	static int GetMouseWheel();
 	
 	BYTE GetKey(int keyNum)const { return key_[keyNum]; }

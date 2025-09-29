@@ -3,6 +3,13 @@
 #include <vector>
 #include <string>
 
+#include "VariableTypes/Vector2.h"
+#include "VariableTypes/Vector2Int.h"
+#include "VariableTypes/Vector3.h"
+#include "VariableTypes/Vector3Int.h"
+
+#include "VariableTypes/Matrix4x4.h"
+
 ///構造体///
 
 struct Vector4 {
@@ -12,35 +19,6 @@ struct Vector4 {
 	float w;
 };
 
-struct Vector3 {
-	float x;
-	float y;
-	float z;
-
-
-	Vector3 operator+(const Vector3& other) const { return { x + other.x, y + other.y, z + other.z }; }
-	Vector3 operator-(const Vector3& other) const { return { x - other.x, y - other.y, z - other.z }; }
-	Vector3 operator-() const {return Vector3(-x, -y, -z);}
-	Vector3 operator*(const Vector3& other) const { return Vector3(x * other.x, y * other.y, z * other.z); }
-	Vector3 operator*(float scalar) const { return Vector3(x * scalar, y * scalar, z * scalar); }
-	Vector3 operator/(const Vector3& other) const { return { x / other.x, y / other.y, z / other.z }; }
-	Vector3& operator=(const Vector3& other) { x = other.x; y = other.y; z = other.z; return *this; }
-	Vector3& operator+=(const Vector3& other) { x += other.x; y += other.y; z += other.z; return *this; }
-	Vector3& operator-=(const Vector3& other) { x -= other.x; y -= other.y; z -= other.z; return *this; }
-	Vector3& operator*=(const Vector3& other) { x *= other.x; y *= other.y; z *= other.z; return *this; }
-	Vector3& operator/=(const Vector3& other) { x /= other.x; y /= other.y; z /= other.z; return *this; }
-};
-struct Vector2
-{
-	float x;
-	float y;
-};
-
-struct Vector2i
-{
-	int x;
-	int y;
-};
 
 struct PolarCoordinates {
 	Vector3 offset;
@@ -50,82 +28,6 @@ struct PolarCoordinates {
 };
 
 
-struct Matrix4x4 {
-	float m[4][4] = {
-		{0,0,0,0},
-		{0,0,0,0},
-		{0,0,0,0},
-		{0,0,0,0},
-	};
-
-	Matrix4x4 operator+(const Matrix4x4& other) const {
-		Matrix4x4 result;
-		for (int i = 0; i < 4; ++i)
-			for (int j = 0; j < 4; ++j)
-				result.m[i][j] = m[i][j] + other.m[i][j];
-		return result;
-	}
-
-	Matrix4x4 operator-(const Matrix4x4& other) const {
-		Matrix4x4 result;
-		for (int i = 0; i < 4; ++i)
-			for (int j = 0; j < 4; ++j)
-				result.m[i][j] = m[i][j] - other.m[i][j];
-		return result;
-	}
-
-	Matrix4x4 operator*(float scalar) const {
-		Matrix4x4 result;
-		for (int i = 0; i < 4; ++i)
-			for (int j = 0; j < 4; ++j)
-				result.m[i][j] = m[i][j] * scalar;
-		return result;
-	}
-
-	Matrix4x4 operator*(const Matrix4x4& other) const {
-		Matrix4x4 result = {};
-		for (int i = 0; i < 4; ++i)
-			for (int j = 0; j < 4; ++j)
-				for (int k = 0; k < 4; ++k)
-					result.m[i][j] += m[i][k] * other.m[k][j];
-		return result;
-	}
-
-	Matrix4x4& operator=(const Matrix4x4& other) {
-		if (this != &other) {
-			for (int i = 0; i < 4; ++i)
-				for (int j = 0; j < 4; ++j)
-					m[i][j] = other.m[i][j];
-		}
-		return *this;
-	}
-
-	Matrix4x4& operator+=(const Matrix4x4& other) {
-		for (int i = 0; i < 4; ++i)
-			for (int j = 0; j < 4; ++j)
-				m[i][j] += other.m[i][j];
-		return *this;
-	}
-
-	Matrix4x4& operator-=(const Matrix4x4& other) {
-		for (int i = 0; i < 4; ++i)
-			for (int j = 0; j < 4; ++j)
-				m[i][j] -= other.m[i][j];
-		return *this;
-	}
-
-	Matrix4x4& operator*=(float scalar) {
-		for (int i = 0; i < 4; ++i)
-			for (int j = 0; j < 4; ++j)
-				m[i][j] *= scalar;
-		return *this;
-	}
-
-	Matrix4x4& operator*=(const Matrix4x4& other) {
-		*this = *this * other;
-		return *this;
-	}
-};
 
 
 /// <summary>

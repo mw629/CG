@@ -19,7 +19,7 @@ void DebugCamera::Initialize() {
 void DebugCamera::Update() {
     isMiddleMouseButtonPressed_ = Input::PressMouse(2);
 
-    Vector2i mouseDelta = Input::GetMouseDelta();
+    Vector2 mouseDelta = Input::GetMouseDelta();
     float M_PI = 3.14f;
     float moveSpeed = 0.1f;
     float rotateSpeed = 0.005f;
@@ -37,11 +37,11 @@ void DebugCamera::Update() {
 
         float panFactor = radius_ * 0.001f;
 
-        eye_ += right * (float)-mouseDelta.x * panFactor;
-        target_ += right * (float)-mouseDelta.x * panFactor;
+        eye_ += right * ((float)-mouseDelta.x * panFactor);
+        target_ += right * ((float)-mouseDelta.x * panFactor);
 
-        eye_ += localUp * (float)mouseDelta.y * panFactor;
-        target_ += localUp * (float)mouseDelta.y * panFactor;
+        eye_ += localUp * ((float)mouseDelta.y * panFactor);
+        target_ += localUp * ((float)mouseDelta.y * panFactor);
     }
 
     float wheelDelta = (float)Input::GetMouseWheel();
