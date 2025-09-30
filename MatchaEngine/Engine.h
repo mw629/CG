@@ -118,6 +118,10 @@ public:
 
 	void End();
 
+	size_t GetProcessMemoryUsage();
+
+	void Debug();
+
 	Input* GetInput() { return input.get(); }
 
 };

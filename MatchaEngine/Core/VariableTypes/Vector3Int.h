@@ -56,7 +56,7 @@ public:
 
 	// 正規化
 	Vector3Int Normalization() const {
-		int len = Length();
+		int len = (int)Length();
 		if (len == 0) return Vector3Int(0, 0, 0); // 0除算防止
 		return Vector3Int(x / len, y / len, z / len);
 	}
@@ -72,7 +72,7 @@ public:
 	}
 
 	// 距離
-	static int Distance(const Vector3Int& v1, const Vector3Int& v2) {
+	static float Distance(const Vector3Int& v1, const Vector3Int& v2) {
 		return (v1 - v2).Length();
 	}
 
