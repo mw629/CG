@@ -1,5 +1,9 @@
 #include "Engine.h"
 
+#include <windows.h>
+#include <psapi.h>
+#include <iostream>
+
 #include "../externals/imgui/imgui.h"
 #include "../externals/imgui/imgui_impl_dx12.h"
 #include "../externals/imgui/imgui_impl_win32.h"
@@ -224,3 +228,36 @@ void Engine::End() {
 	CoUninitialize();
 }
 
+
+size_t Engine::GetProcessMemoryUsage() {
+	PROCESS_MEMORY_COUNTERS_EX pmc{};
+	if (GetProcessMemoryInfo(GetCurrentProcess(), (PROCESS_MEMORY_COUNTERS*)&pmc, sizeof(pmc))) {
+		return pmc.WorkingSetSize; // 現在の物理メモリ使用量（バイト）
+	}
+	return 0;
+}
+
+void Engine::Debug()
+{
+#ifdef _DEBUG
+
+	ImGui::Begin("Debug Info");
+
+	// フレームレート (FPS)
+	ImGui::Text("FPS: %.1f", ImGui::GetIO().Framerate);
+
+	// 1フレームあたりの時間 (ms)
+	ImGui::Text("Frame Time: %.3f ms", 1000.0f / ImGui::GetIO().Framerate);
+
+	// 現在のフレーム数（自分でカウントする必要あり）
+	static int frameCount = 0;
+	frameCount++;
+	ImGui::Text("Frame Count: %d", frameCount);
+
+	size_t mem = GetProcessMemoryUsage();
+	ImGui::Text("Memory Usage: %.2f MB", mem / (1024.0f * 1024.0f));
+
+	ImGui::End();
+
+#endif
+}

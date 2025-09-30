@@ -93,9 +93,9 @@ bool Input::FreeMouse(uint32_t bottom)
 	return !(g_mouseState.rgbButtons[bottom] & 0x80);
 }
 
-Vector2i Input::GetMouseDelta()
+Vector2 Input::GetMouseDelta()
 {
-	 return Vector2i(g_mouseState.lX, g_mouseState.lY); 
+	 return Vector2(g_mouseState.lX, g_mouseState.lY); 
 }
 
 int Input::GetMouseWheel()

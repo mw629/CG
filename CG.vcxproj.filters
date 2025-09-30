@@ -13,315 +13,406 @@
       <UniqueIdentifier>{67DA6AB6-F800-4c08-8B7A-83BB121AAD01}</UniqueIdentifier>
       <Extensions>rc;ico;cur;bmp;dlg;rc2;rct;bin;rgs;gif;jpg;jpeg;jpe;resx;tiff;tif;png;wav;mfcribbon-ms</Extensions>
     </Filter>
-    <Filter Include="imgui">
-      <UniqueIdentifier>{4601c333-aa04-41fc-afe5-32f6d158f906}</UniqueIdentifier>
+    <Filter Include="ソース ファイル\MatchaEngine">
+      <UniqueIdentifier>{9c6ae038-8a6b-4e18-b45c-db77cacfb213}</UniqueIdentifier>
     </Filter>
-    <Filter Include="PSO">
+    <Filter Include="ソース ファイル\MatchaEngine\Common">
+      <UniqueIdentifier>{4c0e0fea-e72a-4df8-b3ef-5b0f14cb099d}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="ソース ファイル\MatchaEngine\Core">
+      <UniqueIdentifier>{3d5f3206-5e94-4464-98ce-858be4915e55}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="ソース ファイル\MatchaEngine\Core\VariableTypes">
+      <UniqueIdentifier>{4ccba8f3-74dd-410e-ba8d-05a75f22a03b}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="ソース ファイル\MatchaEngine\GameObjects">
+      <UniqueIdentifier>{c2cbbca1-eabb-499d-a616-b6ed9f11a0b3}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="ソース ファイル\MatchaEngine\Graphics">
+      <UniqueIdentifier>{5a99851d-6c1b-40f9-9560-3a2f33c33af4}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="ソース ファイル\MatchaEngine\Graphics\PSO">
       <UniqueIdentifier>{3276363f-251f-4b75-ad98-f09f0b484152}</UniqueIdentifier>
     </Filter>
+    <Filter Include="ソース ファイル\MatchaEngine\Input">
+      <UniqueIdentifier>{cf5f1de6-511b-442f-8c48-3e9de93e3117}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="ソース ファイル\MatchaEngine\Math">
+      <UniqueIdentifier>{68929b1b-c3b7-4854-9166-5211761885ba}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="ソース ファイル\MatchaEngine\Resource">
+      <UniqueIdentifier>{72e362f4-0f67-4bd7-81ca-287e3a9b5602}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="ソース ファイル\MatchaEngine\Shader">
+      <UniqueIdentifier>{6ca9b9b3-e1ed-4e54-8cc9-5d5cd2b11281}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="ソース ファイル\externals">
+      <UniqueIdentifier>{df5ec99a-a13d-474d-b363-5965fc736853}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="ソース ファイル\externals\imgui">
+      <UniqueIdentifier>{4601c333-aa04-41fc-afe5-32f6d158f906}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Game">
+      <UniqueIdentifier>{23e92193-486f-4257-97c0-8cd7f43e15e4}</UniqueIdentifier>
+    </Filter>
   </ItemGroup>
   <ItemGroup>
-    <ClCompile Include="main.cpp">
-      <Filter>ソース ファイル</Filter>
-    </ClCompile>
-    <ClCompile Include="MatchaEngine\Math\Calculation.cpp">
-      <Filter>ソース ファイル</Filter>
-    </ClCompile>
     <ClCompile Include="externals\imgui\imgui.cpp">
-      <Filter>imgui</Filter>
+      <Filter>ソース ファイル\externals\imgui</Filter>
     </ClCompile>
     <ClCompile Include="externals\imgui\imgui_demo.cpp">
-      <Filter>imgui</Filter>
+      <Filter>ソース ファイル\externals\imgui</Filter>
     </ClCompile>
     <ClCompile Include="externals\imgui\imgui_draw.cpp">
-      <Filter>imgui</Filter>
+      <Filter>ソース ファイル\externals\imgui</Filter>
     </ClCompile>
     <ClCompile Include="externals\imgui\imgui_impl_dx12.cpp">
-      <Filter>imgui</Filter>
+      <Filter>ソース ファイル\externals\imgui</Filter>
     </ClCompile>
     <ClCompile Include="externals\imgui\imgui_impl_win32.cpp">
-      <Filter>imgui</Filter>
+      <Filter>ソース ファイル\externals\imgui</Filter>
     </ClCompile>
     <ClCompile Include="externals\imgui\imgui_tables.cpp">
-      <Filter>imgui</Filter>
+      <Filter>ソース ファイル\externals\imgui</Filter>
     </ClCompile>
     <ClCompile Include="externals\imgui\imgui_widgets.cpp">
-      <Filter>imgui</Filter>
-    </ClCompile>
-    <ClCompile Include="MatchaEngine\Graphics\Draw.cpp">
-      <Filter>ソース ファイル</Filter>
-    </ClCompile>
-    <ClCompile Include="MatchaEngine\Graphics\GraphicsDevice.cpp">
-      <Filter>ソース ファイル</Filter>
-    </ClCompile>
-    <ClCompile Include="MatchaEngine\Core\LogHandler.cpp">
-      <Filter>ソース ファイル</Filter>
-    </ClCompile>
-    <ClCompile Include="MatchaEngine\Core\WindowConfig.cpp">
-      <Filter>ソース ファイル</Filter>
-    </ClCompile>
-    <ClCompile Include="MatchaEngine\Common\CommandContext.cpp">
-      <Filter>ソース ファイル</Filter>
+      <Filter>ソース ファイル\externals\imgui</Filter>
     </ClCompile>
     <ClCompile Include="MatchaEngine\Graphics\PSO\GraphicsPipelineState.cpp">
-      <Filter>PSO</Filter>
+      <Filter>ソース ファイル\MatchaEngine\Graphics\PSO</Filter>
     </ClCompile>
     <ClCompile Include="MatchaEngine\Graphics\PSO\RootSignature.cpp">
-      <Filter>PSO</Filter>
+      <Filter>ソース ファイル\MatchaEngine\Graphics\PSO</Filter>
     </ClCompile>
     <ClCompile Include="MatchaEngine\Graphics\PSO\InputLayout.cpp">
-      <Filter>PSO</Filter>
+      <Filter>ソース ファイル\MatchaEngine\Graphics\PSO</Filter>
     </ClCompile>
     <ClCompile Include="MatchaEngine\Graphics\PSO\RootParameter.cpp">
-      <Filter>PSO</Filter>
+      <Filter>ソース ファイル\MatchaEngine\Graphics\PSO</Filter>
     </ClCompile>
     <ClCompile Include="MatchaEngine\Graphics\PSO\BlendState.cpp">
-      <Filter>PSO</Filter>
+      <Filter>ソース ファイル\MatchaEngine\Graphics\PSO</Filter>
     </ClCompile>
     <ClCompile Include="MatchaEngine\Graphics\PSO\RasterizerState.cpp">
-      <Filter>PSO</Filter>
+      <Filter>ソース ファイル\MatchaEngine\Graphics\PSO</Filter>
     </ClCompile>
     <ClCompile Include="MatchaEngine\Graphics\PSO\ShaderCompile.cpp">
-      <Filter>PSO</Filter>
+      <Filter>ソース ファイル\MatchaEngine\Graphics\PSO</Filter>
     </ClCompile>
     <ClCompile Include="MatchaEngine\Graphics\PSO\DirectXShaderCompiler.cpp">
-      <Filter>PSO</Filter>
+      <Filter>ソース ファイル\MatchaEngine\Graphics\PSO</Filter>
     </ClCompile>
     <ClCompile Include="MatchaEngine\Graphics\PSO\DepthStencilState.cpp">
-      <Filter>PSO</Filter>
+      <Filter>ソース ファイル\MatchaEngine\Graphics\PSO</Filter>
     </ClCompile>
-    <ClCompile Include="MatchaEngine\Engine.cpp">
-      <Filter>ソース ファイル</Filter>
+    <ClCompile Include="MatchaEngine\Common\CommandContext.cpp">
+      <Filter>ソース ファイル\MatchaEngine\Common</Filter>
     </ClCompile>
-    <ClCompile Include="MatchaEngine\Resource\Audio.cpp">
-      <Filter>ソース ファイル</Filter>
+    <ClCompile Include="MatchaEngine\Core\LogHandler.cpp">
+      <Filter>ソース ファイル\MatchaEngine\Core</Filter>
     </ClCompile>
-    <ClCompile Include="MatchaEngine\Input\Input.cpp">
-      <Filter>ソース ファイル</Filter>
+    <ClCompile Include="MatchaEngine\Core\WindowConfig.cpp">
+      <Filter>ソース ファイル\MatchaEngine\Core</Filter>
     </ClCompile>
     <ClCompile Include="MatchaEngine\GameObjects\DebugCamera.cpp">
-      <Filter>ソース ファイル</Filter>
-    </ClCompile>
-    <ClCompile Include="MatchaEngine\Graphics\SwapChain.cpp">
-      <Filter>ソース ファイル</Filter>
-    </ClCompile>
-    <ClCompile Include="MatchaEngine\Graphics\DescriptorHeap.cpp">
-      <Filter>ソース ファイル</Filter>
-    </ClCompile>
-    <ClCompile Include="MatchaEngine\Graphics\RenderTargetView.cpp">
-      <Filter>ソース ファイル</Filter>
-    </ClCompile>
-    <ClCompile Include="MatchaEngine\GameObjects\MaterialFactory.cpp">
-      <Filter>ソース ファイル</Filter>
-    </ClCompile>
-    <ClCompile Include="MatchaEngine\Graphics\DepthStencil.cpp">
-      <Filter>ソース ファイル</Filter>
-    </ClCompile>
-    <ClCompile Include="MatchaEngine\Graphics\PSO\Sampler.cpp">
-      <Filter>ソース ファイル</Filter>
-    </ClCompile>
-    <ClCompile Include="MatchaEngine\Graphics\GpuSyncManager.cpp">
-      <Filter>ソース ファイル</Filter>
-    </ClCompile>
-    <ClCompile Include="MatchaEngine\Graphics\ViewportScissor.cpp">
-      <Filter>ソース ファイル</Filter>
-    </ClCompile>
-    <ClCompile Include="MatchaEngine\GameObjects\Model.cpp">
-      <Filter>ソース ファイル</Filter>
-    </ClCompile>
-    <ClCompile Include="MatchaEngine\Resource\Texture.cpp">
-      <Filter>ソース ファイル</Filter>
-    </ClCompile>
-    <ClCompile Include="MatchaEngine\Resource\Load.cpp">
-      <Filter>ソース ファイル</Filter>
-    </ClCompile>
-    <ClCompile Include="MatchaEngine\Resource\TextureLoader.cpp">
-      <Filter>ソース ファイル</Filter>
-    </ClCompile>
-    <ClCompile Include="MatchaEngine\Graphics\DirectinalLight.cpp">
-      <Filter>ソース ファイル</Filter>
-    </ClCompile>
-    <ClCompile Include="MatchaEngine\Graphics\ResourceBarrierHelper.cpp">
-      <Filter>ソース ファイル</Filter>
-    </ClCompile>
-    <ClCompile Include="MatchaEngine\GameObjects\Sprite.cpp">
-      <Filter>ソース ファイル</Filter>
-    </ClCompile>
-    <ClCompile Include="MatchaEngine\GameObjects\Sphere.cpp">
-      <Filter>ソース ファイル</Filter>
-    </ClCompile>
-    <ClCompile Include="MatchaEngine\GameObjects\Triangle.cpp">
-      <Filter>ソース ファイル</Filter>
+      <Filter>ソース ファイル\MatchaEngine\GameObjects</Filter>
     </ClCompile>
     <ClCompile Include="MatchaEngine\GameObjects\Grid.cpp">
-      <Filter>ソース ファイル</Filter>
+      <Filter>ソース ファイル\MatchaEngine\GameObjects</Filter>
     </ClCompile>
     <ClCompile Include="MatchaEngine\GameObjects\Line.cpp">
-      <Filter>ソース ファイル</Filter>
+      <Filter>ソース ファイル\MatchaEngine\GameObjects</Filter>
+    </ClCompile>
+    <ClCompile Include="MatchaEngine\GameObjects\MaterialFactory.cpp">
+      <Filter>ソース ファイル\MatchaEngine\GameObjects</Filter>
+    </ClCompile>
+    <ClCompile Include="MatchaEngine\GameObjects\Model.cpp">
+      <Filter>ソース ファイル\MatchaEngine\GameObjects</Filter>
+    </ClCompile>
+    <ClCompile Include="MatchaEngine\GameObjects\Sphere.cpp">
+      <Filter>ソース ファイル\MatchaEngine\GameObjects</Filter>
+    </ClCompile>
+    <ClCompile Include="MatchaEngine\GameObjects\Sprite.cpp">
+      <Filter>ソース ファイル\MatchaEngine\GameObjects</Filter>
+    </ClCompile>
+    <ClCompile Include="MatchaEngine\GameObjects\Triangle.cpp">
+      <Filter>ソース ファイル\MatchaEngine\GameObjects</Filter>
     </ClCompile>
     <ClCompile Include="MatchaEngine\Input\GamePadInput.cpp">
+      <Filter>ソース ファイル\MatchaEngine\Input</Filter>
+    </ClCompile>
+    <ClCompile Include="MatchaEngine\Input\Input.cpp">
+      <Filter>ソース ファイル\MatchaEngine\Input</Filter>
+    </ClCompile>
+    <ClCompile Include="MatchaEngine\Math\Calculation.cpp">
+      <Filter>ソース ファイル\MatchaEngine\Math</Filter>
+    </ClCompile>
+    <ClCompile Include="MatchaEngine\Resource\Audio.cpp">
+      <Filter>ソース ファイル\MatchaEngine\Resource</Filter>
+    </ClCompile>
+    <ClCompile Include="MatchaEngine\Resource\Load.cpp">
+      <Filter>ソース ファイル\MatchaEngine\Resource</Filter>
+    </ClCompile>
+    <ClCompile Include="MatchaEngine\Resource\Texture.cpp">
+      <Filter>ソース ファイル\MatchaEngine\Resource</Filter>
+    </ClCompile>
+    <ClCompile Include="MatchaEngine\Resource\TextureLoader.cpp">
+      <Filter>ソース ファイル\MatchaEngine\Resource</Filter>
+    </ClCompile>
+    <ClCompile Include="MatchaEngine\Graphics\DepthStencil.cpp">
+      <Filter>ソース ファイル\MatchaEngine\Graphics</Filter>
+    </ClCompile>
+    <ClCompile Include="MatchaEngine\Graphics\DescriptorHeap.cpp">
+      <Filter>ソース ファイル\MatchaEngine\Graphics</Filter>
+    </ClCompile>
+    <ClCompile Include="MatchaEngine\Graphics\DirectinalLight.cpp">
+      <Filter>ソース ファイル\MatchaEngine\Graphics</Filter>
+    </ClCompile>
+    <ClCompile Include="MatchaEngine\Graphics\Draw.cpp">
+      <Filter>ソース ファイル\MatchaEngine\Graphics</Filter>
+    </ClCompile>
+    <ClCompile Include="MatchaEngine\Graphics\GpuSyncManager.cpp">
+      <Filter>ソース ファイル\MatchaEngine\Graphics</Filter>
+    </ClCompile>
+    <ClCompile Include="MatchaEngine\Graphics\GraphicsDevice.cpp">
+      <Filter>ソース ファイル\MatchaEngine\Graphics</Filter>
+    </ClCompile>
+    <ClCompile Include="MatchaEngine\Graphics\RenderTargetView.cpp">
+      <Filter>ソース ファイル\MatchaEngine\Graphics</Filter>
+    </ClCompile>
+    <ClCompile Include="MatchaEngine\Graphics\ResourceBarrierHelper.cpp">
+      <Filter>ソース ファイル\MatchaEngine\Graphics</Filter>
+    </ClCompile>
+    <ClCompile Include="MatchaEngine\Graphics\PSO\Sampler.cpp">
+      <Filter>ソース ファイル\MatchaEngine\Graphics</Filter>
+    </ClCompile>
+    <ClCompile Include="MatchaEngine\Graphics\SwapChain.cpp">
+      <Filter>ソース ファイル\MatchaEngine\Graphics</Filter>
+    </ClCompile>
+    <ClCompile Include="MatchaEngine\Graphics\ViewportScissor.cpp">
+      <Filter>ソース ファイル\MatchaEngine\Graphics</Filter>
+    </ClCompile>
+    <ClCompile Include="MatchaEngine\Engine.cpp">
+      <Filter>ソース ファイル\MatchaEngine</Filter>
+    </ClCompile>
+    <ClCompile Include="Game\GameScene.cpp">
+      <Filter>Game</Filter>
+    </ClCompile>
+    <ClCompile Include="Game\SceneChanger.cpp">
+      <Filter>Game</Filter>
+    </ClCompile>
+    <ClCompile Include="Game\SceneManager.cpp">
+      <Filter>Game</Filter>
+    </ClCompile>
+    <ClCompile Include="Game\TitleScene.cpp">
+      <Filter>Game</Filter>
+    </ClCompile>
+    <ClCompile Include="main.cpp" />
+    <ClCompile Include="MatchaEngine\GameObjects\Camera.cpp">
       <Filter>ソース ファイル</Filter>
     </ClCompile>
   </ItemGroup>
   <ItemGroup>
-    <FxCompile Include="MatchaEngine\Shader\Object3d.VS.hlsl" />
-    <FxCompile Include="MatchaEngine\Shader\Object3d.PS.hlsl" />
-    <FxCompile Include="MatchaEngine\Shader\Line.VS.hlsl" />
-    <FxCompile Include="MatchaEngine\Shader\Line.PS.hlsl" />
+    <FxCompile Include="MatchaEngine\Shader\Object3d.VS.hlsl">
+      <Filter>ソース ファイル\MatchaEngine\Shader</Filter>
+    </FxCompile>
+    <FxCompile Include="MatchaEngine\Shader\Line.PS.hlsl">
+      <Filter>ソース ファイル\MatchaEngine\Shader</Filter>
+    </FxCompile>
+    <FxCompile Include="MatchaEngine\Shader\Line.VS.hlsl">
+      <Filter>ソース ファイル\MatchaEngine\Shader</Filter>
+    </FxCompile>
+    <FxCompile Include="MatchaEngine\Shader\Object3d.PS.hlsl">
+      <Filter>ソース ファイル\MatchaEngine\Shader</Filter>
+    </FxCompile>
   </ItemGroup>
   <ItemGroup>
-    <ClInclude Include="MatchaEngine\Math\Calculation.h">
-      <Filter>ヘッダー ファイル</Filter>
-    </ClInclude>
     <ClInclude Include="externals\imgui\imconfig.h">
-      <Filter>imgui</Filter>
+      <Filter>ソース ファイル\externals\imgui</Filter>
     </ClInclude>
     <ClInclude Include="externals\imgui\imgui.h">
-      <Filter>imgui</Filter>
+      <Filter>ソース ファイル\externals\imgui</Filter>
     </ClInclude>
     <ClInclude Include="externals\imgui\imgui_impl_dx12.h">
-      <Filter>imgui</Filter>
+      <Filter>ソース ファイル\externals\imgui</Filter>
     </ClInclude>
     <ClInclude Include="externals\imgui\imgui_impl_win32.h">
-      <Filter>imgui</Filter>
+      <Filter>ソース ファイル\externals\imgui</Filter>
     </ClInclude>
     <ClInclude Include="externals\imgui\imgui_internal.h">
-      <Filter>imgui</Filter>
+      <Filter>ソース ファイル\externals\imgui</Filter>
     </ClInclude>
     <ClInclude Include="externals\imgui\imstb_rectpack.h">
-      <Filter>imgui</Filter>
+      <Filter>ソース ファイル\externals\imgui</Filter>
     </ClInclude>
     <ClInclude Include="externals\imgui\imstb_textedit.h">
-      <Filter>imgui</Filter>
+      <Filter>ソース ファイル\externals\imgui</Filter>
     </ClInclude>
     <ClInclude Include="externals\imgui\imstb_truetype.h">
-      <Filter>imgui</Filter>
-    </ClInclude>
-    <ClInclude Include="MatchaEngine\Graphics\Draw.h">
-      <Filter>ヘッダー ファイル</Filter>
-    </ClInclude>
-    <ClInclude Include="MatchaEngine\Core\VariableTypes.h">
-      <Filter>ヘッダー ファイル</Filter>
-    </ClInclude>
-    <ClInclude Include="MatchaEngine\Graphics\GraphicsDevice.h">
-      <Filter>ヘッダー ファイル</Filter>
-    </ClInclude>
-    <ClInclude Include="MatchaEngine\Core\LogHandler.h">
-      <Filter>ヘッダー ファイル</Filter>
-    </ClInclude>
-    <ClInclude Include="MatchaEngine\Core\WindowConfig.h">
-      <Filter>ヘッダー ファイル</Filter>
-    </ClInclude>
-    <ClInclude Include="MatchaEngine\Common\CommandContext.h">
-      <Filter>ヘッダー ファイル</Filter>
+      <Filter>ソース ファイル\externals\imgui</Filter>
     </ClInclude>
     <ClInclude Include="MatchaEngine\Graphics\PSO\GraphicsPipelineState.h">
-      <Filter>PSO</Filter>
+      <Filter>ソース ファイル\MatchaEngine\Graphics\PSO</Filter>
     </ClInclude>
     <ClInclude Include="MatchaEngine\Graphics\PSO\RootSignature.h">
-      <Filter>PSO</Filter>
+      <Filter>ソース ファイル\MatchaEngine\Graphics\PSO</Filter>
     </ClInclude>
     <ClInclude Include="MatchaEngine\Graphics\PSO\InputLayout.h">
-      <Filter>PSO</Filter>
+      <Filter>ソース ファイル\MatchaEngine\Graphics\PSO</Filter>
     </ClInclude>
     <ClInclude Include="MatchaEngine\Graphics\PSO\RootParameter.h">
-      <Filter>PSO</Filter>
+      <Filter>ソース ファイル\MatchaEngine\Graphics\PSO</Filter>
     </ClInclude>
     <ClInclude Include="MatchaEngine\Graphics\PSO\BlendState.h">
-      <Filter>PSO</Filter>
+      <Filter>ソース ファイル\MatchaEngine\Graphics\PSO</Filter>
     </ClInclude>
     <ClInclude Include="MatchaEngine\Graphics\PSO\RasterizerState.h">
-      <Filter>PSO</Filter>
+      <Filter>ソース ファイル\MatchaEngine\Graphics\PSO</Filter>
     </ClInclude>
     <ClInclude Include="MatchaEngine\Graphics\PSO\ShaderCompile.h">
-      <Filter>PSO</Filter>
+      <Filter>ソース ファイル\MatchaEngine\Graphics\PSO</Filter>
     </ClInclude>
     <ClInclude Include="MatchaEngine\Graphics\PSO\DirectXShaderCompiler.h">
-      <Filter>PSO</Filter>
+      <Filter>ソース ファイル\MatchaEngine\Graphics\PSO</Filter>
     </ClInclude>
     <ClInclude Include="MatchaEngine\Graphics\PSO\DepthStencilState.h">
-      <Filter>PSO</Filter>
+      <Filter>ソース ファイル\MatchaEngine\Graphics\PSO</Filter>
     </ClInclude>
-    <ClInclude Include="MatchaEngine\Engine.h">
-      <Filter>ヘッダー ファイル</Filter>
+    <ClInclude Include="MatchaEngine\Common\CommandContext.h">
+      <Filter>ソース ファイル\MatchaEngine\Common</Filter>
     </ClInclude>
-    <ClInclude Include="MatchaEngine\Resource\Audio.h">
-      <Filter>ヘッダー ファイル</Filter>
+    <ClInclude Include="MatchaEngine\Core\VariableTypes\Vector2.h">
+      <Filter>ソース ファイル\MatchaEngine\Core\VariableTypes</Filter>
     </ClInclude>
-    <ClInclude Include="MatchaEngine\Input\Input.h">
-      <Filter>ヘッダー ファイル</Filter>
+    <ClInclude Include="MatchaEngine\Core\VariableTypes\Vector2Int.h">
+      <Filter>ソース ファイル\MatchaEngine\Core\VariableTypes</Filter>
+    </ClInclude>
+    <ClInclude Include="MatchaEngine\Core\VariableTypes\Vector3.h">
+      <Filter>ソース ファイル\MatchaEngine\Core\VariableTypes</Filter>
+    </ClInclude>
+    <ClInclude Include="MatchaEngine\Core\VariableTypes\Vector3Int.h">
+      <Filter>ソース ファイル\MatchaEngine\Core\VariableTypes</Filter>
+    </ClInclude>
+    <ClInclude Include="MatchaEngine\Core\VariableTypes\Matrix4x4.h">
+      <Filter>ソース ファイル\MatchaEngine\Core\VariableTypes</Filter>
+    </ClInclude>
+    <ClInclude Include="MatchaEngine\Core\VariableTypes.h">
+      <Filter>ソース ファイル\MatchaEngine\Core</Filter>
+    </ClInclude>
+    <ClInclude Include="MatchaEngine\Core\LogHandler.h">
+      <Filter>ソース ファイル\MatchaEngine\Core</Filter>
+    </ClInclude>
+    <ClInclude Include="MatchaEngine\Core\WindowConfig.h">
+      <Filter>ソース ファイル\MatchaEngine\Core</Filter>
     </ClInclude>
     <ClInclude Include="MatchaEngine\GameObjects\DebugCamera.h">
-      <Filter>ヘッダー ファイル</Filter>
-    </ClInclude>
-    <ClInclude Include="MatchaEngine\Graphics\SwapChain.h">
-      <Filter>ヘッダー ファイル</Filter>
-    </ClInclude>
-    <ClInclude Include="MatchaEngine\Graphics\RenderTargetView.h">
-      <Filter>ヘッダー ファイル</Filter>
-    </ClInclude>
-    <ClInclude Include="MatchaEngine\GameObjects\MaterialFactory.h">
-      <Filter>ヘッダー ファイル</Filter>
-    </ClInclude>
-    <ClInclude Include="MatchaEngine\Graphics\DepthStencil.h">
-      <Filter>ヘッダー ファイル</Filter>
-    </ClInclude>
-    <ClInclude Include="MatchaEngine\Graphics\DescriptorHeap.h">
-      <Filter>ヘッダー ファイル</Filter>
-    </ClInclude>
-    <ClInclude Include="MatchaEngine\Graphics\PSO\Sampler.h">
-      <Filter>ヘッダー ファイル</Filter>
-    </ClInclude>
-    <ClInclude Include="MatchaEngine\Graphics\GpuSyncManager.h">
-      <Filter>ヘッダー ファイル</Filter>
-    </ClInclude>
-    <ClInclude Include="MatchaEngine\Graphics\ViewportScissor.h">
-      <Filter>ヘッダー ファイル</Filter>
-    </ClInclude>
-    <ClInclude Include="MatchaEngine\GameObjects\Model.h">
-      <Filter>ヘッダー ファイル</Filter>
-    </ClInclude>
-    <ClInclude Include="MatchaEngine\Resource\Load.h">
-      <Filter>ヘッダー ファイル</Filter>
-    </ClInclude>
-    <ClInclude Include="MatchaEngine\Resource\Texture.h">
-      <Filter>ヘッダー ファイル</Filter>
-    </ClInclude>
-    <ClInclude Include="MatchaEngine\Resource\TextureLoader.h">
-      <Filter>ヘッダー ファイル</Filter>
-    </ClInclude>
-    <ClInclude Include="MatchaEngine\Graphics\DirectinalLight.h">
-      <Filter>ヘッダー ファイル</Filter>
-    </ClInclude>
-    <ClInclude Include="MatchaEngine\Graphics\ResourceBarrierHelper.h">
-      <Filter>ヘッダー ファイル</Filter>
-    </ClInclude>
-    <ClInclude Include="MatchaEngine\GameObjects\Sprite.h">
-      <Filter>ヘッダー ファイル</Filter>
-    </ClInclude>
-    <ClInclude Include="MatchaEngine\GameObjects\Sphere.h">
-      <Filter>ヘッダー ファイル</Filter>
-    </ClInclude>
-    <ClInclude Include="MatchaEngine\GameObjects\Triangle.h">
-      <Filter>ヘッダー ファイル</Filter>
+      <Filter>ソース ファイル\MatchaEngine\GameObjects</Filter>
     </ClInclude>
     <ClInclude Include="MatchaEngine\GameObjects\Grid.h">
-      <Filter>ヘッダー ファイル</Filter>
+      <Filter>ソース ファイル\MatchaEngine\GameObjects</Filter>
     </ClInclude>
     <ClInclude Include="MatchaEngine\GameObjects\Line.h">
-      <Filter>ヘッダー ファイル</Filter>
+      <Filter>ソース ファイル\MatchaEngine\GameObjects</Filter>
+    </ClInclude>
+    <ClInclude Include="MatchaEngine\GameObjects\MaterialFactory.h">
+      <Filter>ソース ファイル\MatchaEngine\GameObjects</Filter>
+    </ClInclude>
+    <ClInclude Include="MatchaEngine\GameObjects\Model.h">
+      <Filter>ソース ファイル\MatchaEngine\GameObjects</Filter>
+    </ClInclude>
+    <ClInclude Include="MatchaEngine\GameObjects\Sphere.h">
+      <Filter>ソース ファイル\MatchaEngine\GameObjects</Filter>
+    </ClInclude>
+    <ClInclude Include="MatchaEngine\GameObjects\Sprite.h">
+      <Filter>ソース ファイル\MatchaEngine\GameObjects</Filter>
+    </ClInclude>
+    <ClInclude Include="MatchaEngine\GameObjects\Triangle.h">
+      <Filter>ソース ファイル\MatchaEngine\GameObjects</Filter>
     </ClInclude>
     <ClInclude Include="MatchaEngine\Input\GamePadInput.h">
+      <Filter>ソース ファイル\MatchaEngine\Input</Filter>
+    </ClInclude>
+    <ClInclude Include="MatchaEngine\Input\Input.h">
+      <Filter>ソース ファイル\MatchaEngine\Input</Filter>
+    </ClInclude>
+    <ClInclude Include="MatchaEngine\Math\Calculation.h">
+      <Filter>ソース ファイル\MatchaEngine\Math</Filter>
+    </ClInclude>
+    <ClInclude Include="MatchaEngine\Resource\Audio.h">
+      <Filter>ソース ファイル\MatchaEngine\Resource</Filter>
+    </ClInclude>
+    <ClInclude Include="MatchaEngine\Resource\Load.h">
+      <Filter>ソース ファイル\MatchaEngine\Resource</Filter>
+    </ClInclude>
+    <ClInclude Include="MatchaEngine\Resource\Texture.h">
+      <Filter>ソース ファイル\MatchaEngine\Resource</Filter>
+    </ClInclude>
+    <ClInclude Include="MatchaEngine\Resource\TextureLoader.h">
+      <Filter>ソース ファイル\MatchaEngine\Resource</Filter>
+    </ClInclude>
+    <ClInclude Include="MatchaEngine\Graphics\DepthStencil.h">
+      <Filter>ソース ファイル\MatchaEngine\Graphics</Filter>
+    </ClInclude>
+    <ClInclude Include="MatchaEngine\Graphics\DescriptorHeap.h">
+      <Filter>ソース ファイル\MatchaEngine\Graphics</Filter>
+    </ClInclude>
+    <ClInclude Include="MatchaEngine\Graphics\DirectinalLight.h">
+      <Filter>ソース ファイル\MatchaEngine\Graphics</Filter>
+    </ClInclude>
+    <ClInclude Include="MatchaEngine\Graphics\Draw.h">
+      <Filter>ソース ファイル\MatchaEngine\Graphics</Filter>
+    </ClInclude>
+    <ClInclude Include="MatchaEngine\Graphics\GpuSyncManager.h">
+      <Filter>ソース ファイル\MatchaEngine\Graphics</Filter>
+    </ClInclude>
+    <ClInclude Include="MatchaEngine\Graphics\GraphicsDevice.h">
+      <Filter>ソース ファイル\MatchaEngine\Graphics</Filter>
+    </ClInclude>
+    <ClInclude Include="MatchaEngine\Graphics\RenderTargetView.h">
+      <Filter>ソース ファイル\MatchaEngine\Graphics</Filter>
+    </ClInclude>
+    <ClInclude Include="MatchaEngine\Graphics\ResourceBarrierHelper.h">
+      <Filter>ソース ファイル\MatchaEngine\Graphics</Filter>
+    </ClInclude>
+    <ClInclude Include="MatchaEngine\Graphics\PSO\Sampler.h">
+      <Filter>ソース ファイル\MatchaEngine\Graphics</Filter>
+    </ClInclude>
+    <ClInclude Include="MatchaEngine\Graphics\SwapChain.h">
+      <Filter>ソース ファイル\MatchaEngine\Graphics</Filter>
+    </ClInclude>
+    <ClInclude Include="MatchaEngine\Graphics\ViewportScissor.h">
+      <Filter>ソース ファイル\MatchaEngine\Graphics</Filter>
+    </ClInclude>
+    <ClInclude Include="MatchaEngine\Engine.h">
+      <Filter>ソース ファイル\MatchaEngine</Filter>
+    </ClInclude>
+    <ClInclude Include="Game\GameScene.h">
+      <Filter>Game</Filter>
+    </ClInclude>
+    <ClInclude Include="Game\SceneChanger.h">
+      <Filter>Game</Filter>
+    </ClInclude>
+    <ClInclude Include="Game\SceneManager.h">
+      <Filter>Game</Filter>
+    </ClInclude>
+    <ClInclude Include="Game\TitleScene.h">
+      <Filter>Game</Filter>
+    </ClInclude>
+    <ClInclude Include="MatchaEngine\GameObjects\Camera.h">
       <Filter>ヘッダー ファイル</Filter>
     </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <Text Include="externals\imgui\LICENSE.txt">
-      <Filter>imgui</Filter>
+      <Filter>ソース ファイル\externals\imgui</Filter>
     </Text>
   </ItemGroup>
   <ItemGroup>
-    <None Include="MatchaEngine\Shader\Object3d.hlsli" />
-    <None Include="MatchaEngine\Shader\Line.hlsli" />
+    <None Include="MatchaEngine\Shader\Line.hlsli">
+      <Filter>ソース ファイル\MatchaEngine\Shader</Filter>
+    </None>
+    <None Include="MatchaEngine\Shader\Object3d.hlsli">
+      <Filter>ソース ファイル\MatchaEngine\Shader</Filter>
+    </None>
   </ItemGroup>
 </Project>
