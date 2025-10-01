@@ -3,6 +3,7 @@
 #include <d3d12.h>
 #include "Core/VariableTypes.h"
 #include "../GameObjects/MaterialFactory.h"
+#include "../Graphics/PSO/RenderState.h"
 
 class Sprite
 {
@@ -54,6 +55,14 @@ public:
 	
 	MaterialFactory* GetMatrial() { return material_; }
 	D3D12_GPU_DESCRIPTOR_HANDLE GetTextureSrvHandleGPU() { return textureSrvHandleGPU_; }
+
+private:
+	ShaderName shader_ = ShaderName::ObjectShader;
+	BlendMode blend_ = BlendMode::kBlendModeNone;
+public:
+	BlendMode SetBlend(BlendMode blend) { blend_ = blend; }
+	ShaderName GetShader() { return shader_; }
+	BlendMode GetBlend() { return blend_; }
 
 };
 

@@ -92,6 +92,8 @@ int WINAPI WinMain(HINSTANCE, HINSTANCE, LPSTR, int) {
 
 			engine.get()->Debug();
 
+			sceneManager.get()->ImGui();
+
 			sceneManager.get()->Update();
 
 
@@ -99,8 +101,6 @@ int WINAPI WinMain(HINSTANCE, HINSTANCE, LPSTR, int) {
 
 			//ImGuiの内部コマンドを生成
 			ImGui::Render();
-
-			engine.get()->PreDraw();
 
 			sceneManager.get()->Draw();
 

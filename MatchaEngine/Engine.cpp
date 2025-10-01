@@ -99,7 +99,7 @@ void Engine::Setting()
 	depthStencil->CreateDepthStencil(graphics->GetDevice(), kClientWidth_, kClientHeight_);
 
 	
-	graphicsPipelineState.get()->CreateALLPSO(logStream, graphics.get()->GetDevice());
+	graphicsPipelineState.get()->ALLPSOCreate(logStream, graphics.get()->GetDevice());
 
 	directinalLight = std::make_unique<DirectinalLight>();
 	directinalLight->CreateDirectinalLight(graphics->GetDevice());
@@ -122,7 +122,7 @@ void Engine::Setting()
 		descriptorHeap->GetSrvDescriptorHeap()->GetCPUDescriptorHandleForHeapStart(),
 		descriptorHeap->GetSrvDescriptorHeap()->GetGPUDescriptorHandleForHeapStart());
 
-	Draw::Initialize(command.get()->GetCommandList());
+	Draw::Initialize(command.get()->GetCommandList(),graphicsPipelineState.get(), directinalLight.get());
 	Texture::Initalize(graphics->GetDevice(), command->GetCommandList(), descriptorHeap.get(), textureLoader.get());
 	
 
@@ -135,15 +135,6 @@ void Engine::Setting()
 
 }
 
-void Engine::PreDraw()
-{
-	command->GetCommandList()->SetPipelineState(graphicsPipelineState->GetGraphicsPipelineState());//PSOを設定
-	//形状を設定。PSOに設定しているものとはまた別。同じものを設定すると考えておけばいい
-	command->GetCommandList()->IASetPrimitiveTopology(D3D_PRIMITIVE_TOPOLOGY_TRIANGLELIST);
-	//RootSignatureを設定。POSに設定しているけど別途設定が必要
-	command->GetCommandList()->SetGraphicsRootSignature(graphicsPipelineState.get()->GetRootSignature()->GetRootSignature());
-	command->GetCommandList()->SetGraphicsRootConstantBufferView(3, directinalLight->GetDirectinalLightResource()->GetGPUVirtualAddress());
-}
 
 void Engine::PostDraw()
 {
@@ -153,15 +144,6 @@ void Engine::PostDraw()
 	//画面に描く処理はすべて終わり、画面に映すので、状態を遷移
 	//今回RenderTargetからPresentにする
 	resourceBarrierHelper->TransitionToPresent(command->GetCommandList());
-}
-
-void Engine::LinePreDraw()
-{
-	command.get()->GetCommandList()->SetPipelineState(graphicsPipelineState->GetLineGraphicsPipelineState());//PSOを設定
-	//形状を設定。PSOに設定しているものとはまた別。同じものを設定すると考えておけばいい
-	command.get()->GetCommandList()->IASetPrimitiveTopology(D3D10_PRIMITIVE_TOPOLOGY_LINELIST);
-	//RootSignatureを設定。POSに設定しているけど別途設定が必要
-	command.get()->GetCommandList()->SetGraphicsRootSignature(graphicsPipelineState.get()->GetLineRootSignature()->GetRootSignature());
 }
 
 
@@ -182,6 +164,8 @@ void Engine::NewFrame() {
 
 	command->GetCommandList()->RSSetViewports(1, viewportScissor->GetViewport());//Viewportを設定
 	command->GetCommandList()->RSSetScissorRects(1, viewportScissor->GetScissorRect());//Sxirssorを設定
+
+	
 
 	input.get()->Updata();
 

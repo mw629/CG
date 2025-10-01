@@ -4,17 +4,33 @@
 
 namespace {
 	ID3D12GraphicsCommandList* commandList_{};
+	GraphicsPipelineState* graphicsPipelineState_;
+	DirectinalLight* directinalLight_;
 }
 
-void Draw::Initialize(ID3D12GraphicsCommandList* commandList)
+void Draw::Initialize(ID3D12GraphicsCommandList* commandList, GraphicsPipelineState* graphicsPipelineState, DirectinalLight* directinalLight)
 {
 	commandList_ = commandList;
+	graphicsPipelineState_ = graphicsPipelineState;
+	directinalLight_ = directinalLight;
 }
 
+void Draw::preDraw(ShaderName shader, BlendMode blend)
+{
+	commandList_->SetPipelineState(graphicsPipelineState_->GetGraphicsPipelineState(shader, blend));//PSOを設定
+	//形状を設定。PSOに設定しているものとはまた別。同じものを設定すると考えておけばいい
+	commandList_->IASetPrimitiveTopology(D3D_PRIMITIVE_TOPOLOGY_TRIANGLELIST);
+	//RootSignatureを設定。POSに設定しているけど別途設定が必要
+	commandList_->SetGraphicsRootSignature(graphicsPipelineState_->GetRootSignature()->GetRootSignature());
 
+	commandList_->SetGraphicsRootConstantBufferView(3, directinalLight_->GetDirectinalLightResource()->GetGPUVirtualAddress());
+
+}
 
 void Draw::DrawObj(Model* model)
 {
+	preDraw(model->GetShader(), model->GetBlend());
+
 	//objectの描画
 	commandList_->IASetVertexBuffers(0, 1, model->GetVertexBufferView());//VBVを設定
 	commandList_->SetGraphicsRootConstantBufferView(0, model->GetMatrial()->GetMaterialResource()->GetGPUVirtualAddress());
@@ -26,6 +42,8 @@ void Draw::DrawObj(Model* model)
 
 void Draw::DrawSprite(Sprite* sprite)
 {
+	preDraw(sprite->GetShader(), sprite->GetBlend());
+
 	commandList_->IASetIndexBuffer(sprite->GetIndexBufferView());//IBVを設定
 	commandList_->IASetVertexBuffers(0, 1, sprite->GetVertexBufferView());//VBVを設定
 	commandList_->SetGraphicsRootConstantBufferView(0, sprite->GetMatrial()->GetMaterialResource()->GetGPUVirtualAddress());
@@ -37,6 +55,8 @@ void Draw::DrawSprite(Sprite* sprite)
 
 void Draw::DrawShpere(Sphere* sphere)
 {
+
+	preDraw(sphere->GetShader(), sphere->GetBlend());
 	//commandList_->IASetIndexBuffer(shpere->GetIndexBufferView());//IBVを設定
 	commandList_->IASetVertexBuffers(0, 1, sphere->GetVertexBufferView());//VBVを設定
 	commandList_->SetGraphicsRootConstantBufferView(0, sphere->GetMatrial()->GetMaterialResource()->GetGPUVirtualAddress());
@@ -47,6 +67,8 @@ void Draw::DrawShpere(Sphere* sphere)
 
 void Draw::DrawTriangle(Triangle* triangle)
 {
+	preDraw(triangle->GetShader(), triangle->GetBlend());
+
 	commandList_->IASetVertexBuffers(0, 1, triangle->GetVertexBufferView());//VBVを設定
 	commandList_->SetGraphicsRootConstantBufferView(0, triangle->GetMatrial()->GetMaterialResource()->GetGPUVirtualAddress());
 	commandList_->SetGraphicsRootConstantBufferView(1, triangle->GetVertexResource()->GetGPUVirtualAddress());

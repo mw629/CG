@@ -226,6 +226,7 @@ copy "$(WindowsSdkDir)bin\$(TargetPlatformVersion)\x64\dxil.dll" "$(TargetDir)dx
     <ClInclude Include="MatchaEngine\Core\VariableTypes\Vector3.h" />
     <ClInclude Include="MatchaEngine\Core\VariableTypes\Vector2Int.h" />
     <ClInclude Include="MatchaEngine\Core\VariableTypes\Vector3Int.h" />
+    <ClInclude Include="MatchaEngine\Graphics\PSO\RenderState.h" />
     <ClInclude Include="MatchaEngine\Input\GamePadInput.h" />
     <ClInclude Include="MatchaEngine\GameObjects\Line.h" />
     <ClInclude Include="MatchaEngine\GameObjects\Grid.h" />

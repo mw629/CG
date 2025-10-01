@@ -4,6 +4,7 @@
 #include "Core/VariableTypes.h"
 #include "Resource/Texture.h"
 #include "MaterialFactory.h"
+#include "../Graphics/PSO/RenderState.h"
 
 
 class Model
@@ -61,9 +62,13 @@ public:
 	ID3D12Resource* GetWvpDataResource() { return wvpDataResource_.Get(); }
 	TransformationMatrix* GetWvpData() { return wvpData_; }
 
-
-
-	
+private:
+	ShaderName shader_ = ShaderName::ObjectShader;
+	BlendMode blend_ = BlendMode::kBlendModeNone;
+public:
+	void SetBlend(BlendMode blend) { blend_ = blend; }
+	ShaderName GetShader() { return shader_; }
+	BlendMode GetBlend() { return blend_; }
 	
 };
 

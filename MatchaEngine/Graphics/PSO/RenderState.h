@@ -11,6 +11,7 @@ enum BlendMode {
 	kBlendNum,
 };
 
+
 enum ShaderName {
 	ObjectShader,
 	LineShader,

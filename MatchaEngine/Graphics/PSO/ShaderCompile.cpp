@@ -75,30 +75,32 @@ Microsoft::WRL::ComPtr<IDxcBlob> ShaderCompile::CompileShader(std::ostream& os,
 
 }
 
-void ShaderCompile::CreateShaderCompile(std::ostream& os, 
-	Microsoft::WRL::ComPtr<IDxcUtils> dxcUtils,
-	Microsoft::WRL::ComPtr<IDxcCompiler3> dxcCompiler,
-	Microsoft::WRL::ComPtr<IDxcIncludeHandler> includeHandler)
+void ShaderCompile::CreateShaderCompile(ShaderName shaderName, std::ostream& os, Microsoft::WRL::ComPtr<IDxcUtils> dxcUtils, Microsoft::WRL::ComPtr<IDxcCompiler3> dxcCompiler, Microsoft::WRL::ComPtr<IDxcIncludeHandler> includeHandler)
 {
-	//Shaderをコンパイルする
-	vertexShaderBlob_ = CompileShader(os, L"MatchaEngine/Shader/Object3D.VS.hlsl",
-		L"vs_6_0", dxcUtils, dxcCompiler, includeHandler);
-	assert(vertexShaderBlob_ != nullptr);
+	switch (shaderName)
+	{
+	case ObjectShader:
+		//Shaderをコンパイルする
+		vertexShaderBlob_ = CompileShader(os, L"MatchaEngine/Shader/Object3D.VS.hlsl",
+			L"vs_6_0", dxcUtils, dxcCompiler, includeHandler);
+		assert(vertexShaderBlob_ != nullptr);
 
-	pixelShaderBlob_ = CompileShader(os, L"MatchaEngine/Shader/Object3D.PS.hlsl",
-		L"ps_6_0", dxcUtils, dxcCompiler, includeHandler);
-	assert(pixelShaderBlob_ != nullptr);
-}
+		pixelShaderBlob_ = CompileShader(os, L"MatchaEngine/Shader/Object3D.PS.hlsl",
+			L"ps_6_0", dxcUtils, dxcCompiler, includeHandler);
+		assert(pixelShaderBlob_ != nullptr);
+		break;
+	case LineShader:
+		//Shaderをコンパイルする
+		vertexShaderBlob_ = CompileShader(os, L"MatchaEngine/Shader/Line.VS.hlsl",
+			L"vs_6_0", dxcUtils, dxcCompiler, includeHandler);
+		assert(vertexShaderBlob_ != nullptr);
 
-void ShaderCompile::CreateLineShaderCompile(std::ostream& os, Microsoft::WRL::ComPtr<IDxcUtils> dxcUtils, Microsoft::WRL::ComPtr<IDxcCompiler3> dxcCompiler, Microsoft::WRL::ComPtr<IDxcIncludeHandler> includeHandler)
-{
-	//Shaderをコンパイルする
-	vertexShaderBlob_ = CompileShader(os, L"MatchaEngine/Shader/Line.VS.hlsl",
-		L"vs_6_0", dxcUtils, dxcCompiler, includeHandler);
-	assert(vertexShaderBlob_ != nullptr);
-
-	pixelShaderBlob_ = CompileShader(os, L"MatchaEngine/Shader/Line.PS.hlsl",
-		L"ps_6_0", dxcUtils, dxcCompiler, includeHandler);
-	assert(pixelShaderBlob_ != nullptr);
+		pixelShaderBlob_ = CompileShader(os, L"MatchaEngine/Shader/Line.PS.hlsl",
+			L"ps_6_0", dxcUtils, dxcCompiler, includeHandler);
+		assert(pixelShaderBlob_ != nullptr);
+		break;
+	default:
+		break;
+	}
 }
 

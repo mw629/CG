@@ -3,6 +3,7 @@
 #include <wrl.h>
 #include <ostream>
 #include <dxcapi.h>
+#include "RenderState.h"
 
 class ShaderCompile
 {
@@ -23,7 +24,7 @@ public:
 		Microsoft::WRL::ComPtr<IDxcCompiler3> dxcCompiler,
 		Microsoft::WRL::ComPtr<IDxcIncludeHandler> includeHandler);
 
-	void CreateShaderCompile(std::ostream& os,
+	void CreateShaderCompile(ShaderName shaderName,std::ostream& os,
 		Microsoft::WRL::ComPtr<IDxcUtils> dxcUtils,
 		Microsoft::WRL::ComPtr<IDxcCompiler3> dxcCompiler,
 		Microsoft::WRL::ComPtr<IDxcIncludeHandler> includeHandler);

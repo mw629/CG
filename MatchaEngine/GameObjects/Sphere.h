@@ -3,6 +3,7 @@
 #include "../Core/VariableTypes.h"
 #include "MaterialFactory.h"
 #include <d3dx12.h>
+#include "../Graphics/PSO/RenderState.h"
 
 
 class Sphere
@@ -58,6 +59,14 @@ public:
 	D3D12_GPU_DESCRIPTOR_HANDLE GetTextureSrvHandleGPU() { return textureSrvHandleGPU_; }
 
 	uint32_t GetSubdivision() { return kSubdivision_; }
+
+private:
+	ShaderName shader_ = ShaderName::ObjectShader;
+	BlendMode blend_ = BlendMode::kBlendModeNone;
+public:
+	BlendMode SetBlend(BlendMode blend) { blend_ = blend; }
+	ShaderName GetShader() { return shader_; }
+	BlendMode GetBlend() { return blend_; }
 
 };
 

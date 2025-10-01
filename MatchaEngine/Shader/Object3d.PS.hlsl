@@ -30,21 +30,7 @@ PixelShaderOutput main(VertexShaderOutput input)
         output.color = gMaterial.color * textureColor;
     }
     
-    ////textureのα値が0.5以下の時にPixelを放棄
-    //if (textureColor[3] <= 0.5)
-    //{
-    //    discard;
-    //}
-    ////textureのα値が0の時にPixelを放棄
-    //if (textureColor[3]==0.0)
-    //{
-    //    discard;
-    //}
-    ////output.colorのα値が0の時にPixelを放棄
-    //if (output.color[3] == 0.0)
-    //{
-    //    discard;
-    //}
+   
     
     return output;
 }
