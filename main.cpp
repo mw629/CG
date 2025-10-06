@@ -1,31 +1,9 @@
-#include <Windows.h>
-#include <cstdint>
-#include <string>
-#include <format>
-#include <d3d12.h>
-#include <dxgi1_6.h>
-#include <cassert>
-#include <filesystem>
-#include <fstream>
-#include <sstream>
-#include <chrono>
-#include <dxgidebug.h>
-#include <dbgHelp.h>
-#include <strsafe.h>
-#include <dxcapi.h>
-#include <vector>
-#include <wrl.h> 
-#include <xaudio2.h>
-
-#include <memory> 
-
-#include "externals/DirectXTex/DirectXTex.h"
-#include "externals/imgui/imgui.h"
-#include "externals/imgui/imgui_impl_dx12.h"
 #include "externals/imgui/imgui_impl_win32.h"
-#include "externals/DirectXTex/d3dx12.h"
 
+#include "MatchaEngine/Engine.h"
 #include "Game/SceneManager.h"
+
+#pragma comment(lib,"dxcompiler.lib")
 
 struct Debug {
 	~Debug() {
@@ -46,21 +24,6 @@ std::unique_ptr<Debug> leakChacker = std::make_unique<Debug>();
 extern IMGUI_IMPL_API LRESULT ImGui_ImplWin32_WndProcHandler(HWND hWnd, UINT msg, WPARAM wParam, LPARAM lParam);
 
 
-#include "MatchaEngine/Engine.h"
-#include "MatchaEngine/Input/GamePadInput.h"
-
-
-#pragma comment(lib,"d3d12.lib")
-#pragma comment(lib,"dxgi.lib")
-#pragma comment(lib,"dxguid.lib")
-#pragma comment(lib,"dbgHelp.lib")
-#pragma comment(lib,"dxcompiler.lib")
-#pragma comment(lib,"xaudio2.lib")
-
-
-///クラス///
-
-
 ///-------------------------------------------
 ///WinMain
 ///------------------------------------------
@@ -77,38 +40,35 @@ int WINAPI WinMain(HINSTANCE, HINSTANCE, LPSTR, int) {
 
 	//メインループ//
 
-	MSG msg{};
+
 	//ウィンドウのxが押されるまでループ
-	while (msg.message != WM_QUIT) {
+	while (true) {
 		//windowにメッセージが来てたら最優先で処理させる
-		if (PeekMessage(&msg, NULL, 0, 0, PM_REMOVE)) {
-			TranslateMessage(&msg);
-			DispatchMessage(&msg);
+		if (WindowConfig::ProcessMassage()) {
+			break;
 		}
-		else {
+
+		engine.get()->NewFrame();
+
+		engine.get()->Debug();
+
+		sceneManager.get()->ImGui();
+
+		sceneManager.get()->Update();
 
 
-			engine.get()->NewFrame();
+		//ゲーム処理
 
-			engine.get()->Debug();
+		//ImGuiの内部コマンドを生成
+		ImGui::Render();
 
-			sceneManager.get()->ImGui();
+		sceneManager.get()->Draw();
 
-			sceneManager.get()->Update();
+		engine.get()->PostDraw();
 
-
-			//ゲーム処理
-
-			//ImGuiの内部コマンドを生成
-			ImGui::Render();
-
-			sceneManager.get()->Draw();
-
-			engine.get()->PostDraw();
-
-			engine.get()->EndFrame();
-		}
+		engine.get()->EndFrame();
 	}
+
 	engine.get()->End();
 
 

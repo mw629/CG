@@ -3,6 +3,7 @@
 
 extern IMGUI_IMPL_API LRESULT ImGui_ImplWin32_WndProcHandler(HWND hWnd, UINT msg, WPARAM wParam, LPARAM lParam);
 
+
 LRESULT WindowConfig::WindowProc(HWND hwnd, UINT msg, WPARAM wparam, LPARAM lparam)
 {
 	if (ImGui_ImplWin32_WndProcHandler(hwnd, msg, wparam, lparam)) { return true; }
@@ -10,7 +11,7 @@ LRESULT WindowConfig::WindowProc(HWND hwnd, UINT msg, WPARAM wparam, LPARAM lpar
 	switch (msg) {
 		//ウィンドウが破棄された
 	case WM_DESTROY:
-		//OSんい対して、アプリ終了を伝える
+		//OSに対して、アプリ終了を伝える
 		PostQuitMessage(0);
 		return 0;
 	}
@@ -63,4 +64,26 @@ void WindowConfig::DrawWindow(const int32_t kClientWidth, const int32_t kClientH
 	SetWindowData(kClientWidth, kClientHeight);
 	//ウィンドウを表示する
 	ShowWindow(hwnd, SW_SHOW);
+
+}
+
+void WindowConfig::Finalize() {
+	//ウィンドウを閉じる
+	CloseWindow(hwnd);
+	//COMの終了処理
+	CoUninitialize();
+}
+
+bool WindowConfig::ProcessMassage()
+{
+	MSG msg{};
+	//windowにメッセージが来てたら最優先で処理させる
+	if (PeekMessage(&msg, NULL, 0, 0, PM_REMOVE)) {
+		TranslateMessage(&msg);
+		DispatchMessage(&msg);
+	}
+	if(msg.message == WM_QUIT) {
+		return true;
+	}
+	return false;
 }

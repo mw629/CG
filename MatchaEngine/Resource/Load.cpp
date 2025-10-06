@@ -6,6 +6,7 @@
 #include <sstream>
 #include <d3dx12.h>
 #include "Texture.h"
+#include "OBJManager.h"
 
 
 /// オブジェクトの読み込み///
@@ -36,6 +37,12 @@ MaterialData LoadMaterialTemplateFile(const std::string& directoryPath, const st
 
 ModelData LoadObjFile(const std::string& directoryPath, const std::string& filename)
 {
+	std::unique_ptr<OBJManager> objManager = std::make_unique<OBJManager>();
+
+	if (objManager.get()->DuplicateConfirmation(directoryPath, filename)) {
+		return objManager.get()->DuplicateReturn(directoryPath, filename);
+	}
+
 	ModelData modelData;
 	std::vector<Vector4> positions;//位置
 	std::vector<Vector3> normals;//法線
@@ -107,6 +114,8 @@ ModelData LoadObjFile(const std::string& directoryPath, const std::string& filen
 	std::unique_ptr<Texture> texture = std::make_unique<Texture>();
 
 	modelData.textureIndex = texture->CreateTexture(modelData.material.textureDilePath);
+
+	objManager.get()->SetModelList(modelData, directoryPath, filename);
 
 	return modelData;
 

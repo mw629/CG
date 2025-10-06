@@ -29,7 +29,9 @@ void GameScene::ImGui()
 void GameScene::Initialize() {
 	
 	ModelData modelData = LoadObjFile("resources/fence", "fence.obj");
-	
+	ModelData modelDat = LoadObjFile("resources/fence", "fence.obj");
+
+
 	model_ = std::make_unique<Model>();
 	model_->Initialize(modelData);
 	model_->CreateModel();

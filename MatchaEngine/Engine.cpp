@@ -205,13 +205,8 @@ void Engine::End() {
 	ImGui_ImplDX12_Shutdown();
 	ImGui_ImplWin32_Shutdown();
 	ImGui::DestroyContext();
-
-
-	//ウィンドウを閉じる
-	CloseWindow(window.GetHwnd());
-
-	//COMの終了処理
-	CoUninitialize();
+	
+	window.Finalize();
 }
 
 

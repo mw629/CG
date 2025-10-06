@@ -81,21 +81,21 @@ void ShaderCompile::CreateShaderCompile(ShaderName shaderName, std::ostream& os,
 	{
 	case ObjectShader:
 		//Shaderをコンパイルする
-		vertexShaderBlob_ = CompileShader(os, L"MatchaEngine/Shader/Object3D.VS.hlsl",
+		vertexShaderBlob_ = CompileShader(os, L"resources/Shader/Object3D.VS.hlsl",
 			L"vs_6_0", dxcUtils, dxcCompiler, includeHandler);
 		assert(vertexShaderBlob_ != nullptr);
 
-		pixelShaderBlob_ = CompileShader(os, L"MatchaEngine/Shader/Object3D.PS.hlsl",
+		pixelShaderBlob_ = CompileShader(os, L"resources/Shader/Object3D.PS.hlsl",
 			L"ps_6_0", dxcUtils, dxcCompiler, includeHandler);
 		assert(pixelShaderBlob_ != nullptr);
 		break;
 	case LineShader:
 		//Shaderをコンパイルする
-		vertexShaderBlob_ = CompileShader(os, L"MatchaEngine/Shader/Line.VS.hlsl",
+		vertexShaderBlob_ = CompileShader(os, L"resources/Shader/Line.VS.hlsl",
 			L"vs_6_0", dxcUtils, dxcCompiler, includeHandler);
 		assert(vertexShaderBlob_ != nullptr);
 
-		pixelShaderBlob_ = CompileShader(os, L"MatchaEngine/Shader/Line.PS.hlsl",
+		pixelShaderBlob_ = CompileShader(os, L"resources/Shader/Line.PS.hlsl",
 			L"ps_6_0", dxcUtils, dxcCompiler, includeHandler);
 		assert(pixelShaderBlob_ != nullptr);
 		break;

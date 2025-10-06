@@ -215,16 +215,16 @@
     </ClCompile>
   </ItemGroup>
   <ItemGroup>
-    <FxCompile Include="MatchaEngine\Shader\Object3d.VS.hlsl">
+    <FxCompile Include="resources\Shader\Object3d.VS.hlsl">
       <Filter>MatchaEngine\Shader</Filter>
     </FxCompile>
-    <FxCompile Include="MatchaEngine\Shader\Line.PS.hlsl">
+    <FxCompile Include="resources\Shader\Line.PS.hlsl">
       <Filter>MatchaEngine\Shader</Filter>
     </FxCompile>
-    <FxCompile Include="MatchaEngine\Shader\Line.VS.hlsl">
+    <FxCompile Include="resources\Shader\Line.VS.hlsl">
       <Filter>MatchaEngine\Shader</Filter>
     </FxCompile>
-    <FxCompile Include="MatchaEngine\Shader\Object3d.PS.hlsl">
+    <FxCompile Include="resources\Shader\Object3d.PS.hlsl">
       <Filter>MatchaEngine\Shader</Filter>
     </FxCompile>
   </ItemGroup>
@@ -413,10 +413,10 @@
     </Text>
   </ItemGroup>
   <ItemGroup>
-    <None Include="MatchaEngine\Shader\Line.hlsli">
+    <None Include="resources\Shader\Line.hlsli">
       <Filter>MatchaEngine\Shader</Filter>
     </None>
-    <None Include="MatchaEngine\Shader\Object3d.hlsli">
+    <None Include="resources\Shader\Object3d.hlsli">
       <Filter>MatchaEngine\Shader</Filter>
     </None>
   </ItemGroup>
