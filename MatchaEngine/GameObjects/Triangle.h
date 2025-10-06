@@ -1,6 +1,8 @@
 #pragma once
 #include <Core/VariableTypes.h>
 #include "MaterialFactory.h"
+#include "../Graphics/PSO/RenderState.h"
+
 class Triangle
 {
 private:
@@ -45,6 +47,14 @@ public:
 	MaterialFactory* GetMatrial()const { return material_; }
 	D3D12_GPU_DESCRIPTOR_HANDLE GetTextureSrvHandleGPU()const { return textureSrvHandleGPU_; }
 
-	
+private:
+	ShaderName shader_ = ShaderName::ObjectShader;
+	BlendMode blend_ = BlendMode::kBlendModeNone;
+public:
+	BlendMode SetBlend(BlendMode blend) { blend_ = blend; }
+	ShaderName GetShader() { return shader_; }
+	BlendMode GetBlend() { return blend_; }
+
+
 };
 

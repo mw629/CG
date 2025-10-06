@@ -1,6 +1,11 @@
 #include "SceneManager.h"
 
 
+void SceneManager::ImGui() {
+	gameScene_.get()->ImGui();
+}
+
+
 void SceneManager::Initialize() {
 	gameScene_ = std::make_unique<GameScene>();
 	gameScene_.get()->Initialize();

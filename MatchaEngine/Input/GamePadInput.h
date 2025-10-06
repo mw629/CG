@@ -36,20 +36,22 @@ public:
 
 	// ボタン入力チェック
 	
-	bool PressedButton(WORD button) const;
-	bool TriggeredButton(WORD button) const;
-	bool ReleasedButton(WORD button) const;
-	bool FreeButton(WORD button)const;
+	static bool PushButton(WORD button);
+	static bool PressButton(WORD button);
+	static bool ReleaseButton(WORD button);
+	static bool FreeButton(WORD button);
 
 	// スティックの値取得（-1.0f〜1.0f）
 	
-	Vector3 GetLeftStick()const { return { GetLeftStickX(),GetLeftStickY() ,0.0f }; }
-	Vector3 GetRightStick()const { return { GetRightStickX(),GetRightStickY() ,0.0f }; }
+	static Vector3 GetLeftStick();  
+	static Vector3 GetRightStick(); 
 
-	float GetLeftStickX() const;
-	float GetLeftStickY() const;
-	float GetRightStickX() const;
-	float GetRightStickY() const;
+	static float GetLeftStickX();
+	static float GetLeftStickY();
+	static float GetRightStickX();
+	static float GetRightStickY();
+
+	void SetPad();
 
 };
 

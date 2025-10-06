@@ -57,9 +57,12 @@ D3D12_BLEND_DESC BlendState::CreateBlendDesc(BlendMode mode)
 		break;
 	}
 
-	// アルファブレンドの設定（たいてい同じでOK）
-	rt.SrcBlendAlpha = D3D12_BLEND_ONE;
-	rt.DestBlendAlpha = D3D12_BLEND_ZERO;
+	// アルファブレンドの設定
+	/*rt.SrcBlendAlpha = D3D12_BLEND_ONE;
+	rt.BlendOpAlpha = D3D12_BLEND_OP_ADD;
+	rt.DestBlendAlpha = D3D12_BLEND_ZERO;*/
+	rt.SrcBlendAlpha = D3D12_BLEND_SRC_ALPHA;
+	rt.DestBlendAlpha = D3D12_BLEND_INV_SRC_ALPHA;
 	rt.BlendOpAlpha = D3D12_BLEND_OP_ADD;
 
 	return blendDesc_;

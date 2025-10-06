@@ -10,6 +10,8 @@ private:
 
 public:
 
+	void ImGui();
+
 	void Initialize();
 
 	void Update();

@@ -1,14 +1,6 @@
 #pragma once
 #include <d3d12.h> 
-
-enum BlendMode {
-	kBlendModeNone,
-	kBlendModeNormal,
-	kBlendModeAdd,
-	kBlendModeSubtract,
-	kBlendModeMultiply,
-	kBlendModeScreen
-};
+#include "RenderState.h"
 
 class BlendState
 {

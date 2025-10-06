@@ -34,11 +34,13 @@ Model::~Model()
 
 
 
-void Model::Initialize(ModelData modelData,D3D12_GPU_DESCRIPTOR_HANDLE textureSrvHandleGPU)
+void Model::Initialize(ModelData modelData)
 {
+	std::unique_ptr<Texture> texture = std::make_unique<Texture>();
+
 	transform_ = {};
 	modelData_ = modelData;
-	textureSrvHandleGPU_ = textureSrvHandleGPU;
+	textureSrvHandleGPU_ = texture->TextureData(modelData.textureIndex);
 
 	material_ = new MaterialFactory();
 	material_->CreateMatrial(device_, false);
