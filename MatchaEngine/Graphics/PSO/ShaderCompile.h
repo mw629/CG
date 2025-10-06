@@ -29,10 +29,6 @@ public:
 		Microsoft::WRL::ComPtr<IDxcCompiler3> dxcCompiler,
 		Microsoft::WRL::ComPtr<IDxcIncludeHandler> includeHandler);
 
-	void CreateLineShaderCompile(std::ostream& os,
-		Microsoft::WRL::ComPtr<IDxcUtils> dxcUtils,
-		Microsoft::WRL::ComPtr<IDxcCompiler3> dxcCompiler,
-		Microsoft::WRL::ComPtr<IDxcIncludeHandler> includeHandler);
 
 	IDxcBlob* GetVertexShaderBlob(){return vertexShaderBlob_.Get(); }
 

@@ -87,6 +87,7 @@ struct ModelData
 {
 	std::vector<VertexData> vertices;
 	MaterialData material;
+	int textureIndex;
 };
 
 struct Segment {

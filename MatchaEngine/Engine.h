@@ -48,6 +48,7 @@
 //Input
 
 #include "Input/Input.h"
+#include "Input/GamePadInput.h"
 
 //Math
 
@@ -82,6 +83,7 @@ private:
 	std::unique_ptr<ViewportScissor> viewportScissor;
 
 	std::unique_ptr<Input> input;
+	std::unique_ptr<GamePadInput> gamePadInput;
 
 	std::unique_ptr<DebugCamera> debudCamera;
 	std::unique_ptr<DepthStencil> depthStencil;
@@ -98,7 +100,7 @@ private:
 	std::unique_ptr<DirectinalLight> directinalLight;
 
 	ID3D12DescriptorHeap* descriptorHeeps[1];
-	
+
 public:
 
 	~Engine();
@@ -106,11 +108,7 @@ public:
 
 	void Setting();
 
-	void PreDraw();
-
 	void PostDraw();
-
-	void LinePreDraw();
 
 	void NewFrame();
 

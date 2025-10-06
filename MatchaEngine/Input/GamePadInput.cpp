@@ -2,14 +2,20 @@
 #include <cmath>
 #include <imgui.h>
 
+namespace {
+	XINPUT_STATE currentState;
+	XINPUT_STATE prevState;
+	int deadZone;
+}
+
 void GamePadInput::DrawImGui()
 {
-	bool press = PressedButton(XINPUT_GAMEPAD_A);
-	bool trigger = TriggeredButton(XINPUT_GAMEPAD_A);
-	bool releas = ReleasedButton(XINPUT_GAMEPAD_A);
+	bool press = PressButton(XINPUT_GAMEPAD_A);
+	bool trigger = PushButton(XINPUT_GAMEPAD_A);
+	bool releas = ReleaseButton(XINPUT_GAMEPAD_A);
 	bool free = FreeButton(XINPUT_GAMEPAD_A);
 
-	Vector3 leftStick=GetLeftStick();
+	Vector3 leftStick = GetLeftStick();
 	Vector3 rightStick = GetRightStick();
 
 	ImGui::Begin("Contoller");
@@ -19,7 +25,7 @@ void GamePadInput::DrawImGui()
 	ImGui::Checkbox("Free", &free);
 
 
-	ImGui::DragFloat3("LeftStick", &leftStick.x,1.0f);
+	ImGui::DragFloat3("LeftStick", &leftStick.x, 1.0f);
 	ImGui::DragFloat3("RightStick", &rightStick.x, 1.0f);
 	ImGui::End();
 
@@ -36,57 +42,76 @@ void GamePadInput::Update()
 	prevState_ = currentState_;
 	ZeroMemory(&currentState_, sizeof(XINPUT_STATE));
 	XInputGetState(0, &currentState_); // プレイヤー1のコントローラー
+	SetPad();
 }
 
 
 ///ボタンの入力///
 
-bool GamePadInput::PressedButton(WORD button) const
+bool GamePadInput::PushButton(WORD button)
 {
-	return (currentState_.Gamepad.wButtons & button) != 0;
+	return (currentState.Gamepad.wButtons & button) &&
+		!(prevState.Gamepad.wButtons & button);
 }
 
-bool GamePadInput::TriggeredButton(WORD button) const
+bool GamePadInput::PressButton(WORD button)
 {
-	return (currentState_.Gamepad.wButtons & button) &&
-		!(prevState_.Gamepad.wButtons & button);
+	return (currentState.Gamepad.wButtons & button) != 0;
 }
 
-bool GamePadInput::ReleasedButton(WORD button) const
+bool GamePadInput::ReleaseButton(WORD button)
 {
-	return !(currentState_.Gamepad.wButtons & button) &&
-		(prevState_.Gamepad.wButtons & button);
+	return !(currentState.Gamepad.wButtons & button) &&
+		(prevState.Gamepad.wButtons & button);
 }
 
-bool GamePadInput::FreeButton(WORD button) const
+bool GamePadInput::FreeButton(WORD button)
 {
-	return !(currentState_.Gamepad.wButtons & button)&&
-		!(prevState_.Gamepad.wButtons & button);
+	return !(currentState.Gamepad.wButtons & button) &&
+		!(prevState.Gamepad.wButtons & button);
 }
 
 ///スティックの入力///
 
-float GamePadInput::GetLeftStickX() const
+Vector3 GamePadInput::GetLeftStick()
 {
-	SHORT x = currentState_.Gamepad.sThumbLX;
-	return (std::abs(x) > deadZone_) ? x / 32768.0f : 0.0f;//DeadZoneより小さいなら0.0fをかえす
+	return { GetLeftStickX(),GetLeftStickY() ,0.0f };
 }
 
-float GamePadInput::GetLeftStickY() const
+
+Vector3 GamePadInput::GetRightStick()
 {
-	SHORT y = currentState_.Gamepad.sThumbLY;
-	return (std::abs(y) > deadZone_) ? y / 32768.0f : 0.0f;
+	return { GetRightStickX(),GetRightStickY() ,0.0f };
 }
 
-float GamePadInput::GetRightStickX() const
+float GamePadInput::GetLeftStickX()
 {
-	SHORT x = currentState_.Gamepad.sThumbRX;
-	return (std::abs(x) > deadZone_) ? x / 32768.0f : 0.0f;
+	SHORT x = currentState.Gamepad.sThumbLX;
+	return (std::abs(x) > deadZone) ? x / 32768.0f : 0.0f;//DeadZoneより小さいなら0.0fをかえす
 }
 
-float GamePadInput::GetRightStickY() const
+float GamePadInput::GetLeftStickY()
 {
-	SHORT y = currentState_.Gamepad.sThumbRY;
-	return (std::abs(y) > deadZone_) ? y / 32768.0f : 0.0f;
+	SHORT y = currentState.Gamepad.sThumbLY;
+	return (std::abs(y) > deadZone) ? y / 32768.0f : 0.0f;
+}
+
+float GamePadInput::GetRightStickX() 
+{
+	SHORT x = currentState.Gamepad.sThumbRX;
+	return (std::abs(x) > deadZone) ? x / 32768.0f : 0.0f;
+}
+
+float GamePadInput::GetRightStickY() 
+{
+	SHORT y = currentState.Gamepad.sThumbRY;
+	return (std::abs(y) > deadZone) ? y / 32768.0f : 0.0f;
+}
+
+void GamePadInput::SetPad()
+{
+	currentState= currentState_;
+	prevState= prevState_;
+	deadZone= deadZone_;
 }
 

@@ -32,7 +32,7 @@ public:
 
 	static void SetDevice(ID3D12Device* device);
 
-	void Initialize(ModelData modelData, D3D12_GPU_DESCRIPTOR_HANDLE textureSrvHandleGPU);
+	void Initialize(ModelData modelData);
 
 	void CreateVertexData();
 	void CreateWVP();

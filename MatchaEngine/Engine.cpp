@@ -40,6 +40,7 @@ Engine::Engine(int32_t kClientWidth, int32_t kClientHeight)
 	viewportScissor = std::make_unique<ViewportScissor>(kClientWidth, kClientHeight);
 	//入力
 	input = std::make_unique<Input>();
+	gamePadInput= std::make_unique<GamePadInput>();
 	//描画
 	debudCamera = std::make_unique<DebugCamera>();
 	depthStencil = std::make_unique<DepthStencil>();
@@ -57,6 +58,7 @@ void Engine::Setting()
 
 	window.DrawWindow(kClientWidth_, kClientHeight_);
 	input->Initialize(window.GetWc(), window.GetHwnd());
+
 	debudCamera->Initialize();
 
 	//エラー・警告、即ちに停止//
@@ -168,7 +170,7 @@ void Engine::NewFrame() {
 	
 
 	input.get()->Updata();
-
+	gamePadInput.get()->Update();
 }
 
 void Engine::EndFrame() {

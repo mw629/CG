@@ -25,6 +25,4 @@ void SwapChain::CreateSwapChain(IDXGIFactory7 *DxgiFactory, ID3D12CommandQueue* 
 	assert(SUCCEEDED(hr_));
 	hr_ = swapChain_->GetBuffer(1, IID_PPV_ARGS(&swapChainResources_[1]));
 	assert(SUCCEEDED(hr_));
-
-
 }

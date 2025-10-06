@@ -27,19 +27,17 @@ void GameScene::ImGui()
 }
 
 void GameScene::Initialize() {
-	std::unique_ptr<Texture> texture = std::make_unique<Texture>();
-
+	
 	ModelData modelData = LoadObjFile("resources/fence", "fence.obj");
-	int index = texture->CreateTexture(modelData.material.textureDilePath);
+	
 	model_ = std::make_unique<Model>();
-	model_->Initialize(modelData, texture->TextureData(index));
+	model_->Initialize(modelData);
 	model_->CreateModel();
 	model_.get()->GetMatrial()->SetColor(modelColor_);
 
 	modelData = LoadObjFile("resources/Player", "Player.obj");
-	index = texture->CreateTexture(modelData.material.textureDilePath);
 	model_2 = std::make_unique<Model>();
-	model_2->Initialize(modelData, texture->TextureData(index));
+	model_2->Initialize(modelData);
 	model_2->CreateModel();
 	model_2.get()->GetMatrial()->SetColor(modelColor_2);
 

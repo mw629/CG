@@ -5,6 +5,7 @@
 #include <fstream>
 #include <sstream>
 #include <d3dx12.h>
+#include "Texture.h"
 
 
 /// オブジェクトの読み込み///
@@ -102,6 +103,11 @@ ModelData LoadObjFile(const std::string& directoryPath, const std::string& filen
 			modelData.material = LoadMaterialTemplateFile(directoryPath, materiaFilename);
 		}
 	}
+
+	std::unique_ptr<Texture> texture = std::make_unique<Texture>();
+
+	modelData.textureIndex = texture->CreateTexture(modelData.material.textureDilePath);
+
 	return modelData;
 
 }
