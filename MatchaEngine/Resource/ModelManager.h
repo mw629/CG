@@ -7,14 +7,14 @@ struct ModelList{
 	std::string filename;
 };
 
-class OBJManager
+class ModelManager
 {
 private:
 	
 	ModelList modelList_;
 
 public:
-	OBJManager();
+	ModelManager();
 
 	void SetModelList(ModelData modelData,const std::string& directoryPath, const std::string& filename);
 

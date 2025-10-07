@@ -31,6 +31,7 @@ public:
 	~Model();
 
 	static void SetDevice(ID3D12Device* device);
+	void SetScreenSize(int Width, int Height) { kClientWidth = Width; kClientHeight = Height; }
 
 	void Initialize(ModelData modelData);
 

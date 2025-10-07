@@ -1,14 +1,14 @@
-#include "OBJManager.h"
+#include "ModelManager.h"
 
 namespace {
 	std::vector<ModelList> modelList;
 }
 
-OBJManager::OBJManager()
+ModelManager::ModelManager()
 {
 }
 
-void OBJManager::SetModelList(ModelData modelData, const std::string& directoryPath, const std::string& filename)
+void ModelManager::SetModelList(ModelData modelData, const std::string& directoryPath, const std::string& filename)
 {
 	modelList_.modelData = modelData;
 	modelList_.directoryPath = directoryPath;
@@ -16,7 +16,7 @@ void OBJManager::SetModelList(ModelData modelData, const std::string& directoryP
 	modelList.push_back(modelList_);
 }
 
-bool OBJManager::DuplicateConfirmation(const std::string& directoryPath, const std::string& filename)
+bool ModelManager::DuplicateConfirmation(const std::string& directoryPath, const std::string& filename)
 {
 	for (int i = 0; i < modelList.size(); i++) {
 		if (modelList[i].directoryPath == directoryPath) {
@@ -28,7 +28,7 @@ bool OBJManager::DuplicateConfirmation(const std::string& directoryPath, const s
 	return false;
 }
 
-ModelData OBJManager::DuplicateReturn(const std::string& directoryPath, const std::string& filename)
+ModelData ModelManager::DuplicateReturn(const std::string& directoryPath, const std::string& filename)
 {
 	for (int i = 0; i < modelList.size(); i++) {
 		if (modelList[i].directoryPath == directoryPath) {

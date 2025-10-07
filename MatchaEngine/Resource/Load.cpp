@@ -6,7 +6,7 @@
 #include <sstream>
 #include <d3dx12.h>
 #include "Texture.h"
-#include "OBJManager.h"
+#include "ModelManager.h"
 
 
 /// オブジェクトの読み込み///
@@ -37,7 +37,7 @@ MaterialData LoadMaterialTemplateFile(const std::string& directoryPath, const st
 
 ModelData LoadObjFile(const std::string& directoryPath, const std::string& filename)
 {
-	std::unique_ptr<OBJManager> objManager = std::make_unique<OBJManager>();
+	std::unique_ptr<ModelManager> objManager = std::make_unique<ModelManager>();
 
 	if (objManager.get()->DuplicateConfirmation(directoryPath, filename)) {
 		return objManager.get()->DuplicateReturn(directoryPath, filename);

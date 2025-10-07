@@ -14,6 +14,7 @@
 //GameObjeects
 #include "GameObjects/Camera.h"
 #include "GameObjects/DebugCamera.h"
+#include "GameObjects/Object.h"
 #include "GameObjects/MaterialFactory.h"
 #include "GameObjects/Model.h"
 #include "GameObjects/Sphere.h"
