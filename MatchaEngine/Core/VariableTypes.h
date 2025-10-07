@@ -40,6 +40,11 @@ struct Transform
 	Vector3 translate;
 };
 
+struct AABB {
+	Vector3 min;
+	Vector3 max;
+};
+
 struct TransformationMatrix
 {
 	Matrix4x4 WVP;
