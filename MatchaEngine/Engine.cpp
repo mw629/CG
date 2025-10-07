@@ -21,7 +21,7 @@ Engine::Engine(int32_t kClientWidth, int32_t kClientHeight)
 
 	SetUnhandledExceptionFilter(ExportDump);
 	logStream = CurrentTimestamp();
-	
+
 	//DebugLayer//
 #ifdef _DEBUG
 	Microsoft::WRL::ComPtr<ID3D12Debug1> debugController = nullptr;
@@ -41,7 +41,7 @@ Engine::Engine(int32_t kClientWidth, int32_t kClientHeight)
 	viewportScissor = std::make_unique<ViewportScissor>(kClientWidth, kClientHeight);
 	//入力
 	input = std::make_unique<Input>();
-	gamePadInput= std::make_unique<GamePadInput>();
+	gamePadInput = std::make_unique<GamePadInput>();
 	//描画
 	debudCamera = std::make_unique<DebugCamera>();
 	depthStencil = std::make_unique<DepthStencil>();
@@ -101,7 +101,7 @@ void Engine::Setting()
 
 	depthStencil->CreateDepthStencil(graphics->GetDevice(), kClientWidth_, kClientHeight_);
 
-	
+
 	graphicsPipelineState.get()->ALLPSOCreate(logStream, graphics.get()->GetDevice());
 
 	directinalLight = std::make_unique<DirectinalLight>();
@@ -125,9 +125,9 @@ void Engine::Setting()
 		descriptorHeap->GetSrvDescriptorHeap()->GetCPUDescriptorHandleForHeapStart(),
 		descriptorHeap->GetSrvDescriptorHeap()->GetGPUDescriptorHandleForHeapStart());
 
-	Draw::Initialize(command.get()->GetCommandList(),graphicsPipelineState.get(), directinalLight.get());
+	Draw::Initialize(command.get()->GetCommandList(), graphicsPipelineState.get(), directinalLight.get());
 	Texture::Initalize(graphics->GetDevice(), command->GetCommandList(), descriptorHeap.get(), textureLoader.get());
-	
+
 
 	Line::SetDevice(graphics.get()->GetDevice());
 	Grid::SetDevice(graphics.get()->GetDevice());
@@ -135,6 +135,13 @@ void Engine::Setting()
 	Triangle::SetDevice(graphics.get()->GetDevice());
 	Sprite::SetDevice(graphics.get()->GetDevice());
 	Sphere::SetDevice(graphics.get()->GetDevice());
+
+	Line::SetScreenSize({ (float)kClientWidth_,(float)kClientHeight_ });
+	Grid::SetScreenSize({ (float)kClientWidth_,(float)kClientHeight_ });
+	Model::SetScreenSize({ (float)kClientWidth_,(float)kClientHeight_ });
+	Triangle::SetScreenSize({ (float)kClientWidth_,(float)kClientHeight_ });
+	Sprite::SetScreenSize({ (float)kClientWidth_,(float)kClientHeight_ });
+	Sphere::SetScreenSize({ (float)kClientWidth_,(float)kClientHeight_ });
 
 }
 
@@ -168,14 +175,14 @@ void Engine::NewFrame() {
 	command->GetCommandList()->RSSetViewports(1, viewportScissor->GetViewport());//Viewportを設定
 	command->GetCommandList()->RSSetScissorRects(1, viewportScissor->GetScissorRect());//Sxirssorを設定
 
-	
+
 
 	input.get()->Updata();
 	gamePadInput.get()->Update();
 }
 
 void Engine::EndFrame() {
-	
+
 	//コマンドリストの内容を確定させる。すべてのコマンドを積んでからCloseすること
 	hr_ = command->GetCommandList()->Close();
 	assert(SUCCEEDED(hr_));
@@ -206,7 +213,7 @@ void Engine::End() {
 	ImGui_ImplDX12_Shutdown();
 	ImGui_ImplWin32_Shutdown();
 	ImGui::DestroyContext();
-	
+
 	window.Finalize();
 }
 

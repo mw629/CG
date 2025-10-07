@@ -24,14 +24,14 @@ private:
 
 
 	bool isAlive = true;
-	int kClientWidth = 1280;
-	int kClientHeight = 720;
+
+
 
 public:
 	~Model();
 
 	static void SetDevice(ID3D12Device* device);
-	void SetScreenSize(int Width, int Height) { kClientWidth = Width; kClientHeight = Height; }
+	static void SetScreenSize(Vector2 screenSize);
 
 	void Initialize(ModelData modelData);
 
