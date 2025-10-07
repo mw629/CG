@@ -12,6 +12,7 @@
 #include "Core/WindowConfig.h"
 
 //GameObjeects
+#include "GameObjects/Camera.h"
 #include "GameObjects/DebugCamera.h"
 #include "GameObjects/MaterialFactory.h"
 #include "GameObjects/Model.h"
