@@ -2,7 +2,7 @@
 #include <Engine.h>
 #include <GameObjects/Camera.h>
 
-class GameScene
+class SceneGame
 {
 private:
 

@@ -195,7 +195,7 @@
     <ClCompile Include="MatchaEngine\Engine.cpp">
       <Filter>MatchaEngine</Filter>
     </ClCompile>
-    <ClCompile Include="Game\GameScene.cpp">
+    <ClCompile Include="Game\SceneGame.cpp">
       <Filter>Game</Filter>
     </ClCompile>
     <ClCompile Include="Game\SceneChanger.cpp">
@@ -394,7 +394,7 @@
     <ClInclude Include="MatchaEngine\Engine.h">
       <Filter>MatchaEngine</Filter>
     </ClInclude>
-    <ClInclude Include="Game\GameScene.h">
+    <ClInclude Include="Game\SceneGame.h">
       <Filter>Game</Filter>
     </ClInclude>
     <ClInclude Include="Game\SceneChanger.h">

@@ -7,7 +7,7 @@ void SceneManager::ImGui() {
 
 
 void SceneManager::Initialize() {
-	gameScene_ = std::make_unique<GameScene>();
+	gameScene_ = std::make_unique<SceneGame>();
 	gameScene_.get()->Initialize();
 }
 
