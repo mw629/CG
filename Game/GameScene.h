@@ -3,7 +3,7 @@
 #include <GameObjects/Camera.h>
 #include "IScene.h"
 
-class SceneGame :public IScene
+class GameScene :public IScene
 {
 private:
 
@@ -18,6 +18,7 @@ private:
 
 
 public:
+	~GameScene()override;
 
 	void ImGui()override;
 

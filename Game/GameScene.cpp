@@ -1,7 +1,11 @@
-#include "SceneGame.h"
+#include "GameScene.h"
 #include <imgui.h>
 
-void SceneGame::ImGui()
+GameScene::~GameScene()
+{
+}
+
+void GameScene::ImGui()
 {
 	if (ImGui::CollapsingHeader("Camera")) {
 		ImGui::DragFloat3("CameraPos", &cameraTransform_.translate.x, 0.1f);
@@ -18,7 +22,7 @@ void SceneGame::ImGui()
 	}
 }
 
-void SceneGame::Initialize() {
+void GameScene::Initialize() {
 	
 	sceneID_ = SceneID::Game;
 
@@ -33,7 +37,7 @@ void SceneGame::Initialize() {
 	camera_.get()->Initialize();
 }
 
-void SceneGame::Update() {
+void GameScene::Update() {
 
 	camera_.get()->SetTransform(cameraTransform_);
 	camera_.get()->Update();
@@ -44,6 +48,6 @@ void SceneGame::Update() {
 
 }
 
-void SceneGame::Draw() {
+void GameScene::Draw() {
 	Draw::DrawObj(model_.get());
 }

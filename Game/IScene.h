@@ -14,10 +14,12 @@ class IScene
 protected:
 
 	int sceneID_ = -1;
-	int nextScene_;
+	int nextSceneID_;
 	bool sceneChangeRequest_;
 
 public:
+	
+	virtual ~IScene(){};
 
 	virtual void ImGui() {}
 
@@ -28,7 +30,7 @@ public:
 	virtual void Draw(){}
 
 	int GetSceneID() { return sceneID_; }
-	int GetNextScene() { return nextScene_; }
+	int GetNextSceneID() { return nextSceneID_; }
 	bool GetSceneChangeRequest() { return sceneChangeRequest_; }
 
 };

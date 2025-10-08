@@ -1,5 +1,5 @@
 #pragma once
-#include "SceneGame.h"
+#include "GameScene.h"
 #include <memory>
 #include "IScene.h"
 
@@ -20,6 +20,8 @@ public:
 	void Update();
 
 	void Draw();
+
+	IScene* CreateScene(int sceneID);
 
 };
 

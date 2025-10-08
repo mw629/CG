@@ -195,7 +195,7 @@
     <ClCompile Include="MatchaEngine\Engine.cpp">
       <Filter>MatchaEngine</Filter>
     </ClCompile>
-    <ClCompile Include="Game\SceneGame.cpp">
+    <ClCompile Include="Game\GameScene.cpp">
       <Filter>Game</Filter>
     </ClCompile>
     <ClCompile Include="Game\SceneManager.cpp">
@@ -217,6 +217,15 @@
       <Filter>ソース ファイル</Filter>
     </ClCompile>
     <ClCompile Include="Game\Fade.cpp">
+      <Filter>ソース ファイル</Filter>
+    </ClCompile>
+    <ClCompile Include="Game\GameScene\Entity\PLayer.cpp">
+      <Filter>ソース ファイル</Filter>
+    </ClCompile>
+    <ClCompile Include="Game\GameScene\Entity\Enemy.cpp">
+      <Filter>ソース ファイル</Filter>
+    </ClCompile>
+    <ClCompile Include="Game\GameScene\Entity\Entity.cpp">
       <Filter>ソース ファイル</Filter>
     </ClCompile>
   </ItemGroup>
@@ -394,7 +403,7 @@
     <ClInclude Include="MatchaEngine\Engine.h">
       <Filter>MatchaEngine</Filter>
     </ClInclude>
-    <ClInclude Include="Game\SceneGame.h">
+    <ClInclude Include="Game\GameScene.h">
       <Filter>Game</Filter>
     </ClInclude>
     <ClInclude Include="Game\SceneManager.h">
@@ -419,6 +428,15 @@
       <Filter>ヘッダー ファイル</Filter>
     </ClInclude>
     <ClInclude Include="Game\Fade.h">
+      <Filter>ヘッダー ファイル</Filter>
+    </ClInclude>
+    <ClInclude Include="Game\GameScene\Entity\PLayer.h">
+      <Filter>ヘッダー ファイル</Filter>
+    </ClInclude>
+    <ClInclude Include="Game\GameScene\Entity\Enemy.h">
+      <Filter>ヘッダー ファイル</Filter>
+    </ClInclude>
+    <ClInclude Include="Game\GameScene\Entity\Entity.h">
       <Filter>ヘッダー ファイル</Filter>
     </ClInclude>
   </ItemGroup>
