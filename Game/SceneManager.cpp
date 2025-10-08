@@ -1,20 +1,30 @@
 #include "SceneManager.h"
+#include "SceneGame.h"
+#include "TitleScene.h"
 
+SceneManager::SceneManager()
+{
+	scene_ = new SceneGame();
+}
+
+SceneManager::~SceneManager()
+{
+	delete scene_;
+}
 
 void SceneManager::ImGui() {
-	gameScene_.get()->ImGui();
+	scene_->ImGui();
 }
 
 
 void SceneManager::Initialize() {
-	gameScene_ = std::make_unique<SceneGame>();
-	gameScene_.get()->Initialize();
+	scene_->Initialize();
 }
 
 void SceneManager::Update() {
-	gameScene_.get()->Update();
+	scene_->Update();
 }
 
 void SceneManager::Draw() {
-	gameScene_.get()->Draw();
+	scene_->Draw();
 }

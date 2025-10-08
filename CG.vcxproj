@@ -138,6 +138,7 @@ copy "$(WindowsSdkDir)bin\$(TargetPlatformVersion)\x64\dxil.dll" "$(TargetDir)dx
     </Link>
   </ItemDefinitionGroup>
   <ItemGroup>
+    <ClCompile Include="Game\Fade.cpp" />
     <ClCompile Include="MatchaEngine\GameObjects\Camera.cpp" />
     <ClCompile Include="Game\SceneGame.cpp" />
     <ClCompile Include="MatchaEngine\Input\GamePadInput.cpp" />
@@ -191,7 +192,6 @@ copy "$(WindowsSdkDir)bin\$(TargetPlatformVersion)\x64\dxil.dll" "$(TargetDir)dx
     <ClCompile Include="MatchaEngine\Graphics\ViewportScissor.cpp" />
     <ClCompile Include="MatchaEngine\GameObjects\Triangle.cpp" />
     <ClCompile Include="Game\TitleScene.cpp" />
-    <ClCompile Include="Game\SceneChanger.cpp" />
     <ClCompile Include="Game\SceneManager.cpp" />
     <ClCompile Include="MatchaEngine\Resource\ModelManager.cpp" />
     <ClCompile Include="MatchaEngine\GameObjects\Particle.cpp" />
@@ -231,6 +231,8 @@ copy "$(WindowsSdkDir)bin\$(TargetPlatformVersion)\x64\dxil.dll" "$(TargetDir)dx
     </FxCompile>
   </ItemGroup>
   <ItemGroup>
+    <ClInclude Include="Game\Fade.h" />
+    <ClInclude Include="Game\IScene.h" />
     <ClInclude Include="MatchaEngine\GameObjects\Camera.h" />
     <ClInclude Include="Game\SceneGame.h" />
     <ClInclude Include="MatchaEngine\Core\VariableTypes\Matrix4x4.h" />
@@ -288,7 +290,6 @@ copy "$(WindowsSdkDir)bin\$(TargetPlatformVersion)\x64\dxil.dll" "$(TargetDir)dx
     <ClInclude Include="MatchaEngine\GameObjects\Triangle.h" />
     <ClInclude Include="MatchaEngine\Core\VariableTypes\Vector2.h" />
     <ClInclude Include="Game\TitleScene.h" />
-    <ClInclude Include="Game\SceneChanger.h" />
     <ClInclude Include="Game\SceneManager.h" />
     <ClInclude Include="MatchaEngine\Resource\ModelManager.h" />
     <ClInclude Include="MatchaEngine\GameObjects\Particle.h" />
