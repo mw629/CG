@@ -139,7 +139,7 @@ copy "$(WindowsSdkDir)bin\$(TargetPlatformVersion)\x64\dxil.dll" "$(TargetDir)dx
   </ItemDefinitionGroup>
   <ItemGroup>
     <ClCompile Include="MatchaEngine\GameObjects\Camera.cpp" />
-    <ClCompile Include="Game\GameScene.cpp" />
+    <ClCompile Include="Game\SceneGame.cpp" />
     <ClCompile Include="MatchaEngine\Input\GamePadInput.cpp" />
     <ClCompile Include="MatchaEngine\GameObjects\Line.cpp" />
     <ClCompile Include="MatchaEngine\GameObjects\Grid.cpp" />
@@ -232,7 +232,7 @@ copy "$(WindowsSdkDir)bin\$(TargetPlatformVersion)\x64\dxil.dll" "$(TargetDir)dx
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="MatchaEngine\GameObjects\Camera.h" />
-    <ClInclude Include="Game\GameScene.h" />
+    <ClInclude Include="Game\SceneGame.h" />
     <ClInclude Include="MatchaEngine\Core\VariableTypes\Matrix4x4.h" />
     <ClInclude Include="MatchaEngine\Core\VariableTypes\Vector3.h" />
     <ClInclude Include="MatchaEngine\Core\VariableTypes\Vector2Int.h" />

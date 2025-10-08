@@ -1,12 +1,12 @@
 #pragma once
-#include "GameScene.h"
+#include "SceneGame.h"
 #include <memory>
 
 class SceneManager
 {
 private:
 
-	std::unique_ptr<GameScene> gameScene_;
+	std::unique_ptr<SceneGame> gameScene_;
 
 public:
 

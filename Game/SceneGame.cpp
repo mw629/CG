@@ -1,7 +1,7 @@
-#include "GameScene.h"
+#include "SceneGame.h"
 #include <imgui.h>
 
-void GameScene::ImGui()
+void SceneGame::ImGui()
 {
 	if (ImGui::CollapsingHeader("Camera")) {
 		ImGui::DragFloat3("CameraPos", &cameraTransform_.translate.x, 0.1f);
@@ -26,7 +26,7 @@ void GameScene::ImGui()
 	}
 }
 
-void GameScene::Initialize() {
+void SceneGame::Initialize() {
 	
 	ModelData modelData = LoadObjFile("resources/fence", "fence.obj");
 	ModelData modelDat = LoadObjFile("resources/fence", "fence.obj");
@@ -47,7 +47,7 @@ void GameScene::Initialize() {
 	camera_.get()->Initialize();
 }
 
-void GameScene::Update() {
+void SceneGame::Update() {
 
 	camera_.get()->SetTransform(cameraTransform_);
 	camera_.get()->Update();
@@ -61,7 +61,7 @@ void GameScene::Update() {
 	model_2->SettingWvp(camera_.get()->GetViewMatrix());
 }
 
-void GameScene::Draw() {
+void SceneGame::Draw() {
 	Draw::DrawObj(model_.get());
 	Draw::DrawObj(model_2.get());
 }
