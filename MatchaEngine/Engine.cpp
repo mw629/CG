@@ -7,6 +7,7 @@
 #include "../externals/imgui/imgui.h"
 #include "../externals/imgui/imgui_impl_dx12.h"
 #include "../externals/imgui/imgui_impl_win32.h"
+#include <thread>
 
 Engine::~Engine()
 {
@@ -18,6 +19,8 @@ Engine::Engine(int32_t kClientWidth, int32_t kClientHeight)
 	kClientWidth_ = kClientWidth;
 	kClientHeight_ = kClientHeight;
 
+	//時間の初期化
+	reference_ = std::chrono::steady_clock::now();
 
 	SetUnhandledExceptionFilter(ExportDump);
 	logStream = CurrentTimestamp();
@@ -188,6 +191,7 @@ void Engine::EndFrame() {
 	assert(SUCCEEDED(hr_));
 
 
+	
 	//コマンドをキックする//
 
 	//GPU2コマンドリストの実行を行わせる
@@ -200,12 +204,17 @@ void Engine::EndFrame() {
 
 	gpuSyncManager.WaitForGpu();
 
+	
+
+
 	//次のフレーム用のコマンドを準備
 	hr_ = command->GetCommandAllocator()->Reset();
 	assert(SUCCEEDED(hr_));
 	hr_ = command->GetCommandList()->Reset(command->GetCommandAllocator(), nullptr);
 	assert(SUCCEEDED(hr_));
 
+
+	UpdateFixFPS();
 }
 
 void Engine::End() {
@@ -215,6 +224,26 @@ void Engine::End() {
 	ImGui::DestroyContext();
 
 	window.Finalize();
+}
+
+void Engine::UpdateFixFPS()
+{
+	const std::chrono::microseconds kMinTIme(uint64_t(1000000.0f / 60.0f));
+	const std::chrono::microseconds kMinCheckTIme(uint64_t(1000000.0f / 65.0f));
+
+	std::chrono::steady_clock::time_point now = std::chrono::steady_clock::now();
+
+	std::chrono::microseconds elapsed =
+		std::chrono::duration_cast<std::chrono::microseconds>(now - reference_);
+
+	//1/60秒立っていない場合
+	if (elapsed < kMinTIme) {
+		while (std::chrono::steady_clock::now()-reference_<kMinTIme)
+		{
+			std::this_thread::sleep_for(std::chrono::microseconds(1));
+		}
+	}
+	reference_ = std::chrono::steady_clock::now();
 }
 
 
@@ -233,15 +262,15 @@ void Engine::Debug()
 	ImGui::Begin("Debug Info");
 
 	// フレームレート (FPS)
-	ImGui::Text("FPS: %.1f", ImGui::GetIO().Framerate);
+	//ImGui::Text("FPS: %.1f", ImGui::GetIO().Framerate);
 
 	// 1フレームあたりの時間 (ms)
-	ImGui::Text("Frame Time: %.3f ms", 1000.0f / ImGui::GetIO().Framerate);
+	//ImGui::Text("Frame Time: %.3f ms", 1000.0f / ImGui::GetIO().Framerate);
 
 	// 現在のフレーム数（自分でカウントする必要あり）
-	static int frameCount = 0;
-	frameCount++;
-	ImGui::Text("Frame Count: %d", frameCount);
+	//static int frameCount = 0;
+	//frameCount++;
+	//ImGui::Text("Frame Count: %d", frameCount);
 
 	size_t mem = GetProcessMemoryUsage();
 	ImGui::Text("Memory Usage: %.2f MB", mem / (1024.0f * 1024.0f));

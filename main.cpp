@@ -48,6 +48,7 @@ int WINAPI WinMain(HINSTANCE, HINSTANCE, LPSTR, int) {
 			break;
 		}
 
+
 		engine.get()->NewFrame();
 
 		engine.get()->Debug();
