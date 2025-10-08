@@ -1,14 +1,17 @@
 #pragma once
-#include "SceneGame.h"
+#include "GameScene.h"
 #include <memory>
+#include "IScene.h"
 
 class SceneManager
 {
 private:
 
-	std::unique_ptr<SceneGame> gameScene_;
+	IScene* scene_;
 
 public:
+	SceneManager();
+	~SceneManager();
 
 	void ImGui();
 
@@ -17,6 +20,8 @@ public:
 	void Update();
 
 	void Draw();
+
+	IScene* CreateScene(int sceneID);
 
 };
 
