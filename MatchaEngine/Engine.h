@@ -1,5 +1,6 @@
 #pragma once
 #include <fstream>
+#include <chrono>
 
 ///自作エンジン///
 
@@ -12,6 +13,7 @@
 #include "Core/WindowConfig.h"
 
 //GameObjeects
+#include "GameObjects/Camera.h"
 #include "GameObjects/DebugCamera.h"
 #include "GameObjects/MaterialFactory.h"
 #include "GameObjects/Model.h"
@@ -67,6 +69,7 @@ class Engine
 private:
 
 	HRESULT hr_;
+	std::chrono::steady_clock::time_point reference_;
 
 	int32_t kClientWidth_;
 	int32_t kClientHeight_;
@@ -115,6 +118,8 @@ public:
 	void EndFrame();
 
 	void End();
+
+	void UpdateFixFPS();
 
 	size_t GetProcessMemoryUsage();
 

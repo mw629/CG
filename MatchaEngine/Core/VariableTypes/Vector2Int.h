@@ -2,50 +2,48 @@
 #include <cmath>
 
 
-class VectorInt2Int
+class Vector2Int
 {
 public:
 	int x = 0;
 	int y = 0;
 
-
-
-	VectorInt2Int operator+(const VectorInt2Int& other) const {
+	Vector2Int operator+(const Vector2Int& other) const {
 		return { x + other.x, y + other.y };
 	}
-	VectorInt2Int operator-(const VectorInt2Int& other) const {
+	Vector2Int operator-(const Vector2Int& other) const {
 		return { x - other.x, y - other.y };
 	}
 
-	VectorInt2Int operator-() const {
-		return VectorInt2Int(-x, -y);
+	Vector2Int operator-() const {
+		return Vector2Int(-x, -y);
 	}
 
-	VectorInt2Int operator*(const VectorInt2Int& other)const {
-		return VectorInt2Int(x * other.x, y * other.y);
+	Vector2Int operator*(const Vector2Int& other)const {
+		return Vector2Int(x * other.x, y * other.y);
 	}
 
-	VectorInt2Int operator*(int scalar) const {
+	Vector2Int operator*(int scalar) const {
 		return { x * scalar, y * scalar };
 	}
 
-	VectorInt2Int operator/(const VectorInt2Int& other) const {
+	Vector2Int operator/(const Vector2Int& other) const {
 		return { x / other.x, y / other.y };
 	}
 
-	VectorInt2Int& operator=(const VectorInt2Int& other) {
+	Vector2Int& operator=(const Vector2Int& other) {
 		x = other.x; y = other.y; return *this;
 	}
-	VectorInt2Int& operator+=(const VectorInt2Int& other) {
+	Vector2Int& operator+=(const Vector2Int& other) {
 		x += other.x; y += other.y; return *this;
 	}
-	VectorInt2Int& operator-=(const VectorInt2Int& other) {
+	Vector2Int& operator-=(const Vector2Int& other) {
 		x -= other.x; y -= other.y;  return *this;
 	}
-	VectorInt2Int& operator*=(const VectorInt2Int& other) {
+	Vector2Int& operator*=(const Vector2Int& other) {
 		x *= other.x; y *= other.y; return *this;
 	}
-	VectorInt2Int& operator/=(const VectorInt2Int& other) {
+	Vector2Int& operator/=(const Vector2Int& other) {
 		x /= other.x; y /= other.y; return *this;
 	}
 
@@ -56,24 +54,24 @@ public:
 	}
 
 	// 正規化
-	VectorInt2Int Normalization() const {
+	Vector2Int Normalization() const {
 		int len = (int)Length();
-		if (len == 0) return VectorInt2Int(0, 0); // 0除算防止
-		return VectorInt2Int(x / len, y / len);
+		if (len == 0) return Vector2Int(0, 0); // 0除算防止
+		return Vector2Int(x / len, y / len);
 	}
 
 	// 内積
-	int Dot(const VectorInt2Int& other) const {
+	int Dot(const Vector2Int& other) const {
 		return x * other.x + y * other.y;
 	}
 
 	// 外積
-	int Cross(const VectorInt2Int& other) const {
+	int Cross(const Vector2Int& other) const {
 		return x * other.y - y * other.x;
 	}
 
 	// 距離
-	static float Distance(const VectorInt2Int& v1, const VectorInt2Int& v2) {
+	static float Distance(const Vector2Int& v1, const Vector2Int& v2) {
 		return (v1 - v2).Length();
 	}
 

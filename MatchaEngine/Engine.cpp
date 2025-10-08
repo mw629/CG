@@ -7,6 +7,7 @@
 #include "../externals/imgui/imgui.h"
 #include "../externals/imgui/imgui_impl_dx12.h"
 #include "../externals/imgui/imgui_impl_win32.h"
+#include <thread>
 
 Engine::~Engine()
 {
@@ -18,9 +19,12 @@ Engine::Engine(int32_t kClientWidth, int32_t kClientHeight)
 	kClientWidth_ = kClientWidth;
 	kClientHeight_ = kClientHeight;
 
+	//時間の初期化
+	reference_ = std::chrono::steady_clock::now();
+
 	SetUnhandledExceptionFilter(ExportDump);
 	logStream = CurrentTimestamp();
-	
+
 	//DebugLayer//
 #ifdef _DEBUG
 	Microsoft::WRL::ComPtr<ID3D12Debug1> debugController = nullptr;
@@ -40,7 +44,7 @@ Engine::Engine(int32_t kClientWidth, int32_t kClientHeight)
 	viewportScissor = std::make_unique<ViewportScissor>(kClientWidth, kClientHeight);
 	//入力
 	input = std::make_unique<Input>();
-	gamePadInput= std::make_unique<GamePadInput>();
+	gamePadInput = std::make_unique<GamePadInput>();
 	//描画
 	debudCamera = std::make_unique<DebugCamera>();
 	depthStencil = std::make_unique<DepthStencil>();
@@ -100,7 +104,7 @@ void Engine::Setting()
 
 	depthStencil->CreateDepthStencil(graphics->GetDevice(), kClientWidth_, kClientHeight_);
 
-	
+
 	graphicsPipelineState.get()->ALLPSOCreate(logStream, graphics.get()->GetDevice());
 
 	directinalLight = std::make_unique<DirectinalLight>();
@@ -124,9 +128,9 @@ void Engine::Setting()
 		descriptorHeap->GetSrvDescriptorHeap()->GetCPUDescriptorHandleForHeapStart(),
 		descriptorHeap->GetSrvDescriptorHeap()->GetGPUDescriptorHandleForHeapStart());
 
-	Draw::Initialize(command.get()->GetCommandList(),graphicsPipelineState.get(), directinalLight.get());
+	Draw::Initialize(command.get()->GetCommandList(), graphicsPipelineState.get(), directinalLight.get());
 	Texture::Initalize(graphics->GetDevice(), command->GetCommandList(), descriptorHeap.get(), textureLoader.get());
-	
+
 
 	Line::SetDevice(graphics.get()->GetDevice());
 	Grid::SetDevice(graphics.get()->GetDevice());
@@ -134,6 +138,13 @@ void Engine::Setting()
 	Triangle::SetDevice(graphics.get()->GetDevice());
 	Sprite::SetDevice(graphics.get()->GetDevice());
 	Sphere::SetDevice(graphics.get()->GetDevice());
+
+	Line::SetScreenSize({ (float)kClientWidth_,(float)kClientHeight_ });
+	Grid::SetScreenSize({ (float)kClientWidth_,(float)kClientHeight_ });
+	Model::SetScreenSize({ (float)kClientWidth_,(float)kClientHeight_ });
+	Triangle::SetScreenSize({ (float)kClientWidth_,(float)kClientHeight_ });
+	Sprite::SetScreenSize({ (float)kClientWidth_,(float)kClientHeight_ });
+	Sphere::SetScreenSize({ (float)kClientWidth_,(float)kClientHeight_ });
 
 }
 
@@ -167,19 +178,20 @@ void Engine::NewFrame() {
 	command->GetCommandList()->RSSetViewports(1, viewportScissor->GetViewport());//Viewportを設定
 	command->GetCommandList()->RSSetScissorRects(1, viewportScissor->GetScissorRect());//Sxirssorを設定
 
-	
+
 
 	input.get()->Updata();
 	gamePadInput.get()->Update();
 }
 
 void Engine::EndFrame() {
-	
+
 	//コマンドリストの内容を確定させる。すべてのコマンドを積んでからCloseすること
 	hr_ = command->GetCommandList()->Close();
 	assert(SUCCEEDED(hr_));
 
 
+	
 	//コマンドをキックする//
 
 	//GPU2コマンドリストの実行を行わせる
@@ -192,12 +204,17 @@ void Engine::EndFrame() {
 
 	gpuSyncManager.WaitForGpu();
 
+	
+
+
 	//次のフレーム用のコマンドを準備
 	hr_ = command->GetCommandAllocator()->Reset();
 	assert(SUCCEEDED(hr_));
 	hr_ = command->GetCommandList()->Reset(command->GetCommandAllocator(), nullptr);
 	assert(SUCCEEDED(hr_));
 
+
+	UpdateFixFPS();
 }
 
 void Engine::End() {
@@ -205,8 +222,28 @@ void Engine::End() {
 	ImGui_ImplDX12_Shutdown();
 	ImGui_ImplWin32_Shutdown();
 	ImGui::DestroyContext();
-	
+
 	window.Finalize();
+}
+
+void Engine::UpdateFixFPS()
+{
+	const std::chrono::microseconds kMinTIme(uint64_t(1000000.0f / 60.0f));
+	const std::chrono::microseconds kMinCheckTIme(uint64_t(1000000.0f / 65.0f));
+
+	std::chrono::steady_clock::time_point now = std::chrono::steady_clock::now();
+
+	std::chrono::microseconds elapsed =
+		std::chrono::duration_cast<std::chrono::microseconds>(now - reference_);
+
+	//1/60秒立っていない場合
+	if (elapsed < kMinTIme) {
+		while (std::chrono::steady_clock::now()-reference_<kMinTIme)
+		{
+			std::this_thread::sleep_for(std::chrono::microseconds(1));
+		}
+	}
+	reference_ = std::chrono::steady_clock::now();
 }
 
 
@@ -225,15 +262,15 @@ void Engine::Debug()
 	ImGui::Begin("Debug Info");
 
 	// フレームレート (FPS)
-	ImGui::Text("FPS: %.1f", ImGui::GetIO().Framerate);
+	//ImGui::Text("FPS: %.1f", ImGui::GetIO().Framerate);
 
 	// 1フレームあたりの時間 (ms)
-	ImGui::Text("Frame Time: %.3f ms", 1000.0f / ImGui::GetIO().Framerate);
+	//ImGui::Text("Frame Time: %.3f ms", 1000.0f / ImGui::GetIO().Framerate);
 
 	// 現在のフレーム数（自分でカウントする必要あり）
-	static int frameCount = 0;
-	frameCount++;
-	ImGui::Text("Frame Count: %d", frameCount);
+	//static int frameCount = 0;
+	//frameCount++;
+	//ImGui::Text("Frame Count: %d", frameCount);
 
 	size_t mem = GetProcessMemoryUsage();
 	ImGui::Text("Memory Usage: %.2f MB", mem / (1024.0f * 1024.0f));

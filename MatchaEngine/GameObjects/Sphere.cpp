@@ -5,12 +5,20 @@
 
 namespace {
 	ID3D12Device* device_;
+	float kClientWidth;
+	float kClientHeight;
 }
 
 
 void Sphere::SetDevice(ID3D12Device* device)
 {
 	device_ = device;
+}
+
+void Sphere::SetScreenSize(Vector2 screenSize)
+{
+	kClientWidth = screenSize.x;
+	kClientHeight = screenSize.y;
 }
 
 Sphere::Sphere()
@@ -201,7 +209,7 @@ void Sphere::CreateSprite()
 
 void Sphere::SettingWvp(Matrix4x4 viewMatrix)
 {
-	Matrix4x4 projectionMatri = MakePerspectiveFovMatrix(0.45f, float(1280) / float(720), 0.1f, 100.0f);
+	Matrix4x4 projectionMatri = MakePerspectiveFovMatrix(0.45f, float(kClientWidth) / float(kClientHeight), 0.1f, 100.0f);
 	Matrix4x4 worldMatrix = MakeAffineMatrix(transform_.translate, transform_.scale, transform_.rotate);
 	Matrix4x4 worldViewProjectionMatrix = MultiplyMatrix4x4(worldMatrix, MultiplyMatrix4x4(viewMatrix, projectionMatri));
 	*wvpData_ = { worldViewProjectionMatrix,worldMatrix };
