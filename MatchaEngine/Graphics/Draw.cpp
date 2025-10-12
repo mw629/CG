@@ -27,7 +27,7 @@ void Draw::preDraw(ShaderName shader, BlendMode blend)
 
 }
 
-void Draw::DrawObj(Model* model)
+void Draw::DrawModel(Model* model)
 {
 	preDraw(model->GetShader(), model->GetBlend());
 

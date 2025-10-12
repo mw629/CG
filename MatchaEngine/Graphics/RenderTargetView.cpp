@@ -33,3 +33,11 @@ void RenderTargetView::SetAndClear(ID3D12GraphicsCommandList* commandList, UINT 
 	//指定した色で画面全体をクリアする
 	commandList->ClearRenderTargetView(rtvHandles_[backBufferIndex], clearColor, 0, nullptr);
 }
+
+void RenderTargetView::RecreateRenderTargetViews(ID3D12Device* device,
+	ID3D12Resource* newSwapChainResources0,
+	ID3D12Resource* newSwapChainResources1,
+	ID3D12DescriptorHeap* rtvDescriptorHeap)
+{
+	CreateRenderTargetView(device, newSwapChainResources0, newSwapChainResources1, rtvDescriptorHeap);
+}

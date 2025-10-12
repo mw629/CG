@@ -3,7 +3,7 @@
 
 
 
-void SwapChain::CreateSwapChain(IDXGIFactory7 *DxgiFactory, ID3D12CommandQueue* CommandQueue, HWND Hwnd,int kClientWidth,int kClientHeight)
+void SwapChain::CreateSwapChain(IDXGIFactory7* DxgiFactory, ID3D12CommandQueue* CommandQueue, HWND Hwnd, int kClientWidth, int kClientHeight)
 {
 	swapChainDesc_.Width = kClientWidth;//画面の幅。ウィンドウのクライアント領域を同じものにしておく
 	swapChainDesc_.Height = kClientHeight;//画面の高さ。ウィンドウのクライアント領域を同じものにしておく
@@ -14,7 +14,7 @@ void SwapChain::CreateSwapChain(IDXGIFactory7 *DxgiFactory, ID3D12CommandQueue* 
 	swapChainDesc_.SwapEffect = DXGI_SWAP_EFFECT_FLIP_DISCARD;//モニタにうつしたら、中身を破棄
 	//コマンドキュー、ウィンドウハンドル、設定を渡して生成する
 
-	hr_ = DxgiFactory->CreateSwapChainForHwnd(CommandQueue,Hwnd, &swapChainDesc_,
+	hr_ = DxgiFactory->CreateSwapChainForHwnd(CommandQueue, Hwnd, &swapChainDesc_,
 		nullptr, nullptr, reinterpret_cast<IDXGISwapChain1**>(swapChain_.GetAddressOf()));
 	assert(SUCCEEDED(hr_));
 
@@ -26,3 +26,31 @@ void SwapChain::CreateSwapChain(IDXGIFactory7 *DxgiFactory, ID3D12CommandQueue* 
 	hr_ = swapChain_->GetBuffer(1, IID_PPV_ARGS(&swapChainResources_[1]));
 	assert(SUCCEEDED(hr_));
 }
+
+void SwapChain::ChangeScreen(int kClientWidth, int kClientHeight, bool windowMode) {
+
+	if (kClientWidth == 0 || kClientHeight == 0) {
+		// ウィンドウが最小化された場合は何もしない
+		return;
+	}
+
+	for (int i = 0; i < _countof(swapChainResources_); i++) {
+		swapChainResources_[i].Reset();
+	}
+
+	if (windowMode) {
+		HRESULT hr = swapChain_.Get()->ResizeBuffers(2, kClientWidth, kClientHeight, DXGI_FORMAT_R8G8B8A8_UNORM, DXGI_SWAP_CHAIN_FLAG_ALLOW_TEARING);
+		assert(SUCCEEDED(hr));
+	}
+	else {
+		HRESULT hr = swapChain_.Get()->ResizeBuffers(2, kClientWidth, kClientHeight, DXGI_FORMAT_R8G8B8A8_UNORM,0);
+		assert(SUCCEEDED(hr));
+	}
+
+	for (UINT i = 0; i < _countof(swapChainResources_); i++) {
+		hr_ = swapChain_->GetBuffer(i, IID_PPV_ARGS(&swapChainResources_[i]));
+		assert(SUCCEEDED(hr_));
+	}
+
+}
+

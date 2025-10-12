@@ -22,10 +22,13 @@ public:
 	
 	void SetAndClear(ID3D12GraphicsCommandList* commandList, UINT backBufferIndex);
 
+	void RecreateRenderTargetViews(ID3D12Device* device, ID3D12Resource* newSwapChainResources0, ID3D12Resource* newSwapChainResources1, ID3D12DescriptorHeap* rtvDescriptorHeap);
+
 	D3D12_RENDER_TARGET_VIEW_DESC GetRtvDesc() { return rtvDesc_; }
 	D3D12_CPU_DESCRIPTOR_HANDLE GetRtvStartHandle_() { return rtvStartHandle_; }
 	D3D12_CPU_DESCRIPTOR_HANDLE* GetRtvHandles(int index) { return &rtvHandles_[index]; };
 
+	void ResetRenderTarget();
 
 	};
 

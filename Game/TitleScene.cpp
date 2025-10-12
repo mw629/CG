@@ -30,7 +30,7 @@ void TitleScene::Update()
 	backImage_->SettingWvp();
 
 
-	if (Input::PushKey(DIK_SPACE)) {
+	if (Input::PushKey(DIK_SPACE)||GamePadInput::PressButton(XINPUT_GAMEPAD_A)) {
 		nextSceneID_ = SceneID::Game;
 		sceneChangeRequest_ = true;
 	}

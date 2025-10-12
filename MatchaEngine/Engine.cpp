@@ -178,9 +178,14 @@ void Engine::NewFrame() {
 	command->GetCommandList()->RSSetViewports(1, viewportScissor->GetViewport());//Viewportを設定
 	command->GetCommandList()->RSSetScissorRects(1, viewportScissor->GetScissorRect());//Sxirssorを設定
 
+	if (Input::PushKey(DIK_P)) {
+		window.ToggleFullscreen();
 
+	}
 
+	isFullScreen = window.IsFullscreen();
 	input.get()->Updata();
+
 	gamePadInput.get()->Update();
 }
 
