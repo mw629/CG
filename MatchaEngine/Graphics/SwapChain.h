@@ -16,6 +16,8 @@ private:
 public:
 	void CreateSwapChain(IDXGIFactory7* DxgiFactory, ID3D12CommandQueue* CommandQueue, HWND Hwnd, int kClientWidth, int kClientHeight);
 
+	void ChangeScreen(int kClientWidth, int kClientHeight, bool windowMode);
+
 	IDXGISwapChain4* GetSwapChain()const { return swapChain_.Get(); }
 	DXGI_SWAP_CHAIN_DESC1 GetSwapChainDesc()const { return swapChainDesc_; }
 	ID3D12Resource* GetSwapChainResources(int index) const { return swapChainResources_[index].Get(); }

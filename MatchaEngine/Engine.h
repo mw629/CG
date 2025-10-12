@@ -71,6 +71,7 @@ private:
 	HRESULT hr_;
 	std::chrono::steady_clock::time_point reference_;
 
+	bool isFullScreen;
 	int32_t kClientWidth_;
 	int32_t kClientHeight_;
 

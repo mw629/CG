@@ -15,6 +15,8 @@ private:
 
 public:
 
+    void ImGui();
+
     void Initialize();
     void Update();
     Matrix4x4 GetViewMatrix()const { return viewMatrix_; }

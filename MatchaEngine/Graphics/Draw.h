@@ -19,7 +19,7 @@ public:
 
 	static void preDraw(ShaderName shader, BlendMode blend);
 
-	static void DrawObj(Model* model);
+	static void DrawModel(Model* model);
 
 	static void DrawSprite(Sprite* sprite);
 
