@@ -26,15 +26,11 @@ private:
 
 	Microsoft::WRL::ComPtr<ID3D12Resource> wvpResource_;
 	TransformationMatrix* wvpData_;
-
-	
-
 public:
 	Sphere();
 	~Sphere();
 
 	static void SetDevice(ID3D12Device* device);
-	static void SetScreenSize(Vector2 screenSize);
 
 	void Initialize(D3D12_GPU_DESCRIPTOR_HANDLE textureSrvHandleGPU);
 

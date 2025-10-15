@@ -8,20 +8,12 @@
 
 namespace {
 	ID3D12Device* device_;
-	float kClientWidth;
-	float kClientHeight;
 }
 
 
 void Model::SetDevice(ID3D12Device* device)
 {
 	device_ = device;
-}
-
-void Model::SetScreenSize(Vector2 screenSize)
-{
-	kClientWidth = screenSize.x;
-	kClientHeight = screenSize.y;
 }
 
 Model::~Model()
@@ -52,6 +44,7 @@ void Model::Initialize(ModelData modelData)
 
 	material_ = new MaterialFactory();
 	material_->CreateMatrial(device_, false);
+	CreateModel();
 }
 
 

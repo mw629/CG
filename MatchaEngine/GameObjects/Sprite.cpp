@@ -5,18 +5,10 @@
 
 namespace {
 	ID3D12Device* device_;
-	float kClientWidth;
-	float kClientHeight;
 }
 
 void Sprite::SetDevice(ID3D12Device* device) {
 	device_ = device;
-}
-
-void Sprite::SetScreenSize(Vector2 screenSize)
-{
-	kClientWidth = screenSize.x;
-	kClientHeight = screenSize.y;
 }
 
 Sprite::Sprite()
@@ -128,7 +120,7 @@ void Sprite::CreateSprite()
 void Sprite::SettingWvp()
 {
 	Matrix4x4 worldMatrix = MakeAffineMatrix(transform_.translate, transform_.scale, transform_.rotate);
-	Matrix4x4 worldViewProjectionMatrix = MultiplyMatrix4x4(worldMatrix, MultiplyMatrix4x4(IdentityMatrix(), MakeOrthographicMatrix(0, float(kClientWidth), 0, float(kClientHeight), 0.0f, 100.0f)));
+	Matrix4x4 worldViewProjectionMatrix = MultiplyMatrix4x4(worldMatrix, MultiplyMatrix4x4(IdentityMatrix(), MakeOrthographicMatrix(0, float(1280), 0, float(720), 0.0f, 100.0f)));
 	*wvpData_ = { worldViewProjectionMatrix,worldMatrix };
 }
 

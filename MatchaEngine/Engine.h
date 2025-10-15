@@ -1,6 +1,5 @@
 #pragma once
 #include <fstream>
-#include <chrono>
 
 ///自作エンジン///
 
@@ -69,7 +68,6 @@ class Engine
 private:
 
 	HRESULT hr_;
-	std::chrono::steady_clock::time_point reference_;
 
 	int32_t kClientWidth_;
 	int32_t kClientHeight_;
@@ -118,8 +116,6 @@ public:
 	void EndFrame();
 
 	void End();
-
-	void UpdateFixFPS();
 
 	size_t GetProcessMemoryUsage();
 

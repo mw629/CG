@@ -1,6 +1,5 @@
 #pragma once
 #include "Windows.h"
-#include "VariableTypes.h"
 #include <cstdint>
 
 
@@ -11,7 +10,6 @@ private:
 	WNDCLASS wc{};
 	HWND hwnd{};
 	
-	Vector2Int ClientArea_;
 
 public:
 	static LRESULT CALLBACK WindowProc(HWND hwnd, UINT msg, WPARAM wparam, LPARAM lparam);

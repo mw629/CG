@@ -1,24 +1,16 @@
 #include "Line.h"
-#include "Graphics/GraphicsDevice.h"
-#include "Math/Calculation.h"       
-#include <cassert>                  
+#include "Graphics/GraphicsDevice.h" // CreateBufferResource関数など
+#include "Math/Calculation.h"       // 行列計算関数 (IdentityMatrixなど)
+#include <cassert>                  // アサート用
 
 namespace {
 	ID3D12Device* device_;
-	float kClientWidth;
-	float kClientHeight;
 }
 
 
 void Line::SetDevice(ID3D12Device* device)
 {
 	device_ = device;
-}
-
-void Line::SetScreenSize(Vector2 screenSize)
-{
-	kClientWidth = screenSize.x;
-	kClientHeight = screenSize.y;
 }
 
 

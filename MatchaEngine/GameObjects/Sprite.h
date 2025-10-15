@@ -31,7 +31,6 @@ public:
 	~Sprite();
 
 	static void SetDevice(ID3D12Device* device);
-	static void SetScreenSize(Vector2 screenSize);
 
 	void Initialize(D3D12_GPU_DESCRIPTOR_HANDLE textureSrvHandleGPU);
 
@@ -61,7 +60,7 @@ private:
 	ShaderName shader_ = ShaderName::ObjectShader;
 	BlendMode blend_ = BlendMode::kBlendModeNone;
 public:
-	BlendMode SetBlend(BlendMode blend) { blend_ = blend; }
+	void SetBlend(BlendMode blend) { blend_ = blend; }
 	ShaderName GetShader() { return shader_; }
 	BlendMode GetBlend() { return blend_; }
 
