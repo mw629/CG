@@ -24,14 +24,13 @@ private:
 
 
 	bool isAlive = true;
-
-
+	int kClientWidth = 1280;
+	int kClientHeight = 720;
 
 public:
 	~Model();
 
 	static void SetDevice(ID3D12Device* device);
-	static void SetScreenSize(Vector2 screenSize);
 
 	void Initialize(ModelData modelData);
 
@@ -49,6 +48,7 @@ public:
 	void SetPos(Vector3 velocity) { transform_.translate = velocity; }
 	void SetAlive(bool flag) { isAlive = flag; }
 	void SetMaterialLighting(bool isActiv) { material_->SetMaterialLighting(isActiv); }
+	void SetTexture(D3D12_GPU_DESCRIPTOR_HANDLE textureSrvHandleGPU){ textureSrvHandleGPU_ = textureSrvHandleGPU; }
 
 	//getter
 	bool GetAlive() const { return isAlive; }
@@ -65,7 +65,7 @@ public:
 
 private:
 	ShaderName shader_ = ShaderName::ObjectShader;
-	BlendMode blend_ = BlendMode::kBlendModeNone;
+	BlendMode blend_ = BlendMode::kBlendModeNormal;
 public:
 	void SetBlend(BlendMode blend) { blend_ = blend; }
 	ShaderName GetShader() { return shader_; }

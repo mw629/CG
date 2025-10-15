@@ -50,8 +50,6 @@ void WindowConfig::SetWindowData(const int32_t kClientWidth, const int32_t kClie
 	//クライアント領域を元に実際のサイズをwrcを変更してもらう
 	AdjustWindowRect(&wrc, WS_OVERLAPPEDWINDOW, false);
 
-	ClientArea_.x = wrc.right - wrc.left;
-	ClientArea_.y = wrc.bottom - wrc.top;
 
 	//ウィンドウの作成//
 	hwnd = CreateWindow(
@@ -60,8 +58,8 @@ void WindowConfig::SetWindowData(const int32_t kClientWidth, const int32_t kClie
 		WS_OVERLAPPEDWINDOW,//よく見るウィンドウスタイル
 		CW_USEDEFAULT,//表示X座標（Windowsに任せる）
 		CW_USEDEFAULT,//表示Y座標（Windowsに任せる）
-		ClientArea_.x,//ウィンドウ横幅
-		ClientArea_.y,//ウィンドウ縦幅
+		wrc.right - wrc.left,//ウィンドウ横幅
+		wrc.bottom - wrc.top,//ウィンドウ縦幅
 		nullptr,//親ウィンドウハンドル
 		nullptr,//メニューハンドル
 		wc.hInstance,//インスタンスハンドル
@@ -93,13 +91,9 @@ bool WindowConfig::ProcessMassage()
 		TranslateMessage(&msg);
 		DispatchMessage(&msg);
 	}
-	
-	
 	if(msg.message == WM_QUIT) {
 		return true;
 	}
-
-
 	return false;
 }
 
