@@ -141,6 +141,9 @@ copy "$(WindowsSdkDir)bin\$(TargetPlatformVersion)\x64\dxil.dll" "$(TargetDir)dx
     <ClCompile Include="Game\GameScene\Entity\Enemy.cpp" />
     <ClCompile Include="Game\Fade.cpp" />
     <ClCompile Include="Game\GameScene\Entity\Entity.cpp" />
+    <ClCompile Include="Game\Map\MapChip.cpp" />
+    <ClCompile Include="Game\Map\MapChipField.cpp" />
+    <ClCompile Include="Game\Map\MapManager.cpp" />
     <ClCompile Include="MatchaEngine\GameObjects\Camera.cpp" />
     <ClCompile Include="Game\GameScene.cpp" />
     <ClCompile Include="MatchaEngine\Input\GamePadInput.cpp" />
@@ -238,6 +241,10 @@ copy "$(WindowsSdkDir)bin\$(TargetPlatformVersion)\x64\dxil.dll" "$(TargetDir)dx
     <ClInclude Include="Game\Fade.h" />
     <ClInclude Include="Game\GameScene\Entity\Entity.h" />
     <ClInclude Include="Game\IScene.h" />
+    <ClInclude Include="Game\Map\MapChip.h" />
+    <ClInclude Include="Game\Map\MapChipField.h" />
+    <ClInclude Include="Game\Map\MapManager.h" />
+    <ClInclude Include="Game\Map\MapStruct.h" />
     <ClInclude Include="MatchaEngine\GameObjects\Camera.h" />
     <ClInclude Include="Game\GameScene.h" />
     <ClInclude Include="MatchaEngine\Core\VariableTypes\Matrix4x4.h" />
