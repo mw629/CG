@@ -17,6 +17,7 @@ void SceneManager::ImGui() {
 }
 
 void SceneManager::Initialize() {
+	mapManager_ = std::make_unique<MapManager>();
 	scene_->Initialize();
 }
 
