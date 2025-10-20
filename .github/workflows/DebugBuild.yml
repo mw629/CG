@@ -6,7 +6,7 @@ on:
       - master
 
 env:
-  SOLUTION_FILE_PATH: project/CG.sln
+  SOLUTION_FILE_PATH: CG2/CG.sln
   CONFIGURATION: Debug
 
 jobs:
