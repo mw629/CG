@@ -2,10 +2,6 @@
 #include <Engine.h>
 #include <GameObjects/Camera.h>
 #include "IScene.h"
-#include "GameScene/Entity/Player.h"
-#include "GameScene/Entity/Enemy.h"
-#include "Map/MapChip.h"
-
 class GameScene :public IScene
 {
 private:
@@ -13,12 +9,6 @@ private:
 	std::unique_ptr<Camera>camera_;
 	Transform cameraTransform_{ {1.0f,1.0f,1.0f},{0.0f,0.0f,0.0f,},{12.0f,0.0f,-50.0f} };
 
-	std::unique_ptr<MapChipField> mapChipField_;
-	std::unique_ptr<MapChip> mapchip_;
-
-	std::unique_ptr<Player> player_;
-
-	std::unique_ptr<Enemy> enemy_;
 
 public:
 	~GameScene()override;

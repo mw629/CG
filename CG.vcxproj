@@ -138,12 +138,7 @@ copy "$(WindowsSdkDir)bin\$(TargetPlatformVersion)\x64\dxil.dll" "$(TargetDir)dx
     </Link>
   </ItemDefinitionGroup>
   <ItemGroup>
-    <ClCompile Include="Game\GameScene\Entity\Enemy.cpp" />
     <ClCompile Include="Game\Fade.cpp" />
-    <ClCompile Include="Game\GameScene\Entity\Entity.cpp" />
-    <ClCompile Include="Game\Map\MapChip.cpp" />
-    <ClCompile Include="Game\Map\MapChipField.cpp" />
-    <ClCompile Include="Game\Map\MapManager.cpp" />
     <ClCompile Include="MatchaEngine\GameObjects\Camera.cpp" />
     <ClCompile Include="Game\GameScene.cpp" />
     <ClCompile Include="MatchaEngine\Input\GamePadInput.cpp" />
@@ -200,7 +195,6 @@ copy "$(WindowsSdkDir)bin\$(TargetPlatformVersion)\x64\dxil.dll" "$(TargetDir)dx
     <ClCompile Include="Game\SceneManager.cpp" />
     <ClCompile Include="MatchaEngine\Resource\ModelManager.cpp" />
     <ClCompile Include="MatchaEngine\GameObjects\Particle.cpp" />
-    <ClCompile Include="Game\GameScene\Entity\Player.cpp" />
   </ItemGroup>
   <ItemGroup>
     <FxCompile Include="resources\Shader\Line.PS.hlsl">
@@ -237,14 +231,8 @@ copy "$(WindowsSdkDir)bin\$(TargetPlatformVersion)\x64\dxil.dll" "$(TargetDir)dx
     </FxCompile>
   </ItemGroup>
   <ItemGroup>
-    <ClInclude Include="Game\GameScene\Entity\Enemy.h" />
     <ClInclude Include="Game\Fade.h" />
-    <ClInclude Include="Game\GameScene\Entity\Entity.h" />
     <ClInclude Include="Game\IScene.h" />
-    <ClInclude Include="Game\Map\MapChip.h" />
-    <ClInclude Include="Game\Map\MapChipField.h" />
-    <ClInclude Include="Game\Map\MapManager.h" />
-    <ClInclude Include="Game\Map\MapStruct.h" />
     <ClInclude Include="MatchaEngine\GameObjects\Camera.h" />
     <ClInclude Include="Game\GameScene.h" />
     <ClInclude Include="MatchaEngine\Core\VariableTypes\Matrix4x4.h" />
@@ -305,7 +293,6 @@ copy "$(WindowsSdkDir)bin\$(TargetPlatformVersion)\x64\dxil.dll" "$(TargetDir)dx
     <ClInclude Include="Game\SceneManager.h" />
     <ClInclude Include="MatchaEngine\Resource\ModelManager.h" />
     <ClInclude Include="MatchaEngine\GameObjects\Particle.h" />
-    <ClInclude Include="Game\GameScene\Entity\Player.h" />
   </ItemGroup>
   <ItemGroup>
     <Text Include="externals\imgui\LICENSE.txt" />

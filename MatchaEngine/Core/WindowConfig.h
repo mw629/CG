@@ -1,4 +1,4 @@
-#pragma once
+﻿#pragma once
 #include "Windows.h"
 #include <cstdint>
 
@@ -21,6 +21,11 @@ public:
 	void Finalize();
 
 	static bool ProcessMassage();
+	
+	// �t���X�N���[���؂�ւ��֐�
+	void ToggleFullscreen();
+	void SetFullscreen(bool fullscreen);
+	//bool IsFullscreen() const { return isFullscreen; }
 
 	WNDCLASS GetWc()const { return wc; }
 	HWND GetHwnd()const { return hwnd; }

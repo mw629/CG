@@ -99,50 +99,50 @@ bool WindowConfig::ProcessMassage()
 
 void WindowConfig::ToggleFullscreen()
 {
-	SetFullscreen(!isFullscreen);
+	//SetFullscreen(!isFullscreen);
 }
 
 void WindowConfig::SetFullscreen(bool fullscreen)
 {
-	if (isFullscreen == fullscreen) {
-		return; // 既に同じ状態の場合は何もしない
-	}
+	//if (isFullscreen == fullscreen) {
+	//	return; // 既に同じ状態の場合は何もしない
+	//}
 
-	if (fullscreen) {
-		// フルスクリーンに切り替え
-		// 現在のウィンドウ情報を保存
-		GetWindowRect(hwnd, &windowedRect);
-		windowedStyle = GetWindowLong(hwnd, GWL_STYLE);
+	//if (fullscreen) {
+	//	// フルスクリーンに切り替え
+	//	// 現在のウィンドウ情報を保存
+	//	GetWindowRect(hwnd, &windowedRect);
+	//	windowedStyle = GetWindowLong(hwnd, GWL_STYLE);
 
-		// モニター情報を取得
-		HMONITOR hMonitor = MonitorFromWindow(hwnd, MONITOR_DEFAULTTONEAREST);
-		MONITORINFO mi = { sizeof(mi) };
-		GetMonitorInfo(hMonitor, &mi);
+	//	// モニター情報を取得
+	//	HMONITOR hMonitor = MonitorFromWindow(hwnd, MONITOR_DEFAULTTONEAREST);
+	//	MONITORINFO mi = { sizeof(mi) };
+	//	GetMonitorInfo(hMonitor, &mi);
 
-		// ウィンドウスタイルを変更（境界線なし）
-		SetWindowLong(hwnd, GWL_STYLE, windowedStyle & ~(WS_CAPTION | WS_THICKFRAME));
+	//	// ウィンドウスタイルを変更（境界線なし）
+	//	SetWindowLong(hwnd, GWL_STYLE, windowedStyle & ~(WS_CAPTION | WS_THICKFRAME));
 
-		// ウィンドウを画面全体に拡張
-		SetWindowPos(hwnd, HWND_TOP,
-			mi.rcMonitor.left, mi.rcMonitor.top,
-			mi.rcMonitor.right - mi.rcMonitor.left,
-			mi.rcMonitor.bottom - mi.rcMonitor.top,
-			SWP_NOOWNERZORDER | SWP_FRAMECHANGED);
+	//	// ウィンドウを画面全体に拡張
+	//	SetWindowPos(hwnd, HWND_TOP,
+	//		mi.rcMonitor.left, mi.rcMonitor.top,
+	//		mi.rcMonitor.right - mi.rcMonitor.left,
+	//		mi.rcMonitor.bottom - mi.rcMonitor.top,
+	//		SWP_NOOWNERZORDER | SWP_FRAMECHANGED);
 
-		isFullscreen = true;
-	}
-	else {
-		// ウィンドウモードに戻す
-		// 保存したスタイルを復元
-		SetWindowLong(hwnd, GWL_STYLE, windowedStyle);
+	//	isFullscreen = true;
+	//}
+	//else {
+	//	// ウィンドウモードに戻す
+	//	// 保存したスタイルを復元
+	//	SetWindowLong(hwnd, GWL_STYLE, windowedStyle);
 
-		// 保存した位置とサイズを復元
-		SetWindowPos(hwnd, NULL,
-			windowedRect.left, windowedRect.top,
-			windowedRect.right - windowedRect.left,
-			windowedRect.bottom - windowedRect.top,
-			SWP_NOOWNERZORDER | SWP_FRAMECHANGED);
+	//	// 保存した位置とサイズを復元
+	//	SetWindowPos(hwnd, NULL,
+	//		windowedRect.left, windowedRect.top,
+	//		windowedRect.right - windowedRect.left,
+	//		windowedRect.bottom - windowedRect.top,
+	//		SWP_NOOWNERZORDER | SWP_FRAMECHANGED);
 
-		isFullscreen = false;
-	}
+	//	isFullscreen = false;
+	//}
 }

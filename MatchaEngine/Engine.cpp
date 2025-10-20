@@ -169,7 +169,6 @@ void Engine::NewFrame() {
 	command->GetCommandList()->RSSetScissorRects(1, viewportScissor->GetScissorRect());//Sxirssorを設定
 
 	
-
 	input.get()->Updata();
 	gamePadInput.get()->Update();
 }
