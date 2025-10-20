@@ -108,6 +108,54 @@ float GamePadInput::GetRightStickY()
 	return (std::abs(y) > deadZone) ? y / 32768.0f : 0.0f;
 }
 
+
+
+float GamePadInput::GetLeftStickOnceX()
+{
+	float now = currentState.Gamepad.sThumbLX / 32768.0f;
+	float prev = prevState.Gamepad.sThumbLX / 32768.0f;
+	const float threshold = 0.5f;
+
+	if (prev <= threshold && now > threshold) return 1.0f;
+	if (prev >= -threshold && now < -threshold) return -1.0f;
+	return 0.0f;
+}
+
+float GamePadInput::GetLeftStickOnceY()
+{
+	float now = currentState.Gamepad.sThumbLY / 32768.0f;
+	float prev = prevState.Gamepad.sThumbLY / 32768.0f;
+	const float threshold = 0.5f;
+
+	if (prev <= threshold && now > threshold) return 1.0f;
+	if (prev >= -threshold && now < -threshold) return -1.0f;
+	return 0.0f;
+
+}
+
+float GamePadInput::GetRightStickOnceX()
+{
+	float now = currentState.Gamepad.sThumbRX / 32768.0f;
+	float prev = prevState.Gamepad.sThumbRX / 32768.0f;
+	const float threshold = 0.5f;
+
+	if (prev <= threshold && now > threshold) return 1.0f;
+	if (prev >= -threshold && now < -threshold) return -1.0f;
+	return 0.0f;
+}
+
+float GamePadInput::GetRightStickOnceY()
+{
+	float now = currentState.Gamepad.sThumbRY / 32768.0f;
+	float prev = prevState.Gamepad.sThumbRY / 32768.0f;
+	const float threshold = 0.5f;
+
+	if (prev <= threshold && now > threshold) return 1.0f;
+	if (prev >= -threshold && now < -threshold) return -1.0f;
+	return 0.0f;
+}
+
+
 void GamePadInput::SetPad()
 {
 	currentState= currentState_;

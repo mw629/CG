@@ -197,7 +197,6 @@ copy "$(WindowsSdkDir)bin\$(TargetPlatformVersion)\x64\dxil.dll" "$(TargetDir)dx
     <ClCompile Include="Game\SceneManager.cpp" />
     <ClCompile Include="MatchaEngine\Resource\ModelManager.cpp" />
     <ClCompile Include="MatchaEngine\GameObjects\Particle.cpp" />
-    <ClCompile Include="Game\GameScene\Entity\PLayer.cpp" />
   </ItemGroup>
   <ItemGroup>
     <FxCompile Include="resources\Shader\Line.PS.hlsl">
@@ -298,7 +297,6 @@ copy "$(WindowsSdkDir)bin\$(TargetPlatformVersion)\x64\dxil.dll" "$(TargetDir)dx
     <ClInclude Include="Game\SceneManager.h" />
     <ClInclude Include="MatchaEngine\Resource\ModelManager.h" />
     <ClInclude Include="MatchaEngine\GameObjects\Particle.h" />
-    <ClInclude Include="Game\GameScene\Entity\PLayer.h" />
   </ItemGroup>
   <ItemGroup>
     <Text Include="externals\imgui\LICENSE.txt" />

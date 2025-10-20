@@ -9,6 +9,8 @@
 #include "../externals/imgui/imgui_impl_win32.h"
 #include <thread>
 
+#pragma comment(lib,"winmm.lib")
+
 Engine::~Engine()
 {
 
@@ -61,6 +63,7 @@ void Engine::Setting()
 {
 
 	window.DrawWindow(kClientWidth_, kClientHeight_);
+	timeBeginPeriod(1);
 	input->Initialize(window.GetWc(), window.GetHwnd());
 
 	debudCamera->Initialize();
@@ -128,9 +131,10 @@ void Engine::Setting()
 		descriptorHeap->GetSrvDescriptorHeap()->GetCPUDescriptorHandleForHeapStart(),
 		descriptorHeap->GetSrvDescriptorHeap()->GetGPUDescriptorHandleForHeapStart());
 
+	Audio::Initialize();
+
 	Draw::Initialize(command.get()->GetCommandList(), graphicsPipelineState.get(), directinalLight.get());
 	Texture::Initalize(graphics->GetDevice(), command->GetCommandList(), descriptorHeap.get(), textureLoader.get());
-
 
 	Line::SetDevice(graphics.get()->GetDevice());
 	Grid::SetDevice(graphics.get()->GetDevice());
@@ -204,7 +208,7 @@ void Engine::EndFrame() {
 
 	gpuSyncManager.WaitForGpu();
 
-	
+	UpdateFixFPS();
 
 
 	//次のフレーム用のコマンドを準備
@@ -214,10 +218,13 @@ void Engine::EndFrame() {
 	assert(SUCCEEDED(hr_));
 
 
-	UpdateFixFPS();
+	
 }
 
 void Engine::End() {
+
+	Audio::Finalize();
+
 	//ImGuiの終了処理
 	ImGui_ImplDX12_Shutdown();
 	ImGui_ImplWin32_Shutdown();
@@ -262,15 +269,15 @@ void Engine::Debug()
 	ImGui::Begin("Debug Info");
 
 	// フレームレート (FPS)
-	//ImGui::Text("FPS: %.1f", ImGui::GetIO().Framerate);
+	ImGui::Text("FPS: %.1f", ImGui::GetIO().Framerate);
 
 	// 1フレームあたりの時間 (ms)
-	//ImGui::Text("Frame Time: %.3f ms", 1000.0f / ImGui::GetIO().Framerate);
+	ImGui::Text("Frame Time: %.3f ms", 1000.0f / ImGui::GetIO().Framerate);
 
 	// 現在のフレーム数（自分でカウントする必要あり）
-	//static int frameCount = 0;
-	//frameCount++;
-	//ImGui::Text("Frame Count: %d", frameCount);
+	static int frameCount = 0;
+	frameCount++;
+	ImGui::Text("Frame Count: %d", frameCount);
 
 	size_t mem = GetProcessMemoryUsage();
 	ImGui::Text("Memory Usage: %.2f MB", mem / (1024.0f * 1024.0f));

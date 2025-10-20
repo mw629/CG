@@ -51,6 +51,11 @@ public:
 	static float GetRightStickX();
 	static float GetRightStickY();
 
+	static float GetLeftStickOnceX();
+	static float GetLeftStickOnceY();
+	static float GetRightStickOnceX();
+	static float GetRightStickOnceY();
+
 	void SetPad();
 
 };

@@ -11,7 +11,7 @@ protected:
 	float kWidth_;
 	float kHeight_;
 
-	bool isAlive_
+	bool isAlive_;
 
 public:
 	virtual ~Entity() {};
