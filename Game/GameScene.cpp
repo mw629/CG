@@ -1,6 +1,5 @@
 #include "GameScene.h"
 #include <imgui.h>
-#include "Map/MapManager.h"
 
 GameScene::~GameScene()
 {
@@ -15,7 +14,6 @@ void GameScene::ImGui()
 		ImGui::DragFloat3("CameraRotate", &cameraTransform_.rotate.x);
 
 	}
-	player_.get()->ImGui();
 
 }
 
