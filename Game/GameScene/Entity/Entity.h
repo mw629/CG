@@ -14,14 +14,6 @@ protected:
 	float kWidth_;
 	float kHeight_;
 
-	//ステータス
-	float HitPoints_;//体力
-	float attack_;//攻撃力
-	float defense_;//防御力
-	float speed_;//速さ
-
-	Vector3 velocity_;
-
 	//生存フラグ
 	bool isAlive_;
 
@@ -37,7 +29,6 @@ public:
 	virtual void Draw() {}
 
 	Transform GetTransform() { return transform_; }
-	Vector3 GetVelocity() { return velocity_; }
 
 	bool IsAlive() { return isAlive_; }
 	

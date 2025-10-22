@@ -195,13 +195,13 @@
     <ClCompile Include="MatchaEngine\Engine.cpp">
       <Filter>MatchaEngine</Filter>
     </ClCompile>
-    <ClCompile Include="Game\GameScene.cpp">
+    <ClCompile Include="Game\GameScene\GameScene.cpp">
       <Filter>Game</Filter>
     </ClCompile>
-    <ClCompile Include="Game\SceneManager.cpp">
+    <ClCompile Include="Game\GameManager.cpp">
       <Filter>Game</Filter>
     </ClCompile>
-    <ClCompile Include="Game\TitleScene.cpp">
+    <ClCompile Include="Game\TitleScene\TitleScene.cpp">
       <Filter>Game</Filter>
     </ClCompile>
     <ClCompile Include="MatchaEngine\GameObjects\Camera.cpp">
@@ -216,25 +216,28 @@
     <ClCompile Include="MatchaEngine\GameObjects\Particle.cpp">
       <Filter>ソース ファイル</Filter>
     </ClCompile>
-    <ClCompile Include="Game\Fade.cpp">
+    <ClCompile Include="Game\Direction\Fade.cpp">
       <Filter>ソース ファイル</Filter>
     </ClCompile>
-    <ClCompile Include="Game\GameScene\Entity\Player.cpp">
+    <ClCompile Include="Game\GameScene\Entity\Player\Player.cpp">
       <Filter>ソース ファイル</Filter>
     </ClCompile>
-    <ClCompile Include="Game\GameScene\Entity\Enemy.cpp">
+    <ClCompile Include="Game\GameScene\Entity\Enemy\Enemy.cpp">
       <Filter>ソース ファイル</Filter>
     </ClCompile>
     <ClCompile Include="Game\GameScene\Entity\Entity.cpp">
       <Filter>ソース ファイル</Filter>
     </ClCompile>
-    <ClCompile Include="Game\Map\MapChip.cpp">
+    <ClCompile Include="Game\GameScene\Entity\MapObject\Block.h.cpp">
       <Filter>ソース ファイル</Filter>
     </ClCompile>
-    <ClCompile Include="Game\Map\MapChipField.cpp">
+    <ClCompile Include="Game\GameScene\Map\MapChipField.cpp">
       <Filter>ソース ファイル</Filter>
     </ClCompile>
-    <ClCompile Include="Game\Map\MapManager.cpp">
+    <ClCompile Include="Game\GameScene\Map\MapManager.cpp">
+      <Filter>ソース ファイル</Filter>
+    </ClCompile>
+    <ClCompile Include="Game\GameScene\System\Pose.cpp">
       <Filter>ソース ファイル</Filter>
     </ClCompile>
   </ItemGroup>
@@ -412,13 +415,13 @@
     <ClInclude Include="MatchaEngine\Engine.h">
       <Filter>MatchaEngine</Filter>
     </ClInclude>
-    <ClInclude Include="Game\GameScene.h">
+    <ClInclude Include="Game\GameScene\GameScene.h">
       <Filter>Game</Filter>
     </ClInclude>
-    <ClInclude Include="Game\SceneManager.h">
+    <ClInclude Include="Game\GameManager.h">
       <Filter>Game</Filter>
     </ClInclude>
-    <ClInclude Include="Game\TitleScene.h">
+    <ClInclude Include="Game\TitleScene\TitleScene.h">
       <Filter>Game</Filter>
     </ClInclude>
     <ClInclude Include="MatchaEngine\GameObjects\Camera.h">
@@ -436,28 +439,31 @@
     <ClInclude Include="Game\IScene.h">
       <Filter>ヘッダー ファイル</Filter>
     </ClInclude>
-    <ClInclude Include="Game\Fade.h">
+    <ClInclude Include="Game\Direction\Fade.h">
       <Filter>ヘッダー ファイル</Filter>
     </ClInclude>
-    <ClInclude Include="Game\GameScene\Entity\Player.h">
+    <ClInclude Include="Game\GameScene\Entity\Player\Player.h">
       <Filter>ヘッダー ファイル</Filter>
     </ClInclude>
-    <ClInclude Include="Game\GameScene\Entity\Enemy.h">
+    <ClInclude Include="Game\GameScene\Entity\Enemy\Enemy.h">
       <Filter>ヘッダー ファイル</Filter>
     </ClInclude>
     <ClInclude Include="Game\GameScene\Entity\Entity.h">
       <Filter>ヘッダー ファイル</Filter>
     </ClInclude>
-    <ClInclude Include="Game\Map\MapChip.h">
+    <ClInclude Include="Game\GameScene\Entity\MapObject\Block.h">
       <Filter>ヘッダー ファイル</Filter>
     </ClInclude>
-    <ClInclude Include="Game\Map\MapChipField.h">
+    <ClInclude Include="Game\GameScene\Map\MapChipField.h">
       <Filter>ヘッダー ファイル</Filter>
     </ClInclude>
-    <ClInclude Include="Game\Map\MapManager.h">
+    <ClInclude Include="Game\GameScene\Map\MapManager.h">
       <Filter>ヘッダー ファイル</Filter>
     </ClInclude>
-    <ClInclude Include="Game\Map\MapStruct.h">
+    <ClInclude Include="Game\GameScene\Map\MapStruct.h">
+      <Filter>ヘッダー ファイル</Filter>
+    </ClInclude>
+    <ClInclude Include="Game\GameScene\System\Pose.h">
       <Filter>ヘッダー ファイル</Filter>
     </ClInclude>
   </ItemGroup>

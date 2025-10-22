@@ -2,11 +2,11 @@
 
 enum SceneID
 {
-	Title = 0,
-	StageSelect = 1,
-	Game = 2,
-	Clear = 3,
-	GameOver = 4
+	kTitle = 0,
+	kStageSelect = 1,
+	kGame = 2,
+	kClear = 3,
+	kGameOver = 4
 };
 
 class IScene
@@ -18,16 +18,16 @@ protected:
 	bool sceneChangeRequest_;
 
 public:
-	
-	virtual ~IScene(){};
+
+	virtual ~IScene() {};
 
 	virtual void ImGui() {}
 
 	virtual void Initialize() {}
 
-	virtual void Update(){}
+	virtual void Update() {}
 
-	virtual void Draw(){}
+	virtual void Draw() {}
 
 	int GetSceneID() { return sceneID_; }
 	int GetNextSceneID() { return nextSceneID_; }
