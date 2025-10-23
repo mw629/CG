@@ -237,7 +237,10 @@
     <ClCompile Include="Game\GameScene\Map\MapManager.cpp">
       <Filter>ソース ファイル</Filter>
     </ClCompile>
-    <ClCompile Include="Game\GameScene\System\Pose.cpp">
+    <ClCompile Include="Game\GameScene\Playing.cpp">
+      <Filter>ソース ファイル</Filter>
+    </ClCompile>
+    <ClCompile Include="Game\GameScene\Pause.cpp">
       <Filter>ソース ファイル</Filter>
     </ClCompile>
   </ItemGroup>
@@ -463,7 +466,13 @@
     <ClInclude Include="Game\GameScene\Map\MapStruct.h">
       <Filter>ヘッダー ファイル</Filter>
     </ClInclude>
-    <ClInclude Include="Game\GameScene\System\Pose.h">
+    <ClInclude Include="Game\GameScene\System\GameState.h">
+      <Filter>ヘッダー ファイル</Filter>
+    </ClInclude>
+    <ClInclude Include="Game\GameScene\Playing.h">
+      <Filter>ヘッダー ファイル</Filter>
+    </ClInclude>
+    <ClInclude Include="Game\GameScene\Pause.h">
       <Filter>ヘッダー ファイル</Filter>
     </ClInclude>
   </ItemGroup>

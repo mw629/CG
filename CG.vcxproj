@@ -201,7 +201,8 @@ copy "$(WindowsSdkDir)bin\$(TargetPlatformVersion)\x64\dxil.dll" "$(TargetDir)dx
     <ClCompile Include="MatchaEngine\Resource\ModelManager.cpp" />
     <ClCompile Include="MatchaEngine\GameObjects\Particle.cpp" />
     <ClCompile Include="Game\GameScene\Entity\Player\Player.cpp" />
-    <ClCompile Include="Game\GameScene\System\Pose.cpp" />
+    <ClCompile Include="Game\GameScene\Playing.cpp" />
+    <ClCompile Include="Game\GameScene\Pause.cpp" />
   </ItemGroup>
   <ItemGroup>
     <FxCompile Include="resources\Shader\Line.PS.hlsl">
@@ -241,6 +242,7 @@ copy "$(WindowsSdkDir)bin\$(TargetPlatformVersion)\x64\dxil.dll" "$(TargetDir)dx
     <ClInclude Include="Game\GameScene\Entity\Enemy\Enemy.h" />
     <ClInclude Include="Game\Direction\Fade.h" />
     <ClInclude Include="Game\GameScene\Entity\Entity.h" />
+    <ClInclude Include="Game\GameScene\System\GameState.h" />
     <ClInclude Include="Game\IScene.h" />
     <ClInclude Include="Game\GameScene\Entity\MapObject\Block.h" />
     <ClInclude Include="Game\GameScene\Map\MapChipField.h" />
@@ -307,7 +309,8 @@ copy "$(WindowsSdkDir)bin\$(TargetPlatformVersion)\x64\dxil.dll" "$(TargetDir)dx
     <ClInclude Include="MatchaEngine\Resource\ModelManager.h" />
     <ClInclude Include="MatchaEngine\GameObjects\Particle.h" />
     <ClInclude Include="Game\GameScene\Entity\Player\Player.h" />
-    <ClInclude Include="Game\GameScene\System\Pose.h" />
+    <ClInclude Include="Game\GameScene\Playing.h" />
+    <ClInclude Include="Game\GameScene\Pause.h" />
   </ItemGroup>
   <ItemGroup>
     <Text Include="externals\imgui\LICENSE.txt" />
