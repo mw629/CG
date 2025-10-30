@@ -11,24 +11,24 @@ void MapChipField::SetMapData(MapChipData mapData)
 }
 
 MapChipType MapChipField::GetMapChipTypeByIndex(uint32_t xIndex, uint32_t yIndex) {
-	if (xIndex < 0 || kNumBlockHorizontal_ - 1 < xIndex) {
+	if (xIndex < 0 || mapChipData_.width - 1 < xIndex) {
 		return MapChipType::kBlank;
 	}
-	if (yIndex < 0 || kNumBlockVirtical_ - 1 < yIndex) {
+	if (yIndex < 0 || mapChipData_.height - 1 < yIndex) {
 		return MapChipType::kBlank;
 	}
 	return mapChipData_.data[yIndex][xIndex];
 }
 
 Vector3 MapChipField::GetMapChipPositionByIndex(uint32_t xIndex, uint32_t yIndex) {
-	return Vector3(kBlockWidth_ * xIndex, kBlockHeight_ * (kNumBlockVirtical_ - 1 - yIndex), 0);
+	return Vector3(kBlockWidth_ * xIndex, kBlockHeight_ * (mapChipData_.height - 1 - yIndex), 0);
 }
 
 IndexSet MapChipField::GetMapChipIndexSetByPosition(const Vector3& position) {
 	IndexSet indexSet = {};
 	indexSet.xIndex = static_cast<uint32_t>((position.x + kBlockWidth_ / 2.0f) / kBlockWidth_);
 	indexSet.yIndex = static_cast<uint32_t>((position.y + kBlockHeight_ / 2.0f) / kBlockHeight_);
-	indexSet.yIndex = kNumBlockVirtical_ - 1 - indexSet.yIndex;
+	indexSet.yIndex = mapChipData_.height - 1 - indexSet.yIndex;
 	return indexSet;
 }
 
@@ -45,8 +45,8 @@ Rect MapChipField::GetRectByIndex(uint32_t xIndex, uint32_t yIndex) {
 
 Vector3 MapChipField::GetPos(MapChipType mapChipType)
 {
-	for (uint32_t y = 0; y < kNumBlockVirtical_; ++y) {
-		for (uint32_t x = 0; x < kNumBlockHorizontal_; ++x) {
+	for (uint32_t y = 0; y < mapChipData_.height; ++y) {
+		for (uint32_t x = 0; x < mapChipData_.width; ++x) {
 			if (mapChipData_.data[y][x] == mapChipType) {
 				// 見つけたらその位置を返す
 				return GetMapChipPositionByIndex(x, y);

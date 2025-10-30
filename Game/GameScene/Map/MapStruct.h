@@ -8,11 +8,14 @@ enum class MapChipType {
 	kBlock, // ブロック
 	kPlayerSpawn,//プレイヤースポーン地点
 	kGoal,//ゴール
+	kNone,
 };
 
 
 struct MapChipData {
 	std::vector<std::vector<MapChipType>> data;
+	float width;
+	float height;
 };
 
 struct IndexSet {

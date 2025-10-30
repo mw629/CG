@@ -26,7 +26,7 @@ public:
 	void Update(Matrix4x4 viewMatrix);
 
 	void Draw();
-
+	
 
 };
 

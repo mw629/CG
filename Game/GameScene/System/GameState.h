@@ -2,7 +2,7 @@
 
 
 enum State {
-	kGame,
+	kPlaying,
 	kPause,
 };
 

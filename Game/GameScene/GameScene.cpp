@@ -40,61 +40,62 @@ void GameScene::Update() {
 	camera_.get()->SetTransform(cameraTransform_);
 	camera_.get()->Update();
 
-	playing_.get()->Update(camera_.get()->GetViewMatrix());
+	StateUpdate();
 
 }
 
 void GameScene::Draw() {
 
-	playing_.get()->Draw();
+	StateDraw();
 }
 
 
-void GameScene::PoseState()
+void GameScene::StateUpdate()
 {
-	PoseInput();
-
-
-}
-
-void GameScene::PoseInput()
-{
-	if (Input::PushKey(DIK_SPACE)) {
-		if (menuCommand_ == kReturnToGame) {
-			GameState_ = kGame;
-		}
-		else {
-			sceneChangeRequest_ = true;
-
-			switch (menuCommand_)
-			{
-			case GameScene::kRestart:
-				nextSceneID_ = SceneID::kGame;
-				sceneChangeRequest_ = true;
-				break;
-			case GameScene::kReturnToStageSelect:
-				nextSceneID_ = SceneID::kStageSelect;
-				sceneChangeRequest_ = true;
-				break;
-			}
-		}
-	}
-
-	switch (menuCommand_)
+	switch (gameState_)
 	{
-	case GameScene::kReturnToGame:
-		if (Input::PushKey(DIK_S)) { menuCommand_ = kRestart; }
+	case kPlaying:
+		playing_.get()->Update(camera_.get()->GetViewMatrix());
 		break;
-	case GameScene::kRestart:
-		if (Input::PushKey(DIK_W)) { menuCommand_ = kReturnToGame; }
-		if (Input::PushKey(DIK_S)) { menuCommand_ = kReturnToStageSelect; }
+	case kPause:
+		pause_.get()->Update(camera_.get()->GetViewMatrix());
 		break;
-	case GameScene::kReturnToStageSelect:
-		if (Input::PushKey(DIK_W)) { menuCommand_ = kRestart; }
+	default:
 		break;
 	}
 
-
 }
 
+void GameScene::StateDraw()
+{
+	switch (gameState_)
+	{
+	case kPlaying:
+		playing_.get()->Draw();
+		break;
+	case kPause:
+		pause_.get()->Draw();
+		break;
+	default:
+		break;
+	}
+}
+
+void GameScene::ChangeState()
+{
+	switch (gameState_)
+	{
+	case kPlaying:
+		if (Input::PushKey(DIK_ESCAPE)) {
+			gameState_ = kPause;
+		}
+
+		break;
+	case kPause:
+		
+		break;
+	default:
+		break;
+	}
+}
 

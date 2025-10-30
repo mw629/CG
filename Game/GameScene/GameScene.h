@@ -4,6 +4,7 @@
 #include "../IScene.h"
 #include "Playing.h"
 #include "Pause.h"
+#include "System/GameState.h"
 
 
 
@@ -11,6 +12,8 @@
 class GameScene :public IScene
 {
 private:
+
+	State gameState_;
 
 	std::unique_ptr<Camera>camera_;
 	Transform cameraTransform_{ {1.0f,1.0f,1.0f},{0.0f,0.0f,0.0f,},{12.0f,0.0f,-50.0f} };
@@ -29,17 +32,15 @@ public:
 
 	void Draw()override;
 
+	//状態ごとの更新
+	void StateUpdate();
 
-	//ゲーム用の関数
+	//状態ごとの描画
+	void StateDraw();
 
-	void GameState();
 
+	void ChangeState();
 
-	//ポーズ用の関数
-
-	void PoseState();
-
-	void PoseInput();
 
 };
 
