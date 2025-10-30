@@ -9,6 +9,10 @@
 #include "../externals/imgui/imgui_impl_win32.h"
 #include <thread>
 
+#pragma comment(lib,"winmm.lib")
+
+bool Engine::isEnd_ = false;
+
 Engine::~Engine()
 {
 
@@ -61,6 +65,7 @@ void Engine::Setting()
 {
 
 	window.DrawWindow(kClientWidth_, kClientHeight_);
+	timeBeginPeriod(1);
 	input->Initialize(window.GetWc(), window.GetHwnd());
 
 	debudCamera->Initialize();
@@ -128,9 +133,10 @@ void Engine::Setting()
 		descriptorHeap->GetSrvDescriptorHeap()->GetCPUDescriptorHandleForHeapStart(),
 		descriptorHeap->GetSrvDescriptorHeap()->GetGPUDescriptorHandleForHeapStart());
 
+	Audio::Initialize();
+
 	Draw::Initialize(command.get()->GetCommandList(), graphicsPipelineState.get(), directinalLight.get());
 	Texture::Initalize(graphics->GetDevice(), command->GetCommandList(), descriptorHeap.get(), textureLoader.get());
-
 
 	Line::SetDevice(graphics.get()->GetDevice());
 	Grid::SetDevice(graphics.get()->GetDevice());
@@ -178,12 +184,8 @@ void Engine::NewFrame() {
 	command->GetCommandList()->RSSetViewports(1, viewportScissor->GetViewport());//Viewportを設定
 	command->GetCommandList()->RSSetScissorRects(1, viewportScissor->GetScissorRect());//Sxirssorを設定
 
-	if (Input::PushKey(DIK_P)) {
-		window.ToggleFullscreen();
 
-	}
 
-	isFullScreen = window.IsFullscreen();
 	input.get()->Updata();
 
 	gamePadInput.get()->Update();
@@ -196,12 +198,13 @@ void Engine::EndFrame() {
 	assert(SUCCEEDED(hr_));
 
 
-	
+
 	//コマンドをキックする//
 
 	//GPU2コマンドリストの実行を行わせる
 	ID3D12CommandList* commandLists[] = { command->GetCommandList() };
 	command->GetCommandQueue()->ExecuteCommandLists(1, commandLists);
+	
 	//GPUとOSに画面の交換を行うよう通知する
 	swapChain->GetSwapChain()->Present(1, 0);
 
@@ -209,7 +212,7 @@ void Engine::EndFrame() {
 
 	gpuSyncManager.WaitForGpu();
 
-	
+	UpdateFixFPS();
 
 
 	//次のフレーム用のコマンドを準備
@@ -218,11 +221,12 @@ void Engine::EndFrame() {
 	hr_ = command->GetCommandList()->Reset(command->GetCommandAllocator(), nullptr);
 	assert(SUCCEEDED(hr_));
 
-
-	UpdateFixFPS();
 }
 
 void Engine::End() {
+
+	Audio::Finalize();
+
 	//ImGuiの終了処理
 	ImGui_ImplDX12_Shutdown();
 	ImGui_ImplWin32_Shutdown();
@@ -243,13 +247,14 @@ void Engine::UpdateFixFPS()
 
 	//1/60秒立っていない場合
 	if (elapsed < kMinTIme) {
-		while (std::chrono::steady_clock::now()-reference_<kMinTIme)
+		while (std::chrono::steady_clock::now() - reference_ < kMinTIme)
 		{
 			std::this_thread::sleep_for(std::chrono::microseconds(1));
 		}
 	}
 	reference_ = std::chrono::steady_clock::now();
 }
+
 
 
 size_t Engine::GetProcessMemoryUsage() {
@@ -266,19 +271,21 @@ void Engine::Debug()
 
 	ImGui::Begin("Debug Info");
 
-	// フレームレート (FPS)
-	//ImGui::Text("FPS: %.1f", ImGui::GetIO().Framerate);
+	//フレームレート (FPS)
+	ImGui::Text("FPS: %.1f", ImGui::GetIO().Framerate);
 
 	// 1フレームあたりの時間 (ms)
 	//ImGui::Text("Frame Time: %.3f ms", 1000.0f / ImGui::GetIO().Framerate);
 
-	// 現在のフレーム数（自分でカウントする必要あり）
-	//static int frameCount = 0;
-	//frameCount++;
-	//ImGui::Text("Frame Count: %d", frameCount);
+	//現在のフレーム数（自分でカウントする必要あり）
+	static int frameCount = 0;
+	frameCount++;
+	ImGui::Text("Frame Count: %d", frameCount);
 
 	size_t mem = GetProcessMemoryUsage();
 	ImGui::Text("Memory Usage: %.2f MB", mem / (1024.0f * 1024.0f));
+
+	textureLoader.get()->Draw();
 
 	ImGui::End();
 

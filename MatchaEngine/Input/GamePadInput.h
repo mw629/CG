@@ -51,6 +51,9 @@ public:
 	static float GetRightStickX();
 	static float GetRightStickY();
 
+	// コントローラーを振動させる（0〜65535）
+	static void SetVibration(WORD leftMotorSpeed, WORD rightMotorSpeed);
+
 	void SetPad();
 
 };

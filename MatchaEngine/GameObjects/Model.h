@@ -49,6 +49,7 @@ public:
 	void SetPos(Vector3 velocity) { transform_.translate = velocity; }
 	void SetAlive(bool flag) { isAlive = flag; }
 	void SetMaterialLighting(bool isActiv) { material_->SetMaterialLighting(isActiv); }
+	void SetTexture(D3D12_GPU_DESCRIPTOR_HANDLE textureSrvHandleGPU) { textureSrvHandleGPU_ = textureSrvHandleGPU; }
 
 	//getter
 	bool GetAlive() const { return isAlive; }

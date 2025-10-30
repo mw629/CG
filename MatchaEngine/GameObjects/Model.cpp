@@ -91,6 +91,7 @@ void Model::CreateModel()
 	CreateWVP();
 }
 
+
 void Model::SettingWvp(Matrix4x4 viewMatrix)
 {
 	Matrix4x4 projectionMatri = MakePerspectiveFovMatrix(0.45f, float(kClientWidth) / float(kClientHeight), 0.1f, 100.0f);

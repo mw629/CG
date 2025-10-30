@@ -38,6 +38,17 @@ void TextureLoader::Draw() {
 }
 
 
+int TextureLoader::GetTextureIndex(const std::string& filePath)
+{
+	int number = 0;
+	for (int i = 0; i < texture_.size(); i++) {
+		if (texture_[i].filePath == filePath) {
+			return  i;
+		}
+	}
+	return 0;
+}
+
 D3D12_GPU_DESCRIPTOR_HANDLE TextureLoader::GetTexture(const std::string& filePath)
 {
 	int number = 0;

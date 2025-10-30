@@ -25,6 +25,7 @@ private:
 	Microsoft::WRL::ComPtr<ID3D12Resource> wvpResource_;
 	TransformationMatrix* wvpData_;
 
+
 	
 public:
 	Sprite();
@@ -49,17 +50,20 @@ public:
 
 	void SetMaterialLighting(bool isActiv) { material_->SetMaterialLighting(isActiv); }
 
+	void SetTexture(D3D12_GPU_DESCRIPTOR_HANDLE textureSrvHandleGPU) { textureSrvHandleGPU_ = textureSrvHandleGPU; }
+
 	D3D12_VERTEX_BUFFER_VIEW* GetVertexBufferView() { return &vertexBufferView_; }
 	ID3D12Resource* GetVertexResource() { return wvpResource_.Get(); }
 	D3D12_INDEX_BUFFER_VIEW* GetIndexBufferView() { return &indexBufferView_; }
 
+	Transform& GetTransform() { return transform_; }
 	
 	MaterialFactory* GetMatrial() { return material_; }
 	D3D12_GPU_DESCRIPTOR_HANDLE GetTextureSrvHandleGPU() { return textureSrvHandleGPU_; }
 
 private:
 	ShaderName shader_ = ShaderName::ObjectShader;
-	BlendMode blend_ = BlendMode::kBlendModeNone;
+	BlendMode blend_ = BlendMode::kBlendModeNormal;
 public:
 	BlendMode SetBlend(BlendMode blend) { blend_ = blend; }
 	ShaderName GetShader() { return shader_; }
