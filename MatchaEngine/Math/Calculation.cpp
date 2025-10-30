@@ -77,6 +77,13 @@ Vector3 Cross(const Vector3& v1, const Vector3& v2) {
 	return result;
 }
 
+
+float Lerp(float a, float b, float t)
+{
+	return a + (b - a) * t;
+}
+
+
 // 行列
 
 Matrix4x4 AddMatrix4x4(Matrix4x4 m1, Matrix4x4 m2)//o

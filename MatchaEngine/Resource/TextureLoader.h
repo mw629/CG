@@ -32,7 +32,7 @@ public:
 
 	int GetLastIndex() { return static_cast<int>(texture_.size()); }
 
-	//std::vector<Texture> SetTexture() { return texture_; }
+	int GetTextureIndex(const std::string& filePath);
 	D3D12_GPU_DESCRIPTOR_HANDLE GetTexture(const std::string& filePath);
 	D3D12_GPU_DESCRIPTOR_HANDLE GetTexture(int index);
 

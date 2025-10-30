@@ -69,6 +69,9 @@ float Dot(Vector3 v1, Vector3 v2);
 /// <returns>クロス積(外積)の結果</returns>
 Vector3 Cross(const Vector3& v1, const Vector3& v2);
 
+
+float Lerp(float a, float b, float t);
+
 //行列の計算
 
 /// <summary>
