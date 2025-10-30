@@ -25,12 +25,14 @@ private:
 	Microsoft::WRL::ComPtr<ID3D12Resource> wvpResource_;
 	TransformationMatrix* wvpData_;
 
+
 	
 public:
 	Sprite();
 	~Sprite();
 
 	static void SetDevice(ID3D12Device* device);
+	static void SetScreenSize(Vector2 screenSize);
 
 	void Initialize(D3D12_GPU_DESCRIPTOR_HANDLE textureSrvHandleGPU);
 
@@ -50,18 +52,18 @@ public:
 
 	void SetTexture(D3D12_GPU_DESCRIPTOR_HANDLE textureSrvHandleGPU) { textureSrvHandleGPU_ = textureSrvHandleGPU; }
 
-
 	D3D12_VERTEX_BUFFER_VIEW* GetVertexBufferView() { return &vertexBufferView_; }
 	ID3D12Resource* GetVertexResource() { return wvpResource_.Get(); }
 	D3D12_INDEX_BUFFER_VIEW* GetIndexBufferView() { return &indexBufferView_; }
 
+	Transform& GetTransform() { return transform_; }
 	
 	MaterialFactory* GetMatrial() { return material_; }
 	D3D12_GPU_DESCRIPTOR_HANDLE GetTextureSrvHandleGPU() { return textureSrvHandleGPU_; }
 
 private:
 	ShaderName shader_ = ShaderName::ObjectShader;
-	BlendMode blend_ = BlendMode::kBlendModeNone;
+	BlendMode blend_ = BlendMode::kBlendModeNormal;
 public:
 	void SetBlend(BlendMode blend) { blend_ = blend; }
 	ShaderName GetShader() { return shader_; }

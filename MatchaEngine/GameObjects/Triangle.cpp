@@ -16,19 +16,28 @@ Triangle::~Triangle()
 	// ComPtrは自動的に解放される
 	vertexResource_.Reset();
 	wvpResource_.Reset();
-	
+
 	delete material_;
 }
 
 namespace {
 	ID3D12Device* device_;
+	float kClientWidth;
+	float kClientHeight;
 }
 
 void Triangle::SetDevice(ID3D12Device* device) {
 	device_ = device;
 }
 
-void Triangle::Initialize(D3D12_GPU_DESCRIPTOR_HANDLE textureSrvHandleGPU) { 
+void Triangle::SetScreenSize(Vector2 screenSize) {
+
+	kClientWidth = screenSize.x;
+	kClientHeight = screenSize.y;
+}
+
+
+void Triangle::Initialize(D3D12_GPU_DESCRIPTOR_HANDLE textureSrvHandleGPU) {
 	textureSrvHandleGPU_ = textureSrvHandleGPU;
 	vertex_[0] = { -0.1f,-0.1f,0.0f,1.0f };
 	vertex_[1] = { 0.0f,0.1f,0.0f,1.0f };
@@ -89,7 +98,7 @@ void Triangle::CreateTriangle()
 
 void Triangle::SettingWvp(Matrix4x4 viewMatrix)
 {
-	Matrix4x4 projectionMatri = MakePerspectiveFovMatrix(0.45f, float(1280) / float(720), 0.1f, 100.0f);
+	Matrix4x4 projectionMatri = MakePerspectiveFovMatrix(0.45f, float(kClientWidth) / float(kClientHeight), 0.1f, 100.0f);
 	Matrix4x4 worldMatrix = MakeAffineMatrix(transform_.translate, transform_.scale, transform_.rotate);
 	Matrix4x4 worldViewProjectionMatrix = MultiplyMatrix4x4(worldMatrix, MultiplyMatrix4x4(viewMatrix, projectionMatri));
 	*wvpData_ = { worldViewProjectionMatrix,worldMatrix };

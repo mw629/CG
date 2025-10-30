@@ -1,5 +1,6 @@
 #pragma once
 #include <fstream>
+#include <chrono>
 
 ///自作エンジン///
 
@@ -68,8 +69,8 @@ class Engine
 private:
 
 	HRESULT hr_;
+	std::chrono::steady_clock::time_point reference_;
 
-	bool isFullScreen;
 	int32_t kClientWidth_;
 	int32_t kClientHeight_;
 
@@ -103,6 +104,8 @@ private:
 
 	ID3D12DescriptorHeap* descriptorHeeps[1];
 
+	static bool isEnd_;
+
 public:
 
 	~Engine();
@@ -118,11 +121,15 @@ public:
 
 	void End();
 
+	void UpdateFixFPS();
+
 	size_t GetProcessMemoryUsage();
 
 	void Debug();
 
 	Input* GetInput() { return input.get(); }
 
+	static void SetEnd(bool isEnd) { isEnd_ = isEnd; }
+	static bool IsEnd() { return isEnd_; }
 };
 
