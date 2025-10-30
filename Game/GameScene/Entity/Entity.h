@@ -16,6 +16,7 @@ protected:
 public:
 	virtual ~Entity() {};
 
+
 	virtual void ImGui() {}
 
 	virtual void Initialize() {}
