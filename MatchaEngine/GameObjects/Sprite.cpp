@@ -50,7 +50,6 @@ void Sprite::Initialize(D3D12_GPU_DESCRIPTOR_HANDLE textureSrvHandleGPU)
 
 	material_ = new MaterialFactory();
 	material_->CreateMatrial(device_, false);
-	CreateSprite();
 }
 
 void Sprite::CreateVertexData()

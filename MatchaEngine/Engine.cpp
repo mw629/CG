@@ -187,6 +187,7 @@ void Engine::NewFrame() {
 
 
 	input.get()->Updata();
+
 	gamePadInput.get()->Update();
 }
 
@@ -219,6 +220,7 @@ void Engine::EndFrame() {
 	assert(SUCCEEDED(hr_));
 	hr_ = command->GetCommandList()->Reset(command->GetCommandAllocator(), nullptr);
 	assert(SUCCEEDED(hr_));
+
 }
 
 void Engine::End() {
@@ -254,6 +256,7 @@ void Engine::UpdateFixFPS()
 }
 
 
+
 size_t Engine::GetProcessMemoryUsage() {
 	PROCESS_MEMORY_COUNTERS_EX pmc{};
 	if (GetProcessMemoryInfo(GetCurrentProcess(), (PROCESS_MEMORY_COUNTERS*)&pmc, sizeof(pmc))) {
@@ -272,7 +275,7 @@ void Engine::Debug()
 	ImGui::Text("FPS: %.1f", ImGui::GetIO().Framerate);
 
 	// 1フレームあたりの時間 (ms)
-	ImGui::Text("Frame Time: %.3f ms", 1000.0f / ImGui::GetIO().Framerate);
+	//ImGui::Text("Frame Time: %.3f ms", 1000.0f / ImGui::GetIO().Framerate);
 
 	//現在のフレーム数（自分でカウントする必要あり）
 	static int frameCount = 0;
