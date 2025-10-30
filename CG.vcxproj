@@ -237,6 +237,7 @@ copy "$(WindowsSdkDir)bin\$(TargetPlatformVersion)\x64\dxil.dll" "$(TargetDir)dx
     <ClInclude Include="Game\GameScene\Entity\Enemy.h" />
     <ClInclude Include="Game\Fade.h" />
     <ClInclude Include="Game\GameScene\Entity\Entity.h" />
+    <ClInclude Include="Game\GameScene\System\GameState.h" />
     <ClInclude Include="Game\IScene.h" />
     <ClInclude Include="MatchaEngine\GameObjects\Camera.h" />
     <ClInclude Include="Game\GameScene.h" />
