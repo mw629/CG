@@ -34,7 +34,7 @@ public:
 	static void SetDevice(ID3D12Device* device);
 	static void SetScreenSize(Vector2 screenSize);
 
-	void Initialize(D3D12_GPU_DESCRIPTOR_HANDLE textureSrvHandleGPU);
+	void Initialize(int textureHandle);
 
 	void CreateVertexData();
 
