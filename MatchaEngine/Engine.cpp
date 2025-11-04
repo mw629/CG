@@ -247,7 +247,7 @@ void Engine::UpdateFixFPS()
 
 	//1/60秒立っていない場合
 	if (elapsed < kMinCheckTIme) {
-		while (std::chrono::steady_clock::now() - reference_ < kMinCheckTIme)
+		while (std::chrono::steady_clock::now() - reference_ < kMinTIme)
 		{
 			std::this_thread::sleep_for(std::chrono::microseconds(1));
 		}
