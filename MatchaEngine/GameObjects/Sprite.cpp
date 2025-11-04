@@ -2,6 +2,7 @@
 #include "Graphics/GraphicsDevice.h"
 #include "Core/VariableTypes.h"
 #include "Math/Calculation.h"
+#include <Resource/Texture.h>
 
 namespace {
 	ID3D12Device* device_;
@@ -44,9 +45,11 @@ Sprite::~Sprite()
 	delete material_;
 }
 
-void Sprite::Initialize(D3D12_GPU_DESCRIPTOR_HANDLE textureSrvHandleGPU)
+void Sprite::Initialize(int textureHandle)
 {
-	textureSrvHandleGPU_ = textureSrvHandleGPU;
+	std::unique_ptr<Texture> texture = std::make_unique<Texture>();
+
+	textureSrvHandleGPU_ = texture.get()->TextureData(textureHandle);
 
 	material_ = new MaterialFactory();
 	material_->CreateMatrial(device_, false);
