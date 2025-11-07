@@ -14,6 +14,16 @@ void GameScene::ImGui()
 		ImGui::DragFloat3("CameraSize", &cameraTransform_.scale.x);
 		ImGui::DragFloat3("CameraRotate", &cameraTransform_.rotate.x);
 	}
+	switch (gameState_)
+	{
+	case kPlaying:
+		playing_.get()->ImGui();
+		break;
+	case kPause:
+		break;
+	default:
+		break;
+	}
 
 }
 
@@ -37,6 +47,11 @@ void GameScene::Initialize() {
 
 void GameScene::Update() {
 
+	if (Input::PushKey(DIK_Q)) {
+		nextSceneID_ = SceneID::kTitle;
+		sceneChangeRequest_ = true;
+	}
+
 	camera_.get()->SetTransform(cameraTransform_);
 	camera_.get()->Update();
 
@@ -56,9 +71,11 @@ void GameScene::StateUpdate()
 	{
 	case kPlaying:
 		playing_.get()->Update(camera_.get()->GetViewMatrix());
+
 		break;
 	case kPause:
 		pause_.get()->Update(camera_.get()->GetViewMatrix());
+
 		break;
 	default:
 		break;

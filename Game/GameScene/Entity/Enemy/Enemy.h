@@ -1,19 +1,19 @@
 #pragma once
-#include "../Entity.h"
+#include <Engine.h>
 
-class Enemy:public Entity
+class Enemy
 {
 
 public:
-	~Enemy()override;
+	~Enemy();
 
-	void ImGui()override;
+	void ImGui();
 
-	void Initialize()override;
+	void Initialize();
 
-	void Update(Matrix4x4 viewMatrix)override;
+	void Update(Matrix4x4 viewMatrix);
 
-	void Draw()override;
+	void Draw();
 
 };
 

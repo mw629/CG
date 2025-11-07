@@ -5,7 +5,7 @@
 
 
 void Playing::ImGui() {
-
+	player_.get()->ImGui();
 }
 
 void Playing::Initialize(Matrix4x4 viewMatrix) {
@@ -20,8 +20,8 @@ void Playing::Initialize(Matrix4x4 viewMatrix) {
 	player_.get()->Initialize(mapChipField_.get()->GetPlayerSpawn(), viewMatrix);
 	player_.get()->SetMapChipField(mapChipField_.get());
 
-
 }
+
 
 void Playing::Update(Matrix4x4 viewMatrix) {
 

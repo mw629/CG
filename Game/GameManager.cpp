@@ -4,7 +4,7 @@
 
 GameManager::GameManager()
 {
-	scene_ = new GameScene();
+	scene_ = new TitleScene();
 }
 
 GameManager::~GameManager()
@@ -17,24 +17,52 @@ void GameManager::ImGui() {
 }
 
 void GameManager::Initialize() {
+
 	mapManager_ = std::make_unique<MapManager>();
 	scene_->Initialize();
+
+	fade_ = std::make_unique<Fade>();
+	fade_.get()->Initialize(0.5f);
+
+	isChange_ = false;
 }
 
 void GameManager::Update() {
-	
-	if (scene_->GetSceneChangeRequest()) {
-		int NexrScene = scene_->GetNextSceneID();
-		delete  scene_;
-		scene_ = CreateScene(NexrScene);
-		scene_->Initialize();
-	}
-	
-	scene_->Update();
-}
 
+	int NexrScene = scene_->GetNextSceneID();
+
+	if (scene_->GetSceneChangeRequest()) {
+		if (!isChange_) {
+			fade_.get()->FadeIn();
+		}
+		isChange_ = true;
+	}
+
+	if (isChange_) {
+		if (fade_.get()->IsFinish()) {
+			isChange_ = false;
+			delete  scene_;
+			scene_ = CreateScene(NexrScene);
+			scene_->Initialize();
+			scene_->Update();
+			fade_.get()->FadeOut();
+		}
+	}
+
+	fade_.get()->Update();
+
+	if (fade_.get()->IsFinish() && !isChange_) {
+		scene_->Update();
+	}
+
+	if (!isChange_) {
+		scene_->Update();
+	}
+
+}
 void GameManager::Draw() {
 	scene_->Draw();
+	fade_.get()->Draw();
 }
 
 IScene* GameManager::CreateScene(int sceneID)

@@ -53,6 +53,8 @@ void Sprite::Initialize(int textureHandle)
 
 	material_ = new MaterialFactory();
 	material_->CreateMatrial(device_, false);
+	
+	CreateSprite();
 }
 
 void Sprite::CreateVertexData()

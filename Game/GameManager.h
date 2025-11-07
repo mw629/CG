@@ -9,6 +9,8 @@ class GameManager
 private:
 
 	IScene* scene_;
+	bool isChange_;
+
 	std::unique_ptr<MapManager> mapManager_;
 
 	std::unique_ptr<Fade> fade_;

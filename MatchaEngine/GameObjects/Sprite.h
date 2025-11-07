@@ -65,7 +65,7 @@ private:
 	ShaderName shader_ = ShaderName::ObjectShader;
 	BlendMode blend_ = BlendMode::kBlendModeNormal;
 public:
-	BlendMode SetBlend(BlendMode blend) { blend_ = blend; }
+	void SetBlend(BlendMode blend) { blend_ = blend; }
 	ShaderName GetShader() { return shader_; }
 	BlendMode GetBlend() { return blend_; }
 

@@ -138,9 +138,9 @@ copy "$(WindowsSdkDir)bin\$(TargetPlatformVersion)\x64\dxil.dll" "$(TargetDir)dx
     </Link>
   </ItemDefinitionGroup>
   <ItemGroup>
+    <ClCompile Include="Game\GameScene\Entity\Player\Bullet.cpp" />
     <ClCompile Include="Game\GameScene\Entity\Enemy\Enemy.cpp" />
     <ClCompile Include="Game\Direction\Fade.cpp" />
-    <ClCompile Include="Game\GameScene\Entity\Entity.cpp" />
     <ClCompile Include="Game\GameScene\Entity\MapObject\Block.h.cpp" />
     <ClCompile Include="Game\GameScene\Map\MapChipField.cpp" />
     <ClCompile Include="Game\GameScene\Map\MapManager.cpp" />
@@ -239,9 +239,9 @@ copy "$(WindowsSdkDir)bin\$(TargetPlatformVersion)\x64\dxil.dll" "$(TargetDir)dx
     </FxCompile>
   </ItemGroup>
   <ItemGroup>
+    <ClInclude Include="Game\GameScene\Entity\Player\Bullet.h" />
     <ClInclude Include="Game\GameScene\Entity\Enemy\Enemy.h" />
     <ClInclude Include="Game\Direction\Fade.h" />
-    <ClInclude Include="Game\GameScene\Entity\Entity.h" />
     <ClInclude Include="Game\GameScene\System\GameState.h" />
     <ClInclude Include="Game\IScene.h" />
     <ClInclude Include="Game\GameScene\Entity\MapObject\Block.h" />
