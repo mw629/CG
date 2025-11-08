@@ -83,6 +83,14 @@ float Lerp(float a, float b, float t)
 	return a + (b - a) * t;
 }
 
+Vector3 Lerp(Vector3 a, Vector3 b, float t) {
+	Vector3 v;
+	v.x = Lerp(a.x, b.x, t);
+	v.y = Lerp(a.y, b.y, t);
+	v.z = Lerp(a.z, b.z, t);
+	return v;
+}
+
 
 // 行列
 

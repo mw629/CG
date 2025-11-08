@@ -6,6 +6,10 @@ class MapChipField;
 class Goal;
 class Coin;
 
+enum class LRDirection {
+	kRight,
+	kLeft,
+};
 
 class Player
 {
@@ -18,6 +22,7 @@ private:
 	Vector3 velocity_ = { 0.0f,0.0f,0.0f };
 	float speed_ = 0.1f;
 
+	bool isShot_;
 
 	//// 構造体 ////
 
@@ -30,10 +35,7 @@ private:
 	};
 
 	//// 列挙型 ////
-	enum class LRDirection {
-		kRight,
-		kLeft,
-	};
+
 
 	enum Corner {
 		kRightBottom, // 右下
@@ -124,18 +126,23 @@ public:
 	// 壁に接触している場合の処理
 	void contactWithAWall(const CollisionMapInfo& info);
 
+	void OnCollision(const Goal* goal);
+	void OnCollision(const Coin* coin);
 
-	Transform& GetWorldTransform() { return transform_; };
+	AABB GetAABB();
+	Transform& GetTransform() { return transform_; };
 	Vector3& GetVelocity() { return velocity_; };
-	void SetMapChipField(MapChipField* mapChipField) { mapChipField_ = mapChipField; };
-	//AABB GetAABB();
+	bool IsShot() { return isShot_; }
+	LRDirection GetDirection() { return lrDirection_; }
+
 	// デスフラグのgetter
 	bool IsDead() const { return isDead_; };
 	void SetDead(bool flag) { isDead_ = flag; };
+	void SetMapChipField(MapChipField* mapChipField) { mapChipField_ = mapChipField; };
 	
-	void OnCollision(const Goal* goal);
-	void OnCollision(const Coin* coin);
-	AABB GetAABB();
+
+
+
 
 };
 

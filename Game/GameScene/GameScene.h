@@ -15,9 +15,6 @@ private:
 
 	State gameState_;
 
-	std::unique_ptr<Camera>camera_;
-	Transform cameraTransform_{ {1.0f,1.0f,1.0f},{0.0f,0.0f,0.0f,},{12.0f,0.0f,-50.0f} };
-
 	std::unique_ptr<Playing> playing_;
 	std::unique_ptr<Pause> pause_;
 
@@ -37,7 +34,6 @@ public:
 
 	//状態ごとの描画
 	void StateDraw();
-
 
 	void ChangeState();
 

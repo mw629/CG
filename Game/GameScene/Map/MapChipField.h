@@ -26,6 +26,7 @@ public:
 
 	Vector3 GetPos(MapChipType mapChipType);
 
+	std::list<Vector3> GetEnemyPosition();
 	Vector3 GetPlayerSpawn() { return GetPos(MapChipType::kPlayerSpawn); };
 	Vector3 GetGoalPosition() { return GetPos(MapChipType::kGoal); };
 

@@ -48,11 +48,22 @@ Vector3 MapChipField::GetPos(MapChipType mapChipType)
 	for (uint32_t y = 0; y < mapChipData_.height; ++y) {
 		for (uint32_t x = 0; x < mapChipData_.width; ++x) {
 			if (mapChipData_.data[y][x] == mapChipType) {
-				// 見つけたらその位置を返す
 				return GetMapChipPositionByIndex(x, y);
 			}
 		}
 	}
-	// 見つからなかった場合のデフォルト（0,0,0）を返す
 	return Vector3(0, 0, 0);
+}
+
+std::list<Vector3> MapChipField::GetEnemyPosition()
+{
+	std::list<Vector3> vector;
+	for (uint32_t y = 0; y < mapChipData_.height; ++y) {
+		for (uint32_t x = 0; x < mapChipData_.width; ++x) {
+			if (mapChipData_.data[y][x] == MapChipType::kEnemySpawn) {
+				vector.push_back(GetMapChipPositionByIndex(x, y));
+			}
+		}
+	}
+	return vector;
 }

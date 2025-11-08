@@ -3,39 +3,32 @@
 #include <Engine.h>
 
 class Player;
-class Enemy;
 
-class Bullet
+class Goal
 {
 private:
 
+
+	ModelData modelData_;
 	std::unique_ptr<Model> model_;
 	Transform transform_ = { {1.0f,1.0f,1.0f},{0.0f,0.0f,0.0f} ,{0.0f,0.0f,0.0f} };
-	Vector3 velocity_;
-	bool speed_ = 1.0f;
-	bool isActiv_;
 
-	float fream_=1.0f;
+	// キャラクターの当たり判定サイズ
+	Vector2 size_ = { 1.0f,1.0f };
+	bool isActive_ = true;
 
-	Vector2 size_ = { 0.8f,0.8f };
 
 public:
 
-	void ImGui();
-
-	void Initialize();
+	void Initialize(const Vector3& position, Matrix4x4 viewMatrix);
 
 	void Update(Matrix4x4 viewMatrix);
 
 	void Draw();
 
-	void IsShot(Player *player);
-
-	void OnCollision(const Enemy* enemy);
+	bool IsActive() { return isActive_; }
 
 	AABB GetAABB();
-	bool IsActiv() { return isActiv_; }
-
 
 };
 

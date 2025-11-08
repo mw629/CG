@@ -42,7 +42,6 @@ void Block::Initialize(MapChipField* mapChipField, Matrix4x4 viewMatrix) {
 			if (mapChipField_->GetMapChipTypeByIndex(j, i) == MapChipType::kBlock) {
 				Model* model = new Model();
 				model->Initialize(blockModel);
-				model->CreateModel();
 				model->SetTransform(transform);
 				model->SettingWvp(viewMatrix);
 				modelRow.push_back(model);

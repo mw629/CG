@@ -6,15 +6,17 @@ class Pause
 {
 private:
 
+
+
 	MenuCommand menuCommand_ = kReturnToGame;
 
 public:
 
 	void ImGui();
 
-	void Initialize(Matrix4x4 viewMatrix);
+	void Initialize( );
 
-	void Update(Matrix4x4 viewMatrix);
+	void Update( );
 
 	void Draw();
 

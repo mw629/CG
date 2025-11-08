@@ -9,11 +9,6 @@ GameScene::~GameScene()
 void GameScene::ImGui()
 {
 
-	if (ImGui::CollapsingHeader("Camera")) {
-		ImGui::DragFloat3("CameraPos", &cameraTransform_.translate.x);
-		ImGui::DragFloat3("CameraSize", &cameraTransform_.scale.x);
-		ImGui::DragFloat3("CameraRotate", &cameraTransform_.rotate.x);
-	}
 	switch (gameState_)
 	{
 	case kPlaying:
@@ -31,13 +26,10 @@ void GameScene::Initialize() {
 
 	sceneID_ = SceneID::kGame;
 
-	camera_ = std::make_unique<Camera>();
-	camera_.get()->Initialize();
-	camera_.get()->SetTransform(cameraTransform_);
-	camera_.get()->Update();
+	
 
 	playing_ = std::make_unique<Playing>();
-	playing_.get()->Initialize(camera_.get()->GetViewMatrix());
+	playing_.get()->Initialize();
 
 	pause_ = std::make_unique<Pause>();
 	//pause_.get()->Initialize();
@@ -51,9 +43,10 @@ void GameScene::Update() {
 		nextSceneID_ = SceneID::kTitle;
 		sceneChangeRequest_ = true;
 	}
-
-	camera_.get()->SetTransform(cameraTransform_);
-	camera_.get()->Update();
+	if (playing_.get()->IsGoal()) {
+		nextSceneID_ = SceneID::kTitle;
+		sceneChangeRequest_ = true;
+	}
 
 	StateUpdate();
 
@@ -70,11 +63,11 @@ void GameScene::StateUpdate()
 	switch (gameState_)
 	{
 	case kPlaying:
-		playing_.get()->Update(camera_.get()->GetViewMatrix());
+		playing_.get()->Update();
 
 		break;
 	case kPause:
-		pause_.get()->Update(camera_.get()->GetViewMatrix());
+		pause_.get()->Update();
 
 		break;
 	default:

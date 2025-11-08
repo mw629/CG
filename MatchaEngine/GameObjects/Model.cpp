@@ -52,6 +52,7 @@ void Model::Initialize(ModelData modelData)
 
 	material_ = new MaterialFactory();
 	material_->CreateMatrial(device_, false);
+	CreateModel();
 }
 
 

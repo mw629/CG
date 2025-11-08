@@ -6,8 +6,9 @@
 enum class MapChipType {
 	kBlank, // 空白
 	kBlock, // ブロック
-	kPlayerSpawn,//プレイヤースポーン地点
 	kGoal,//ゴール
+	kPlayerSpawn,//プレイヤースポーン地点
+	kEnemySpawn,//敵のスポーン位置
 	kNone,
 };
 

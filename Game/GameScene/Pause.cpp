@@ -6,11 +6,11 @@ void Pause::ImGui(){
 
 }
 
-void Pause::Initialize(Matrix4x4 viewMatrix) {
+void Pause::Initialize() {
 
 }
 
-void Pause::Update(Matrix4x4 viewMatrix) {
+void Pause::Update() {
 
 }
 

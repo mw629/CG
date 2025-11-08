@@ -4,6 +4,7 @@
 #include "../../Map/MapStruct.h"
 
 void Player::ImGui() {
+
 	if (ImGui::CollapsingHeader("Player")) {
 		if (ImGui::CollapsingHeader("Transform")) {
 			ImGui::DragFloat3("Pos", &transform_.translate.x);
@@ -32,7 +33,6 @@ void Player::Initialize(const Vector3& position, Matrix4x4 viewMatrix) {
 	model_ = std::make_unique<Model>();
 	transform_.translate = position;
 	model_->Initialize(modelData);
-	model_->CreateModel();	
 	model_->SetTransform(transform_);
 	model_->SettingWvp(viewMatrix);
 }
@@ -80,7 +80,7 @@ void Player::MoveInput() {
 
 
 
-	if (Input::PushKey(DIK_SPACE) || GamePadInput::PushButton(XINPUT_GAMEPAD_A)) {
+	if (Input::PushKey(DIK_W) || GamePadInput::PushButton(XINPUT_GAMEPAD_A)) {
 		if (onGround_) {
 
 			velocity_.y = kJumpAcceleration; // 上向きの速度
@@ -100,6 +100,11 @@ void Player::MoveInput() {
 				isWallJumping = false;
 			}
 		}
+	}
+
+	isShot_ = false;
+	if (Input::PushKey(DIK_SPACE)) {
+		isShot_ = true;
 	}
 
 
