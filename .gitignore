@@ -321,5 +321,9 @@ Dump/
 # log files 
 logs/
 
+x64/
+
+CG/
+
 # DirectXTex Compiled Shaders
 **/DirectXTex/Shaders/Compiled/
