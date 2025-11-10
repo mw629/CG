@@ -53,10 +53,6 @@ void GameManager::Update() {
 
 	fade_.get()->Update();
 
-	if (fade_.get()->IsFinish() && !isChange_) {
-		scene_->Update();
-	}
-
 	if (!isChange_) {
 		scene_->Update();
 	}

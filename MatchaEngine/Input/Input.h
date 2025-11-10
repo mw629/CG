@@ -13,14 +13,9 @@ private:
 	IDirectInput8* directInput_{};
 	HRESULT result{};
 	IDirectInputDevice8* keyboard{};
-	
-	BYTE key_[256] = {};  
-	BYTE prevKey_[256] = {};  
 
 	IDirectInputDevice8* mouse{};
 
-	DIMOUSESTATE mouseState{};  
-	DIMOUSESTATE prevMouseState{};  
 	
 
 public:  
@@ -52,8 +47,6 @@ public:
 	static Vector2 GetMouseDelta();
 	static int GetMouseWheel();
 	
-	BYTE GetKey(int keyNum)const { return key_[keyNum]; }
 
-	void SetKey();
 
 };

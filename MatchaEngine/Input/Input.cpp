@@ -12,10 +12,7 @@ namespace {
 }
 
 void Input::Initialize(WNDCLASS wc, HWND hwnd) {
-
-
-
-	directInput_=nullptr;
+	directInput_ = nullptr;
 	result = DirectInput8Create(
 		wc.hInstance, DIRECTINPUT_VERSION, IID_IDirectInput8,
 		(void**)&directInput_, nullptr);
@@ -56,14 +53,14 @@ void Input::SetExclusionLevel(HWND hwnd)
 void Input::Update()
 {
 	//kyeの取得
-	std::memcpy(prevKey_, key_, sizeof(key_));
+	std::memcpy(g_prevKey, g_key, sizeof(g_key));
 	keyboard->Acquire();
-	keyboard->GetDeviceState(sizeof(key_), key_);
+	keyboard->GetDeviceState(sizeof(g_key), g_key);
 	//マウスの取得
-	std::memcpy(&prevMouseState,&mouseState, sizeof(mouseState));
+	std::memcpy(&g_prevMouseState, &g_mouseState, sizeof(g_mouseState));
 	mouse->Acquire();
-	mouse->GetDeviceState(sizeof(DIMOUSESTATE), &mouseState);
-	SetKey();
+	mouse->GetDeviceState(sizeof(DIMOUSESTATE), &g_mouseState);
+	
 }
 
 bool Input::PushKey(uint32_t key)
@@ -98,23 +95,14 @@ bool Input::FreeMouse(uint32_t bottom)
 
 Vector2 Input::GetMouseDelta()
 {
-	 return Vector2(g_mouseState.lX, g_mouseState.lY); 
+	return Vector2(g_mouseState.lX, g_mouseState.lY);
 }
 
 int Input::GetMouseWheel()
 {
-	 return g_mouseState.lZ; 
+	return g_mouseState.lZ;
 }
 
-void Input::SetKey()
-{
-	for (int i = 0; i < 256; i++) {
-		g_key[i] = key_[i];
-		g_prevKey[i] = prevKey_[i];
-	}
-	g_mouseState= mouseState;
-	g_prevMouseState= prevMouseState;
-}
 
 
 

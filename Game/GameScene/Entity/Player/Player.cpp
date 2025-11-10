@@ -106,13 +106,8 @@ void Player::MoveInput() {
 	}
 
 	isShot_ = false;
-	f++;
-	if (Input::PushKey(DIK_SPACE)) {
+	if (Input::PushKey(DIK_SPACE)||GamePadInput::PushButton(XINPUT_GAMEPAD_A)) {
 		isShot_ = true;
-		if (a + 1 == f) {
-			Sleep(100000000);
-		}
-		a = f;
 	}
 
 

@@ -8,8 +8,7 @@
 class GamePadInput
 {
 private:
-	XINPUT_STATE currentState_;
-	XINPUT_STATE prevState_;
+	
 	int deadZone_ = 8000;
 public:
 
@@ -54,7 +53,6 @@ public:
 	// コントローラーを振動させる（0〜65535）
 	static void SetVibration(WORD leftMotorSpeed, WORD rightMotorSpeed);
 
-	void SetPad();
 
 };
 

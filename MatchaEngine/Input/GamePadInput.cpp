@@ -33,16 +33,15 @@ void GamePadInput::DrawImGui()
 
 GamePadInput::GamePadInput()
 {
-	ZeroMemory(&currentState_, sizeof(XINPUT_STATE));
-	ZeroMemory(&prevState_, sizeof(XINPUT_STATE));
+	ZeroMemory(&currentState, sizeof(XINPUT_STATE));
+	ZeroMemory(&prevState, sizeof(XINPUT_STATE));
 }
 
 void GamePadInput::Update()
 {
-	prevState_ = currentState_;
-	ZeroMemory(&currentState_, sizeof(XINPUT_STATE));
-	XInputGetState(0, &currentState_); // プレイヤー1のコントローラー
-	SetPad();
+	prevState = currentState;
+	ZeroMemory(&currentState, sizeof(XINPUT_STATE));
+	XInputGetState(0, &currentState); // プレイヤー1のコントローラー
 }
 
 
@@ -128,11 +127,3 @@ void GamePadInput::SetVibration(WORD leftMotorSpeed, WORD rightMotorSpeed)
 		XInputSetState(0, &vibration);
 	}
 }
-
-void GamePadInput::SetPad()
-{
-	currentState = currentState_;
-	prevState = prevState_;
-	deadZone = deadZone_;
-}
-
