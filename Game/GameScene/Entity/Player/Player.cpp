@@ -57,9 +57,6 @@ void Player::Update(Matrix4x4 viewMatrix) {
 	// ⑥設置状態の切り替え
 	SwitchingInstallationStatus(collisionMapInfo);
 
-	if (transform_.translate.y < -2.0f) {
-		isDead_ = true;
-	}
 
 	model_->SetTransform(transform_);
 	model_->SettingWvp(viewMatrix);
