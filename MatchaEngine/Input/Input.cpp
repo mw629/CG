@@ -56,9 +56,7 @@ void Input::SetExclusionLevel(HWND hwnd)
 void Input::Update()
 {
 	//kyeの取得
-	for (int i = 0; i < 256; i++) {
-		prevKey_[i] = key_[i];
-	}
+	std::memcpy(prevKey_, key_, sizeof(key_));
 	keyboard->Acquire();
 	keyboard->GetDeviceState(sizeof(key_), key_);
 	//マウスの取得

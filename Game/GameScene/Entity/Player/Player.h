@@ -59,8 +59,10 @@ private:
 	};
 #pragma endregion
 
-	int HP_ = 3;
+	int f = 0;
+	int a=0;
 
+	int HP_ = 3;
 
 	Vector3 velocity_ = { 0.0f,0.0f,0.0f };
 	float speed_ = 0.1f;

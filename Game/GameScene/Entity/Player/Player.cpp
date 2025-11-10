@@ -106,9 +106,16 @@ void Player::MoveInput() {
 	}
 
 	isShot_ = false;
+	f++;
 	if (Input::PushKey(DIK_SPACE)) {
 		isShot_ = true;
+		if (a + 1 == f) {
+			Sleep(100000000);
+		}
+		a = f;
 	}
+
+
 
 
 	if (!onGround_) {
