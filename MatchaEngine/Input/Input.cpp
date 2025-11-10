@@ -12,6 +12,9 @@ namespace {
 }
 
 void Input::Initialize(WNDCLASS wc, HWND hwnd) {
+
+
+
 	directInput_=nullptr;
 	result = DirectInput8Create(
 		wc.hInstance, DIRECTINPUT_VERSION, IID_IDirectInput8,
@@ -50,10 +53,12 @@ void Input::SetExclusionLevel(HWND hwnd)
 	assert(SUCCEEDED(result));
 }
 
-void Input::Updata()
+void Input::Update()
 {
 	//kyeの取得
-	std::memcpy(prevKey_, key_, sizeof(key_));
+	for (int i = 0; i < 256; i++) {
+		prevKey_[i] = key_[i];
+	}
 	keyboard->Acquire();
 	keyboard->GetDeviceState(sizeof(key_), key_);
 	//マウスの取得

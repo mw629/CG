@@ -13,6 +13,8 @@ private:
 	std::unique_ptr<Model> model_;
 	Transform transform_ = { {1.0f,1.0f,1.0f},{0.0f,0.0f,0.0f} ,{0.0f,0.0f,0.0f} };
 
+	Vector4 color = { 1.0f,0.0f,0.0f,1.0f };
+
 	// キャラクターの当たり判定サイズ
 	Vector2 size_ = { 1.0f,1.0f };
 

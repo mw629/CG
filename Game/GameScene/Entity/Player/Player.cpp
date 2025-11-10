@@ -6,6 +6,7 @@
 void Player::ImGui() {
 
 	if (ImGui::CollapsingHeader("Player")) {
+		ImGui::DragInt("HP", &HP_);
 		if (ImGui::CollapsingHeader("Transform")) {
 			ImGui::DragFloat3("Pos", &transform_.translate.x);
 			ImGui::DragFloat3("Size", &transform_.scale.x);
@@ -40,6 +41,8 @@ void Player::Initialize(const Vector3& position, Matrix4x4 viewMatrix) {
 void Player::Update(Matrix4x4 viewMatrix) {
 
 	MoveInput();
+
+	invincibleFream--;
 
 	// 衝突情報を初期化
 	CollisionMapInfo collisionMapInfo;
@@ -484,9 +487,15 @@ void Player::OnCollision(const Goal* goal)
 	(goal);
 }
 
-void Player::OnCollision(const Coin* coin)
+void Player::OnCollision(const Enemy* enemy)
 {
-	(coin);
+	if (invincibleFream < 0) {
+		HP_--;
+		invincibleFream = invincibleTime;
+	}
+	if (HP_ == 0) {
+		isDead_ = true;
+	}
 }
 
 AABB Player::GetAABB()

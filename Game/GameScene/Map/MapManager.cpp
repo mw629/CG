@@ -18,7 +18,7 @@ namespace {
 	{"2",MapChipType::kGoal},
 	{"3",MapChipType::kPlayerSpawn},
 	{"4",MapChipType::kEnemySpawn},
-	{"5",MapChipType::kNone},
+	{"5sss",MapChipType::kNone},
 	};
 }
 

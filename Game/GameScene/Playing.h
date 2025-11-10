@@ -34,6 +34,7 @@ private:
 	std::list<Enemy*> enemy_;
 
 	bool isGoal_;
+	bool isGameOver_;
 
 public:
 	~Playing();
@@ -53,6 +54,6 @@ public:
 	void CheckAllCollisions();
 	
 	bool IsGoal() { return isGoal_; }
-
+	bool IsGameOver() { return isGameOver_; }
 };
 

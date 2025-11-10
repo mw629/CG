@@ -186,7 +186,7 @@ void Engine::NewFrame() {
 
 
 
-	input.get()->Updata();
+	input.get()->Update();
 
 	gamePadInput.get()->Update();
 }

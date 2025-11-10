@@ -22,7 +22,7 @@ private:
 	Vector3 targetVelocity_;
 	Vector3 targeOffset = { 0, 0, -30.0f };
 
-	static inline const float kInterpolationRate = 0.1f;
+	static inline const float kInterpolationRate = 0.05f;
 	Vector3 targetLocation_{};
 
 

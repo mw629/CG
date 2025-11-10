@@ -48,7 +48,9 @@ void Bullet::IsShot(Player* player)
 void Bullet::OnCollision(const Enemy* enemy)
 {
 	(enemy);
-	isActiv_ = false;
+	if (isActiv_) {
+		isActiv_ = false;
+	}
 }
 
 

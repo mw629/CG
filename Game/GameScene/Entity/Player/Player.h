@@ -4,7 +4,7 @@
 
 class MapChipField;
 class Goal;
-class Coin;
+class Enemy;
 
 enum class LRDirection {
 	kRight,
@@ -15,27 +15,7 @@ class Player
 {
 private:
 
-	std::unique_ptr<Model> model_;
-	Transform transform_ = { {1.0f,1.0f,1.0f},{0.0f,0.0f,0.0f} ,{0.0f,0.0f,0.0f} };
-
-
-	Vector3 velocity_ = { 0.0f,0.0f,0.0f };
-	float speed_ = 0.1f;
-
-	bool isShot_;
-
-	//// 構造体 ////
-
-	// マップとの当たり判定情報
-	struct CollisionMapInfo {
-		bool ceilingCollisionFlag = false; // 天井衝突フラグ
-		bool landingFlag = false;          // 着地フラグ
-		bool wallContactFlag = false;      // 壁接触フラグ
-		Vector3 velocity;                  // 移動量
-	};
-
-	//// 列挙型 ////
-
+#pragma region enum
 
 	enum Corner {
 		kRightBottom, // 右下
@@ -57,31 +37,60 @@ private:
 		lingeringSound
 	};
 
-	//// 変数 ////
+#pragma endregion
+
+#pragma region Playerのデータ
+	std::unique_ptr<Model> model_;
+	Transform transform_ = { {1.0f,1.0f,1.0f},{0.0f,0.0f,0.0f} ,{0.0f,0.0f,0.0f} };
+	// キャラクターの当たり判定サイズ
+	float kWidth = 0.9f;
+	float kHeight = 0.9f;
+	// 向き
+	LRDirection lrDirection_ = LRDirection::kRight;
+#pragma endregion
+
+#pragma region 構造体
+	// マップとの当たり判定情報
+	struct CollisionMapInfo {
+		bool ceilingCollisionFlag = false; // 天井衝突フラグ
+		bool landingFlag = false;          // 着地フラグ
+		bool wallContactFlag = false;      // 壁接触フラグ
+		Vector3 velocity;                  // 移動量
+	};
+#pragma endregion
+
+	int HP_ = 3;
+
+
+	Vector3 velocity_ = { 0.0f,0.0f,0.0f };
+	float speed_ = 0.1f;
+
+	bool isShot_;
+	bool isDead_ = false;
+
+	float invincibleTime = 90.0f;
+	float invincibleFream = 0;
+
+
+	
+
 	// 固定の加速度
 	static inline const float kAcceleration = 0.9f;
 	// 固定の減衰抵抗力
 	static inline const float kAttenuation = 0.08f;
 	// 最大速度制限
 	static inline const float kLimitRunSpeed = 0.1f;
-	// 向き
-	LRDirection lrDirection_ = LRDirection::kRight;
-	// 旋回開始時の角度
-	float turnFirstRotationY_ = 0.0f;
-	// 旋回タイマー
-	float turnTimer_ = 0.0f;
-	// 旋回時間<秒>
-	static inline const float kTimeTurn = 0.3f;
+	
 	// 設置状態フラグ
 	bool onGround_ = true;
 	// 重力加速度(下方向)
-	float kGravityAccleration = 0.9f;
+	float kGravityAccleration = 0.7f;
 	// 最大落下速度(下方向)
 	float kLimitFallSpeed = 0.5f;
 	//壁との衝突時の摩擦係数
 	float wallFrictio = 0.3f;
 	// ジャンプ初速(上方向)
-	float kJumpAcceleration = 0.305f;
+	float kJumpAcceleration = 0.25f;  
 	// 接地フラグ
 	bool landing = false;
 	//ダブルジャンプのフラグ
@@ -94,11 +103,17 @@ private:
 	bool isWallJumping = false;
 	// マップチップによるフィールド
 	MapChipField* mapChipField_ = nullptr;
-	// キャラクターの当たり判定サイズ
-	float kWidth = 0.9f;
-	float kHeight = 0.9f;
-	// デスフラグ
-	bool isDead_ = false;
+
+
+#pragma region Animetion
+	// 旋回開始時の角度
+	float turnFirstRotationY_ = 0.0f;
+	// 旋回タイマー
+	float turnTimer_ = 0.0f;
+	// 旋回時間<秒>
+	static inline const float kTimeTurn = 0.3f;
+#pragma endregion
+
 public:
 	void ImGui();
 
@@ -111,6 +126,7 @@ public:
 	//入力処理
 	void MoveInput();
 
+#pragma region 当たり判定
 	// マップ衝突判定
 	void MapCollisionDetection(CollisionMapInfo& info);
 	void MapCollisionDetectionUp(CollisionMapInfo& info);
@@ -125,9 +141,10 @@ public:
 	void SwitchingInstallationStatus(const CollisionMapInfo& info);
 	// 壁に接触している場合の処理
 	void contactWithAWall(const CollisionMapInfo& info);
+#pragma endregion
 
 	void OnCollision(const Goal* goal);
-	void OnCollision(const Coin* coin);
+	void OnCollision(const Enemy* enemy);
 
 	AABB GetAABB();
 	Transform& GetTransform() { return transform_; };
@@ -140,9 +157,5 @@ public:
 	void SetDead(bool flag) { isDead_ = flag; };
 	void SetMapChipField(MapChipField* mapChipField) { mapChipField_ = mapChipField; };
 	
-
-
-
-
 };
 

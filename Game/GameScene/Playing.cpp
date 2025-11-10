@@ -23,6 +23,15 @@ void Playing::ImGui() {
 
 	camera_.get()->ImGui();
 	player_.get()->ImGui();
+
+	int bulletNum=0;
+	for (Bullet* bullet : bullet_) {
+		if (bullet->IsActiv()) {
+			bulletNum++;
+		}
+	}
+	ImGui::DragInt("BulletNum", &bulletNum);
+
 }
 
 void Playing::Initialize() {
@@ -129,6 +138,18 @@ void Playing::CheckAllCollisions() {
 	aabb2 = goal_.get()->GetAABB();
 	if (IsCollision(aabb1, aabb2)) {
 		isGoal_ = true;
+	}
+	for (Enemy* enemy : enemy_) {
+		if (!enemy->IsActive()) {
+			continue;
+		}
+		aabb2 = enemy->GetAABB();
+		if (IsCollision(aabb1, aabb2)) {
+			player_.get()->OnCollision(enemy);
+			if (player_.get()->IsDead()) {
+				isGameOver_ = true;
+			}
+		}
 	}
 
 	for (Bullet* bullet : bullet_) {

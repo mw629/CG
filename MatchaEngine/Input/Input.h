@@ -28,7 +28,7 @@ public:
 	void CreateInpuDevice();  
 	void SetInputType();  
 	void SetExclusionLevel(HWND hwnd);  
-	void Updata();  
+	void Update();
 
 	//押して瞬間  
 	static bool PushKey(uint32_t Key);  

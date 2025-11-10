@@ -1,6 +1,8 @@
 #include "GameManager.h"
 #include "GameScene/GameScene.h"
 #include "TitleScene/TitleScene.h"
+#include "ClearScene/ClearScene.h"
+#include "GameOverScene/GameOverScene.h"
 
 GameManager::GameManager()
 {
@@ -70,6 +72,8 @@ IScene* GameManager::CreateScene(int sceneID)
 	switch (sceneID) {
 	case SceneID::kTitle: return new TitleScene();
 	case SceneID::kGame:  return new GameScene();
+	case SceneID::kClear: return new ClearScene();
+	case SceneID::kGameOver: return new GameOverScene();
 	default: return nullptr;
 	}
 }

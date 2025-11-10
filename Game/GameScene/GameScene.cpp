@@ -44,7 +44,11 @@ void GameScene::Update() {
 		sceneChangeRequest_ = true;
 	}
 	if (playing_.get()->IsGoal()) {
-		nextSceneID_ = SceneID::kTitle;
+		nextSceneID_ = SceneID::kClear;
+		sceneChangeRequest_ = true;
+	}
+	if (playing_.get()->IsGameOver()) {
+		nextSceneID_ = SceneID::kGameOver;
 		sceneChangeRequest_ = true;
 	}
 
