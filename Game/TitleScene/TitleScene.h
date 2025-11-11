@@ -8,6 +8,7 @@ class TitleScene:public IScene
 private:
 
 	std::unique_ptr<Sprite> backImage_;
+	std::unique_ptr<Sprite> SpaceSprite_ = std::make_unique<Sprite>();
 
 	std::unique_ptr<SkyDome> skyDome_;
 
