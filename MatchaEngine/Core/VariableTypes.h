@@ -62,6 +62,7 @@ struct VertexData
 	Vector4 position;
 	Vector2 texcoord;
 	Vector3 normal;
+
 };
 
 struct LineVertexData {
@@ -99,5 +100,6 @@ struct Segment {
 	Vector3 origin; //始点
 	Vector3 diff;//終点への差分
 };
+
 
 

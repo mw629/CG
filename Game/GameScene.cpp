@@ -26,8 +26,11 @@ void GameScene::Initialize() {
 	camera_.get()->SetTransform(cameraTransform_);
 	camera_.get()->Update();
 
-
-
+	for (int i = 0; i < 10; i++) {
+		particleTransform_.push_back({ {1.0f,1.0f,1.0f},{0.0f + 0.1f * i,0.0f,0.0f,},{12.0f,0.0f,-50.0f} });
+	}
+	particle_ = std::make_unique<Particle>();
+	particle_.get()->Initialize(particleTransform_);
 }
 
 void GameScene::Update() {
@@ -36,10 +39,12 @@ void GameScene::Update() {
 	camera_.get()->Update();
 
 	
-
+	particle_->SettingWvp(camera_.get()->GetViewMatrix());
 
 }
 
 void GameScene::Draw() {
+
+	Draw::DrawParticle(particle_.get());
 
 }

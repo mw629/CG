@@ -9,6 +9,8 @@ private:
 	std::unique_ptr<Camera>camera_;
 	Transform cameraTransform_{ {1.0f,1.0f,1.0f},{0.0f,0.0f,0.0f,},{12.0f,0.0f,-50.0f} };
 
+	std::unique_ptr<Particle> particle_;
+	std::vector<Transform> particleTransform_;
 
 public:
 	~GameScene()override;

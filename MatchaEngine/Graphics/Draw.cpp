@@ -40,6 +40,18 @@ void Draw::DrawModel(Model* model)
 	commandList_->DrawInstanced(UINT(model->GetModelData().vertices.size()), 1, 0, 0);
 }
 
+void Draw::DrawParticle(Particle* particle)
+{
+	preDraw(particle->GetShader(), particle->GetBlend());
+	commandList_->IASetVertexBuffers(0, 1, particle->GetVertexBufferView());//VBVを設定
+	commandList_->SetGraphicsRootConstantBufferView(0, particle->GetMatrial()->GetMaterialResource()->GetGPUVirtualAddress());
+	for (int i = 0; i < particle->GetParticle(); i++) {
+		commandList_->SetGraphicsRootConstantBufferView(1, particle->GetWvpDataResource(i)->GetGPUVirtualAddress());
+		commandList_->SetGraphicsRootDescriptorTable(2, particle->GetTextureSrvHandleGPU());
+		commandList_->DrawInstanced(6, 1, 0, 0);
+	}
+}
+
 void Draw::DrawSprite(Sprite* sprite)
 {
 	preDraw(sprite->GetShader(), sprite->GetBlend());

@@ -17,6 +17,7 @@
 #include "GameObjects/DebugCamera.h"
 #include "GameObjects/MaterialFactory.h"
 #include "GameObjects/Model.h"
+#include "GameObjects/Particle.h"
 #include "GameObjects/Sphere.h"
 #include "GameObjects/Sprite.h"
 #include "GameObjects/Triangle.h"

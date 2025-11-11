@@ -141,6 +141,7 @@ void Engine::Setting()
 	Line::SetDevice(graphics.get()->GetDevice());
 	Grid::SetDevice(graphics.get()->GetDevice());
 	Model::SetDevice(graphics.get()->GetDevice());
+	Particle::SetDevice(graphics.get()->GetDevice());
 	Triangle::SetDevice(graphics.get()->GetDevice());
 	Sprite::SetDevice(graphics.get()->GetDevice());
 	Sphere::SetDevice(graphics.get()->GetDevice());
@@ -148,6 +149,7 @@ void Engine::Setting()
 	Line::SetScreenSize({ (float)kClientWidth_,(float)kClientHeight_ });
 	Grid::SetScreenSize({ (float)kClientWidth_,(float)kClientHeight_ });
 	Model::SetScreenSize({ (float)kClientWidth_,(float)kClientHeight_ });
+	Particle::SetScreenSize({ (float)kClientWidth_,(float)kClientHeight_ });
 	Triangle::SetScreenSize({ (float)kClientWidth_,(float)kClientHeight_ });
 	Sprite::SetScreenSize({ (float)kClientWidth_,(float)kClientHeight_ });
 	Sphere::SetScreenSize({ (float)kClientWidth_,(float)kClientHeight_ });

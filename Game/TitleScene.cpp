@@ -14,7 +14,7 @@ void TitleScene::Initialize()
 	int backImageHandle = texture.get()->CreateTexture("resources/nightSky.png");
 
 	backImage_ = std::make_unique<Sprite>();
-	backImage_->Initialize(texture->TextureData(backImageHandle));
+	backImage_->Initialize(backImageHandle);
 	backImage_->CreateSprite();
 	spritePos[0] = { 0.0f,0.0f };
 	spritePos[1] = { 1280.0f, 720.0f };

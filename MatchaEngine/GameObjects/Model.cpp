@@ -4,6 +4,7 @@
 #include "Resource/Load.h"
 #include <fstream>
 #include <sstream>
+#include "Particle.h"
 
 
 namespace {
@@ -39,7 +40,6 @@ Model::~Model()
 
 	delete material_;
 }
-
 
 
 void Model::Initialize(ModelData modelData)

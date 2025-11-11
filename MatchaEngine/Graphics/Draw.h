@@ -5,6 +5,7 @@
 #include <d3d12.h>  
 #include <cstdint>  
 #include "../GameObjects/Model.h"
+#include "../GameObjects/Particle.h"
 #include "../GameObjects/Sprite.h"
 #include "../GameObjects/Sphere.h"
 #include "../GameObjects/Triangle.h"
@@ -20,6 +21,8 @@ public:
 	static void preDraw(ShaderName shader, BlendMode blend);
 
 	static void DrawModel(Model* model);
+
+	static void DrawParticle(Particle* particle);
 
 	static void DrawSprite(Sprite* sprite);
 
