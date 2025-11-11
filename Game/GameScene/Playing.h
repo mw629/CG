@@ -41,7 +41,7 @@ public:
 
 	void ImGui();
 
-	void Initialize();
+	void Initialize(int stage);
 
 	void Update();
 

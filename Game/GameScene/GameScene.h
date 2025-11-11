@@ -37,6 +37,7 @@ public:
 
 	void ChangeState();
 
+	static void SetStage(int stage);
 
 };
 

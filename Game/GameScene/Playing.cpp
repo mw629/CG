@@ -34,7 +34,7 @@ void Playing::ImGui() {
 
 }
 
-void Playing::Initialize() {
+void Playing::Initialize(int stage) {
 
 	//生成
 	camera_ = std::make_unique<TrackingCamera>();
@@ -45,7 +45,7 @@ void Playing::Initialize() {
 	player_ = std::make_unique<Player>();
 
 	mapChipField_ = std::make_unique<MapChipField>();
-	mapChipField_.get()->SetMapData(MapManager::MapData(0));//stage数を引数に入れる
+	mapChipField_.get()->SetMapData(MapManager::MapData(stage));//stage数を引数に入れる
 
 	camera_.get()->Initialize(player_.get());
 	viewMatrix_ = camera_.get()->GetView();

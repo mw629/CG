@@ -2,6 +2,10 @@
 #include <imgui.h>
 #include "Map/MapManager.h"
 
+namespace {
+	int g_stage = 0;
+}
+
 GameScene::~GameScene()
 {
 }
@@ -29,7 +33,7 @@ void GameScene::Initialize() {
 	
 
 	playing_ = std::make_unique<Playing>();
-	playing_.get()->Initialize();
+	playing_.get()->Initialize(g_stage);
 
 	pause_ = std::make_unique<Pause>();
 	//pause_.get()->Initialize();
@@ -111,5 +115,10 @@ void GameScene::ChangeState()
 	default:
 		break;
 	}
+}
+
+void GameScene::SetStage(int stage)
+{
+	g_stage = stage;
 }
 

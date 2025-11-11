@@ -2,6 +2,7 @@
 #include <imgui.h>
 #include "../../Map/MapChipField.h"
 #include "../../Map/MapStruct.h"
+#include <numbers>
 
 void Player::ImGui() {
 
@@ -57,6 +58,17 @@ void Player::Update(Matrix4x4 viewMatrix) {
 	// ⑥設置状態の切り替え
 	SwitchingInstallationStatus(collisionMapInfo);
 
+	if (turnTimer_ > 0.0f) {
+		// 旋回タイマーを1/60秒だけカウントダウンする
+		turnTimer_ -= 1.0f / 60.0f;
+		// 左右の自キャラ角度テーブル
+		float destinationRotationYTable[] = { 0.0f,std::numbers::pi_v<float> };
+		// 状態に応じた角度を取得する
+		float destinationRotationY = destinationRotationYTable[static_cast<uint32_t>(lrDirection_)];
+		// 自キャラの角度を設定する
+		float t = 1.0f - (turnTimer_ / kTimeTurn);
+		transform_.rotate.y = Lerp(turnFirstRotationY_, destinationRotationY, t);
+	}
 
 	model_->SetTransform(transform_);
 	model_->SettingWvp(viewMatrix);
@@ -69,16 +81,19 @@ void Player::Draw() {
 void Player::MoveInput() {
 
 	velocity_.x = 0;
-	if (Input::PressKey(DIK_A)) {
-		velocity_.x += speed_*-1.0f;
-		lrDirection_ = LRDirection::kLeft;
+	if (Input::PressKey(DIK_A) || Input::PressKey(DIK_D)) {
+		if (Input::PressKey(DIK_A)) {
+			velocity_.x += speed_ * -1.0f;
+			lrDirection_ = LRDirection::kLeft;
+		}
+		if (Input::PressKey(DIK_D)) {
+			velocity_.x += speed_;
+			lrDirection_ = LRDirection::kRight;
+		}
+		// 回転開始処理
+		turnTimer_ = kTimeTurn;
+		turnFirstRotationY_ = transform_.rotate.y;
 	}
-	if (Input::PressKey(DIK_D)) {
-		velocity_.x += speed_;
-		lrDirection_ = LRDirection::kRight;
-	}
-
-
 
 	if (Input::PushKey(DIK_W) || GamePadInput::PushButton(XINPUT_GAMEPAD_A)) {
 		if (onGround_) {
@@ -103,7 +118,7 @@ void Player::MoveInput() {
 	}
 
 	isShot_ = false;
-	if (Input::PushKey(DIK_SPACE)||GamePadInput::PushButton(XINPUT_GAMEPAD_A)) {
+	if (Input::PushKey(DIK_SPACE) || GamePadInput::PushButton(XINPUT_GAMEPAD_RIGHT_SHOULDER)) {
 		isShot_ = true;
 	}
 
@@ -138,7 +153,7 @@ void Player::MapCollisionDetection(CollisionMapInfo& info) {
 
 	// Y軸の移動量のみを考慮して当たり判定を行う
 	CollisionMapInfo verticalInfo{};
-	
+
 	verticalInfo.velocity = Vector3(0.0f, info.velocity.y, 0.0f);
 
 	if (wallKick) {
@@ -463,13 +478,7 @@ void Player::contactWithAWall(const CollisionMapInfo& info) {
 	// 壁接触による減速
 	if (info.wallContactFlag) {
 		if (onGround_) {
-			if (lrDirection_ == LRDirection::kRight) {
-				lrDirection_ = LRDirection::kLeft;
-			}
-			else
-			{
-				lrDirection_ = LRDirection::kRight;
-			}
+
 		}
 		else {
 			wallKick = true;
