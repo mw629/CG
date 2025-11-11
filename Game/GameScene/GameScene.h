@@ -13,7 +13,7 @@ class GameScene :public IScene
 {
 private:
 
-	State gameState_;
+	State gameState_=State::kPlaying;
 
 	std::unique_ptr<Playing> playing_;
 	std::unique_ptr<Pause> pause_;
