@@ -1,5 +1,7 @@
 #include "GameScene.h"
+#ifdef USE_IMGUI
 #include <imgui.h>
+#endif
 #include "Map/MapManager.h"
 
 namespace {
@@ -30,14 +32,14 @@ void GameScene::Initialize() {
 
 	sceneID_ = SceneID::kGame;
 
-	
-
 	playing_ = std::make_unique<Playing>();
 	playing_.get()->Initialize(g_stage);
 
 	pause_ = std::make_unique<Pause>();
 	//pause_.get()->Initialize();
 
+	skyDome_ = std::make_unique<SkyDome>();
+	skyDome_.get()->Initialize();
 
 }
 
@@ -56,11 +58,16 @@ void GameScene::Update() {
 		sceneChangeRequest_ = true;
 	}
 
+
+
 	StateUpdate();
 
+	skyDome_.get()->Update();
 }
 
 void GameScene::Draw() {
+
+	skyDome_.get()->Draw();
 
 	StateDraw();
 }

@@ -1,9 +1,14 @@
 #include "TitleScene.h"
+
+#ifdef USE_IMGUI
 #include <imgui.h>
+#endif
 
 void TitleScene::ImGui()
 {
+#ifdef USE_IMGUI
 	ImGui::Text("TITLE");
+#endif
 }
 
 void TitleScene::Initialize()
@@ -44,7 +49,7 @@ void TitleScene::Update()
 	skyDome_.get()->Update();
 
 	if (Input::PushKey(DIK_SPACE)||GamePadInput::PressButton(XINPUT_GAMEPAD_A)) {
-		nextSceneID_ = SceneID::kGame;
+		nextSceneID_ = SceneID::kStageSelect;
 		sceneChangeRequest_ = true;
 	}
 }

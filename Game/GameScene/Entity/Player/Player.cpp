@@ -1,10 +1,15 @@
 #include "Player.h"
+
+#ifdef USE_IMGUI
 #include <imgui.h>
+#endif
+
 #include "../../Map/MapChipField.h"
 #include "../../Map/MapStruct.h"
 #include <numbers>
 
 void Player::ImGui() {
+#ifdef USE_IMGUI
 
 	if (ImGui::CollapsingHeader("Player")) {
 		ImGui::DragInt("HP", &HP_);
@@ -28,6 +33,7 @@ void Player::ImGui() {
 			ImGui::DragFloat("WallJumpAcceleration", &kWallJumpAcceleration);//壁キックの初速度
 		}
 	}
+#endif
 }
 
 void Player::Initialize(const Vector3& position, Matrix4x4 viewMatrix) {

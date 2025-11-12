@@ -5,6 +5,7 @@
 #include "Playing.h"
 #include "Pause.h"
 #include "System/GameState.h"
+#include "../SkyDome.h"
 
 
 
@@ -17,6 +18,8 @@ private:
 
 	std::unique_ptr<Playing> playing_;
 	std::unique_ptr<Pause> pause_;
+
+	std::unique_ptr<SkyDome> skyDome_;
 
 public:
 	~GameScene()override;

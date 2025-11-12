@@ -151,6 +151,7 @@ public:
 	AABB GetAABB();
 	Transform& GetTransform() { return transform_; };
 	Vector3& GetVelocity() { return velocity_; };
+	int GetHP() { return HP_; };
 	bool IsShot() { return isShot_; }
 	LRDirection GetDirection() { return lrDirection_; }
 

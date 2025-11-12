@@ -1,7 +1,9 @@
 #include "Playing.h"
 #include "Map/MapManager.h"
-#include <imgui.h>
 
+#ifdef USE_IMGUI
+#include <imgui.h>
+#endif
 
 
 
@@ -20,7 +22,7 @@ Playing::~Playing()
 }
 
 void Playing::ImGui() {
-
+#ifdef USE_IMGUI
 	camera_.get()->ImGui();
 	player_.get()->ImGui();
 
@@ -31,7 +33,7 @@ void Playing::ImGui() {
 		}
 	}
 	ImGui::DragInt("BulletNum", &bulletNum);
-
+#endif
 }
 
 void Playing::Initialize(int stage) {
@@ -65,6 +67,9 @@ void Playing::Initialize(int stage) {
 	}
 
 	EnemySpawn();
+
+	HP_ = std::make_unique<HP>();
+	HP_.get()->Initialize();
 }
 
 
@@ -73,6 +78,8 @@ void Playing::Update() {
 	CheckAllCollisions();
 
 	player_.get()->Update(viewMatrix_);
+	HP_.get()->Update(player_.get()->GetHP());
+
 
 	if (player_.get()->IsShot()) {
 		for (Bullet* bullet : bullet_) {
@@ -96,6 +103,8 @@ void Playing::Update() {
 	viewMatrix_ = camera_.get()->GetView();
 }
 void Playing::Draw() {
+
+	HP_.get()->Draw();
 
 	player_.get()->Draw();
 

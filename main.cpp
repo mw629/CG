@@ -59,10 +59,10 @@ int WINAPI WinMain(HINSTANCE, HINSTANCE, LPSTR, int) {
 
 
 		//ゲーム処理
-
+#ifdef USE_IMGUI
 		//ImGuiの内部コマンドを生成
 		ImGui::Render();
-
+#endif
 		sceneManager.get()->Draw();
 
 		engine.get()->PostDraw();

@@ -1,6 +1,7 @@
 #include "GameManager.h"
 #include "GameScene/GameScene.h"
 #include "TitleScene/TitleScene.h"
+#include "StageSelect/StageSelect.h"
 #include "ClearScene/ClearScene.h"
 #include "GameOverScene/GameOverScene.h"
 
@@ -15,7 +16,9 @@ GameManager::~GameManager()
 }
 
 void GameManager::ImGui() {
+#ifdef DEBUG
 	scene_->ImGui();
+#endif // DEBUG
 }
 
 void GameManager::Initialize() {
@@ -67,6 +70,7 @@ IScene* GameManager::CreateScene(int sceneID)
 {
 	switch (sceneID) {
 	case SceneID::kTitle: return new TitleScene();
+	case SceneID::kStageSelect: return new StageSelect();
 	case SceneID::kGame:  return new GameScene();
 	case SceneID::kClear: return new ClearScene();
 	case SceneID::kGameOver: return new GameOverScene();

@@ -10,6 +10,7 @@
 #include "Entity/Enemy/Enemy.h"
 #include "Entity/MapObject/Block.h"
 #include "Entity/MapObject/Goal.h"
+#include "Entity/UI/HP.h"
 
 
 
@@ -25,16 +26,19 @@ private:
 	std::unique_ptr<Block> mapchip_;
 
 	std::unique_ptr<Player> player_;
-	std::unique_ptr<Goal> goal_;
-
-
 	std::list<Bullet*> bullet_;
 	int bulletNum_ = 10;
 
+	std::unique_ptr<Goal> goal_;
+	
 	std::list<Enemy*> enemy_;
 
 	bool isGoal_;
 	bool isGameOver_;
+
+
+	std::unique_ptr<HP> HP_;
+
 
 public:
 	~Playing();

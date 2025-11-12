@@ -18,6 +18,7 @@ void GamePadInput::DrawImGui()
 	Vector3 leftStick = GetLeftStick();
 	Vector3 rightStick = GetRightStick();
 
+#ifdef USE_IMGUI
 	ImGui::Begin("Contoller");
 	ImGui::Checkbox("Press", &press);
 	ImGui::Checkbox("Trigger", &trigger);
@@ -28,6 +29,7 @@ void GamePadInput::DrawImGui()
 	ImGui::DragFloat3("LeftStick", &leftStick.x, 1.0f);
 	ImGui::DragFloat3("RightStick", &rightStick.x, 1.0f);
 	ImGui::End();
+#endif
 
 }
 

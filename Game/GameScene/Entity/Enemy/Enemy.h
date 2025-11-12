@@ -24,6 +24,10 @@ private:
 	float velocity_;
 
 
+	float moveSpeed_ = 0.05f; 
+	float moveRange_ = 0.3f;  
+	float moveTimer_ = 0.0f;
+
 public:
 
 	void Initialize(const Vector3& position,Matrix4x4 viewMatrix);

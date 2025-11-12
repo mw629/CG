@@ -6,6 +6,8 @@ ClearScene::~ClearScene()
 
 void ClearScene::ImGui()
 {
+#ifdef USE_IMGUI
+#endif
 }
 
 void ClearScene::Initialize()
@@ -30,10 +32,16 @@ void ClearScene::Initialize()
 	SpaceSprite_.get()->SetSize(spritePos[0], spritePos[1]);
 	SpaceSprite_->SettingWvp();
 
+	skyDome_ = std::make_unique<SkyDome>();
+	skyDome_.get()->Initialize();
+
 }
 
 void ClearScene::Update()
 {
+
+	skyDome_.get()->Update();
+
 	if (Input::PushKey(DIK_SPACE)) {
 		nextSceneID_ = SceneID::kTitle;
 		sceneChangeRequest_ = true;
@@ -42,6 +50,8 @@ void ClearScene::Update()
 
 void ClearScene::Draw()
 {
+	skyDome_.get()->Draw();
+
 	Draw::DrawSprite(sprite_.get());
 	Draw::DrawSprite(SpaceSprite_.get());
 }

@@ -3,15 +3,21 @@
 #include "TrackingCamera.h"
 #include "../Entity/Player/Player.h"
 #include <algorithm>
+
+#ifdef USE_IMGUI
 #include <imgui.h>
+#endif
 
 void TrackingCamera::ImGui()
 {
+#ifdef USE_IMGUI
+
 	if (ImGui::CollapsingHeader("Camera")) {
 		ImGui::DragFloat3("CameraPos", &transform_.translate.x);
 		ImGui::DragFloat3("CameraSize", &transform_.scale.x);
 		ImGui::DragFloat3("CameraRotate", &transform_.rotate.x);
 	}
+#endif
 }
 
 void TrackingCamera::Initialize(Player* player)

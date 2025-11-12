@@ -6,6 +6,8 @@ GameOverScene::~GameOverScene()
 
 void GameOverScene::ImGui()
 {
+#ifdef USE_IMGUI
+#endif
 }
 
 void GameOverScene::Initialize()
@@ -32,10 +34,17 @@ void GameOverScene::Initialize()
 	SpaceSprite_.get()->SetSize(spritePos[0], spritePos[1]);
 	SpaceSprite_->SettingWvp();
 
+
+	skyDome_ = std::make_unique<SkyDome>();
+	skyDome_.get()->Initialize();
+
 }
 
 void GameOverScene::Update()
 {
+
+	skyDome_.get()->Update();
+
 	if (Input::PushKey(DIK_SPACE)) {
 		nextSceneID_ = SceneID::kTitle;
 		sceneChangeRequest_ = true;
@@ -44,6 +53,8 @@ void GameOverScene::Update()
 
 void GameOverScene::Draw()
 {
+	skyDome_.get()->Draw();
+
 	Draw::DrawSprite(sprite_.get());
 	Draw::DrawSprite(SpaceSprite_.get());
 }
