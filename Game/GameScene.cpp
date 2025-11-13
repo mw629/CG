@@ -27,7 +27,7 @@ void GameScene::Initialize() {
 	camera_.get()->Update();
 
 	for (int i = 0; i < 10; i++) {
-		particleTransform_.push_back({ {1.0f,1.0f,1.0f},{0.0f + 0.1f * i,0.0f,0.0f,},{12.0f,0.0f,-50.0f} });
+		particleTransform_.push_back({ {1.0f,1.0f,1.0f},{0.0f ,0.0f,0.0f,},{0.0f + 0.1f * i,0.0f + 0.1f * i,0.0f} });
 	}
 	particle_ = std::make_unique<Particle>();
 	particle_.get()->Initialize(particleTransform_);
