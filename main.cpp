@@ -1,7 +1,7 @@
 #include "externals/imgui/imgui_impl_win32.h"
 
 #include "MatchaEngine/Engine.h"
-#include "Game/SceneManager.h"
+#include "Game/GameManager.h"
 
 #pragma comment(lib,"dxcompiler.lib")
 
@@ -35,7 +35,7 @@ int WINAPI WinMain(HINSTANCE, HINSTANCE, LPSTR, int) {
 	std::unique_ptr<Engine> engine = std::make_unique<Engine>(1280, 720);
 	engine.get()->Setting();
 
-	std::unique_ptr<SceneManager> sceneManager = std::make_unique<SceneManager>();
+	std::unique_ptr<GameManager> sceneManager = std::make_unique<GameManager>();
 	sceneManager.get()->Initialize();
 
 	//メインループ//
@@ -59,10 +59,10 @@ int WINAPI WinMain(HINSTANCE, HINSTANCE, LPSTR, int) {
 
 
 		//ゲーム処理
-
+#ifdef USE_IMGUI
 		//ImGuiの内部コマンドを生成
 		ImGui::Render();
-
+#endif
 		sceneManager.get()->Draw();
 
 		engine.get()->PostDraw();

@@ -8,8 +8,7 @@
 class GamePadInput
 {
 private:
-	XINPUT_STATE currentState_;
-	XINPUT_STATE prevState_;
+	
 	int deadZone_ = 8000;
 public:
 
@@ -51,12 +50,9 @@ public:
 	static float GetRightStickX();
 	static float GetRightStickY();
 
-	static float GetLeftStickOnceX();
-	static float GetLeftStickOnceY();
-	static float GetRightStickOnceX();
-	static float GetRightStickOnceY();
+	// コントローラーを振動させる（0〜65535）
+	static void SetVibration(WORD leftMotorSpeed, WORD rightMotorSpeed);
 
-	void SetPad();
 
 };
 

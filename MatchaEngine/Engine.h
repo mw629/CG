@@ -103,6 +103,8 @@ private:
 
 	ID3D12DescriptorHeap* descriptorHeeps[1];
 
+	static bool isEnd_;
+
 public:
 
 	~Engine();
@@ -124,5 +126,7 @@ public:
 
 	Input* GetInput() { return input.get(); }
 
+	static void SetEnd(bool isEnd) { isEnd_ = isEnd; }
+	static bool IsEnd() { return isEnd_; }
 };
 

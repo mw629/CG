@@ -18,6 +18,7 @@ void GamePadInput::DrawImGui()
 	Vector3 leftStick = GetLeftStick();
 	Vector3 rightStick = GetRightStick();
 
+#ifdef USE_IMGUI
 	ImGui::Begin("Contoller");
 	ImGui::Checkbox("Press", &press);
 	ImGui::Checkbox("Trigger", &trigger);
@@ -28,22 +29,23 @@ void GamePadInput::DrawImGui()
 	ImGui::DragFloat3("LeftStick", &leftStick.x, 1.0f);
 	ImGui::DragFloat3("RightStick", &rightStick.x, 1.0f);
 	ImGui::End();
+#endif
 
 }
 
 GamePadInput::GamePadInput()
 {
-	ZeroMemory(&currentState_, sizeof(XINPUT_STATE));
-	ZeroMemory(&prevState_, sizeof(XINPUT_STATE));
+	ZeroMemory(&currentState, sizeof(XINPUT_STATE));
+	ZeroMemory(&prevState, sizeof(XINPUT_STATE));
 }
 
 void GamePadInput::Update()
 {
-	prevState_ = currentState_;
-	ZeroMemory(&currentState_, sizeof(XINPUT_STATE));
-	XInputGetState(0, &currentState_); // プレイヤー1のコントローラー
-	SetPad();
+	prevState = currentState;
+	ZeroMemory(&currentState, sizeof(XINPUT_STATE));
+	XInputGetState(0, &currentState); // プレイヤー1のコントローラー
 }
+
 
 
 ///ボタンの入力///
@@ -96,70 +98,34 @@ float GamePadInput::GetLeftStickY()
 	return (std::abs(y) > deadZone) ? y / 32768.0f : 0.0f;
 }
 
-float GamePadInput::GetRightStickX() 
+float GamePadInput::GetRightStickX()
 {
 	SHORT x = currentState.Gamepad.sThumbRX;
 	return (std::abs(x) > deadZone) ? x / 32768.0f : 0.0f;
 }
 
-float GamePadInput::GetRightStickY() 
+float GamePadInput::GetRightStickY()
 {
 	SHORT y = currentState.Gamepad.sThumbRY;
 	return (std::abs(y) > deadZone) ? y / 32768.0f : 0.0f;
 }
 
-
-
-float GamePadInput::GetLeftStickOnceX()
+void GamePadInput::SetVibration(WORD leftMotorSpeed, WORD rightMotorSpeed)
 {
-	float now = currentState.Gamepad.sThumbLX / 32768.0f;
-	float prev = prevState.Gamepad.sThumbLX / 32768.0f;
-	const float threshold = 0.5f;
+	{
+		XINPUT_VIBRATION vibration;
+		ZeroMemory(&vibration, sizeof(XINPUT_VIBRATION));
 
-	if (prev <= threshold && now > threshold) return 1.0f;
-	if (prev >= -threshold && now < -threshold) return -1.0f;
-	return 0.0f;
+		// 左モーター（低周波）の速度を設定
+		// 0: 振動なし, 65535: 最大振動
+		vibration.wLeftMotorSpeed = leftMotorSpeed;
+
+		// 右モーター（高周波）の速度を設定
+		// 0: 振動なし, 65535: 最大振動
+		vibration.wRightMotorSpeed = rightMotorSpeed;
+
+		// プレイヤー1 (dwUserIndex=0) に振動状態を設定
+		// XInputSetStateが振動を設定するための関数
+		XInputSetState(0, &vibration);
+	}
 }
-
-float GamePadInput::GetLeftStickOnceY()
-{
-	float now = currentState.Gamepad.sThumbLY / 32768.0f;
-	float prev = prevState.Gamepad.sThumbLY / 32768.0f;
-	const float threshold = 0.5f;
-
-	if (prev <= threshold && now > threshold) return 1.0f;
-	if (prev >= -threshold && now < -threshold) return -1.0f;
-	return 0.0f;
-
-}
-
-float GamePadInput::GetRightStickOnceX()
-{
-	float now = currentState.Gamepad.sThumbRX / 32768.0f;
-	float prev = prevState.Gamepad.sThumbRX / 32768.0f;
-	const float threshold = 0.5f;
-
-	if (prev <= threshold && now > threshold) return 1.0f;
-	if (prev >= -threshold && now < -threshold) return -1.0f;
-	return 0.0f;
-}
-
-float GamePadInput::GetRightStickOnceY()
-{
-	float now = currentState.Gamepad.sThumbRY / 32768.0f;
-	float prev = prevState.Gamepad.sThumbRY / 32768.0f;
-	const float threshold = 0.5f;
-
-	if (prev <= threshold && now > threshold) return 1.0f;
-	if (prev >= -threshold && now < -threshold) return -1.0f;
-	return 0.0f;
-}
-
-
-void GamePadInput::SetPad()
-{
-	currentState= currentState_;
-	prevState= prevState_;
-	deadZone= deadZone_;
-}
-

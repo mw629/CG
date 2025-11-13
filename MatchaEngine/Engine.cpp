@@ -4,9 +4,16 @@
 #include <psapi.h>
 #include <iostream>
 
+#ifdef USE_IMGUI
 #include "../externals/imgui/imgui.h"
 #include "../externals/imgui/imgui_impl_dx12.h"
 #include "../externals/imgui/imgui_impl_win32.h"
+#endif
+
+#include <thread>
+#pragma comment(lib,"winmm.lib")
+
+bool Engine::isEnd_ = false;
 
 Engine::~Engine()
 {
@@ -18,9 +25,12 @@ Engine::Engine(int32_t kClientWidth, int32_t kClientHeight)
 	kClientWidth_ = kClientWidth;
 	kClientHeight_ = kClientHeight;
 
+	//時間の初期化
+	reference_ = std::chrono::steady_clock::now();
+
 	SetUnhandledExceptionFilter(ExportDump);
 	logStream = CurrentTimestamp();
-	
+
 	//DebugLayer//
 #ifdef _DEBUG
 	Microsoft::WRL::ComPtr<ID3D12Debug1> debugController = nullptr;
@@ -40,7 +50,7 @@ Engine::Engine(int32_t kClientWidth, int32_t kClientHeight)
 	viewportScissor = std::make_unique<ViewportScissor>(kClientWidth, kClientHeight);
 	//入力
 	input = std::make_unique<Input>();
-	gamePadInput= std::make_unique<GamePadInput>();
+	gamePadInput = std::make_unique<GamePadInput>();
 	//描画
 	debudCamera = std::make_unique<DebugCamera>();
 	depthStencil = std::make_unique<DepthStencil>();
@@ -57,6 +67,7 @@ void Engine::Setting()
 {
 
 	window.DrawWindow(kClientWidth_, kClientHeight_);
+	timeBeginPeriod(1);
 	input->Initialize(window.GetWc(), window.GetHwnd());
 
 	debudCamera->Initialize();
@@ -77,8 +88,7 @@ void Engine::Setting()
 		D3D12_MESSAGE_ID denyIds[] = {
 			//Windows11でのDXGIデバッグレイヤーとDX12デバッグレイヤーの相互作用バグによるエラーメッセージ
 			//https://stackoverflow.com/question/69805245/directx-12-application-is-crashing-in-windows--11
-			D3D12_MESSAGE_ID_RESOURCE_BARRIER_MISMATCHING_COMMAND_LIST_TYPE,
-		};
+			D3D12_MESSAGE_ID_RESOURCE_BARRIER_MISMATCHING_COMMAND_LIST_TYPE };
 		//抑制レベル
 		D3D12_MESSAGE_SEVERITY severities[] = { D3D12_MESSAGE_SEVERITY_INFO };
 		D3D12_INFO_QUEUE_FILTER filter{};
@@ -101,7 +111,7 @@ void Engine::Setting()
 
 	depthStencil->CreateDepthStencil(graphics->GetDevice(), kClientWidth_, kClientHeight_);
 
-	
+
 	graphicsPipelineState.get()->ALLPSOCreate(logStream, graphics.get()->GetDevice());
 
 	directinalLight = std::make_unique<DirectinalLight>();
@@ -114,6 +124,7 @@ void Engine::Setting()
 
 	descriptorHeeps[0] = { descriptorHeap->GetSrvDescriptorHeap() };
 
+#ifdef USE_IMGUI
 	IMGUI_CHECKVERSION();
 	ImGui::CreateContext();
 	ImGui::StyleColorsDark();
@@ -124,10 +135,12 @@ void Engine::Setting()
 		descriptorHeap->GetSrvDescriptorHeap(),
 		descriptorHeap->GetSrvDescriptorHeap()->GetCPUDescriptorHandleForHeapStart(),
 		descriptorHeap->GetSrvDescriptorHeap()->GetGPUDescriptorHandleForHeapStart());
+#endif
 
-	Draw::Initialize(command.get()->GetCommandList(),graphicsPipelineState.get(), directinalLight.get());
+	Audio::Initialize();
+
+	Draw::Initialize(command.get()->GetCommandList(), graphicsPipelineState.get(), directinalLight.get());
 	Texture::Initalize(graphics->GetDevice(), command->GetCommandList(), descriptorHeap.get(), textureLoader.get());
-	
 
 	Line::SetDevice(graphics.get()->GetDevice());
 	Grid::SetDevice(graphics.get()->GetDevice());
@@ -136,13 +149,22 @@ void Engine::Setting()
 	Sprite::SetDevice(graphics.get()->GetDevice());
 	Sphere::SetDevice(graphics.get()->GetDevice());
 
+	Line::SetScreenSize({ (float)kClientWidth_,(float)kClientHeight_ });
+	Grid::SetScreenSize({ (float)kClientWidth_,(float)kClientHeight_ });
+	Model::SetScreenSize({ (float)kClientWidth_,(float)kClientHeight_ });
+	Triangle::SetScreenSize({ (float)kClientWidth_,(float)kClientHeight_ });
+	Sprite::SetScreenSize({ (float)kClientWidth_,(float)kClientHeight_ });
+	Sphere::SetScreenSize({ (float)kClientWidth_,(float)kClientHeight_ });
+
 }
 
 
 void Engine::PostDraw()
 {
+#ifdef USE_IMGUI
 	//ImGuiの描画コマンド
 	ImGui_ImplDX12_RenderDrawData(ImGui::GetDrawData(), command->GetCommandList());
+#endif
 
 	//画面に描く処理はすべて終わり、画面に映すので、状態を遷移
 	//今回RenderTargetからPresentにする
@@ -151,9 +173,11 @@ void Engine::PostDraw()
 
 
 void Engine::NewFrame() {
+#ifdef USE_IMGUI
 	ImGui_ImplDX12_NewFrame();
 	ImGui_ImplWin32_NewFrame();
 	ImGui::NewFrame();
+#endif
 
 	//コマンドを積み込んで確定させる//
 	resourceBarrierHelper->Transition(command->GetCommandList(), swapChain.get());
@@ -168,17 +192,19 @@ void Engine::NewFrame() {
 	command->GetCommandList()->RSSetViewports(1, viewportScissor->GetViewport());//Viewportを設定
 	command->GetCommandList()->RSSetScissorRects(1, viewportScissor->GetScissorRect());//Sxirssorを設定
 
-	
 
-	input.get()->Updata();
+
+	input.get()->Update();
+
 	gamePadInput.get()->Update();
 }
 
 void Engine::EndFrame() {
-	
+
 	//コマンドリストの内容を確定させる。すべてのコマンドを積んでからCloseすること
 	hr_ = command->GetCommandList()->Close();
 	assert(SUCCEEDED(hr_));
+
 
 
 	//コマンドをキックする//
@@ -186,12 +212,16 @@ void Engine::EndFrame() {
 	//GPU2コマンドリストの実行を行わせる
 	ID3D12CommandList* commandLists[] = { command->GetCommandList() };
 	command->GetCommandQueue()->ExecuteCommandLists(1, commandLists);
+	
 	//GPUとOSに画面の交換を行うよう通知する
 	swapChain->GetSwapChain()->Present(1, 0);
 
 	gpuSyncManager.Signal(command.get()->GetCommandQueue());
 
 	gpuSyncManager.WaitForGpu();
+
+	UpdateFixFPS();
+
 
 	//次のフレーム用のコマンドを準備
 	hr_ = command->GetCommandAllocator()->Reset();
@@ -202,13 +232,37 @@ void Engine::EndFrame() {
 }
 
 void Engine::End() {
+
+	Audio::Finalize();
+#ifdef USE_IMGUI
 	//ImGuiの終了処理
 	ImGui_ImplDX12_Shutdown();
 	ImGui_ImplWin32_Shutdown();
 	ImGui::DestroyContext();
-	
+#endif
 	window.Finalize();
 }
+
+void Engine::UpdateFixFPS()
+{
+	const std::chrono::microseconds kMinTIme(uint64_t(1000000.0f / 60.0f));
+	const std::chrono::microseconds kMinCheckTIme(uint64_t(1000000.0f / 65.0f));
+
+	std::chrono::steady_clock::time_point now = std::chrono::steady_clock::now();
+
+	std::chrono::microseconds elapsed =
+		std::chrono::duration_cast<std::chrono::microseconds>(now - reference_);
+
+	//1/60秒立っていない場合
+	if (elapsed < kMinCheckTIme) {
+		while (std::chrono::steady_clock::now() - reference_ < kMinTIme)
+		{
+			std::this_thread::sleep_for(std::chrono::microseconds(1));
+		}
+	}
+	reference_ = std::chrono::steady_clock::now();
+}
+
 
 
 size_t Engine::GetProcessMemoryUsage() {
@@ -221,23 +275,25 @@ size_t Engine::GetProcessMemoryUsage() {
 
 void Engine::Debug()
 {
-#ifdef _DEBUG
+#ifdef USE_IMGUI
 
 	ImGui::Begin("Debug Info");
 
-	// フレームレート (FPS)
+	//フレームレート (FPS)
 	ImGui::Text("FPS: %.1f", ImGui::GetIO().Framerate);
 
 	// 1フレームあたりの時間 (ms)
-	ImGui::Text("Frame Time: %.3f ms", 1000.0f / ImGui::GetIO().Framerate);
+	//ImGui::Text("Frame Time: %.3f ms", 1000.0f / ImGui::GetIO().Framerate);
 
-	// 現在のフレーム数（自分でカウントする必要あり）
+	//現在のフレーム数（自分でカウントする必要あり）
 	static int frameCount = 0;
 	frameCount++;
 	ImGui::Text("Frame Count: %d", frameCount);
 
 	size_t mem = GetProcessMemoryUsage();
 	ImGui::Text("Memory Usage: %.2f MB", mem / (1024.0f * 1024.0f));
+
+	textureLoader.get()->Draw();
 
 	ImGui::End();
 

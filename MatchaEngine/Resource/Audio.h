@@ -27,6 +27,7 @@ private:
         BYTE* pBuffer = nullptr;
         unsigned int bufferSize = 0;
         IXAudio2SourceVoice* pSourceVoice = nullptr;
+        std::string filePath;
     };
 
     // 静的メンバ変数
@@ -52,5 +53,7 @@ public:
 
    
     static void Stop(int soundHandle);
+
+    static void SetPitch(int soundHandle, float pitch);
 
 };

@@ -35,6 +35,14 @@ void Audio::Finalize() {
 
 int Audio::Load(const std::string& filePath) {
  
+
+    for (int i = 0; i < sSoundData.size(); i++) {
+        if (sSoundData[i].filePath == filePath) {
+            return i; // 同じファイルなら再利用
+        }
+    }
+
+
     // 1. ソースリーダーの作成
     Microsoft::WRL::ComPtr<IMFSourceReader> pReader;
     std::wstring wFilePath(filePath.begin(), filePath.end());
@@ -89,6 +97,7 @@ int Audio::Load(const std::string& filePath) {
     CoTaskMemFree(pFormat); // WAVEFORMATEXを解放
     data.bufferSize = static_cast<UINT32>(mediaData.size());
     data.pBuffer = new BYTE[data.bufferSize];
+    data.filePath = filePath;
     memcpy(data.pBuffer, mediaData.data(), data.bufferSize);
 
     sSoundData.push_back(data);
@@ -149,5 +158,15 @@ void Audio::Stop(int soundHandle) {
         data.pSourceVoice->Stop();
         data.pSourceVoice->DestroyVoice();
         data.pSourceVoice = nullptr;
+    }
+}
+
+void Audio::SetPitch(int soundHandle, float pitch)
+{
+    if (soundHandle < 0 || soundHandle >= sSoundData.size()) return;
+
+    SoundData& data = sSoundData[soundHandle];
+    if (data.pSourceVoice) {
+        data.pSourceVoice->SetFrequencyRatio(pitch);
     }
 }
