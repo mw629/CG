@@ -12,7 +12,7 @@ class Model
 private:
 	ModelData modelData_{};
 	Transform transform_{};
-	MaterialFactory* material_{};
+	std::unique_ptr<MaterialFactory> material_{};
 	D3D12_GPU_DESCRIPTOR_HANDLE textureSrvHandleGPU_{};
 
 
@@ -48,7 +48,7 @@ public:
 	
 	void SetPos(Vector3 velocity) { transform_.translate = velocity; }
 	void SetAlive(bool flag) { isAlive = flag; }
-	void SetMaterialLighting(bool isActiv) { material_->SetMaterialLighting(isActiv); }
+	void SetMaterialLighting(bool isActiv) { material_.get()->SetMaterialLighting(isActiv); }
 	void SetTexture(D3D12_GPU_DESCRIPTOR_HANDLE textureSrvHandleGPU) { textureSrvHandleGPU_ = textureSrvHandleGPU; }
 
 	//getter
@@ -56,7 +56,7 @@ public:
 	Transform GetTransform() const { return transform_; }
 	
 	ModelData GetModelData() { return modelData_; }
-	MaterialFactory* GetMatrial() { return material_; }
+	MaterialFactory* GetMatrial() { return material_.get(); }
 	D3D12_GPU_DESCRIPTOR_HANDLE GetTextureSrvHandleGPU()const { return textureSrvHandleGPU_; }
 
 

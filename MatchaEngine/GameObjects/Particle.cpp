@@ -33,7 +33,7 @@ void Particle::Initialize(std::vector<Transform> transform)
 	std::unique_ptr<Texture> texture = std::make_unique<Texture>();
 	textureSrvHandleGPU_ = texture.get()->TextureData(texture.get()->CreateTexture("resources/uvChecker.png"));
 
-	material_ = new MaterialFactory();
+	material_ = std::make_unique<MaterialFactory>();
 	material_->CreateMatrial(device_, false);
 	CreateParticle();
 }
@@ -69,14 +69,14 @@ void Particle::CreateWVP()
 		Microsoft::WRL::ComPtr<ID3D12Resource>wvpDataResource;
 		TransformationMatrix* wvpData = nullptr;
 		//Sprite用ののTransformationMatrix用のリソースを作る。Matrix4x41つ分のサイズを用意する
-		wvpDataResource = GraphicsDevice::CreateBufferResource(device_, sizeof(TransformationMatrix));
+		wvpDataResource = GraphicsDevice::CreateBufferResource(device_, sizeof(TransformationMatrix)* particleNum_);
 		//データを書き込む
 		//書き込むためのアドレスを取得
 		wvpDataResource->Map(0, nullptr, reinterpret_cast<void**>(&wvpData));
 		//単位行列をかきこんでおく
 		wvpData->WVP = IdentityMatrix();
 		wvpData->World = IdentityMatrix();
-
+		
 		wvpDataResource_.push_back(wvpDataResource);
 		wvpData_.push_back(wvpData);
 	}

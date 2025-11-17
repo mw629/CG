@@ -14,6 +14,8 @@ public:
 
 	void CreateLineRootParameter(D3D12_ROOT_SIGNATURE_DESC& descriptionRootSignature);
 
+	void CreateParticleParameter(D3D12_ROOT_SIGNATURE_DESC& descriptionRootSignature);
+
 	void CreateRootParameter(D3D12_ROOT_SIGNATURE_DESC& descriptionRootSignature);
 };
 

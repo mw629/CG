@@ -11,7 +11,7 @@ class Particle
 private:
 
 	ModelData modelData_{};
-	MaterialFactory* material_{};
+	std::unique_ptr<MaterialFactory> material_;
 	D3D12_GPU_DESCRIPTOR_HANDLE textureSrvHandleGPU_{};
 
 
@@ -41,7 +41,7 @@ public:
 	void CreateParticle();
 
 	ModelData GetModelData() { return modelData_; }
-	MaterialFactory* GetMatrial() { return material_; }
+	MaterialFactory* GetMatrial() { return material_.get(); }
 	D3D12_GPU_DESCRIPTOR_HANDLE GetTextureSrvHandleGPU()const { return textureSrvHandleGPU_; }
 
 	D3D12_VERTEX_BUFFER_VIEW* GetVertexBufferView() { return &vertexBufferView_; }

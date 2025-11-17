@@ -38,7 +38,6 @@ Model::~Model()
 	vertexResource_.Reset();
 	wvpDataResource_.Reset();
 
-	delete material_;
 }
 
 
@@ -50,7 +49,7 @@ void Model::Initialize(ModelData modelData)
 	modelData_ = modelData;
 	textureSrvHandleGPU_ = texture->TextureData(modelData.textureIndex);
 
-	material_ = new MaterialFactory();
+	material_ = std::make_unique<MaterialFactory>();
 	material_->CreateMatrial(device_, false);
 }
 
