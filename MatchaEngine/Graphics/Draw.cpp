@@ -21,7 +21,7 @@ void Draw::preDraw(ShaderName shader, BlendMode blend)
 	//形状を設定。PSOに設定しているものとはまた別。同じものを設定すると考えておけばいい
 	commandList_->IASetPrimitiveTopology(D3D_PRIMITIVE_TOPOLOGY_TRIANGLELIST);
 	//RootSignatureを設定。POSに設定しているけど別途設定が必要
-	commandList_->SetGraphicsRootSignature(graphicsPipelineState_->GetRootSignature()->GetRootSignature());
+	commandList_->SetGraphicsRootSignature(graphicsPipelineState_->GetRootSignature(shader, blend)->GetRootSignature());
 
 	commandList_->SetGraphicsRootConstantBufferView(3, directinalLight_->GetDirectinalLightResource()->GetGPUVirtualAddress());
 

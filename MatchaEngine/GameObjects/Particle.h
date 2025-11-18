@@ -18,7 +18,7 @@ private:
 	Microsoft::WRL::ComPtr<ID3D12Resource> vertexResource_;
 	D3D12_VERTEX_BUFFER_VIEW vertexBufferView_{};
 	VertexData* vertexData_ = nullptr;
-	std::vector<Microsoft::WRL::ComPtr<ID3D12Resource> >wvpDataResource_;
+	Microsoft::WRL::ComPtr<ID3D12Resource> wvpDataResource_;
 	std::vector<TransformationMatrix*> wvpData_;
 
 	int particleNum_;
@@ -45,7 +45,7 @@ public:
 	D3D12_GPU_DESCRIPTOR_HANDLE GetTextureSrvHandleGPU()const { return textureSrvHandleGPU_; }
 
 	D3D12_VERTEX_BUFFER_VIEW* GetVertexBufferView() { return &vertexBufferView_; }
-	ID3D12Resource* GetWvpDataResource(int particleNum) { return wvpDataResource_[particleNum].Get(); }
+	ID3D12Resource* GetWvpDataResource(int particleNum) { return wvpDataResource_.Get(); }
 	TransformationMatrix* GetWvpData(int particleNum) { return wvpData_[particleNum]; }
 
 	int GetParticle() { return particleNum_; }

@@ -28,6 +28,7 @@ void GameScene::Initialize() {
 	for (int i = 0; i < 10; i++) {
 		particleTransform_.push_back({ {1.0f,1.0f,1.0f},{0.0f ,0.0f,0.0f,},{0.0f + 0.1f * i,0.0f + 0.1f * i,0.0f} });
 	}
+
 	particle_.get()->Initialize(particleTransform_);
 
 	ModelData modelData = LoadObjFile("resources/Player", "Player.obj");

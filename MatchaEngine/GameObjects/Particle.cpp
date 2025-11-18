@@ -49,38 +49,38 @@ void Particle::CreateVertexData()
 	modelData_.vertices.push_back({ .position = {  1.0f, -1.0f, 0.0f, 1.0f }, .texcoord = {1.0f,1.0f}, .normal = {0.0f,0.0f,1.0f} }); // 右下
 
 	//頂点リソースを作る
-	vertexResource_ = GraphicsDevice::CreateBufferResource(device_, sizeof(VertexData) * modelData_.vertices.size());
+	vertexResource_ = GraphicsDevice::CreateBufferResource(device_, sizeof(VertexData) * 6);
 	//頂点バッファービューを作成する
 	//リソースの先頭アドレスから使う
 	vertexBufferView_.BufferLocation = vertexResource_->GetGPUVirtualAddress();
 	//使用するリソースのサイズは頂点6つ分のサイズ
-	vertexBufferView_.SizeInBytes = static_cast<UINT>(sizeof(VertexData) * modelData_.vertices.size());
+	vertexBufferView_.SizeInBytes = static_cast<UINT>(sizeof(VertexData) * 6);
 	//1頂点当たりのサイズ
 	vertexBufferView_.StrideInBytes = sizeof(VertexData);
 	//頂点リソースにデータを書き込む
 	vertexResource_->Map(0, nullptr, reinterpret_cast<void**>(&vertexData_));
-	std::memcpy(vertexData_, modelData_.vertices.data(), sizeof(VertexData) * modelData_.vertices.size());
+	std::memcpy(vertexData_, modelData_.vertices.data(), sizeof(VertexData) * 6);
 }
 
 
 void Particle::CreateWVP()
 {
-	
-		Microsoft::WRL::ComPtr<ID3D12Resource>wvpDataResource;
-		TransformationMatrix* wvpData = nullptr;
-		//Sprite用ののTransformationMatrix用のリソースを作る。Matrix4x41つ分のサイズを用意する
-		wvpDataResource = GraphicsDevice::CreateBufferResource(device_, sizeof(TransformationMatrix)* particleNum_);
-		//データを書き込む
-		//書き込むためのアドレスを取得
-		wvpDataResource->Map(0, nullptr, reinterpret_cast<void**>(&wvpData));
-		//単位行列をかきこんでおく
+
+	TransformationMatrix* wvpData = nullptr;
+	//Sprite用ののTransformationMatrix用のリソースを作る。Matrix4x41つ分のサイズを用意する
+	wvpDataResource_ = GraphicsDevice::CreateBufferResource(device_, sizeof(TransformationMatrix) * particleNum_);
+	//データを書き込む
+	//書き込むためのアドレスを取得
+	wvpDataResource_->Map(0, nullptr, reinterpret_cast<void**>(&wvpData));
+	//単位行列をかきこんでおく
+	for (int i = 0; i < particleNum_; i++) {
 		wvpData->WVP = IdentityMatrix();
 		wvpData->World = IdentityMatrix();
-		
-		wvpDataResource_.push_back(wvpDataResource);
 		wvpData_.push_back(wvpData);
 	}
+
 }
+
 
 
 void Particle::CreateParticle()
@@ -95,7 +95,7 @@ void Particle::SettingWvp(Matrix4x4 viewMatrix)
 		Matrix4x4 projectionMatri = MakePerspectiveFovMatrix(0.45f, float(kClientWidth) / float(kClientHeight), 0.1f, 100.0f);
 		Matrix4x4 worldMatrixObj = MakeAffineMatrix(transform_[i].translate, transform_[i].scale, transform_[i].rotate);
 		Matrix4x4 worldViewProjectionMatrixObj = MultiplyMatrix4x4(worldMatrixObj, MultiplyMatrix4x4(viewMatrix, projectionMatri));
-		*wvpData_[i] = {worldViewProjectionMatrixObj,worldMatrixObj};
+		*wvpData_[i] = { worldViewProjectionMatrixObj,worldMatrixObj };
 	}
 }
 
