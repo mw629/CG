@@ -51,6 +51,7 @@ void Model::Initialize(ModelData modelData)
 
 	material_ = std::make_unique<MaterialFactory>();
 	material_->CreateMatrial(device_, false);
+	CreateModel();
 }
 
 

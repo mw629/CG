@@ -21,7 +21,6 @@ void GameScene::Initialize() {
 	
 	sceneID_ = SceneID::Game;
 
-	camera_ = std::make_unique<Camera>();
 	camera_.get()->Initialize();
 	camera_.get()->SetTransform(cameraTransform_);
 	camera_.get()->Update();
@@ -29,8 +28,12 @@ void GameScene::Initialize() {
 	for (int i = 0; i < 10; i++) {
 		particleTransform_.push_back({ {1.0f,1.0f,1.0f},{0.0f ,0.0f,0.0f,},{0.0f + 0.1f * i,0.0f + 0.1f * i,0.0f} });
 	}
-	particle_ = std::make_unique<Particle>();
 	particle_.get()->Initialize(particleTransform_);
+
+	ModelData modelData = LoadObjFile("resources/Player", "Player.obj");
+
+	model_.get()->Initialize(modelData);
+	model_.get()->SetTransform(modelTransform_);
 }
 
 void GameScene::Update() {
@@ -38,13 +41,13 @@ void GameScene::Update() {
 	camera_.get()->SetTransform(cameraTransform_);
 	camera_.get()->Update();
 
-	
+	model_->SettingWvp(camera_.get()->GetViewMatrix());
 	particle_->SettingWvp(camera_.get()->GetViewMatrix());
 
 }
 
 void GameScene::Draw() {
-
+	Draw::DrawModel(model_.get());
 	Draw::DrawParticle(particle_.get());
-
+	
 }

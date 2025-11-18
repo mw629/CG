@@ -65,7 +65,7 @@ void Particle::CreateVertexData()
 
 void Particle::CreateWVP()
 {
-	for (int i = 0; i < particleNum_; i++) {
+	
 		Microsoft::WRL::ComPtr<ID3D12Resource>wvpDataResource;
 		TransformationMatrix* wvpData = nullptr;
 		//Sprite用ののTransformationMatrix用のリソースを作る。Matrix4x41つ分のサイズを用意する
