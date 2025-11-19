@@ -11,7 +11,6 @@ private:
 	D3D12_ROOT_PARAMETER lineRootParameter[1] = {};
 
 public:
-	void CreateDescriptorRange();
 
 	void CreateRootParameter(D3D12_ROOT_SIGNATURE_DESC& descriptionRootSignature,ShaderName shader);
 

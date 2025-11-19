@@ -14,6 +14,7 @@ enum BlendMode {
 
 enum ShaderName {
 	ObjectShader,
+	ParticleShader,
 	LineShader,
 
 	ShaderNum,
