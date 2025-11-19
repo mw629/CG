@@ -6,11 +6,11 @@
 #include "Map/MapChipField.h"
 
 #include "Entity/Player/Player.h"
-#include "Entity/Player/Bullet.h"
+#include "Entity/Player/Bullet/NormalBullet.h"
 #include "Entity/Enemy/Enemy.h"
 #include "Entity/MapObject/Block.h"
 #include "Entity/MapObject/Goal.h"
-#include "Entity/UI/HP.h"
+#include "UI/HP.h"
 
 
 

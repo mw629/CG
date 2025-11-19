@@ -1,29 +1,18 @@
 #pragma once
 #include <memory>
 #include <Engine.h>
+#include "../Entity.h"
 
 class MapChipField;
 class Goal;
 class Enemy;
 
-enum class LRDirection {
-	kRight,
-	kLeft,
-};
 
-class Player
+class Player : public Entity
 {
 private:
 
 #pragma region enum
-
-	enum Corner {
-		kRightBottom, // 右下
-		kLeftBottom,  // 左下
-		kRightTop,    // 右上
-		kLeftTop,     // 左上
-		kNumCorner    // 要素数
-	};
 
 	enum class Behavior {
 		kUnknown, // 変更リクエストなし
@@ -39,32 +28,9 @@ private:
 
 #pragma endregion
 
-#pragma region Playerのデータ
-	std::unique_ptr<Model> model_;
-	Transform transform_ = { {1.0f,1.0f,1.0f},{0.0f,0.0f,0.0f} ,{0.0f,0.0f,0.0f} };
-	// キャラクターの当たり判定サイズ
-	float kWidth = 0.9f;
-	float kHeight = 0.9f;
-	// 向き
-	LRDirection lrDirection_ = LRDirection::kRight;
-#pragma endregion
 
-#pragma region 構造体
-	// マップとの当たり判定情報
-	struct CollisionMapInfo {
-		bool ceilingCollisionFlag = false; // 天井衝突フラグ
-		bool landingFlag = false;          // 着地フラグ
-		bool wallContactFlag = false;      // 壁接触フラグ
-		Vector3 velocity;                  // 移動量
-	};
-#pragma endregion
-
-	int f = 0;
-	int a=0;
 
 	int HP_ = 3;
-
-	Vector3 velocity_ = { 0.0f,0.0f,0.0f };
 	float speed_ = 0.1f;
 
 	bool isShot_;
@@ -74,7 +40,7 @@ private:
 	float invincibleFream = 0;
 
 
-	
+
 
 	// 固定の加速度
 	static inline const float kAcceleration = 0.9f;
@@ -82,9 +48,9 @@ private:
 	static inline const float kAttenuation = 0.08f;
 	// 最大速度制限
 	static inline const float kLimitRunSpeed = 0.1f;
-	
-	// 設置状態フラグ
-	bool onGround_ = true;
+
+
+
 	// 重力加速度(下方向)
 	float kGravityAccleration = 0.7f;
 	// 最大落下速度(下方向)
@@ -92,19 +58,10 @@ private:
 	//壁との衝突時の摩擦係数
 	float wallFrictio = 0.3f;
 	// ジャンプ初速(上方向)
-	float kJumpAcceleration = 0.25f;  
-	// 接地フラグ
-	bool landing = false;
+	float kJumpAcceleration = 0.25f;
+	
 	//ダブルジャンプのフラグ
-	bool doubleJump=false;
-	//壁キックの初速度
-	float kWallJumpAcceleration = 0.3f;
-	//壁ジャンプ可能フラグ
-	bool wallKick = false;
-	//壁ジャンプ中のフラグ
-	bool isWallJumping = false;
-	// マップチップによるフィールド
-	MapChipField* mapChipField_ = nullptr;
+	bool doubleJump = false;
 
 
 #pragma region Animetion
@@ -128,37 +85,21 @@ public:
 	//入力処理
 	void MoveInput();
 
-#pragma region 当たり判定
-	// マップ衝突判定
-	void MapCollisionDetection(CollisionMapInfo& info);
-	void MapCollisionDetectionUp(CollisionMapInfo& info);
-	void MapCollisionDetectionDown(CollisionMapInfo& info);
-	void MapCollisionDetectionLeft(CollisionMapInfo& info);
-	void MapCollisionDetectionRight(CollisionMapInfo& info);
-	// 指定した角の座標を得る
-	Vector3 CornerPosition(const Vector3& center, Corner corner);
-	// 天井に接触しているときの処理
-	void touchingTheCeiling(const CollisionMapInfo& info);
-	// 設置状態の切り替え処理
-	void SwitchingInstallationStatus(const CollisionMapInfo& info);
-	// 壁に接触している場合の処理
-	void contactWithAWall(const CollisionMapInfo& info);
-#pragma endregion
+
+	void HitWall()override;
+	void OnGround()override;
 
 	void OnCollision(const Goal* goal);
 	void OnCollision(const Enemy* enemy);
 
-	AABB GetAABB();
-	Transform& GetTransform() { return transform_; };
 	Vector3& GetVelocity() { return velocity_; };
 	int GetHP() { return HP_; };
 	bool IsShot() { return isShot_; }
-	LRDirection GetDirection() { return lrDirection_; }
 
 	// デスフラグのgetter
 	bool IsDead() const { return isDead_; };
 	void SetDead(bool flag) { isDead_ = flag; };
-	void SetMapChipField(MapChipField* mapChipField) { mapChipField_ = mapChipField; };
-	
+
+
 };
 

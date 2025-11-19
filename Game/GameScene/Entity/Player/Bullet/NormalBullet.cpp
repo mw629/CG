@@ -1,38 +1,40 @@
-#include "Bullet.h"
-#include "Player.h"
+#include "NormalBullet.h"
+#include "../Player.h"
 
-
-void Bullet::ImGui() {
-
-}
-
-void Bullet::Initialize() {
-
+void NormalBullet::Initialize(MapChipField* mapChipField)
+{
 	ModelData modelData = LoadObjFile("resources/Bullet", "Bullet.obj");
 	model_ = std::make_unique<Model>();
 	model_->Initialize(modelData);
+	SetMapChipField(mapChipField);
+
+	// キャラクターの当たり判定サイズ
+	kWidth = 0.8f;
+	kHeight = 0.8f;
 }
 
-void Bullet::Update(Matrix4x4 viewMatrix) {
-
+void NormalBullet::Update(Matrix4x4 viewMatrix)
+{
 	fream_ -= 1.0f / 60.0f;
 
 	if (fream_ < 0.0f) {
 		isActiv_ = false;
 	}
-	transform_.translate += velocity_;
+
+	MapCollision();
 
 	model_->SetTransform(transform_);
 	model_->SettingWvp(viewMatrix);
 }
 
-void Bullet::Draw() {
+void NormalBullet::Draw()
+{
 	if (isActiv_) {
 		Draw::DrawModel(model_.get());
 	}
 }
 
-void Bullet::IsShot(Player* player)
+void NormalBullet::IsShot(Player* player)
 {
 	transform_.translate = player->GetTransform().translate;
 	fream_ = 1.0f;
@@ -42,25 +44,19 @@ void Bullet::IsShot(Player* player)
 	else {
 		velocity_.x = speed_ / 10.0f;
 	}
+	velocity_.y = 0.0f;  // Y方向の速度を初期化
 	isActiv_ = true;
 }
 
-void Bullet::OnCollision(const Enemy* enemy)
+void NormalBullet::HitWall()
+{
+	isActiv_ = false;
+}
+
+void NormalBullet::OnCollision(const Enemy* enemy)
 {
 	(enemy);
 	if (isActiv_) {
 		isActiv_ = false;
 	}
-}
-
-
-
-AABB Bullet::GetAABB()
-{
-	Vector3 worldPos = transform_.translate;
-	AABB aabb;
-	aabb.min = { worldPos.x - size_.x / 2.0f, worldPos.y - size_.y / 2.0f, worldPos.z - size_.x / 2.0f };
-	aabb.max = { worldPos.x + size_.x / 2.0f, worldPos.y + size_.y / 2.0f, worldPos.z + size_.x / 2.0f };
-
-	return aabb;
 }

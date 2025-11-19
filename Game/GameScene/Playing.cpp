@@ -49,9 +49,9 @@ void Playing::Initialize(int stage) {
 	mapChipField_ = std::make_unique<MapChipField>();
 	mapChipField_.get()->SetMapData(MapManager::MapData(stage));//stage数を引数に入れる
 
+	//初期化
 	camera_.get()->Initialize(player_.get());
 	viewMatrix_ = camera_.get()->GetView();
-
 
 	mapchip_.get()->Initialize(mapChipField_.get(), viewMatrix_);
 
@@ -61,8 +61,8 @@ void Playing::Initialize(int stage) {
 	goal_.get()->Initialize(mapChipField_.get()->GetGoalPosition(), viewMatrix_);
 
 	for (int i = 0; i < bulletNum_; i++) {
-		Bullet *newBullet = new Bullet();
-		newBullet->Initialize();
+		Bullet *newBullet = new NormalBullet();
+		newBullet->Initialize(mapChipField_.get());
 		bullet_.push_back(newBullet);
 	}
 
@@ -162,12 +162,13 @@ void Playing::CheckAllCollisions() {
 	}
 
 	for (Bullet* bullet : bullet_) {
+		
 		aabb1 = bullet->GetAABB();
-		if (!bullet->IsActiv()) {
-			continue;
-		}
 		for (Enemy* enemy : enemy_) {
 			if (!enemy->IsActive()) {
+				continue;
+			}
+			if (!bullet->IsActiv()) {
 				continue;
 			}
 			aabb2 = enemy->GetAABB();

@@ -148,7 +148,8 @@ copy "$(WindowsSdkDir)bin\$(TargetPlatformVersion)\x64\dxil.dll" "$(TargetDir)dx
   <ItemGroup>
     <ClCompile Include="Game\GameOverScene\GameOverScene.cpp" />
     <ClCompile Include="Game\ClearScene\ClearScene.cpp" />
-    <ClCompile Include="Game\GameScene\Entity\Player\Bullet.cpp" />
+    <ClCompile Include="Game\GameScene\Entity\Entity.cpp" />
+    <ClCompile Include="Game\GameScene\Entity\Player\Bullet\Bullet.cpp" />
     <ClCompile Include="Game\GameScene\Entity\Enemy\Enemy.cpp" />
     <ClCompile Include="Game\Direction\Fade.cpp" />
     <ClCompile Include="Game\GameScene\Entity\MapObject\Block.h.cpp" />
@@ -156,7 +157,7 @@ copy "$(WindowsSdkDir)bin\$(TargetPlatformVersion)\x64\dxil.dll" "$(TargetDir)dx
     <ClCompile Include="Game\GameScene\Map\MapManager.cpp" />
     <ClCompile Include="Game\GameScene\Entity\MapObject\Goal.cpp" />
     <ClCompile Include="Game\SkyDome.cpp" />
-    <ClCompile Include="Game\GameScene\Entity\UI\HP.cpp" />
+    <ClCompile Include="Game\GameScene\UI\HP.cpp" />
     <ClCompile Include="MatchaEngine\GameObjects\Camera.cpp" />
     <ClCompile Include="Game\GameScene\GameScene.cpp" />
     <ClCompile Include="MatchaEngine\Input\GamePadInput.cpp" />
@@ -232,6 +233,7 @@ copy "$(WindowsSdkDir)bin\$(TargetPlatformVersion)\x64\dxil.dll" "$(TargetDir)dx
     <ClCompile Include="Game\GameScene\Pause.cpp" />
     <ClCompile Include="Game\GameScene\System\TrackingCamera.cpp" />
     <ClCompile Include="Game\StageSelect\StageSelect.cpp" />
+    <ClCompile Include="Game\GameScene\Entity\Player\Bullet\NormalBullet.cpp" />
   </ItemGroup>
   <ItemGroup>
     <FxCompile Include="resources\Shader\Line.PS.hlsl">
@@ -268,9 +270,10 @@ copy "$(WindowsSdkDir)bin\$(TargetPlatformVersion)\x64\dxil.dll" "$(TargetDir)dx
     </FxCompile>
   </ItemGroup>
   <ItemGroup>
+    <ClInclude Include="Game\GameScene\Entity\Entity.h" />
     <ClInclude Include="Game\GameOverScene\GameOverScene.h" />
     <ClInclude Include="Game\ClearScene\ClearScene.h" />
-    <ClInclude Include="Game\GameScene\Entity\Player\Bullet.h" />
+    <ClInclude Include="Game\GameScene\Entity\Player\Bullet\Bullet.h" />
     <ClInclude Include="Game\GameScene\Entity\Enemy\Enemy.h" />
     <ClInclude Include="Game\Direction\Fade.h" />
     <ClInclude Include="Game\GameScene\System\GameState.h" />
@@ -281,7 +284,7 @@ copy "$(WindowsSdkDir)bin\$(TargetPlatformVersion)\x64\dxil.dll" "$(TargetDir)dx
     <ClInclude Include="Game\GameScene\Map\MapStruct.h" />
     <ClInclude Include="Game\GameScene\Entity\MapObject\Goal.h" />
     <ClInclude Include="Game\SkyDome.h" />
-    <ClInclude Include="Game\GameScene\Entity\UI\HP.h" />
+    <ClInclude Include="Game\GameScene\UI\HP.h" />
     <ClInclude Include="MatchaEngine\GameObjects\Camera.h" />
     <ClInclude Include="Game\GameScene\GameScene.h" />
     <ClInclude Include="MatchaEngine\Core\VariableTypes\Matrix4x4.h" />
@@ -347,6 +350,7 @@ copy "$(WindowsSdkDir)bin\$(TargetPlatformVersion)\x64\dxil.dll" "$(TargetDir)dx
     <ClInclude Include="Game\GameScene\Pause.h" />
     <ClInclude Include="Game\GameScene\System\TrackingCamera.h" />
     <ClInclude Include="Game\StageSelect\StageSelect.h" />
+    <ClInclude Include="Game\GameScene\Entity\Player\Bullet\NormalBullet.h" />
   </ItemGroup>
   <ItemGroup>
     <Text Include="externals\imgui\LICENSE.txt" />

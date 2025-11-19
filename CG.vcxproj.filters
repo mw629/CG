@@ -240,7 +240,7 @@
     <ClCompile Include="Game\GameScene\Pause.cpp">
       <Filter>ソース ファイル</Filter>
     </ClCompile>
-    <ClCompile Include="Game\GameScene\Entity\Player\Bullet.cpp">
+    <ClCompile Include="Game\GameScene\Entity\Player\Bullet\Bullet.cpp">
       <Filter>ソース ファイル</Filter>
     </ClCompile>
     <ClCompile Include="Game\GameScene\Entity\MapObject\Goal.cpp">
@@ -261,7 +261,13 @@
     <ClCompile Include="Game\SkyDome.cpp">
       <Filter>ソース ファイル</Filter>
     </ClCompile>
-    <ClCompile Include="Game\GameScene\Entity\UI\HP.cpp">
+    <ClCompile Include="Game\GameScene\UI\HP.cpp">
+      <Filter>ソース ファイル</Filter>
+    </ClCompile>
+    <ClCompile Include="Game\GameScene\Entity\Entity.cpp">
+      <Filter>ソース ファイル</Filter>
+    </ClCompile>
+    <ClCompile Include="Game\GameScene\Entity\Player\Bullet\NormalBullet.cpp">
       <Filter>ソース ファイル</Filter>
     </ClCompile>
   </ItemGroup>
@@ -493,7 +499,7 @@
     <ClInclude Include="Game\GameScene\Pause.h">
       <Filter>ヘッダー ファイル</Filter>
     </ClInclude>
-    <ClInclude Include="Game\GameScene\Entity\Player\Bullet.h">
+    <ClInclude Include="Game\GameScene\Entity\Player\Bullet\Bullet.h">
       <Filter>ヘッダー ファイル</Filter>
     </ClInclude>
     <ClInclude Include="Game\GameScene\Entity\MapObject\Goal.h">
@@ -514,7 +520,13 @@
     <ClInclude Include="Game\SkyDome.h">
       <Filter>ヘッダー ファイル</Filter>
     </ClInclude>
-    <ClInclude Include="Game\GameScene\Entity\UI\HP.h">
+    <ClInclude Include="Game\GameScene\UI\HP.h">
+      <Filter>ヘッダー ファイル</Filter>
+    </ClInclude>
+    <ClInclude Include="Game\GameScene\Entity\Entity.h">
+      <Filter>ヘッダー ファイル</Filter>
+    </ClInclude>
+    <ClInclude Include="Game\GameScene\Entity\Player\Bullet\NormalBullet.h">
       <Filter>ヘッダー ファイル</Filter>
     </ClInclude>
   </ItemGroup>
