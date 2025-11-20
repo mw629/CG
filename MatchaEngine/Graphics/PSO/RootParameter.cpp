@@ -52,23 +52,31 @@ void RootParameter::CreateOBJRootParameter(D3D12_ROOT_SIGNATURE_DESC& descriptio
 
 void RootParameter::CreateParticleParameter(D3D12_ROOT_SIGNATURE_DESC& descriptionRootSignature)
 {
-	descriptorRange_[0].BaseShaderRegister = 0;//0から始まる
-	descriptorRange_[0].NumDescriptors = 1;//1から始まる
-	descriptorRange_[0].RangeType = D3D12_DESCRIPTOR_RANGE_TYPE_SRV;//SRVを使う
-	descriptorRange_[0].OffsetInDescriptorsFromTableStart = D3D12_DESCRIPTOR_RANGE_OFFSET_APPEND;//Offsetを自動計算
+	descriptorRange_[0].RangeType = D3D12_DESCRIPTOR_RANGE_TYPE_SRV;
+	descriptorRange_[0].BaseShaderRegister = 0; // PS用 t0
+	descriptorRange_[0].NumDescriptors = 1;
+	descriptorRange_[0].OffsetInDescriptorsFromTableStart = D3D12_DESCRIPTOR_RANGE_OFFSET_APPEND;
 
-	rootParameter[1].ParameterType = D3D12_ROOT_PARAMETER_TYPE_DESCRIPTOR_TABLE;//DescriptorTadleを使う
-	rootParameter[1].ShaderVisibility = D3D12_SHADER_VISIBILITY_VERTEX;//VertexShaderで行う
-	rootParameter[1].DescriptorTable.pDescriptorRanges = descriptorRange_; //Tableの中身の配列を配列を指定
-	rootParameter[1].DescriptorTable.NumDescriptorRanges = _countof(descriptorRange_);//Tableで利用する数
 
-	rootParameter[2].ParameterType = D3D12_ROOT_PARAMETER_TYPE_CBV;//CBVを使う
-	rootParameter[2].ShaderVisibility = D3D12_SHADER_VISIBILITY_PIXEL;//VertexShaderで行う
-	rootParameter[2].Descriptor.ShaderRegister = 1;//レジスタ番号1とバインド
+	// CBV
+	rootParameter[0].ParameterType = D3D12_ROOT_PARAMETER_TYPE_CBV;
+	rootParameter[0].ShaderVisibility = D3D12_SHADER_VISIBILITY_ALL;
+	rootParameter[0].Descriptor.ShaderRegister = 0;
 
-	descriptionRootSignature.pParameters = rootParameter;//ルートパラメータ配列へのポインタ
-	descriptionRootSignature.NumParameters = 2;//配列の長さ
+	// VS で使う SRV
+	rootParameter[1].ParameterType = D3D12_ROOT_PARAMETER_TYPE_DESCRIPTOR_TABLE;
+	rootParameter[1].ShaderVisibility = D3D12_SHADER_VISIBILITY_VERTEX;
+	rootParameter[1].DescriptorTable.pDescriptorRanges = &descriptorRange_[0];
+	rootParameter[1].DescriptorTable.NumDescriptorRanges = 1;
 
+	// PS で使う SRV
+	rootParameter[2].ParameterType = D3D12_ROOT_PARAMETER_TYPE_DESCRIPTOR_TABLE;
+	rootParameter[2].ShaderVisibility = D3D12_SHADER_VISIBILITY_PIXEL;
+	rootParameter[2].DescriptorTable.pDescriptorRanges = &descriptorRange_[0];
+	rootParameter[2].DescriptorTable.NumDescriptorRanges = 1;
+
+	descriptionRootSignature.pParameters = rootParameter;
+	descriptionRootSignature.NumParameters = 3;
 }
 
 void RootParameter::CreateLineRootParameter(D3D12_ROOT_SIGNATURE_DESC& descriptionRootSignature)
@@ -86,7 +94,7 @@ void RootParameter::CreateLineRootParameter(D3D12_ROOT_SIGNATURE_DESC& descripti
 
 
 	descriptionRootSignature.pParameters = rootParameter;//ルートパラメータ配列へのポインタ
-	descriptionRootSignature.NumParameters = _countof(lineRootParameter);//配列の長さ
+	descriptionRootSignature.NumParameters = 2;//配列の長さ
 }
 
 
