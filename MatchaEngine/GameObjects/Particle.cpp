@@ -5,11 +5,17 @@
 #include "Graphics/GraphicsDevice.h"
 #include "Sprite.h"
 #include <algorithm>
+#include <d3d12.h>
+#include <d3dx12.h> 
+#include "../Graphics/DescriptorHeap.h"
+#include <Resource/Load.h>
 
 namespace {
 	ID3D12Device* device_;
 	float kClientWidth;
 	float kClientHeight;
+
+	DescriptorHeap* descriptorHeap_;
 }
 
 
@@ -23,6 +29,11 @@ void Particle::SetScreenSize(Vector2 screenSize)
 {
 	kClientWidth = screenSize.x;
 	kClientHeight = screenSize.y;
+}
+
+void Particle::SetDescriptorHeap(DescriptorHeap* descriptorHeap)
+{
+	descriptorHeap_ = descriptorHeap;
 }
 
 void Particle::Initialize(std::vector<Transform> transform)
@@ -66,19 +77,35 @@ void Particle::CreateVertexData()
 void Particle::CreateWVP()
 {
 
-	TransformationMatrix* wvpData = nullptr;
 	//Sprite用ののTransformationMatrix用のリソースを作る。Matrix4x41つ分のサイズを用意する
-	wvpDataResource_ = GraphicsDevice::CreateBufferResource(device_, sizeof(TransformationMatrix) * particleNum_);
+	instancingResource_ = GraphicsDevice::CreateBufferResource(device_, sizeof(TransformationMatrix) * particleNum_);
 	//データを書き込む
 	//書き込むためのアドレスを取得
-	wvpDataResource_->Map(0, nullptr, reinterpret_cast<void**>(&wvpData));
+	instancingResource_->Map(0, nullptr, reinterpret_cast<void**>(&instancingData_));
 	//単位行列をかきこんでおく
 	for (int i = 0; i < particleNum_; i++) {
-		wvpData->WVP = IdentityMatrix();
-		wvpData->World = IdentityMatrix();
-		wvpData_.push_back(wvpData);
+		instancingData_[i].WVP = IdentityMatrix();
+		instancingData_[i].World = IdentityMatrix();
 	}
 
+
+
+
+}
+
+void Particle::CreateSRV()
+{
+	instancingSrvDesc_.Format = DXGI_FORMAT_UNKNOWN;
+	instancingSrvDesc_.Shader4ComponentMapping = D3D12_DEFAULT_SHADER_4_COMPONENT_MAPPING;
+	instancingSrvDesc_.ViewDimension = D3D12_SRV_DIMENSION_BUFFER;
+	instancingSrvDesc_.Buffer.FirstElement = 0;
+	instancingSrvDesc_.Buffer.Flags = D3D12_BUFFER_SRV_FLAG_NONE;
+	instancingSrvDesc_.Buffer.NumElements = particleNum_;
+	instancingSrvDesc_.Buffer.StructureByteStride = sizeof(TransformationMatrix);
+	instancingSrvHandleCPU_ = GetCPUDescriptorHandle(descriptorHeap_->GetSrvDescriptorHeap(), descriptorHeap_->GetDescriptorSizeSRV(), 3);
+	instancingSrvHandleGPU_ = GetGPUDescriptorHandle(descriptorHeap_->GetSrvDescriptorHeap(), descriptorHeap_->GetDescriptorSizeSRV(), 3);
+
+	device_->CreateShaderResourceView(instancingResource_.Get(), &instancingSrvDesc_, instancingSrvHandleCPU_);
 }
 
 
@@ -87,6 +114,7 @@ void Particle::CreateParticle()
 {
 	CreateVertexData();
 	CreateWVP();
+	CreateSRV();
 }
 
 void Particle::SettingWvp(Matrix4x4 viewMatrix)
@@ -95,7 +123,7 @@ void Particle::SettingWvp(Matrix4x4 viewMatrix)
 		Matrix4x4 projectionMatri = MakePerspectiveFovMatrix(0.45f, float(kClientWidth) / float(kClientHeight), 0.1f, 100.0f);
 		Matrix4x4 worldMatrixObj = MakeAffineMatrix(transform_[i].translate, transform_[i].scale, transform_[i].rotate);
 		Matrix4x4 worldViewProjectionMatrixObj = MultiplyMatrix4x4(worldMatrixObj, MultiplyMatrix4x4(viewMatrix, projectionMatri));
-		*wvpData_[i] = { worldViewProjectionMatrixObj,worldMatrixObj };
+		instancingData_[i] = { worldViewProjectionMatrixObj,worldMatrixObj };
 	}
 }
 

@@ -12,9 +12,8 @@ void GameScene::ImGui()
 		ImGui::DragFloat3("CameraPos", &cameraTransform_.translate.x);
 		ImGui::DragFloat3("CameraSize", &cameraTransform_.scale.x);
 		ImGui::DragFloat3("CameraRotate", &cameraTransform_.rotate.x);
-
 	}
-
+	
 }
 
 void GameScene::Initialize() {
@@ -43,6 +42,8 @@ void GameScene::Update() {
 	camera_.get()->Update();
 
 	model_->SettingWvp(camera_.get()->GetViewMatrix());
+
+	particle_.get()->SetTransform(particleTransform_);
 	particle_->SettingWvp(camera_.get()->GetViewMatrix());
 
 }

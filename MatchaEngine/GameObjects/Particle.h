@@ -18,8 +18,12 @@ private:
 	Microsoft::WRL::ComPtr<ID3D12Resource> vertexResource_;
 	D3D12_VERTEX_BUFFER_VIEW vertexBufferView_{};
 	VertexData* vertexData_ = nullptr;
-	Microsoft::WRL::ComPtr<ID3D12Resource> wvpDataResource_;
-	std::vector<TransformationMatrix*> wvpData_;
+	Microsoft::WRL::ComPtr<ID3D12Resource> instancingResource_;
+	TransformationMatrix* instancingData_=nullptr;
+	D3D12_SHADER_RESOURCE_VIEW_DESC instancingSrvDesc_{};
+
+	D3D12_CPU_DESCRIPTOR_HANDLE instancingSrvHandleCPU_;
+	D3D12_GPU_DESCRIPTOR_HANDLE instancingSrvHandleGPU_;
 
 	int particleNum_;
 	std::vector<Transform> transform_;
@@ -29,11 +33,13 @@ public:
 
 	static void SetDevice(ID3D12Device* device);
 	static void SetScreenSize(Vector2 screenSize);
+	static void SetDescriptorHeap(DescriptorHeap* descriptorHeap);
 
 	void Initialize(std::vector<Transform> transform);
 
 	void CreateVertexData();
 	void CreateWVP();
+	void CreateSRV();
 
 	void SettingWvp(Matrix4x4 viewMatrix);
 	void SetTransform(std::vector<Transform> transform);
@@ -45,13 +51,15 @@ public:
 	D3D12_GPU_DESCRIPTOR_HANDLE GetTextureSrvHandleGPU()const { return textureSrvHandleGPU_; }
 
 	D3D12_VERTEX_BUFFER_VIEW* GetVertexBufferView() { return &vertexBufferView_; }
-	ID3D12Resource* GetWvpDataResource(int particleNum) { return wvpDataResource_.Get(); }
-	TransformationMatrix* GetWvpData(int particleNum) { return wvpData_[particleNum]; }
+	ID3D12Resource* GetInstancingResource() { return instancingResource_.Get(); }
 
-	int GetParticle() { return particleNum_; }
+	D3D12_CPU_DESCRIPTOR_HANDLE GetInstancingSrvHandleCPU() { return instancingSrvHandleCPU_; }
+	D3D12_GPU_DESCRIPTOR_HANDLE GetInstancingSrvHandleGPU() { return instancingSrvHandleGPU_; }
+
+	int GetParticleNum() { return particleNum_; }
 
 private:
-	ShaderName shader_ = ShaderName::ObjectShader;
+	ShaderName shader_ = ShaderName::ParticleShader;
 	BlendMode blend_ = BlendMode::kBlendModeNone;
 public:
 	void SetBlend(BlendMode blend) { blend_ = blend; }

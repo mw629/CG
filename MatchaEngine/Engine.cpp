@@ -154,6 +154,7 @@ void Engine::Setting()
 	Sprite::SetScreenSize({ (float)kClientWidth_,(float)kClientHeight_ });
 	Sphere::SetScreenSize({ (float)kClientWidth_,(float)kClientHeight_ });
 
+	Particle::SetDescriptorHeap(descriptorHeap.get());
 }
 
 

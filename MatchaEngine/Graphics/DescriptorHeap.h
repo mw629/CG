@@ -21,6 +21,8 @@ public:
 	Microsoft::WRL::ComPtr<ID3D12DescriptorHeap> CreateDescriptorHeep(
 		ID3D12Device* device, D3D12_DESCRIPTOR_HEAP_TYPE heapType, UINT numDesxriptors, bool shaderVisible);
 
+
+
 	uint32_t GetDescriptorSizeSRV() { return descriptorSizeSRV_; }
 	uint32_t GetDescriptorSizeRTV() { return  descriptorSizeRTV_; }
 	uint32_t GetDescriptorSizeDSV() { return descriptorSizeDSV_; }
