@@ -78,7 +78,7 @@ void Particle::CreateWVP()
 {
 
 	//Sprite用ののTransformationMatrix用のリソースを作る。Matrix4x41つ分のサイズを用意する
-	instancingResource_ = GraphicsDevice::CreateBufferResource(device_, sizeof(TransformationMatrix) * particleNum_);
+	instancingResource_ = GraphicsDevice::CreateBufferResource(device_, sizeof(ParticleForGPU) * particleNum_);
 	//データを書き込む
 	//書き込むためのアドレスを取得
 	instancingResource_->Map(0, nullptr, reinterpret_cast<void**>(&instancingData_));
@@ -86,11 +86,8 @@ void Particle::CreateWVP()
 	for (int i = 0; i < particleNum_; i++) {
 		instancingData_[i].WVP = IdentityMatrix();
 		instancingData_[i].World = IdentityMatrix();
+		instancingData_[i].color = Vector4(1.0f, 1.0f, 1.0f, 1.0f);
 	}
-
-
-
-
 }
 
 void Particle::CreateSRV()
@@ -101,7 +98,7 @@ void Particle::CreateSRV()
 	instancingSrvDesc_.Buffer.FirstElement = 0;
 	instancingSrvDesc_.Buffer.Flags = D3D12_BUFFER_SRV_FLAG_NONE;
 	instancingSrvDesc_.Buffer.NumElements = particleNum_;
-	instancingSrvDesc_.Buffer.StructureByteStride = sizeof(TransformationMatrix);
+	instancingSrvDesc_.Buffer.StructureByteStride = sizeof(ParticleForGPU);
 	instancingSrvHandleCPU_ = GetCPUDescriptorHandle(descriptorHeap_->GetSrvDescriptorHeap(), descriptorHeap_->GetDescriptorSizeSRV(), 3);
 	instancingSrvHandleGPU_ = GetGPUDescriptorHandle(descriptorHeap_->GetSrvDescriptorHeap(), descriptorHeap_->GetDescriptorSizeSRV(), 3);
 

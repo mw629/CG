@@ -19,7 +19,7 @@ private:
 	D3D12_VERTEX_BUFFER_VIEW vertexBufferView_{};
 	VertexData* vertexData_ = nullptr;
 	Microsoft::WRL::ComPtr<ID3D12Resource> instancingResource_;
-	TransformationMatrix* instancingData_=nullptr;
+	ParticleForGPU* instancingData_=nullptr;
 	D3D12_SHADER_RESOURCE_VIEW_DESC instancingSrvDesc_{};
 
 	D3D12_CPU_DESCRIPTOR_HANDLE instancingSrvHandleCPU_;
@@ -43,6 +43,8 @@ public:
 
 	void SettingWvp(Matrix4x4 viewMatrix);
 	void SetTransform(std::vector<Transform> transform);
+
+
 
 	void CreateParticle();
 
