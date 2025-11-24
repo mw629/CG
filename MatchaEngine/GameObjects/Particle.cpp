@@ -36,10 +36,10 @@ void Particle::SetDescriptorHeap(DescriptorHeap* descriptorHeap)
 	descriptorHeap_ = descriptorHeap;
 }
 
-void Particle::Initialize(std::vector<Transform> transform)
+void Particle::Initialize(std::vector<ParticleData> data)
 {
-	transform_ = transform;
-	particleNum_ = transform.size();
+	particleData_ = data;
+	particleNum_ = data.size();
 
 	std::unique_ptr<Texture> texture = std::make_unique<Texture>();
 	textureSrvHandleGPU_ = texture.get()->TextureData(texture.get()->CreateTexture("resources/uvChecker.png"));
@@ -116,18 +116,35 @@ void Particle::CreateParticle()
 
 void Particle::SettingWvp(Matrix4x4 viewMatrix)
 {
+	Matrix4x4 billboard = viewMatrix;
+	billboard = Inverse(billboard);
+	billboard.m[3][0] = billboard.m[3][1] = billboard.m[3][2] = 0.0f; // 平行移動成分消す
+	
+
+	Matrix4x4 worldMatrixObj;
+
 	for (int i = 0; i < particleNum_; i++) {
 		Matrix4x4 projectionMatri = MakePerspectiveFovMatrix(0.45f, float(kClientWidth) / float(kClientHeight), 0.1f, 100.0f);
-		Matrix4x4 worldMatrixObj = MakeAffineMatrix(transform_[i].translate, transform_[i].scale, transform_[i].rotate);
+		if (!isBillboard_) {
+			worldMatrixObj = MakeAffineMatrix(particleData_[i].transform.translate, particleData_[i].transform.scale, particleData_[i].transform.rotate);
+		}
+		else {
+			worldMatrixObj = MultiplyMatrix4x4(MakeAffineMatrix(particleData_[i].transform.translate, particleData_[i].transform.scale, particleData_[i].transform.rotate), billboard);
+		}
 		Matrix4x4 worldViewProjectionMatrixObj = MultiplyMatrix4x4(worldMatrixObj, MultiplyMatrix4x4(viewMatrix, projectionMatri));
 		instancingData_[i] = { worldViewProjectionMatrixObj,worldMatrixObj };
+		instancingData_[i].color = particleData_[i].color;
+
 	}
 }
 
-void Particle::SetTransform(std::vector<Transform> transform)
+void Particle::SetData(std::vector<ParticleData> particleData)
 {
-	size_t count = std::min(transform_.size(), transform.size());
-	for (size_t i = 0; i < count; i++) {
-		transform_[i] = transform[i];
-	}
+	particleData_ = particleData;
+}
+
+void Particle::Updata(Matrix4x4 viewMatrix, std::vector<ParticleData> particleData)
+{
+	SetData(particleData);
+	SettingWvp(viewMatrix);
 }

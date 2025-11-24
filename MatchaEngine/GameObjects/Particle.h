@@ -6,6 +6,12 @@
 #include "MaterialFactory.h"
 #include "../Graphics/PSO/RenderState.h"
 
+struct ParticleData {
+	Transform transform;
+	Vector3 velocity;
+	Vector4 color;
+};
+
 class Particle
 {
 private:
@@ -19,15 +25,16 @@ private:
 	D3D12_VERTEX_BUFFER_VIEW vertexBufferView_{};
 	VertexData* vertexData_ = nullptr;
 	Microsoft::WRL::ComPtr<ID3D12Resource> instancingResource_;
-	ParticleForGPU* instancingData_=nullptr;
+	ParticleForGPU* instancingData_ = nullptr;
 	D3D12_SHADER_RESOURCE_VIEW_DESC instancingSrvDesc_{};
 
 	D3D12_CPU_DESCRIPTOR_HANDLE instancingSrvHandleCPU_;
 	D3D12_GPU_DESCRIPTOR_HANDLE instancingSrvHandleGPU_;
 
 	int particleNum_;
-	std::vector<Transform> transform_;
+	std::vector<ParticleData> particleData_;
 
+	bool isBillboard_ = true;
 
 public:
 
@@ -35,18 +42,21 @@ public:
 	static void SetScreenSize(Vector2 screenSize);
 	static void SetDescriptorHeap(DescriptorHeap* descriptorHeap);
 
-	void Initialize(std::vector<Transform> transform);
+	void Initialize(std::vector<ParticleData> data);
 
 	void CreateVertexData();
 	void CreateWVP();
 	void CreateSRV();
 
 	void SettingWvp(Matrix4x4 viewMatrix);
-	void SetTransform(std::vector<Transform> transform);
+	void SetData(std::vector<ParticleData> particleData);
 
-
+	void Updata(Matrix4x4 viewMatrix, std::vector<ParticleData> particleData);
 
 	void CreateParticle();
+
+
+	void SetBillboard(bool flag) { isBillboard_ = flag; }
 
 	ModelData GetModelData() { return modelData_; }
 	MaterialFactory* GetMatrial() { return material_.get(); }
@@ -59,6 +69,7 @@ public:
 	D3D12_GPU_DESCRIPTOR_HANDLE GetInstancingSrvHandleGPU() { return instancingSrvHandleGPU_; }
 
 	int GetParticleNum() { return particleNum_; }
+
 
 private:
 	ShaderName shader_ = ShaderName::ParticleShader;

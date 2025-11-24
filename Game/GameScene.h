@@ -10,10 +10,12 @@ private:
 	Transform cameraTransform_{ {1.0f,1.0f,1.0f},{0.0f,0.0f,0.0f,},{0.0f,0.0f,-20.0f} };
 
 	std::unique_ptr<Particle> particle_ = std::make_unique<Particle>();
-	std::vector<Transform> particleTransform_;
+	std::vector<ParticleData> particleData_;
 
 	std::unique_ptr<Model> model_ = std::make_unique<Model>();
 	Transform modelTransform_{ {1.0f,1.0f,1.0f},{0.0f,0.0f,0.0f,},{6.0f,0.0f,0.0f} };
+
+	bool bill = false;
 
 public:
 	~GameScene()override;
