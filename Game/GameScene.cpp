@@ -13,6 +13,7 @@ void GameScene::ImGui()
 		ImGui::DragFloat3("CameraSize", &cameraTransform_.scale.x);
 		ImGui::DragFloat3("CameraRotate", &cameraTransform_.rotate.x);
 	}
+	camera_.get()->ImGui();
 	if (ImGui::CollapsingHeader("Particle")) {
 		for (int i = 0; i < particleData_.size(); i++) {
 
@@ -54,7 +55,7 @@ void GameScene::Initialize() {
 	camera_.get()->SetTransform(cameraTransform_);
 	camera_.get()->Update();
 
-	for (int i = 0; i < 10; i++) {
+	for (int i = 0; i < 100; i++) {
 		ParticleData particleData;
 		particleData.transform = { {1.0f,1.0f,1.0f},{0.0f ,0.0f,0.0f,},{0.0f + 0.1f * i,0.0f + 0.1f * i,0.0f} };
 		particleData.color = { 1.0f,1.0f,1.0f,1.0f };

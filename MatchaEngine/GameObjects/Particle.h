@@ -82,3 +82,12 @@ public:
 
 };
 
+class Emitter {
+
+private:
+
+
+public:
+
+
+};

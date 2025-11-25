@@ -15,7 +15,7 @@ private:
 	std::unique_ptr<Model> model_ = std::make_unique<Model>();
 	Transform modelTransform_{ {1.0f,1.0f,1.0f},{0.0f,0.0f,0.0f,},{6.0f,0.0f,0.0f} };
 
-	bool bill = false;
+	bool bill = true;
 
 public:
 	~GameScene()override;

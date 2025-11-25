@@ -138,6 +138,7 @@ copy "$(WindowsSdkDir)bin\$(TargetPlatformVersion)\x64\dxil.dll" "$(TargetDir)dx
     </Link>
   </ItemDefinitionGroup>
   <ItemGroup>
+    <ClCompile Include="MatchaEngine\Math\Emitter.cpp" />
     <ClCompile Include="Game\GameScene\Entity\Enemy.cpp" />
     <ClCompile Include="Game\Fade.cpp" />
     <ClCompile Include="Game\GameScene\Entity\Entity.cpp" />
@@ -244,6 +245,7 @@ copy "$(WindowsSdkDir)bin\$(TargetPlatformVersion)\x64\dxil.dll" "$(TargetDir)dx
     </FxCompile>
   </ItemGroup>
   <ItemGroup>
+    <ClInclude Include="MatchaEngine\Math\Emitter.h" />
     <ClInclude Include="Game\GameScene\Entity\Enemy.h" />
     <ClInclude Include="Game\Fade.h" />
     <ClInclude Include="Game\GameScene\Entity\Entity.h" />
