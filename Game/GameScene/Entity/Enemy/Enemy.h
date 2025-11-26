@@ -7,7 +7,9 @@ class Player;
 class Bullet;
 
 class Enemy{
-private:
+
+	
+protected:
 
 	ModelData modelData_;
 	std::unique_ptr<Model> model_;
@@ -30,9 +32,9 @@ private:
 
 public:
 
-	void Initialize(const Vector3& position,Matrix4x4 viewMatrix);
+	virtual void Initialize(const Vector3& position,Matrix4x4 viewMatrix);
 
-	void Update(Matrix4x4 viewMatrix);
+	virtual void Update(Matrix4x4 viewMatrix);
 
 	void Draw();
 

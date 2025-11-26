@@ -158,6 +158,7 @@ copy "$(WindowsSdkDir)bin\$(TargetPlatformVersion)\x64\dxil.dll" "$(TargetDir)dx
     <ClCompile Include="Game\GameScene\Entity\MapObject\Goal.cpp" />
     <ClCompile Include="Game\SkyDome.cpp" />
     <ClCompile Include="Game\GameScene\UI\HP.cpp" />
+    <ClCompile Include="Game\GameScene\Entity\Enemy\JumpEnemy\JumpEnemy.cpp" />
     <ClCompile Include="MatchaEngine\GameObjects\Camera.cpp" />
     <ClCompile Include="Game\GameScene\GameScene.cpp" />
     <ClCompile Include="MatchaEngine\Input\GamePadInput.cpp" />
@@ -285,6 +286,7 @@ copy "$(WindowsSdkDir)bin\$(TargetPlatformVersion)\x64\dxil.dll" "$(TargetDir)dx
     <ClInclude Include="Game\GameScene\Entity\MapObject\Goal.h" />
     <ClInclude Include="Game\SkyDome.h" />
     <ClInclude Include="Game\GameScene\UI\HP.h" />
+    <ClInclude Include="Game\GameScene\Entity\Enemy\JumpEnemy\JumpEnemy.h" />
     <ClInclude Include="MatchaEngine\GameObjects\Camera.h" />
     <ClInclude Include="Game\GameScene\GameScene.h" />
     <ClInclude Include="MatchaEngine\Core\VariableTypes\Matrix4x4.h" />
