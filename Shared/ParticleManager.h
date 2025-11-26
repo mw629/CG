@@ -5,8 +5,8 @@
 struct Emitter {
 	Transform transform = { {1.0f,1.0f,1.0f} ,{0.0f,0.0f,0.0f},{0.0f,0.0f,0.0f} };//エミッタのTransform
 	uint32_t count = 10;//発生数
-	float frequency;//発生頻度
-	float frequencyTime;//頻度用時刻
+	float frequency=0.5f;//発生頻度
+	float frequencyTime=0.0f;//頻度用時刻
 };
 
 

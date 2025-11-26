@@ -151,21 +151,19 @@ void Particle::SetData(std::list<ParticleData> particleData)
 void Particle::Updata(Matrix4x4 viewMatrix, std::list<ParticleData> particleData)
 {
 	SetData(particleData);
-	
-	// パーティクルがない場合は処理をスキップ
-	if (particleData_.empty()) {
-		return;
-	}
-	
-	SettingWvp(viewMatrix);
 
+	particleNum_ = 0;
 	for (std::list<ParticleData>::iterator particleIterator = particleData_.begin();
 		particleIterator != particleData_.end(); ) {
 		if (particleIterator->lifeTime <= particleIterator->currentTime) {
 			particleIterator = particleData_.erase(particleIterator);
+			continue;
 		}
-		else {
-			++particleIterator;
-		}
+
+		SettingWvp(viewMatrix);
+
+		++particleNum_;
+		++particleIterator;
 	}
 }
+

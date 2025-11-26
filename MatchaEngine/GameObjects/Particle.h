@@ -34,6 +34,7 @@ private:
 	D3D12_GPU_DESCRIPTOR_HANDLE instancingSrvHandleGPU_;
 
 	int particleMaxNum_ = 1000;
+	int particleNum_;
 	
 	std::list<ParticleData> particleData_;
 
@@ -71,7 +72,7 @@ public:
 	D3D12_CPU_DESCRIPTOR_HANDLE GetInstancingSrvHandleCPU() { return instancingSrvHandleCPU_; }
 	D3D12_GPU_DESCRIPTOR_HANDLE GetInstancingSrvHandleGPU() { return instancingSrvHandleGPU_; }
 
-	int GetParticleNum() { return static_cast<int>(particleData_.size()); }
+	int GetParticleNum() { return particleNum_; }
 
 
 private:
