@@ -1,5 +1,5 @@
 #include "GraphicsPipelineState.h"
-#include "../../Core/LogHandler.h"
+#include "LogHandler.h"
 #include <cassert>
 
 
@@ -43,7 +43,7 @@ void GraphicsPipelineState::CreatePSO(ShaderName shaderName, BlendMode blendmode
 	shaderCompile->CreateShaderCompile(shaderName, os, directXShaderCompiler.GetDxcUtils(), directXShaderCompiler.GetDxcCompiler(), directXShaderCompiler.GetIncludeHandler());
 	Log(os, "ShaderCompileの生成完了\n");
 	//DepthStencilStateの設定//
-	depthStencilState->CreateDepthStencilState();
+	depthStencilState->CreateDepthStencilState(shaderName);
 	Log(os, "DepthStencilStateの生成完了\n");
 
 
