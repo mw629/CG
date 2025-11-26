@@ -10,7 +10,7 @@ class SwapChain
 private:
 	Microsoft::WRL::ComPtr<IDXGISwapChain4> swapChain_ = nullptr;
 	DXGI_SWAP_CHAIN_DESC1 swapChainDesc_{};
-	Microsoft::WRL::ComPtr<ID3D12Resource> swapChainResources_[2] = { nullptr };
+	std::vector<Microsoft::WRL::ComPtr<ID3D12Resource>> swapChainResources_ = { nullptr,nullptr };
 
 	HRESULT hr_{};
 public:
@@ -21,6 +21,6 @@ public:
 	IDXGISwapChain4* GetSwapChain()const { return swapChain_.Get(); }
 	DXGI_SWAP_CHAIN_DESC1 GetSwapChainDesc()const { return swapChainDesc_; }
 	ID3D12Resource* GetSwapChainResources(int index) const { return swapChainResources_[index].Get(); }
-	ID3D12Resource* GetSwapChainResources()const { return swapChainResources_->Get(); }
+	std::vector<Microsoft::WRL::ComPtr<ID3D12Resource>> GetSwapChainResources()const { return swapChainResources_; }
 
 };

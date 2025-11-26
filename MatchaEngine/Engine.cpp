@@ -103,7 +103,7 @@ void Engine::Setting()
 
 	swapChain->CreateSwapChain(graphics->GetDxgiFactory(), command->GetCommandQueue(), window.GetHwnd(), kClientWidth_, kClientHeight_);
 	descriptorHeap->CreateHeap(graphics->GetDevice());
-	renderTargetView->CreateRenderTargetView(graphics->GetDevice(), swapChain->GetSwapChainResources(0), swapChain->GetSwapChainResources(1), descriptorHeap->GetRtvDescriptorHeap());
+	renderTargetView->CreateRenderTargetView(graphics->GetDevice(), swapChain->GetSwapChainResources(), descriptorHeap->GetRtvDescriptorHeap());
 
 	gpuSyncManager.Initialize(graphics.get()->GetDevice());
 

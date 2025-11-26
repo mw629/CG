@@ -34,7 +34,7 @@ void SwapChain::ChangeScreen(int kClientWidth, int kClientHeight, bool windowMod
 		return;
 	}
 
-	for (int i = 0; i < _countof(swapChainResources_); i++) {
+	for (int i = 0; i < swapChainResources_.size(); i++) {
 		swapChainResources_[i].Reset();
 	}
 
@@ -47,7 +47,7 @@ void SwapChain::ChangeScreen(int kClientWidth, int kClientHeight, bool windowMod
 		assert(SUCCEEDED(hr));
 	}
 
-	for (UINT i = 0; i < _countof(swapChainResources_); i++) {
+	for (UINT i = 0; i < swapChainResources_.size(); i++) {
 		hr_ = swapChain_->GetBuffer(i, IID_PPV_ARGS(&swapChainResources_[i]));
 		assert(SUCCEEDED(hr_));
 	}
