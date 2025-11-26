@@ -122,8 +122,9 @@ void Playing::Draw() {
 void Playing::EnemySpawn()
 {
 	for (const auto& enemyPos : mapChipField_.get()->GetEnemyPosition()) {
-		Enemy* newEnemy = new Enemy();
+		Enemy* newEnemy = new JumpEnemy();
 		newEnemy->Initialize(enemyPos,viewMatrix_);
+		newEnemy->SetMapChipField(mapChipField_.get());
 		enemy_.push_back(newEnemy);
 	}
 }

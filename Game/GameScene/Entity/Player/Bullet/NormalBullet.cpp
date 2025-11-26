@@ -18,7 +18,7 @@ void NormalBullet::Update(Matrix4x4 viewMatrix)
 	fream_ -= 1.0f / 60.0f;
 
 	if (fream_ < 0.0f) {
-		isActiv_ = false;
+		isActive_ = false;
 	}
 
 	MapCollision();
@@ -29,7 +29,7 @@ void NormalBullet::Update(Matrix4x4 viewMatrix)
 
 void NormalBullet::Draw()
 {
-	if (isActiv_) {
+	if (isActive_) {
 		Draw::DrawModel(model_.get());
 	}
 }
@@ -45,18 +45,18 @@ void NormalBullet::IsShot(Player* player)
 		velocity_.x = speed_ / 10.0f;
 	}
 	velocity_.y = 0.0f;  // Y方向の速度を初期化
-	isActiv_ = true;
+	isActive_ = true;
 }
 
 void NormalBullet::HitWall()
 {
-	isActiv_ = false;
+	isActive_ = false;
 }
 
 void NormalBullet::OnCollision(const Enemy* enemy)
 {
 	(enemy);
-	if (isActiv_) {
-		isActiv_ = false;
+	if (isActive_) {
+		isActive_ = false;
 	}
 }

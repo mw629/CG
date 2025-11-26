@@ -10,6 +10,9 @@ void Enemy::Initialize(const Vector3& position, Matrix4x4 viewMatrix) {
 	model_->GetMatrial()->SetColor(color);
 	isActive_ = true;
 
+	// キャラクターの当たり判定サイズ
+	float kWidth = 0.9f;
+	float kHeight = 0.9f;
 }
 
 void Enemy::Update(Matrix4x4 viewMatrix) {
@@ -32,13 +35,4 @@ void Enemy::Draw() {
 void Enemy::OnCollision(const Bullet* bullet) {
 	(bullet);
 	isActive_ = false;
-}
-
-AABB Enemy::GetAABB() {
-	Vector3 worldPos = transform_.translate;
-	AABB aabb;
-	aabb.min = { worldPos.x - size_.x / 2.0f, worldPos.y - size_.y / 2.0f, worldPos.z - size_.x / 2.0f };
-	aabb.max = { worldPos.x + size_.x / 2.0f, worldPos.y + size_.y / 2.0f, worldPos.z + size_.x / 2.0f };
-
-	return aabb;
 }

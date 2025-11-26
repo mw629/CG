@@ -30,7 +30,7 @@ public:
 
 	virtual void OnCollision(const Enemy* enemy) {};
 
-	bool IsActiv() { return isActiv_; }
+	bool IsActiv() { return isActive_; }
 
 
 };

@@ -34,13 +34,15 @@ protected:
 	std::unique_ptr<Model> model_;
 	Transform transform_ = { {1.0f,1.0f,1.0f},{0.0f,0.0f,0.0f} ,{0.0f,0.0f,0.0f} };
 	Vector3 velocity_ = { 0.0f,0.0f,0.0f };
+	
+	Vector4 color = { 1.0f,0.0f,0.0f,1.0f };
 	// キャラクターの当たり判定サイズ
 	float kWidth = 0.9f;
 	float kHeight = 0.9f;
 	// 向き
 	LRDirection lrDirection_ = LRDirection::kRight;
 
-	bool isActiv_;
+	bool isActive_;
 	// 設置状態フラグ
 	bool onGround_ = true;
 	// 接地フラグ
