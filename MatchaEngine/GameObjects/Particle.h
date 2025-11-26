@@ -1,15 +1,17 @@
 #pragma once
 #include <wrl.h>
 #include <d3dx12.h>
-#include "Core/VariableTypes.h"
-#include "Resource/Texture.h"
+#include "VariableTypes.h"
+#include "Texture.h"
 #include "MaterialFactory.h"
-#include "../Graphics/PSO/RenderState.h"
+#include "RenderState.h"
 
 struct ParticleData {
 	Transform transform;
 	Vector3 velocity;
 	Vector4 color;
+	float lifeTime;
+	float currentTime = 0;
 };
 
 class Particle
@@ -31,8 +33,9 @@ private:
 	D3D12_CPU_DESCRIPTOR_HANDLE instancingSrvHandleCPU_;
 	D3D12_GPU_DESCRIPTOR_HANDLE instancingSrvHandleGPU_;
 
-	int particleNum_;
-	std::vector<ParticleData> particleData_;
+	int particleMaxNum_ = 1000;
+	
+	std::list<ParticleData> particleData_;
 
 	bool isBillboard_ = true;
 
@@ -42,16 +45,16 @@ public:
 	static void SetScreenSize(Vector2 screenSize);
 	static void SetDescriptorHeap(DescriptorHeap* descriptorHeap);
 
-	void Initialize(std::vector<ParticleData> data);
+	void Initialize();
 
 	void CreateVertexData();
 	void CreateWVP();
 	void CreateSRV();
 
 	void SettingWvp(Matrix4x4 viewMatrix);
-	void SetData(std::vector<ParticleData> particleData);
+	void SetData(std::list<ParticleData> particleData);
 
-	void Updata(Matrix4x4 viewMatrix, std::vector<ParticleData> particleData);
+	void Updata(Matrix4x4 viewMatrix, std::list<ParticleData> particleData);
 
 	void CreateParticle();
 
@@ -68,26 +71,16 @@ public:
 	D3D12_CPU_DESCRIPTOR_HANDLE GetInstancingSrvHandleCPU() { return instancingSrvHandleCPU_; }
 	D3D12_GPU_DESCRIPTOR_HANDLE GetInstancingSrvHandleGPU() { return instancingSrvHandleGPU_; }
 
-	int GetParticleNum() { return particleNum_; }
+	int GetParticleNum() { return static_cast<int>(particleData_.size()); }
 
 
 private:
 	ShaderName shader_ = ShaderName::ParticleShader;
-	BlendMode blend_ = BlendMode::kBlendModeNone;
+	BlendMode blend_ = BlendMode::kBlendModeAdd;
 public:
 	void SetBlend(BlendMode blend) { blend_ = blend; }
 	ShaderName GetShader() { return shader_; }
 	BlendMode GetBlend() { return blend_; }
-
-
-};
-
-class Emitter {
-
-private:
-
-
-public:
 
 
 };

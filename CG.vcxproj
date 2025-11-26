@@ -79,7 +79,7 @@
       <AdditionalOptions>/utf-8 %(AdditionalOptions)</AdditionalOptions>
       <MultiProcessorCompilation>true</MultiProcessorCompilation>
       <RuntimeLibrary>MultiThreadedDebug</RuntimeLibrary>
-      <AdditionalIncludeDirectories>$(ProjectDir)MatchaEngine;$(ProjectDir)externals\imgui;$(ProjectDir)externals\DirectXTex;$(ProjectDir)MatchaEngine;$(ProjectDir)externals\imgui;$(ProjectDir)externals\DirectXTex;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+      <AdditionalIncludeDirectories>$(ProjectDir)MatchaEngine;$(ProjectDir)externals\imgui;$(ProjectDir)externals\DirectXTex;$(ProjectDir)MatchaEngine\Common;$(ProjectDir)MatchaEngine\Core;$(ProjectDir)MatchaEngine\GameObjects;$(ProjectDir)MatchaEngine\Graphics;$(ProjectDir)MatchaEngine\Input;$(ProjectDir)MatchaEngine\Math;$(ProjectDir)MatchaEngine\PSO;$(ProjectDir)MatchaEngine\Resource;$(ProjectDir)Shared;$(ProjectDir)MatchaEngine;$(ProjectDir)externals\imgui;$(ProjectDir)externals\DirectXTex;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
     </ClCompile>
     <Link>
       <SubSystem>Windows</SubSystem>
@@ -104,7 +104,7 @@ copy "$(WindowsSdkDir)bin\$(TargetPlatformVersion)\x64\dxil.dll" "$(TargetDir)dx
       <AdditionalOptions>/utf-8 %(AdditionalOptions)</AdditionalOptions>
       <MultiProcessorCompilation>true</MultiProcessorCompilation>
       <RuntimeLibrary>MultiThreaded</RuntimeLibrary>
-      <AdditionalIncludeDirectories>$(ProjectDir)MatchaEngine;$(ProjectDir)externals\imgui;$(ProjectDir)externals\DirectXTex;$(ProjectDir)MatchaEngine;$(ProjectDir)externals\imgui;$(ProjectDir)externals\DirectXTex;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+      <AdditionalIncludeDirectories>$(ProjectDir)MatchaEngine;$(ProjectDir)externals\imgui;$(ProjectDir)externals\DirectXTex;$(ProjectDir)MatchaEngine\Common;$(ProjectDir)MatchaEngine\Core;$(ProjectDir)MatchaEngine\GameObjects;$(ProjectDir)MatchaEngine\Graphics;$(ProjectDir)MatchaEngine\Input;$(ProjectDir)MatchaEngine\Math;$(ProjectDir)MatchaEngine\PSO;$(ProjectDir)MatchaEngine\Resource;$(ProjectDir)Shared;$(ProjectDir)MatchaEngine;$(ProjectDir)externals\imgui;$(ProjectDir)externals\DirectXTex;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
     </ClCompile>
     <Link>
       <SubSystem>Windows</SubSystem>
@@ -125,7 +125,7 @@ copy "$(WindowsSdkDir)bin\$(TargetPlatformVersion)\x64\dxil.dll" "$(TargetDir)dx
       <AdditionalOptions>/utf-8 %(AdditionalOptions)</AdditionalOptions>
       <MultiProcessorCompilation>true</MultiProcessorCompilation>
       <RuntimeLibrary>MultiThreaded</RuntimeLibrary>
-      <AdditionalIncludeDirectories>$(ProjectDir)MatchaEngine;$(ProjectDir)externals\imgui;$(ProjectDir)externals\DirectXTex;$(ProjectDir)externals\Game;$(ProjectDir)MatchaEngine;$(ProjectDir)externals\imgui;$(ProjectDir)externals\DirectXTex;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+      <AdditionalIncludeDirectories>$(ProjectDir)MatchaEngine;$(ProjectDir)externals\imgui;$(ProjectDir)externals\DirectXTex;$(ProjectDir)MatchaEngine\Common;$(ProjectDir)MatchaEngine\Core;$(ProjectDir)MatchaEngine\GameObjects;$(ProjectDir)MatchaEngine\Graphics;$(ProjectDir)MatchaEngine\Input;$(ProjectDir)MatchaEngine\Math;$(ProjectDir)MatchaEngine\PSO;$(ProjectDir)MatchaEngine\Resource;$(ProjectDir)Shared;$(ProjectDir)externals\Game;$(ProjectDir)MatchaEngine;$(ProjectDir)externals\imgui;$(ProjectDir)externals\DirectXTex;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
       <Optimization>Disabled</Optimization>
       <WholeProgramOptimization>false</WholeProgramOptimization>
     </ClCompile>
@@ -138,7 +138,7 @@ copy "$(WindowsSdkDir)bin\$(TargetPlatformVersion)\x64\dxil.dll" "$(TargetDir)dx
     </Link>
   </ItemDefinitionGroup>
   <ItemGroup>
-    <ClCompile Include="MatchaEngine\Math\Emitter.cpp" />
+    <ClCompile Include="Shared\ParticleManager.cpp" />
     <ClCompile Include="Game\GameScene\Entity\Enemy.cpp" />
     <ClCompile Include="Game\Fade.cpp" />
     <ClCompile Include="Game\GameScene\Entity\Entity.cpp" />
@@ -156,12 +156,12 @@ copy "$(WindowsSdkDir)bin\$(TargetPlatformVersion)\x64\dxil.dll" "$(TargetDir)dx
     <ClCompile Include="MatchaEngine\Resource\Audio.cpp" />
     <ClCompile Include="MatchaEngine\Input\Input.cpp" />
     <ClCompile Include="MatchaEngine\Engine.cpp" />
-    <ClCompile Include="MatchaEngine\Graphics\PSO\BlendState.cpp" />
+    <ClCompile Include="MatchaEngine\PSO\BlendState.cpp" />
     <ClCompile Include="MatchaEngine\Math\Calculation.cpp" />
     <ClCompile Include="MatchaEngine\Common\CommandContext.cpp" />
-    <ClCompile Include="MatchaEngine\Graphics\PSO\DepthStencilState.cpp" />
+    <ClCompile Include="MatchaEngine\PSO\DepthStencilState.cpp" />
     <ClCompile Include="MatchaEngine\Graphics\Draw.cpp" />
-    <ClCompile Include="MatchaEngine\Graphics\PSO\DirectXShaderCompiler.cpp" />
+    <ClCompile Include="MatchaEngine\PSO\DirectXShaderCompiler.cpp" />
     <ClCompile Include="externals\imgui\imgui.cpp" />
     <ClCompile Include="externals\imgui\imgui_demo.cpp" />
     <ClCompile Include="externals\imgui\imgui_draw.cpp" />
@@ -170,24 +170,24 @@ copy "$(WindowsSdkDir)bin\$(TargetPlatformVersion)\x64\dxil.dll" "$(TargetDir)dx
     <ClCompile Include="externals\imgui\imgui_tables.cpp" />
     <ClCompile Include="externals\imgui\imgui_widgets.cpp" />
     <ClCompile Include="MatchaEngine\Graphics\GraphicsDevice.cpp" />
-    <ClCompile Include="MatchaEngine\Graphics\PSO\GraphicsPipelineState.cpp" />
-    <ClCompile Include="MatchaEngine\Graphics\PSO\InputLayout.cpp" />
+    <ClCompile Include="MatchaEngine\PSO\GraphicsPipelineState.cpp" />
+    <ClCompile Include="MatchaEngine\PSO\InputLayout.cpp" />
     <ClCompile Include="MatchaEngine\Core\LogHandler.cpp" />
     <ClCompile Include="main.cpp">
       <Optimization Condition="'$(Configuration)|$(Platform)'=='Development|x64'">MaxSpeed</Optimization>
       <WholeProgramOptimization Condition="'$(Configuration)|$(Platform)'=='Development|x64'">true</WholeProgramOptimization>
     </ClCompile>
-    <ClCompile Include="MatchaEngine\Graphics\PSO\RasterizerState.cpp" />
-    <ClCompile Include="MatchaEngine\Graphics\PSO\RootParameter.cpp" />
-    <ClCompile Include="MatchaEngine\Graphics\PSO\RootSignature.cpp" />
-    <ClCompile Include="MatchaEngine\Graphics\PSO\ShaderCompile.cpp" />
+    <ClCompile Include="MatchaEngine\PSO\RasterizerState.cpp" />
+    <ClCompile Include="MatchaEngine\PSO\RootParameter.cpp" />
+    <ClCompile Include="MatchaEngine\PSO\RootSignature.cpp" />
+    <ClCompile Include="MatchaEngine\PSO\ShaderCompile.cpp" />
     <ClCompile Include="MatchaEngine\Core\WindowConfig.cpp" />
     <ClCompile Include="MatchaEngine\GameObjects\MaterialFactory.cpp" />
     <ClCompile Include="MatchaEngine\GameObjects\Model.cpp" />
     <ClCompile Include="MatchaEngine\Resource\Load.cpp" />
     <ClCompile Include="MatchaEngine\Resource\TextureLoader.cpp" />
     <ClCompile Include="MatchaEngine\Graphics\RenderTargetView.cpp" />
-    <ClCompile Include="MatchaEngine\Graphics\PSO\Sampler.cpp" />
+    <ClCompile Include="MatchaEngine\PSO\Sampler.cpp" />
     <ClCompile Include="MatchaEngine\Graphics\ResourceBarrierHelper.cpp" />
     <ClCompile Include="MatchaEngine\GameObjects\Sphere.cpp" />
     <ClCompile Include="MatchaEngine\Graphics\SwapChain.cpp" />
@@ -245,7 +245,7 @@ copy "$(WindowsSdkDir)bin\$(TargetPlatformVersion)\x64\dxil.dll" "$(TargetDir)dx
     </FxCompile>
   </ItemGroup>
   <ItemGroup>
-    <ClInclude Include="MatchaEngine\Math\Emitter.h" />
+    <ClInclude Include="Shared\ParticleManager.h" />
     <ClInclude Include="Game\GameScene\Entity\Enemy.h" />
     <ClInclude Include="Game\Fade.h" />
     <ClInclude Include="Game\GameScene\Entity\Entity.h" />
@@ -257,7 +257,7 @@ copy "$(WindowsSdkDir)bin\$(TargetPlatformVersion)\x64\dxil.dll" "$(TargetDir)dx
     <ClInclude Include="MatchaEngine\Core\VariableTypes\Vector3.h" />
     <ClInclude Include="MatchaEngine\Core\VariableTypes\Vector2Int.h" />
     <ClInclude Include="MatchaEngine\Core\VariableTypes\Vector3Int.h" />
-    <ClInclude Include="MatchaEngine\Graphics\PSO\RenderState.h" />
+    <ClInclude Include="MatchaEngine\PSO\RenderState.h" />
     <ClInclude Include="MatchaEngine\Input\GamePadInput.h" />
     <ClInclude Include="MatchaEngine\GameObjects\Line.h" />
     <ClInclude Include="MatchaEngine\GameObjects\Grid.h" />
@@ -271,12 +271,12 @@ copy "$(WindowsSdkDir)bin\$(TargetPlatformVersion)\x64\dxil.dll" "$(TargetDir)dx
     <ClInclude Include="MatchaEngine\Resource\Audio.h" />
     <ClInclude Include="MatchaEngine\Input\Input.h" />
     <ClInclude Include="MatchaEngine\Engine.h" />
-    <ClInclude Include="MatchaEngine\Graphics\PSO\BlendState.h" />
+    <ClInclude Include="MatchaEngine\PSO\BlendState.h" />
     <ClInclude Include="MatchaEngine\Math\Calculation.h" />
     <ClInclude Include="MatchaEngine\Common\CommandContext.h" />
-    <ClInclude Include="MatchaEngine\Graphics\PSO\DepthStencilState.h" />
+    <ClInclude Include="MatchaEngine\PSO\DepthStencilState.h" />
     <ClInclude Include="MatchaEngine\Graphics\Draw.h" />
-    <ClInclude Include="MatchaEngine\Graphics\PSO\DirectXShaderCompiler.h" />
+    <ClInclude Include="MatchaEngine\PSO\DirectXShaderCompiler.h" />
     <ClInclude Include="externals\imgui\imconfig.h" />
     <ClInclude Include="externals\imgui\imgui.h" />
     <ClInclude Include="externals\imgui\imgui_impl_dx12.h" />
@@ -286,20 +286,20 @@ copy "$(WindowsSdkDir)bin\$(TargetPlatformVersion)\x64\dxil.dll" "$(TargetDir)dx
     <ClInclude Include="externals\imgui\imstb_textedit.h" />
     <ClInclude Include="externals\imgui\imstb_truetype.h" />
     <ClInclude Include="MatchaEngine\Graphics\GraphicsDevice.h" />
-    <ClInclude Include="MatchaEngine\Graphics\PSO\GraphicsPipelineState.h" />
-    <ClInclude Include="MatchaEngine\Graphics\PSO\InputLayout.h" />
+    <ClInclude Include="MatchaEngine\PSO\GraphicsPipelineState.h" />
+    <ClInclude Include="MatchaEngine\PSO\InputLayout.h" />
     <ClInclude Include="MatchaEngine\Core\LogHandler.h" />
-    <ClInclude Include="MatchaEngine\Graphics\PSO\RasterizerState.h" />
-    <ClInclude Include="MatchaEngine\Graphics\PSO\RootParameter.h" />
-    <ClInclude Include="MatchaEngine\Graphics\PSO\RootSignature.h" />
-    <ClInclude Include="MatchaEngine\Graphics\PSO\ShaderCompile.h" />
+    <ClInclude Include="MatchaEngine\PSO\RasterizerState.h" />
+    <ClInclude Include="MatchaEngine\PSO\RootParameter.h" />
+    <ClInclude Include="MatchaEngine\PSO\RootSignature.h" />
+    <ClInclude Include="MatchaEngine\PSO\ShaderCompile.h" />
     <ClInclude Include="MatchaEngine\Core\VariableTypes.h" />
     <ClInclude Include="MatchaEngine\Core\WindowConfig.h" />
     <ClInclude Include="MatchaEngine\GameObjects\MaterialFactory.h" />
     <ClInclude Include="MatchaEngine\GameObjects\Model.h" />
     <ClInclude Include="MatchaEngine\Resource\TextureLoader.h" />
     <ClInclude Include="MatchaEngine\Graphics\RenderTargetView.h" />
-    <ClInclude Include="MatchaEngine\Graphics\PSO\Sampler.h" />
+    <ClInclude Include="MatchaEngine\PSO\Sampler.h" />
     <ClInclude Include="MatchaEngine\Graphics\ResourceBarrierHelper.h" />
     <ClInclude Include="MatchaEngine\GameObjects\Sphere.h" />
     <ClInclude Include="MatchaEngine\Graphics\SwapChain.h" />

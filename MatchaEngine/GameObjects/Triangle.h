@@ -1,7 +1,7 @@
 #pragma once
-#include <Core/VariableTypes.h>
+#include "VariableTypes.h"
 #include "MaterialFactory.h"
-#include "../Graphics/PSO/RenderState.h"
+#include "RenderState.h"
 
 class Triangle
 {

@@ -5,64 +5,64 @@
 ///自作エンジン///
 
 //Common
-#include "Common/CommandContext.h"
+#include "CommandContext.h"
 
 //Core
-#include "Core/LogHandler.h"
-#include "Core/VariableTypes.h"
-#include "Core/WindowConfig.h"
+#include "LogHandler.h"
+#include "VariableTypes.h"
+#include "WindowConfig.h"
 
 //GameObjeects
-#include "GameObjects/Camera.h"
-#include "GameObjects/DebugCamera.h"
-#include "GameObjects/MaterialFactory.h"
-#include "GameObjects/Model.h"
-#include "GameObjects/Particle.h"
-#include "GameObjects/Sphere.h"
-#include "GameObjects/Sprite.h"
-#include "GameObjects/Triangle.h"
-#include "GameObjects/Line.h"
-#include "GameObjects/Grid.h"
+#include "Camera.h"
+#include "DebugCamera.h"
+#include "MaterialFactory.h"
+#include "Model.h"
+#include "Particle.h"
+#include "Sphere.h"
+#include "Sprite.h"
+#include "Triangle.h"
+#include "Line.h"
+#include "Grid.h"
 
 //Graphics
 
-#include "Graphics/DepthStencil.h"
-#include "Graphics/DescriptorHeap.h"
-#include "Graphics/DirectinalLight.h"
-#include "Graphics/Draw.h"
-#include "Graphics/GpuSyncManager.h"
-#include "Graphics/GraphicsDevice.h"
-#include "Graphics/RenderTargetView.h"
-#include "Graphics/ResourceBarrierHelper.h"
-#include "Graphics/SwapChain.h"
-#include "Graphics/ViewportScissor.h"
+#include "DepthStencil.h"
+#include "DescriptorHeap.h"
+#include "DirectinalLight.h"
+#include "Draw.h"
+#include "GpuSyncManager.h"
+#include "GraphicsDevice.h"
+#include "RenderTargetView.h"
+#include "ResourceBarrierHelper.h"
+#include "SwapChain.h"
+#include "ViewportScissor.h"
 //PSO
-#include "Graphics/PSO/BlendState.h"
-#include "Graphics/PSO/DepthStencilState.h"
-#include "Graphics/PSO/DirectXShaderCompiler.h"
-#include "Graphics/PSO/GraphicsPipelineState.h"
-#include "Graphics/PSO/InputLayout.h"
-#include "Graphics/PSO/RasterizerState.h"
-#include "Graphics/PSO/RootSignature.h"
-#include "Graphics/PSO/RootParameter.h"
-#include "Graphics/PSO/Sampler.h"
-#include "Graphics/PSO/ShaderCompile.h"
+#include "BlendState.h"
+#include "DepthStencilState.h"
+#include "DirectXShaderCompiler.h"
+#include "GraphicsPipelineState.h"
+#include "InputLayout.h"
+#include "RasterizerState.h"
+#include "RootSignature.h"
+#include "RootParameter.h"
+#include "Sampler.h"
+#include "ShaderCompile.h"
 
 //Input
 
-#include "Input/Input.h"
-#include "Input/GamePadInput.h"
+#include "Input.h"
+#include "GamePadInput.h"
 
 //Math
 
-#include "Math/Calculation.h"
+#include "Calculation.h"
 
 //Resource
 
-#include "Resource/Audio.h"
-#include "Resource/Load.h"
-#include "Resource/Texture.h"
-#include "Resource/TextureLoader.h"
+#include "Audio.h"
+#include "Load.h"
+#include "Texture.h"
+#include "TextureLoader.h"
 
 
 class Engine

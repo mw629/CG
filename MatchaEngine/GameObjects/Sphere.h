@@ -1,9 +1,9 @@
 #pragma once
 #include <wrl.h>
-#include "../Core/VariableTypes.h"
+#include "VariableTypes.h"
 #include "MaterialFactory.h"
 #include <d3dx12.h>
-#include "../Graphics/PSO/RenderState.h"
+#include "RenderState.h"
 
 
 class Sphere

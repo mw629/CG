@@ -1,10 +1,10 @@
 #pragma once
 #include <wrl.h>
 #include <d3dx12.h>
-#include "Core/VariableTypes.h"
-#include "Resource/Texture.h"
+#include "VariableTypes.h"
+#include "Texture.h"
 #include "MaterialFactory.h"
-#include "../Graphics/PSO/RenderState.h"
+#include "RenderState.h"
 
 
 class Model

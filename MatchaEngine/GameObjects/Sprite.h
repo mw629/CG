@@ -2,8 +2,8 @@
 #include <wrl.h>
 #include <d3d12.h>
 #include "Core/VariableTypes.h"
-#include "../GameObjects/MaterialFactory.h"
-#include "../Graphics/PSO/RenderState.h"
+#include "MaterialFactory.h"
+#include "RenderState.h"
 
 class Sprite
 {
