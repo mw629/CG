@@ -33,13 +33,20 @@ public:
 
 	void Initialize();
 
+	void Initialize(Emitter emitter);
+
 	void Update(Matrix4x4 viewMatrix);
+	void Update(Matrix4x4 viewMatrix, ParticleData particleMove(ParticleData particleData));//動きに変化をつけたい場合
+
+	void Update(Matrix4x4 viewMatrix, Vector3 scale);
 
 	void Draw();
 	
 	ParticleData MakeNewParticle();
-
+	ParticleData MakeNewParticle(Vector3 scale);//サイズを変えれるnew
+ 
 	void Emit();
+
 
 };
 

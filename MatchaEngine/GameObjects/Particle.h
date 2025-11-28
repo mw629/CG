@@ -40,6 +40,8 @@ private:
 
 	bool isBillboard_ = true;
 
+	static int DescriptorNum;
+
 public:
 
 	static void SetDevice(ID3D12Device* device);

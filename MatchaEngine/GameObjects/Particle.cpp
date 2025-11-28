@@ -18,7 +18,7 @@ namespace {
 	DescriptorHeap* descriptorHeap_;
 }
 
-
+int Particle::DescriptorNum = 3;
 
 void Particle::SetDevice(ID3D12Device* device)
 {
@@ -97,8 +97,8 @@ void Particle::CreateSRV()
 	instancingSrvDesc_.Buffer.Flags = D3D12_BUFFER_SRV_FLAG_NONE;
 	instancingSrvDesc_.Buffer.NumElements = particleMaxNum_;
 	instancingSrvDesc_.Buffer.StructureByteStride = sizeof(ParticleForGPU);
-	instancingSrvHandleCPU_ = GetCPUDescriptorHandle(descriptorHeap_->GetSrvDescriptorHeap(), descriptorHeap_->GetDescriptorSizeSRV(), 3);
-	instancingSrvHandleGPU_ = GetGPUDescriptorHandle(descriptorHeap_->GetSrvDescriptorHeap(), descriptorHeap_->GetDescriptorSizeSRV(), 3);
+	instancingSrvHandleCPU_ = GetCPUDescriptorHandle(descriptorHeap_->GetSrvDescriptorHeap(), descriptorHeap_->GetDescriptorSizeSRV(), DescriptorNum);
+	instancingSrvHandleGPU_ = GetGPUDescriptorHandle(descriptorHeap_->GetSrvDescriptorHeap(), descriptorHeap_->GetDescriptorSizeSRV(), DescriptorNum);
 
 	device_->CreateShaderResourceView(instancingResource_.Get(), &instancingSrvDesc_, instancingSrvHandleCPU_);
 }
@@ -110,6 +110,7 @@ void Particle::CreateParticle()
 	CreateVertexData();
 	CreateWVP();
 	CreateSRV();
+	DescriptorNum++;
 }
 
 void Particle::SettingWvp(Matrix4x4 viewMatrix)
