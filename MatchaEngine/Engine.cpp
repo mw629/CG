@@ -4,9 +4,12 @@
 #include <psapi.h>
 #include <iostream>
 
+#ifdef _USE_IMGUI
 #include "../externals/imgui/imgui.h"
 #include "../externals/imgui/imgui_impl_dx12.h"
 #include "../externals/imgui/imgui_impl_win32.h"
+#endif // _USE_IMGUI
+
 #include <thread>
 
 #pragma comment(lib,"winmm.lib")
@@ -122,7 +125,9 @@ void Engine::Setting()
 
 	descriptorHeeps[0] = { descriptorHeap->GetSrvDescriptorHeap() };
 
-	IMGUI_CHECKVERSION();
+
+#ifdef _USE_IMGUI
+IMGUI_CHECKVERSION();
 	ImGui::CreateContext();
 	ImGui::StyleColorsDark();
 	ImGui_ImplWin32_Init(window.GetHwnd());
@@ -132,7 +137,9 @@ void Engine::Setting()
 		descriptorHeap->GetSrvDescriptorHeap(),
 		descriptorHeap->GetSrvDescriptorHeap()->GetCPUDescriptorHandleForHeapStart(),
 		descriptorHeap->GetSrvDescriptorHeap()->GetGPUDescriptorHandleForHeapStart());
+#endif // _USE_IMGUI
 
+	
 	Audio::Initialize();
 
 	Draw::Initialize(command.get()->GetCommandList(), graphicsPipelineState.get(), directinalLight.get());
@@ -160,8 +167,10 @@ void Engine::Setting()
 
 void Engine::PostDraw()
 {
+#ifdef _USE_IMGUI
 	//ImGuiの描画コマンド
 	ImGui_ImplDX12_RenderDrawData(ImGui::GetDrawData(), command->GetCommandList());
+#endif // _USE_IMGUI
 
 	//画面に描く処理はすべて終わり、画面に映すので、状態を遷移
 	//今回RenderTargetからPresentにする
@@ -170,9 +179,12 @@ void Engine::PostDraw()
 
 
 void Engine::NewFrame() {
+
+#ifdef _USE_IMGUI
 	ImGui_ImplDX12_NewFrame();
 	ImGui_ImplWin32_NewFrame();
 	ImGui::NewFrame();
+#endif // _USE_IMGUI
 
 	//コマンドを積み込んで確定させる//
 	resourceBarrierHelper->Transition(command->GetCommandList(), swapChain.get());
@@ -230,10 +242,12 @@ void Engine::End() {
 
 	Audio::Finalize();
 
+#ifdef _USE_IMGUI
 	//ImGuiの終了処理
 	ImGui_ImplDX12_Shutdown();
 	ImGui_ImplWin32_Shutdown();
 	ImGui::DestroyContext();
+#endif // _USE_IMGUI
 
 	window.Finalize();
 }
@@ -270,7 +284,7 @@ size_t Engine::GetProcessMemoryUsage() {
 
 void Engine::Debug()
 {
-#ifdef _DEBUG
+#ifdef _USE_IMGUI
 
 	ImGui::Begin("Debug Info");
 

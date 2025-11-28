@@ -7,15 +7,18 @@ GameScene::~GameScene()
 
 void GameScene::ImGui()
 {
-
-	if (ImGui::CollapsingHeader("Camera")) {
+#ifdef _USE_IMGUI
+if (ImGui::CollapsingHeader("Camera")) {
 		ImGui::DragFloat3("CameraPos", &cameraTransform_.translate.x);
 		ImGui::DragFloat3("CameraSize", &cameraTransform_.scale.x);
 		ImGui::DragFloat3("CameraRotate", &cameraTransform_.rotate.x);
 	}
 	camera_.get()->ImGui();
-	
+
 	particle_.get()->ImGui();
+#endif // _USE_IMGUI
+	
+	
 
 }
 

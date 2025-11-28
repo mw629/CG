@@ -4,8 +4,8 @@
 
 
 void ParticleManager::ImGui() {
-
-	if (ImGui::CollapsingHeader("Particle")) {
+#ifdef _USE_IMGUI
+if (ImGui::CollapsingHeader("Particle")) {
 		int i = 0;
 		for (auto it = particleData_.begin(); it != particleData_.end(); ++it, ++i) {
 
@@ -62,6 +62,8 @@ void ParticleManager::ImGui() {
 	if (ImGui::Button("Add Particle")) {
 		Emit();
 	}
+#endif // _USE_IMGUI
+	
 
 
 }

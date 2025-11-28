@@ -1,10 +1,16 @@
 #include "Camera.h"
 #include <Engine.h>
+
+#ifdef _USE_IMGUI
 #include <imgui.h>
+#endif // _USE_IMGUI
 
 void Camera::ImGui()
 {
+#ifdef _USE_IMGUI
+
 	ImGui::Checkbox("debugCamera", &isDebugCamera_);
+#endif // _USE_IMGUI
 }
 
 void Camera::Initialize() {

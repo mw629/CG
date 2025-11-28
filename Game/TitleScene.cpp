@@ -3,7 +3,9 @@
 
 void TitleScene::ImGui()
 {
-	ImGui::Text("TITLE");
+#ifdef _USE_IMGUI
+ImGui::Text("TITLE");
+#endif // _USE_IMGUI
 }
 
 void TitleScene::Initialize()

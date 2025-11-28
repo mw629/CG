@@ -1,6 +1,9 @@
 #include "GamePadInput.h"
 #include <cmath>
+
+#ifdef _USE_IMGUI
 #include <imgui.h>
+#endif // _USE_IMGUI
 
 namespace {
 	XINPUT_STATE currentState;
@@ -10,7 +13,8 @@ namespace {
 
 void GamePadInput::DrawImGui()
 {
-	bool press = PressButton(XINPUT_GAMEPAD_A);
+#ifdef _USE_IMGUI
+bool press = PressButton(XINPUT_GAMEPAD_A);
 	bool trigger = PushButton(XINPUT_GAMEPAD_A);
 	bool releas = ReleaseButton(XINPUT_GAMEPAD_A);
 	bool free = FreeButton(XINPUT_GAMEPAD_A);
@@ -28,6 +32,8 @@ void GamePadInput::DrawImGui()
 	ImGui::DragFloat3("LeftStick", &leftStick.x, 1.0f);
 	ImGui::DragFloat3("RightStick", &rightStick.x, 1.0f);
 	ImGui::End();
+#endif // _USE_IMGUI
+	
 
 }
 

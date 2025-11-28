@@ -1,12 +1,15 @@
 #include "WindowConfig.h"
-#include "imgui_impl_win32.h"
 
+#ifdef _USE_IMGUI
+#include<imgui.h>
 extern IMGUI_IMPL_API LRESULT ImGui_ImplWin32_WndProcHandler(HWND hWnd, UINT msg, WPARAM wParam, LPARAM lParam);
-
+#endif // _USE_IMGUI
 
 LRESULT WindowConfig::WindowProc(HWND hwnd, UINT msg, WPARAM wparam, LPARAM lparam)
 {
+#ifdef _USE_IMGUI
 	if (ImGui_ImplWin32_WndProcHandler(hwnd, msg, wparam, lparam)) { return true; }
+#endif // _USE_IMGUI
 	//メッセージに応じてゲーム固有の処理を行う
 	switch (msg) {
 		//ウィンドウが破棄された
@@ -14,7 +17,7 @@ LRESULT WindowConfig::WindowProc(HWND hwnd, UINT msg, WPARAM wparam, LPARAM lpar
 		//OSに対して、アプリ終了を伝える
 		PostQuitMessage(0);
 		return 0;
-	// Alt+Enterでフルスクリーン切り替え
+		// Alt+Enterでフルスクリーン切り替え
 	case WM_SYSKEYDOWN:
 		if (wparam == VK_RETURN && (lparam & (1 << 29))) {
 			// Alt+Enterが押された場合
@@ -24,6 +27,8 @@ LRESULT WindowConfig::WindowProc(HWND hwnd, UINT msg, WPARAM wparam, LPARAM lpar
 		}
 		break;
 	}
+
+
 	//標準のメッセージ処理を行う
 	return DefWindowProc(hwnd, msg, wparam, lparam);
 }
@@ -67,7 +72,7 @@ void WindowConfig::SetWindowData(const int32_t kClientWidth, const int32_t kClie
 		wc.hInstance,//インスタンスハンドル
 		nullptr);
 
-	
+
 }
 
 void WindowConfig::DrawWindow(const int32_t kClientWidth, const int32_t kClientHeight)
@@ -93,9 +98,9 @@ bool WindowConfig::ProcessMassage()
 		TranslateMessage(&msg);
 		DispatchMessage(&msg);
 	}
-	
-	
-	if(msg.message == WM_QUIT) {
+
+
+	if (msg.message == WM_QUIT) {
 		return true;
 	}
 

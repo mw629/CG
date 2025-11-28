@@ -1,5 +1,8 @@
 #include "TextureLoader.h"
-#include "../externals/imgui/imgui.h"
+
+#ifdef _USE_IMGUI
+#include <imgui.h>
+#endif // _USE_IMGUI
 
 bool TextureLoader::CheckFilePath(const std::string& filePath)
 {
@@ -29,12 +32,15 @@ bool TextureLoader::StockTextureData(const std::string& filePath,
 }
 
 void TextureLoader::Draw() {
-	if (ImGui::Begin("Texture List")) {
+#ifdef _USE_IMGUI
+if (ImGui::Begin("Texture List")) {
 		for (const auto& tex : texture_) {
 			ImGui::Text("%d | %s", tex.index, tex.filePath.c_str());
 		}
 	}
 	ImGui::End();
+#endif // _USE_IMGUI
+	
 }
 
 
