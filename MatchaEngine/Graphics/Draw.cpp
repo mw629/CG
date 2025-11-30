@@ -42,13 +42,19 @@ void Draw::DrawModel(Model* model)
 
 void Draw::DrawParticle(Particle* particle)
 {
+	// インスタンス数が0なら描画しない
+	const UINT instanceCount = static_cast<UINT>(particle->GetParticleNum());
+	if (instanceCount == 0) {
+		return;
+	}
+
 	preDraw(particle->GetShader(), particle->GetBlend());
 
 	commandList_->IASetVertexBuffers(0, 1, particle->GetVertexBufferView());//VBVを設定
 	commandList_->SetGraphicsRootConstantBufferView(0, particle->GetMatrial()->GetMaterialResource()->GetGPUVirtualAddress());
 	commandList_->SetGraphicsRootDescriptorTable(1, particle->GetInstancingSrvHandleGPU());
 	commandList_->SetGraphicsRootDescriptorTable(2, particle->GetTextureSrvHandleGPU());
-	commandList_->DrawInstanced(6, particle->GetParticleNum(), 0, 0);
+	commandList_->DrawInstanced(6, instanceCount, 0, 0);
 
 }
 

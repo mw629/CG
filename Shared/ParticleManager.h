@@ -17,6 +17,8 @@ private:
 	std::unique_ptr<Particle> particle_ = std::make_unique<Particle>();
 	std::list<ParticleData> particleData_;
 
+	ParticleData SetParticleData_;
+
 	Emitter emitter_;
 	std::mt19937 randomEngine;
 
@@ -24,7 +26,7 @@ private:
 	std::random_device seedGenerator_;
 
 	
-
+	bool isStop_=false;
 
 
 public:
@@ -34,10 +36,12 @@ public:
 	void Initialize();
 
 	void Initialize(Emitter emitter);
+	void Initialize(Emitter emitter,ParticleData particleData);
+	void Initialize(Emitter emitter, ParticleData particleData,int TextureHandle);
 
 	void Update(Matrix4x4 viewMatrix);
-	void Update(Matrix4x4 viewMatrix, ParticleData particleMove(ParticleData particleData));//動きに変化をつけたい場合
-
+	void Update(Matrix4x4 viewMatrix, int a);//動きに変化をつけたい場合
+	void Update(Emitter emitter, Matrix4x4 viewMatrix, int a);//動きに変化をつけたい場合
 	void Update(Matrix4x4 viewMatrix, Vector3 scale);
 
 	void Draw();
@@ -45,8 +49,17 @@ public:
 	ParticleData MakeNewParticle();
 	ParticleData MakeNewParticle(Vector3 scale);//サイズを変えれるnew
  
+	ParticleData particleMove(ParticleData p);
+	ParticleData particleMoveFire(ParticleData p);
+
+	void EmitSize();
+
+	void OnCollision(ParticleManager *particle);
+
 	void Emit();
 
+	void SetBlend(BlendMode blend) { particle_.get()->SetBlend(blend); }
 
+	std::list<ParticleData> GetParticleData() { return particle_.get()->GetParticleData(); }
 };
 

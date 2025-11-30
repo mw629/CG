@@ -7,11 +7,11 @@
 #include "RenderState.h"
 
 struct ParticleData {
-	Transform transform;
-	Vector3 velocity;
-	Vector4 color;
-	float lifeTime;
-	float currentTime = 0;
+	Transform transform = { {1.0f,1.0f,1.0f},{0.0f,0.0f,0.0f}, {0.0f,0.0f,0.0f} };
+	Vector3 velocity = {0.0f,0.0f,0.0f};
+	Vector4 color = {1.0f,1.0f,1.0f,1.0f};
+	float lifeTime=3.0f;
+	float currentTime = 0.0f;
 };
 
 class Particle
@@ -49,6 +49,7 @@ public:
 	static void SetDescriptorHeap(DescriptorHeap* descriptorHeap);
 
 	void Initialize();
+	void Initialize(int TextureHandle);
 
 	void CreateVertexData();
 	void CreateWVP();
@@ -61,6 +62,7 @@ public:
 
 	void CreateParticle();
 
+	void DeleteParticle(int ParticleNum);
 
 	void SetBillboard(bool flag) { isBillboard_ = flag; }
 
@@ -76,6 +78,7 @@ public:
 
 	int GetParticleNum() { return particleNum_; }
 
+	std::list<ParticleData> GetParticleData() { return particleData_; }
 
 private:
 	ShaderName shader_ = ShaderName::ParticleShader;

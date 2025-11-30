@@ -1,5 +1,9 @@
-c:\technicalschool\cg2\externals\directxtex\bin\desktop_2022_win10\x64\debug\directxtex.pch
 c:\technicalschool\cg2\externals\directxtex\bin\desktop_2022_win10\x64\debug\directxtex.pdb
+c:\technicalschool\cg2\externals\directxtex\bin\desktop_2022_win10\x64\debug\bcdirectcompute.obj
+c:\technicalschool\cg2\externals\directxtex\bin\desktop_2022_win10\x64\debug\bc6hbc7.obj
+c:\technicalschool\cg2\externals\directxtex\bin\desktop_2022_win10\x64\debug\bc4bc5.obj
+c:\technicalschool\cg2\externals\directxtex\bin\desktop_2022_win10\x64\debug\bc.obj
+c:\technicalschool\cg2\externals\directxtex\bin\desktop_2022_win10\x64\debug\directxtex.pch
 c:\technicalschool\cg2\externals\directxtex\bin\desktop_2022_win10\x64\debug\directxtexutil.obj
 c:\technicalschool\cg2\externals\directxtex\bin\desktop_2022_win10\x64\debug\directxtexwic.obj
 c:\technicalschool\cg2\externals\directxtex\bin\desktop_2022_win10\x64\debug\directxtextga.obj
@@ -17,10 +21,6 @@ c:\technicalschool\cg2\externals\directxtex\bin\desktop_2022_win10\x64\debug\dir
 c:\technicalschool\cg2\externals\directxtex\bin\desktop_2022_win10\x64\debug\directxtexconvert.obj
 c:\technicalschool\cg2\externals\directxtex\bin\desktop_2022_win10\x64\debug\directxtexcompressgpu.obj
 c:\technicalschool\cg2\externals\directxtex\bin\desktop_2022_win10\x64\debug\directxtexcompress.obj
-c:\technicalschool\cg2\externals\directxtex\bin\desktop_2022_win10\x64\debug\bcdirectcompute.obj
-c:\technicalschool\cg2\externals\directxtex\bin\desktop_2022_win10\x64\debug\bc6hbc7.obj
-c:\technicalschool\cg2\externals\directxtex\bin\desktop_2022_win10\x64\debug\bc4bc5.obj
-c:\technicalschool\cg2\externals\directxtex\bin\desktop_2022_win10\x64\debug\bc.obj
 c:\technicalschool\cg2\externals\directxtex\bin\desktop_2022_win10\x64\debug\directxtex.lib
 c:\technicalschool\cg2\externals\directxtex\bin\desktop_2022_win10\x64\debug\directxtex.tlog\cl.command.1.tlog
 c:\technicalschool\cg2\externals\directxtex\bin\desktop_2022_win10\x64\debug\directxtex.tlog\cl.items.tlog

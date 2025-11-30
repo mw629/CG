@@ -18,7 +18,7 @@ namespace {
 	DescriptorHeap* descriptorHeap_;
 }
 
-int Particle::DescriptorNum = 3;
+int Particle::DescriptorNum = 5;
 
 void Particle::SetDevice(ID3D12Device* device)
 {
@@ -41,6 +41,16 @@ void Particle::Initialize()
 
 	std::unique_ptr<Texture> texture = std::make_unique<Texture>();
 	textureSrvHandleGPU_ = texture.get()->TextureData(texture.get()->CreateTexture("resources/circle.png"));
+
+	material_ = std::make_unique<MaterialFactory>();
+	material_->CreateMatrial(device_, false);
+	CreateParticle();
+}
+
+void Particle::Initialize(int TextureHandle)
+{
+	std::unique_ptr<Texture> texture = std::make_unique<Texture>();
+	textureSrvHandleGPU_ = texture.get()->TextureData(TextureHandle);
 
 	material_ = std::make_unique<MaterialFactory>();
 	material_->CreateMatrial(device_, false);
@@ -97,8 +107,8 @@ void Particle::CreateSRV()
 	instancingSrvDesc_.Buffer.Flags = D3D12_BUFFER_SRV_FLAG_NONE;
 	instancingSrvDesc_.Buffer.NumElements = particleMaxNum_;
 	instancingSrvDesc_.Buffer.StructureByteStride = sizeof(ParticleForGPU);
-	instancingSrvHandleCPU_ = GetCPUDescriptorHandle(descriptorHeap_->GetSrvDescriptorHeap(), descriptorHeap_->GetDescriptorSizeSRV(), DescriptorNum);
-	instancingSrvHandleGPU_ = GetGPUDescriptorHandle(descriptorHeap_->GetSrvDescriptorHeap(), descriptorHeap_->GetDescriptorSizeSRV(), DescriptorNum);
+	instancingSrvHandleCPU_ = GetCPUDescriptorHandle(descriptorHeap_->GetSrvDescriptorHeap(), descriptorHeap_->GetDescriptorSizeSRV());
+	instancingSrvHandleGPU_ = GetGPUDescriptorHandle(descriptorHeap_->GetSrvDescriptorHeap(), descriptorHeap_->GetDescriptorSizeSRV());
 
 	device_->CreateShaderResourceView(instancingResource_.Get(), &instancingSrvDesc_, instancingSrvHandleCPU_);
 }
@@ -113,58 +123,72 @@ void Particle::CreateParticle()
 	DescriptorNum++;
 }
 
+void Particle::DeleteParticle(int ParticleNum)
+{
+	int index = 0;
+	for (auto it = particleData_.begin(); it != particleData_.end(); ) {
+		if (index == ParticleNum) {
+			it = particleData_.erase(it);
+			return;
+		}
+		++it;
+		++index;
+	}
+}
+
+
 void Particle::SettingWvp(Matrix4x4 viewMatrix)
 {
-	Matrix4x4 billboard = viewMatrix;
-	billboard = Inverse(billboard);
-	billboard.m[3][0] = billboard.m[3][1] = billboard.m[3][2] = 0.0f;
+    Matrix4x4 billboard = viewMatrix;
+    billboard = Inverse(billboard);
+    billboard.m[3][0] = billboard.m[3][1] = billboard.m[3][2] = 0.0f;
 
-	Matrix4x4 projectionMatri = MakePerspectiveFovMatrix(0.45f, float(kClientWidth) / float(kClientHeight), 0.1f, 100.0f);
-	Matrix4x4 worldMatrixObj;
+    Matrix4x4 projectionMatri = MakePerspectiveFovMatrix(0.45f, float(kClientWidth) / float(kClientHeight), 0.1f, 100.0f);
 
-	auto particleIter = particleData_.begin();
-	auto instancingIter = instancingData_;
+    auto particleIter = particleData_.begin();
+    auto instancingIter = instancingData_;
 
-	int i = 0;
-	while (particleIter != particleData_.end()) {
-		if (!isBillboard_) {
-			worldMatrixObj = MakeAffineMatrix(particleIter->transform.translate, particleIter->transform.scale, particleIter->transform.rotate);
-		}
-		else {
-			worldMatrixObj = MultiplyMatrix4x4(MakeAffineMatrix(particleIter->transform.translate, particleIter->transform.scale, particleIter->transform.rotate), billboard);
-		}
-		Matrix4x4 worldViewProjectionMatrixObj = MultiplyMatrix4x4(worldMatrixObj, MultiplyMatrix4x4(viewMatrix, projectionMatri));
+    int i = 0;
+    while (particleIter != particleData_.end() && i < particleMaxNum_) {
+        Matrix4x4 worldMatrixObj;
+        if (!isBillboard_) {
+            worldMatrixObj = MakeAffineMatrix(particleIter->transform.translate, particleIter->transform.scale, particleIter->transform.rotate);
+        } else {
+            worldMatrixObj = MultiplyMatrix4x4(MakeAffineMatrix(particleIter->transform.translate, particleIter->transform.scale, particleIter->transform.rotate), billboard);
+        }
+        Matrix4x4 worldViewProjectionMatrixObj = MultiplyMatrix4x4(worldMatrixObj, MultiplyMatrix4x4(viewMatrix, projectionMatri));
 
-		instancingIter[i].WVP = worldViewProjectionMatrixObj;
-		instancingIter[i].World = worldMatrixObj;
-		instancingIter[i].color = particleIter->color;
+        instancingIter[i].WVP = worldViewProjectionMatrixObj;
+        instancingIter[i].World = worldMatrixObj;
+        instancingIter[i].color = particleIter->color;
 
-		++particleIter;
-		++i;
-	}
+        ++particleIter;
+        ++i;
+    }
+
+    // 実際に書き込んだ要素数を反映
+    particleNum_ = i;
 }
 
 void Particle::SetData(std::list<ParticleData> particleData)
 {
-	particleData_ = particleData;
+	particleData_ = std::move(particleData);
 }
 
 void Particle::Updata(Matrix4x4 viewMatrix, std::list<ParticleData> particleData)
 {
-	SetData(particleData);
+    SetData(particleData);
 
-	particleNum_ = 0;
-	for (std::list<ParticleData>::iterator particleIterator = particleData_.begin();
-		particleIterator != particleData_.end(); ) {
-		if (particleIterator->lifeTime <= particleIterator->currentTime) {
-			particleIterator = particleData_.erase(particleIterator);
-			continue;
-		}
+    // 寿命切れを削除
+    for (auto it = particleData_.begin(); it != particleData_.end(); ) {
+        if (it->lifeTime <= it->currentTime) {
+            it = particleData_.erase(it);
+        } else {
+            ++it;
+        }
+    }
 
-		SettingWvp(viewMatrix);
-
-		++particleNum_;
-		++particleIterator;
-	}
+    // 一度だけWVPを更新（最大particleMaxNum_まで）
+    SettingWvp(viewMatrix);
 }
 
