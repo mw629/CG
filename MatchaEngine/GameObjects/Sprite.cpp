@@ -20,6 +20,7 @@ void Sprite::SetScreenSize(Vector2 screenSize)
 	kClientHeight = screenSize.y;
 }
 
+
 Sprite::Sprite()
 {
 	transform_ = { {1.0f,1.0f,1.0f},{0.0f,0.0f,0.0f},{0.0f,0.0f,0.0f} };
@@ -45,11 +46,15 @@ Sprite::~Sprite()
 	delete material_;
 }
 
-void Sprite::Initialize(int textureHandle)
+void Sprite::Initialize(SpriteData spriteData, int textureHandle)
 {
 	std::unique_ptr<Texture> texture = std::make_unique<Texture>();
-
 	textureSrvHandleGPU_ = texture.get()->TextureData(textureHandle);
+
+	SetTransform(spriteData.transform);
+	SetSize(spriteData.size);
+	SetTextureArea(spriteData.textureArea);
+
 
 	material_ = new MaterialFactory();
 	material_->CreateMatrial(device_, false);
@@ -76,15 +81,23 @@ void Sprite::CreateVertexData()
 	
 	vertexResource_->Map(0, nullptr, reinterpret_cast<void**>(&vertexData_));
 	//１枚目の三角形
-	vertexData_[0].position = { 0.0f,360.0f,0.0f,1.0f };//左下
-	vertexData_[0].texcoord = { 0.0f,1.0f };
-	vertexData_[1].position = { 0.0f,0.0f,0.0f,1.0f };//左上
-	vertexData_[1].texcoord = { 0.0f,0.0f };
-	vertexData_[2].position = { 640.0f,360.0f,0.0f,1.0f };//右下
-	vertexData_[2].texcoord = { 1.0f,1.0f };
+
+	leftTop_.x = transform_.translate.x - (size_.x / 2.0f);
+	leftTop_.y = transform_.translate.y - (size_.y / 2.0f);
+	rigthBottom_.x = transform_.translate.x + (size_.x / 2.0f);
+	rigthBottom_.y = transform_.translate.y + (size_.y / 2.0f);
+
+	//１枚目の三角形
+	vertexData_[0].position = { leftTop_.x,rigthBottom_.y,0.0f,1.0f };//左下
+	vertexData_[0].texcoord = { textureArea_[0].x,textureArea_[1].y };
+	vertexData_[1].position = { leftTop_.x,leftTop_.y,0.0f,1.0f };//左上
+	vertexData_[1].texcoord = { textureArea_[0].x,textureArea_[0].y };
+	vertexData_[2].position = { rigthBottom_.x,rigthBottom_.y,0.0f,1.0f };//右下
+	vertexData_[2].texcoord = { textureArea_[1].x,textureArea_[1].y };
 	//2枚目の三角形
-	vertexData_[3].position = { 640.0f,0.0f,0.0f,1.0f };//右上
-	vertexData_[3].texcoord = { 1.0f,0.0f };
+	vertexData_[3].position = { rigthBottom_.x,leftTop_.y,0.0f,1.0f };//右上
+	vertexData_[3].texcoord = { textureArea_[1].x,textureArea_[0].y };
+
 
 }
 
@@ -134,19 +147,45 @@ void Sprite::SettingWvp()
 	Matrix4x4 worldMatrix = MakeAffineMatrix(transform_.translate, transform_.scale, transform_.rotate);
 	Matrix4x4 worldViewProjectionMatrix = MultiplyMatrix4x4(worldMatrix, MultiplyMatrix4x4(IdentityMatrix(), MakeOrthographicMatrix(0, float(kClientWidth), 0, float(kClientHeight), 0.0f, 100.0f)));
 	*wvpData_ = { worldViewProjectionMatrix,worldMatrix };
+
 }
 
-void Sprite::SetSize(Vector2 leftTop, Vector2 rigthBottom)
+void Sprite::SetTransform(Transform transform) {
+	transform_ = transform;
+}
+
+void Sprite::SetSize(Vector2 size)
 {
-	//１枚目の三角形
-	vertexData_[0].position = { leftTop.x,rigthBottom.y,0.0f,1.0f };//左下
-	vertexData_[0].texcoord = { 0.0f,1.0f };
-	vertexData_[1].position = { leftTop.x,leftTop.y,0.0f,1.0f };//左上
-	vertexData_[1].texcoord = { 0.0f,0.0f };
-	vertexData_[2].position = { rigthBottom.x,rigthBottom.y,0.0f,1.0f };//右下
-	vertexData_[2].texcoord = { 1.0f,1.0f };
-	//2枚目の三角形
-	vertexData_[3].position = { rigthBottom.x,leftTop.y,0.0f,1.0f };//右上
-	vertexData_[3].texcoord = { 1.0f,0.0f };
+	size_ = size;
 }
 
+void Sprite::SetTextureArea(Vector2 textureArea[2])
+{
+	textureArea_[0] = textureArea[0];
+	textureArea_[1] = textureArea[1];
+}
+
+void Sprite::Update(SpriteData spriteData)
+{
+	SetTransform(spriteData.transform);
+	SetSize(spriteData.size);
+	SetTextureArea(spriteData.textureArea);
+
+	leftTop_.x = transform_.translate.x - (size_.x / 2.0f);
+	leftTop_.y = transform_.translate.y - (size_.y / 2.0f);
+	rigthBottom_.x = transform_.translate.x + (size_.x / 2.0f);
+	rigthBottom_.y = transform_.translate.y + (size_.y / 2.0f);
+
+	//１枚目の三角形
+	vertexData_[0].position = { leftTop_.x,rigthBottom_.y,0.0f,1.0f };//左下
+	vertexData_[0].texcoord = { textureArea_[0].x,textureArea_[1].y};
+	vertexData_[1].position = { leftTop_.x,leftTop_.y,0.0f,1.0f };//左上
+	vertexData_[1].texcoord = { textureArea_[0].x,textureArea_[0].y };
+	vertexData_[2].position = { rigthBottom_.x,rigthBottom_.y,0.0f,1.0f };//右下
+	vertexData_[2].texcoord = { textureArea_[1].x,textureArea_[1].y };
+	//2枚目の三角形
+	vertexData_[3].position = { rigthBottom_.x,leftTop_.y,0.0f,1.0f };//右上
+	vertexData_[3].texcoord = { textureArea_[1].x,textureArea_[0].y };
+
+	SettingWvp();
+}

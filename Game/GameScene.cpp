@@ -18,6 +18,8 @@ void GameScene::ImGui()
 	for (int i = 0, n = static_cast<int>(particle_.size()); i < n; ++i) {
 		particle_[i].get()->ImGui();
 	}
+	ImGui::DragFloat3("SpritePos", &spriteData_.transform.translate.x);
+
 #endif // _USE_IMGUI
 }
 
@@ -60,9 +62,8 @@ void GameScene::Initialize() {
 	particle1.get()->Initialize(emitter1, data1, texture);
 	particle_.push_back(std::move(particle1));
 
-	texture = texture_.get()->CreateTexture("resources/sousa.png");
-	sprite_.get()->Initialize(texture);
-	sprite_.get()->SetSize({ 0.0f,656.0f }, { 320.0f ,720.0f});
+	texture = texture_.get()->CreateTexture("resources/uvChecker.png");
+	sprite_.get()->Initialize(spriteData_,texture);
 }
 
 void GameScene::Update() {
@@ -71,8 +72,7 @@ void GameScene::Update() {
 	camera_.get()->Update();
 	Matrix4x4 view = camera_.get()->GetViewMatrix();
 
-	sprite_.get()->SettingWvp();
-
+	sprite_.get()->Update(spriteData_);
 
 	model_->SettingWvp(view);
 

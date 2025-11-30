@@ -5,6 +5,12 @@
 #include "MaterialFactory.h"
 #include "RenderState.h"
 
+struct SpriteData{
+	Transform transform;
+	Vector2 size;
+	Vector2 textureArea[2];
+};
+
 class Sprite
 {
 private:
@@ -26,6 +32,15 @@ private:
 	TransformationMatrix* wvpData_;
 
 
+	Vector2 size_ = { 200,200 };
+	Vector2 textureArea_[2] = { {0.0f,0.0f},{1.0f,1.0f} };
+
+	Vector2 leftTop_;
+	Vector2 rigthBottom_;
+	Vector2 textureLeftTop_;
+	Vector2 textureRigthBottom_;
+
+
 	
 public:
 	Sprite();
@@ -34,7 +49,7 @@ public:
 	static void SetDevice(ID3D12Device* device);
 	static void SetScreenSize(Vector2 screenSize);
 
-	void Initialize(int textureHandle);
+	void Initialize(SpriteData spriteData, int textureHandle);
 
 	void CreateVertexData();
 
@@ -46,7 +61,13 @@ public:
 
 	void SettingWvp();
 
-	void SetSize(Vector2 leftTop, Vector2 rigthBottom);
+	void SetTransform(Transform transform);
+
+	void SetSize(Vector2 size);
+
+	void SetTextureArea(Vector2 textureArea[2]);
+
+	void Update(SpriteData spriteData);
 
 	void SetMaterialLighting(bool isActiv) { material_->SetMaterialLighting(isActiv); }
 

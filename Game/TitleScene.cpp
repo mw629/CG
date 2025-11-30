@@ -15,9 +15,6 @@ void TitleScene::Initialize()
 	std::unique_ptr<Texture> texture = std::make_unique<Texture>();
 	int backImageHandle = texture.get()->CreateTexture("resources/nightSky.png");
 
-	backImage_ = std::make_unique<Sprite>();
-	backImage_->Initialize(backImageHandle);
-	backImage_->CreateSprite();
 	spritePos[0] = { 0.0f,0.0f };
 	spritePos[1] = { 1280.0f, 720.0f };
 
@@ -28,8 +25,6 @@ void TitleScene::Initialize()
 void TitleScene::Update()
 {
 
-	backImage_.get()->SetSize(spritePos[0], spritePos[1]);
-	backImage_->SettingWvp();
 
 
 	if (Input::PushKey(DIK_SPACE)||GamePadInput::PressButton(XINPUT_GAMEPAD_A)) {
@@ -40,5 +35,4 @@ void TitleScene::Update()
 
 void TitleScene::Draw()
 {
-	Draw::DrawSprite(backImage_.get());
 }
