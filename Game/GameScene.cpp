@@ -31,9 +31,10 @@ void GameScene::Initialize() {
 	camera_.get()->SetTransform(cameraTransform_);
 	camera_.get()->Update();
 
-	ModelData modelData = LoadObjFile("resources/Stick", "Stick.obj");
+	ModelData modelData = AssimpLoadObjFile("resources/Stick", "Stick.obj");
 
 	model_.get()->Initialize(modelData);
+	
 	model_.get()->SetTransform(modelTransform_);
 
 	Emitter emitter;

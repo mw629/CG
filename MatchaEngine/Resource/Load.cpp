@@ -150,9 +150,9 @@ ModelData AssimpLoadObjFile(const std::string& directoryPath, const std::string&
 			assert(face.mNumIndices == 3);//三角形のみサポート
 			for (uint32_t element = 0; element < face.mNumIndices; ++element) {
 				uint32_t vertexIndex = face.mIndices[element];
-				aiVector3D& postion = mesh->mVertices[element];
-				aiVector3D& normal = mesh->mNormals[element];
-				aiVector3D& texcoord = mesh->mTextureCoords[0][element];
+				aiVector3D& postion = mesh->mVertices[vertexIndex];      
+				aiVector3D& normal = mesh->mNormals[vertexIndex];       
+				aiVector3D& texcoord = mesh->mTextureCoords[0][vertexIndex]; 
 				VertexData vertex;
 				vertex.position = { postion.x,postion.y, postion.z,1.0f };
 				vertex.normal = { normal.x,normal.y, normal.z };
@@ -174,6 +174,13 @@ ModelData AssimpLoadObjFile(const std::string& directoryPath, const std::string&
 		}
 	}
 
+	std::unique_ptr<Texture> texture = std::make_unique<Texture>();
+
+	modelData.textureIndex = texture->CreateTexture(modelData.material.textureDilePath);
+
+	objManager.get()->SetModelList(modelData, directoryPath, filename);
+
+	return modelData;
 
 }
 
