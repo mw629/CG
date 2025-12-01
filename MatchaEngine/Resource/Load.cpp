@@ -8,6 +8,10 @@
 #include "Texture.h"
 #include "ModelManager.h"
 
+#include <assimp/Importer.hpp>
+#include <assimp/scene.h>
+#include <assimp/postprocess.h>
+
 
 /// オブジェクトの読み込み///
 
@@ -121,6 +125,39 @@ ModelData LoadObjFile(const std::string& directoryPath, const std::string& filen
 
 }
 
+ModelData AssimpLoadObjFile(const std::string& directoryPath, const std::string& filename)
+{
+	std::unique_ptr<ModelManager> objManager = std::make_unique<ModelManager>();
+
+	if (objManager.get()->DuplicateConfirmation(directoryPath, filename)) {
+		return objManager.get()->DuplicateReturn(directoryPath, filename);
+	}
+
+	Assimp::Importer impoter;
+	std::string filePath = directoryPath + "/" + filename;
+	const aiScene* scene = impoter.ReadFile(filePath.c_str(), aiProcess_FlipWindingOrder | aiProcess_FlipUVs);
+	assert(scene->HasMeshes());
+
+	for (uint32_t meshIndex = 0; meshIndex < scene->mNumMeshes; ++meshIndex) {
+		aiMesh* mesh = scene->mMeshes[meshIndex];
+		assert(mesh->HasNormals());//法線がないMeshは今回非対称
+		assert(mesh->HasTextureCoords(0));//TexcoordがないMeshは今回非対応
+		//ここからMeshの中身(Face)の解析を行っていく
+		for (uint32_t faceIndex = 0; faceIndex < mesh->mNumFaces; ++faceIndex) {
+			aiFace& face = mesh->mFaces[faceIndex];
+			assert(face.mNumIndices == 3);//三角形のみサポート
+			for (uint32_t element = 0; element < face.mNumIndices; ++element) {
+				uint32_t vertexIndex = face.mIndices[element];
+				aiVector3D& postion =mesh->mVertices[element];
+				aiVector3D& postion = mesh->mVertices[element];
+				VertexData vertex;
+				vertex.position = { postion.x,postion.y, postion.z,1.0f };
+			}
+		}
+	}
+	
+
+}
 
 ///テクスチャの読み込み///
 

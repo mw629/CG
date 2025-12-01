@@ -10,6 +10,9 @@ MaterialData LoadMaterialTemplateFile(const std::string& directoryPath, const st
 
 ModelData LoadObjFile(const std::string& directoryPath, const std::string& filename);
 
+ModelData AssimpLoadObjFile(const std::string& directoryPath, const std::string& filename);
+
+
 ///テクスチャの読み込み///
 
 DirectX::ScratchImage LoadTexture(const std::string& filePath);
