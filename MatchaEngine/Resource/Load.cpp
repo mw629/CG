@@ -133,6 +133,8 @@ ModelData AssimpLoadObjFile(const std::string& directoryPath, const std::string&
 		return objManager.get()->DuplicateReturn(directoryPath, filename);
 	}
 
+	ModelData modelData;
+
 	Assimp::Importer impoter;
 	std::string filePath = directoryPath + "/" + filename;
 	const aiScene* scene = impoter.ReadFile(filePath.c_str(), aiProcess_FlipWindingOrder | aiProcess_FlipUVs);
@@ -148,14 +150,30 @@ ModelData AssimpLoadObjFile(const std::string& directoryPath, const std::string&
 			assert(face.mNumIndices == 3);//三角形のみサポート
 			for (uint32_t element = 0; element < face.mNumIndices; ++element) {
 				uint32_t vertexIndex = face.mIndices[element];
-				aiVector3D& postion =mesh->mVertices[element];
 				aiVector3D& postion = mesh->mVertices[element];
+				aiVector3D& normal = mesh->mNormals[element];
+				aiVector3D& texcoord = mesh->mTextureCoords[0][element];
 				VertexData vertex;
 				vertex.position = { postion.x,postion.y, postion.z,1.0f };
+				vertex.normal = { normal.x,normal.y, normal.z };
+				vertex.texcoord = { texcoord.x,texcoord.y };
+				//右手から左手への変換
+				vertex.position.x *= -1.0f;
+				vertex.normal.x *= -1.0f;
+				modelData.vertices.push_back(vertex);
+			}
+		}
+		//matrialを解析する
+		for (uint32_t materialIndex = 0; materialIndex < scene->mNumMaterials; ++materialIndex) {
+			aiMaterial* material = scene->mMaterials[materialIndex];
+			if (material->GetTextureCount(aiTextureType_DIFFUSE) != 0) {
+				aiString textureFilePath;
+				material->GetTexture(aiTextureType_DIFFUSE, 0, &textureFilePath);
+				modelData.material.textureDilePath = directoryPath + "/" + textureFilePath.C_Str();
 			}
 		}
 	}
-	
+
 
 }
 
