@@ -7,8 +7,8 @@
 #include "VariableTypes/Vector2Int.h"
 #include "VariableTypes/Vector3.h"
 #include "VariableTypes/Vector3Int.h"
-
 #include "VariableTypes/Matrix4x4.h"
+
 
 ///構造体///
 
@@ -95,11 +95,23 @@ struct MaterialData
 	std::string textureDilePath;
 };
 
+struct Node {
+	Matrix4x4 localMatrix = {
+		1.0f,0.0f,0.0f,0.0f,
+		0.0f,1.0f,0.0f,0.0f,
+		0.0f,0.0f,1.0f,0.0f,
+		0.0f,0.0f,0.0f,1.0f,
+	};
+	std::string name;
+	std::vector<Node> children;
+};
+
 struct ModelData
 {
 	std::vector<VertexData> vertices;
 	MaterialData material;
 	int textureIndex;
+	Node rootNode;
 };
 
 struct Segment {

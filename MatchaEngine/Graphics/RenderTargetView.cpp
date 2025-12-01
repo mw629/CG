@@ -8,10 +8,6 @@ RenderTargetView::RenderTargetView()
 	clearColor[2] = 0.5f;
 	clearColor[3] = 1.0f;//青っぽい色。RGBAの順
 
-	clearColor[0] = 0.0f;
-	clearColor[1] = 0.0f;
-	clearColor[2] = 0.0f;
-	clearColor[3] = 1.0f;//青っぽい色。RGBAの順
 }
 
 void RenderTargetView::CreateRenderTargetView(ID3D12Device* device, std::vector<Microsoft::WRL::ComPtr<ID3D12Resource>> swapChainResources, ID3D12DescriptorHeap* rtvDescriptorHeap)

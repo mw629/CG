@@ -8,9 +8,7 @@
 #include "Texture.h"
 #include "ModelManager.h"
 
-#include <assimp/Importer.hpp>
-#include <assimp/scene.h>
-#include <assimp/postprocess.h>
+
 
 
 /// オブジェクトの読み込み///
@@ -137,7 +135,8 @@ ModelData AssimpLoadObjFile(const std::string& directoryPath, const std::string&
 
 	Assimp::Importer impoter;
 	std::string filePath = directoryPath + "/" + filename;
-	const aiScene* scene = impoter.ReadFile(filePath.c_str(), aiProcess_FlipWindingOrder | aiProcess_FlipUVs);
+	const aiScene* scene = impoter.ReadFile(filePath.c_str(), 
+		aiProcess_FlipWindingOrder | aiProcess_FlipUVs);
 	assert(scene->HasMeshes());
 
 	for (uint32_t meshIndex = 0; meshIndex < scene->mNumMeshes; ++meshIndex) {
@@ -174,6 +173,8 @@ ModelData AssimpLoadObjFile(const std::string& directoryPath, const std::string&
 		}
 	}
 
+	modelData.rootNode = ReadNode(scene->mRootNode);
+
 	std::unique_ptr<Texture> texture = std::make_unique<Texture>();
 
 	modelData.textureIndex = texture->CreateTexture(modelData.material.textureDilePath);
@@ -182,6 +183,25 @@ ModelData AssimpLoadObjFile(const std::string& directoryPath, const std::string&
 
 	return modelData;
 
+}
+
+Node ReadNode(aiNode* node)
+{
+	Node result;
+	aiMatrix4x4 aiLocalMatrix = node->mTransformation;//nodeのLocalMatrixを取得
+	aiLocalMatrix.Transpose();//列ベクトル形式を行ベクトル形式に転置
+	for (int i = 0; i < 4; i++) {
+		for (int j = 0; j < 4; j++) {
+			result.localMatrix.m[i][j] = aiLocalMatrix[i][j];//ほかの要素も同様に
+		}
+	}
+	result.name = node->mName.C_Str();//Nodeの名前
+	result.children.resize(node->mNumChildren);//子供の数だけ確保
+	for (uint32_t childIndex = 0; childIndex < node->mNumChildren; ++childIndex) {
+		//再帰的に読んで階層構造を作っていく
+		result.children[childIndex] = ReadNode(node->mChildren[childIndex]);
+	}
+	return result;
 }
 
 ///テクスチャの読み込み///

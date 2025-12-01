@@ -4,6 +4,10 @@
 #include <fstream>
 #include <sstream>
 
+#include <assimp/Importer.hpp>
+#include <assimp/scene.h>
+#include <assimp/postprocess.h>
+
 /// オブジェクトの読み込み///
 
 MaterialData LoadMaterialTemplateFile(const std::string& directoryPath, const std::string& filename);
@@ -12,6 +16,7 @@ ModelData LoadObjFile(const std::string& directoryPath, const std::string& filen
 
 ModelData AssimpLoadObjFile(const std::string& directoryPath, const std::string& filename);
 
+Node ReadNode(aiNode* node);
 
 ///テクスチャの読み込み///
 

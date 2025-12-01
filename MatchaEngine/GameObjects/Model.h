@@ -44,7 +44,7 @@ public:
 
 	void CreateModel();
 
-
+	
 	
 	void SetPos(Vector3 velocity) { transform_.translate = velocity; }
 	void SetAlive(bool flag) { isAlive = flag; }

@@ -31,7 +31,7 @@ void GameScene::Initialize() {
 	camera_.get()->SetTransform(cameraTransform_);
 	camera_.get()->Update();
 
-	ModelData modelData = AssimpLoadObjFile("resources/Stick", "Stick.obj");
+	ModelData modelData = AssimpLoadObjFile("resources/Plane", "Plane.gltf");
 
 	model_.get()->Initialize(modelData);
 	
@@ -89,5 +89,5 @@ void GameScene::Draw() {
 	for (int i = 0, n = static_cast<int>(particle_.size()); i < n; ++i) {
 		particle_[i].get()->Draw();
 	}
-	Draw::DrawSprite(sprite_.get());
+	//Draw::DrawSprite(sprite_.get());
 }
