@@ -23,4 +23,5 @@ public:
     void Update();
     Matrix4x4 GetViewMatrix()const { return viewMatrix_; }
     Vector3 GetTarget() const { return target_; }
+    Vector3 GetEye() const { return eye_; }
 };

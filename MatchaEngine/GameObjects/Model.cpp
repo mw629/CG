@@ -98,8 +98,8 @@ void Model::SettingWvp(Matrix4x4 viewMatrix)
 	Matrix4x4 worldMatrixObj = MakeAffineMatrix(transform_.translate, transform_.scale, transform_.rotate);
 	Matrix4x4 worldViewProjectionMatrixObj = MultiplyMatrix4x4(worldMatrixObj, MultiplyMatrix4x4(viewMatrix, projectionMatri));
 
-	wvpData_->WVP = worldViewProjectionMatrixObj * modelData_.rootNode.localMatrix;
-	wvpData_->World = worldMatrixObj * modelData_.rootNode.localMatrix;
+	wvpData_->WVP = MultiplyMatrix4x4(modelData_.rootNode.localMatrix, worldViewProjectionMatrixObj);
+	wvpData_->World = MultiplyMatrix4x4(modelData_.rootNode.localMatrix, worldMatrixObj);
 };
 
 

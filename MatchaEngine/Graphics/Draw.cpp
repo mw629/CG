@@ -26,10 +26,11 @@ void Draw::preDraw(ShaderName shader, BlendMode blend)
 
 }
 
-void Draw::DrawModel(Model* model)
+void Draw::DrawModel(Model* model, Camera* camera)
 {
 	preDraw(model->GetShader(), model->GetBlend());
 	commandList_->SetGraphicsRootConstantBufferView(3, directinalLight_->GetDirectinalLightResource()->GetGPUVirtualAddress());
+	commandList_->SetGraphicsRootConstantBufferView(4, camera->GetCameraResource()->GetGPUVirtualAddress());
 
 	//objectの描画
 	commandList_->IASetVertexBuffers(0, 1, model->GetVertexBufferView());//VBVを設定
@@ -72,11 +73,12 @@ void Draw::DrawSprite(Sprite* sprite)
 	commandList_->DrawIndexedInstanced(6, 1, 0, 0, 0);
 }
 
-void Draw::DrawShpere(Sphere* sphere)
+void Draw::DrawShpere(Sphere* sphere, Camera* camera)
 {
 
 	preDraw(sphere->GetShader(), sphere->GetBlend());
 	commandList_->SetGraphicsRootConstantBufferView(3, directinalLight_->GetDirectinalLightResource()->GetGPUVirtualAddress());
+	commandList_->SetGraphicsRootConstantBufferView(4, camera->GetCameraResource()->GetGPUVirtualAddress());
 
 	//commandList_->IASetIndexBuffer(shpere->GetIndexBufferView());//IBVを設定
 	commandList_->IASetVertexBuffers(0, 1, sphere->GetVertexBufferView());//VBVを設定
@@ -86,10 +88,11 @@ void Draw::DrawShpere(Sphere* sphere)
 	commandList_->DrawInstanced(static_cast<UINT>(pow(sphere->GetSubdivision(), 2) * 6), 1, 0, 0);
 }
 
-void Draw::DrawTriangle(Triangle* triangle)
+void Draw::DrawTriangle(Triangle* triangle, Camera* camera)
 {
 	preDraw(triangle->GetShader(), triangle->GetBlend());
 	commandList_->SetGraphicsRootConstantBufferView(3, directinalLight_->GetDirectinalLightResource()->GetGPUVirtualAddress());
+	commandList_->SetGraphicsRootConstantBufferView(4, camera->GetCameraResource()->GetGPUVirtualAddress());
 
 	commandList_->IASetVertexBuffers(0, 1, triangle->GetVertexBufferView());//VBVを設定
 	commandList_->SetGraphicsRootConstantBufferView(0, triangle->GetMatrial()->GetMaterialResource()->GetGPUVirtualAddress());

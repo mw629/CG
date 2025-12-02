@@ -11,6 +11,7 @@
 #include "../GameObjects/Triangle.h"
 #include "../GameObjects/Line.h"
 #include "../GameObjects/Grid.h"
+#include "../GameObjects/Camera.h"
 #include "DirectinalLight.h"
 
 class Draw {
@@ -20,15 +21,15 @@ public:
 
 	static void preDraw(ShaderName shader, BlendMode blend);
 
-	static void DrawModel(Model* model);
+	static void DrawModel(Model* model, Camera* camera);
 
 	static void DrawParticle(Particle* particle);
 
 	static void DrawSprite(Sprite* sprite);
 
-	static void DrawShpere(Sphere* sphere);
+	static void DrawShpere(Sphere* sphere, Camera* camera);
 
-	static void DrawTriangle(Triangle* triangle);
+	static void DrawTriangle(Triangle* triangle, Camera* camera);
 
 	static void DrawLine(Line* line);
 

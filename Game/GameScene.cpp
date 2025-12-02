@@ -9,11 +9,7 @@ GameScene::~GameScene()
 void GameScene::ImGui()
 {
 #ifdef _USE_IMGUI
-	if (ImGui::CollapsingHeader("Camera")) {
-		ImGui::DragFloat3("CameraPos", &cameraTransform_.translate.x);
-		ImGui::DragFloat3("CameraSize", &cameraTransform_.scale.x);
-		ImGui::DragFloat3("CameraRotate", &cameraTransform_.rotate.x);
-	}
+	
 	camera_.get()->ImGui();
 	for (int i = 0, n = static_cast<int>(particle_.size()); i < n; ++i) {
 		particle_[i].get()->ImGui();
@@ -31,7 +27,7 @@ void GameScene::Initialize() {
 	camera_.get()->SetTransform(cameraTransform_);
 	camera_.get()->Update();
 
-	ModelData modelData = AssimpLoadObjFile("resources/Plane", "Plane.gltf");
+	ModelData modelData = AssimpLoadObjFile("resources/obj", "axis.obj");
 
 	model_.get()->Initialize(modelData);
 	
@@ -69,7 +65,6 @@ void GameScene::Initialize() {
 
 void GameScene::Update() {
 
-	camera_.get()->SetTransform(cameraTransform_);
 	camera_.get()->Update();
 	Matrix4x4 view = camera_.get()->GetViewMatrix();
 
@@ -85,9 +80,9 @@ void GameScene::Update() {
 }
 
 void GameScene::Draw() {
-	Draw::DrawModel(model_.get());
+	Draw::DrawModel(model_.get(), camera_.get());
 	for (int i = 0, n = static_cast<int>(particle_.size()); i < n; ++i) {
-		particle_[i].get()->Draw();
+		//particle_[i].get()->Draw();
 	}
 	//Draw::DrawSprite(sprite_.get());
 }

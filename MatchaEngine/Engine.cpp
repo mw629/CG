@@ -145,6 +145,7 @@ IMGUI_CHECKVERSION();
 	Draw::Initialize(command.get()->GetCommandList(), graphicsPipelineState.get(), directinalLight.get());
 	Texture::Initalize(graphics->GetDevice(), command->GetCommandList(), descriptorHeap.get(), textureLoader.get());
 
+	Camera::SetDevice(graphics.get()->GetDevice());
 	Line::SetDevice(graphics.get()->GetDevice());
 	Grid::SetDevice(graphics.get()->GetDevice());
 	Model::SetDevice(graphics.get()->GetDevice());
