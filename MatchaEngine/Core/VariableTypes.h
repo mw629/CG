@@ -57,6 +57,10 @@ struct ParticleForGPU {
 	Vector4 color;
 };
 
+struct CameraForGPU {
+	Vector3 worldPosition;
+};
+
 struct LineTransformationMatrix
 {
 	Matrix4x4 WVP;
@@ -82,6 +86,7 @@ struct Material
 	int32_t endbleLighting;
 	float paddinmg[3];
 	Matrix4x4 uvTransform;
+	
 };
 
 struct DirectionalLight {

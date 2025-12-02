@@ -20,6 +20,11 @@ void InputLayout::CreateInputLayout(ShaderName shader)
 		inputElementDescs_[2].Format = DXGI_FORMAT_R32G32B32_FLOAT;
 		inputElementDescs_[2].AlignedByteOffset = D3D12_APPEND_ALIGNED_ELEMENT;
 
+		inputElementDescs_[3].SemanticName = "POSITION";
+		inputElementDescs_[3].SemanticIndex = 0;
+		inputElementDescs_[3].Format = DXGI_FORMAT_R32G32B32_FLOAT;
+		inputElementDescs_[3].AlignedByteOffset = D3D12_APPEND_ALIGNED_ELEMENT;
+
 		inputLayoutDesc_.pInputElementDescs = inputElementDescs_;
 		inputLayoutDesc_.NumElements = 3;
 		break;
