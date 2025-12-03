@@ -118,6 +118,7 @@ void Engine::Setting()
 	directinalLight = std::make_unique<DirectinalLight>();
 	directinalLight->CreateDirectinalLight(graphics->GetDevice());
 
+
 	//ビューポート
 	viewportScissor->CreateViewPort();
 	//シーザー矩形
@@ -278,7 +279,7 @@ void Engine::UpdateFixFPS()
 size_t Engine::GetProcessMemoryUsage() {
 	PROCESS_MEMORY_COUNTERS_EX pmc{};
 	if (GetProcessMemoryInfo(GetCurrentProcess(), (PROCESS_MEMORY_COUNTERS*)&pmc, sizeof(pmc))) {
-		return pmc.WorkingSetSize; // 現在の物理メモリ使用量（バイト）
+		return pmc.WorkingSetSize; // 現在の物理メモリ使用量(バイト)
 	}
 	return 0;
 }
@@ -295,7 +296,7 @@ void Engine::Debug()
 	// 1フレームあたりの時間 (ms)
 	//ImGui::Text("Frame Time: %.3f ms", 1000.0f / ImGui::GetIO().Framerate);
 
-	//現在のフレーム数（自分でカウントする必要あり）
+	//現在のフレーム数(自分でカウントする必要あり)
 	static int frameCount = 0;
 	frameCount++;
 	ImGui::Text("Frame Count: %d", frameCount);
@@ -306,6 +307,18 @@ void Engine::Debug()
 	textureLoader.get()->Draw();
 
 	ImGui::End();
+
+	// F1キーでDirectionalLightの表示をトグル
+	static bool showDirectionalLight = false;
+	if (ImGui::IsKeyPressed(ImGuiKey_F1))
+	{
+		showDirectionalLight = !showDirectionalLight;
+	}
+
+	if (showDirectionalLight)
+	{
+		directinalLight->ImGui();
+	}
 
 #endif
 }
