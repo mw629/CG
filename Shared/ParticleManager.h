@@ -9,6 +9,10 @@ struct Emitter {
 	float frequencyTime=0.0f;//頻度用時刻
 };
 
+struct AccelerationFiled {
+	Vector3 acceleration = { 0.05f,0.0f,0.0f };
+	AABB area = { { -10.0f,-10.0f,-10.0f },{10.0f,10.0f,10.0f} };
+};
 
 class ParticleManager
 {
@@ -17,16 +21,18 @@ private:
 	std::unique_ptr<Particle> particle_ = std::make_unique<Particle>();
 	std::list<ParticleData> particleData_;
 
+	AccelerationFiled accelerationFiled_;
+
 	ParticleData SetParticleData_;
 
 	Emitter emitter_;
 	std::mt19937 randomEngine;
 
-
 	std::random_device seedGenerator_;
 
 	
 	bool isStop_=false;
+	bool isHit_ = false;
 
 
 public:
@@ -54,10 +60,11 @@ public:
 
 	void EmitSize();
 
-	void OnCollision(ParticleManager *particle);
+	bool OnCollision(ParticleData particleData);
 
 	void Emit();
 
+	void SetAccelerationFiled(AccelerationFiled accelerationFiled) { accelerationFiled_ = accelerationFiled; }
 	void SetBlend(BlendMode blend) { particle_.get()->SetBlend(blend); }
 
 	std::list<ParticleData> GetParticleData() { return particle_.get()->GetParticleData(); }

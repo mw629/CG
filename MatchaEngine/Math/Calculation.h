@@ -232,5 +232,6 @@ Matrix4x4 MakePerspectiveFovMatrix(float fovY, float a, float zn, float zf);
 /// <returns>ビューポート行列</returns>
 Matrix4x4 MakeViewPortMatrix(float width, float height, float left, float top, float minD, float maxD);
 
-
 Matrix4x4 MakeLookAtLH(const Vector3& eye, const Vector3& target, const Vector3& up);
+
+AABB GetAABB(Transform transform_, float kWidth, float kHeight);

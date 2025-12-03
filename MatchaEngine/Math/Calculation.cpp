@@ -487,3 +487,13 @@ Matrix4x4 MakeLookAtLH(const Vector3& eye, const Vector3& target, const Vector3&
 
 	return result;
 }
+
+
+AABB GetAABB(Transform transform_,float kWidth,float kHeight) {
+	Vector3 worldPos = transform_.translate;
+	AABB aabb;
+	aabb.min = { worldPos.x - kWidth / 2.0f, worldPos.y - kHeight / 2.0f, worldPos.z - kWidth / 2.0f };
+	aabb.max = { worldPos.x + kWidth / 2.0f, worldPos.y + kHeight / 2.0f, worldPos.z + kWidth / 2.0f };
+
+	return aabb;
+}

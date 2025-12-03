@@ -11,6 +11,9 @@
 
 void ParticleManager::ImGui() {
 #ifdef _USE_IMGUI
+
+	
+
 	std::ostringstream oss;
 	oss << "Particle###" << static_cast<const void*>(this);
 	const std::string windowTitle = oss.str();
@@ -33,6 +36,7 @@ void ParticleManager::ImGui() {
 			Emit();
 		}
 		ImGui::Checkbox("stop", &isStop_);
+		ImGui::Checkbox("IsHit", &isHit_);
 		ImGui::Separator();
 		ImGui::Text("Active Particles: %d", particle_.get()->GetParticleNum());
 		ImGui::PopID();
@@ -110,6 +114,8 @@ void ParticleManager::Update(Matrix4x4 viewMatrix, int a)
 	for (std::list<ParticleData>::iterator particleIterator = particleData_.begin();
 		particleIterator != particleData_.end(); ) {
 
+		
+
 		// 外部のムーブ関数で更新結果を受け取る
 		ParticleData updated;
 		if (a == 0) {
@@ -120,6 +126,14 @@ void ParticleManager::Update(Matrix4x4 viewMatrix, int a)
 		}
 		// 必要なフィールドを反映
 		particleIterator->velocity = updated.velocity;
+
+
+		if (OnCollision(*particleIterator)&& isHit_) {
+			(*particleIterator).velocity += accelerationFiled_.acceleration / 60.0f;
+		}
+		
+
+
 		particleIterator->transform.translate += particleIterator->velocity;
 		particleIterator->transform.scale = updated.transform.scale;
 		particleIterator->transform.rotate = updated.transform.rotate;
@@ -138,6 +152,10 @@ void ParticleManager::Update(Matrix4x4 viewMatrix, int a)
 			emitter_.frequencyTime -= emitter_.frequency;
 		}
 	}
+
+	
+
+
 	particle_.get()->Updata(viewMatrix, particleData_);
 }
 
@@ -274,38 +292,16 @@ void ParticleManager::EmitSize()
 	}
 }
 
-void ParticleManager::OnCollision(ParticleManager* particle)
+bool ParticleManager::OnCollision(ParticleData particleData)
 {
-	for (auto& a : particleData_) {
-
-		Vector3 posA = a.transform.translate;
-		float radiusA = a.transform.scale.x; // 半径
-		int index = 0;
-		for (auto& b : particle->GetParticleData()) {
-
-			Vector3 posB = b.transform.translate;
-			float radiusB = b.transform.scale.x; // 半径
-
-			// A → B へのベクトル
-			Vector3 d = {
-				posB.x - posA.x,
-				posB.y - posA.y,
-				posB.z - posA.z
-			};
-
-			// 距離の2乗
-			float distSq = d.x * d.x + d.y * d.y + d.z * d.z;
-
-			// 半径の合計
-			float r = radiusA + radiusB;
-
-			// 衝突チェック
-			if (distSq <= r * r) {
-				particle_.get()->DeleteParticle(index);
-			}
-		}
-		index += 1;
+	AABB aabb1 = accelerationFiled_.area;
+	AABB aabb2 = GetAABB(particleData.transform, particleData.transform.scale.x, particleData.transform.scale.z);
+	if (aabb1.min.x <= aabb2.max.x && aabb1.max.x >= aabb2.min.x &&
+		aabb1.min.y <= aabb2.max.y && aabb1.max.y >= aabb2.min.y &&
+		aabb1.min.z <= aabb2.max.z && aabb1.max.z >= aabb2.min.z) {
+		return true;
 	}
+	return false;
 
 }
 

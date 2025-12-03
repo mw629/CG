@@ -33,12 +33,15 @@ private:
 	D3D12_CPU_DESCRIPTOR_HANDLE instancingSrvHandleCPU_;
 	D3D12_GPU_DESCRIPTOR_HANDLE instancingSrvHandleGPU_;
 
+
+
 	int particleMaxNum_ = 1000;
 	int particleNum_;
 	
 	std::list<ParticleData> particleData_;
 
 	bool isBillboard_ = true;
+	
 
 	static int DescriptorNum;
 
