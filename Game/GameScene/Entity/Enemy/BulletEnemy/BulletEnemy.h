@@ -2,7 +2,7 @@
 #include <Engine.h>
 #include "../Enemy.h"
 
-class BulletEnemy :public Enemy
+class BulletEnemy : public Enemy
 {
 };
 
