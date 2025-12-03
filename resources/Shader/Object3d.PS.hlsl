@@ -28,16 +28,27 @@ PixelShaderOutput main(VertexShaderOutput input)
     
     float cos = pow(NdirL * 0.5f + 0.5f, 2.0f);
     
-           //拡散反射
-        float32_t3 diffuse =
+    
+    if (gMaterial.enableLighting != 0)
+    {
+        output.color = gMaterial.color * textureColor * gDirectionalLight.color * cos * gDirectionalLight.intensity;
+        output.color[3] = gMaterial.color[3] * textureColor[3];
+    }
+    else
+    {
+        output.color = gMaterial.color * textureColor;
+    }
+    
+    //拡散反射
+    float32_t3 diffuse =
         gMaterial.color.rgb * textureColor.rgb * gDirectionalLight.color.rgb * cos * gDirectionalLight.intensity;
-        //鏡面反射
-        float32_t3 specular =
+    //鏡面反射
+    float32_t3 specular =
         gDirectionalLight.color.rgb * gDirectionalLight.intensity * specularPow * float32_t3(1.0f, 1.0f, 1.0f);
-        //拡散反射＋鏡面反射
-        output.color.rgb = diffuse + specular;
-        //αは今まで通り
-        output.color.a = gMaterial.color.a * textureColor.a;
+    //拡散反射＋鏡面反射
+    output.color.rgb = diffuse + specular;
+    //αは今まで通り
+    output.color.a = gMaterial.color.a * textureColor.a;
     
     
   

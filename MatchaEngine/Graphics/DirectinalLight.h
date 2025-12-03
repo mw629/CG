@@ -14,6 +14,9 @@ private:
 	float intensity=1.0f;
 
 public:
+
+	void ImGui();
+
 	void CreateDirectinalLight(ID3D12Device *device);
 
 	ID3D12Resource* GetDirectinalLightResource() { return directinalLightResource_.Get(); }

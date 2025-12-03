@@ -1,6 +1,13 @@
 #include "DirectinalLight.h"
 #include "Graphics/GraphicsDevice.h"
 
+void DirectinalLight::ImGui()
+{
+
+
+
+}
+
 void DirectinalLight::CreateDirectinalLight(ID3D12Device *device)
 {
 	 directinalLightResource_ = GraphicsDevice::CreateBufferResource(device, sizeof(DirectionalLight));
