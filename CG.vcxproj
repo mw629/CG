@@ -146,6 +146,7 @@ copy "$(WindowsSdkDir)bin\$(TargetPlatformVersion)\x64\dxil.dll" "$(TargetDir)dx
     </PostBuildEvent>
   </ItemDefinitionGroup>
   <ItemGroup>
+    <ClCompile Include="Game\GameScene\Entity\Enemy\BulletEnemy\BulletEnemy.cpp" />
     <ClCompile Include="Game\GameOverScene\GameOverScene.cpp" />
     <ClCompile Include="Game\ClearScene\ClearScene.cpp" />
     <ClCompile Include="Game\GameScene\Entity\Entity.cpp" />
@@ -271,6 +272,7 @@ copy "$(WindowsSdkDir)bin\$(TargetPlatformVersion)\x64\dxil.dll" "$(TargetDir)dx
     </FxCompile>
   </ItemGroup>
   <ItemGroup>
+    <ClInclude Include="Game\GameScene\Entity\Enemy\BulletEnemy\BulletEnemy.h" />
     <ClInclude Include="Game\GameScene\Entity\Entity.h" />
     <ClInclude Include="Game\GameOverScene\GameOverScene.h" />
     <ClInclude Include="Game\ClearScene\ClearScene.h" />

@@ -13,7 +13,9 @@ private:
 	float kJumpAcceleration = 0.25f;
 
 	float gravity_=0.7f;
-	float kLimitFallSpeed = 0.5f;
+	float kLimitFallSpeed = 0.1f;
+
+	float runSpeed_=-1.0f;
 
 public:
 
@@ -22,6 +24,8 @@ public:
 	void Update(Matrix4x4 viewMatrix)override;
 
 	void Move();
+
+	void HitWall()override;
 
 };
 

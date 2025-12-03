@@ -34,6 +34,7 @@ void JumpEnemy::Update(Matrix4x4 viewMatrix)
 
 void JumpEnemy::Move()
 {
+	velocity_.x = runSpeed_/60.0f;
 
 	if (canJump) {
 		JumpCoolTime = JumpCoolTimeMax;
@@ -54,5 +55,10 @@ void JumpEnemy::Move()
 		// 落下速度制限
 		velocity_.y = (std::max)(velocity_.y, -kLimitFallSpeed);
 	}
+}
+
+void JumpEnemy::HitWall()
+{
+	runSpeed_ *= -1.0f;
 }
 
