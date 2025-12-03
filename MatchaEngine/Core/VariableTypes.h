@@ -90,10 +90,31 @@ struct Material
 	float shininess;
 };
 
-struct DirectionalLight {
+struct DirectionalLightData {
 	Vector4 color;//ライトの色
 	Vector3 direction;//ライトの向き
 	float intensity;//輝度
+};
+
+struct PointLightData {
+	Vector4 color;//ライトの色
+	Vector3 position;//ライトの向き
+	float intensity;//輝度
+	float radius;//ライトの届く最大距離
+	float decay;//減衰率
+	float padding[2];
+};
+
+struct SpotLightData {
+	Vector4 color;//ライトの色
+	Vector3 position;//ライトの向き
+	float intensity;//輝度
+	Vector3 direction;//ライトの向き
+	float distance;//ライトの届く最大距離
+	float decay;//減衰率
+	float cosAngle;//スポットライトの余弦
+	float cosFalloffStart;//Falloの開始角度
+	float padding[2];
 };
 
 struct MaterialData

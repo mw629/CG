@@ -31,8 +31,11 @@ void GameScene::Initialize() {
 	ModelData modelData = LoadObjFile("resources/obj", "sphere.obj");
 
 	model_.get()->Initialize(modelData);
-	
 	model_.get()->SetTransform(modelTransform_);
+
+	modelData = LoadObjFile("resources/Ground", "Ground.obj");
+	floor.get()->Initialize(modelData);
+	floor.get()->SetTransform(floorT);
 
 	Emitter emitter;
 	emitter.transform = modelTransform_;
@@ -72,6 +75,7 @@ void GameScene::Update() {
 	sprite_.get()->Update(spriteData_);
 
 	model_->SettingWvp(view);
+	floor->SettingWvp(view);
 
 	particle_[1].get()->EmitSize();
 	
@@ -82,6 +86,7 @@ void GameScene::Update() {
 
 void GameScene::Draw() {
 	Draw::DrawModel(model_.get(), camera_.get());
+	Draw::DrawModel(floor.get(), camera_.get());
 	for (int i = 0, n = static_cast<int>(particle_.size()); i < n; ++i) {
 		//particle_[i].get()->Draw();
 	}

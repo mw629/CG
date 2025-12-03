@@ -5,7 +5,7 @@
 class RootParameter
 {
 private:
-	D3D12_ROOT_PARAMETER rootParameter[5] = {};
+	D3D12_ROOT_PARAMETER rootParameter[12] = {};
 
 	D3D12_ROOT_PARAMETER ParticleRootParameter[3] = {};
 	D3D12_DESCRIPTOR_RANGE descriptorRange_[1] = {};

@@ -4,20 +4,24 @@
 #include "PSO/GraphicsPipelineState.h"
 #include <d3d12.h>  
 #include <cstdint>  
-#include "../GameObjects/Model.h"
-#include "../GameObjects/Particle.h"
-#include "../GameObjects/Sprite.h"
-#include "../GameObjects/Sphere.h"
-#include "../GameObjects/Triangle.h"
-#include "../GameObjects/Line.h"
-#include "../GameObjects/Grid.h"
-#include "../GameObjects/Camera.h"
-#include "DirectinalLight.h"
+#include "Model.h"
+#include "Particle.h"
+#include "Sprite.h"
+#include "Sphere.h"
+#include "Triangle.h"
+#include "Line.h"
+#include "Grid.h"
+#include "Camera.h"
+
+#include "DirectionalLight.h"
+#include "PointLight.h"
+#include "SpotLight.h"
 
 class Draw {
 public:
 
-	static void Initialize(ID3D12GraphicsCommandList* commandList, GraphicsPipelineState* graphicsPipelineState, DirectinalLight* directinalLight);
+	static void Initialize(ID3D12GraphicsCommandList* commandList, GraphicsPipelineState* graphicsPipelineState, 
+		DirectionalLight* directionalLight, PointLight *pointLight, SpotLight* spotLight);
 
 	static void preDraw(ShaderName shader, BlendMode blend);
 
@@ -25,7 +29,7 @@ public:
 
 	static void DrawParticle(Particle* particle);
 
-	static void DrawSprite(Sprite* sprite);
+	static void DrawSprite(Sprite* sprite, Camera* camera);
 
 	static void DrawShpere(Sphere* sphere, Camera* camera);
 

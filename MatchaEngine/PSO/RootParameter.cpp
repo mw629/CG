@@ -50,8 +50,17 @@ void RootParameter::CreateOBJRootParameter(D3D12_ROOT_SIGNATURE_DESC& descriptio
 	rootParameter[4].ShaderVisibility = D3D12_SHADER_VISIBILITY_PIXEL;//PixelShaderで行う
 	rootParameter[4].Descriptor.ShaderRegister = 2;//レジスタ番号1とバインド
 
+	rootParameter[5].ParameterType = D3D12_ROOT_PARAMETER_TYPE_CBV;//CBVを使う
+	rootParameter[5].ShaderVisibility = D3D12_SHADER_VISIBILITY_PIXEL;//PixelShaderで行う
+	rootParameter[5].Descriptor.ShaderRegister = 3;//レジスタ番号1とバインド
+
+	rootParameter[6].ParameterType = D3D12_ROOT_PARAMETER_TYPE_CBV;//CBVを使う
+	rootParameter[6].ShaderVisibility = D3D12_SHADER_VISIBILITY_PIXEL;//PixelShaderで行う
+	rootParameter[6].Descriptor.ShaderRegister = 4;//レジスタ番号1とバインド
+
+
 	descriptionRootSignature.pParameters = rootParameter;//ルートパラメータ配列へのポインタ
-	descriptionRootSignature.NumParameters = 5;//配列の長さ
+	descriptionRootSignature.NumParameters = 7;//配列の長さ
 }
 
 void RootParameter::CreateParticleParameter(D3D12_ROOT_SIGNATURE_DESC& descriptionRootSignature)

@@ -53,7 +53,7 @@ Engine::Engine(int32_t kClientWidth, int32_t kClientHeight)
 	input = std::make_unique<Input>();
 	gamePadInput = std::make_unique<GamePadInput>();
 	//描画
-	debudCamera = std::make_unique<DebugCamera>();
+	debugCamera = std::make_unique<DebugCamera>();
 	depthStencil = std::make_unique<DepthStencil>();
 	draw = std::make_unique<Draw>();
 	textureLoader = std::make_unique<TextureLoader>();
@@ -71,7 +71,7 @@ void Engine::Setting()
 	timeBeginPeriod(1);
 	input->Initialize(window.GetWc(), window.GetHwnd());
 
-	debudCamera->Initialize();
+	debugCamera->Initialize();
 
 	//エラー・警告、即ちに停止//
 #ifdef _DEBUG
@@ -115,20 +115,23 @@ void Engine::Setting()
 
 	graphicsPipelineState.get()->ALLPSOCreate(logStream, graphics.get()->GetDevice());
 
-	directinalLight = std::make_unique<DirectinalLight>();
-	directinalLight->CreateDirectinalLight(graphics->GetDevice());
-
+	directionalLight = std::make_unique<DirectionalLight>();
+	directionalLight.get()->CreateDirectionalLight(graphics->GetDevice());
+	pointLight = std::make_unique<PointLight>();
+	pointLight.get()->CreatePointLight(graphics->GetDevice());
+	spotLight = std::make_unique<SpotLight>();
+	spotLight.get()->CreatePointLight(graphics->GetDevice());
 
 	//ビューポート
 	viewportScissor->CreateViewPort();
 	//シーザー矩形
 	viewportScissor->CreateSxissor();
 
-	descriptorHeeps[0] = { descriptorHeap->GetSrvDescriptorHeap() };
+	descriptorHeaps[0] = { descriptorHeap->GetSrvDescriptorHeap() };
 
 
 #ifdef _USE_IMGUI
-IMGUI_CHECKVERSION();
+	IMGUI_CHECKVERSION();
 	ImGui::CreateContext();
 	ImGui::StyleColorsDark();
 	ImGui_ImplWin32_Init(window.GetHwnd());
@@ -140,10 +143,11 @@ IMGUI_CHECKVERSION();
 		descriptorHeap->GetSrvDescriptorHeap()->GetGPUDescriptorHandleForHeapStart());
 #endif // _USE_IMGUI
 
-	
+
 	Audio::Initialize();
 
-	Draw::Initialize(command.get()->GetCommandList(), graphicsPipelineState.get(), directinalLight.get());
+	Draw::Initialize(command.get()->GetCommandList(), graphicsPipelineState.get(),
+		directionalLight.get(), pointLight.get(), spotLight.get());
 	Texture::Initalize(graphics->GetDevice(), command->GetCommandList(), descriptorHeap.get(), textureLoader.get());
 
 	Camera::SetDevice(graphics.get()->GetDevice());
@@ -195,11 +199,11 @@ void Engine::NewFrame() {
 	depthStencil->SetDSV(command->GetCommandList(), renderTargetView->GetRtvHandles(swapChain->GetSwapChain()->GetCurrentBackBufferIndex()));
 	//コマンドを積む//
 
-	ID3D12DescriptorHeap* descriptorHeeps[] = { descriptorHeap->GetSrvDescriptorHeap() };
-	command->GetCommandList()->SetDescriptorHeaps(1, descriptorHeeps);
+	ID3D12DescriptorHeap* descriptorHeaps[] = { descriptorHeap->GetSrvDescriptorHeap() };
+	command->GetCommandList()->SetDescriptorHeaps(1, descriptorHeaps);
 
 	command->GetCommandList()->RSSetViewports(1, viewportScissor->GetViewport());//Viewportを設定
-	command->GetCommandList()->RSSetScissorRects(1, viewportScissor->GetScissorRect());//Sxirssorを設定
+	command->GetCommandList()->RSSetScissorRects(1, viewportScissor->GetScissorRect());//Scissorを設定
 
 
 
@@ -221,7 +225,7 @@ void Engine::EndFrame() {
 	//GPU2コマンドリストの実行を行わせる
 	ID3D12CommandList* commandLists[] = { command->GetCommandList() };
 	command->GetCommandQueue()->ExecuteCommandLists(1, commandLists);
-	
+
 	//GPUとOSに画面の交換を行うよう通知する
 	swapChain->GetSwapChain()->Present(1, 0);
 
@@ -309,15 +313,18 @@ void Engine::Debug()
 	ImGui::End();
 
 	// F1キーでDirectionalLightの表示をトグル
-	static bool showDirectionalLight = false;
+	static bool showLight = false;
 	if (ImGui::IsKeyPressed(ImGuiKey_F1))
 	{
-		showDirectionalLight = !showDirectionalLight;
+		showLight = !showLight;
 	}
 
-	if (showDirectionalLight)
+	if (showLight)
 	{
-		directinalLight->ImGui();
+		directionalLight->ImGui();
+		pointLight.get()->ImGui();
+		spotLight.get()->ImGui();
+
 	}
 
 #endif

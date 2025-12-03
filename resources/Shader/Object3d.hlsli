@@ -31,7 +31,28 @@ struct DirectionalLight
 {
     float32_t4 color; //ライトの色
     float32_t3 direction; //ライトの向き
-    float intensity; //輝度
+    float32_t intensity; //輝度
+};
+
+struct PointLight
+{
+    float32_t4 color; //ライトの色
+    float32_t3 position; //ライトの向き
+    float32_t intensity; //輝度
+    float32_t radius; //ライトの届く最大距離
+    float32_t decay; //減衰率
+};
+
+struct SpotLight
+{
+    float32_t4 color; //ライトの色
+    float32_t3 position; //ライトの向き
+    float32_t intensity; //輝度
+    float32_t3 direction; //ライトの向き
+    float32_t distance; //ライトの届く最大距離
+    float32_t decay; //減衰率
+    float32_t cosAngle; //スポットライトの余弦
+    float32_t cosFalloffStart;//Falloの開始角度
 };
 
 struct Material

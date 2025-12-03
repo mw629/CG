@@ -114,7 +114,7 @@
     <ClCompile Include="MatchaEngine\Core\WindowConfig.cpp">
       <Filter>MatchaEngine\Core</Filter>
     </ClCompile>
-    <ClCompile Include="MatchaEngine\GameObjects\DebugCamera.cpp">
+    <ClCompile Include="MatchaEngine\GameObjects\Camera\DebugCamera.cpp">
       <Filter>MatchaEngine\GameObjects</Filter>
     </ClCompile>
     <ClCompile Include="MatchaEngine\GameObjects\Grid.cpp">
@@ -165,7 +165,7 @@
     <ClCompile Include="MatchaEngine\Graphics\DescriptorHeap.cpp">
       <Filter>MatchaEngine\Graphics</Filter>
     </ClCompile>
-    <ClCompile Include="MatchaEngine\Graphics\DirectinalLight.cpp">
+    <ClCompile Include="MatchaEngine\GameObjects\Light\DirectionalLight.cpp">
       <Filter>MatchaEngine\Graphics</Filter>
     </ClCompile>
     <ClCompile Include="MatchaEngine\Graphics\Draw.cpp">
@@ -204,7 +204,7 @@
     <ClCompile Include="Game\TitleScene.cpp">
       <Filter>Game</Filter>
     </ClCompile>
-    <ClCompile Include="MatchaEngine\GameObjects\Camera.cpp">
+    <ClCompile Include="MatchaEngine\GameObjects\Camera\Camera.cpp">
       <Filter>MatchaEngine\GameObjects</Filter>
     </ClCompile>
     <ClCompile Include="main.cpp">
@@ -229,6 +229,12 @@
       <Filter>ソース ファイル</Filter>
     </ClCompile>
     <ClCompile Include="Shared\ParticleManager.cpp">
+      <Filter>ソース ファイル</Filter>
+    </ClCompile>
+    <ClCompile Include="MatchaEngine\GameObjects\Light\PointLight.cpp">
+      <Filter>ソース ファイル</Filter>
+    </ClCompile>
+    <ClCompile Include="MatchaEngine\GameObjects\Light\SpotLight.cpp">
       <Filter>ソース ファイル</Filter>
     </ClCompile>
   </ItemGroup>
@@ -327,7 +333,7 @@
     <ClInclude Include="MatchaEngine\Core\WindowConfig.h">
       <Filter>MatchaEngine\Core</Filter>
     </ClInclude>
-    <ClInclude Include="MatchaEngine\GameObjects\DebugCamera.h">
+    <ClInclude Include="MatchaEngine\GameObjects\Camera\DebugCamera.h">
       <Filter>MatchaEngine\GameObjects</Filter>
     </ClInclude>
     <ClInclude Include="MatchaEngine\GameObjects\Grid.h">
@@ -378,7 +384,7 @@
     <ClInclude Include="MatchaEngine\Graphics\DescriptorHeap.h">
       <Filter>MatchaEngine\Graphics</Filter>
     </ClInclude>
-    <ClInclude Include="MatchaEngine\Graphics\DirectinalLight.h">
+    <ClInclude Include="MatchaEngine\GameObjects\Light\DirectionalLight.h">
       <Filter>MatchaEngine\Graphics</Filter>
     </ClInclude>
     <ClInclude Include="MatchaEngine\Graphics\Draw.h">
@@ -417,7 +423,7 @@
     <ClInclude Include="Game\TitleScene.h">
       <Filter>Game</Filter>
     </ClInclude>
-    <ClInclude Include="MatchaEngine\GameObjects\Camera.h">
+    <ClInclude Include="MatchaEngine\GameObjects\Camera\Camera.h">
       <Filter>MatchaEngine\GameObjects</Filter>
     </ClInclude>
     <ClInclude Include="MatchaEngine\PSO\RenderState.h">
@@ -448,6 +454,12 @@
       <Filter>ヘッダー ファイル</Filter>
     </ClInclude>
     <ClInclude Include="Shared\ParticleManager.h">
+      <Filter>ヘッダー ファイル</Filter>
+    </ClInclude>
+    <ClInclude Include="MatchaEngine\GameObjects\Light\PointLight.h">
+      <Filter>ヘッダー ファイル</Filter>
+    </ClInclude>
+    <ClInclude Include="MatchaEngine\GameObjects\Light\SpotLight.h">
       <Filter>ヘッダー ファイル</Filter>
     </ClInclude>
   </ItemGroup>

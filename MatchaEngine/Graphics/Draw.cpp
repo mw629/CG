@@ -2,17 +2,23 @@
 #include "Graphics/GraphicsDevice.h"
 #include <cassert>
 
+
 namespace {
 	ID3D12GraphicsCommandList* commandList_{};
 	GraphicsPipelineState* graphicsPipelineState_;
-	DirectinalLight* directinalLight_;
+	DirectionalLight* directionalLight_;
+	PointLight* pointLight_;
+	SpotLight* spotLight_;
 }
 
-void Draw::Initialize(ID3D12GraphicsCommandList* commandList, GraphicsPipelineState* graphicsPipelineState, DirectinalLight* directinalLight)
+void Draw::Initialize(ID3D12GraphicsCommandList* commandList, GraphicsPipelineState* graphicsPipelineState, 
+	DirectionalLight* directionalLight, PointLight* pointLight, SpotLight* spotLight)
 {
 	commandList_ = commandList;
 	graphicsPipelineState_ = graphicsPipelineState;
-	directinalLight_ = directinalLight;
+	directionalLight_ = directionalLight;
+	pointLight_ = pointLight;
+	spotLight_ = spotLight;
 }
 
 void Draw::preDraw(ShaderName shader, BlendMode blend)
@@ -35,8 +41,10 @@ void Draw::DrawModel(Model* model, Camera* camera)
 	commandList_->SetGraphicsRootConstantBufferView(0, model->GetMatrial()->GetMaterialResource()->GetGPUVirtualAddress());
 	commandList_->SetGraphicsRootConstantBufferView(1, model->GetWvpDataResource()->GetGPUVirtualAddress());
 	commandList_->SetGraphicsRootDescriptorTable(2, model->GetTextureSrvHandleGPU());
-	commandList_->SetGraphicsRootConstantBufferView(3, directinalLight_->GetDirectinalLightResource()->GetGPUVirtualAddress());
-	commandList_->SetGraphicsRootConstantBufferView(4, camera->GetCameraResource()->GetGPUVirtualAddress());
+	commandList_->SetGraphicsRootConstantBufferView(3, camera->GetCameraResource()->GetGPUVirtualAddress());
+	commandList_->SetGraphicsRootConstantBufferView(4, directionalLight_->GetDirectinalLightResource()->GetGPUVirtualAddress());
+	commandList_->SetGraphicsRootConstantBufferView(5, pointLight_->GetDirectinalLightResource()->GetGPUVirtualAddress());
+	commandList_->SetGraphicsRootConstantBufferView(6, spotLight_->GetDirectinalLightResource()->GetGPUVirtualAddress());
 
 	commandList_->DrawInstanced(UINT(model->GetModelData().vertices.size()), 1, 0, 0);
 }
@@ -59,16 +67,20 @@ void Draw::DrawParticle(Particle* particle)
 
 }
 
-void Draw::DrawSprite(Sprite* sprite)
+void Draw::DrawSprite(Sprite* sprite, Camera* camera)
 {
 	preDraw(sprite->GetShader(), sprite->GetBlend());
-	commandList_->SetGraphicsRootConstantBufferView(3, directinalLight_->GetDirectinalLightResource()->GetGPUVirtualAddress());
+	commandList_->SetGraphicsRootConstantBufferView(3, directionalLight_->GetDirectinalLightResource()->GetGPUVirtualAddress());
 
 	commandList_->IASetIndexBuffer(sprite->GetIndexBufferView());//IBVを設定
 	commandList_->IASetVertexBuffers(0, 1, sprite->GetVertexBufferView());//VBVを設定
 	commandList_->SetGraphicsRootConstantBufferView(0, sprite->GetMatrial()->GetMaterialResource()->GetGPUVirtualAddress());
 	commandList_->SetGraphicsRootConstantBufferView(1, sprite->GetVertexResource()->GetGPUVirtualAddress());
 	commandList_->SetGraphicsRootDescriptorTable(2, sprite->GetTextureSrvHandleGPU());
+	commandList_->SetGraphicsRootConstantBufferView(3, camera->GetCameraResource()->GetGPUVirtualAddress());
+	commandList_->SetGraphicsRootConstantBufferView(4, directionalLight_->GetDirectinalLightResource()->GetGPUVirtualAddress());
+	commandList_->SetGraphicsRootConstantBufferView(5, pointLight_->GetDirectinalLightResource()->GetGPUVirtualAddress());
+	commandList_->SetGraphicsRootConstantBufferView(6, spotLight_->GetDirectinalLightResource()->GetGPUVirtualAddress());
 
 	commandList_->DrawIndexedInstanced(6, 1, 0, 0, 0);
 }
@@ -77,27 +89,35 @@ void Draw::DrawShpere(Sphere* sphere, Camera* camera)
 {
 
 	preDraw(sphere->GetShader(), sphere->GetBlend());
-	commandList_->SetGraphicsRootConstantBufferView(3, directinalLight_->GetDirectinalLightResource()->GetGPUVirtualAddress());
-	commandList_->SetGraphicsRootConstantBufferView(4, camera->GetCameraResource()->GetGPUVirtualAddress());
+	
 
 	//commandList_->IASetIndexBuffer(shpere->GetIndexBufferView());//IBVを設定
 	commandList_->IASetVertexBuffers(0, 1, sphere->GetVertexBufferView());//VBVを設定
 	commandList_->SetGraphicsRootConstantBufferView(0, sphere->GetMatrial()->GetMaterialResource()->GetGPUVirtualAddress());
 	commandList_->SetGraphicsRootConstantBufferView(1, sphere->GetVertexResource()->GetGPUVirtualAddress());
 	commandList_->SetGraphicsRootDescriptorTable(2, sphere->GetTextureSrvHandleGPU());
+	commandList_->SetGraphicsRootConstantBufferView(3, camera->GetCameraResource()->GetGPUVirtualAddress());
+	commandList_->SetGraphicsRootConstantBufferView(4, directionalLight_->GetDirectinalLightResource()->GetGPUVirtualAddress());
+	commandList_->SetGraphicsRootConstantBufferView(5, pointLight_->GetDirectinalLightResource()->GetGPUVirtualAddress());
+	commandList_->SetGraphicsRootConstantBufferView(6, spotLight_->GetDirectinalLightResource()->GetGPUVirtualAddress());
+
 	commandList_->DrawInstanced(static_cast<UINT>(pow(sphere->GetSubdivision(), 2) * 6), 1, 0, 0);
 }
 
 void Draw::DrawTriangle(Triangle* triangle, Camera* camera)
 {
 	preDraw(triangle->GetShader(), triangle->GetBlend());
-	commandList_->SetGraphicsRootConstantBufferView(3, directinalLight_->GetDirectinalLightResource()->GetGPUVirtualAddress());
-	commandList_->SetGraphicsRootConstantBufferView(4, camera->GetCameraResource()->GetGPUVirtualAddress());
 
 	commandList_->IASetVertexBuffers(0, 1, triangle->GetVertexBufferView());//VBVを設定
 	commandList_->SetGraphicsRootConstantBufferView(0, triangle->GetMatrial()->GetMaterialResource()->GetGPUVirtualAddress());
 	commandList_->SetGraphicsRootConstantBufferView(1, triangle->GetVertexResource()->GetGPUVirtualAddress());
 	commandList_->SetGraphicsRootDescriptorTable(2, triangle->GetTextureSrvHandleGPU());
+	commandList_->SetGraphicsRootConstantBufferView(3, camera->GetCameraResource()->GetGPUVirtualAddress());
+	commandList_->SetGraphicsRootConstantBufferView(4, directionalLight_->GetDirectinalLightResource()->GetGPUVirtualAddress());
+	commandList_->SetGraphicsRootConstantBufferView(5, pointLight_->GetDirectinalLightResource()->GetGPUVirtualAddress());
+	commandList_->SetGraphicsRootConstantBufferView(6, spotLight_->GetDirectinalLightResource()->GetGPUVirtualAddress());
+
+	
 	commandList_->DrawInstanced(3, 1, 0, 0);
 }
 

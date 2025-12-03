@@ -13,8 +13,19 @@
 #include "WindowConfig.h"
 
 //GameObjeects
+
+//Light
+
+#include "DirectionalLight.h"
+#include "PointLight.h"
+#include "SpotLight.h"
+
+//Camera
+
 #include "Camera.h"
 #include "DebugCamera.h"
+
+
 #include "MaterialFactory.h"
 #include "Model.h"
 #include "Particle.h"
@@ -28,7 +39,6 @@
 
 #include "DepthStencil.h"
 #include "DescriptorHeap.h"
-#include "DirectinalLight.h"
 #include "Draw.h"
 #include "GpuSyncManager.h"
 #include "GraphicsDevice.h"
@@ -89,7 +99,7 @@ private:
 	std::unique_ptr<Input> input;
 	std::unique_ptr<GamePadInput> gamePadInput;
 
-	std::unique_ptr<DebugCamera> debudCamera;
+	std::unique_ptr<DebugCamera> debugCamera;
 	std::unique_ptr<DepthStencil> depthStencil;
 
 	std::unique_ptr<Draw> draw;
@@ -101,9 +111,11 @@ private:
 
 	std::unique_ptr<GraphicsPipelineState> graphicsPipelineState;
 
-	std::unique_ptr<DirectinalLight> directinalLight;
+	std::unique_ptr<DirectionalLight> directionalLight;
+	std::unique_ptr<PointLight> pointLight;
+	std::unique_ptr<SpotLight> spotLight;
 
-	ID3D12DescriptorHeap* descriptorHeeps[1];
+	ID3D12DescriptorHeap* descriptorHeaps[1];
 
 	static bool isEnd_;
 

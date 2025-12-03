@@ -23,7 +23,7 @@ namespace {
 void Model::ImGui() {
 #ifdef _USE_IMGUI
 	std::ostringstream oss;
-	oss << "Particle###" << static_cast<const void*>(this);
+	oss << "Model###" << static_cast<const void*>(this);
 	const std::string windowTitle = oss.str();
 
 	if (ImGui::Begin(windowTitle.c_str())) {
@@ -124,7 +124,7 @@ void Model::CreateModel()
 
 void Model::SettingWvp(Matrix4x4 viewMatrix)
 {
-	Matrix4x4 projectionMatri = MakePerspectiveFovMatrix(0.45f, float(kClientWidth) / float(kClientHeight), 0.1f, 100.0f);
+	Matrix4x4 projectionMatri = MakePerspectiveFovMatrix(0.45f, float(kClientWidth) / float(kClientHeight), 0.1f, 10000.0f);
 	Matrix4x4 worldMatrixObj = MakeAffineMatrix(transform_.translate, transform_.scale, transform_.rotate);
 	Matrix4x4 worldViewProjectionMatrixObj = MultiplyMatrix4x4(worldMatrixObj, MultiplyMatrix4x4(viewMatrix, projectionMatri));
 	Matrix4x4 worldInverseTranspose = TransposeMatrix4x4(Inverse(worldMatrixObj));
