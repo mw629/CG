@@ -253,6 +253,7 @@
     </FxCompile>
     <FxCompile Include="resources\Shader\Particle.PS.hlsl" />
     <FxCompile Include="resources\Shader\Particle.VS.hlsl" />
+    <FxCompile Include="resources\Shader\BasicGeometryShader.hlsl" />
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="externals\imgui\imconfig.h">

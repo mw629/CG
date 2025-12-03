@@ -52,6 +52,11 @@ void GraphicsPipelineState::CreatePSO(ShaderName shaderName, BlendMode blendmode
 	graphicsPipelineStateDesc_[shaderName][blendmode].InputLayout = inputLayout->GetInputLayoutDesc();//InputLayout
 	graphicsPipelineStateDesc_[shaderName][blendmode].VS = { shaderCompile->GetVertexShaderBlob()->GetBufferPointer(),
 	 shaderCompile->GetVertexShaderBlob()->GetBufferSize() };//VertexShader
+	if (shaderName == ObjectShader) {
+		graphicsPipelineStateDesc_[shaderName][blendmode].GS = { shaderCompile->GetGometryShaderBlob()->GetBufferPointer(),
+			 shaderCompile->GetGometryShaderBlob()->GetBufferSize() };//VertexShader
+	}
+
 	graphicsPipelineStateDesc_[shaderName][blendmode].PS = { shaderCompile->GetPixelShaderBlob()->GetBufferPointer(),
 	shaderCompile->GetPixelShaderBlob()->GetBufferSize() };//PixelShader
 	graphicsPipelineStateDesc_[shaderName][blendmode].BlendState = blendState->GetBlendDesc();//BlenderState

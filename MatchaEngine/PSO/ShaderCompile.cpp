@@ -85,6 +85,10 @@ void ShaderCompile::CreateShaderCompile(ShaderName shaderName, std::ostream& os,
 			L"vs_6_0", dxcUtils, dxcCompiler, includeHandler);
 		assert(vertexShaderBlob_ != nullptr);
 
+		geometryShaderBlob_ = CompileShader(os, L"resources/Shader/BasicGeometryShader.hlsl",
+			L"gs_6_0", dxcUtils, dxcCompiler, includeHandler);
+		assert(vertexShaderBlob_ != nullptr);
+
 		pixelShaderBlob_ = CompileShader(os, L"resources/Shader/Object3D.PS.hlsl",
 			L"ps_6_0", dxcUtils, dxcCompiler, includeHandler);
 		assert(pixelShaderBlob_ != nullptr);

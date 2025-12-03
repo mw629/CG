@@ -9,6 +9,7 @@ class ShaderCompile
 {
 private:
 	Microsoft::WRL::ComPtr<IDxcBlob> vertexShaderBlob_;
+	Microsoft::WRL::ComPtr<IDxcBlob> geometryShaderBlob_;
 	Microsoft::WRL::ComPtr<IDxcBlob> pixelShaderBlob_;
 public:
 
@@ -31,7 +32,7 @@ public:
 
 
 	IDxcBlob* GetVertexShaderBlob(){return vertexShaderBlob_.Get(); }
-
+	IDxcBlob* GetGometryShaderBlob() { return geometryShaderBlob_.Get(); }
 	IDxcBlob* GetPixelShaderBlob() { return pixelShaderBlob_.Get(); }
 
 
