@@ -16,6 +16,7 @@ void GameScene::ImGui()
 	}
 	ImGui::DragFloat3("SpritePos", &spriteData_.transform.translate.x);
 
+	model_.get()->ImGui();
 #endif // _USE_IMGUI
 }
 

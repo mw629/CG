@@ -23,46 +23,43 @@ PixelShaderOutput main(VertexShaderOutput input)
    
     float32_t3 reflectLight = reflect(gDirectionalLight.direction, normalize(input.normal));
 
+    //Phong
     float RdotE = dot(reflectLight, toEye);
-    float specularPow = pow(saturate(RdotE), gMaterial.shininess);
+    //float specularPow = pow(saturate(RdotE), gMaterial.shininess);
+    //BlinnPhong
+    float32_t3 halfVector = normalize(-gDirectionalLight.direction + toEye);
+    float NDotH = dot(normalize(input.normal), halfVector);
+    float specularPow = pow(saturate(NDotH), gMaterial.shininess);
     
    
-    float cos = pow(NdirL * 0.5f + 0.5f, 2.0f);
+    
     
     if (gMaterial.enableLighting != 0)
     {
-       
+       float cos = pow(NdirL * 0.5f + 0.5f, 2.0f);
+       //float cos = saturate(dot(normalize(input.normal), -gDirectionalLight.direction));
+        
         output.color = gMaterial.color * textureColor * gDirectionalLight.color * cos * gDirectionalLight.intensity;
         output.color[3] = gMaterial.color[3] * textureColor[3];
 
-           
+        
+          //拡散反射
+        float32_t3 diffuse =
+        gMaterial.color.rgb * textureColor.rgb * gDirectionalLight.color.rgb * cos * gDirectionalLight.intensity;
+        //鏡面反射
+        float32_t3 specular =
+        gDirectionalLight.color.rgb * gDirectionalLight.intensity * specularPow * float32_t3(1.0f, 1.0f, 1.0f);
+        //拡散反射＋鏡面反射
+        output.color.rgb = diffuse + specular;
+        //αは今まで通り
+        output.color.a = gMaterial.color.a * textureColor.a;
+  
     
     }
     else
     {
         output.color = gMaterial.color * textureColor;
     }
-    
- 
-          //拡散反射
-    float32_t3 diffuse =
-        gMaterial.color.rgb * textureColor.rgb * gDirectionalLight.color.rgb * cos * gDirectionalLight.intensity;
-        //鏡面反射
-    float32_t3 specular =
-        gDirectionalLight.color.rgb * gDirectionalLight.intensity * specularPow * float32_t3(0.5f, 0.5f, 0.5f);
-        //拡散反射＋鏡面反射
-    output.color.rgb = diffuse + specular;
-        //αは今まで通り
-    output.color.a = gMaterial.color.a * textureColor.a;
-  
-  
-    
-   
-    
-    //if (output.color.a <= 0.5f)
-    //{
-    //    discard;
-    //}
    
     
     return output;

@@ -7,12 +7,40 @@
 #include "Particle.h"
 
 
+#ifdef _USE_IMGUI
+
+#include <imgui.h>
+#endif // _USE_IMGUI
+
+
+
 namespace {
 	ID3D12Device* device_;
 	float kClientWidth;
 	float kClientHeight;
 }
 
+void Model::ImGui() {
+#ifdef _USE_IMGUI
+	std::ostringstream oss;
+	oss << "Particle###" << static_cast<const void*>(this);
+	const std::string windowTitle = oss.str();
+
+	if (ImGui::Begin(windowTitle.c_str())) {
+		ImGui::PushID(this);
+
+		if (ImGui::CollapsingHeader("Model")) {
+			if (ImGui::CollapsingHeader("Transform")) {
+				ImGui::DragFloat3("Position", &transform_.translate.x, 0.01f);
+				ImGui::DragFloat3("Rotation", &transform_.rotate.x, 0.01f);
+				ImGui::DragFloat3("Scale", &transform_.scale.x, 0.01f);
+			}
+		}
+		ImGui::PopID();
+	}
+	ImGui::End();
+#endif // _USE_IMGUI
+}
 
 void Model::SetDevice(ID3D12Device* device)
 {
@@ -51,6 +79,7 @@ void Model::Initialize(ModelData modelData)
 
 	material_ = std::make_unique<MaterialFactory>();
 	material_->CreateMatrial(device_, false);
+	material_.get()->SetMaterialLighting(true);
 	CreateModel();
 }
 
@@ -83,6 +112,7 @@ void Model::CreateWVP()
 	//単位行列をかきこんでおく
 	wvpData_->WVP = IdentityMatrix();
 	wvpData_->World = IdentityMatrix();
+	wvpData_->WorldInverseTranspose = IdentityMatrix();;
 }
 
 void Model::CreateModel()
@@ -97,9 +127,13 @@ void Model::SettingWvp(Matrix4x4 viewMatrix)
 	Matrix4x4 projectionMatri = MakePerspectiveFovMatrix(0.45f, float(kClientWidth) / float(kClientHeight), 0.1f, 100.0f);
 	Matrix4x4 worldMatrixObj = MakeAffineMatrix(transform_.translate, transform_.scale, transform_.rotate);
 	Matrix4x4 worldViewProjectionMatrixObj = MultiplyMatrix4x4(worldMatrixObj, MultiplyMatrix4x4(viewMatrix, projectionMatri));
+	Matrix4x4 worldInverseTranspose = TransposeMatrix4x4(Inverse(worldMatrixObj));
+
 
 	wvpData_->WVP = MultiplyMatrix4x4(modelData_.rootNode.localMatrix, worldViewProjectionMatrixObj);
 	wvpData_->World = MultiplyMatrix4x4(modelData_.rootNode.localMatrix, worldMatrixObj);
+	wvpData_->WorldInverseTranspose = worldInverseTranspose;
+
 };
 
 

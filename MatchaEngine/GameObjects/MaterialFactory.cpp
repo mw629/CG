@@ -20,4 +20,5 @@ void MaterialFactory::CreateMatrial(ID3D12Device* device,bool Lighting)
 	materialData_->color = Vector4(1.0f, 1.0f, 1.0f, 1.0f);
 	materialData_->endbleLighting = Lighting;
 	materialData_->uvTransform = IdentityMatrix();
+	materialData_->shininess = 30.0f;
 }

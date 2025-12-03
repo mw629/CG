@@ -49,6 +49,7 @@ struct TransformationMatrix
 {
 	Matrix4x4 WVP;
 	Matrix4x4 World;
+	Matrix4x4 WorldInverseTranspose;
 };
 
 struct ParticleForGPU {
@@ -86,7 +87,7 @@ struct Material
 	int32_t endbleLighting;
 	float paddinmg[3];
 	Matrix4x4 uvTransform;
-	
+	float shininess;
 };
 
 struct DirectionalLight {

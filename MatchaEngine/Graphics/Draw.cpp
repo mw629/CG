@@ -29,14 +29,14 @@ void Draw::preDraw(ShaderName shader, BlendMode blend)
 void Draw::DrawModel(Model* model, Camera* camera)
 {
 	preDraw(model->GetShader(), model->GetBlend());
-	commandList_->SetGraphicsRootConstantBufferView(3, directinalLight_->GetDirectinalLightResource()->GetGPUVirtualAddress());
-	commandList_->SetGraphicsRootConstantBufferView(4, camera->GetCameraResource()->GetGPUVirtualAddress());
-
+	
 	//objectの描画
 	commandList_->IASetVertexBuffers(0, 1, model->GetVertexBufferView());//VBVを設定
 	commandList_->SetGraphicsRootConstantBufferView(0, model->GetMatrial()->GetMaterialResource()->GetGPUVirtualAddress());
 	commandList_->SetGraphicsRootConstantBufferView(1, model->GetWvpDataResource()->GetGPUVirtualAddress());
 	commandList_->SetGraphicsRootDescriptorTable(2, model->GetTextureSrvHandleGPU());
+	commandList_->SetGraphicsRootConstantBufferView(3, directinalLight_->GetDirectinalLightResource()->GetGPUVirtualAddress());
+	commandList_->SetGraphicsRootConstantBufferView(4, camera->GetCameraResource()->GetGPUVirtualAddress());
 
 	commandList_->DrawInstanced(UINT(model->GetModelData().vertices.size()), 1, 0, 0);
 }

@@ -45,13 +45,11 @@ void Camera::Update() {
         eye = debugCamera_.GetEye();
     }
     else {
-        // ★カメラの scale は使わない！(絶対ズレる)
-        Matrix4x4 cameraMatrix = MakeAffineMatrix({ 1,1,1 }, transform_.rotate, transform_.translate);
+        Matrix4x4 cameraMatrix = MakeAffineMatrix(transform_.translate, transform_.scale, transform_.rotate);
         viewMatrix_ = Inverse(cameraMatrix);
         eye = transform_.translate;
     }
 
-    // ★ConstantBuffer を毎フレーム更新
     cameraData_->worldPosition = eye;
 }
 
