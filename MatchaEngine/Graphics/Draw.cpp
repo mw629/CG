@@ -70,17 +70,12 @@ void Draw::DrawParticle(Particle* particle)
 void Draw::DrawSprite(Sprite* sprite, Camera* camera)
 {
 	preDraw(sprite->GetShader(), sprite->GetBlend());
-	commandList_->SetGraphicsRootConstantBufferView(3, directionalLight_->GetDirectinalLightResource()->GetGPUVirtualAddress());
 
 	commandList_->IASetIndexBuffer(sprite->GetIndexBufferView());//IBVを設定
 	commandList_->IASetVertexBuffers(0, 1, sprite->GetVertexBufferView());//VBVを設定
-	commandList_->SetGraphicsRootConstantBufferView(0, sprite->GetMatrial()->GetMaterialResource()->GetGPUVirtualAddress());
-	commandList_->SetGraphicsRootConstantBufferView(1, sprite->GetVertexResource()->GetGPUVirtualAddress());
-	commandList_->SetGraphicsRootDescriptorTable(2, sprite->GetTextureSrvHandleGPU());
-	commandList_->SetGraphicsRootConstantBufferView(3, camera->GetCameraResource()->GetGPUVirtualAddress());
-	commandList_->SetGraphicsRootConstantBufferView(4, directionalLight_->GetDirectinalLightResource()->GetGPUVirtualAddress());
-	commandList_->SetGraphicsRootConstantBufferView(5, pointLight_->GetDirectinalLightResource()->GetGPUVirtualAddress());
-	commandList_->SetGraphicsRootConstantBufferView(6, spotLight_->GetDirectinalLightResource()->GetGPUVirtualAddress());
+	commandList_->SetGraphicsRootConstantBufferView(0, sprite->GetVertexResource()->GetGPUVirtualAddress());
+	commandList_->SetGraphicsRootDescriptorTable(1, sprite->GetTextureSrvHandleGPU());
+	commandList_->SetGraphicsRootConstantBufferView(2, sprite->GetMatrial()->GetMaterialResource()->GetGPUVirtualAddress());
 
 	commandList_->DrawIndexedInstanced(6, 1, 0, 0, 0);
 }

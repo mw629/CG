@@ -90,5 +90,5 @@ void GameScene::Draw() {
 	for (int i = 0, n = static_cast<int>(particle_.size()); i < n; ++i) {
 		particle_[i].get()->Draw();
 	}
-	//Draw::DrawSprite(sprite_.get(), camera_.get());
+	Draw::DrawSprite(sprite_.get(), camera_.get());
 }
