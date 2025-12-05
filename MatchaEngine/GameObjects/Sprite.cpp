@@ -159,6 +159,16 @@ void Sprite::SetSize(Vector2 size)
 	size_ = size;
 }
 
+SpriteData Sprite::SetData(Vector2* const size)
+{
+	SpriteData data;
+	data.transform = transform_;
+	data.size = *size;
+	data.textureArea[0] = textureArea_[0];
+	data.textureArea[1] = textureArea_[1];
+	return data;
+}
+
 void Sprite::SetTextureArea(Vector2 textureArea[2])
 {
 	textureArea_[0] = textureArea[0];

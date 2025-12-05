@@ -93,6 +93,16 @@ void ShaderCompile::CreateShaderCompile(ShaderName shaderName, std::ostream& os,
 			L"ps_6_0", dxcUtils, dxcCompiler, includeHandler);
 		assert(pixelShaderBlob_ != nullptr);
 		break;
+	case SpriteShader:
+		//Shaderをコンパイルする
+		vertexShaderBlob_ = CompileShader(os, L"resources/Shader/Sprite.VS.hlsl",
+			L"vs_6_0", dxcUtils, dxcCompiler, includeHandler);
+		assert(vertexShaderBlob_ != nullptr);
+
+		pixelShaderBlob_ = CompileShader(os, L"resources/Shader/Sprite.PS.hlsl",
+			L"ps_6_0", dxcUtils, dxcCompiler, includeHandler);
+		assert(pixelShaderBlob_ != nullptr);
+		break;
 	case ParticleShader:
 		//Shaderをコンパイルする
 		vertexShaderBlob_ = CompileShader(os, L"resources/Shader/Particle.VS.hlsl",

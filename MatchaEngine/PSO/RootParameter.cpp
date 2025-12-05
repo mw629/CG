@@ -9,6 +9,9 @@ void RootParameter::CreateRootParameter(D3D12_ROOT_SIGNATURE_DESC& descriptionRo
 	case ObjectShader:
 		CreateOBJRootParameter(descriptionRootSignature);
 		break;
+	case SpriteShader:
+		CreateSpriteRootParameter(descriptionRootSignature);
+		break;
 	case ParticleShader:
 		CreateParticleParameter(descriptionRootSignature);
 		break;
@@ -63,28 +66,54 @@ void RootParameter::CreateOBJRootParameter(D3D12_ROOT_SIGNATURE_DESC& descriptio
 	descriptionRootSignature.NumParameters = 7;//配列の長さ
 }
 
-void RootParameter::CreateParticleParameter(D3D12_ROOT_SIGNATURE_DESC& descriptionRootSignature)
+void RootParameter::CreateSpriteRootParameter(D3D12_ROOT_SIGNATURE_DESC& descriptionRootSignature)
 {
-	descriptorRange_[0].RangeType = D3D12_DESCRIPTOR_RANGE_TYPE_SRV;
-	descriptorRange_[0].BaseShaderRegister = 0; 
-	descriptorRange_[0].NumDescriptors = 1;
-	descriptorRange_[0].OffsetInDescriptorsFromTableStart = D3D12_DESCRIPTOR_RANGE_OFFSET_APPEND;
+	descriptorRange_[0].BaseShaderRegister = 0;//0から始まる
+	descriptorRange_[0].NumDescriptors = 1;//1から始まる
+	descriptorRange_[0].RangeType = D3D12_DESCRIPTOR_RANGE_TYPE_SRV;//SRVを使う
+	descriptorRange_[0].OffsetInDescriptorsFromTableStart = D3D12_DESCRIPTOR_RANGE_OFFSET_APPEND;//Offsetを自動計算
 
-	rootParameter[0].ParameterType = D3D12_ROOT_PARAMETER_TYPE_CBV;//CBVを使う
-	rootParameter[0].ShaderVisibility = D3D12_SHADER_VISIBILITY_PIXEL;//PixelShaderで行う
-	rootParameter[0].Descriptor.ShaderRegister = 0;//レジスタ番号0とバインド
+	rootParameter[0].ParameterType = D3D12_ROOT_PARAMETER_TYPE_CBV;
+	rootParameter[0].ShaderVisibility = D3D12_SHADER_VISIBILITY_VERTEX;
+	rootParameter[0].Descriptor.ShaderRegister = 0;
+
 
 	rootParameter[1].ParameterType = D3D12_ROOT_PARAMETER_TYPE_DESCRIPTOR_TABLE;
-	rootParameter[1].ShaderVisibility = D3D12_SHADER_VISIBILITY_VERTEX;
+	rootParameter[1].ShaderVisibility = D3D12_SHADER_VISIBILITY_ALL;
 	rootParameter[1].DescriptorTable.pDescriptorRanges = descriptorRange_;
 	rootParameter[1].DescriptorTable.NumDescriptorRanges = _countof(descriptorRange_);
 
-	rootParameter[2].ParameterType = D3D12_ROOT_PARAMETER_TYPE_DESCRIPTOR_TABLE;//DescriptorTebleを使う
-	rootParameter[2].ShaderVisibility = D3D12_SHADER_VISIBILITY_PIXEL;//PixelShaderで行う
-	rootParameter[2].DescriptorTable.pDescriptorRanges = descriptorRange_;//Tableの中身の配列を指定
+	rootParameter[2].ParameterType = D3D12_ROOT_PARAMETER_TYPE_CBV;
+	rootParameter[2].ShaderVisibility = D3D12_SHADER_VISIBILITY_PIXEL;
+	rootParameter[2].Descriptor.ShaderRegister = 0;
+
+	descriptionRootSignature.pParameters = rootParameter;
+	descriptionRootSignature.NumParameters = 3;
+}
+
+void RootParameter::CreateParticleParameter(D3D12_ROOT_SIGNATURE_DESC& descriptionRootSignature)
+{
+	// Pixel Shader用のテクスチャ
+	descriptorRange_[0].RangeType = D3D12_DESCRIPTOR_RANGE_TYPE_SRV;
+	descriptorRange_[0].BaseShaderRegister = 0;
+	descriptorRange_[0].NumDescriptors = 1;
+	descriptorRange_[0].OffsetInDescriptorsFromTableStart = D3D12_DESCRIPTOR_RANGE_OFFSET_APPEND;
+
+	// rootParameter[0]: Pixel Shader用のCBV (b0)
+	rootParameter[0].ParameterType = D3D12_ROOT_PARAMETER_TYPE_CBV;
+	rootParameter[0].ShaderVisibility = D3D12_SHADER_VISIBILITY_PIXEL;
+	rootParameter[0].Descriptor.ShaderRegister = 0;
+
+	// rootParameter[1]: Vertex Shader用のCBV (b0) - インスタンシングデータなど
+	rootParameter[1].ParameterType = D3D12_ROOT_PARAMETER_TYPE_CBV;
+	rootParameter[1].ShaderVisibility = D3D12_SHADER_VISIBILITY_VERTEX;
+	rootParameter[1].Descriptor.ShaderRegister = 0;
+
+	// rootParameter[2]: Pixel Shader用のDescriptor Table (t0)
+	rootParameter[2].ParameterType = D3D12_ROOT_PARAMETER_TYPE_DESCRIPTOR_TABLE;
+	rootParameter[2].ShaderVisibility = D3D12_SHADER_VISIBILITY_PIXEL;
+	rootParameter[2].DescriptorTable.pDescriptorRanges = descriptorRange_;
 	rootParameter[2].DescriptorTable.NumDescriptorRanges = _countof(descriptorRange_);
-
-
 
 	descriptionRootSignature.pParameters = rootParameter;
 	descriptionRootSignature.NumParameters = 3;

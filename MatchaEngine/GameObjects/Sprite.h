@@ -65,6 +65,8 @@ public:
 
 	void SetSize(Vector2 size);
 
+	SpriteData SetData(Vector2* const size);
+
 	void SetTextureArea(Vector2 textureArea[2]);
 
 	void Update(SpriteData spriteData);
@@ -83,7 +85,7 @@ public:
 	D3D12_GPU_DESCRIPTOR_HANDLE GetTextureSrvHandleGPU() { return textureSrvHandleGPU_; }
 
 private:
-	ShaderName shader_ = ShaderName::ObjectShader;
+	ShaderName shader_ = ShaderName::SpriteShader;
 	BlendMode blend_ = BlendMode::kBlendModeNormal;
 public:
 	BlendMode SetBlend(BlendMode blend) { blend_ = blend; }
@@ -91,5 +93,6 @@ public:
 	BlendMode GetBlend() { return blend_; }
 
 };
+
 
 

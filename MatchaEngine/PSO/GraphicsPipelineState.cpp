@@ -89,7 +89,7 @@ void GraphicsPipelineState::ALLPSOCreate(std::ostream& os, ID3D12Device* device)
 {
 	for (int i = 0; i < ShaderNum; i++) {
 		for (int j = 0; j < kBlendNum; j++) {
-			CreatePSO(ShaderName(i), BlendMode(j), os, device);
+				CreatePSO(ShaderName(i), BlendMode(j), os, device);
 		}
 	}
 }
