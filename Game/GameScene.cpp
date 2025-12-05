@@ -28,7 +28,7 @@ void GameScene::Initialize() {
 	camera_.get()->SetTransform(cameraTransform_);
 	camera_.get()->Update();
 
-	ModelData modelData = LoadObjFile("resources/obj", "sphere.obj");
+	ModelData modelData = AssimpLoadObjFile("resources/obj", "sphere.obj");
 
 	model_.get()->Initialize(modelData);
 	model_.get()->SetTransform(modelTransform_);
