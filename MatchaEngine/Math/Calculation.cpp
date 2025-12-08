@@ -407,6 +407,11 @@ Matrix4x4 MakeAffineMatrix(Vector3 pos, Vector3 scale, Vector3 angle)
 	return result;
 }
 
+Matrix4x4 MakeAffineMatrix(Transform transform)
+{
+	return MakeAffineMatrix(transform.translate, transform.scale, transform.rotate);
+}
+
 Matrix4x4 MakeAffineMatrix(Matrix4x4 translationMatrix, Vector3 scale, Matrix4x4 rotationMatrix)
 {
 	Matrix4x4 result;

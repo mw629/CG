@@ -4,10 +4,37 @@
 #include "Math/Calculation.h"
 #include <Resource/Texture.h>
 
+#ifdef _USE_IMGUI
+#include <ImGui.h>
+#endif // _USE_IMGUI
+
+
 namespace {
 	ID3D12Device* device_;
 	float kClientWidth;
 	float kClientHeight;
+}
+
+void Sprite::ImGui() {
+#ifdef _USE_IMGUI
+	std::ostringstream oss;
+	oss << "Particle###" << static_cast<const void*>(this);
+	const std::string windowTitle = oss.str();
+
+	if (ImGui::Begin(windowTitle.c_str())) {
+		ImGui::PushID(this);
+
+		if (ImGui::CollapsingHeader("Sprite")) {
+			if (ImGui::CollapsingHeader("Transform")) {
+				ImGui::DragFloat3("Position", &transform_.translate.x, 0.01f);
+				ImGui::DragFloat3("Rotation", &transform_.rotate.x, 0.01f);
+				ImGui::DragFloat3("Scale", &transform_.scale.x, 0.01f);
+			}
+		}
+		ImGui::PopID();
+	}
+	ImGui::End();
+#endif // _USE_IMGUI
 }
 
 void Sprite::SetDevice(ID3D12Device* device) {
