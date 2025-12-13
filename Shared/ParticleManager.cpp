@@ -88,6 +88,12 @@ void ParticleManager::Update(Matrix4x4 viewMatrix) {
 	for (std::list<ParticleData>::iterator particleIterator = particleData_.begin();
 		particleIterator != particleData_.end(); ) {
 
+		// ループの先頭に追加
+		if (particleIterator->currentTime >= particleIterator->lifeTime) {
+			particleIterator = particleData_.erase(particleIterator);
+			continue;
+		}
+
 		// 位置を更新
 		particleIterator->transform.translate += particleIterator->velocity;
 
@@ -114,7 +120,11 @@ void ParticleManager::Update(Matrix4x4 viewMatrix, int a)
 	for (std::list<ParticleData>::iterator particleIterator = particleData_.begin();
 		particleIterator != particleData_.end(); ) {
 
-		
+		// ループの先頭に追加
+		if (particleIterator->currentTime >= particleIterator->lifeTime) {
+			particleIterator = particleData_.erase(particleIterator);
+			continue;
+		}
 
 		// 外部のムーブ関数で更新結果を受け取る
 		ParticleData updated;
@@ -167,6 +177,12 @@ void ParticleManager::Update(Emitter emitter, Matrix4x4 viewMatrix, int a)
 	for (std::list<ParticleData>::iterator particleIterator = particleData_.begin();
 		particleIterator != particleData_.end(); ) {
 
+		// ループの先頭に追加
+		if (particleIterator->currentTime >= particleIterator->lifeTime) {
+			particleIterator = particleData_.erase(particleIterator);
+			continue;
+		}
+
 		// 外部のムーブ関数で更新結果を受け取る
 		ParticleData updated;
 		if (a == 0) {
@@ -204,13 +220,21 @@ void ParticleManager::Update(Matrix4x4 viewMatrix, Vector3 scale)
 	for (std::list<ParticleData>::iterator particleIterator = particleData_.begin();
 		particleIterator != particleData_.end(); ) {
 
+		// ループの先頭に追加
+		if (particleIterator->currentTime >= particleIterator->lifeTime) {
+			particleIterator = particleData_.erase(particleIterator);
+			continue;
+		}
+		else {
+			++particleIterator;//これを忘れた未来の僕がいるならこれを忘れた今の僕が悲しむ
+		}
 		// 位置を更新
 		particleIterator->transform.translate += particleIterator->velocity;
 
 		particleIterator->color.w -= 1.0f / (particleIterator->lifeTime * 60.0f);
 		particleIterator->currentTime += 1.0f / 60.0f;
 
-		++particleIterator;//これを忘れた未来の僕がいるならこれを忘れた今の僕が悲しむ
+		
 	}
 	if (!isStop_) {
 		emitter_.frequencyTime += 1.0f / 60.0f;

@@ -79,8 +79,8 @@ void GameScene::Update() {
 
 	particle_[1].get()->EmitSize();
 	
-	particle_[0].get()->Update(view, 0);
-	particle_[1].get()->Update(view, 1);
+	particle_[0].get()->Update(view);
+	particle_[1].get()->Update(view);
 
 }
 

@@ -35,7 +35,7 @@ private:
 
 
 
-	int particleMaxNum_ = 1000;
+	int particleMaxNum_ = 10000;
 	int particleNum_;
 	
 	std::list<ParticleData> particleData_;
