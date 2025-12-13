@@ -17,8 +17,10 @@ namespace {
 	{"1",MapChipType::kBlock},
 	{"2",MapChipType::kGoal},
 	{"3",MapChipType::kPlayerSpawn},
-	{"4",MapChipType::kEnemySpawn},
-	{"5sss",MapChipType::kNone},
+	{"4",MapChipType::kStopEnemySpawn},//敵のスポーン位置
+	{"5", MapChipType::kRunEnemySpawn },
+	{"6", MapChipType::kJumpEnemySpawn },
+	{ "7", MapChipType::kNone },
 	};
 }
 

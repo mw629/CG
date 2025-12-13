@@ -7,7 +7,7 @@
 
 GameManager::GameManager()
 {
-	scene_ = new GameScene();
+	scene_ = new TitleScene();
 }
 
 GameManager::~GameManager()

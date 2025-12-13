@@ -7,7 +7,7 @@ void Enemy::Initialize(const Vector3& position, Matrix4x4 viewMatrix) {
 	model_->Initialize(modelData);
 	model_->SetTransform(transform_);
 	model_->SettingWvp(viewMatrix);
-	model_->GetMatrial()->SetColor(color);
+	model_->GetMatrial()->SetColor(color_);
 	isActive_ = true;
 
 	// キャラクターの当たり判定サイズ

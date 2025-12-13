@@ -4,11 +4,13 @@
 #include <string>
 
 enum class MapChipType {
-	kBlank, // 空白
-	kBlock, // ブロック
-	kGoal,//ゴール
-	kPlayerSpawn,//プレイヤースポーン地点
-	kEnemySpawn,//敵のスポーン位置
+	kBlank = 0, // 空白
+	kBlock = 1, // ブロック
+	kGoal = 2,//ゴール
+	kPlayerSpawn = 3,//プレイヤースポーン地点
+	kStopEnemySpawn = 4,//敵のスポーン位置
+	kRunEnemySpawn = 5,//敵のスポーン位置
+	kJumpEnemySpawn = 6,//敵のスポーン位置
 	kNone,
 };
 

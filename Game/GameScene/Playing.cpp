@@ -26,7 +26,7 @@ void Playing::ImGui() {
 	camera_.get()->ImGui();
 	player_.get()->ImGui();
 
-	int bulletNum=0;
+	int bulletNum = 0;
 	for (Bullet* bullet : bullet_) {
 		if (bullet->IsActiv()) {
 			bulletNum++;
@@ -61,7 +61,7 @@ void Playing::Initialize(int stage) {
 	goal_.get()->Initialize(mapChipField_.get()->GetGoalPosition(), viewMatrix_);
 
 	for (int i = 0; i < bulletNum_; i++) {
-		Bullet *newBullet = new NormalBullet();
+		Bullet* newBullet = new NormalBullet();
 		newBullet->Initialize(mapChipField_.get());
 		bullet_.push_back(newBullet);
 	}
@@ -121,12 +121,25 @@ void Playing::Draw() {
 
 void Playing::EnemySpawn()
 {
-	for (const auto& enemyPos : mapChipField_.get()->GetEnemyPosition()) {
-		Enemy* newEnemy = new JumpEnemy();
-		newEnemy->Initialize(enemyPos,viewMatrix_);
+	for (const auto& enemyPos : mapChipField_.get()->GetEnemyPosition(0)) {
+		Enemy* newEnemy = new StopEnemy();
+		newEnemy->Initialize(enemyPos, viewMatrix_);
 		newEnemy->SetMapChipField(mapChipField_.get());
 		enemy_.push_back(newEnemy);
 	}
+	for (const auto& enemyPos : mapChipField_.get()->GetEnemyPosition(1)) {
+		Enemy* newEnemy = new RunEnemy();
+		newEnemy->Initialize(enemyPos, viewMatrix_);
+		newEnemy->SetMapChipField(mapChipField_.get());
+		enemy_.push_back(newEnemy);
+	}
+	for (const auto& enemyPos : mapChipField_.get()->GetEnemyPosition(2)) {
+		Enemy* newEnemy = new JumpEnemy();
+		newEnemy->Initialize(enemyPos, viewMatrix_);
+		newEnemy->SetMapChipField(mapChipField_.get());
+		enemy_.push_back(newEnemy);
+	}
+
 }
 
 
@@ -141,7 +154,7 @@ bool Playing::IsCollision(const AABB& aabb1, const AABB& aabb2)
 }
 
 void Playing::CheckAllCollisions() {
-	#pragma region 自キャラとゴール・コインの当たり判定
+#pragma region 自キャラとゴール・コインの当たり判定
 	AABB aabb1, aabb2;
 
 	aabb1 = player_.get()->GetAABB();
@@ -163,7 +176,7 @@ void Playing::CheckAllCollisions() {
 	}
 
 	for (Bullet* bullet : bullet_) {
-		
+
 		aabb1 = bullet->GetAABB();
 		for (Enemy* enemy : enemy_) {
 			if (!enemy->IsActive()) {

@@ -55,13 +55,33 @@ Vector3 MapChipField::GetPos(MapChipType mapChipType)
 	return Vector3(0, 0, 0);
 }
 
-std::list<Vector3> MapChipField::GetEnemyPosition()
+std::list<Vector3> MapChipField::GetEnemyPosition(int i)
 {
 	std::list<Vector3> vector;
-	for (uint32_t y = 0; y < mapChipData_.height; ++y) {
-		for (uint32_t x = 0; x < mapChipData_.width; ++x) {
-			if (mapChipData_.data[y][x] == MapChipType::kEnemySpawn) {
-				vector.push_back(GetMapChipPositionByIndex(x, y));
+	if (i == 0) {
+		for (uint32_t y = 0; y < mapChipData_.height; ++y) {
+			for (uint32_t x = 0; x < mapChipData_.width; ++x) {
+				if (mapChipData_.data[y][x] == MapChipType::kStopEnemySpawn) {
+					vector.push_back(GetMapChipPositionByIndex(x, y));
+				}
+			}
+		}
+	}
+	if (i == 1) {
+		for (uint32_t y = 0; y < mapChipData_.height; ++y) {
+			for (uint32_t x = 0; x < mapChipData_.width; ++x) {
+				if (mapChipData_.data[y][x] == MapChipType::kRunEnemySpawn) {
+					vector.push_back(GetMapChipPositionByIndex(x, y));
+				}
+			}
+		}
+	}
+	if (i == 2) {
+		for (uint32_t y = 0; y < mapChipData_.height; ++y) {
+			for (uint32_t x = 0; x < mapChipData_.width; ++x) {
+				if (mapChipData_.data[y][x] == MapChipType::kJumpEnemySpawn) {
+					vector.push_back(GetMapChipPositionByIndex(x, y));
+				}
 			}
 		}
 	}

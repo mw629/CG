@@ -35,7 +35,7 @@ protected:
 	Transform transform_ = { {1.0f,1.0f,1.0f},{0.0f,0.0f,0.0f} ,{0.0f,0.0f,0.0f} };
 	Vector3 velocity_ = { 0.0f,0.0f,0.0f };
 	
-	Vector4 color = { 1.0f,0.0f,0.0f,1.0f };
+	Vector4 color_ = { 1.0f,0.0f,0.0f,1.0f };
 	// キャラクターの当たり判定サイズ
 	float kWidth = 0.9f;
 	float kHeight = 0.9f;

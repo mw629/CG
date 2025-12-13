@@ -1,10 +1,10 @@
-#include "JumpEnemy.h"
+#include "RunEnemy.h"
 #define NOMINMAX
 
 #include <algorithm>
 
 
-void JumpEnemy::Initialize(const Vector3& position, Matrix4x4 viewMatrix)
+void RunEnemy::Initialize(const Vector3& position, Matrix4x4 viewMatrix)
 {
 	ModelData modelData = LoadObjFile("resources/Enemy", "Enemy.obj");
 	model_ = std::make_unique<Model>();
@@ -12,7 +12,7 @@ void JumpEnemy::Initialize(const Vector3& position, Matrix4x4 viewMatrix)
 	model_->Initialize(modelData);
 	model_->SetTransform(transform_);
 	model_->SettingWvp(viewMatrix);
-	color_ = { 1.0f,1.0f,0.0f,1.0f };
+	color_ = { 0.0f,0.0f,1.0f,1.0f };
 	model_->GetMatrial()->SetColor(color_);
 	isActive_ = true;
 
@@ -21,7 +21,7 @@ void JumpEnemy::Initialize(const Vector3& position, Matrix4x4 viewMatrix)
 	float kHeight = 0.9f;
 }
 
-void JumpEnemy::Update(Matrix4x4 viewMatrix)
+void RunEnemy::Update(Matrix4x4 viewMatrix)
 {
 	Move();
 
@@ -33,24 +33,11 @@ void JumpEnemy::Update(Matrix4x4 viewMatrix)
 	model_.get()->SettingWvp(viewMatrix);
 }
 
-void JumpEnemy::Move()
+void RunEnemy::Move()
 {
-	velocity_.x = runSpeed_/60.0f;
-
-	if (canJump) {
-		JumpCoolTime = JumpCoolTimeMax;
-		canJump = false;
-		velocity_.y = kJumpAcceleration;
-	}
-	if (onGround_) {
-		JumpCoolTime -= 1.0f / 60.0f;
-		if (JumpCoolTime < 0) {
-			canJump = true;
-		}
-	}
+	velocity_.x = runSpeed_ / 60.0f;
 
 	if (!onGround_) {
-		canJump = false;
 		// 落下速度
 		velocity_ = velocity_ + Vector3(0.0f, -gravity_ / 60.0f, 0.0f);
 		// 落下速度制限
@@ -58,7 +45,7 @@ void JumpEnemy::Move()
 	}
 }
 
-void JumpEnemy::HitWall()
+void RunEnemy::HitWall()
 {
 	runSpeed_ *= -1.0f;
 }

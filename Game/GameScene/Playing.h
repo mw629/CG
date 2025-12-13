@@ -7,8 +7,12 @@
 
 #include "Entity/Player/Player.h"
 #include "Entity/Player/Bullet/NormalBullet.h"
+
 #include "Entity/Enemy/Enemy.h"
 #include "Entity/Enemy/JumpEnemy/JumpEnemy.h"
+#include "Entity/Enemy/StopEnemy/StopEnemy.h"
+#include "Entity/Enemy/RunEnemy/RunEnemy.h"
+
 #include "Entity/MapObject/Block.h"
 #include "Entity/MapObject/Goal.h"
 #include "UI/HP.h"

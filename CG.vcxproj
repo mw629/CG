@@ -236,6 +236,8 @@ copy "$(WindowsSdkDir)bin\$(TargetPlatformVersion)\x64\dxil.dll" "$(TargetDir)dx
     <ClCompile Include="Game\GameScene\System\TrackingCamera.cpp" />
     <ClCompile Include="Game\StageSelect\StageSelect.cpp" />
     <ClCompile Include="Game\GameScene\Entity\Player\Bullet\NormalBullet.cpp" />
+    <ClCompile Include="Game\GameScene\Entity\Enemy\StopEnemy\StopEnemy.cpp" />
+    <ClCompile Include="Game\GameScene\Entity\Enemy\RunEnemy\RunEnemy.cpp" />
   </ItemGroup>
   <ItemGroup>
     <FxCompile Include="resources\Shader\Line.PS.hlsl">
@@ -355,6 +357,8 @@ copy "$(WindowsSdkDir)bin\$(TargetPlatformVersion)\x64\dxil.dll" "$(TargetDir)dx
     <ClInclude Include="Game\GameScene\System\TrackingCamera.h" />
     <ClInclude Include="Game\StageSelect\StageSelect.h" />
     <ClInclude Include="Game\GameScene\Entity\Player\Bullet\NormalBullet.h" />
+    <ClInclude Include="Game\GameScene\Entity\Enemy\StopEnemy\StopEnemy.h" />
+    <ClInclude Include="Game\GameScene\Entity\Enemy\RunEnemy\RunEnemy.h" />
   </ItemGroup>
   <ItemGroup>
     <Text Include="externals\imgui\LICENSE.txt" />
