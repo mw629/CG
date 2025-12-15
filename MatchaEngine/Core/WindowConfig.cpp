@@ -84,8 +84,10 @@ void WindowConfig::DrawWindow(const int32_t kClientWidth, const int32_t kClientH
 }
 
 void WindowConfig::Finalize() {
-	//ウィンドウを閉じる
-	CloseWindow(hwnd);
+	//ウィンドウを破棄する
+	DestroyWindow(hwnd);
+	//ウィンドウクラスの登録解除
+	UnregisterClass(wc.lpszClassName, wc.hInstance);
 	//COMの終了処理
 	CoUninitialize();
 }
@@ -94,16 +96,13 @@ bool WindowConfig::ProcessMassage()
 {
 	MSG msg{};
 	//windowにメッセージが来てたら最優先で処理させる
-	if (PeekMessage(&msg, NULL, 0, 0, PM_REMOVE)) {
+	while (PeekMessage(&msg, NULL, 0, 0, PM_REMOVE)) {
+		if (msg.message == WM_QUIT) {
+			return true;
+		}
 		TranslateMessage(&msg);
 		DispatchMessage(&msg);
 	}
-
-
-	if (msg.message == WM_QUIT) {
-		return true;
-	}
-
 
 	return false;
 }
