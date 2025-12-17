@@ -323,3 +323,13 @@ logs/
 
 # DirectXTex Compiled Shaders
 **/DirectXTex/Shaders/Compiled/
+
+# DirectXTex build outputs
+**/DirectXTex/bin/
+**/DirectXTex/obj/
+
+# ImGui settings
+imgui.ini
+**/imgui.ini
+
+
