@@ -325,8 +325,8 @@ logs/
 **/DirectXTex/Shaders/Compiled/
 
 # DirectXTex build outputs
-**/DirectXTex/bin/
-**/DirectXTex/obj/
+externals/DirectXTex/bin/
+externals/DirectXTex/obj/
 
 # ImGui settings
 imgui.ini
