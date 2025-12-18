@@ -79,7 +79,7 @@
       <AdditionalOptions>/utf-8 %(AdditionalOptions)</AdditionalOptions>
       <MultiProcessorCompilation>true</MultiProcessorCompilation>
       <RuntimeLibrary>MultiThreadedDebug</RuntimeLibrary>
-      <AdditionalIncludeDirectories>$(ProjectDir)externals\assimp\include;$(ProjectDir)MatchaEngine;$(ProjectDir)externals\imgui;$(ProjectDir)externals\DirectXTex;$(ProjectDir)MatchaEngine\Common;$(ProjectDir)MatchaEngine\Core;$(ProjectDir)MatchaEngine\GameObjects;$(ProjectDir)MatchaEngine\GameObjects\Light;$(ProjectDir)MatchaEngine\GameObjects\Camera;$(ProjectDir)MatchaEngine\Graphics;$(ProjectDir)MatchaEngine\Input;$(ProjectDir)MatchaEngine\Math;$(ProjectDir)MatchaEngine\PSO;$(ProjectDir)MatchaEngine\Resource;$(ProjectDir)Shared;$(ProjectDir)MatchaEngine;$(ProjectDir)externals\imgui;$(ProjectDir)externals\DirectXTex;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+      <AdditionalIncludeDirectories>$(ProjectDir)externals\assimp\include;$(ProjectDir)MatchaEngine;$(ProjectDir)externals\imgui;$(ProjectDir)externals\DirectXTex;$(ProjectDir)MatchaEngine\Common;$(ProjectDir)MatchaEngine\Core;$(ProjectDir)MatchaEngine\GameObjects;$(ProjectDir)MatchaEngine\GameObjects\Light;$(ProjectDir)MatchaEngine\GameObjects\Camera;$(ProjectDir)MatchaEngine\GameObjects\2d;$(ProjectDir)MatchaEngine\GameObjects\3d;$(ProjectDir)MatchaEngine\GameObjects\Line;$(ProjectDir)MatchaEngine\Graphics;$(ProjectDir)MatchaEngine\Input;$(ProjectDir)MatchaEngine\Math;$(ProjectDir)MatchaEngine\PSO;$(ProjectDir)MatchaEngine\Resource;$(ProjectDir)Shared;$(ProjectDir)MatchaEngine;$(ProjectDir)externals\imgui;$(ProjectDir)externals\DirectXTex;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
     </ClCompile>
     <Link>
       <SubSystem>Windows</SubSystem>
@@ -106,7 +106,7 @@ copy "$(WindowsSdkDir)bin\$(TargetPlatformVersion)\x64\dxil.dll" "$(TargetDir)dx
       <AdditionalOptions>/utf-8 %(AdditionalOptions)</AdditionalOptions>
       <MultiProcessorCompilation>true</MultiProcessorCompilation>
       <RuntimeLibrary>MultiThreaded</RuntimeLibrary>
-      <AdditionalIncludeDirectories>$(ProjectDir)externals\assimp\include;$(ProjectDir)MatchaEngine;$(ProjectDir)externals\imgui;$(ProjectDir)externals\DirectXTex;$(ProjectDir)MatchaEngine\Common;$(ProjectDir)MatchaEngine\Core;$(ProjectDir)MatchaEngine\GameObjects;$(ProjectDir)MatchaEngine\GameObjects\Light;$(ProjectDir)MatchaEngine\GameObjects\Camera;$(ProjectDir)MatchaEngine\Graphics;$(ProjectDir)MatchaEngine\Input;$(ProjectDir)MatchaEngine\Math;$(ProjectDir)MatchaEngine\PSO;$(ProjectDir)MatchaEngine\Resource;$(ProjectDir)Shared;$(ProjectDir)MatchaEngine;$(ProjectDir)externals\imgui;$(ProjectDir)externals\DirectXTex;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+      <AdditionalIncludeDirectories>$(ProjectDir)externals\assimp\include;$(ProjectDir)MatchaEngine;$(ProjectDir)externals\imgui;$(ProjectDir)externals\DirectXTex;$(ProjectDir)MatchaEngine\Common;$(ProjectDir)MatchaEngine\Core;$(ProjectDir)MatchaEngine\GameObjects;$(ProjectDir)MatchaEngine\GameObjects\Light;$(ProjectDir)MatchaEngine\GameObjects\Camera;$(ProjectDir)MatchaEngine\GameObjects\2d;$(ProjectDir)MatchaEngine\GameObjects\3d;$(ProjectDir)MatchaEngine\GameObjects\Line;$(ProjectDir)MatchaEngine\Graphics;$(ProjectDir)MatchaEngine\Input;$(ProjectDir)MatchaEngine\Math;$(ProjectDir)MatchaEngine\PSO;$(ProjectDir)MatchaEngine\Resource;$(ProjectDir)Shared;$(ProjectDir)MatchaEngine;$(ProjectDir)externals\imgui;$(ProjectDir)externals\DirectXTex;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
     </ClCompile>
     <Link>
       <SubSystem>Windows</SubSystem>
@@ -129,7 +129,7 @@ copy "$(WindowsSdkDir)bin\$(TargetPlatformVersion)\x64\dxil.dll" "$(TargetDir)dx
       <AdditionalOptions>/utf-8 %(AdditionalOptions)</AdditionalOptions>
       <MultiProcessorCompilation>true</MultiProcessorCompilation>
       <RuntimeLibrary>MultiThreaded</RuntimeLibrary>
-      <AdditionalIncludeDirectories>$(ProjectDir)externals\assimp\include;$(ProjectDir)MatchaEngine;$(ProjectDir)externals\imgui;$(ProjectDir)externals\DirectXTex;$(ProjectDir)MatchaEngine\Common;$(ProjectDir)MatchaEngine\Core;$(ProjectDir)MatchaEngine\GameObjects;$(ProjectDir)MatchaEngine\GameObjects\Light;$(ProjectDir)MatchaEngine\GameObjects\Camera;$(ProjectDir)MatchaEngine\Graphics;$(ProjectDir)MatchaEngine\Input;$(ProjectDir)MatchaEngine\Math;$(ProjectDir)MatchaEngine\PSO;$(ProjectDir)MatchaEngine\Resource;$(ProjectDir)Shared;$(ProjectDir)externals\Game;$(ProjectDir)MatchaEngine;$(ProjectDir)externals\imgui;$(ProjectDir)externals\DirectXTex;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+      <AdditionalIncludeDirectories>$(ProjectDir)externals\assimp\include;$(ProjectDir)MatchaEngine;$(ProjectDir)externals\imgui;$(ProjectDir)externals\DirectXTex;$(ProjectDir)MatchaEngine\Common;$(ProjectDir)MatchaEngine\Core;$(ProjectDir)MatchaEngine\GameObjects;$(ProjectDir)MatchaEngine\GameObjects\Light;$(ProjectDir)MatchaEngine\GameObjects\Camera;$(ProjectDir)MatchaEngine\GameObjects\2d;$(ProjectDir)MatchaEngine\GameObjects\3d;$(ProjectDir)MatchaEngine\GameObjects\Line;$(ProjectDir)MatchaEngine\Graphics;$(ProjectDir)MatchaEngine\Input;$(ProjectDir)MatchaEngine\Math;$(ProjectDir)MatchaEngine\PSO;$(ProjectDir)MatchaEngine\Resource;$(ProjectDir)Shared;$(ProjectDir)externals\Game;$(ProjectDir)MatchaEngine;$(ProjectDir)externals\imgui;$(ProjectDir)externals\DirectXTex;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
       <Optimization>Disabled</Optimization>
       <WholeProgramOptimization>false</WholeProgramOptimization>
     </ClCompile>
@@ -150,14 +150,14 @@ copy "$(WindowsSdkDir)bin\$(TargetPlatformVersion)\x64\dxil.dll" "$(TargetDir)dx
     <ClCompile Include="MatchaEngine\GameObjects\Camera\Camera.cpp" />
     <ClCompile Include="Game\GameScene.cpp" />
     <ClCompile Include="MatchaEngine\Input\GamePadInput.cpp" />
-    <ClCompile Include="MatchaEngine\GameObjects\Line.cpp" />
-    <ClCompile Include="MatchaEngine\GameObjects\Grid.cpp" />
+    <ClCompile Include="MatchaEngine\GameObjects\Line\Line.cpp" />
+    <ClCompile Include="MatchaEngine\GameObjects\Line\Grid.cpp" />
     <ClCompile Include="MatchaEngine\Graphics\DepthStencil.cpp" />
     <ClCompile Include="MatchaEngine\Graphics\DescriptorHeap.cpp" />
     <ClCompile Include="MatchaEngine\GameObjects\Light\DirectionalLight.cpp" />
     <ClCompile Include="MatchaEngine\Graphics\GpuSyncManager.cpp" />
     <ClCompile Include="MatchaEngine\GameObjects\Camera\DebugCamera.cpp" />
-    <ClCompile Include="MatchaEngine\GameObjects\Sprite.cpp" />
+    <ClCompile Include="MatchaEngine\GameObjects\2d\Sprite.cpp" />
     <ClCompile Include="MatchaEngine\Resource\Audio.cpp" />
     <ClCompile Include="MatchaEngine\Input\Input.cpp" />
     <ClCompile Include="MatchaEngine\Engine.cpp" />
@@ -202,17 +202,17 @@ copy "$(WindowsSdkDir)bin\$(TargetPlatformVersion)\x64\dxil.dll" "$(TargetDir)dx
     <ClCompile Include="MatchaEngine\PSO\ShaderCompile.cpp" />
     <ClCompile Include="MatchaEngine\Core\WindowConfig.cpp" />
     <ClCompile Include="MatchaEngine\GameObjects\MaterialFactory.cpp" />
-    <ClCompile Include="MatchaEngine\GameObjects\Model.cpp" />
+    <ClCompile Include="MatchaEngine\GameObjects\3d\Model.cpp" />
     <ClCompile Include="MatchaEngine\Resource\Load.cpp" />
     <ClCompile Include="MatchaEngine\Resource\TextureLoader.cpp" />
     <ClCompile Include="MatchaEngine\Graphics\RenderTargetView.cpp" />
     <ClCompile Include="MatchaEngine\PSO\Sampler.cpp" />
     <ClCompile Include="MatchaEngine\Graphics\ResourceBarrierHelper.cpp" />
-    <ClCompile Include="MatchaEngine\GameObjects\Sphere.cpp" />
+    <ClCompile Include="MatchaEngine\GameObjects\3d\Sphere.cpp" />
     <ClCompile Include="MatchaEngine\Graphics\SwapChain.cpp" />
     <ClCompile Include="MatchaEngine\Resource\Texture.cpp" />
     <ClCompile Include="MatchaEngine\Graphics\ViewportScissor.cpp" />
-    <ClCompile Include="MatchaEngine\GameObjects\Triangle.cpp" />
+    <ClCompile Include="MatchaEngine\GameObjects\3d\Triangle.cpp" />
     <ClCompile Include="Game\TitleScene.cpp" />
     <ClCompile Include="Game\SceneManager.cpp" />
     <ClCompile Include="MatchaEngine\Resource\ModelManager.cpp" />
@@ -280,13 +280,13 @@ copy "$(WindowsSdkDir)bin\$(TargetPlatformVersion)\x64\dxil.dll" "$(TargetDir)dx
     <ClInclude Include="MatchaEngine\Core\VariableTypes\Vector3Int.h" />
     <ClInclude Include="MatchaEngine\PSO\RenderState.h" />
     <ClInclude Include="MatchaEngine\Input\GamePadInput.h" />
-    <ClInclude Include="MatchaEngine\GameObjects\Line.h" />
-    <ClInclude Include="MatchaEngine\GameObjects\Grid.h" />
+    <ClInclude Include="MatchaEngine\GameObjects\Line\Line.h" />
+    <ClInclude Include="MatchaEngine\GameObjects\Line\Grid.h" />
     <ClInclude Include="MatchaEngine\Graphics\DepthStencil.h" />
     <ClInclude Include="MatchaEngine\Graphics\DescriptorHeap.h" />
     <ClInclude Include="MatchaEngine\GameObjects\Light\DirectionalLight.h" />
     <ClInclude Include="MatchaEngine\Graphics\GpuSyncManager.h" />
-    <ClInclude Include="MatchaEngine\GameObjects\Sprite.h" />
+    <ClInclude Include="MatchaEngine\GameObjects\2d\Sprite.h" />
     <ClInclude Include="MatchaEngine\Resource\Load.h" />
     <ClInclude Include="MatchaEngine\GameObjects\Camera\DebugCamera.h" />
     <ClInclude Include="MatchaEngine\Resource\Audio.h" />
@@ -317,16 +317,16 @@ copy "$(WindowsSdkDir)bin\$(TargetPlatformVersion)\x64\dxil.dll" "$(TargetDir)dx
     <ClInclude Include="MatchaEngine\Core\VariableTypes.h" />
     <ClInclude Include="MatchaEngine\Core\WindowConfig.h" />
     <ClInclude Include="MatchaEngine\GameObjects\MaterialFactory.h" />
-    <ClInclude Include="MatchaEngine\GameObjects\Model.h" />
+    <ClInclude Include="MatchaEngine\GameObjects\3d\Model.h" />
     <ClInclude Include="MatchaEngine\Resource\TextureLoader.h" />
     <ClInclude Include="MatchaEngine\Graphics\RenderTargetView.h" />
     <ClInclude Include="MatchaEngine\PSO\Sampler.h" />
     <ClInclude Include="MatchaEngine\Graphics\ResourceBarrierHelper.h" />
-    <ClInclude Include="MatchaEngine\GameObjects\Sphere.h" />
+    <ClInclude Include="MatchaEngine\GameObjects\3d\Sphere.h" />
     <ClInclude Include="MatchaEngine\Graphics\SwapChain.h" />
     <ClInclude Include="MatchaEngine\Resource\Texture.h" />
     <ClInclude Include="MatchaEngine\Graphics\ViewportScissor.h" />
-    <ClInclude Include="MatchaEngine\GameObjects\Triangle.h" />
+    <ClInclude Include="MatchaEngine\GameObjects\3d\Triangle.h" />
     <ClInclude Include="MatchaEngine\Core\VariableTypes\Vector2.h" />
     <ClInclude Include="Game\TitleScene.h" />
     <ClInclude Include="Game\SceneManager.h" />
