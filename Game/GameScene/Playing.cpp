@@ -70,6 +70,10 @@ void Playing::Initialize(int stage) {
 
 	HP_ = std::make_unique<HP>();
 	HP_.get()->Initialize();
+
+	// フラグの初期化
+	isGoal_ = false;
+	isGameOver_ = false;
 }
 
 
@@ -162,17 +166,23 @@ void Playing::CheckAllCollisions() {
 	if (IsCollision(aabb1, aabb2)) {
 		isGoal_ = true;
 	}
-	for (Enemy* enemy : enemy_) {
-		if (!enemy->IsActive()) {
-			continue;
-		}
-		aabb2 = enemy->GetAABB();
-		if (IsCollision(aabb1, aabb2)) {
-			player_.get()->OnCollision(enemy);
-			if (player_.get()->IsDead()) {
-				isGameOver_ = true;
+
+	// 死亡していない場合のみ敵との衝突判定を行う
+	if (!player_.get()->IsDead()) {
+		for (Enemy* enemy : enemy_) {
+			if (!enemy->IsActive()) {
+				continue;
+			}
+			aabb2 = enemy->GetAABB();
+			if (IsCollision(aabb1, aabb2)) {
+				player_.get()->OnCollision(enemy);
 			}
 		}
+	}
+
+	// 死亡演出が完了したらゲームオーバーフラグを立てる
+	if (player_.get()->IsDeathAnimationFinished()) {
+		isGameOver_ = true;
 	}
 
 	for (Bullet* bullet : bullet_) {

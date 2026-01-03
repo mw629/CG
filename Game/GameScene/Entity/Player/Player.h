@@ -18,6 +18,7 @@ private:
 		kUnknown, // 変更リクエストなし
 		kRoot,   // 通常状態
 		kAttack, // 攻撃中
+		kDeath,  // 死亡演出中
 	};
 
 	enum class AttackPhase {
@@ -38,8 +39,6 @@ private:
 
 	float invincibleTime = 90.0f;
 	float invincibleFream = 0;
-
-
 
 
 	// 固定の加速度
@@ -63,14 +62,27 @@ private:
 	//ダブルジャンプのフラグ
 	bool doubleJump = false;
 
+	// コヨーテタイム用
+	float coyoteTime_ = 0.0f;
+	static inline const float kCoyoteTimeDuration = 0.1f; // 6フレーム (0.1秒)
 
 #pragma region Animetion
+	
 	// 旋回開始時の角度
 	float turnFirstRotationY_ = 0.0f;
 	// 旋回タイマー
 	float turnTimer_ = 0.0f;
 	// 旋回時間<秒>
 	static inline const float kTimeTurn = 0.3f;
+
+	//ジャンプ用
+	bool isJump_;
+	float animationFream_ = 0.0f;
+
+	// 死亡演出用
+	float deathAnimationTimer_ = 0.0f;
+	static inline const float kDeathAnimationDuration = 1.0f; // 死亡演出時間（秒）
+
 #pragma endregion
 
 public:
@@ -85,6 +97,9 @@ public:
 	//入力処理
 	void MoveInput();
 
+	void JumpAnimation();
+	void DeathAnimation();
+	void ClearAnimation();
 
 	void HitWall()override;
 	void OnGround()override;
@@ -100,6 +115,8 @@ public:
 	bool IsDead() const { return isDead_; };
 	void SetDead(bool flag) { isDead_ = flag; };
 
+	// 死亡演出が完了したかどうか
+	bool IsDeathAnimationFinished() const { return isDead_ && deathAnimationTimer_ >= kDeathAnimationDuration; }
 
 };
 

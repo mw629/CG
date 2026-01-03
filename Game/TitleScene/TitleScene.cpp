@@ -44,8 +44,6 @@ void TitleScene::Initialize()
 void TitleScene::Update()
 {
 
-	
-
 	skyDome_.get()->Update();
 
 	if (Input::PushKey(DIK_SPACE)||GamePadInput::PressButton(XINPUT_GAMEPAD_A)) {

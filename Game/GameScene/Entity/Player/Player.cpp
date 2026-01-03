@@ -30,6 +30,10 @@ void Player::ImGui() {
 			ImGui::DragFloat("JumpAcceleration", &kJumpAcceleration);//ジャンプの初速度
 
 		}
+		if (ImGui::CollapsingHeader("Death")) {
+			ImGui::Checkbox("IsDead", &isDead_);
+			ImGui::DragFloat("DeathTimer", &deathAnimationTimer_);
+		}
 	}
 #endif
 }
@@ -49,11 +53,21 @@ void Player::Initialize(const Vector3& position, Matrix4x4 viewMatrix) {
 
 void Player::Update(Matrix4x4 viewMatrix) {
 
+	// 死亡演出中は通常の更新処理をスキップ
+	if (isDead_) {
+		DeathAnimation();
+		model_->SetTransform(transform_);
+		model_->SettingWvp(viewMatrix);
+		return;
+	}
+
 	MoveInput();
 
 	invincibleFream--;
 
 	MapCollision();
+
+	JumpAnimation();
 
 	if (turnTimer_ > 0.0f) {
 		// 旋回タイマーを1/60秒だけカウントダウンする
@@ -92,16 +106,25 @@ void Player::MoveInput() {
 		turnFirstRotationY_ = transform_.rotate.y;
 	}
 
+	// コヨーテタイムの更新
+	if (onGround_) {
+		coyoteTime_ = kCoyoteTimeDuration; // 地面にいる間はリセット
+	} else {
+		coyoteTime_ -= 1.0f / 60.0f; // 空中では減らす
+	}
+
 	if (Input::PushKey(DIK_W) || GamePadInput::PushButton(XINPUT_GAMEPAD_A)) {
-		if (onGround_) {
-
+		// 地面にいるか、コヨーテタイム内ならジャンプ可能
+		if (onGround_ || coyoteTime_ > 0.0f) {
 			velocity_.y = kJumpAcceleration; // 上向きの速度
-
+			isJump_ = true;
+			coyoteTime_ = 0.0f; // ジャンプしたらコヨーテタイムを消費
 		}
 		else {
 			 if (!doubleJump) {
 				velocity_.y = kJumpAcceleration; // 上向きの速度
 				doubleJump = true;
+				isJump_ = true;
 			}
 		}
 	}
@@ -110,8 +133,6 @@ void Player::MoveInput() {
 	if (Input::PushKey(DIK_SPACE) || GamePadInput::PushButton(XINPUT_GAMEPAD_RIGHT_SHOULDER)) {
 		isShot_ = true;
 	}
-
-
 
 
 	if (!onGround_) {
@@ -123,7 +144,78 @@ void Player::MoveInput() {
 }
 
 
+void Player::JumpAnimation()
+{
+	if (!isJump_) {
+		animationFream_ = 0;
+		transform_.scale = { 1.0f, 1.0f, 1.0f };
+		return;
+	}
+	else {
+		animationFream_++;
+	}
 
+	// 縮む・伸びるアニメーション時間
+	const int shrinkTime = 5;   // 縮むフレーム
+	const int stretchTime = 10; // 伸びるフレーム
+	const int totalTime = shrinkTime + stretchTime + 10; // 空中→戻り時間も含めて調整
+
+	// 🔥変化幅を強める（前より派手）　
+	const float minY = 0.5f;
+	const float maxY = 1.1f;
+	const float maxX = 1.1f;
+	const float minX = 0.5f;
+
+
+	if (animationFream_ < shrinkTime) {
+		// 地面から飛び上がる前 → 縦に縮む
+		float t = (float)animationFream_ / shrinkTime;
+		transform_.scale.y = Lerp(1.0f, minY, t); // 縮む
+		transform_.scale.x = Lerp(1.0f, maxX, t); // 横に広がる
+	}
+	else if (animationFream_ < shrinkTime + stretchTime) {
+		// 上昇中 → びよーんと伸びる
+		float t = (float)(animationFream_ - shrinkTime) / stretchTime;
+		transform_.scale.y = Lerp(minY, maxY, t); // 伸びる
+		transform_.scale.x = Lerp(maxX, minX, t); // 横が細くなる
+	}
+	else {
+		// 空中で少しずつ元に戻る
+		transform_.scale.y = Lerp(transform_.scale.y, 1.0f, 0.15f);
+		transform_.scale.x = Lerp(transform_.scale.x, 1.0f, 0.15f);
+	}
+
+	// ⏱ 一定時間経過でジャンプ終了
+	if (animationFream_ >= totalTime) {
+		isJump_ = false;
+		animationFream_ = 0;
+		transform_.scale = { 1.0f, 1.0f, 1.0f };
+	}
+}
+
+void Player::DeathAnimation()
+{
+	// タイマーを進める
+	deathAnimationTimer_ += 1.0f / 60.0f;
+
+	// 正規化された時間 (0.0 ~ 1.0)
+	float t = deathAnimationTimer_ / kDeathAnimationDuration;
+	t = (std::min)(t, 1.0f);
+
+	// 演出パターン1: 縮みながら回転して消える
+	transform_.scale = Vector3(
+		Lerp(1.0f, 0.0f, t),
+		Lerp(1.0f, 0.0f, t),
+		Lerp(1.0f, 0.0f, t)
+	);
+	transform_.rotate.y += 0.1f; // 回転
+	
+	// 演出パターン2: 倒れる演出（X軸回転）
+	//transform_.rotate.x = Lerp(0.0f, std::numbers::pi_v<float> / 2.0f, t);
+	
+	// 演出パターン3: 下に沈む演出
+	// transform_.translate.y -= 0.02f;
+}
 
 
 void Player::HitWall()
@@ -148,6 +240,7 @@ void Player::OnCollision(const Enemy* enemy)
 	}
 	if (HP_ == 0) {
 		isDead_ = true;
+		deathAnimationTimer_ = 0.0f; // タイマー初期化
 	}
 }
 
