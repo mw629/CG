@@ -59,7 +59,7 @@ void GameScene::Update() {
 	}
 
 
-
+	ChangeState();
 	StateUpdate();
 
 	skyDome_.get()->Update();
@@ -93,10 +93,11 @@ void GameScene::StateUpdate()
 
 void GameScene::StateDraw()
 {
+	playing_.get()->Draw();
 	switch (gameState_)
 	{
 	case kPlaying:
-		playing_.get()->Draw();
+
 		break;
 	case kPause:
 		pause_.get()->Draw();
@@ -113,6 +114,7 @@ void GameScene::ChangeState()
 	case kPlaying:
 		if (Input::PushKey(DIK_ESCAPE)) {
 			gameState_ = kPause;
+			pause_.get()->Initialize();
 		}
 
 		break;

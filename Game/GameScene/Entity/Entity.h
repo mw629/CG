@@ -87,6 +87,7 @@ public:
 
 #pragma region ゲッター
 	Transform& GetTransform() { return transform_; };
+	const Transform& GetTransform() const { return transform_; };
 	LRDirection GetDirection() { return lrDirection_; }
 #pragma endregion
 

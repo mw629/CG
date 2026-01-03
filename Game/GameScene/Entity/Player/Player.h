@@ -40,6 +40,15 @@ private:
 	float invincibleTime = 90.0f;
 	float invincibleFream = 0;
 
+	// ノックバック用パラメータ
+	bool isKnockback_ = false;
+	float knockbackTimer_ = 0.0f;
+	Vector3 knockbackVelocity_ = { 0.0f, 0.0f, 0.0f };
+	static inline const float kKnockbackDuration = 0.3f; // ノックバック時間（秒）
+	static inline const float kKnockbackForceX = 0.1f;   // 横方向のノックバック力
+	static inline const float kKnockbackForceY = 0.1f;   // 上方向のノックバック力
+
+
 
 	// 固定の加速度
 	static inline const float kAcceleration = 0.9f;

@@ -6,6 +6,7 @@
 
 #include "../../Map/MapChipField.h"
 #include "../../Map/MapStruct.h"
+#include "../Enemy/Enemy.h"
 #include <numbers>
 
 void Player::ImGui() {
@@ -61,7 +62,24 @@ void Player::Update(Matrix4x4 viewMatrix) {
 		return;
 	}
 
-	MoveInput();
+	// ノックバック中の処理
+	if (isKnockback_) {
+		knockbackTimer_ += 1.0f / 60.0f;
+		
+		// ノックバック時間が終了したら通常状態に戻る
+		if (knockbackTimer_ >= kKnockbackDuration) {
+			isKnockback_ = false;
+			knockbackTimer_ = 0.0f;
+			knockbackVelocity_ = { 0.0f, 0.0f, 0.0f };
+		} else {
+			// ノックバック速度を減衰させながら適用
+			float decayRate = 1.0f - (knockbackTimer_ / kKnockbackDuration);
+			velocity_.x = knockbackVelocity_.x * decayRate;
+			velocity_.y = knockbackVelocity_.y * decayRate;
+		}
+	} else {
+		MoveInput();
+	}
 
 	invincibleFream--;
 
@@ -203,15 +221,15 @@ void Player::DeathAnimation()
 	t = (std::min)(t, 1.0f);
 
 	// 演出パターン1: 縮みながら回転して消える
-	transform_.scale = Vector3(
-		Lerp(1.0f, 0.0f, t),
-		Lerp(1.0f, 0.0f, t),
-		Lerp(1.0f, 0.0f, t)
-	);
-	transform_.rotate.y += 0.1f; // 回転
+	//transform_.scale = Vector3(
+	//	Lerp(1.0f, 0.0f, t),
+	//	Lerp(1.0f, 0.0f, t),
+	//	Lerp(1.0f, 0.0f, t)
+	//);
+	//transform_.rotate.y += 0.1f; // 回転
 	
 	// 演出パターン2: 倒れる演出（X軸回転）
-	//transform_.rotate.x = Lerp(0.0f, std::numbers::pi_v<float> / 2.0f, t);
+	transform_.rotate.x = Lerp(0.0f, std::numbers::pi_v<float> / 2.0f, t);
 	
 	// 演出パターン3: 下に沈む演出
 	// transform_.translate.y -= 0.02f;
@@ -237,6 +255,26 @@ void Player::OnCollision(const Enemy* enemy)
 	if (invincibleFream < 0) {
 		HP_--;
 		invincibleFream = invincibleTime;
+		
+		// ノックバック処理
+		isKnockback_ = true;
+		knockbackTimer_ = 0.0f;
+		
+		// 敵の位置に応じてノックバック方向を決定
+		Vector3 enemyPos = enemy->GetTransform().translate;
+		Vector3 playerPos = transform_.translate;
+		
+		// プレイヤーが敵の右側にいるか左側にいるかで方向を決定
+		if (playerPos.x > enemyPos.x) {
+			// 右にノックバック
+			knockbackVelocity_.x = kKnockbackForceX;
+		} else {
+			// 左にノックバック
+			knockbackVelocity_.x = -kKnockbackForceX;
+		}
+		
+		// 上方向にも少し飛ばす
+		knockbackVelocity_.y = kKnockbackForceY;
 	}
 	if (HP_ == 0) {
 		isDead_ = true;
