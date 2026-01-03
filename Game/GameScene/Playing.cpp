@@ -170,7 +170,8 @@ void Playing::CheckAllCollisions() {
 	// 死亡していない場合のみ敵との衝突判定を行う
 	if (!player_.get()->IsDead()) {
 		for (Enemy* enemy : enemy_) {
-			if (!enemy->IsActive()) {
+			// 死亡演出中または非アクティブな敵はスキップ
+			if (!enemy->IsActive() || enemy->IsPlayingDeathAnimation()) {
 				continue;
 			}
 			aabb2 = enemy->GetAABB();
@@ -189,7 +190,8 @@ void Playing::CheckAllCollisions() {
 
 		aabb1 = bullet->GetAABB();
 		for (Enemy* enemy : enemy_) {
-			if (!enemy->IsActive()) {
+			// 死亡演出中または非アクティブな敵はスキップ
+			if (!enemy->IsActive() || enemy->IsPlayingDeathAnimation()) {
 				continue;
 			}
 			if (!bullet->IsActiv()) {
