@@ -38,7 +38,7 @@ private:
 	bool isDead_ = false;
 
 	float invincibleTime = 90.0f;
-	float invincibleFream = 0;
+	int invincibleFream = 0;  // float から int に変更
 
 	// ノックバック用パラメータ
 	bool isKnockback_ = false;

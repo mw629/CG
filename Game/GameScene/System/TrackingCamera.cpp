@@ -46,10 +46,13 @@ void TrackingCamera::Update() {
 	// プレイヤーの速度を取得
 	targetVelocity_ = target_->GetVelocity();
 
+	// 目標位置を計算（プレイヤー位置 + オフセット + 速度予測）
 	targetLocation_ = AddVector3(AddVector3(targetTransform.translate, targeOffset), ScalarMultiply(targetVelocity_, kVelocityBias));
 
+	// 線形補間でスムーズに追従
 	transform_.translate = Lerp(transform_.translate, targetLocation_, kInterpolationRate);
 
+	// マージン内に制限
 	transform_.translate.x = std::clamp(transform_.translate.x, targetTransform.translate.x + Margin.left, targetTransform.translate.x + Margin.right);
 	transform_.translate.y = std::clamp(transform_.translate.y, targetTransform.translate.y + Margin.bottom, targetTransform.translate.y + Margin.top);
 

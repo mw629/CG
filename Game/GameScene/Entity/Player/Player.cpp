@@ -46,7 +46,7 @@ void Player::Initialize(const Vector3& position, Matrix4x4 viewMatrix) {
 	model_->Initialize(modelData);
 	model_->SetTransform(transform_);
 	model_->SettingWvp(viewMatrix);
-
+	model_.get()->SetBlend(kBlendModeNormal);
 	// キャラクターの当たり判定サイズ
 	float kWidth = 0.9f;
 	float kHeight = 0.9f;
@@ -71,14 +71,28 @@ void Player::Update(Matrix4x4 viewMatrix) {
 			isKnockback_ = false;
 			knockbackTimer_ = 0.0f;
 			knockbackVelocity_ = { 0.0f, 0.0f, 0.0f };
+			// 通常の色に戻す
+			model_->GetMatrial()->SetColor({ 1.0f, 1.0f, 1.0f, 1.0f });
 		} else {
 			// ノックバック速度を減衰させながら適用
 			float decayRate = 1.0f - (knockbackTimer_ / kKnockbackDuration);
 			velocity_.x = knockbackVelocity_.x * decayRate;
 			velocity_.y = knockbackVelocity_.y * decayRate;
+			
+			// ノックバック時の点滅効果（赤色）
+			float blinkRate = (std::sin)(knockbackTimer_ * 30.0f) * 0.5f + 0.5f;
+			model_->GetMatrial()->SetColor({ 1.0f, blinkRate * 0.3f, blinkRate * 0.3f, 1.0f });
 		}
 	} else {
 		MoveInput();
+		// 無敵時間中の点滅
+		if (invincibleFream > 0) {
+			float blinkRate = (invincibleFream % 10 < 5) ? 0.5f : 1.0f;
+			model_->GetMatrial()->SetColor({ 1.0f, 1.0f, 1.0f, blinkRate });
+		} else {
+			// 通常時の色
+			model_->GetMatrial()->SetColor({ 1.0f, 1.0f, 1.0f, 1.0f });
+		}
 	}
 
 	invincibleFream--;
@@ -220,6 +234,11 @@ void Player::DeathAnimation()
 	float t = deathAnimationTimer_ / kDeathAnimationDuration;
 	t = (std::min)(t, 1.0f);
 
+	// 死亡時の色変化（白→黒にフェード、透明度も下げる）
+	float colorValue = Lerp(1.0f, 0.0f, t);
+	float alpha = Lerp(1.0f, 0.0f, t);
+	model_->GetMatrial()->SetColor({ colorValue, colorValue, colorValue, alpha });
+
 	// 演出パターン1: 縮みながら回転して消える
 	//transform_.scale = Vector3(
 	//	Lerp(1.0f, 0.0f, t),
@@ -233,6 +252,10 @@ void Player::DeathAnimation()
 	
 	// 演出パターン3: 下に沈む演出
 	// transform_.translate.y -= 0.02f;
+}
+
+void Player::ClearAnimation()
+{
 }
 
 
