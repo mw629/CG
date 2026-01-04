@@ -83,8 +83,10 @@ void WindowConfig::DrawWindow(const int32_t kClientWidth, const int32_t kClientH
 }
 
 void WindowConfig::Finalize() {
-	//ウィンドウを閉じる
-	CloseWindow(hwnd);
+	//ウィンドウを破棄する
+	DestroyWindow(hwnd);
+	//ウィンドウクラスの登録解除
+	UnregisterClass(wc.lpszClassName, wc.hInstance);
 	//COMの終了処理
 	CoUninitialize();
 }
