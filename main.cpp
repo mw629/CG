@@ -68,6 +68,11 @@ int WINAPI WinMain(HINSTANCE, HINSTANCE, LPSTR, int) {
 		engine.get()->PostDraw();
 
 		engine.get()->EndFrame();
+
+		if (Engine::IsEnd()) {
+			break;
+		}
+
 	}
 
 	engine.get()->End();

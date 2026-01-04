@@ -21,11 +21,12 @@ void GameScene::ImGui()
 		playing_.get()->ImGui();
 		break;
 	case kPause:
+		pause_.get()->ImGui();
 		break;
 	default:
 		break;
 	}
-
+	
 }
 
 void GameScene::Initialize() {
@@ -120,6 +121,14 @@ void GameScene::ChangeState()
 		break;
 	case kPause:
 		
+		if (!pause_.get()->IsPause()) {
+			gameState_ = kPlaying;
+		}
+		if (pause_.get()->IsSelect()) {
+			nextSceneID_ = SceneID::kStageSelect;
+			sceneChangeRequest_ = true;
+		}
+
 		break;
 	default:
 		break;

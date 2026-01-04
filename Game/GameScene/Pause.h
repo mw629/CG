@@ -15,6 +15,7 @@ private:
 
 	SelectMode selectMode_;
 	bool isPause_=true;
+	bool isSelect_ = false;
 
 	MenuCommand menuCommand_ = kReturnToGame;
 
@@ -29,5 +30,6 @@ public:
 	void Draw();
 
 	bool IsPause() { return isPause_; }
+	bool IsSelect() { return isSelect_; }
 };
 

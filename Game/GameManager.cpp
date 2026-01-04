@@ -16,7 +16,7 @@ GameManager::~GameManager()
 }
 
 void GameManager::ImGui() {
-#ifdef DEBUG
+#ifdef _DEBUG
 	scene_->ImGui();
 #endif // DEBUG
 }
