@@ -16,6 +16,15 @@ void Pause::Initialize() {
 	isPause_ = true;
 	isSelect_ = false;
 	selectMode_ = backGame;
+
+	std::unique_ptr<Texture> texture = std::make_unique<Texture>();
+	int textureHndle = texture.get()->CreateTexture("resources/white64x64.png");
+	dimming_.get()->Initialize(textureHndle);
+	Vector2 overlayPos_[2] = { {0.0f,0.0f}, {1280.0f,720.0f} };
+	dimming_.get()->SetSize(overlayPos_[0], overlayPos_[1]);
+	dimming_->SettingWvp();
+	dimming_.get()->SetBlend(BlendMode::kBlendModeNormal);
+	dimming_.get()->GetMatrial()->SetColor(dimmingColor_);
 }
 
 void Pause::Update() {
@@ -54,11 +63,11 @@ void Pause::Update() {
 			break;
 		}
 	
-
+		dimming_.get()->SettingWvp();
 
 }
 
 void Pause::Draw() {
-
+	Draw::DrawSprite(dimming_.get());
 }
 

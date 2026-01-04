@@ -19,6 +19,10 @@ private:
 
 	MenuCommand menuCommand_ = kReturnToGame;
 
+	std::unique_ptr<Sprite> dimming_ = std::make_unique<Sprite>();
+	Vector4 dimmingColor_ = { 0.0f,0.0f,0.0f,0.7f };
+
+
 public:
 
 	void ImGui();
