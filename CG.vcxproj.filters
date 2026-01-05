@@ -282,7 +282,7 @@
     <ClCompile Include="Game\GameScene\Entity\Enemy\RunEnemy\RunEnemy.cpp">
       <Filter>ソース ファイル</Filter>
     </ClCompile>
-    <ClCompile Include="Operation.cpp">
+    <ClCompile Include="Game\GameScene\UI\Operation.cpp">
       <Filter>ソース ファイル</Filter>
     </ClCompile>
   </ItemGroup>
@@ -556,7 +556,7 @@
     <ClInclude Include="Game\GameScene\Entity\Enemy\RunEnemy\RunEnemy.h">
       <Filter>ヘッダー ファイル</Filter>
     </ClInclude>
-    <ClInclude Include="Operation.h">
+    <ClInclude Include="Game\GameScene\UI\Operation.h">
       <Filter>ヘッダー ファイル</Filter>
     </ClInclude>
   </ItemGroup>

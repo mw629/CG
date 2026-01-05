@@ -70,6 +70,8 @@ void Playing::Initialize(int stage) {
 
 	HP_ = std::make_unique<HP>();
 	HP_.get()->Initialize();
+	operation_ = std::make_unique<Operation>();
+	operation_.get()->Initialize();
 
 	// フラグの初期化
 	isGoal_ = false;
@@ -83,7 +85,7 @@ void Playing::Update() {
 
 	player_.get()->Update(viewMatrix_);
 	HP_.get()->Update(player_.get()->GetHP());
-
+	operation_.get()->Update();
 
 	if (player_.get()->IsShot()) {
 		for (Bullet* bullet : bullet_) {
@@ -109,6 +111,7 @@ void Playing::Update() {
 void Playing::Draw() {
 
 	HP_.get()->Draw();
+	operation_.get()->Draw();
 
 	for (Enemy* enemy : enemy_) {
 		enemy->Draw();

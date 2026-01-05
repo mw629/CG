@@ -46,6 +46,8 @@ public:
 
 	void SettingWvp();
 
+	void SetTransform(Transform transform) {transform_ = transform;}
+
 	void SetSize(Vector2 leftTop, Vector2 rigthBottom);
 
 	void SetMaterialLighting(bool isActiv) { material_->SetMaterialLighting(isActiv); }

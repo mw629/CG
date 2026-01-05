@@ -16,6 +16,7 @@
 #include "Entity/MapObject/Block.h"
 #include "Entity/MapObject/Goal.h"
 #include "UI/HP.h"
+#include "UI/Operation.h"
 
 
 
@@ -43,6 +44,7 @@ private:
 
 
 	std::unique_ptr<HP> HP_;
+	std::unique_ptr<Operation> operation_;
 
 
 public:

@@ -238,7 +238,7 @@ copy "$(WindowsSdkDir)bin\$(TargetPlatformVersion)\x64\dxil.dll" "$(TargetDir)dx
     <ClCompile Include="Game\GameScene\Entity\Player\Bullet\NormalBullet.cpp" />
     <ClCompile Include="Game\GameScene\Entity\Enemy\StopEnemy\StopEnemy.cpp" />
     <ClCompile Include="Game\GameScene\Entity\Enemy\RunEnemy\RunEnemy.cpp" />
-    <ClCompile Include="Operation.cpp" />
+    <ClCompile Include="Game\GameScene\UI\Operation.cpp" />
   </ItemGroup>
   <ItemGroup>
     <FxCompile Include="resources\Shader\Line.PS.hlsl">
@@ -360,7 +360,7 @@ copy "$(WindowsSdkDir)bin\$(TargetPlatformVersion)\x64\dxil.dll" "$(TargetDir)dx
     <ClInclude Include="Game\GameScene\Entity\Player\Bullet\NormalBullet.h" />
     <ClInclude Include="Game\GameScene\Entity\Enemy\StopEnemy\StopEnemy.h" />
     <ClInclude Include="Game\GameScene\Entity\Enemy\RunEnemy\RunEnemy.h" />
-    <ClInclude Include="Operation.h" />
+    <ClInclude Include="Game\GameScene\UI\Operation.h" />
   </ItemGroup>
   <ItemGroup>
     <Text Include="externals\imgui\LICENSE.txt" />

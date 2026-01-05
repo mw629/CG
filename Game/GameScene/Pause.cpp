@@ -25,13 +25,7 @@ void Pause::Initialize() {
 		isInitialized_ = true;
 
 
-		int ChoicesImage[4];
-		
-		ChoicesImage[0] = texture.get()->CreateTexture("resources/UI/Pause/Back.png");
-		ChoicesImage[1] = texture.get()->CreateTexture("resources/UI/Pause/Restart.png");
-		ChoicesImage[2] = texture.get()->CreateTexture("resources/UI/Pause/Select.png");
-		ChoicesImage[3] = texture.get()->CreateTexture("resources/UI/Pause/End.png");
-
+	
 		// テクスチャパスを配列で管理
 		const char* texturePathes[4] = {
 			"resources/UI/Pause/Back.png",
