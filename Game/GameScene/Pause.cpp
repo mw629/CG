@@ -26,18 +26,28 @@ void Pause::Initialize() {
 
 
 		int ChoicesImage[4];
-		ChoicesImage[0] = texture.get()->CreateTexture("resources/white64x64.png");;
-		ChoicesImage[1] = texture.get()->CreateTexture("resources/white64x64.png");;
-		ChoicesImage[2] = texture.get()->CreateTexture("resources/white64x64.png");;
-		ChoicesImage[3] = texture.get()->CreateTexture("resources/white64x64.png");;
+		
+		ChoicesImage[0] = texture.get()->CreateTexture("resources/UI/Pause/Back.png");
+		ChoicesImage[1] = texture.get()->CreateTexture("resources/UI/Pause/Restart.png");
+		ChoicesImage[2] = texture.get()->CreateTexture("resources/UI/Pause/Select.png");
+		ChoicesImage[3] = texture.get()->CreateTexture("resources/UI/Pause/End.png");
+
+		// テクスチャパスを配列で管理
+		const char* texturePathes[4] = {
+			"resources/UI/Pause/Back.png",
+			"resources/UI/Pause/Restart.png",
+			"resources/UI/Pause/Select.png",
+			"resources/UI/Pause/End.png"
+		};
 
 		for (int i = 0; i < 4; i++) {
 			Choices_[i] = std::make_unique<Sprite>();
-			Choices_[i].get()->Initialize(ChoicesImage[i]);
-			Vector2 ChoicesPos[2] = { {640.0f,100 + i * 64.0f}, {640.0f + 320.0f,100 + i * 64.0f} };
+			int textureHandle = texture.get()->CreateTexture(texturePathes[i]);
+			Choices_[i].get()->Initialize(textureHandle);
+			Vector2 ChoicesPos[2] = { {480.0f, 180.0f + i * 100.0f}, {800.0f, 244.0f + i * 100.0f} };
 			Choices_[i].get()->SetSize(ChoicesPos[0], ChoicesPos[1]);
 			Choices_[i]->SettingWvp();
-			Choices_[i].get()->SetBlend(BlendMode::kBlendModeNormal);
+			Choices_[i].get()->SetBlend(BlendMode::kBlendModeNormal); // BlendModeを設定
 		}
 
 	}
@@ -94,8 +104,14 @@ void Pause::Update() {
 		break;
 	}
 
+	// 各選択肢の色を設定して更新
 	for (int i = 0; i < 4; i++) {
-		Choices_[i].get()->GetMatrial()->SetColor(Vector4(1.0f, 1.0f, 1.0f, 1.0f));
+		// 選択中の項目をハイライト
+		if (i == static_cast<int>(menuCommand_)) {
+			Choices_[i].get()->GetMatrial()->SetColor(Vector4(1.0f, 1.0f, 0.0f, 1.0f)); // 黄色
+		} else {
+			Choices_[i].get()->GetMatrial()->SetColor(Vector4(1.0f, 1.0f, 1.0f, 1.0f)); // 白色
+		}
 		Choices_[i].get()->SettingWvp();
 	}
 	dimming_.get()->SettingWvp();
