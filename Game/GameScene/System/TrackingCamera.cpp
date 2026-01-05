@@ -49,12 +49,24 @@ void TrackingCamera::Update() {
 	// 目標位置を計算（プレイヤー位置 + オフセット + 速度予測）
 	targetLocation_ = AddVector3(AddVector3(targetTransform.translate, targeOffset), ScalarMultiply(targetVelocity_, kVelocityBias));
 
+	// 死亡時はプレイヤーに少し近づく
+	if (target_->IsDead()) {
+		// Z方向を近づける（プレイヤー位置に向かってオフセットを縮める）
+		targetLocation_.z = targetTransform.translate.z + targeOffset.z * kDeathZoomFactor;
+		// X, Y もプレイヤー中心に寄せる
+		targetLocation_.x = targetTransform.translate.x;
+		targetLocation_.y = targetTransform.translate.y + targeOffset.y;
+	}
+
 	// 線形補間でスムーズに追従
 	transform_.translate = Lerp(transform_.translate, targetLocation_, kInterpolationRate);
 
-	// マージン内に制限
-	transform_.translate.x = std::clamp(transform_.translate.x, targetTransform.translate.x + Margin.left, targetTransform.translate.x + Margin.right);
-	transform_.translate.y = std::clamp(transform_.translate.y, targetTransform.translate.y + Margin.bottom, targetTransform.translate.y + Margin.top);
+	// 死亡時はマージン制限を無効化
+	if (!target_->IsDead()) {
+		// マージン内に制限
+		transform_.translate.x = std::clamp(transform_.translate.x, targetTransform.translate.x + Margin.left, targetTransform.translate.x + Margin.right);
+		transform_.translate.y = std::clamp(transform_.translate.y, targetTransform.translate.y + Margin.bottom, targetTransform.translate.y + Margin.top);
+	}
 
 	camera_.get()->SetTransform(transform_);
 	camera_.get()->Update();

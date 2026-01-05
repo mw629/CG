@@ -22,9 +22,9 @@ private:
 	Vector3 targetVelocity_;
 	Vector3 targeOffset = { 0, 0, -30.0f };
 
-	static inline const float kInterpolationRate = 0.05f;
+	const float kInterpolationRate = 0.05f;
 	Vector3 targetLocation_{};
-
+	const float kDeathZoomFactor = 0.5f;
 
 	Rect movableArea_ = { 0, 500, 0, 100 };
 
@@ -45,6 +45,8 @@ public:
 	void SetMovableArea(Rect area) { movableArea_ = area; };
 
 	Matrix4x4 GetView() { return camera_.get()->GetViewMatrix(); }
+
+	
 
 };
 

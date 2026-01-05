@@ -192,7 +192,6 @@ void Player::JumpAnimation()
 	const int stretchTime = 10; // 伸びるフレーム
 	const int totalTime = shrinkTime + stretchTime + 10; // 空中→戻り時間も含めて調整
 
-	// 🔥変化幅を強める（前より派手）　
 	const float minY = 0.5f;
 	const float maxY = 1.1f;
 	const float maxX = 1.1f;
@@ -200,13 +199,11 @@ void Player::JumpAnimation()
 
 
 	if (animationFream_ < shrinkTime) {
-		// 地面から飛び上がる前 → 縦に縮む
 		float t = (float)animationFream_ / shrinkTime;
 		transform_.scale.y = Lerp(1.0f, minY, t); // 縮む
 		transform_.scale.x = Lerp(1.0f, maxX, t); // 横に広がる
 	}
 	else if (animationFream_ < shrinkTime + stretchTime) {
-		// 上昇中 → びよーんと伸びる
 		float t = (float)(animationFream_ - shrinkTime) / stretchTime;
 		transform_.scale.y = Lerp(minY, maxY, t); // 伸びる
 		transform_.scale.x = Lerp(maxX, minX, t); // 横が細くなる
@@ -217,7 +214,6 @@ void Player::JumpAnimation()
 		transform_.scale.x = Lerp(transform_.scale.x, 1.0f, 0.15f);
 	}
 
-	// ⏱ 一定時間経過でジャンプ終了
 	if (animationFream_ >= totalTime) {
 		isJump_ = false;
 		animationFream_ = 0;

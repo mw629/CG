@@ -128,6 +128,12 @@ void GameScene::ChangeState()
 			nextSceneID_ = SceneID::kStageSelect;
 			sceneChangeRequest_ = true;
 		}
+		if (pause_.get()->IsRestart()) {
+			// 新しいインスタンスを作成（古いものは自動的に解放される）
+			playing_ = std::make_unique<Playing>();
+			playing_.get()->Initialize(g_stage);
+			gameState_ = kPlaying;
+		}
 
 		break;
 	default:

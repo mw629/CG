@@ -10,6 +10,7 @@ enum MenuCommand {
 	kReturnToGame,
 	kRestart,
 	kReturnToStageSelect,
+	kEnd,
 };
 
 

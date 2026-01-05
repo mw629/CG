@@ -110,14 +110,16 @@ void Playing::Draw() {
 
 	HP_.get()->Draw();
 
+	for (Enemy* enemy : enemy_) {
+		enemy->Draw();
+	}
+
 	player_.get()->Draw();
 
 	for (Bullet* bullet : bullet_) {
 		bullet->Draw();
 	}
-	for (Enemy* enemy : enemy_) {
-		enemy->Draw();
-	}
+	
 
 	mapchip_.get()->Draw();
 	goal_.get()->Draw();
@@ -181,7 +183,6 @@ void Playing::CheckAllCollisions() {
 		}
 	}
 
-	// 死亡演出が完了したらゲームオーバーフラグを立てる
 	if (player_.get()->IsDeathAnimationFinished()) {
 		isGameOver_ = true;
 	}

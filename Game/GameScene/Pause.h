@@ -5,35 +5,27 @@
 class Pause
 {
 private:
+    bool isPause_ = true;
+    bool isSelect_ = false;
+    bool isRestart_ = false;
 
-	enum SelectMode
-	{
-		backGame,
-		backSelectScene,
-		gameEnd,
-	};
+    MenuCommand menuCommand_ = kReturnToGame;
 
-	SelectMode selectMode_;
-	bool isPause_=true;
-	bool isSelect_ = false;
+    std::unique_ptr<Sprite> Choices_[4];
 
-	MenuCommand menuCommand_ = kReturnToGame;
+    std::unique_ptr<Sprite> dimming_ = std::make_unique<Sprite>();
+    Vector4 dimmingColor_ = { 0.0f, 0.0f, 0.0f, 0.7f };
 
-	std::unique_ptr<Sprite> dimming_ = std::make_unique<Sprite>();
-	Vector4 dimmingColor_ = { 0.0f,0.0f,0.0f,0.7f };
-
+    bool isInitialized_ = false;
 
 public:
+    void ImGui();
+    void Initialize();
+    void Update();
+    void Draw();
 
-	void ImGui();
-
-	void Initialize( );
-
-	void Update( );
-
-	void Draw();
-
-	bool IsPause() { return isPause_; }
-	bool IsSelect() { return isSelect_; }
+    bool IsPause() { return isPause_; }
+    bool IsSelect() { return isSelect_; }
+    bool IsRestart() { return isRestart_; }
 };
 
