@@ -3,16 +3,27 @@
 SkyDome::~SkyDome()
 {
 	delete skydomeModel;
+	delete fogModel;
+
 }
 
 void SkyDome::Initialize() {
 	std::unique_ptr<Texture> texture = std::make_unique<Texture>();
 
 	ModelData modelData = LoadObjFile("resources/skydome", "skydome.obj");
-	int index = texture->CreateTexture(modelData.material.textureDilePath);
 	skydomeModel = new Model();
 	skydomeModel->Initialize(modelData);
 	skydomeModel->CreateModel();
+
+
+	modelData = LoadObjFile("resources/skydome", "skydome.obj");
+	int index = texture->CreateTexture("resources/skydome/skydome.png");
+	fogModel = new Model();
+	fogModel->Initialize(modelData);
+	fogModel->SetTexture(texture.get()->TextureData(index));
+	fogModel->CreateModel();
+	fogModel->GetMatrial()->SetColor({ 0.0f,0.0f,0.6f,0.4f });
+	fogModel->SetBlend(kBlendModeNormal);
 
 	//生成
 	camera_ = std::make_unique<Camera>();
@@ -21,17 +32,28 @@ void SkyDome::Initialize() {
 	camera_.get()->Update();
 }
 
-void SkyDome::Update(Matrix4x4 viewMatrix){
+void SkyDome::Update(Matrix4x4 viewMatrix) {
 	skydomeModel->SetTransform(objTransform);
 	skydomeModel->SettingWvp(viewMatrix);
+
+	fogTransform.rotate.y += 3.14 / (60.0f * 10.0f);
+
+	fogModel->SetTransform(fogTransform);
+	fogModel->SettingWvp(viewMatrix);
 }
 
 void SkyDome::Update() {
-	
+
 	skydomeModel->SetTransform(objTransform);
 	skydomeModel->SettingWvp(camera_.get()->GetViewMatrix());
+
+	fogTransform.rotate.y += 3.14 / (60.0f * 10.0f);
+
+	fogModel->SetTransform(fogTransform);
+	fogModel->SettingWvp(camera_.get()->GetViewMatrix());
 }
 
-void SkyDome::Draw(){
+void SkyDome::Draw() {
 	Draw::DrawModel(skydomeModel);
+	Draw::DrawModel(fogModel);
 }
