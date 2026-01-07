@@ -1,10 +1,10 @@
 #include "Model.h"
-#include "Graphics/GraphicsDevice.h"
-#include "Math/Calculation.h"
-#include "Resource/Load.h"
+#include "GraphicsDevice.h"
+#include "Calculation.h"
+#include "Load.h"
+#include "Texture.h"
 #include <fstream>
 #include <sstream>
-#include "Particle.h"
 
 
 #ifdef _USE_IMGUI
@@ -20,26 +20,32 @@ namespace {
 	float kClientHeight;
 }
 
+Model::~Model()
+{
+	// 基底クラス(Object3DBase)のデストラクタが自動的に呼ばれる
+	// materialはunique_ptrなので自動的に解放される
+}
+
 void Model::ImGui() {
-#ifdef _USE_IMGUI
-	std::ostringstream oss;
-	oss << "Model###" << static_cast<const void*>(this);
-	const std::string windowTitle = oss.str();
-
-	if (ImGui::Begin(windowTitle.c_str())) {
-		ImGui::PushID(this);
-
-		if (ImGui::CollapsingHeader("Model")) {
-			if (ImGui::CollapsingHeader("Transform")) {
-				ImGui::DragFloat3("Position", &transform_.translate.x, 0.01f);
-				ImGui::DragFloat3("Rotation", &transform_.rotate.x, 0.01f);
-				ImGui::DragFloat3("Scale", &transform_.scale.x, 0.01f);
-			}
-		}
-		ImGui::PopID();
-	}
-	ImGui::End();
-#endif // _USE_IMGUI
+//#ifdef _USE_IMGUI
+//	std::ostringstream oss;
+//	oss << "Model###" << static_cast<const void*>(this);
+//	const std::string windowTitle = oss.str();
+//
+//	if (ImGui::Begin(windowTitle.c_str())) {
+//		ImGui::PushID(this);
+//
+//		if (ImGui::CollapsingHeader("Model")) {
+//			if (ImGui::CollapsingHeader("Transform")) {
+//				ImGui::DragFloat3("Position", &transform_.translate.x, 0.01f);
+//				ImGui::DragFloat3("Rotation", &transform_.rotate.x, 0.01f);
+//				ImGui::DragFloat3("Scale", &transform_.scale.x, 0.01f);
+//			}
+//		}
+//		ImGui::PopID();
+//	}
+//	ImGui::End();
+//#endif // _USE_IMGUI
 }
 
 void Model::SetDevice(ID3D12Device* device)
@@ -53,36 +59,19 @@ void Model::SetScreenSize(Vector2 screenSize)
 	kClientHeight = screenSize.y;
 }
 
-Model::~Model()
-{
-	// MapしたポインタをUnmapする
-	if (vertexData_) {
-		vertexResource_->Unmap(0, nullptr);
-	}
-	if (wvpData_) {
-		wvpDataResource_->Unmap(0, nullptr);
-	}
-	// ComPtrは自動的に解放される
-	vertexResource_.Reset();
-	wvpDataResource_.Reset();
-
-}
 
 
 void Model::Initialize(ModelData modelData)
 {
-	std::unique_ptr<Texture> texture = std::make_unique<Texture>();
-
-	transform_ = {};
+	
 	modelData_ = modelData;
 	textureSrvHandleGPU_ = texture->TextureData(modelData.textureIndex);
 
 	material_ = std::make_unique<MaterialFactory>();
 	material_->CreateMatrial(device_, false);
 	material_.get()->SetMaterialLighting(true);
-	CreateModel();
+	CreateObject();
 }
-
 
 void Model::CreateVertexData()
 {
@@ -100,30 +89,7 @@ void Model::CreateVertexData()
 	std::memcpy(vertexData_, modelData_.vertices.data(), sizeof(VertexData) * modelData_.vertices.size());
 }
 
-
-void Model::CreateWVP()
-{
-	//Sprite用ののTransformationMatrix用のリソースを作る。Matrix4x41つ分のサイズを用意する
-	wvpDataResource_ = GraphicsDevice::CreateBufferResource(device_, sizeof(TransformationMatrix));
-	//データを書き込む
-
-	//書き込むためのアドレスを取得
-	wvpDataResource_->Map(0, nullptr, reinterpret_cast<void**>(&wvpData_));
-	//単位行列をかきこんでおく
-	wvpData_->WVP = IdentityMatrix();
-	wvpData_->World = IdentityMatrix();
-	wvpData_->WorldInverseTranspose = IdentityMatrix();;
-}
-
-void Model::CreateModel()
-{
-	CreateVertexData();
-	CreateWVP();
-}
-
-
-void Model::SettingWvp(Matrix4x4 viewMatrix)
-{
+void Model::SettingWvp(Matrix4x4 viewMatrix) {
 	Matrix4x4 projectionMatri = MakePerspectiveFovMatrix(0.45f, float(kClientWidth) / float(kClientHeight), 0.1f, 10000.0f);
 	Matrix4x4 worldMatrixObj = MakeAffineMatrix(transform_.translate, transform_.scale, transform_.rotate);
 	Matrix4x4 worldViewProjectionMatrixObj = MultiplyMatrix4x4(worldMatrixObj, MultiplyMatrix4x4(viewMatrix, projectionMatri));
@@ -133,13 +99,4 @@ void Model::SettingWvp(Matrix4x4 viewMatrix)
 	wvpData_->WVP = MultiplyMatrix4x4(modelData_.rootNode.localMatrix, worldViewProjectionMatrixObj);
 	wvpData_->World = MultiplyMatrix4x4(modelData_.rootNode.localMatrix, worldMatrixObj);
 	wvpData_->WorldInverseTranspose = worldInverseTranspose;
-
-};
-
-
-void Model::SetTransform(Transform transform)
-{
-	transform_.translate = transform.translate;
-	transform_.scale = transform.scale;
-	transform_.rotate = transform.rotate;
 }

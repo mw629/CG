@@ -21,13 +21,13 @@ public:
 	
 	virtual ~IScene(){};
 
-	virtual void ImGui() {}
+	virtual void ImGui() = 0;
 
-	virtual void Initialize() {}
+	virtual void Initialize() = 0;
 
-	virtual void Update(){}
+	virtual void Update() = 0;
 
-	virtual void Draw(){}
+	virtual void Draw() = 0;
 
 	int GetSceneID() { return sceneID_; }
 	int GetNextSceneID() { return nextSceneID_; }

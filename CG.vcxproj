@@ -144,6 +144,7 @@ copy "$(WindowsSdkDir)bin\$(TargetPlatformVersion)\x64\dxil.dll" "$(TargetDir)dx
   <ItemGroup>
     <ClCompile Include="MatchaEngine\GameObjects\Light\PointLight.cpp" />
     <ClCompile Include="MatchaEngine\GameObjects\Primitive.cpp" />
+    <ClCompile Include="MatchaEngine\GameObjects\3d\Object3DBase.cpp" />
     <ClCompile Include="Shared\ParticleManager.cpp" />
     <ClCompile Include="Game\GameScene\Entity\Enemy.cpp" />
     <ClCompile Include="Game\Fade.cpp" />
@@ -268,6 +269,7 @@ copy "$(WindowsSdkDir)bin\$(TargetPlatformVersion)\x64\dxil.dll" "$(TargetDir)dx
   <ItemGroup>
     <ClInclude Include="MatchaEngine\GameObjects\Light\PointLight.h" />
     <ClInclude Include="MatchaEngine\GameObjects\Primitive.h" />
+    <ClInclude Include="MatchaEngine\GameObjects\3d\Object3DBase.h" />
     <ClInclude Include="Shared\ParticleManager.h" />
     <ClInclude Include="Game\GameScene\Entity\Enemy.h" />
     <ClInclude Include="Game\Fade.h" />
