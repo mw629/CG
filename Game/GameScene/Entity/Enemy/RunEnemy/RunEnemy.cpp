@@ -24,6 +24,8 @@ void RunEnemy::Initialize(const Vector3& position, Matrix4x4 viewMatrix)
 	// キャラクターの当たり判定サイズ
 	float kWidth = 0.9f;
 	float kHeight = 0.9f;
+
+	deathSE_ = Audio::Load("resources/Audio/SE/gou.mp3");
 }
 
 void RunEnemy::Update(Matrix4x4 viewMatrix)

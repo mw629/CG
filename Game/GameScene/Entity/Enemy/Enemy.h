@@ -25,6 +25,9 @@ protected:
 
 	Vector3 initialScale_ = {1.0f, 1.0f, 1.0f};
 
+	// 死亡効果音
+	int deathSE_ = -1;
+
 public:
 
 	virtual void Initialize(const Vector3& position,Matrix4x4 viewMatrix);

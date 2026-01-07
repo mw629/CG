@@ -27,6 +27,14 @@ private:
 		lingeringSound
 	};
 
+	// クリア演出フェーズ
+	enum class ClearPhase {
+		kWaitLanding,  // 着地待ち
+		kTurnToCamera, // 画面向き変更
+		kBackflip,     // バク転
+		kFinished      // 完了
+	};
+
 #pragma endregion
 
 
@@ -38,15 +46,15 @@ private:
 	bool isDead_ = false;
 
 	float invincibleTime = 90.0f;
-	int invincibleFream = 0;  // float から int に変更
+	int invincibleFream = 0;
 
 	// ノックバック用パラメータ
 	bool isKnockback_ = false;
 	float knockbackTimer_ = 0.0f;
 	Vector3 knockbackVelocity_ = { 0.0f, 0.0f, 0.0f };
-	static inline const float kKnockbackDuration = 0.3f; // ノックバック時間（秒）
-	static inline const float kKnockbackForceX = 0.1f;   // 横方向のノックバック力
-	static inline const float kKnockbackForceY = 0.1f;   // 上方向のノックバック力
+	static inline const float kKnockbackDuration = 0.3f;
+	static inline const float kKnockbackForceX = 0.1f;
+	static inline const float kKnockbackForceY = 0.1f;
 
 
 
@@ -73,7 +81,7 @@ private:
 
 	// コヨーテタイム用
 	float coyoteTime_ = 0.0f;
-	static inline const float kCoyoteTimeDuration = 0.1f; // 6フレーム (0.1秒)
+	static inline const float kCoyoteTimeDuration = 0.1f;
 
 #pragma region Animetion
 	
@@ -90,7 +98,24 @@ private:
 
 	// 死亡演出用
 	float deathAnimationTimer_ = 0.0f;
-	static inline const float kDeathAnimationDuration = 1.0f; // 死亡演出時間（秒）
+	static inline const float kDeathAnimationDuration = 1.0f;
+
+	// クリア演出用
+	bool isClear_ = false;
+	ClearPhase clearPhase_ = ClearPhase::kWaitLanding;
+	float clearAnimationTimer_ = 0.0f;
+	static inline const float kTurnToCameraDuration = 0.3f;
+	static inline const float kBackflipDuration = 0.8f;
+	float clearTurnStartRotationY_ = 0.0f;
+
+#pragma endregion
+
+#pragma region Audio
+
+	// ジャンプ効果音
+	int jumpSE_ = -1;
+	// ダメージ効果音
+	int damageSE_ = -1;
 
 #pragma endregion
 
@@ -126,6 +151,11 @@ public:
 
 	// 死亡演出が完了したかどうか
 	bool IsDeathAnimationFinished() const { return isDead_ && deathAnimationTimer_ >= kDeathAnimationDuration; }
+
+	// クリア関連
+	bool IsClear() const { return isClear_; }
+	void SetClear(bool flag) { isClear_ = flag; clearPhase_ = ClearPhase::kWaitLanding; clearAnimationTimer_ = 0.0f; }
+	bool IsClearAnimationFinished() const { return isClear_ && clearPhase_ == ClearPhase::kFinished; }
 
 };
 

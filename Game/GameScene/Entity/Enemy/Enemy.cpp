@@ -22,6 +22,9 @@ void Enemy::Initialize(const Vector3& position, Matrix4x4 viewMatrix) {
 	// キャラクターの当たり判定サイズ
 	float kWidth = 0.9f;
 	float kHeight = 0.9f;
+
+	// 死亡効果音のロード
+	deathSE_ = Audio::Load("resources/Audio/SE/gou.mp3");
 }
 
 void Enemy::Update(Matrix4x4 viewMatrix) {
@@ -90,4 +93,9 @@ void Enemy::OnCollision(const Bullet* bullet) {
 	isDead_ = true;
 	isPlayingDeathAnimation_ = true;
 	deathAnimationTimer_ = 0.0f;
+
+	// 死亡効果音を再生
+	if (deathSE_ >= 0) {
+		Audio::Play(deathSE_, false,10.0f);
+	}
 }

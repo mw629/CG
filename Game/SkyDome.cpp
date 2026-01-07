@@ -22,7 +22,7 @@ void SkyDome::Initialize() {
 	fogModel->Initialize(modelData);
 	fogModel->SetTexture(texture.get()->TextureData(index));
 	fogModel->CreateModel();
-	fogModel->GetMatrial()->SetColor({ 0.0f,0.0f,0.6f,0.4f });
+	fogModel->GetMatrial()->SetColor({ 1.0f,1.0f,1.0f,0.2f });
 	fogModel->SetBlend(kBlendModeNormal);
 
 	//生成

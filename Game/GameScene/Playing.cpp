@@ -169,6 +169,12 @@ void Playing::CheckAllCollisions() {
 	aabb1 = player_.get()->GetAABB();
 	aabb2 = goal_.get()->GetAABB();
 	if (IsCollision(aabb1, aabb2)) {
+		// ゴールに触れたらプレイヤーにクリア状態を設定
+		player_.get()->OnCollision(goal_.get());
+	}
+
+	// クリア演出が完了したらシーン遷移フラグを立てる
+	if (player_.get()->IsClearAnimationFinished()) {
 		isGoal_ = true;
 	}
 

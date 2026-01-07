@@ -13,6 +13,7 @@ GameManager::GameManager()
 GameManager::~GameManager()
 {
 	delete scene_;
+	Audio::Stop(audio);
 }
 
 void GameManager::ImGui() {
@@ -29,12 +30,17 @@ void GameManager::Initialize() {
 	fade_ = std::make_unique<Fade>();
 	fade_.get()->Initialize(0.5f);
 
+	audio = Audio::Load("resources/Audio/BGM/game.mp3");
+	
+	Audio::Play(audio, true);
+
 	isChange_ = false;
 }
 
 void GameManager::Update() {
 
 	int NexrScene = scene_->GetNextSceneID();
+	
 
 	if (scene_->GetSceneChangeRequest()) {
 		if (!isChange_) {

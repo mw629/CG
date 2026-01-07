@@ -15,6 +15,7 @@ private:
 
 	std::unique_ptr<Fade> fade_;
 
+	int audio = -1;
 
 public:
 	GameManager();

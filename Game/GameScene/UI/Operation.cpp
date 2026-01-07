@@ -63,6 +63,8 @@ void Operation::Update() {
 
 void Operation::Draw() {
 	for (int i = 0; i < 6; i++) {
-		Draw::DrawSprite(Operation_[i].get());
+		if (i != S) {
+			Draw::DrawSprite(Operation_[i].get());
+		}
 	}
 }

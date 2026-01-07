@@ -43,7 +43,7 @@ void ClearScene::Update()
 	skyDome_.get()->Update();
 
 	if (Input::PushKey(DIK_SPACE)) {
-		nextSceneID_ = SceneID::kTitle;
+		nextSceneID_ = SceneID::kStageSelect;
 		sceneChangeRequest_ = true;
 	}
 }

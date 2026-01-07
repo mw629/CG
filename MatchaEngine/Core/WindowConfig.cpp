@@ -10,6 +10,7 @@ LRESULT WindowConfig::WindowProc(HWND hwnd, UINT msg, WPARAM wparam, LPARAM lpar
 
 	if (ImGui_ImplWin32_WndProcHandler(hwnd, msg, wparam, lparam)) { return true; }
 	//メッセージに応じてゲーム固有の処理を行う
+#endif
 	switch (msg) {
 		//ウィンドウが破棄された
 	case WM_DESTROY:
@@ -26,7 +27,7 @@ LRESULT WindowConfig::WindowProc(HWND hwnd, UINT msg, WPARAM wparam, LPARAM lpar
 		}
 		break;
 	}
-#endif
+
 	//標準のメッセージ処理を行う
 	return DefWindowProc(hwnd, msg, wparam, lparam);
 
@@ -60,7 +61,7 @@ void WindowConfig::SetWindowData(const int32_t kClientWidth, const int32_t kClie
 	//ウィンドウの作成//
 	hwnd = CreateWindow(
 		wc.lpszClassName, //利用するクラス名
-		L"LE2B_29_ワタナベ_マサト_TITLE",//タイトルバーの文字
+		L"LE2B_29_ワタナベ_マサト_ガンダッシュ",//タイトルバーの文字
 		WS_OVERLAPPEDWINDOW,//よく見るウィンドウスタイル
 		CW_USEDEFAULT,//表示X座標（Windowsに任せる）
 		CW_USEDEFAULT,//表示Y座標（Windowsに任せる）

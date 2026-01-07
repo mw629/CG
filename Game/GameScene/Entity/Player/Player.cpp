@@ -35,6 +35,11 @@ void Player::ImGui() {
 			ImGui::Checkbox("IsDead", &isDead_);
 			ImGui::DragFloat("DeathTimer", &deathAnimationTimer_);
 		}
+		if (ImGui::CollapsingHeader("Clear")) {
+			ImGui::Checkbox("IsClear", &isClear_);
+			ImGui::DragFloat("ClearTimer", &clearAnimationTimer_);
+			ImGui::Text("Phase: %d", static_cast<int>(clearPhase_));
+		}
 	}
 #endif
 }
@@ -50,6 +55,10 @@ void Player::Initialize(const Vector3& position, Matrix4x4 viewMatrix) {
 	// キャラクターの当たり判定サイズ
 	float kWidth = 0.9f;
 	float kHeight = 0.9f;
+
+	jumpSE_ = Audio::Load("resources/Audio/SE/Jump.mp3");
+	damageSE_ = Audio::Load("resources/Audio/SE/damage.mp3");
+
 }
 
 void Player::Update(Matrix4x4 viewMatrix) {
@@ -61,6 +70,19 @@ void Player::Update(Matrix4x4 viewMatrix) {
 		model_->SettingWvp(viewMatrix);
 		return;
 	}
+
+	// クリア演出中
+	if (isClear_) {
+		// クリア演出中は無敵の点滅を無効化し、通常色に戻す
+		model_->GetMatrial()->SetColor({ 1.0f, 1.0f, 1.0f, 1.0f });
+		ClearAnimation();
+		model_->SetTransform(transform_);
+		model_->SettingWvp(viewMatrix);
+		return;
+	}
+
+	// 射撃フラグを毎フレームリセット（ノックバック中も含めて）
+	isShot_ = false;
 
 	// ノックバック中の処理
 	if (isKnockback_) {
@@ -151,12 +173,20 @@ void Player::MoveInput() {
 			velocity_.y = kJumpAcceleration; // 上向きの速度
 			isJump_ = true;
 			coyoteTime_ = 0.0f; // ジャンプしたらコヨーテタイムを消費
+			// ジャンプ効果音を再生
+			if (jumpSE_ >= 0) {
+				Audio::Play(jumpSE_, false);
+			}
 		}
 		else {
 			 if (!doubleJump) {
 				velocity_.y = kJumpAcceleration; // 上向きの速度
 				doubleJump = true;
 				isJump_ = true;
+				// ダブルジャンプ時も効果音を再生
+				if (jumpSE_ >= 0) {
+					Audio::Play(jumpSE_, false);
+				}
 			}
 		}
 	}
@@ -201,7 +231,7 @@ void Player::JumpAnimation()
 	if (animationFream_ < shrinkTime) {
 		float t = (float)animationFream_ / shrinkTime;
 		transform_.scale.y = Lerp(1.0f, minY, t); // 縮む
-		transform_.scale.x = Lerp(1.0f, maxX, t); // 横に広がる
+		transform_.scale.x = Lerp(maxX, maxX, t); // 横に広がる
 	}
 	else if (animationFream_ < shrinkTime + stretchTime) {
 		float t = (float)(animationFream_ - shrinkTime) / stretchTime;
@@ -231,9 +261,9 @@ void Player::DeathAnimation()
 	t = (std::min)(t, 1.0f);
 
 	// 死亡時の色変化（白→黒にフェード、透明度も下げる）
-	float colorValue = Lerp(1.0f, 0.0f, t);
-	float alpha = Lerp(1.0f, 0.0f, t);
-	model_->GetMatrial()->SetColor({ colorValue, colorValue, colorValue, alpha });
+// 	float colorValue = Lerp(1.0f, 0.0f, t);
+// 	float alpha = Lerp(1.0f, 0.0f, t);
+// 	model_->GetMatrial()->SetColor({ colorValue, colorValue, colorValue, alpha });
 
 	// 演出パターン1: 縮みながら回転して消える
 	//transform_.scale = Vector3(
@@ -241,7 +271,7 @@ void Player::DeathAnimation()
 	//	Lerp(1.0f, 0.0f, t),
 	//	Lerp(1.0f, 0.0f, t)
 	//);
-	//transform_.rotate.y += 0.1f; // 回転
+	//transform_.rotate.y += 0.1f; // 回転	
 	
 	// 演出パターン2: 倒れる演出（X軸回転）
 	transform_.rotate.x = Lerp(0.0f, std::numbers::pi_v<float> / 2.0f, t);
@@ -252,6 +282,76 @@ void Player::DeathAnimation()
 
 void Player::ClearAnimation()
 {
+	const float deltaTime = 1.0f / 60.0f;
+
+	switch (clearPhase_) {
+	case ClearPhase::kWaitLanding:
+		// 空中にいる場合は重力を適用して落下させる
+		if (!onGround_) {
+			velocity_.x = 0.0f; // 横移動を止める
+			velocity_ = velocity_ + Vector3(0.0f, -kGravityAccleration / 60.0f, 0.0f);
+			velocity_.y = (std::max)(velocity_.y, -kLimitFallSpeed);
+			MapCollision();
+		} else {
+			// 着地したら次のフェーズへ
+			velocity_ = { 0.0f, 0.0f, 0.0f };
+			clearPhase_ = ClearPhase::kTurnToCamera;
+			clearAnimationTimer_ = 0.0f;
+			clearTurnStartRotationY_ = transform_.rotate.y;
+		}
+		break;
+
+	case ClearPhase::kTurnToCamera:
+		// 画面の方向（Z軸正方向＝カメラ側）を向く
+		clearAnimationTimer_ += deltaTime;
+		{
+			float t = clearAnimationTimer_ / kTurnToCameraDuration;
+			t = (std::min)(t, 1.0f);
+			// 画面向き（Y回転 = π/2 で手前を向く）
+			const float targetRotationY = std::numbers::pi_v<float> / 2.0f;
+			transform_.rotate.y = Lerp(clearTurnStartRotationY_, targetRotationY, t);
+
+			if (t >= 1.0f) {
+				clearPhase_ = ClearPhase::kBackflip;
+				clearAnimationTimer_ = 0.0f;
+				transform_.rotate.x = 0.0f;
+			}
+		}
+		break;
+
+	case ClearPhase::kBackflip:
+		// バク転アニメーション（後方回転 + ジャンプ）
+		clearAnimationTimer_ += deltaTime;
+		{
+			float t = clearAnimationTimer_ / kBackflipDuration;
+			t = (std::min)(t, 1.0f);
+
+			// バク転は後ろ向きに回転（X軸で-2π回転）
+			transform_.rotate.x = Lerp(0.0f, -std::numbers::pi_v<float> * 2.0f, t);
+
+			// ジャンプの高さ（放物線）
+			// sin(π * t) で 0→1→0 の動きを作る
+			float jumpHeight = std::sin(std::numbers::pi_v<float> * t) * 1.5f;
+			
+			// 初回のみ基準位置を保存
+			static float baseY = 0.0f;
+			if (clearAnimationTimer_ <= deltaTime) {
+				baseY = transform_.translate.y;
+			}
+			transform_.translate.y = baseY + jumpHeight;
+
+			if (t >= 1.0f) {
+				clearPhase_ = ClearPhase::kFinished;
+				transform_.rotate.x = 0.0f;
+				transform_.translate.y = baseY;
+			}
+		}
+		break;
+
+	case ClearPhase::kFinished:
+		// 演出完了
+		break;
+	}
 }
 
 
@@ -267,6 +367,10 @@ void Player::OnGround()
 void Player::OnCollision(const Goal* goal)
 {
 	(goal);
+	// ゴールに触れたらクリア状態にする
+	if (!isClear_) {
+		SetClear(true);
+	}
 }
 
 void Player::OnCollision(const Enemy* enemy)
@@ -274,6 +378,11 @@ void Player::OnCollision(const Enemy* enemy)
 	if (invincibleFream < 0) {
 		HP_--;
 		invincibleFream = invincibleTime;
+		
+		// ダメージ効果音を再生
+		if (damageSE_ >= 0) {
+			Audio::Play(damageSE_, false);
+		}
 		
 		// ノックバック処理
 		isKnockback_ = true;
