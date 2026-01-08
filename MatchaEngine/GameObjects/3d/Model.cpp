@@ -7,58 +7,11 @@
 #include <sstream>
 
 
-#ifdef _USE_IMGUI
-
-#include <imgui.h>
-#endif // _USE_IMGUI
-
-
-
-namespace {
-	ID3D12Device* device_;
-	float kClientWidth;
-	float kClientHeight;
-}
-
 Model::~Model()
 {
 	// 基底クラス(Object3DBase)のデストラクタが自動的に呼ばれる
 	// materialはunique_ptrなので自動的に解放される
 }
-
-void Model::ImGui() {
-//#ifdef _USE_IMGUI
-//	std::ostringstream oss;
-//	oss << "Model###" << static_cast<const void*>(this);
-//	const std::string windowTitle = oss.str();
-//
-//	if (ImGui::Begin(windowTitle.c_str())) {
-//		ImGui::PushID(this);
-//
-//		if (ImGui::CollapsingHeader("Model")) {
-//			if (ImGui::CollapsingHeader("Transform")) {
-//				ImGui::DragFloat3("Position", &transform_.translate.x, 0.01f);
-//				ImGui::DragFloat3("Rotation", &transform_.rotate.x, 0.01f);
-//				ImGui::DragFloat3("Scale", &transform_.scale.x, 0.01f);
-//			}
-//		}
-//		ImGui::PopID();
-//	}
-//	ImGui::End();
-//#endif // _USE_IMGUI
-}
-
-void Model::SetDevice(ID3D12Device* device)
-{
-	device_ = device;
-}
-
-void Model::SetScreenSize(Vector2 screenSize)
-{
-	kClientWidth = screenSize.x;
-	kClientHeight = screenSize.y;
-}
-
 
 
 void Model::Initialize(ModelData modelData)
@@ -90,7 +43,7 @@ void Model::CreateVertexData()
 }
 
 void Model::SettingWvp(Matrix4x4 viewMatrix) {
-	Matrix4x4 projectionMatri = MakePerspectiveFovMatrix(0.45f, float(kClientWidth) / float(kClientHeight), 0.1f, 10000.0f);
+	Matrix4x4 projectionMatri = MakePerspectiveFovMatrix(0.45f, float(kClientWidth_) / float(kClientHeight_), 0.1f, 10000.0f);
 	Matrix4x4 worldMatrixObj = MakeAffineMatrix(transform_.translate, transform_.scale, transform_.rotate);
 	Matrix4x4 worldViewProjectionMatrixObj = MultiplyMatrix4x4(worldMatrixObj, MultiplyMatrix4x4(viewMatrix, projectionMatri));
 	Matrix4x4 worldInverseTranspose = TransposeMatrix4x4(Inverse(worldMatrixObj));

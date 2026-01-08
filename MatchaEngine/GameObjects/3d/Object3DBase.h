@@ -9,8 +9,12 @@
 class Object3DBase
 {
 protected:
+	// 派生クラスからアクセス可能な静的メンバー
+	static ID3D12Device* device_;
+	static float kClientWidth_;
+	static float kClientHeight_;
 
-	Transform transform_{};
+	Transform transform_;
 
 	//objectResource
 	
@@ -31,6 +35,8 @@ public:
 
 	virtual ~Object3DBase();
 
+	static void ImGui();
+
 	static void SetObjectResource(ID3D12Device* device,Vector2 ClientSize);
 
 	virtual void CreateVertexData() = 0;
@@ -40,7 +46,7 @@ public:
 	virtual void SettingWvp(Matrix4x4 viewMatrix);
 
 
-	void SetTransform(Transform transform) { transform_ = transform_; }
+	void SetTransform(Transform transform) { transform_ = transform; }  // バグ修正: transform_ = transform_ → transform_ = transform
 	void SetLighting(bool isActiv) { material_.get()->SetMaterialLighting(isActiv); }
 	void SetTexture(D3D12_GPU_DESCRIPTOR_HANDLE textureSrvHandleGPU) { textureSrvHandleGPU_ = textureSrvHandleGPU; }
 

@@ -1,31 +1,50 @@
 #include "Object3DBase.h"
 #include "Calculation.h"
 
-namespace {
-	ID3D12Device* device_;
-	float kClientWidth;
-	float kClientHeight;
-}
+#ifdef _USE_IMGUI
+
+#include <imgui.h>
+#endif // _USE_IMGUI
+
+
+// 静的メンバーの定義
+ID3D12Device* Object3DBase::device_ = nullptr;
+float Object3DBase::kClientWidth_ = 0.0f;
+float Object3DBase::kClientHeight_ = 0.0f;
 
 Object3DBase::~Object3DBase()
 {
-	// MapしたポインタをUnmapする
-	if (vertexData_) {
-		vertexResource_->Unmap(0, nullptr);
-	}
-	if (wvpData_) {
-		wvpDataResource_->Unmap(0, nullptr);
-	}
-	// ComPtrは自動的に解放される
-	vertexResource_.Reset();
-	wvpDataResource_.Reset();
+	
 }
+
+void ImGui() {
+	#ifdef _USE_IMGUI
+	std::ostringstream oss;
+	oss << "Object###" << static_cast<const void*>(this);
+	const std::string windowTitle = oss.str();
+
+	if (ImGui::Begin(windowTitle.c_str())) {
+		ImGui::PushID(this);
+
+		if (ImGui::CollapsingHeader("Object")) {
+			if (ImGui::CollapsingHeader("Transform")) {
+				ImGui::DragFloat3("Position", &transform_.translate.x, 0.01f);
+				ImGui::DragFloat3("Rotation", &transform_.rotate.x, 0.01f);
+				ImGui::DragFloat3("Scale", &transform_.scale.x, 0.01f);
+			}
+		}
+		ImGui::PopID();
+	}
+	ImGui::End();
+#endif // _USE_IMGUI
+}
+
 
 void Object3DBase::SetObjectResource(ID3D12Device* device, Vector2 ClientSize)
 {
 	device_ = device;
-	kClientWidth = ClientSize.x;
-	kClientHeight = ClientSize.y;
+	kClientWidth_ = ClientSize.x;
+	kClientHeight_ = ClientSize.y;
 }
 
 void Object3DBase::CreateWVP()
@@ -44,7 +63,7 @@ void Object3DBase::CreateWVP()
 
 void Object3DBase::SettingWvp(Matrix4x4 viewMatrix)
 {
-	Matrix4x4 projectionMatri = MakePerspectiveFovMatrix(0.45f, float(kClientWidth) / float(kClientHeight), 0.1f, 100.0f);
+	Matrix4x4 projectionMatri = MakePerspectiveFovMatrix(0.45f, float(kClientWidth_) / float(kClientHeight_), 0.1f, 100.0f);
 	Matrix4x4 worldMatrix = MakeAffineMatrix(transform_.translate, transform_.scale, transform_.rotate);
 	Matrix4x4 worldViewProjectionMatrix = MultiplyMatrix4x4(worldMatrix, MultiplyMatrix4x4(viewMatrix, projectionMatri));
 	*wvpData_ = { worldViewProjectionMatrix,worldMatrix };
