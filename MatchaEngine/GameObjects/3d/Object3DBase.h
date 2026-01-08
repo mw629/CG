@@ -35,7 +35,7 @@ public:
 
 	virtual ~Object3DBase();
 
-	static void ImGui();
+	virtual void ImGui();
 
 	static void SetObjectResource(ID3D12Device* device,Vector2 ClientSize);
 

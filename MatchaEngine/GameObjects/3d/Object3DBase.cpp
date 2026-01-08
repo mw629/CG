@@ -2,7 +2,6 @@
 #include "Calculation.h"
 
 #ifdef _USE_IMGUI
-
 #include <imgui.h>
 #endif // _USE_IMGUI
 
@@ -14,28 +13,16 @@ float Object3DBase::kClientHeight_ = 0.0f;
 
 Object3DBase::~Object3DBase()
 {
-	
+
 }
 
-void ImGui() {
-	#ifdef _USE_IMGUI
-	std::ostringstream oss;
-	oss << "Object###" << static_cast<const void*>(this);
-	const std::string windowTitle = oss.str();
-
-	if (ImGui::Begin(windowTitle.c_str())) {
-		ImGui::PushID(this);
-
-		if (ImGui::CollapsingHeader("Object")) {
-			if (ImGui::CollapsingHeader("Transform")) {
-				ImGui::DragFloat3("Position", &transform_.translate.x, 0.01f);
-				ImGui::DragFloat3("Rotation", &transform_.rotate.x, 0.01f);
-				ImGui::DragFloat3("Scale", &transform_.scale.x, 0.01f);
-			}
-		}
-		ImGui::PopID();
+void Object3DBase::ImGui() {
+#ifdef _USE_IMGUI
+	if (ImGui::CollapsingHeader("Transform")) {
+		ImGui::DragFloat3("Position", reinterpret_cast<float*>(&transform_.translate), 0.01f);
+		ImGui::DragFloat3("Rotation", reinterpret_cast<float*>(&transform_.rotate), 0.01f);
+		ImGui::DragFloat3("Scale", reinterpret_cast<float*>(&transform_.scale), 0.01f);
 	}
-	ImGui::End();
 #endif // _USE_IMGUI
 }
 

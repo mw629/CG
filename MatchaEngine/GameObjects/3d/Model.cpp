@@ -21,7 +21,7 @@ void Model::Initialize(ModelData modelData)
 	textureSrvHandleGPU_ = texture->TextureData(modelData.textureIndex);
 
 	material_ = std::make_unique<MaterialFactory>();
-	material_->CreateMatrial(device_, false);
+	material_->CreateMatrial(device_);
 	material_.get()->SetMaterialLighting(true);
 	CreateObject();
 }

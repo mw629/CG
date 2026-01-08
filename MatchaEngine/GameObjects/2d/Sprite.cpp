@@ -57,7 +57,7 @@ void Sprite::Initialize(SpriteData spriteData, int textureHandle)
 
 
 	material_ = new MaterialFactory();
-	material_->CreateMatrial(device_, false);
+	material_->CreateMatrial(device_);
 	CreateSprite();
 }
 

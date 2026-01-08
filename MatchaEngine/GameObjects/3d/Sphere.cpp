@@ -54,7 +54,7 @@ void Sphere::Initialize( D3D12_GPU_DESCRIPTOR_HANDLE textureSrvHandleGPU)
 	textureSrvHandleGPU_ = textureSrvHandleGPU;
 
 	material_ = new MaterialFactory();
-	material_->CreateMatrial(device_, false);
+	material_->CreateMatrial(device_);
 }
 
 void Sphere::CreateVertexData()

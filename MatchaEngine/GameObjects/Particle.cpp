@@ -53,7 +53,7 @@ void Particle::Initialize(int TextureHandle)
 	textureSrvHandleGPU_ = texture.get()->TextureData(TextureHandle);
 
 	material_ = std::make_unique<MaterialFactory>();
-	material_->CreateMatrial(device_, false);
+	material_->CreateMatrial(device_);
 	CreateParticle();
 }
 
