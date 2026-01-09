@@ -21,15 +21,14 @@ void Model::Initialize(ModelData modelData)
 	textureSrvHandleGPU_ = texture->TextureData(modelData.textureIndex);
 
 	material_ = std::make_unique<MaterialFactory>();
-	material_->CreateMatrial(device_);
-	material_.get()->SetMaterialLighting(true);
+	material_->CreateMatrial();
 	CreateObject();
 }
 
 void Model::CreateVertexData()
 {
 	//頂点リソースを作る
-	vertexResource_ = GraphicsDevice::CreateBufferResource(device_, sizeof(VertexData) * modelData_.vertices.size());
+	vertexResource_ = GraphicsDevice::CreateBufferResource(sizeof(VertexData) * modelData_.vertices.size());
 	//頂点バッファービューを作成する
 	//リソースの先頭アドレスから使う
 	vertexBufferView_.BufferLocation = vertexResource_->GetGPUVirtualAddress();

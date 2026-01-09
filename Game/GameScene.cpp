@@ -33,6 +33,10 @@ void GameScene::Initialize() {
 	model_.get()->Initialize(modelData);
 	model_.get()->SetTransform(modelTransform_);
 
+	int texture1= texture_.get()->CreateTexture("resources/monsterBall.png");
+	sphere_.get()->Initialize(texture1);
+	sphere_.get()->SetTransform(modelTransform_);
+
 	modelData = LoadObjFile("resources/Ground", "Ground.obj");
 	floor.get()->Initialize(modelData);
 	floor.get()->SetTransform(floorT);
@@ -77,6 +81,8 @@ void GameScene::Update() {
 	model_->SettingWvp(view);
 	floor->SettingWvp(view);
 
+	sphere_.get()->SettingWvp(view);
+
 	particle_[1].get()->EmitSize();
 	
 	particle_[0].get()->Update(view);
@@ -85,8 +91,9 @@ void GameScene::Update() {
 }
 
 void GameScene::Draw() {
-	Draw::DrawModel(model_.get(), camera_.get());
-	Draw::DrawModel(floor.get(), camera_.get());
+	//Draw::DrawModel(model_.get(), camera_.get());
+	//Draw::DrawModel(floor.get(), camera_.get());
+	Draw::DrawShpere(sphere_.get(), camera_.get());
 	for (int i = 0, n = static_cast<int>(particle_.size()); i < n; ++i) {
 		particle_[i].get()->Draw();
 	}

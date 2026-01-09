@@ -18,7 +18,7 @@ public:
 
 	void ImGui();
 
-	void CreateDirectionalLight(ID3D12Device* device);
+	void CreateDirectionalLight();
 
 	ID3D12Resource* GetDirectinalLightResource() { return directionalLightResource_.Get(); }
 	DirectionalLightData* GetDirectinalLightData() { return directionalLightData_; }

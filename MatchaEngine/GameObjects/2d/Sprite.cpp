@@ -5,14 +5,10 @@
 #include <Resource/Texture.h>
 
 namespace {
-	ID3D12Device* device_;
 	float kClientWidth;
 	float kClientHeight;
 }
 
-void Sprite::SetDevice(ID3D12Device* device) {
-	device_ = device;
-}
 
 void Sprite::SetScreenSize(Vector2 screenSize)
 {
@@ -57,7 +53,7 @@ void Sprite::Initialize(SpriteData spriteData, int textureHandle)
 
 
 	material_ = new MaterialFactory();
-	material_->CreateMatrial(device_);
+	material_->CreateMatrial();
 	CreateSprite();
 }
 
@@ -65,7 +61,7 @@ void Sprite::CreateVertexData()
 {
 	//Sprote用の頂点リソースを作る//
 
-	vertexResource_ = GraphicsDevice::CreateBufferResource(device_, sizeof(VertexData) * 6);
+	vertexResource_ = GraphicsDevice::CreateBufferResource(sizeof(VertexData) * 6);
 
 	//頂点バッファービューを作成する
 	
@@ -103,7 +99,7 @@ void Sprite::CreateVertexData()
 
 void Sprite::CreateIndexResource()
 {
-	indexResource_ = GraphicsDevice::CreateBufferResource(device_, sizeof(uint32_t) * 6); ;
+	indexResource_ = GraphicsDevice::CreateBufferResource(sizeof(uint32_t) * 6); ;
 
 
 	indexBufferView_.BufferLocation = indexResource_->GetGPUVirtualAddress();
@@ -125,7 +121,7 @@ void Sprite::CreateWVP()
 {
 	
 	//Sprite用ののTransformationMatrix用のリソースを作る。Matrix4x41つ分のサイズを用意する
-	wvpResource_ = GraphicsDevice::CreateBufferResource(device_, sizeof(TransformationMatrix));
+	wvpResource_ = GraphicsDevice::CreateBufferResource(sizeof(TransformationMatrix));
 	//データを書き込む
 	wvpData_ = nullptr;
 	//書き込むためのアドレスを取得

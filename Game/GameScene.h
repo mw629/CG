@@ -26,6 +26,9 @@ private:
 	std::unique_ptr<Model> model_ = std::make_unique<Model>();
 	Transform modelTransform_{ {1.0f,1.0f,1.0f},{0.0f,0.0f,0.0f,},{0.0f,2.0f,1.5f} };
 
+	std::unique_ptr<Sphere> sphere_ = std::make_unique<Sphere>();
+	Transform Transform_{ {1.0f,1.0f,1.0f},{0.0f,0.0f,0.0f,},{0.0f,2.0f,1.5f} };
+
 	std::unique_ptr<Model> floor = std::make_unique<Model>();
 	Transform floorT{ {1.0f,1.0f,1.0f},{0.0f,0.0f,0.0f,},{0.0f,0.0f,0.0f} };
 

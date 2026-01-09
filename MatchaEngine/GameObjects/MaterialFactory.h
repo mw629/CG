@@ -12,7 +12,7 @@ private:
 public:
 	~MaterialFactory();
 
-	void CreateMatrial(ID3D12Device* device, bool Lighting = true);
+	void CreateMatrial(bool Lighting = true);
 
 	void SetColor(Vector4 color) { materialData_->color = color; }
 	void SetMaterialLighting(bool isActiv) { materialData_->endbleLighting = isActiv; }

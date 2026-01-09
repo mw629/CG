@@ -4,16 +4,10 @@
 #include <cassert>                  
 
 namespace {
-	ID3D12Device* device_;
 	float kClientWidth;
 	float kClientHeight;
 }
 
-
-void Line::SetDevice(ID3D12Device* device)
-{
-	device_ = device;
-}
 
 void Line::SetScreenSize(Vector2 screenSize)
 {
@@ -42,7 +36,7 @@ Line::~Line(){
 void Line::CreateVertexData()
 {
 	//VertexResourceを生成する//
-	vertexResource_ = GraphicsDevice::CreateBufferResource(device_, sizeof(LineVertexData) * 2);
+	vertexResource_ = GraphicsDevice::CreateBufferResource(sizeof(LineVertexData) * 2);
 	//頂点バッファビューを作成する
 	//リソースの先頭のアドレスから使う
 	vertexBufferView_.BufferLocation = vertexResource_->GetGPUVirtualAddress();
@@ -62,7 +56,7 @@ void Line::CreateVertexData()
 
 void Line::CreateWVP() {
 	//WVP用のリソースを作る
-	wvpResource_ = GraphicsDevice::CreateBufferResource(device_, sizeof(LineTransformationMatrix));
+	wvpResource_ = GraphicsDevice::CreateBufferResource(sizeof(LineTransformationMatrix));
 	//
 	wvpData_ = nullptr;
 	//

@@ -10,7 +10,6 @@ class Object3DBase
 {
 protected:
 	// 派生クラスからアクセス可能な静的メンバー
-	static ID3D12Device* device_;
 	static float kClientWidth_;
 	static float kClientHeight_;
 
@@ -31,16 +30,23 @@ protected:
 	Microsoft::WRL::ComPtr<ID3D12Resource> wvpDataResource_;
 	TransformationMatrix* wvpData_ = nullptr;
 
+	Microsoft::WRL::ComPtr<ID3D12Resource> indexResource_;
+	D3D12_INDEX_BUFFER_VIEW indexBufferView_{};
+	uint32_t* indexData_ = nullptr;
+
+
 public:
 
 	virtual ~Object3DBase();
 
 	virtual void ImGui();
 
-	static void SetObjectResource(ID3D12Device* device,Vector2 ClientSize);
+	static void SetObjectResource(Vector2 ClientSize);
 
 	virtual void CreateVertexData() = 0;
 	virtual void CreateWVP();
+	void CreateIndexResource();
+	
 	virtual void CreateObject();
 
 	virtual void SettingWvp(Matrix4x4 viewMatrix);
@@ -58,6 +64,18 @@ public:
 	D3D12_VERTEX_BUFFER_VIEW* GetVertexBufferView() { return &vertexBufferView_; }
 	ID3D12Resource* GetWvpDataResource() { return wvpDataResource_.Get(); }
 	TransformationMatrix* GetWvpData() { return wvpData_; }
+
+private:
+	ShaderName shader_ = ShaderName::ObjectShader;
+	BlendMode blend_ = BlendMode::kBlendModeNone;
+public:
+
+	void SetShader(ShaderName shader) { shader_ = shader; }
+	void SetBlend(BlendMode blend) { blend_ = blend; }
+	
+	ShaderName GetShader() { return shader_; }
+	BlendMode GetBlend() { return blend_; }
+
 
 };
 

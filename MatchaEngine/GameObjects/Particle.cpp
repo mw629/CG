@@ -43,7 +43,7 @@ void Particle::Initialize()
 	textureSrvHandleGPU_ = texture.get()->TextureData(texture.get()->CreateTexture("resources/circle.png"));
 
 	material_ = std::make_unique<MaterialFactory>();
-	material_->CreateMatrial(device_, false);
+	material_->CreateMatrial(false);
 	CreateParticle();
 }
 
@@ -53,7 +53,7 @@ void Particle::Initialize(int TextureHandle)
 	textureSrvHandleGPU_ = texture.get()->TextureData(TextureHandle);
 
 	material_ = std::make_unique<MaterialFactory>();
-	material_->CreateMatrial(device_);
+	material_->CreateMatrial();
 	CreateParticle();
 }
 
@@ -68,7 +68,7 @@ void Particle::CreateVertexData()
 	modelData_.vertices.push_back({ .position = {  1.0f, -1.0f, 0.0f, 1.0f }, .texcoord = {1.0f,1.0f}, .normal = {0.0f,0.0f,1.0f} }); // 右下
 
 	//頂点リソースを作る
-	vertexResource_ = GraphicsDevice::CreateBufferResource(device_, sizeof(VertexData) * 6);
+	vertexResource_ = GraphicsDevice::CreateBufferResource(sizeof(VertexData) * 6);
 	//頂点バッファービューを作成する
 	//リソースの先頭アドレスから使う
 	vertexBufferView_.BufferLocation = vertexResource_->GetGPUVirtualAddress();
@@ -86,7 +86,7 @@ void Particle::CreateWVP()
 {
 
 	//Sprite用ののTransformationMatrix用のリソースを作る。Matrix4x41つ分のサイズを用意する
-	instancingResource_ = GraphicsDevice::CreateBufferResource(device_, sizeof(ParticleForGPU) * particleMaxNum_);
+	instancingResource_ = GraphicsDevice::CreateBufferResource(sizeof(ParticleForGPU) * particleMaxNum_);
 	//データを書き込む
 	//書き込むためのアドレスを取得
 	instancingResource_->Map(0, nullptr, reinterpret_cast<void**>(&instancingData_));

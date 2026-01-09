@@ -3,58 +3,22 @@
 #include "Core/VariableTypes.h"
 #include "Math/Calculation.h"
 
-namespace {
-	ID3D12Device* device_;
-	float kClientWidth;
-	float kClientHeight;
-}
 
-
-void Sphere::SetDevice(ID3D12Device* device)
-{
-	device_ = device;
-}
-
-void Sphere::SetScreenSize(Vector2 screenSize)
-{
-	kClientWidth = screenSize.x;
-	kClientHeight = screenSize.y;
-}
-
-Sphere::Sphere()
-{
-	transform_ = { {1.0f,1.0f,1.0f},{0.0f,0.0f,0.0f},{0.0f,0.0f,0.0f} };
-}
 
 Sphere::~Sphere()
 {
-	if (vertexData_) { // vertexData_がnullptrでないか確認
-		vertexResource_->Unmap(0, nullptr);
-	}
-	if (indexData_) { // indexData_がnullptrでないか確認
-		indexResource_->Unmap(0, nullptr);
-	}
-	if (wvpData_) { // wvpData_がnullptrでないか確認
-		wvpResource_->Unmap(0, nullptr);
-	}
-	// ComPtrはスコープを抜けるときに自動的に解放されますが、
-	// 明示的にReset()を呼ぶことで早期に解放できます（必須ではないが安全策）
-	vertexResource_.Reset();
-	indexResource_.Reset();
-	wvpResource_.Reset();
-
-	delete material_;
 }
 
 
 
-
-void Sphere::Initialize( D3D12_GPU_DESCRIPTOR_HANDLE textureSrvHandleGPU)
+void Sphere::Initialize(int textureSrvHandle)
 {
-	textureSrvHandleGPU_ = textureSrvHandleGPU;
+	textureSrvHandleGPU_ = texture.get()->TextureData(textureSrvHandle);
 
-	material_ = new MaterialFactory();
-	material_->CreateMatrial(device_);
+	material_ = std::make_unique<MaterialFactory>();
+	material_->CreateMatrial();
+	
+	CreateObject(); // この行を追加
 }
 
 void Sphere::CreateVertexData()
@@ -65,7 +29,7 @@ void Sphere::CreateVertexData()
 
 	//Shpere用の頂点リソースを作る//
 
-	vertexResource_ = GraphicsDevice::CreateBufferResource(device_, sizeof(VertexData) * (kSubdivision_ * kSubdivision_) * 6);
+	vertexResource_ = GraphicsDevice::CreateBufferResource(sizeof(VertexData) * (kSubdivision_ * kSubdivision_) * 6);
 
 	//頂点バッファービューを作成する
 
@@ -166,58 +130,9 @@ void Sphere::CreateVertexData()
 
 }
 
-void Sphere::CreateIndexResource()
-{
-	indexResource_ = GraphicsDevice::CreateBufferResource(device_, sizeof(uint32_t) * 6); ;
-
-
-	indexBufferView_.BufferLocation = indexResource_->GetGPUVirtualAddress();
-	indexBufferView_.SizeInBytes = sizeof(uint32_t) * 6;
-	indexBufferView_.Format = DXGI_FORMAT_R32_UINT;
-
-	indexResource_->Map(0, nullptr, reinterpret_cast<void**>(&indexData_));
-
-	indexData_[0] = 0;
-	indexData_[1] = 1;
-	indexData_[2] = 2;
-	indexData_[3] = 1;
-	indexData_[4] = 3;
-	indexData_[5] = 2;
-
-}
-
-void Sphere::CreateWVP()
-{
-
-	//Sprite用ののTransformationMatrix用のリソースを作る。Matrix4x41つ分のサイズを用意する
-	wvpResource_ = GraphicsDevice::CreateBufferResource(device_, sizeof(TransformationMatrix));
-	//データを書き込む
-	wvpData_ = nullptr;
-	//書き込むためのアドレスを取得
-	wvpResource_->Map(0, nullptr, reinterpret_cast<void**>(&wvpData_));
-	//単位行列をかきこんでおく
-	wvpData_->World = IdentityMatrix();
-	wvpData_->WVP = IdentityMatrix();
-}
-
-void Sphere::CreateSprite()
+void Sphere::CreateObject()
 {
 	CreateVertexData();
-	//CreateIndexResource(device);
 	CreateWVP();
 }
 
-void Sphere::SettingWvp(Matrix4x4 viewMatrix)
-{
-	Matrix4x4 projectionMatri = MakePerspectiveFovMatrix(0.45f, float(kClientWidth) / float(kClientHeight), 0.1f, 100.0f);
-	Matrix4x4 worldMatrix = MakeAffineMatrix(transform_.translate, transform_.scale, transform_.rotate);
-	Matrix4x4 worldViewProjectionMatrix = MultiplyMatrix4x4(worldMatrix, MultiplyMatrix4x4(viewMatrix, projectionMatri));
-	*wvpData_ = { worldViewProjectionMatrix,worldMatrix };
-}
-
-void Sphere::SetTrandform(Transform transform)
-{
-	transform_.translate = transform.translate;
-	transform_.scale = transform.scale;
-	transform_.rotate = transform.rotate;
-}

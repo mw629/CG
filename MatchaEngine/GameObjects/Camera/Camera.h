@@ -19,7 +19,6 @@ private:
 	Microsoft::WRL::ComPtr<ID3D12Resource> cameraResource_;
 	CameraForGPU* cameraData_ = nullptr;
 
-	static ID3D12Device* device_;
 
 public:
 
@@ -30,7 +29,6 @@ public:
 	Matrix4x4 GetViewMatrix()const { return viewMatrix_; }
 
 	void SetTransform(Transform transform) { transform_ = transform; }
-	static void SetDevice(ID3D12Device* device) { device_ = device; }
 	
 	ID3D12Resource* GetCameraResource() const { return cameraResource_.Get(); }
 

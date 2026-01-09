@@ -24,7 +24,6 @@ private:
 public:
 	~Triangle();
 
-	static void SetDevice(ID3D12Device* device);
 	static void SetScreenSize(Vector2 screenSize);
 
 

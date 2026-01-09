@@ -10,10 +10,10 @@ MaterialFactory::~MaterialFactory(){
 	}
 }
 
-void MaterialFactory::CreateMatrial(ID3D12Device* device,bool Lighting)
+void MaterialFactory::CreateMatrial(bool Lighting)
 {
 	//マテリアル用のリソースを作る。今回はcolor1つ分のサイズを用意する
-	materialResource_ = GraphicsDevice::CreateBufferResource(device, sizeof(Material));
+	materialResource_ = GraphicsDevice::CreateBufferResource(sizeof(Material));
 	//書き込むためのアドレス取得
 	materialResource_->Map(0, nullptr, reinterpret_cast<void**>(&materialData_));
 	//今回は書き込んでみる

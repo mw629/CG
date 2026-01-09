@@ -4,14 +4,10 @@
 #include <cassert>                  
 
 namespace {
-	ID3D12Device* device_;
 	float kClientWidth;
 	float kClientHeight;
 }
 
-void Grid::SetDevice(ID3D12Device* device) {
-	device_ = device;
-}
 
 void Grid::SetScreenSize(Vector2 screenSize)
 {
@@ -39,7 +35,7 @@ Grid::~Grid() {
 void Grid::CreateVertexData()
 {
 	//VertexResourceを生成する//
-	vertexResource_ = GraphicsDevice::CreateBufferResource(device_, sizeof(LineVertexData) * kSubdivision_ * 4);
+	vertexResource_ = GraphicsDevice::CreateBufferResource(sizeof(LineVertexData) * kSubdivision_ * 4);
 	//頂点バッファビューを作成する
 	//リソースの先頭のアドレスから使う
 	vertexBufferView_.BufferLocation = vertexResource_->GetGPUVirtualAddress();
@@ -86,7 +82,7 @@ void Grid::CreateVertexData()
 
 void Grid::CreateWVP() {
 	//WVP用のリソースを作る
-	wvpResource_ = GraphicsDevice::CreateBufferResource(device_, sizeof(LineTransformationMatrix));
+	wvpResource_ = GraphicsDevice::CreateBufferResource(sizeof(LineTransformationMatrix));
 	//
 	wvpData_ = nullptr;
 	//

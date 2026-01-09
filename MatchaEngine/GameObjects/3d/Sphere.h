@@ -1,76 +1,29 @@
 #pragma once
-#include <wrl.h>
-#include "VariableTypes.h"
-#include "MaterialFactory.h"
-#include <d3dx12.h>
-#include "RenderState.h"
+#include "Object3DBase.h"
 
 
-class Sphere
+class Sphere :public Object3DBase
 {
 private:
-	Transform transform_;
-	MaterialFactory* material_;
-	D3D12_GPU_DESCRIPTOR_HANDLE textureSrvHandleGPU_;
-
 	uint32_t kSubdivision_ = 16;
 
-	Microsoft::WRL::ComPtr<ID3D12Resource> vertexResource_;
-	D3D12_VERTEX_BUFFER_VIEW vertexBufferView_{};
-	VertexData* vertexData_ = nullptr;
 
 
-	Microsoft::WRL::ComPtr<ID3D12Resource> indexResource_;
-	D3D12_INDEX_BUFFER_VIEW indexBufferView_{};
-	uint32_t* indexData_ = nullptr;
 
-	Microsoft::WRL::ComPtr<ID3D12Resource> wvpResource_;
-	TransformationMatrix* wvpData_;
-
-	
 
 public:
-	Sphere();
-	~Sphere();
+	~Sphere()override;
 
-	static void SetDevice(ID3D12Device* device);
-	static void SetScreenSize(Vector2 screenSize);
+	void Initialize(int textureSrvHandle);
 
-	void Initialize(D3D12_GPU_DESCRIPTOR_HANDLE textureSrvHandleGPU);
+	void CreateVertexData()override;
 
-	void CreateVertexData();
+	void CreateObject()override;
 
-	void CreateIndexResource();
-
-	void CreateWVP();
-
-	void CreateSprite();
-
-	void SettingWvp(Matrix4x4 viewMatrix);
-
-	void SetTrandform(Transform transform);
-
-	void SetMaterialLighting(bool isActiv) { material_->SetMaterialLighting(isActiv); }
-
-	void SetColor(Vector4 Color){return material_->SetColor(Color); }
-
-	D3D12_VERTEX_BUFFER_VIEW* GetVertexBufferView() { return &vertexBufferView_; }
-	ID3D12Resource* GetVertexResource() { return wvpResource_.Get(); }
-	D3D12_INDEX_BUFFER_VIEW* GetIndexBufferView() { return &indexBufferView_; }
-
-
-	MaterialFactory* GetMatrial() { return material_; }
-	D3D12_GPU_DESCRIPTOR_HANDLE GetTextureSrvHandleGPU() { return textureSrvHandleGPU_; }
+	uint32_t SetSubdivision(int kSubdivision) { kSubdivision_ = kSubdivision; }
 
 	uint32_t GetSubdivision() { return kSubdivision_; }
 
-private:
-	ShaderName shader_ = ShaderName::ObjectShader;
-	BlendMode blend_ = BlendMode::kBlendModeNone;
-public:
-	BlendMode SetBlend(BlendMode blend) { blend_ = blend; }
-	ShaderName GetShader() { return shader_; }
-	BlendMode GetBlend() { return blend_; }
 
 };
 
