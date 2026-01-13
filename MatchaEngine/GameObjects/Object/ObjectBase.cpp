@@ -1,4 +1,4 @@
-#include "Object3DBase.h"
+#include "ObjectBase.h"
 #include "Calculation.h"
 
 #ifdef _USE_IMGUI
@@ -7,15 +7,15 @@
 
 
 // 静的メンバーの定義
-float Object3DBase::kClientWidth_ = 0.0f;
-float Object3DBase::kClientHeight_ = 0.0f;
+float ObjectBase::kClientWidth_ = 0.0f;
+float ObjectBase::kClientHeight_ = 0.0f;
 
-Object3DBase::~Object3DBase()
+ObjectBase::~ObjectBase()
 {
 
 }
 
-void Object3DBase::ImGui() {
+void ObjectBase::ImGui() {
 #ifdef _USE_IMGUI
 	if (ImGui::CollapsingHeader("Transform")) {
 		ImGui::DragFloat3("Position", reinterpret_cast<float*>(&transform_.translate), 0.01f);
@@ -26,13 +26,13 @@ void Object3DBase::ImGui() {
 }
 
 
-void Object3DBase::SetObjectResource(Vector2 ClientSize)
+void ObjectBase::SetObjectResource(Vector2 ClientSize)
 {
 	kClientWidth_ = ClientSize.x;
 	kClientHeight_ = ClientSize.y;
 }
 
-void Object3DBase::CreateWVP()
+void ObjectBase::CreateWVP()
 {
 	//Sprite用ののTransformationMatrix用のリソースを作る。Matrix4x41つ分のサイズを用意する
 	wvpDataResource_ = GraphicsDevice::CreateBufferResource(sizeof(TransformationMatrix));
@@ -46,7 +46,7 @@ void Object3DBase::CreateWVP()
 	wvpData_->WorldInverseTranspose = IdentityMatrix();;
 }
 
-void Object3DBase::CreateIndexResource()
+void ObjectBase::CreateIndexResource()
 {
 	indexResource_ = GraphicsDevice::CreateBufferResource(sizeof(uint32_t) * 6); ;
 
@@ -67,7 +67,7 @@ void Object3DBase::CreateIndexResource()
 }
 
 
-void Object3DBase::SettingWvp(Matrix4x4 viewMatrix)
+void ObjectBase::SettingWvp(Matrix4x4 viewMatrix)
 {
 	Matrix4x4 projectionMatri = MakePerspectiveFovMatrix(0.45f, float(kClientWidth_) / float(kClientHeight_), 0.1f, 100.0f);
 	Matrix4x4 worldMatrix = MakeAffineMatrix(transform_.translate, transform_.scale, transform_.rotate);
@@ -80,7 +80,7 @@ void Object3DBase::SettingWvp(Matrix4x4 viewMatrix)
 
 };
 
-void Object3DBase::CreateObject()
+void ObjectBase::CreateObject()
 {
 	CreateVertexData();
 	CreateWVP();

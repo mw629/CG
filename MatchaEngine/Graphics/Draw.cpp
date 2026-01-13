@@ -9,6 +9,7 @@ namespace {
 	DirectionalLight* directionalLight_;
 	PointLight* pointLight_;
 	SpotLight* spotLight_;
+	Camera* camera;
 }
 
 void Draw::Initialize(ID3D12GraphicsCommandList* commandList, GraphicsPipelineState* graphicsPipelineState, 
@@ -21,6 +22,11 @@ void Draw::Initialize(ID3D12GraphicsCommandList* commandList, GraphicsPipelineSt
 	spotLight_ = spotLight;
 }
 
+void Draw::SetCamera(Camera* setcamera)
+{
+	camera = setcamera;
+}
+
 void Draw::preDraw(ShaderName shader, BlendMode blend)
 {
 	commandList_->SetPipelineState(graphicsPipelineState_->GetGraphicsPipelineState(shader, blend));//PSOを設定
@@ -30,6 +36,23 @@ void Draw::preDraw(ShaderName shader, BlendMode blend)
 	commandList_->SetGraphicsRootSignature(graphicsPipelineState_->GetRootSignature(shader, blend)->GetRootSignature());
 
 
+}
+
+void Draw::DrawObj(ObjectBase *obj)
+{
+	preDraw(obj->GetShader(), obj->GetBlend());
+
+	//objectの描画
+	commandList_->IASetVertexBuffers(0, 1, obj->GetVertexBufferView());//VBVを設定
+	commandList_->SetGraphicsRootConstantBufferView(0, obj->GetMatrial()->GetMaterialResource()->GetGPUVirtualAddress());
+	commandList_->SetGraphicsRootConstantBufferView(1, obj->GetWvpDataResource()->GetGPUVirtualAddress());
+	commandList_->SetGraphicsRootDescriptorTable(2, obj->GetTextureSrvHandleGPU());
+	commandList_->SetGraphicsRootConstantBufferView(3, camera->GetCameraResource()->GetGPUVirtualAddress());
+	commandList_->SetGraphicsRootConstantBufferView(4, directionalLight_->GetDirectinalLightResource()->GetGPUVirtualAddress());
+	commandList_->SetGraphicsRootConstantBufferView(5, pointLight_->GetDirectinalLightResource()->GetGPUVirtualAddress());
+	commandList_->SetGraphicsRootConstantBufferView(6, spotLight_->GetDirectinalLightResource()->GetGPUVirtualAddress());
+
+	commandList_->DrawInstanced(obj->GetVertexSize(), 1, 0, 0);
 }
 
 void Draw::DrawModel(Model* model, Camera* camera)

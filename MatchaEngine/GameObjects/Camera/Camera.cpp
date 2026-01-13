@@ -7,6 +7,11 @@
 #endif // _USE_IMGUI
 
 
+Camera::Camera()
+{
+	Initialize();
+}
+
 void Camera::ImGui()
 {
 #ifdef _USE_IMGUI

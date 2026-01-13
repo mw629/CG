@@ -39,6 +39,8 @@ void Model::CreateVertexData()
 	//頂点リソースにデータを書き込む
 	vertexResource_->Map(0, nullptr, reinterpret_cast<void**>(&vertexData_));
 	std::memcpy(vertexData_, modelData_.vertices.data(), sizeof(VertexData) * modelData_.vertices.size());
+
+	vertexSize_ = modelData_.vertices.size();
 }
 
 void Model::SettingWvp(Matrix4x4 viewMatrix) {

@@ -6,7 +6,7 @@
 #include "MaterialFactory.h"
 #include "RenderState.h"
 
-class Object3DBase
+class ObjectBase
 {
 protected:
 	// 派生クラスからアクセス可能な静的メンバー
@@ -16,7 +16,7 @@ protected:
 	Transform transform_;
 
 	//objectResource
-	
+
 
 	//マテリアルデータ
 	std::unique_ptr<Texture> texture = std::make_unique<Texture>();
@@ -29,6 +29,7 @@ protected:
 	VertexData* vertexData_ = nullptr;
 	Microsoft::WRL::ComPtr<ID3D12Resource> wvpDataResource_;
 	TransformationMatrix* wvpData_ = nullptr;
+	int vertexSize_ = 0;
 
 	Microsoft::WRL::ComPtr<ID3D12Resource> indexResource_;
 	D3D12_INDEX_BUFFER_VIEW indexBufferView_{};
@@ -37,7 +38,7 @@ protected:
 
 public:
 
-	virtual ~Object3DBase();
+	virtual ~ObjectBase();
 
 	virtual void ImGui();
 
@@ -46,7 +47,7 @@ public:
 	virtual void CreateVertexData() = 0;
 	virtual void CreateWVP();
 	void CreateIndexResource();
-	
+
 	virtual void CreateObject();
 
 	virtual void SettingWvp(Matrix4x4 viewMatrix);
@@ -63,6 +64,7 @@ public:
 
 	D3D12_VERTEX_BUFFER_VIEW* GetVertexBufferView() { return &vertexBufferView_; }
 	ID3D12Resource* GetWvpDataResource() { return wvpDataResource_.Get(); }
+	int GetVertexSize() { return vertexSize_;}
 	TransformationMatrix* GetWvpData() { return wvpData_; }
 
 private:
@@ -72,7 +74,7 @@ public:
 
 	void SetShader(ShaderName shader) { shader_ = shader; }
 	void SetBlend(BlendMode blend) { blend_ = blend; }
-	
+
 	ShaderName GetShader() { return shader_; }
 	BlendMode GetBlend() { return blend_; }
 

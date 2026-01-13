@@ -4,6 +4,9 @@
 #include "PSO/GraphicsPipelineState.h"
 #include <d3d12.h>  
 #include <cstdint>  
+
+#include "ObjectBase.h"
+
 #include "Model.h"
 #include "Particle.h"
 #include "Sprite.h"
@@ -23,7 +26,11 @@ public:
 	static void Initialize(ID3D12GraphicsCommandList* commandList, GraphicsPipelineState* graphicsPipelineState, 
 		DirectionalLight* directionalLight, PointLight *pointLight, SpotLight* spotLight);
 
+	static void SetCamera(Camera* setcamera);
+
 	static void preDraw(ShaderName shader, BlendMode blend);
+
+	static void DrawObj(ObjectBase *obj);
 
 	static void DrawModel(Model* model, Camera* camera);
 

@@ -1,8 +1,8 @@
 #pragma once
-#include"Object3DBase.h"
+#include"ObjectBase.h"
 
 
-class Model	:public Object3DBase
+class Model	:public ObjectBase
 {
 private:
 	ModelData modelData_{};

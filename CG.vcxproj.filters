@@ -126,16 +126,16 @@
     <ClCompile Include="MatchaEngine\GameObjects\MaterialFactory.cpp">
       <Filter>MatchaEngine\GameObjects</Filter>
     </ClCompile>
-    <ClCompile Include="MatchaEngine\GameObjects\3d\Model.cpp">
+    <ClCompile Include="MatchaEngine\GameObjects\Object\3d\Model.cpp">
       <Filter>MatchaEngine\GameObjects</Filter>
     </ClCompile>
-    <ClCompile Include="MatchaEngine\GameObjects\3d\Sphere.cpp">
+    <ClCompile Include="MatchaEngine\GameObjects\Object\3d\Sphere.cpp">
       <Filter>MatchaEngine\GameObjects</Filter>
     </ClCompile>
-    <ClCompile Include="MatchaEngine\GameObjects\2d\Sprite.cpp">
+    <ClCompile Include="MatchaEngine\GameObjects\Object\2d\Sprite.cpp">
       <Filter>MatchaEngine\GameObjects</Filter>
     </ClCompile>
-    <ClCompile Include="MatchaEngine\GameObjects\3d\Triangle.cpp">
+    <ClCompile Include="MatchaEngine\GameObjects\Object\3d\Triangle.cpp">
       <Filter>MatchaEngine\GameObjects</Filter>
     </ClCompile>
     <ClCompile Include="MatchaEngine\Input\GamePadInput.cpp">
@@ -240,7 +240,7 @@
     <ClCompile Include="MatchaEngine\GameObjects\Primitive.cpp">
       <Filter>ソース ファイル</Filter>
     </ClCompile>
-    <ClCompile Include="MatchaEngine\GameObjects\3d\Object3DBase.cpp">
+    <ClCompile Include="MatchaEngine\GameObjects\Object\ObjectBase.cpp">
       <Filter>ソース ファイル</Filter>
     </ClCompile>
     <ClCompile Include="MatchaEngine\GameObjects\Light\LightManeger.cpp">
@@ -354,16 +354,16 @@
     <ClInclude Include="MatchaEngine\GameObjects\MaterialFactory.h">
       <Filter>MatchaEngine\GameObjects</Filter>
     </ClInclude>
-    <ClInclude Include="MatchaEngine\GameObjects\3d\Model.h">
+    <ClInclude Include="MatchaEngine\GameObjects\Object\3d\Model.h">
       <Filter>MatchaEngine\GameObjects</Filter>
     </ClInclude>
-    <ClInclude Include="MatchaEngine\GameObjects\3d\Sphere.h">
+    <ClInclude Include="MatchaEngine\GameObjects\Object\3d\Sphere.h">
       <Filter>MatchaEngine\GameObjects</Filter>
     </ClInclude>
-    <ClInclude Include="MatchaEngine\GameObjects\2d\Sprite.h">
+    <ClInclude Include="MatchaEngine\GameObjects\Object\2d\Sprite.h">
       <Filter>MatchaEngine\GameObjects</Filter>
     </ClInclude>
-    <ClInclude Include="MatchaEngine\GameObjects\3d\Triangle.h">
+    <ClInclude Include="MatchaEngine\GameObjects\Object\3d\Triangle.h">
       <Filter>MatchaEngine\GameObjects</Filter>
     </ClInclude>
     <ClInclude Include="MatchaEngine\Input\GamePadInput.h">
@@ -474,7 +474,7 @@
     <ClInclude Include="MatchaEngine\GameObjects\Primitive.h">
       <Filter>ヘッダー ファイル</Filter>
     </ClInclude>
-    <ClInclude Include="MatchaEngine\GameObjects\3d\Object3DBase.h">
+    <ClInclude Include="MatchaEngine\GameObjects\Object\ObjectBase.h">
       <Filter>ヘッダー ファイル</Filter>
     </ClInclude>
     <ClInclude Include="MatchaEngine\GameObjects\Light\LightManeger.h">

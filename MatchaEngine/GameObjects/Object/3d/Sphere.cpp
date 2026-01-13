@@ -126,7 +126,7 @@ void Sphere::CreateVertexData()
 
 		}
 	}
-
+	vertexSize_ = kSubdivision_ * kSubdivision_ * 6;
 
 }
 

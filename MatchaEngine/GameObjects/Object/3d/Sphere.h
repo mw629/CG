@@ -1,8 +1,8 @@
 #pragma once
-#include "Object3DBase.h"
+#include "ObjectBase.h"
 
 
-class Sphere :public Object3DBase
+class Sphere :public ObjectBase
 {
 private:
 	uint32_t kSubdivision_ = 16;

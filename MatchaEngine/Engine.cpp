@@ -151,7 +151,7 @@ void Engine::Setting()
 	Texture::Initalize(graphics->GetDevice(), command->GetCommandList(), descriptorHeap.get(), textureLoader.get());
 
 	Vector2 Client = { (float)kClientWidth_,(float)kClientHeight_ };
-	Object3DBase::SetObjectResource(Client);
+	ObjectBase::SetObjectResource(Client);
 	Line::SetScreenSize(Client);
 	Grid::SetScreenSize(Client);
 	Particle::SetScreenSize(Client);

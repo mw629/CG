@@ -21,6 +21,8 @@ private:
 
 
 public:
+	Camera();
+
 
 	void ImGui();
 
