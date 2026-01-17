@@ -55,6 +55,13 @@ struct SpotLight
     float32_t cosFalloffStart;//Falloの開始角度
 };
 
+// ライトの数を受け取る
+struct LightCounts
+{
+    uint pointLightCount;
+    uint spotLightCount;
+};
+
 struct Material
 {
     float32_t4 color;
