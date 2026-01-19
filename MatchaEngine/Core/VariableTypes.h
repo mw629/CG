@@ -9,6 +9,7 @@
 #include "VariableTypes/Vector3Int.h"
 #include "VariableTypes/Matrix4x4.h"
 #include <map>
+#include <optional>
 
 
 ///構造体///
@@ -137,14 +138,6 @@ struct MaterialData
 	std::string textureDilePath;
 };
 
-struct ModelData
-{
-	std::vector<VertexData> vertices;
-	MaterialData material;
-	int textureIndex;
-	Node rootNode;
-};
-
 
 struct Node {
 	QuaternionTransform transform;
@@ -159,15 +152,24 @@ struct Node {
 	std::vector<Node> children;
 };
 
-struct KeyframeVector3 {
-	Vector3 value;//キーフレームの値
-	float time;//キーフレームの時間
+struct ModelData
+{
+	std::vector<VertexData> vertices;
+	MaterialData material;
+	int textureIndex;
+	Node rootNode;
 };
 
-struct KeydreamQuaternion {
-	Quaternion value;
-	float time;
-};
+
+//struct KeyframeVector3 {
+//	Vector3 value;//キーフレームの値
+//	float time;//キーフレームの時間
+//};
+//
+//struct KeyframeQuaternion {
+//	Quaternion value;
+//	float time;
+//};
 
 template<typename tValue>
 
@@ -176,11 +178,11 @@ struct Keyframe {
 	tValue value;
 };
 using KeyframeVector3 = Keyframe<Vector3>;
-using KeydreamQuaternion = Keyframe<Quaternion>;
+using KeyframeQuaternion = Keyframe<Quaternion>;
 
 struct NodeAnimation {
 	std::vector<KeyframeVector3> translate;
-	std::vector<KeydreamQuaternion> rotate;
+	std::vector<KeyframeQuaternion> rotate;
 	std::vector<KeyframeVector3> scale;
 
 };
@@ -188,7 +190,7 @@ struct NodeAnimation {
 struct Animation {
 	float duration;//アニメーション全体の尺
 	//NodeAnimationの集合。Node名で弾けるようにしておく
-	std::map<std::string, NodeAnimation> nodeAnimation;
+	std::map<std::string, NodeAnimation> nodeAnimations;
 };
 
 
