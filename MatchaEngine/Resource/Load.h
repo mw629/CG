@@ -16,7 +16,12 @@ ModelData LoadObjFile(const std::string& directoryPath, const std::string& filen
 
 ModelData AssimpLoadObjFile(const std::string& directoryPath, const std::string& filename);
 
+
+
+/// アニメーションの読み込み ///
 Node ReadNode(aiNode* node);
+
+Animation LoadAnimationFile(const std::string& directoryPath, const std::string& filename);
 
 ///テクスチャの読み込み///
 

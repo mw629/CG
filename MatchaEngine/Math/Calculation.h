@@ -195,6 +195,8 @@ Matrix4x4 IdentityMatrix();
 /// <returns>アフィン行列</returns>
 Matrix4x4 MakeAffineMatrix(Vector3 pos, Vector3 scale, Vector3 angle);
 
+Matrix4x4 MakeAffineMatrix(Vector3 pos, Vector3 scale,Quaternion  roteta);
+
 
 Matrix4x4 MakeAffineMatrix(Matrix4x4 translationMatrix, Vector3 scale, Matrix4x4 rotationMatrix);
 

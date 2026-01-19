@@ -407,6 +407,46 @@ Matrix4x4 MakeAffineMatrix(Vector3 pos, Vector3 scale, Vector3 angle)
 	return result;
 }
 
+Matrix4x4 MakeAffineMatrix(Vector3 pos, Vector3 scale, Quaternion rotate)
+{
+	Matrix4x4 result{};
+
+	// Quaternionから回転行列の要素を計算
+	float xx = rotate.x * rotate.x;
+	float yy = rotate.y * rotate.y;
+	float zz = rotate.z * rotate.z;
+	float xy = rotate.x * rotate.y;
+	float xz = rotate.x * rotate.z;
+	float yz = rotate.y * rotate.z;
+	float wx = rotate.w * rotate.x;
+	float wy = rotate.w * rotate.y;
+	float wz = rotate.w * rotate.z;
+
+	// 回転行列 × スケール行列を合成
+	result.m[0][0] = (1.0f - 2.0f * (yy + zz)) * scale.x;
+	result.m[0][1] = (2.0f * (xy + wz)) * scale.x;
+	result.m[0][2] = (2.0f * (xz - wy)) * scale.x;
+	result.m[0][3] = 0.0f;
+
+	result.m[1][0] = (2.0f * (xy - wz)) * scale.y;
+	result.m[1][1] = (1.0f - 2.0f * (xx + zz)) * scale.y;
+	result.m[1][2] = (2.0f * (yz + wx)) * scale.y;
+	result.m[1][3] = 0.0f;
+
+	result.m[2][0] = (2.0f * (xz + wy)) * scale.z;
+	result.m[2][1] = (2.0f * (yz - wx)) * scale.z;
+	result.m[2][2] = (1.0f - 2.0f * (xx + yy)) * scale.z;
+	result.m[2][3] = 0.0f;
+
+	// 平行移動
+	result.m[3][0] = pos.x;
+	result.m[3][1] = pos.y;
+	result.m[3][2] = pos.z;
+	result.m[3][3] = 1.0f;
+
+	return result;
+}
+
 Matrix4x4 MakeAffineMatrix(Matrix4x4 translationMatrix, Vector3 scale, Matrix4x4 rotationMatrix)
 {
 	Matrix4x4 result;

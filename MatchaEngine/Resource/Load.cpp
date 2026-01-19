@@ -204,6 +204,11 @@ Node ReadNode(aiNode* node)
 	return result;
 }
 
+Animation LoadAnimationFile(const std::string& directoryPath, const std::string& filename)
+{
+	return Animation();
+}
+
 ///テクスチャの読み込み///
 
 

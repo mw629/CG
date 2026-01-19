@@ -8,6 +8,7 @@
 #include "VariableTypes/Vector3.h"
 #include "VariableTypes/Vector3Int.h"
 #include "VariableTypes/Matrix4x4.h"
+#include <map>
 
 
 ///構造体///
@@ -19,6 +20,13 @@ struct Vector4 {
 	float w;
 };
 
+
+struct Quaternion {
+	float x;
+	float y;
+	float z;
+	float w;
+};
 
 struct PolarCoordinates {
 	Vector3 offset;
@@ -37,6 +45,13 @@ struct Transform
 {
 	Vector3 scale = { 1.0f,1.0f,1.0f };
 	Vector3 rotate = { 0.0f,0.0f,0.0f };
+	Vector3 translate = { 0.0f,0.0f,0.0f };
+};
+
+struct QuaternionTransform
+{
+	Vector3 scale = { 1.0f,1.0f,1.0f };
+	Quaternion rotate = { 0.0f,0.0f,0.0f };
 	Vector3 translate = { 0.0f,0.0f,0.0f };
 };
 
@@ -122,7 +137,18 @@ struct MaterialData
 	std::string textureDilePath;
 };
 
+struct ModelData
+{
+	std::vector<VertexData> vertices;
+	MaterialData material;
+	int textureIndex;
+	Node rootNode;
+};
+
+
 struct Node {
+	QuaternionTransform transform;
+
 	Matrix4x4 localMatrix = {
 		1.0f,0.0f,0.0f,0.0f,
 		0.0f,1.0f,0.0f,0.0f,
@@ -133,18 +159,58 @@ struct Node {
 	std::vector<Node> children;
 };
 
-struct ModelData
-{
-	std::vector<VertexData> vertices;
-	MaterialData material;
-	int textureIndex;
-	Node rootNode;
+struct KeyframeVector3 {
+	Vector3 value;//キーフレームの値
+	float time;//キーフレームの時間
 };
+
+struct KeydreamQuaternion {
+	Quaternion value;
+	float time;
+};
+
+template<typename tValue>
+
+struct Keyframe {
+	float time;
+	tValue value;
+};
+using KeyframeVector3 = Keyframe<Vector3>;
+using KeydreamQuaternion = Keyframe<Quaternion>;
+
+struct NodeAnimation {
+	std::vector<KeyframeVector3> translate;
+	std::vector<KeydreamQuaternion> rotate;
+	std::vector<KeyframeVector3> scale;
+
+};
+
+struct Animation {
+	float duration;//アニメーション全体の尺
+	//NodeAnimationの集合。Node名で弾けるようにしておく
+	std::map<std::string, NodeAnimation> nodeAnimation;
+};
+
+
 
 struct Segment {
 	Vector3 origin; //始点
 	Vector3 diff;//終点への差分
 };
 
+struct Joint {
+	QuaternionTransform transform;
+	Matrix4x4 localMatrix;
+	Matrix4x4 skeletonSpaceMatrix;
+	std::string name;//名まえ
+	std::vector<int32_t> children;//子ジョイントのインデックス
+	int32_t index;//自身のインデックス
+	std::optional<int32_t> parent;//親ジョイント
+};
 
+struct Skeleton {
+	int32_t root;
+	std::map<std::string, int32_t> jpintMap;//ジョイントとインデックスの辞書
+	std::vector<Joint> joints;
+};
 
