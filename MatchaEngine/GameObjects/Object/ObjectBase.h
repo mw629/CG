@@ -54,12 +54,12 @@ public:
 
 
 	void SetTransform(Transform transform) { transform_ = transform; }  // バグ修正: transform_ = transform_ → transform_ = transform
-	void SetLighting(bool isActiv) { material_.get()->SetMaterialLighting(isActiv); }
+	void SetLighting(bool isActive) { material_.get()->SetMaterialLighting(isActive); }
 	void SetTexture(D3D12_GPU_DESCRIPTOR_HANDLE textureSrvHandleGPU) { textureSrvHandleGPU_ = textureSrvHandleGPU; }
 
 	//getter
 	Transform GetTransform() const { return transform_; }
-	MaterialFactory* GetMatrial() { return material_.get(); }
+	MaterialFactory* GetMartial() { return material_.get(); }
 	D3D12_GPU_DESCRIPTOR_HANDLE GetTextureSrvHandleGPU()const { return textureSrvHandleGPU_; }
 
 	D3D12_VERTEX_BUFFER_VIEW* GetVertexBufferView() { return &vertexBufferView_; }

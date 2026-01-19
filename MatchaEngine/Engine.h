@@ -12,7 +12,7 @@
 #include "VariableTypes.h"
 #include "WindowConfig.h"
 
-//GameObjeects
+//GameObjects
 
 //Light
 
@@ -28,6 +28,7 @@
 
 #include "MaterialFactory.h"
 #include "Model.h"
+#include "CharacterAnimator.h"
 #include "Particle.h"
 #include "Sphere.h"
 #include "Sprite.h"

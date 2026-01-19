@@ -83,6 +83,28 @@ float Lerp(float a, float b, float t)
 	return a + (b - a) * t;
 }
 
+Vector3 Lerp(const Vector3& a, const Vector3& b, float t)
+{
+	return a * (1.0f - t) + b * t;
+}
+
+Quaternion Lerp(const Quaternion& a, const Quaternion& b, float t) {
+	Quaternion result;
+	result.x = a.x * (1.0f - t) + b.x * t;
+	result.y = a.y * (1.0f - t) + b.y * t;
+	result.z = a.z * (1.0f - t) + b.z * t;
+	result.w = a.w * (1.0f - t) + b.w * t;
+	// 正規化（補間後のクォータニオンが単位クォータニオンになるように）
+	float len = std::sqrt(result.x * result.x + result.y * result.y + result.z * result.z + result.w * result.w);
+	if (len != 0.0f) {
+		result.x /= len;
+		result.y /= len;
+		result.z /= len;
+		result.w /= len;
+	}
+	return result;
+}
+
 
 // 行列
 

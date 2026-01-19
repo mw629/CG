@@ -32,6 +32,9 @@ void GameScene::Initialize() {
 	model_.get()->Initialize(modelData);
 	model_.get()->SetTransform(modelTransform_);
 
+	animation_.get()->Initialize("resources/AnimatedCube", "AnimatedCube.gltf");
+
+
 	int texture1= texture_.get()->CreateTexture("resources/monsterBall.png");
 	sphere_.get()->Initialize(texture1);
 	sphere_.get()->SetTransform(modelTransform_);
@@ -87,6 +90,7 @@ void GameScene::Update() {
 	particle_[0].get()->Update(view);
 	particle_[1].get()->Update(view);
 
+	animation_.get()->Update(view);
 }
 
 void GameScene::Draw() {
@@ -95,6 +99,8 @@ void GameScene::Draw() {
 
 	Draw::DrawObj(model_.get());
 	Draw::DrawObj(floor.get());
+
+	Draw::DrawObj(animation_.get());
 
 	//Draw::DrawObj(sphere_.get());
 	for (int i = 0, n = static_cast<int>(particle_.size()); i < n; ++i) {

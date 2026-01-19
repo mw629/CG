@@ -32,6 +32,8 @@ private:
 	std::unique_ptr<Model> floor = std::make_unique<Model>();
 	Transform floorT{ {1.0f,1.0f,1.0f},{0.0f,0.0f,0.0f,},{0.0f,0.0f,0.0f} };
 
+	std::unique_ptr<CharacterAnimator> animation_ = std::make_unique<CharacterAnimator>();
+
 	bool bill = true;
 
 public:

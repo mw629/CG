@@ -78,7 +78,7 @@ public:
 
 	Transform& GetTransform() { return transform_; }
 	
-	MaterialFactory* GetMatrial() { return material_; }
+	MaterialFactory* GetMartial() { return material_; }
 	D3D12_GPU_DESCRIPTOR_HANDLE GetTextureSrvHandleGPU() { return textureSrvHandleGPU_; }
 
 private:
