@@ -212,6 +212,8 @@ SkinCluster CharacterAnimator::CreateSkinCluster(ID3D12DescriptorHeap* descripto
 	paletteSrvDesc.Buffer.StructureByteStride = sizeof(WellForGPU);
 	device->CreateShaderResourceView(skinCluster.paletteResource.Get(), &paletteSrvDesc, skinCluster.paletteSrvHandle.first);
 
+	skinCluster.influenceResource= GraphicsDevice::CreateBufferResource(sizeof(VertexInfluence) * modelData_.vertices.size());
+
 
 	return skinCluster;
 }
