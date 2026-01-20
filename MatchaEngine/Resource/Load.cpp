@@ -187,18 +187,28 @@ ModelData AssimpLoadObjFile(const std::string& directoryPath, const std::string&
 
 Node ReadNode(aiNode* node)
 {
+	//Node result;
+	//aiMatrix4x4 aiLocalMatrix = node->mTransformation;//nodeのLocalMatrixを取得
+	//aiLocalMatrix.Transpose();//列ベクトル形式を行ベクトル形式に転置
+	//for (int i = 0; i < 4; i++) {
+	//	for (int j = 0; j < 4; j++) {
+	//		result.localMatrix.m[i][j] = aiLocalMatrix[i][j];//ほかの要素も同様に
+	//	}
+	//}
 	Node result;
-	aiMatrix4x4 aiLocalMatrix = node->mTransformation;//nodeのLocalMatrixを取得
-	aiLocalMatrix.Transpose();//列ベクトル形式を行ベクトル形式に転置
-	for (int i = 0; i < 4; i++) {
-		for (int j = 0; j < 4; j++) {
-			result.localMatrix.m[i][j] = aiLocalMatrix[i][j];//ほかの要素も同様に
-		}
-	}
-	result.name = node->mName.C_Str();//Nodeの名前
-	result.children.resize(node->mNumChildren);//子供の数だけ確保
+
+	aiVector3D scale, translate;
+	aiQuaternion rotate;
+	node->mTransformation.Decompose(scale, rotate, translate); // assimpの行列からSRTを抽出する関数を利用
+	result.transform.scale = { scale.x, scale.y, scale.z }; // Scaleはそのまま
+	result.transform.rotate = { rotate.x, -rotate.y, -rotate.z, rotate.w }; // x軸を反転、さらに回転方向が逆なので軸を反転させる
+	result.transform.translate = { -translate.x, translate.y, translate.z }; // x軸を反転
+	result.localMatrix = MakeAffineMatrix(result.transform.translate, result.transform.scale, result.transform.rotate);
+
+	result.name = node->mName.C_Str(); // Nodeの名前
+	result.children.resize(node->mNumChildren); // 子供の数だけ確保
 	for (uint32_t childIndex = 0; childIndex < node->mNumChildren; ++childIndex) {
-		//再帰的に読んで階層構造を作っていく
+		// 再帰的に読んで階層構造を作っていく
 		result.children[childIndex] = ReadNode(node->mChildren[childIndex]);
 	}
 	return result;

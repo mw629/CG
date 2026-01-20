@@ -18,6 +18,8 @@ void CharacterAnimator::Initialize(const std::string& directoryPath, const std::
 	animation_=LoadAnimationFile(directoryPath, filename);
 	textureSrvHandleGPU_ = texture->TextureData(modelData_.textureIndex);
 
+	skeleton_ = CreateSkeleton(modelData_.rootNode);
+
 	material_ = std::make_unique<MaterialFactory>();
 	material_->CreateMatrial();
 	CreateObject();
@@ -48,9 +50,54 @@ void CharacterAnimator::SettingWvp(Matrix4x4 viewMatrix) {
 	Matrix4x4 worldInverseTranspose = TransposeMatrix4x4(Inverse(worldViewProjectionMatrix));
 
 
-	wvpData_->WVP = localMatrix_ * worldMatrix * worldViewProjectionMatrix;
+	wvpData_->WVP = worldMatrix * worldViewProjectionMatrix;
 	wvpData_->World = localMatrix_ * worldMatrix;
 	wvpData_->WorldInverseTranspose = worldInverseTranspose;
+}
+
+Skeleton CharacterAnimator::CreateSkeleton(const Node& rootNode)
+{
+	Skeleton skeleton;
+	skeleton.root = CreateJoint(rootNode, {},skeleton.joints);
+	
+	//名前とindexのマッピングを行いアクセスしやすくする
+	for (const Joint& joint : skeleton.joints) {
+		skeleton.jpintMap.emplace(joint.name, joint.index);
+	}
+	return skeleton;
+
+}
+
+int32_t CharacterAnimator::CreateJoint(const Node& node, const std::optional<int32_t>& parent, std::vector<Joint>& joints)
+{
+	Joint joint;
+	joint.name = node.name;
+	joint.localMatrix = node.localMatrix;
+	joint.skeletonSpaceMatrix = IdentityMatrix();
+	joint.transform = node.transform;
+	joint.index = int32_t(joints.size());
+	joint.parent = parent;
+	joints.push_back(joint);
+	for (const Node& child : node.children) {
+		//子Jointを作成しindexを登録
+		int32_t childIndex = CreateJoint(child, joint.index, joints);
+		joints[joint.index].children.push_back(childIndex);
+	}
+	return joint.index;
+
+}
+
+void CharacterAnimator::ApplyAnimation()
+{
+	for (Joint& joint : skeleton_.joints) {
+		//対象のJointにAnimationがあれば、値の適応を行う。下記のif文はC++17から可能になった初期化月if文
+		if (auto it = animation_.nodeAnimations.find(joint.name); it != animation_.nodeAnimations.end()) {
+			const NodeAnimation& rootNodeAnimation = (*it).second;
+			joint.transform.translate = CalculateValue(rootNodeAnimation.translate, animationTime_);
+			joint.transform.rotate = CalculateValue(rootNodeAnimation.rotate, animationTime_);
+			joint.transform.scale = CalculateValue(rootNodeAnimation.scale, animationTime_);
+		}
+	}
 }
 
 
@@ -58,13 +105,30 @@ void CharacterAnimator::SettingWvp(Matrix4x4 viewMatrix) {
 
 void CharacterAnimator::Update(Matrix4x4 viewMatrix)
 {
+
 	animationTime_ += 1.0f / 60.0f;//時間を進める
 	animationTime_ = std::fmod(animationTime_, animation_.duration);//リピート再生
-	NodeAnimation& rootNodeAnimation = animation_.nodeAnimations[modelData_.rootNode.name];
+	/*NodeAnimation& rootNodeAnimation = animation_.nodeAnimations[modelData_.rootNode.name];
+	
 	Vector3 translate = CalculateValue(rootNodeAnimation.translate, animationTime_);
 	Quaternion rotate = CalculateValue(rootNodeAnimation.rotate, animationTime_);
+
 	Vector3 scale = CalculateValue(rootNodeAnimation.scale, animationTime_);
-	localMatrix_ = MakeAffineMatrix(translate, scale, rotate);
+	localMatrix_ = MakeAffineMatrix(translate, scale, rotate);*/
+
+
+	ApplyAnimation();
+
+	for (Joint& joint : skeleton_.joints) {
+		joint.localMatrix = MakeAffineMatrix
+		(joint.transform.translate, joint.transform.scale, joint.transform.rotate);
+		if (joint.parent) {//親がいれば行列をかける
+			joint.skeletonSpaceMatrix = joint.localMatrix * skeleton_.joints[*joint.parent].skeletonSpaceMatrix;
+		}
+		else {//親がいあないのでlocalMatrixとskeletonSpaceMatrixは一致する
+			joint.skeletonSpaceMatrix = joint.localMatrix;
+		}
+	}
 
 	SettingWvp(viewMatrix);
 

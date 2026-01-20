@@ -215,4 +215,3 @@ struct Skeleton {
 	std::map<std::string, int32_t> jpintMap;//ジョイントとインデックスの辞書
 	std::vector<Joint> joints;
 };
-
