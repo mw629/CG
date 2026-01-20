@@ -2,6 +2,7 @@
 #include <VariableTypes.h>
 #include "ObjectBase.h"
 #include <Model.h>
+#include "Line.h"
 
 class CharacterAnimator :public ObjectBase
 {
@@ -16,6 +17,10 @@ private:
 
 	Matrix4x4 localMatrix_;
 
+	// スケルトン描画用
+	std::vector<std::unique_ptr<Line>> skeletonLines_;
+	bool isDrawSkeleton_ = true;
+
 public:
 
 	~CharacterAnimator()override;
@@ -24,6 +29,9 @@ public:
 	void Initialize(const std::string& directoryPath, const std::string& filename);
 
 	void CreateVertexData()override;
+
+	void CreateIndexResource();
+
 	void SettingWvp(Matrix4x4 viewMatrix) override;
 
 	Skeleton CreateSkeleton(const Node& rootNode);
@@ -32,7 +40,7 @@ public:
 
 	void ApplyAnimation();
 
-
+	
 	void Update(Matrix4x4 viewMatrix);
 
 

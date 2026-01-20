@@ -43,6 +43,7 @@ void Draw::DrawObj(ObjectBase *obj)
 	preDraw(obj->GetShader(), obj->GetBlend());
 
 	//objectの描画
+	commandList_->IASetIndexBuffer(obj->GetIndexBufferView());
 	commandList_->IASetVertexBuffers(0, 1, obj->GetVertexBufferView());//VBVを設定
 	commandList_->SetGraphicsRootConstantBufferView(0, obj->GetMartial()->GetMaterialResource()->GetGPUVirtualAddress());
 	commandList_->SetGraphicsRootConstantBufferView(1, obj->GetWvpDataResource()->GetGPUVirtualAddress());

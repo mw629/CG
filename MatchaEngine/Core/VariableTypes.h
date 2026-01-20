@@ -156,6 +156,7 @@ struct ModelData
 {
 	std::vector<VertexData> vertices;
 	MaterialData material;
+	std::vector<int32_t>indices;
 	int textureIndex;
 	Node rootNode;
 };

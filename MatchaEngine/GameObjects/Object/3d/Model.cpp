@@ -54,3 +54,4 @@ void Model::SettingWvp(Matrix4x4 viewMatrix) {
 	wvpData_->World = MultiplyMatrix4x4(modelData_.rootNode.localMatrix, worldMatrixObj);
 	wvpData_->WorldInverseTranspose = worldInverseTranspose;
 }
+

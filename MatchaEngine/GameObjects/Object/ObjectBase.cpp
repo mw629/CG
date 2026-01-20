@@ -84,4 +84,5 @@ void ObjectBase::CreateObject()
 {
 	CreateVertexData();
 	CreateWVP();
+	CreateIndexResource();
 }

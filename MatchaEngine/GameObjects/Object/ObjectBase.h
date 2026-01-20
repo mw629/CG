@@ -67,6 +67,10 @@ public:
 	int GetVertexSize() { return vertexSize_;}
 	TransformationMatrix* GetWvpData() { return wvpData_; }
 
+	ID3D12Resource* GetIndexResource() { return indexResource_.Get(); }
+	D3D12_INDEX_BUFFER_VIEW* GetIndexBufferView() { return &indexBufferView_; }
+
+
 private:
 	ShaderName shader_ = ShaderName::ObjectShader;
 	BlendMode blend_ = BlendMode::kBlendModeNone;

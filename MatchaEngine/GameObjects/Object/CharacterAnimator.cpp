@@ -43,6 +43,25 @@ void CharacterAnimator::CreateVertexData()
 	vertexSize_ = modelData_.vertices.size();
 }
 
+void CharacterAnimator::CreateIndexResource()
+{
+	indexResource_ = GraphicsDevice::CreateBufferResource(sizeof(uint32_t) * modelData_.indices.size());
+
+	indexBufferView_.BufferLocation = indexResource_->GetGPUVirtualAddress();
+	indexBufferView_.SizeInBytes = sizeof(uint32_t) * modelData_.indices.size();
+	indexBufferView_.Format = DXGI_FORMAT_R32_UINT;
+
+	indexResource_->Map(0, nullptr, reinterpret_cast<void**>(&indexData_));
+	std::memcpy(indexData_, modelData_.indices.data(), sizeof(uint32_t) * modelData_.indices.size());
+
+	/*indexData_[0] = 0;
+	indexData_[1] = 1;
+	indexData_[2] = 2;
+	indexData_[3] = 1;
+	indexData_[4] = 3;
+	indexData_[5] = 2;*/
+}
+
 void CharacterAnimator::SettingWvp(Matrix4x4 viewMatrix) {
 	Matrix4x4 projectionMatrix = MakePerspectiveFovMatrix(0.45f, float(kClientWidth_) / float(kClientHeight_), 0.1f, 10000.0f);
 	Matrix4x4 worldMatrix = MakeAffineMatrix(transform_.translate, transform_.scale, transform_.rotate);
@@ -50,7 +69,7 @@ void CharacterAnimator::SettingWvp(Matrix4x4 viewMatrix) {
 	Matrix4x4 worldInverseTranspose = TransposeMatrix4x4(Inverse(worldViewProjectionMatrix));
 
 
-	wvpData_->WVP = worldMatrix * worldViewProjectionMatrix;
+	wvpData_->WVP =   worldMatrix * worldViewProjectionMatrix;
 	wvpData_->World = localMatrix_ * worldMatrix;
 	wvpData_->WorldInverseTranspose = worldInverseTranspose;
 }

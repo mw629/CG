@@ -143,24 +143,26 @@ ModelData AssimpLoadObjFile(const std::string& directoryPath, const std::string&
 		aiMesh* mesh = scene->mMeshes[meshIndex];
 		assert(mesh->HasNormals());//法線がないMeshは今回非対称
 		assert(mesh->HasTextureCoords(0));//TexcoordがないMeshは今回非対応
-		//ここからMeshの中身(Face)の解析を行っていく
+		modelData.vertices.resize(mesh->mNumVertices);
+
+		for (uint32_t vertexIndex = 0; vertexIndex < mesh->mNumVertices; ++vertexIndex) {
+			aiVector3D& position = mesh->mVertices[vertexIndex];
+			aiVector3D& normal = mesh->mNormals[vertexIndex];
+			aiVector3D& texcord = mesh->mTextureCoords[0][vertexIndex];
+
+			modelData.vertices[vertexIndex].position = { -position.x,position.y,position.z,1.0f };
+			modelData.vertices[vertexIndex].normal = { -normal.x,normal.y,normal.z };
+			modelData.vertices[vertexIndex].texcoord = { texcord.x,texcord.y };
+		}
 		for (uint32_t faceIndex = 0; faceIndex < mesh->mNumFaces; ++faceIndex) {
-			aiFace& face = mesh->mFaces[faceIndex];
-			assert(face.mNumIndices == 3);//三角形のみサポート
-			for (uint32_t element = 0; element < face.mNumIndices; ++element) {
-				uint32_t vertexIndex = face.mIndices[element];
-				aiVector3D& postion = mesh->mVertices[vertexIndex];
-				aiVector3D& normal = mesh->mNormals[vertexIndex];
-				aiVector3D& texcoord = mesh->mTextureCoords[0][vertexIndex];
-				VertexData vertex;
-				vertex.position = { postion.x,postion.y, postion.z,1.0f };
-				vertex.normal = { normal.x,normal.y, normal.z };
-				vertex.texcoord = { texcoord.x,texcoord.y };
-				//右手から左手への変換
-				vertex.position.x *= -1.0f;
-				vertex.normal.x *= -1.0f;
-				modelData.vertices.push_back(vertex);
+			aiFace& fance = mesh->mFaces[faceIndex];
+			assert(fance.mNumIndices == 3);
+
+			for (uint32_t element = 0; element < fance.mNumIndices; ++element) {
+				uint32_t vertexIndex = fance.mIndices[element];
+				modelData.indices.push_back(vertexIndex);
 			}
+
 		}
 		//matrialを解析する
 		for (uint32_t materialIndex = 0; materialIndex < scene->mNumMaterials; ++materialIndex) {

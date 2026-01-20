@@ -32,6 +32,7 @@ void GameScene::Initialize() {
 	model_.get()->Initialize(modelData);
 	model_.get()->SetTransform(modelTransform_);
 
+
 	animation_.get()->Initialize("resources/human", "walk.gltf");
 
 

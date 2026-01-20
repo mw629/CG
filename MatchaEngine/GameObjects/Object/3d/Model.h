@@ -18,7 +18,6 @@ public:
 	void CreateVertexData()override;
 	void SettingWvp(Matrix4x4 viewMatrix) override;
 
-
 	ModelData GetModelData() { return modelData_; }
 	
 
