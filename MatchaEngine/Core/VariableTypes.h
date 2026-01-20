@@ -10,6 +10,7 @@
 #include "VariableTypes/Matrix4x4.h"
 #include <map>
 #include <optional>
+#include <span>
 
 
 ///構造体///
@@ -156,9 +157,12 @@ struct ModelData
 {
 	std::vector<VertexData> vertices;
 	MaterialData material;
-	std::vector<int32_t>indices;
 	int textureIndex;
+
+	//アニメーション
 	Node rootNode;
+	std::vector<int32_t>indices;
+	std::map<std::string, JointWeightData>skinClusterData;
 };
 
 
@@ -216,3 +220,37 @@ struct Skeleton {
 	std::map<std::string, int32_t> jpintMap;//ジョイントとインデックスの辞書
 	std::vector<Joint> joints;
 };
+
+struct VertexWeightData {
+	float weight;
+	uint32_t VertexIndex;
+};
+
+struct JointWeightData
+{
+	Matrix4x4 inverseBindPoseMatrix;
+	std::vector<VertexWeightData> vertexWeights;
+};
+
+const uint32_t kNumMaxInfluence = 4;
+struct VertexInfluence {
+	std::array<float, kNumMaxInfluence>wights;
+	std::array<int32_t, kNumMaxInfluence>jointIndices;
+};
+
+struct WellForGPU {
+	Matrix4x4 skeletonSpaceMatrix;
+	Matrix4x4 skeletonSpaceInverseTransposeMatrix;
+};
+
+struct SkinCluster {
+	std::vector<Matrix4x4> inverseBindPoseMatrices;
+	Microsoft::WRL::ComPtr<ID3D12Resource> influenceResource;
+	D3D12_VERTEX_BUFFER_VIEW influenceBufferView;
+	std::span<VertexInfluence> mappedInfluence;
+	Microsoft::WRL::ComPtr<ID3D12Resource> paletteResource;
+	std::span<WellForGPU> mappedPalette;
+	std::pair<D3D12_CPU_DESCRIPTOR_HANDLE, D3D12_GPU_DESCRIPTOR_HANDLE> paletteSrvHandle;
+};
+
+

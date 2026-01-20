@@ -130,9 +130,27 @@ void Sphere::CreateVertexData()
 
 }
 
-void Sphere::CreateObject()
+void Sphere::CreateIndexResource()
 {
-	CreateVertexData();
-	CreateWVP();
+	// インデックス数は頂点数と同じ
+	indexSize_ = vertexSize_;
+
+	// インデックスバッファ作成
+	indexResource_ = GraphicsDevice::CreateBufferResource(sizeof(uint32_t) * indexSize_);
+
+	// インデックスバッファビュー設定
+	indexBufferView_.BufferLocation = indexResource_->GetGPUVirtualAddress();
+	indexBufferView_.SizeInBytes = sizeof(uint32_t) * indexSize_;
+	indexBufferView_.Format = DXGI_FORMAT_R32_UINT;
+
+	// マップ
+	uint32_t* indexData = nullptr;
+	indexResource_->Map(0, nullptr, reinterpret_cast<void**>(&indexData));
+
+	// 0,1,2,3,4,5... を順番に詰めるだけ
+	for (uint32_t i = 0; i < indexSize_; ++i) {
+		indexData[i] = i;
+	}
 }
+
 

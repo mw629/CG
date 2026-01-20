@@ -57,6 +57,8 @@ void ObjectBase::CreateIndexResource()
 
 	indexResource_->Map(0, nullptr, reinterpret_cast<void**>(&indexData_));
 
+	indexSize_ = sizeof(uint32_t) * 6;
+
 	indexData_[0] = 0;
 	indexData_[1] = 1;
 	indexData_[2] = 2;

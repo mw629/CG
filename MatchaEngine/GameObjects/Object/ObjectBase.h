@@ -34,7 +34,7 @@ protected:
 	Microsoft::WRL::ComPtr<ID3D12Resource> indexResource_;
 	D3D12_INDEX_BUFFER_VIEW indexBufferView_{};
 	uint32_t* indexData_ = nullptr;
-
+	int indexSize_;
 
 public:
 
@@ -46,7 +46,7 @@ public:
 
 	virtual void CreateVertexData() = 0;
 	virtual void CreateWVP();
-	void CreateIndexResource();
+	virtual void CreateIndexResource() = 0;
 
 	virtual void CreateObject();
 
@@ -64,12 +64,13 @@ public:
 
 	D3D12_VERTEX_BUFFER_VIEW* GetVertexBufferView() { return &vertexBufferView_; }
 	ID3D12Resource* GetWvpDataResource() { return wvpDataResource_.Get(); }
-	int GetVertexSize() { return vertexSize_;}
+	int GetVertexSize() { return vertexSize_; }
 	TransformationMatrix* GetWvpData() { return wvpData_; }
 
 	ID3D12Resource* GetIndexResource() { return indexResource_.Get(); }
 	D3D12_INDEX_BUFFER_VIEW* GetIndexBufferView() { return &indexBufferView_; }
 
+	virtual int GetIndexSize() { return indexSize_; }
 
 private:
 	ShaderName shader_ = ShaderName::ObjectShader;

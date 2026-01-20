@@ -27,7 +27,7 @@ void GameScene::Initialize() {
 	camera_.get()->SetTransform(cameraTransform_);
 	camera_.get()->Update();
 
-	ModelData modelData = LoadObjFile("resources/obj", "sphere.obj");
+	ModelData modelData = AssimpLoadObjFile("resources/obj", "sphere.obj");
 
 	model_.get()->Initialize(modelData);
 	model_.get()->SetTransform(modelTransform_);
@@ -40,7 +40,7 @@ void GameScene::Initialize() {
 	sphere_.get()->Initialize(texture1);
 	sphere_.get()->SetTransform(modelTransform_);
 
-	modelData = LoadObjFile("resources/Ground", "Ground.obj");
+	modelData = AssimpLoadObjFile("resources/Ground", "Ground.obj");
 	floor.get()->Initialize(modelData);
 	floor.get()->SetTransform(floorT);
 
@@ -98,12 +98,12 @@ void GameScene::Draw() {
 
 	Draw::SetCamera(camera_.get());
 
-	Draw::DrawObj(model_.get());
+	//Draw::DrawObj(model_.get());
 	Draw::DrawObj(floor.get());
 
 	Draw::DrawObj(animation_.get());
 
-	//Draw::DrawObj(sphere_.get());
+	Draw::DrawObj(sphere_.get());
 	for (int i = 0, n = static_cast<int>(particle_.size()); i < n; ++i) {
 		particle_[i].get()->Draw();
 	}

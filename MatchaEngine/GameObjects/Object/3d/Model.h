@@ -17,10 +17,11 @@ public:
 
 	void CreateVertexData()override;
 	void SettingWvp(Matrix4x4 viewMatrix) override;
+	void CreateIndexResource()override;
+
 
 	ModelData GetModelData() { return modelData_; }
-	
-
+	int GetIndexSize()override { return modelData_.indices.size(); }
 
 };
 

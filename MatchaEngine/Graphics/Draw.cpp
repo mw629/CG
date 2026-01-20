@@ -53,7 +53,7 @@ void Draw::DrawObj(ObjectBase *obj)
 	commandList_->SetGraphicsRootConstantBufferView(5, pointLight_->GetDirectinalLightResource()->GetGPUVirtualAddress());
 	commandList_->SetGraphicsRootConstantBufferView(6, spotLight_->GetDirectinalLightResource()->GetGPUVirtualAddress());
 
-	commandList_->DrawInstanced(obj->GetVertexSize(), 1, 0, 0);
+	commandList_->DrawIndexedInstanced(obj->GetIndexSize(), 1, 0, 0, 0);
 }
 
 void Draw::DrawModel(Model* model, Camera* camera)

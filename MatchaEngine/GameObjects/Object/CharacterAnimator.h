@@ -30,7 +30,7 @@ public:
 
 	void CreateVertexData()override;
 
-	void CreateIndexResource();
+	void CreateIndexResource()override;
 
 	void SettingWvp(Matrix4x4 viewMatrix) override;
 
@@ -39,16 +39,15 @@ public:
 		const std::optional<int32_t>& parent, std::vector<Joint>& joints);
 
 	void ApplyAnimation();
-
 	
 	void Update(Matrix4x4 viewMatrix);
 
-
-
 	ModelData GetModelData() { return modelData_; }
+	int GetIndexSize()override { return modelData_.indices.size(); }
 
 	Vector3 CalculateValue(const std::vector<KeyframeVector3>& keyframe, float time);
 	Quaternion CalculateValue(const std::vector<KeyframeQuaternion>& keyframe, float time);
 
+	SkinCluster CreateSkinCluster(ID3D12DescriptorHeap* descriptorHeap, uint32_t descriprtorSize);
 };
 

@@ -17,8 +17,9 @@ public:
 	void Initialize(int textureSrvHandle);
 
 	void CreateVertexData()override;
+	void CreateIndexResource()override;
 
-	void CreateObject()override;
+
 
 	uint32_t SetSubdivision(int kSubdivision) { kSubdivision_ = kSubdivision; }
 
