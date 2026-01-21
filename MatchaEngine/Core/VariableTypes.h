@@ -2,6 +2,7 @@
 #include <cstdint>
 #include <vector>
 #include <string>
+#include <array>
 
 #include "VariableTypes/Vector2.h"
 #include "VariableTypes/Vector2Int.h"
@@ -11,7 +12,8 @@
 #include <map>
 #include <optional>
 #include <span>
-
+#include <wrl/client.h>
+#include <d3d12.h>
 
 ///構造体///
 
@@ -153,6 +155,17 @@ struct Node {
 	std::vector<Node> children;
 };
 
+struct VertexWeightData {
+	float weight;
+	uint32_t VertexIndex;
+};
+
+struct JointWeightData
+{
+	Matrix4x4 inverseBindPoseMatrix;
+	std::vector<VertexWeightData> vertexWeights;
+};
+
 struct ModelData
 {
 	std::vector<VertexData> vertices;
@@ -162,7 +175,7 @@ struct ModelData
 	//アニメーション
 	Node rootNode;
 	std::vector<int32_t>indices;
-	std::map<std::string, JointWeightData>skinClusterData;
+	std::map<std::string, JointWeightData> skinClusterData;
 };
 
 
@@ -221,16 +234,7 @@ struct Skeleton {
 	std::vector<Joint> joints;
 };
 
-struct VertexWeightData {
-	float weight;
-	uint32_t VertexIndex;
-};
 
-struct JointWeightData
-{
-	Matrix4x4 inverseBindPoseMatrix;
-	std::vector<VertexWeightData> vertexWeights;
-};
 
 const uint32_t kNumMaxInfluence = 4;
 struct VertexInfluence {
