@@ -14,6 +14,7 @@ private:
 	float animationTime_ = 0.0f;
 
 	Skeleton skeleton_;
+	SkinCluster skinCluster_;
 
 	Matrix4x4 localMatrix_;
 
@@ -40,6 +41,9 @@ public:
 
 	void ApplyAnimation();
 	
+	void SkeletonUpdate();
+	void SkinClusterUpdate();
+
 	void noUpdate(Matrix4x4 viewMatrix);
 	void Update(Matrix4x4 viewMatrix);
 
@@ -49,6 +53,6 @@ public:
 	Vector3 CalculateValue(const std::vector<KeyframeVector3>& keyframe, float time);
 	Quaternion CalculateValue(const std::vector<KeyframeQuaternion>& keyframe, float time);
 
-	SkinCluster CreateSkinCluster(ID3D12DescriptorHeap* descriptorHeap, uint32_t descriprtorSize);
+	void CreateSkinCluster(ID3D12DescriptorHeap* descriptorHeap, uint32_t descriprtorSize);
 };
 
