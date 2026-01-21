@@ -40,6 +40,7 @@ public:
 
 	void ApplyAnimation();
 	
+	void noUpdate(Matrix4x4 viewMatrix);
 	void Update(Matrix4x4 viewMatrix);
 
 	ModelData GetModelData() { return modelData_; }

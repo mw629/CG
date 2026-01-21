@@ -230,7 +230,7 @@ struct Joint {
 
 struct Skeleton {
 	int32_t root;
-	std::map<std::string, int32_t> jpintMap;//ジョイントとインデックスの辞書
+	std::map<std::string, int32_t> jointMap;//ジョイントとインデックスの辞書
 	std::vector<Joint> joints;
 };
 
