@@ -1,9 +1,12 @@
 #include "CharacterAnimator.h"
 #include "Calculation.h"
+#include "DescriptorHeap.h"
 #include <Load.h>
+#include <algorithm>
 
 namespace {
 	ID3D12Device* device;
+	DescriptorHeap* descriptorHeap; 
 }
 
 CharacterAnimator::~CharacterAnimator()
@@ -14,13 +17,20 @@ CharacterAnimator::CharacterAnimator()
 {
 }
 
+void CharacterAnimator::SetData(ID3D12Device* SetDevice, DescriptorHeap* SetDescriptorHeap)
+{
+	device = SetDevice;
+	descriptorHeap = SetDescriptorHeap;
+}
+
 void CharacterAnimator::Initialize(const std::string& directoryPath, const std::string& filename)
 {
 	modelData_ = AssimpLoadObjFile(directoryPath, filename);
-	animation_=LoadAnimationFile(directoryPath, filename);
+	animation_ = LoadAnimationFile(directoryPath, filename);
 	textureSrvHandleGPU_ = texture->TextureData(modelData_.textureIndex);
 
 	skeleton_ = CreateSkeleton(modelData_.rootNode);
+	CreateSkinCluster();
 
 	material_ = std::make_unique<MaterialFactory>();
 	material_->CreateMatrial();
@@ -66,7 +76,7 @@ void CharacterAnimator::SettingWvp(Matrix4x4 viewMatrix) {
 	Matrix4x4 worldInverseTranspose = TransposeMatrix4x4(Inverse(worldViewProjectionMatrix));
 
 
-	wvpData_->WVP =   worldMatrix * worldViewProjectionMatrix;
+	wvpData_->WVP = worldMatrix * worldViewProjectionMatrix;
 	wvpData_->World = localMatrix_ * worldMatrix;
 	wvpData_->WorldInverseTranspose = worldInverseTranspose;
 }
@@ -74,8 +84,8 @@ void CharacterAnimator::SettingWvp(Matrix4x4 viewMatrix) {
 Skeleton CharacterAnimator::CreateSkeleton(const Node& rootNode)
 {
 	Skeleton skeleton;
-	skeleton.root = CreateJoint(rootNode, {},skeleton.joints);
-	
+	skeleton.root = CreateJoint(rootNode, {}, skeleton.joints);
+
 	//名前とindexのマッピングを行いアクセスしやすくする
 	for (const Joint& joint : skeleton.joints) {
 		skeleton.jointMap.emplace(joint.name, joint.index);
@@ -215,17 +225,17 @@ Quaternion CharacterAnimator::CalculateValue(const std::vector<KeyframeQuaternio
 	return keyframe.back().value;
 }
 
-void CharacterAnimator::CreateSkinCluster(ID3D12DescriptorHeap* descriptorHeap, uint32_t descriptorSize)
+void CharacterAnimator::CreateSkinCluster()
 {
-	
+
 
 	//palette用のResourceを確保
 	skinCluster_.paletteResource = GraphicsDevice::CreateBufferResource(sizeof(WellForGPU) * skeleton_.joints.size());
 	WellForGPU* mappedPalette = nullptr;
 	skinCluster_.paletteResource->Map(0, nullptr, reinterpret_cast<void**>(&mappedPalette));
 	skinCluster_.mappedPalette = { mappedPalette,skeleton_.joints.size() };
-	skinCluster_.paletteSrvHandle.first = GetCPUDescriptorHandle(descriptorHeap, descriptorSize);
-	skinCluster_.paletteSrvHandle.second = GetGPUDescriptorHandle(descriptorHeap, descriptorSize);
+	skinCluster_.paletteSrvHandle.first = GetCPUDescriptorHandle(descriptorHeap->GetSrvDescriptorHeap(), descriptorHeap->GetDescriptorSizeSRV());
+	skinCluster_.paletteSrvHandle.second = GetGPUDescriptorHandle(descriptorHeap->GetSrvDescriptorHeap(), descriptorHeap->GetDescriptorSizeSRV());
 
 	//palette用のSRVを作成。StructerBufferでアクセスできるようにする
 	D3D12_SHADER_RESOURCE_VIEW_DESC paletteSrvDesc{};
@@ -252,7 +262,11 @@ void CharacterAnimator::CreateSkinCluster(ID3D12DescriptorHeap* descriptorHeap, 
 
 	//InverseBindPoseMatrixを格納する場所を作成して、単位行列で埋める
 	skinCluster_.inverseBindPoseMatrices.resize(skeleton_.joints.size());
-	std::generate(skinCluster_.inverseBindPoseMatrices.begin(), skinCluster_.inverseBindPoseMatrices.end(), IdentityMatrix());
+	// std::generate(...) の代わりに for 文で初期化
+	//std::generate(skinCluster_.inverseBindPoseMatrices.begin(), skinCluster_.inverseBindPoseMatrices.end(), IdentityMatrix());
+	for (size_t i = 0; i < skinCluster_.inverseBindPoseMatrices.size(); ++i) {
+		skinCluster_.inverseBindPoseMatrices[i] = IdentityMatrix();
+	}
 
 	for (const auto& JointWeight : modelData_.skinClusterData) {//modelのSkinClusterの情報解析
 		auto it = skeleton_.jointMap.find(JointWeight.first);
@@ -266,7 +280,7 @@ void CharacterAnimator::CreateSkinCluster(ID3D12DescriptorHeap* descriptorHeap, 
 			for (uint32_t index = 0; index < kNumMaxInfluence; ++index) {//空いているところに入れる
 				if (currentInfluece.wights[index] == 0.0f) {//wight==0が空いている状態なので、そに場所にwightとjointのindexを代入
 					currentInfluece.wights[index] = vertexWight.weight;
-					currentInfluece.jointIndices[index] =(*it).second;
+					currentInfluece.jointIndices[index] = (*it).second;
 					break;
 				}
 			}

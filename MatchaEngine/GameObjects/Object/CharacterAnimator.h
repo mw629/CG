@@ -27,6 +27,8 @@ public:
 	~CharacterAnimator()override;
 	CharacterAnimator();
 
+	static void SetData(ID3D12Device* SetDevice, DescriptorHeap* SetDescriptorHeap);
+
 	void Initialize(const std::string& directoryPath, const std::string& filename);
 
 	void CreateVertexData()override;
@@ -53,6 +55,6 @@ public:
 	Vector3 CalculateValue(const std::vector<KeyframeVector3>& keyframe, float time);
 	Quaternion CalculateValue(const std::vector<KeyframeQuaternion>& keyframe, float time);
 
-	void CreateSkinCluster(ID3D12DescriptorHeap* descriptorHeap, uint32_t descriprtorSize);
+	void CreateSkinCluster();
 };
 

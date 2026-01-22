@@ -150,6 +150,8 @@ void Engine::Setting()
 		directionalLight.get(), pointLight.get(), spotLight.get());
 	Texture::Initalize(graphics->GetDevice(), command->GetCommandList(), descriptorHeap.get(), textureLoader.get());
 
+	CharacterAnimator::SetData(graphics.get()->GetDevice(), descriptorHeap.get());
+
 	Vector2 Client = { (float)kClientWidth_,(float)kClientHeight_ };
 	ObjectBase::SetObjectResource(Client);
 	Line::SetScreenSize(Client);
