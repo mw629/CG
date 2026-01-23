@@ -141,8 +141,8 @@ ModelData AssimpLoadObjFile(const std::string& directoryPath, const std::string&
 
 	for (uint32_t meshIndex = 0; meshIndex < scene->mNumMeshes; ++meshIndex) {
 		aiMesh* mesh = scene->mMeshes[meshIndex];
-		assert(mesh->HasNormals());//法線がないMeshは今回非対称
-		assert(mesh->HasTextureCoords(0));//TexcoordがないMeshは今回非対応
+		//assert(mesh->HasNormals());//法線がないMeshは今回非対称
+		//assert(mesh->HasTextureCoords(0));//TexcoordがないMeshは今回非対応
 		modelData.vertices.resize(mesh->mNumVertices);
 
 		for (uint32_t vertexIndex = 0; vertexIndex < mesh->mNumVertices; ++vertexIndex) {

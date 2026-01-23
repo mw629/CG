@@ -14,6 +14,7 @@ enum BlendMode {
 
 enum ShaderName {
 	ObjectShader,
+	AnimationObj,
 	ParticleShader,
 	LineShader,
 
@@ -25,6 +26,7 @@ static const char* ShaderNameToString(ShaderName name)
 {
 	switch (name) {
 	case ObjectShader:  return "ObjectShader";
+	case AnimationObj:  return "AnimationObj";
 	case ParticleShader: return "ParticleShader";
 	case LineShader: return "LineShader";
 	default: return "UnknownShader";
