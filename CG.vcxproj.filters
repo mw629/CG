@@ -246,7 +246,10 @@
     <ClCompile Include="MatchaEngine\GameObjects\Light\LightManeger.cpp">
       <Filter>ソース ファイル</Filter>
     </ClCompile>
-    <ClCompile Include="MatchaEngine\GameObjects\Object\CharacterAnimator.cpp">
+    <ClCompile Include="MatchaEngine\GameObjects\Object\Animation\CharacterAnimator.cpp">
+      <Filter>ソース ファイル</Filter>
+    </ClCompile>
+    <ClCompile Include="MatchaEngine\GameObjects\Object\Animation\NodeAnimation.cpp">
       <Filter>ソース ファイル</Filter>
     </ClCompile>
   </ItemGroup>
@@ -485,7 +488,10 @@
     <ClInclude Include="MatchaEngine\GameObjects\Light\LightManeger.h">
       <Filter>ヘッダー ファイル</Filter>
     </ClInclude>
-    <ClInclude Include="MatchaEngine\GameObjects\Object\CharacterAnimator.h">
+    <ClInclude Include="MatchaEngine\GameObjects\Object\Animation\CharacterAnimator.h">
+      <Filter>ヘッダー ファイル</Filter>
+    </ClInclude>
+    <ClInclude Include="MatchaEngine\GameObjects\Object\Animation\NodeAnimation.h">
       <Filter>ヘッダー ファイル</Filter>
     </ClInclude>
   </ItemGroup>

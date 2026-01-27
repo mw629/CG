@@ -79,7 +79,7 @@
       <AdditionalOptions>/utf-8 %(AdditionalOptions)</AdditionalOptions>
       <MultiProcessorCompilation>true</MultiProcessorCompilation>
       <RuntimeLibrary>MultiThreadedDebug</RuntimeLibrary>
-      <AdditionalIncludeDirectories>$(ProjectDir)externals\assimp\include;$(ProjectDir)MatchaEngine;$(ProjectDir)externals\imgui;$(ProjectDir)externals\DirectXTex;$(ProjectDir)MatchaEngine\Common;$(ProjectDir)MatchaEngine\Core;$(ProjectDir)MatchaEngine\GameObjects;$(ProjectDir)MatchaEngine\GameObjects\Light;$(ProjectDir)MatchaEngine\GameObjects\Camera;$(ProjectDir)MatchaEngine\GameObjects\Object;$(ProjectDir)MatchaEngine\GameObjects\Object\2d;$(ProjectDir)MatchaEngine\GameObjects\Object\3d;$(ProjectDir)MatchaEngine\GameObjects\Line;$(ProjectDir)MatchaEngine\Graphics;$(ProjectDir)MatchaEngine\Input;$(ProjectDir)MatchaEngine\Math;$(ProjectDir)MatchaEngine\PSO;$(ProjectDir)MatchaEngine\Resource;$(ProjectDir)Shared;$(ProjectDir)MatchaEngine;$(ProjectDir)externals\imgui;$(ProjectDir)externals\DirectXTex;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+      <AdditionalIncludeDirectories>$(ProjectDir)externals\assimp\include;$(ProjectDir)MatchaEngine;$(ProjectDir)externals\imgui;$(ProjectDir)externals\DirectXTex;$(ProjectDir)MatchaEngine\Common;$(ProjectDir)MatchaEngine\Core;$(ProjectDir)MatchaEngine\GameObjects;$(ProjectDir)MatchaEngine\GameObjects\Light;$(ProjectDir)MatchaEngine\GameObjects\Camera;$(ProjectDir)MatchaEngine\GameObjects\Object;$(ProjectDir)MatchaEngine\GameObjects\Object\2d;$(ProjectDir)MatchaEngine\GameObjects\Object\3d;$(ProjectDir)MatchaEngine\GameObjects\Object\Aimation;$(ProjectDir)MatchaEngine\GameObjects\Line;$(ProjectDir)MatchaEngine\Graphics;$(ProjectDir)MatchaEngine\Input;$(ProjectDir)MatchaEngine\Math;$(ProjectDir)MatchaEngine\PSO;$(ProjectDir)MatchaEngine\Resource;$(ProjectDir)Shared;$(ProjectDir)MatchaEngine;$(ProjectDir)externals\imgui;$(ProjectDir)externals\DirectXTex;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
     </ClCompile>
     <Link>
       <SubSystem>Windows</SubSystem>
@@ -106,7 +106,7 @@ copy "$(WindowsSdkDir)bin\$(TargetPlatformVersion)\x64\dxil.dll" "$(TargetDir)dx
       <AdditionalOptions>/utf-8 %(AdditionalOptions)</AdditionalOptions>
       <MultiProcessorCompilation>true</MultiProcessorCompilation>
       <RuntimeLibrary>MultiThreaded</RuntimeLibrary>
-      <AdditionalIncludeDirectories>$(ProjectDir)externals\assimp\include;$(ProjectDir)MatchaEngine;$(ProjectDir)externals\imgui;$(ProjectDir)externals\DirectXTex;$(ProjectDir)MatchaEngine\Common;$(ProjectDir)MatchaEngine\Core;$(ProjectDir)MatchaEngine\GameObjects;$(ProjectDir)MatchaEngine\GameObjects\Light;$(ProjectDir)MatchaEngine\GameObjects\Camera;$(ProjectDir)MatchaEngine\GameObjects\Object;$(ProjectDir)MatchaEngine\GameObjects\Object\2d;$(ProjectDir)MatchaEngine\GameObjects\Object\3d;$(ProjectDir)MatchaEngine\GameObjects\Line;$(ProjectDir)MatchaEngine\Graphics;$(ProjectDir)MatchaEngine\Input;$(ProjectDir)MatchaEngine\Math;$(ProjectDir)MatchaEngine\PSO;$(ProjectDir)MatchaEngine\Resource;$(ProjectDir)Shared;$(ProjectDir)MatchaEngine;$(ProjectDir)externals\imgui;$(ProjectDir)externals\DirectXTex;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+      <AdditionalIncludeDirectories>$(ProjectDir)externals\assimp\include;$(ProjectDir)MatchaEngine;$(ProjectDir)externals\imgui;$(ProjectDir)externals\DirectXTex;$(ProjectDir)MatchaEngine\Common;$(ProjectDir)MatchaEngine\Core;$(ProjectDir)MatchaEngine\GameObjects;$(ProjectDir)MatchaEngine\GameObjects\Light;$(ProjectDir)MatchaEngine\GameObjects\Camera;$(ProjectDir)MatchaEngine\GameObjects\Object;$(ProjectDir)MatchaEngine\GameObjects\Object\2d;$(ProjectDir)MatchaEngine\GameObjects\Object\3d;$(ProjectDir)MatchaEngine\GameObjects\Object\Aimation;$(ProjectDir)MatchaEngine\GameObjects\Line;$(ProjectDir)MatchaEngine\Graphics;$(ProjectDir)MatchaEngine\Input;$(ProjectDir)MatchaEngine\Math;$(ProjectDir)MatchaEngine\PSO;$(ProjectDir)MatchaEngine\Resource;$(ProjectDir)Shared;$(ProjectDir)MatchaEngine;$(ProjectDir)externals\imgui;$(ProjectDir)externals\DirectXTex;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
     </ClCompile>
     <Link>
       <SubSystem>Windows</SubSystem>
@@ -129,7 +129,7 @@ copy "$(WindowsSdkDir)bin\$(TargetPlatformVersion)\x64\dxil.dll" "$(TargetDir)dx
       <AdditionalOptions>/utf-8 %(AdditionalOptions)</AdditionalOptions>
       <MultiProcessorCompilation>true</MultiProcessorCompilation>
       <RuntimeLibrary>MultiThreaded</RuntimeLibrary>
-      <AdditionalIncludeDirectories>$(ProjectDir)externals\assimp\include;$(ProjectDir)MatchaEngine;$(ProjectDir)externals\imgui;$(ProjectDir)externals\DirectXTex;$(ProjectDir)MatchaEngine\Common;$(ProjectDir)MatchaEngine\Core;$(ProjectDir)MatchaEngine\GameObjects;$(ProjectDir)MatchaEngine\GameObjects\Light;$(ProjectDir)MatchaEngine\GameObjects\Camera;$(ProjectDir)MatchaEngine\GameObjects\Object;$(ProjectDir)MatchaEngine\GameObjects\Object\2d;$(ProjectDir)MatchaEngine\GameObjects\Object\3d;$(ProjectDir)MatchaEngine\GameObjects\Line;$(ProjectDir)MatchaEngine\Graphics;$(ProjectDir)MatchaEngine\Input;$(ProjectDir)MatchaEngine\Math;$(ProjectDir)MatchaEngine\PSO;$(ProjectDir)MatchaEngine\Resource;$(ProjectDir)Shared;$(ProjectDir)externals\Game;$(ProjectDir)MatchaEngine;$(ProjectDir)externals\imgui;$(ProjectDir)externals\DirectXTex;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+      <AdditionalIncludeDirectories>$(ProjectDir)externals\assimp\include;$(ProjectDir)MatchaEngine;$(ProjectDir)externals\imgui;$(ProjectDir)externals\DirectXTex;$(ProjectDir)MatchaEngine\Common;$(ProjectDir)MatchaEngine\Core;$(ProjectDir)MatchaEngine\GameObjects;$(ProjectDir)MatchaEngine\GameObjects\Light;$(ProjectDir)MatchaEngine\GameObjects\Camera;$(ProjectDir)MatchaEngine\GameObjects\Object;$(ProjectDir)MatchaEngine\GameObjects\Object\2d;$(ProjectDir)MatchaEngine\GameObjects\Object\3d;$(ProjectDir)MatchaEngine\GameObjects\Object\Aimation;$(ProjectDir)MatchaEngine\GameObjects\Line;$(ProjectDir)MatchaEngine\Graphics;$(ProjectDir)MatchaEngine\Input;$(ProjectDir)MatchaEngine\Math;$(ProjectDir)MatchaEngine\PSO;$(ProjectDir)MatchaEngine\Resource;$(ProjectDir)Shared;$(ProjectDir)externals\Game;$(ProjectDir)MatchaEngine;$(ProjectDir)externals\imgui;$(ProjectDir)externals\DirectXTex;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
       <Optimization>Disabled</Optimization>
       <WholeProgramOptimization>false</WholeProgramOptimization>
     </ClCompile>
@@ -142,11 +142,12 @@ copy "$(WindowsSdkDir)bin\$(TargetPlatformVersion)\x64\dxil.dll" "$(TargetDir)dx
     </Link>
   </ItemDefinitionGroup>
   <ItemGroup>
-    <ClCompile Include="MatchaEngine\GameObjects\Object\CharacterAnimator.cpp" />
+    <ClCompile Include="MatchaEngine\GameObjects\Object\Animation\CharacterAnimator.cpp" />
     <ClCompile Include="MatchaEngine\GameObjects\Light\LightManeger.cpp" />
     <ClCompile Include="MatchaEngine\GameObjects\Light\PointLight.cpp" />
     <ClCompile Include="MatchaEngine\GameObjects\Primitive.cpp" />
     <ClCompile Include="MatchaEngine\GameObjects\Object\ObjectBase.cpp" />
+    <ClCompile Include="MatchaEngine\GameObjects\Object\Animation\NodeAnimation.cpp" />
     <ClCompile Include="Shared\ParticleManager.cpp" />
     <ClCompile Include="Game\GameScene\Entity\Enemy.cpp" />
     <ClCompile Include="Game\Fade.cpp" />
@@ -285,11 +286,12 @@ copy "$(WindowsSdkDir)bin\$(TargetPlatformVersion)\x64\dxil.dll" "$(TargetDir)dx
     </FxCompile>
   </ItemGroup>
   <ItemGroup>
-    <ClInclude Include="MatchaEngine\GameObjects\Object\CharacterAnimator.h" />
+    <ClInclude Include="MatchaEngine\GameObjects\Object\Animation\CharacterAnimator.h" />
     <ClInclude Include="MatchaEngine\GameObjects\Light\LightManeger.h" />
     <ClInclude Include="MatchaEngine\GameObjects\Light\PointLight.h" />
     <ClInclude Include="MatchaEngine\GameObjects\Primitive.h" />
     <ClInclude Include="MatchaEngine\GameObjects\Object\ObjectBase.h" />
+    <ClInclude Include="MatchaEngine\GameObjects\Object\Animation\NodeAnimation.h" />
     <ClInclude Include="Shared\ParticleManager.h" />
     <ClInclude Include="Game\GameScene\Entity\Enemy.h" />
     <ClInclude Include="Game\Fade.h" />

@@ -56,5 +56,11 @@ public:
 	Quaternion CalculateValue(const std::vector<KeyframeQuaternion>& keyframe, float time);
 
 	void CreateSkinCluster();
+
+	// 追加: インフルエンス用 VBV を取得
+	D3D12_VERTEX_BUFFER_VIEW* GetInfluenceBufferView() { return &skinCluster_.influenceBufferView; }
+
+	// 追加: スキンパレット SRV の GPU ハンドルを取得
+	D3D12_GPU_DESCRIPTOR_HANDLE GetPaletteSrvHandleGPU() const { return skinCluster_.paletteSrvHandle.second; }
 };
 

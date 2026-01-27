@@ -33,7 +33,7 @@ void GameScene::Initialize() {
 	model_.get()->SetTransform(modelTransform_);
 
 
-	animation_.get()->Initialize("resources/human", "walk.gltf");
+	animation_.get()->Initialize("resources/human", "sneakWalk.gltf");
 
 
 	int texture1= texture_.get()->CreateTexture("resources/monsterBall.png");
@@ -101,7 +101,7 @@ void GameScene::Draw() {
 	//Draw::DrawObj(model_.get());
 	Draw::DrawObj(floor.get());
 
-	Draw::DrawObj(animation_.get());
+	Draw::DrawAnimtion(animation_.get());
 
 	Draw::DrawObj(sphere_.get());
 	for (int i = 0, n = static_cast<int>(particle_.size()); i < n; ++i) {

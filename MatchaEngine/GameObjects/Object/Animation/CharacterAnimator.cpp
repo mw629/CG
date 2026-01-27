@@ -35,6 +35,9 @@ void CharacterAnimator::Initialize(const std::string& directoryPath, const std::
 	material_ = std::make_unique<MaterialFactory>();
 	material_->CreateMatrial();
 	CreateObject();
+
+	SetShader(AnimationObj);
+
 }
 
 void CharacterAnimator::CreateVertexData()

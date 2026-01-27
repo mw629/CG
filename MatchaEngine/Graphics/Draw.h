@@ -16,6 +16,8 @@
 #include "Grid.h"
 #include "Camera.h"
 
+#include "CharacterAnimator.h"
+
 #include "DirectionalLight.h"
 #include "PointLight.h"
 #include "SpotLight.h"
@@ -31,6 +33,8 @@ public:
 	static void preDraw(ShaderName shader, BlendMode blend);
 
 	static void DrawObj(ObjectBase *obj);
+
+	static void DrawAnimtion(CharacterAnimator* obj);
 
 	static void DrawModel(Model* model, Camera* camera);
 
