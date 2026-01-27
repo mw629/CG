@@ -5,7 +5,7 @@
 class InputLayout
 {
 private:
-	D3D12_INPUT_ELEMENT_DESC inputElementDescs_[4] = {};
+	D3D12_INPUT_ELEMENT_DESC inputElementDescs_[5] = {};
 	D3D12_INPUT_LAYOUT_DESC inputLayoutDesc_{};
 
 

@@ -9,7 +9,7 @@ GameScene::~GameScene()
 void GameScene::ImGui()
 {
 #ifdef _USE_IMGUI
-	
+
 	camera_.get()->ImGui();
 	for (int i = 0, n = static_cast<int>(particle_.size()); i < n; ++i) {
 		particle_[i].get()->ImGui();
@@ -33,10 +33,11 @@ void GameScene::Initialize() {
 	model_.get()->SetTransform(modelTransform_);
 
 
-	animation_.get()->Initialize("resources/human", "walk.gltf");
+	animation_.get()->Initialize("resources/human", "sneakWalk.gltf");
+	nodeanimation_.get()->Initialize("resources/AnimatedCube", "AnimatedCube.gltf");
 
 
-	int texture1= texture_.get()->CreateTexture("resources/monsterBall.png");
+	int texture1 = texture_.get()->CreateTexture("resources/monsterBall.png");
 	sphere_.get()->Initialize(texture1);
 	sphere_.get()->SetTransform(modelTransform_);
 
@@ -71,7 +72,7 @@ void GameScene::Initialize() {
 	particle_.push_back(std::move(particle1));
 
 	texture = texture_.get()->CreateTexture("resources/uvChecker.png");
-	sprite_.get()->Initialize(spriteData_,texture);
+	sprite_.get()->Initialize(spriteData_, texture);
 }
 
 void GameScene::Update() {
@@ -87,11 +88,12 @@ void GameScene::Update() {
 	sphere_.get()->SettingWvp(view);
 
 	particle_[1].get()->EmitSize();
-	
+
 	particle_[0].get()->Update(view);
 	particle_[1].get()->Update(view);
 
 	animation_.get()->Update(view);
+	nodeanimation_.get()->Update(view);
 }
 
 void GameScene::Draw() {
@@ -100,8 +102,8 @@ void GameScene::Draw() {
 
 	//Draw::DrawObj(model_.get());
 	Draw::DrawObj(floor.get());
-
-	Draw::DrawObj(animation_.get());
+	Draw::DrawObj(nodeanimation_.get());
+	//Draw::DrawAnimtion(animation_.get());
 
 	Draw::DrawObj(sphere_.get());
 	for (int i = 0, n = static_cast<int>(particle_.size()); i < n; ++i) {

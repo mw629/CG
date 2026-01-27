@@ -33,6 +33,7 @@ private:
 	Transform floorT{ {1.0f,1.0f,1.0f},{0.0f,0.0f,0.0f,},{0.0f,0.0f,0.0f} };
 
 	std::unique_ptr<CharacterAnimator> animation_ = std::make_unique<CharacterAnimator>();
+	std::unique_ptr<TransformAnimation> nodeanimation_ = std::make_unique<TransformAnimation>();
 
 	bool bill = true;
 

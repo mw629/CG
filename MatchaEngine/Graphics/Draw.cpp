@@ -12,7 +12,7 @@ namespace {
 	Camera* camera;
 }
 
-void Draw::Initialize(ID3D12GraphicsCommandList* commandList, GraphicsPipelineState* graphicsPipelineState, 
+void Draw::Initialize(ID3D12GraphicsCommandList* commandList, GraphicsPipelineState* graphicsPipelineState,
 	DirectionalLight* directionalLight, PointLight* pointLight, SpotLight* spotLight)
 {
 	commandList_ = commandList;
@@ -38,7 +38,7 @@ void Draw::preDraw(ShaderName shader, BlendMode blend)
 
 }
 
-void Draw::DrawObj(ObjectBase *obj)
+void Draw::DrawObj(ObjectBase* obj)
 {
 	preDraw(obj->GetShader(), obj->GetBlend());
 
@@ -54,12 +54,40 @@ void Draw::DrawObj(ObjectBase *obj)
 	commandList_->SetGraphicsRootConstantBufferView(6, spotLight_->GetDirectinalLightResource()->GetGPUVirtualAddress());
 
 	commandList_->DrawIndexedInstanced(obj->GetIndexSize(), 1, 0, 0, 0);
+
 }
+
+void Draw::DrawAnimtion(CharacterAnimator* obj)
+{
+	preDraw(obj->GetShader(), obj->GetBlend());
+
+	// インデックス設定
+	commandList_->IASetIndexBuffer(obj->GetIndexBufferView());
+
+	// VBV を複数渡す（頂点データ + インフルエンスデータ）
+	D3D12_VERTEX_BUFFER_VIEW vbvs[2];
+	vbvs[0] = *obj->GetVertexBufferView();
+	vbvs[1] = *obj->GetInfluenceBufferView();
+	commandList_->IASetVertexBuffers(0, 2, vbvs);
+
+	// ルートをアニメーション用レイアウトに合わせて設定
+	commandList_->SetGraphicsRootConstantBufferView(0, obj->GetMartial()->GetMaterialResource()->GetGPUVirtualAddress()); // material (pixel b0)
+	commandList_->SetGraphicsRootConstantBufferView(1, obj->GetWvpDataResource()->GetGPUVirtualAddress()); // wvp (vertex b0)
+	commandList_->SetGraphicsRootDescriptorTable(2, obj->GetPaletteSrvHandleGPU()); // matrix palette SRV (t0)
+	commandList_->SetGraphicsRootDescriptorTable(3, obj->GetTextureSrvHandleGPU()); // texture SRV (t1)
+	commandList_->SetGraphicsRootConstantBufferView(4, camera->GetCameraResource()->GetGPUVirtualAddress());
+	commandList_->SetGraphicsRootConstantBufferView(5, directionalLight_->GetDirectinalLightResource()->GetGPUVirtualAddress());
+	commandList_->SetGraphicsRootConstantBufferView(6, pointLight_->GetDirectinalLightResource()->GetGPUVirtualAddress());
+	commandList_->SetGraphicsRootConstantBufferView(7, spotLight_->GetDirectinalLightResource()->GetGPUVirtualAddress());
+
+	commandList_->DrawIndexedInstanced(obj->GetIndexSize(), 1, 0, 0, 0);
+}
+
 
 void Draw::DrawModel(Model* model, Camera* camera)
 {
 	preDraw(model->GetShader(), model->GetBlend());
-	
+
 	//objectの描画
 	commandList_->IASetVertexBuffers(0, 1, model->GetVertexBufferView());//VBVを設定
 	commandList_->SetGraphicsRootConstantBufferView(0, model->GetMartial()->GetMaterialResource()->GetGPUVirtualAddress());
@@ -113,7 +141,7 @@ void Draw::DrawShpere(Sphere* sphere, Camera* camera)
 {
 
 	preDraw(sphere->GetShader(), sphere->GetBlend());
-	
+
 
 	//commandList_->IASetIndexBuffer(shpere->GetIndexBufferView());//IBVを設定
 	commandList_->IASetVertexBuffers(0, 1, sphere->GetVertexBufferView());//VBVを設定
@@ -141,7 +169,7 @@ void Draw::DrawTriangle(Triangle* triangle, Camera* camera)
 	commandList_->SetGraphicsRootConstantBufferView(5, pointLight_->GetDirectinalLightResource()->GetGPUVirtualAddress());
 	commandList_->SetGraphicsRootConstantBufferView(6, spotLight_->GetDirectinalLightResource()->GetGPUVirtualAddress());
 
-	
+
 	commandList_->DrawInstanced(3, 1, 0, 0);
 }
 

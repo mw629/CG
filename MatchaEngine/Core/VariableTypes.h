@@ -198,7 +198,7 @@ struct Keyframe {
 using KeyframeVector3 = Keyframe<Vector3>;
 using KeyframeQuaternion = Keyframe<Quaternion>;
 
-struct NodeAnimation {
+struct AnimationNode {
 	std::vector<KeyframeVector3> translate;
 	std::vector<KeyframeQuaternion> rotate;
 	std::vector<KeyframeVector3> scale;
@@ -207,8 +207,8 @@ struct NodeAnimation {
 
 struct Animation {
 	float duration;//アニメーション全体の尺
-	//NodeAnimationの集合。Node名で弾けるようにしておく
-	std::map<std::string, NodeAnimation> nodeAnimations;
+	//AnimationNodeの集合。Node名で弾けるようにしておく
+	std::map<std::string, AnimationNode> AnimationNodes;
 };
 
 
@@ -230,7 +230,7 @@ struct Joint {
 
 struct Skeleton {
 	int32_t root;
-	std::map<std::string, int32_t> jpintMap;//ジョイントとインデックスの辞書
+	std::map<std::string, int32_t> jointMap;//ジョイントとインデックスの辞書
 	std::vector<Joint> joints;
 };
 
