@@ -246,35 +246,35 @@ Animation LoadAnimationFile(const std::string& directoryPath, const std::string&
 	aiAnimation* animationAssimp = scene->mAnimations[0];//最初のアニメーションだけ採用。複数対応させるべき
 	animation.duration = float(animationAssimp->mDuration / animationAssimp->mTicksPerSecond);//時間単位を秒に変換
 
-	//NodeAnimationを解析
+	//AnimationNodeを解析
 	for (uint32_t channelIndex = 0; channelIndex < animationAssimp->mNumChannels; ++channelIndex) {
 
-		aiNodeAnim* nodeAnimationAssimp = animationAssimp->mChannels[channelIndex];
-		NodeAnimation& nodeAnimation = animation.nodeAnimations[nodeAnimationAssimp->mNodeName.C_Str()];
+		aiNodeAnim* AnimationNodeAssimp = animationAssimp->mChannels[channelIndex];
+		AnimationNode& AnimationNode = animation.AnimationNodes[AnimationNodeAssimp->mNodeName.C_Str()];
 
 		//Translate
-		for (uint32_t keyIndex = 0; keyIndex < nodeAnimationAssimp->mNumPositionKeys; ++keyIndex) {
-			aiVectorKey& keyAssimp = nodeAnimationAssimp->mPositionKeys[keyIndex];
+		for (uint32_t keyIndex = 0; keyIndex < AnimationNodeAssimp->mNumPositionKeys; ++keyIndex) {
+			aiVectorKey& keyAssimp = AnimationNodeAssimp->mPositionKeys[keyIndex];
 			KeyframeVector3 keyframe;
 			keyframe.time = float(keyAssimp.mTime / animationAssimp->mTicksPerSecond);//ここも秒に変換
 			keyframe.value = { -keyAssimp.mValue.x,keyAssimp.mValue.y,keyAssimp.mValue.z };//右手→左手
-			nodeAnimation.translate.push_back(keyframe);
+			AnimationNode.translate.push_back(keyframe);
 		}
 		//Rotate
-		for (uint32_t keyIndex = 0; keyIndex < nodeAnimationAssimp->mNumRotationKeys; ++keyIndex) {
-			aiQuatKey& keyAssimp = nodeAnimationAssimp->mRotationKeys[keyIndex];
+		for (uint32_t keyIndex = 0; keyIndex < AnimationNodeAssimp->mNumRotationKeys; ++keyIndex) {
+			aiQuatKey& keyAssimp = AnimationNodeAssimp->mRotationKeys[keyIndex];
 			KeyframeQuaternion keyframe;
 			keyframe.time = float(keyAssimp.mTime / animationAssimp->mTicksPerSecond);//ここも秒に変換
 			keyframe.value = { keyAssimp.mValue.x, -keyAssimp.mValue.y, -keyAssimp.mValue.z, keyAssimp.mValue.w };
-			nodeAnimation.rotate.push_back(keyframe);
+			AnimationNode.rotate.push_back(keyframe);
 		}
 		//Scale
-		for (uint32_t keyIndex = 0; keyIndex < nodeAnimationAssimp->mNumScalingKeys; ++keyIndex) {
-			aiVectorKey& keyAssimp = nodeAnimationAssimp->mScalingKeys[keyIndex];
+		for (uint32_t keyIndex = 0; keyIndex < AnimationNodeAssimp->mNumScalingKeys; ++keyIndex) {
+			aiVectorKey& keyAssimp = AnimationNodeAssimp->mScalingKeys[keyIndex];
 			KeyframeVector3 keyframe;
 			keyframe.time = float(keyAssimp.mTime / animationAssimp->mTicksPerSecond);//ここも秒に変換
 			keyframe.value = { keyAssimp.mValue.x, keyAssimp.mValue.y, keyAssimp.mValue.z };
-			nodeAnimation.scale.push_back(keyframe);
+			AnimationNode.scale.push_back(keyframe);
 		}
 	}
 	return animation;

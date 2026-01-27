@@ -147,7 +147,7 @@ copy "$(WindowsSdkDir)bin\$(TargetPlatformVersion)\x64\dxil.dll" "$(TargetDir)dx
     <ClCompile Include="MatchaEngine\GameObjects\Light\PointLight.cpp" />
     <ClCompile Include="MatchaEngine\GameObjects\Primitive.cpp" />
     <ClCompile Include="MatchaEngine\GameObjects\Object\ObjectBase.cpp" />
-    <ClCompile Include="MatchaEngine\GameObjects\Object\Animation\NodeAnimation.cpp" />
+    <ClCompile Include="MatchaEngine\GameObjects\Object\Animation\AnimationNode.cpp" />
     <ClCompile Include="Shared\ParticleManager.cpp" />
     <ClCompile Include="Game\GameScene\Entity\Enemy.cpp" />
     <ClCompile Include="Game\Fade.cpp" />
@@ -291,7 +291,7 @@ copy "$(WindowsSdkDir)bin\$(TargetPlatformVersion)\x64\dxil.dll" "$(TargetDir)dx
     <ClInclude Include="MatchaEngine\GameObjects\Light\PointLight.h" />
     <ClInclude Include="MatchaEngine\GameObjects\Primitive.h" />
     <ClInclude Include="MatchaEngine\GameObjects\Object\ObjectBase.h" />
-    <ClInclude Include="MatchaEngine\GameObjects\Object\Animation\NodeAnimation.h" />
+    <ClInclude Include="MatchaEngine\GameObjects\Object\Animation\AnimationNode.h" />
     <ClInclude Include="Shared\ParticleManager.h" />
     <ClInclude Include="Game\GameScene\Entity\Enemy.h" />
     <ClInclude Include="Game\Fade.h" />

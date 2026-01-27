@@ -120,11 +120,11 @@ void CharacterAnimator::ApplyAnimation()
 {
 	for (Joint& joint : skeleton_.joints) {
 		//対象のJointにAnimationがあれば、値の適応を行う。下記のif文はC++17から可能になった初期化月if文
-		if (auto it = animation_.nodeAnimations.find(joint.name); it != animation_.nodeAnimations.end()) {
-			const NodeAnimation& rootNodeAnimation = (*it).second;
-			joint.transform.translate = CalculateValue(rootNodeAnimation.translate, animationTime_);
-			joint.transform.rotate = CalculateValue(rootNodeAnimation.rotate, animationTime_);
-			joint.transform.scale = CalculateValue(rootNodeAnimation.scale, animationTime_);
+		if (auto it = animation_.AnimationNodes.find(joint.name); it != animation_.AnimationNodes.end()) {
+			const AnimationNode& rootAnimationNode = (*it).second;
+			joint.transform.translate = CalculateValue(rootAnimationNode.translate, animationTime_);
+			joint.transform.rotate = CalculateValue(rootAnimationNode.rotate, animationTime_);
+			joint.transform.scale = CalculateValue(rootAnimationNode.scale, animationTime_);
 		}
 	}
 }
@@ -161,12 +161,12 @@ void CharacterAnimator::noUpdate(Matrix4x4 viewMatrix)
 {
 	animationTime_ += 1.0f / 60.0f;//時間を進める
 	animationTime_ = std::fmod(animationTime_, animation_.duration);//リピート再生
-	NodeAnimation& rootNodeAnimation = animation_.nodeAnimations[modelData_.rootNode.name];
+	AnimationNode& rootAnimationNode = animation_.AnimationNodes[modelData_.rootNode.name];
 
-	Vector3 translate = CalculateValue(rootNodeAnimation.translate, animationTime_);
-	Quaternion rotate = CalculateValue(rootNodeAnimation.rotate, animationTime_);
+	Vector3 translate = CalculateValue(rootAnimationNode.translate, animationTime_);
+	Quaternion rotate = CalculateValue(rootAnimationNode.rotate, animationTime_);
 
-	Vector3 scale = CalculateValue(rootNodeAnimation.scale, animationTime_);
+	Vector3 scale = CalculateValue(rootAnimationNode.scale, animationTime_);
 	localMatrix_ = MakeAffineMatrix(translate, scale, rotate);
 
 	SettingWvp(viewMatrix);
