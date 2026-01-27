@@ -249,7 +249,7 @@
     <ClCompile Include="MatchaEngine\GameObjects\Object\Animation\CharacterAnimator.cpp">
       <Filter>ソース ファイル</Filter>
     </ClCompile>
-    <ClCompile Include="MatchaEngine\GameObjects\Object\Animation\AnimationNode.cpp">
+    <ClCompile Include="MatchaEngine\GameObjects\Object\Animation\TransformAnimation.cpp">
       <Filter>ソース ファイル</Filter>
     </ClCompile>
   </ItemGroup>
@@ -491,7 +491,7 @@
     <ClInclude Include="MatchaEngine\GameObjects\Object\Animation\CharacterAnimator.h">
       <Filter>ヘッダー ファイル</Filter>
     </ClInclude>
-    <ClInclude Include="MatchaEngine\GameObjects\Object\Animation\AnimationNode.h">
+    <ClInclude Include="MatchaEngine\GameObjects\Object\Animation\TransformAnimation.h">
       <Filter>ヘッダー ファイル</Filter>
     </ClInclude>
   </ItemGroup>

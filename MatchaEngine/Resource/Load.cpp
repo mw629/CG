@@ -123,6 +123,90 @@ MaterialData LoadMaterialTemplateFile(const std::string& directoryPath, const st
 //
 //}
 
+ModelData LoadObjFile(const std::string& directoryPath, const std::string& filename)//NodeAnimationで使う
+{
+	std::unique_ptr<ModelManager> objManager = std::make_unique<ModelManager>();
+
+	if (objManager.get()->DuplicateConfirmation(directoryPath, filename)) {
+		return objManager.get()->DuplicateReturn(directoryPath, filename);
+	}
+
+	ModelData modelData;
+
+	Assimp::Importer impoter;
+	std::string filePath = directoryPath + "/" + filename;
+	const aiScene* scene = impoter.ReadFile(filePath.c_str(),
+		aiProcess_FlipWindingOrder | aiProcess_FlipUVs);
+	assert(scene->HasMeshes());
+
+	for (uint32_t meshIndex = 0; meshIndex < scene->mNumMeshes; ++meshIndex) {
+		aiMesh* mesh = scene->mMeshes[meshIndex];
+		assert(mesh->HasNormals());//法線がないMeshは今回非対称
+		assert(mesh->HasTextureCoords(0));//TexcoordがないMeshは今回非対応
+		modelData.vertices.resize(mesh->mNumVertices);
+
+		for (uint32_t vertexIndex = 0; vertexIndex < mesh->mNumVertices; ++vertexIndex) {
+			aiVector3D& position = mesh->mVertices[vertexIndex];
+			aiVector3D& normal = mesh->mNormals[vertexIndex];
+			aiVector3D& texcord = mesh->mTextureCoords[0][vertexIndex];
+
+			modelData.vertices[vertexIndex].position = { -position.x,position.y,position.z,1.0f };
+			modelData.vertices[vertexIndex].normal = { -normal.x,normal.y,normal.z };
+			modelData.vertices[vertexIndex].texcoord = { texcord.x,texcord.y };
+		}
+		for (uint32_t boneIndex = 0; boneIndex < mesh->mNumBones; ++boneIndex) {
+			aiBone* bone = mesh->mBones[boneIndex];
+			std::string jointName = bone->mName.C_Str();
+			JointWeightData& jointWeightData = modelData.skinClusterData[jointName];
+
+			aiMatrix4x4 bindPoseMatrixAssimp = bone->mOffsetMatrix.Inverse();
+			aiVector3D translate;
+			aiVector3D scale;
+			aiQuaternion rotate;
+			bindPoseMatrixAssimp.Decompose(scale, rotate, translate);
+			Matrix4x4 bindPoseMatrix = MakeAffineMatrix(
+				Vector3{ -translate.x, translate.y, translate.z }, // translate
+				Vector3{ scale.x, scale.y, scale.z },              // scale
+				Quaternion{ rotate.x, -rotate.y, -rotate.z, rotate.w }); // rotate
+			jointWeightData.inverseBindPoseMatrix = Inverse(bindPoseMatrix);
+
+			for (uint32_t weightIndex = 0; weightIndex < bone->mNumWeights; ++weightIndex) {
+				jointWeightData.vertexWeights.push_back({ bone->mWeights[weightIndex].mWeight,bone->mWeights[weightIndex].mVertexId });
+			}
+		}
+		for (uint32_t faceIndex = 0; faceIndex < mesh->mNumFaces; ++faceIndex) {
+			aiFace& fence = mesh->mFaces[faceIndex];
+			assert(fence.mNumIndices == 3);
+
+			for (uint32_t element = 0; element < fence.mNumIndices; ++element) {
+				uint32_t vertexIndex = fence.mIndices[element];
+				modelData.indices.push_back(vertexIndex);
+			}
+
+		}
+		//materialを解析する
+		for (uint32_t materialIndex = 0; materialIndex < scene->mNumMaterials; ++materialIndex) {
+			aiMaterial* material = scene->mMaterials[materialIndex];
+			if (material->GetTextureCount(aiTextureType_DIFFUSE) != 0) {
+				aiString textureFilePath;
+				material->GetTexture(aiTextureType_DIFFUSE, 0, &textureFilePath);
+				modelData.material.textureDilePath = directoryPath + "/" + textureFilePath.C_Str();
+			}
+		}
+	}
+
+	modelData.rootNode = ReadNode(scene->mRootNode);
+
+	std::unique_ptr<Texture> texture = std::make_unique<Texture>();
+
+	modelData.textureIndex = texture->CreateTexture(modelData.material.textureDilePath);
+
+	objManager.get()->SetModelList(modelData, directoryPath, filename);
+
+	return modelData;
+
+}
+
 ModelData AssimpLoadObjFile(const std::string& directoryPath, const std::string& filename)
 {
 	std::unique_ptr<ModelManager> objManager = std::make_unique<ModelManager>();

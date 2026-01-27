@@ -29,6 +29,7 @@
 #include "MaterialFactory.h"
 #include "Model.h"
 #include "CharacterAnimator.h"
+#include "TransformAnimation.h"
 #include "Particle.h"
 #include "Sphere.h"
 #include "Sprite.h"

@@ -1,10 +1,11 @@
 #pragma once
+#pragma once
 #include <VariableTypes.h>
 #include "ObjectBase.h"
 #include <Model.h>
 #include "Line.h"
 
-class AnimationNode :public ObjectBase
+class TransformAnimation :public ObjectBase
 {
 private:
 
@@ -23,8 +24,8 @@ private:
 
 public:
 
-	~AnimationNode()override;
-	AnimationNode();
+	~TransformAnimation()override;
+	TransformAnimation();
 
 	void Initialize(const std::string& directoryPath, const std::string& filename);
 
@@ -50,3 +51,4 @@ public:
 
 	SkinCluster CreateSkinCluster(ID3D12DescriptorHeap* descriptorHeap, uint32_t descriprtorSize);
 };
+

@@ -1,4 +1,4 @@
-#include "AnimationNode.h"
+#include "TransformAnimation.h"
 #include "Calculation.h"
 #include <Load.h>
 
@@ -6,17 +6,17 @@ namespace {
 	ID3D12Device* device;
 }
 
-AnimationNode::~AnimationNode()
+TransformAnimation::~TransformAnimation()
 {
 }
 
-AnimationNode::AnimationNode()
+TransformAnimation::TransformAnimation()
 {
 }
 
-void AnimationNode::Initialize(const std::string& directoryPath, const std::string& filename)
+void TransformAnimation::Initialize(const std::string& directoryPath, const std::string& filename)
 {
-	modelData_ = AssimpLoadObjFile(directoryPath, filename);
+	modelData_ = LoadObjFile(directoryPath, filename);
 	animation_ = LoadAnimationFile(directoryPath, filename);
 	textureSrvHandleGPU_ = texture->TextureData(modelData_.textureIndex);
 
@@ -27,7 +27,7 @@ void AnimationNode::Initialize(const std::string& directoryPath, const std::stri
 	CreateObject();
 }
 
-void AnimationNode::CreateVertexData()
+void TransformAnimation::CreateVertexData()
 {
 	//頂点リソースを作る
 	vertexResource_ = GraphicsDevice::CreateBufferResource(sizeof(VertexData) * modelData_.vertices.size());
@@ -45,7 +45,7 @@ void AnimationNode::CreateVertexData()
 	vertexSize_ = modelData_.vertices.size();
 }
 
-void AnimationNode::CreateIndexResource()
+void TransformAnimation::CreateIndexResource()
 {
 	indexResource_ = GraphicsDevice::CreateBufferResource(sizeof(uint32_t) * modelData_.indices.size());
 
@@ -59,7 +59,7 @@ void AnimationNode::CreateIndexResource()
 
 }
 
-void AnimationNode::SettingWvp(Matrix4x4 viewMatrix) {
+void TransformAnimation::SettingWvp(Matrix4x4 viewMatrix) {
 	Matrix4x4 projectionMatrix = MakePerspectiveFovMatrix(0.45f, float(kClientWidth_) / float(kClientHeight_), 0.1f, 10000.0f);
 	Matrix4x4 worldMatrix = MakeAffineMatrix(transform_.translate, transform_.scale, transform_.rotate);
 	Matrix4x4 worldViewProjectionMatrix = MultiplyMatrix4x4(worldMatrix, MultiplyMatrix4x4(viewMatrix, projectionMatrix));
@@ -71,7 +71,7 @@ void AnimationNode::SettingWvp(Matrix4x4 viewMatrix) {
 	wvpData_->WorldInverseTranspose = worldInverseTranspose;
 }
 
-Skeleton AnimationNode::CreateSkeleton(const Node& rootNode)
+Skeleton TransformAnimation::CreateSkeleton(const Node& rootNode)
 {
 	Skeleton skeleton;
 	skeleton.root = CreateJoint(rootNode, {}, skeleton.joints);
@@ -84,7 +84,7 @@ Skeleton AnimationNode::CreateSkeleton(const Node& rootNode)
 
 }
 
-int32_t AnimationNode::CreateJoint(const Node& node, const std::optional<int32_t>& parent, std::vector<Joint>& joints)
+int32_t TransformAnimation::CreateJoint(const Node& node, const std::optional<int32_t>& parent, std::vector<Joint>& joints)
 {
 	Joint joint;
 	joint.name = node.name;
@@ -103,28 +103,16 @@ int32_t AnimationNode::CreateJoint(const Node& node, const std::optional<int32_t
 
 }
 
-void AnimationNode::ApplyAnimation()
-{
-	for (Joint& joint : skeleton_.joints) {
-		//対象のJointにAnimationがあれば、値の適応を行う。下記のif文はC++17から可能になった初期化月if文
-		if (auto it = animation_.AnimationNodes.find(joint.name); it != animation_.AnimationNodes.end()) {
-			const AnimationNode& rootAnimationNode = (*it).second;
-			joint.transform.translate = CalculateValue(rootAnimationNode.translate, animationTime_);
-			joint.transform.rotate = CalculateValue(rootAnimationNode.rotate, animationTime_);
-			joint.transform.scale = CalculateValue(rootAnimationNode.scale, animationTime_);
-		}
-	}
-}
 
 
 
 
-void AnimationNode::Update(Matrix4x4 viewMatrix)
+void TransformAnimation::Update(Matrix4x4 viewMatrix)
 {
 
 	animationTime_ += 1.0f / 60.0f;//時間を進める
 	animationTime_ = std::fmod(animationTime_, animation_.duration);//リピート再生
-	NodeAnimation& rootNodeAnimation = animation_.nodeAnimations[modelData_.rootNode.name];
+	AnimationNode& rootNodeAnimation = animation_.AnimationNodes[modelData_.rootNode.name];
 
 	Vector3 translate = CalculateValue(rootNodeAnimation.translate, animationTime_);
 	Quaternion rotate = CalculateValue(rootNodeAnimation.rotate, animationTime_);
@@ -132,13 +120,12 @@ void AnimationNode::Update(Matrix4x4 viewMatrix)
 	Vector3 scale = CalculateValue(rootNodeAnimation.scale, animationTime_);
 	localMatrix_ = MakeAffineMatrix(translate, scale, rotate);
 
-
 	SettingWvp(viewMatrix);
 
 }
 
 
-Vector3 AnimationNode::CalculateValue(const std::vector<KeyframeVector3>& keyframe, float time)
+Vector3 TransformAnimation::CalculateValue(const std::vector<KeyframeVector3>& keyframe, float time)
 {
 	assert(!keyframe.empty());
 	if (keyframe.size() == 1 || time <= keyframe[0].time) {//キーは一つか、時刻がキーフレーム前なら最初の値にする
@@ -158,7 +145,7 @@ Vector3 AnimationNode::CalculateValue(const std::vector<KeyframeVector3>& keyfra
 	return keyframe.back().value;
 }
 
-Quaternion AnimationNode::CalculateValue(const std::vector<KeyframeQuaternion>& keyframe, float time)
+Quaternion TransformAnimation::CalculateValue(const std::vector<KeyframeQuaternion>& keyframe, float time)
 {
 	assert(!keyframe.empty());
 	if (keyframe.size() == 1 || time <= keyframe[0].time) {//キーは一つか、時刻がキーフレーム前なら最初の値にする
@@ -178,7 +165,7 @@ Quaternion AnimationNode::CalculateValue(const std::vector<KeyframeQuaternion>& 
 	return keyframe.back().value;
 }
 
-SkinCluster AnimationNode::CreateSkinCluster(ID3D12DescriptorHeap* descriptorHeap, uint32_t descriptorSize)
+SkinCluster TransformAnimation::CreateSkinCluster(ID3D12DescriptorHeap* descriptorHeap, uint32_t descriptorSize)
 {
 	SkinCluster skinCluster;
 
