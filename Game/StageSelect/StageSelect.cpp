@@ -1,6 +1,8 @@
 #include "StageSelect.h"
 #include "../Game/GameScene/GameScene.h"
 
+int StageSelect::stageNum_ = 0;
+
 float StageSelect::EaseOutCubic(float t)
 {
 	return 1.0f - std::pow(1.0f - t, 3.0f);
@@ -19,11 +21,12 @@ void StageSelect::Initialize()
 
 	std::unique_ptr<Texture> texture = std::make_unique<Texture>();
 
-	// 9ステージ分のスプライト作成
+	// 10ステージ分のスプライト作成
 	for (int i = 0; i < kMaxStage; i++) {
 		sprite_[i] = std::make_unique<Sprite>();
 		int textureHndle = texture.get()->CreateTexture("resources/UI/Stage/Stage" + std::to_string(i + 1) + ".png");
 		sprite_[i]->Initialize(textureHndle);
+
 		sprite_[i]->CreateSprite();
 
 		// 初期位置は後でUpdateで設定するため、仮の値
@@ -42,9 +45,9 @@ void StageSelect::Initialize()
 	SpaceSprite_.get()->SetSize(spritePos[0], spritePos[1]);
 	SpaceSprite_->SettingWvp();
 
-	// 初期オフセットを設定
-	displayOffset_ = 0.0f;
-	targetOffset_ = 0.0f;
+	// 初期オフセットを表示中のステージに合わせて即時反映（シーン遷移時の急速移動を防ぐ）
+	targetOffset_ = static_cast<float>(stageNum_) * kSpriteWidth;
+	displayOffset_ = targetOffset_;
 }
 
 void StageSelect::Update()
@@ -57,7 +60,7 @@ void StageSelect::Update()
 		stageNum_--;
 	}
 
-	// ステージ番号のクランプ (0〜8)
+	// ステージ番号のクランプ (0〜9)
 	if (stageNum_ < 0) {
 		stageNum_ = 0;
 	}
@@ -76,6 +79,9 @@ void StageSelect::Update()
 	if (std::abs(diff) < 0.1f) {
 		displayOffset_ = targetOffset_;
 	}
+
+	// ボブ（上下揺れ）タイマー更新
+	bobTimer_ += bobSpeed_ * 0.0166667f; // 仮に60FPSのデルタタイム相当。実環境に合わせて調整してください。
 
 	// 決定処理
 	if (Input::PushKey(DIK_SPACE)) {
@@ -96,9 +102,15 @@ void StageSelect::Update()
 		float halfWidth = 64.0f;
 		float halfHeight = 64.0f;
 
+		// 選択中なら上下に揺らすオフセットを加算
+		float bobOffset = 0.0f;
+		if (i == stageNum_) {
+			bobOffset = std::sin(bobTimer_) * bobAmplitude_;
+		}
+
 		Vector2 spritePos[2] = {
-			{posX - halfWidth, 264.0f},
-			{posX + halfWidth, 392.0f}
+			{posX - halfWidth, 264.0f + bobOffset},
+			{posX + halfWidth, 392.0f + bobOffset}
 		};
 		sprite_[i].get()->SetSize(spritePos[0], spritePos[1]);
 		sprite_[i]->SettingWvp();

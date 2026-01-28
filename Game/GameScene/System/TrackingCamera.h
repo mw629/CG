@@ -22,13 +22,20 @@ private:
 	Vector3 targetVelocity_;
 	Vector3 targeOffset = { 0, 0, -30.0f };
 
-	const float kInterpolationRate = 0.05f;
+	// separate interpolation rates per axis so X can follow stronger and Y weaker
+	float kInterpolationRateX = 0.01f;
+	float kInterpolationRateY = 0.001f;
+	float kInterpolationRateZ = 0.001f;
 	Vector3 targetLocation_{};
 	const float kDeathZoomFactor = 0.5f;
 
 	Rect movableArea_ = { 0, 500, 0, 100 };
 
 	Rect Margin = { -10.0f, 10.0f, -0.5f, 0.5f };
+
+
+	bool hasPrev_;
+	Vector3 prevTargetPos_;
 
 public:
 
@@ -46,7 +53,6 @@ public:
 
 	Matrix4x4 GetView() { return camera_.get()->GetViewMatrix(); }
 
-	
 
 };
 

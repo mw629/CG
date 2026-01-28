@@ -91,6 +91,11 @@ private:
 	float turnTimer_ = 0.0f;
 	// 旋回時間<秒>
 	static inline const float kTimeTurn = 0.3f;
+	// 立ち止まりから移動へ切り替わったときの短い旋回時間
+	static inline const float kTimeTurnQuick = 0.08f;
+
+	// 現在使用する旋回時間（通常は kTimeTurn、必要時に kTimeTurnQuick に切替）
+	float currentTurnDuration_ = kTimeTurn;
 
 	//ジャンプ用
 	bool isJump_;
@@ -107,6 +112,27 @@ private:
 	static inline const float kTurnToCameraDuration = 0.3f;
 	static inline const float kBackflipDuration = 0.8f;
 	float clearTurnStartRotationY_ = 0.0f;
+
+	// 走りアニメーション用タイマー
+	float runAnimationTimer_ = 0.0f;
+
+	//　待機モーション
+	float standbyFream_ = 0.0f;
+	float standbyAnimationCoolTime_ = 120.0f;
+	float standbyAnimationFream_ = 0.0f;
+
+	// Standby rotation animation state
+	bool standbyRotateActive_ = false;
+	int standbyRotatePhase_ = 0; // 0 = not started, 1..4 phases for go/return twice
+	float standbyRotateTimer_ = 0.0f;
+	float standbyRotateDuration_ = 0.25f; // duration for one go or return (shorter = faster)
+	float standbyRotateStartY_ = 0.0f;
+	float standbyRotateTargetY_ = 0.0f;
+	static inline const int kStandbyRotateRepeat = 2; // go and return twice
+
+	// Cooldown to prevent standby rotate from repeating immediately
+	int standbyRotateCooldown_ = 0; // frames remaining until next possible idle rotate
+	static inline const int kStandbyRotateCooldownFrames = 180; // 3 seconds at 60fps
 
 #pragma endregion
 
@@ -131,6 +157,8 @@ public:
 	//入力処理
 	void MoveInput();
 
+	void StandbyAnimation();
+	void RunAnimation();
 	void JumpAnimation();
 	void DeathAnimation();
 	void ClearAnimation();
@@ -154,7 +182,7 @@ public:
 
 	// クリア関連
 	bool IsClear() const { return isClear_; }
-	void SetClear(bool flag) { isClear_ = flag; clearPhase_ = ClearPhase::kWaitLanding; clearAnimationTimer_ = 0.0f; }
+	void SetClear(bool flag) { isClear_ = flag; clearPhase_ = ClearPhase::kWaitLanding; clearAnimationTimer_ = 0.0f; transform_.scale = {1.0f,1.0f,1.0f}; runAnimationTimer_ = 0.0f; isJump_ = false; standbyRotateActive_ = false; standbyRotatePhase_ = 0; standbyRotateTimer_ = 0.0f; standbyAnimationFream_ = 0.0f; standbyFream_ = 0.0f; }
 	bool IsClearAnimationFinished() const { return isClear_ && clearPhase_ == ClearPhase::kFinished; }
 
 };

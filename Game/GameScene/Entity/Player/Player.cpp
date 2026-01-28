@@ -8,6 +8,7 @@
 #include "../../Map/MapStruct.h"
 #include "../Enemy/Enemy.h"
 #include <numbers>
+#include <cmath>
 
 void Player::ImGui() {
 #ifdef USE_IMGUI
@@ -23,6 +24,12 @@ void Player::ImGui() {
 			ImGui::DragFloat3("Velocity", &velocity_.x);//速度
 			ImGui::DragFloat("Speed", &speed_, 0.0f, 2.0f);//速さ
 			ImGui::DragFloat("WallFrictio", &wallFrictio, 0.0f, 1.0f);//壁との摩擦
+			// Debug info for run animation
+			ImGui::Text("runTimer: %.3f", runAnimationTimer_);
+			ImGui::Text("vel.x: %.3f", velocity_.x);
+			ImGui::Text("isJump: %d", isJump_);
+			ImGui::Text("isKnockback: %d", isKnockback_);
+			ImGui::Text("onGround: %d", onGround_);
 		}
 		if (ImGui::CollapsingHeader("Jump")) {
 			ImGui::DragFloat("GravityAccleration", &kGravityAccleration);//重力
@@ -87,7 +94,7 @@ void Player::Update(Matrix4x4 viewMatrix) {
 	// ノックバック中の処理
 	if (isKnockback_) {
 		knockbackTimer_ += 1.0f / 60.0f;
-		
+
 		// ノックバック時間が終了したら通常状態に戻る
 		if (knockbackTimer_ >= kKnockbackDuration) {
 			isKnockback_ = false;
@@ -95,23 +102,26 @@ void Player::Update(Matrix4x4 viewMatrix) {
 			knockbackVelocity_ = { 0.0f, 0.0f, 0.0f };
 			// 通常の色に戻す
 			model_->GetMatrial()->SetColor({ 1.0f, 1.0f, 1.0f, 1.0f });
-		} else {
+		}
+		else {
 			// ノックバック速度を減衰させながら適用
 			float decayRate = 1.0f - (knockbackTimer_ / kKnockbackDuration);
 			velocity_.x = knockbackVelocity_.x * decayRate;
 			velocity_.y = knockbackVelocity_.y * decayRate;
-			
+
 			// ノックバック時の点滅効果（赤色）
 			float blinkRate = (std::sin)(knockbackTimer_ * 30.0f) * 0.5f + 0.5f;
 			model_->GetMatrial()->SetColor({ 1.0f, blinkRate * 0.3f, blinkRate * 0.3f, 1.0f });
 		}
-	} else {
+	}
+	else {
 		MoveInput();
 		// 無敵時間中の点滅
 		if (invincibleFream > 0) {
 			float blinkRate = (invincibleFream % 10 < 5) ? 0.5f : 1.0f;
 			model_->GetMatrial()->SetColor({ 1.0f, 1.0f, 1.0f, blinkRate });
-		} else {
+		}
+		else {
 			// 通常時の色
 			model_->GetMatrial()->SetColor({ 1.0f, 1.0f, 1.0f, 1.0f });
 		}
@@ -121,6 +131,10 @@ void Player::Update(Matrix4x4 viewMatrix) {
 
 	MapCollision();
 
+	// 走っているときのスケールアニメーション（先に適用し、ジャンプで上書き）
+	// 待機アニメーションを更新
+	StandbyAnimation();
+	RunAnimation();
 	JumpAnimation();
 
 	if (turnTimer_ > 0.0f) {
@@ -131,7 +145,7 @@ void Player::Update(Matrix4x4 viewMatrix) {
 		// 状態に応じた角度を取得する
 		float destinationRotationY = destinationRotationYTable[static_cast<uint32_t>(lrDirection_)];
 		// 自キャラの角度を設定する
-		float t = 1.0f - (turnTimer_ / kTimeTurn);
+		float t = 1.0f - (turnTimer_ / currentTurnDuration_);
 		transform_.rotate.y = Lerp(turnFirstRotationY_, destinationRotationY, t);
 	}
 
@@ -156,14 +170,21 @@ void Player::MoveInput() {
 			lrDirection_ = LRDirection::kRight;
 		}
 		// 回転開始処理
-		turnTimer_ = kTimeTurn;
+		if (standbyRotateActive_) {
+			currentTurnDuration_ = kTimeTurnQuick;
+		}
+		else {
+			currentTurnDuration_ = kTimeTurn;
+		}
+		turnTimer_ = currentTurnDuration_;
 		turnFirstRotationY_ = transform_.rotate.y;
 	}
 
 	// コヨーテタイムの更新
 	if (onGround_) {
 		coyoteTime_ = kCoyoteTimeDuration; // 地面にいる間はリセット
-	} else {
+	}
+	else {
 		coyoteTime_ -= 1.0f / 60.0f; // 空中では減らす
 	}
 
@@ -179,7 +200,7 @@ void Player::MoveInput() {
 			}
 		}
 		else {
-			 if (!doubleJump) {
+			if (!doubleJump) {
 				velocity_.y = kJumpAcceleration; // 上向きの速度
 				doubleJump = true;
 				isJump_ = true;
@@ -206,11 +227,150 @@ void Player::MoveInput() {
 }
 
 
+void Player::StandbyAnimation()
+{
+	//何もしていない時の処理
+	if (standbyRotateCooldown_ > 0) {
+		standbyRotateCooldown_--;
+	}
+
+	if (turnTimer_ > 0.0f) {
+		if (standbyRotateActive_) {
+			standbyRotateActive_ = false;
+			standbyRotatePhase_ = 0;
+			standbyRotateTimer_ = 0.0f;
+		}
+		if (0 == velocity_.x + velocity_.y + velocity_.z) {
+			standbyFream_++;
+		}
+		else {
+			standbyFream_ = 0;
+		}
+		if (standbyAnimationCoolTime_ > standbyFream_) {
+			standbyAnimationFream_++;
+		}
+		return;
+	}
+
+	if (0 == velocity_.x + velocity_.y + velocity_.z) {
+		standbyFream_++;
+	}
+	else {
+		standbyFream_ = 0;
+	}
+	if (standbyAnimationCoolTime_ > standbyFream_) {
+		standbyAnimationFream_++;
+	}
+
+	if (standbyFream_ >= standbyAnimationCoolTime_ && !standbyRotateActive_ && standbyRotateCooldown_ <= 0 && !isJump_ && !isKnockback_ && !isDead_ && !isClear_) {
+		standbyRotateActive_ = true;
+		standbyRotatePhase_ = 1; 
+		standbyRotateTimer_ = 0.0f;
+		if (lrDirection_ == LRDirection::kRight) {
+			standbyRotateStartY_ = 0.0f;
+			standbyRotateTargetY_ = std::numbers::pi_v<float> / 2.0f;
+		}
+		else {
+			standbyRotateStartY_ = std::numbers::pi_v<float>;
+			standbyRotateTargetY_ = std::numbers::pi_v<float> / 2.0f;
+		}
+		transform_.rotate.y = standbyRotateStartY_;
+	}
+
+	if (standbyRotateActive_) {
+		const float delta = 1.0f / 60.0f;
+		standbyRotateTimer_ += delta;
+
+		const int totalPhases = kStandbyRotateRepeat * 2;
+
+		const float duration = (standbyRotateDuration_ > 0.0f) ? standbyRotateDuration_ : 0.01f;
+		float t = (std::min)(standbyRotateTimer_ / duration, 1.0f);
+
+		// stronger ease-out (quintic): faster start, much slower end
+		// t in [0,1] -> ease-out: 1 - (1 - t)^5
+		t = 1.0f - std::pow(1.0f - t, 5.0f);
+
+		float a0, a1;
+		bool isGoPhase = (standbyRotatePhase_ % 2 == 1);
+		if (isGoPhase) {
+			a0 = standbyRotateStartY_;
+			a1 = standbyRotateTargetY_;
+		}
+		else {
+			a0 = standbyRotateTargetY_;
+			a1 = standbyRotateStartY_;
+		}
+
+		transform_.rotate.y = Lerp(a0, a1, t);
+
+		if (standbyRotateTimer_ >= duration) {
+			standbyRotatePhase_++;
+			standbyRotateTimer_ = 0.0f;
+
+			if (standbyRotatePhase_ > totalPhases) {
+				standbyRotateActive_ = false;
+				standbyRotatePhase_ = 0;
+				standbyRotateTimer_ = 0.0f;
+				standbyAnimationFream_ = 0;
+				standbyRotateCooldown_ = kStandbyRotateCooldownFrames;
+			}
+		}
+	}
+
+}
+
+void Player::RunAnimation()
+{
+	if (isJump_ || isKnockback_ || isDead_ || isClear_) {
+		transform_.scale.x = Lerp(transform_.scale.x, 1.0f, 0.25f);
+		transform_.scale.y = Lerp(transform_.scale.y, 1.0f, 0.25f);
+		transform_.scale.z = Lerp(transform_.scale.z, 1.0f, 0.25f);
+		runAnimationTimer_ = 0.0f;
+		return;
+	}
+
+	const float moveThreshold = 0.001f;
+	bool isMoving = std::abs(velocity_.x) > moveThreshold;
+
+	if (!isMoving) {
+		if (Input::PressKey(DIK_A) || Input::PressKey(DIK_D)) {
+			isMoving = true;
+		}
+		else {
+			float lx = GamePadInput::GetLeftStickX();
+			if (std::abs(lx) > 0.2f) {
+				isMoving = true;
+			}
+		}
+	}
+
+	if (isMoving) {
+		runAnimationTimer_ += 1.0f / 60.0f;
+
+		float bob = std::sin(runAnimationTimer_ * 12.0f) * 0.15f;
+
+		float squash = 1.0f - bob * 0.6f;
+
+		float targetY = (std::max)(0.5f, 1.0f + bob);
+		float targetX = (std::max)(0.6f, squash);
+		float targetZ = 1.0f;
+
+		transform_.scale.y = Lerp(transform_.scale.y, targetY, 0.45f);
+		transform_.scale.x = Lerp(transform_.scale.x, targetX, 0.45f);
+		transform_.scale.z = Lerp(transform_.scale.z, targetZ, 0.35f);
+	}
+	else {
+		transform_.scale.x = Lerp(transform_.scale.x, 1.0f, 0.25f);
+		transform_.scale.y = Lerp(transform_.scale.y, 1.0f, 0.25f);
+		transform_.scale.z = Lerp(transform_.scale.z, 1.0f, 0.25f);
+		runAnimationTimer_ = 0.0f;
+	}
+}
+
 void Player::JumpAnimation()
 {
 	if (!isJump_) {
 		animationFream_ = 0;
-		transform_.scale = { 1.0f, 1.0f, 1.0f };
 		return;
 	}
 	else {
@@ -272,10 +432,10 @@ void Player::DeathAnimation()
 	//	Lerp(1.0f, 0.0f, t)
 	//);
 	//transform_.rotate.y += 0.1f; // 回転	
-	
+
 	// 演出パターン2: 倒れる演出（X軸回転）
 	transform_.rotate.x = Lerp(0.0f, std::numbers::pi_v<float> / 2.0f, t);
-	
+
 	// 演出パターン3: 下に沈む演出
 	// transform_.translate.y -= 0.02f;
 }
@@ -292,7 +452,8 @@ void Player::ClearAnimation()
 			velocity_ = velocity_ + Vector3(0.0f, -kGravityAccleration / 60.0f, 0.0f);
 			velocity_.y = (std::max)(velocity_.y, -kLimitFallSpeed);
 			MapCollision();
-		} else {
+		}
+		else {
 			// 着地したら次のフェーズへ
 			velocity_ = { 0.0f, 0.0f, 0.0f };
 			clearPhase_ = ClearPhase::kTurnToCamera;
@@ -327,12 +488,12 @@ void Player::ClearAnimation()
 			t = (std::min)(t, 1.0f);
 
 			// バク転は後ろ向きに回転（X軸で-2π回転）
-			transform_.rotate.x = Lerp(0.0f, -std::numbers::pi_v<float> * 2.0f, t);
+			transform_.rotate.x = Lerp(0.0f, -std::numbers::pi_v<float> *2.0f, t);
 
 			// ジャンプの高さ（放物線）
 			// sin(π * t) で 0→1→0 の動きを作る
-			float jumpHeight = std::sin(std::numbers::pi_v<float> * t) * 1.5f;
-			
+			float jumpHeight = std::sin(std::numbers::pi_v<float> *t) * 1.5f;
+
 			// 初回のみ基準位置を保存
 			static float baseY = 0.0f;
 			if (clearAnimationTimer_ <= deltaTime) {
@@ -375,32 +536,38 @@ void Player::OnCollision(const Goal* goal)
 
 void Player::OnCollision(const Enemy* enemy)
 {
+	// クリア演出中は敵との当たり判定によるダメージを無効化
+	if (isClear_) {
+		return;
+	}
+
 	if (invincibleFream < 0) {
 		HP_--;
 		invincibleFream = invincibleTime;
-		
+
 		// ダメージ効果音を再生
 		if (damageSE_ >= 0) {
 			Audio::Play(damageSE_, false);
 		}
-		
+
 		// ノックバック処理
 		isKnockback_ = true;
 		knockbackTimer_ = 0.0f;
-		
+
 		// 敵の位置に応じてノックバック方向を決定
 		Vector3 enemyPos = enemy->GetTransform().translate;
 		Vector3 playerPos = transform_.translate;
-		
+
 		// プレイヤーが敵の右側にいるか左側にいるかで方向を決定
 		if (playerPos.x > enemyPos.x) {
 			// 右にノックバック
 			knockbackVelocity_.x = kKnockbackForceX;
-		} else {
+		}
+		else {
 			// 左にノックバック
 			knockbackVelocity_.x = -kKnockbackForceX;
 		}
-		
+
 		// 上方向にも少し飛ばす
 		knockbackVelocity_.y = kKnockbackForceY;
 	}

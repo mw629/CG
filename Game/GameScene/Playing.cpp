@@ -117,6 +117,8 @@ void Playing::Draw() {
 		enemy->Draw();
 	}
 
+	mapchip_.get()->Draw();
+
 	player_.get()->Draw();
 
 	for (Bullet* bullet : bullet_) {
@@ -124,7 +126,6 @@ void Playing::Draw() {
 	}
 	
 
-	mapchip_.get()->Draw();
 	goal_.get()->Draw();
 }
 

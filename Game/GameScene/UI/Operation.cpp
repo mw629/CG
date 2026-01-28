@@ -37,25 +37,26 @@ void Operation::Update() {
 		Operation_[i].get()->GetMatrial()->SetColor({1.0f,1.0f,1.0f,1.0f});
 		Operation_[i]->SettingWvp();
 	}
-	Vector4 red = { 1.0f,0.0f,0.0f,1.0f };
+	//Vector4 red = { 255.0f,156.0f,170.0f,1.0f };
+	Vector4 red = { 255.0f,0.0f,0.0f,1.0f };
 
 	if (Input::PressKey(DIK_W)) {
-		Operation_[W].get()->GetMatrial()->SetColor(red);
+		Operation_[W].get()->GetMatrial()->SetColor255(red);
 	}
 	if (Input::PressKey(DIK_A)) {
-		Operation_[A].get()->GetMatrial()->SetColor(red);
+		Operation_[A].get()->GetMatrial()->SetColor255(red);
 	}
 	if (Input::PressKey(DIK_S)) {
-		Operation_[S].get()->GetMatrial()->SetColor(red);
+		Operation_[S].get()->GetMatrial()->SetColor255(red);
 	}
 	if (Input::PressKey(DIK_D)) {
-		Operation_[D].get()->GetMatrial()->SetColor(red);
+		Operation_[D].get()->GetMatrial()->SetColor255(red);
 	}
 	if (Input::PressKey(DIK_SPACE)) {
-		Operation_[SPACE].get()->GetMatrial()->SetColor(red);
+		Operation_[SPACE].get()->GetMatrial()->SetColor255(red);
 	}
 	if (Input::PressKey(DIK_ESCAPE)) {
-		Operation_[ESC].get()->GetMatrial()->SetColor(red);
+		Operation_[ESC].get()->GetMatrial()->SetColor255(red);
 	}
 
 

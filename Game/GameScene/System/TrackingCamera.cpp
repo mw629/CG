@@ -16,6 +16,10 @@ void TrackingCamera::ImGui()
 		ImGui::DragFloat3("CameraPos", &transform_.translate.x);
 		ImGui::DragFloat3("CameraSize", &transform_.scale.x);
 		ImGui::DragFloat3("CameraRotate", &transform_.rotate.x);
+		// expose per-axis interpolation rates for tuning
+		ImGui::DragFloat("InterpRate X", &kInterpolationRateX, 0.001f, 0.0f, 1.0f);
+		ImGui::DragFloat("InterpRate Y", &kInterpolationRateY, 0.0001f, 0.0f, 1.0f);
+		ImGui::DragFloat("InterpRate Z", &kInterpolationRateZ, 0.001f, 0.0f, 1.0f);
 	}
 #endif
 }
@@ -58,8 +62,12 @@ void TrackingCamera::Update() {
 		targetLocation_.y = targetTransform.translate.y + targeOffset.y;
 	}
 
-	// 線形補間でスムーズに追従
-	transform_.translate = Lerp(transform_.translate, targetLocation_, kInterpolationRate);
+	// 軸ごとに異なる線形補間でスムーズに追従（Xを強め、Yを弱めるため）
+	Vector3 newTranslate;
+	newTranslate.x = Lerp(transform_.translate.x, targetLocation_.x, kInterpolationRateX);
+	newTranslate.y = Lerp(transform_.translate.y, targetLocation_.y, kInterpolationRateY);
+	newTranslate.z = Lerp(transform_.translate.z, targetLocation_.z, kInterpolationRateZ);
+	transform_.translate = newTranslate;
 
 	// 死亡時はマージン制限を無効化
 	if (!target_->IsDead()) {
