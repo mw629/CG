@@ -46,10 +46,10 @@ void GameScene::Initialize() {
 
 void GameScene::Update() {
 
-	if (Input::PushKey(DIK_Q)) {
-		nextSceneID_ = SceneID::kTitle;
-		sceneChangeRequest_ = true;
-	}
+	//if (Input::PushKey(DIK_Q)) {
+	//	nextSceneID_ = SceneID::kTitle;
+	//	sceneChangeRequest_ = true;
+	//}
 	if (playing_.get()->IsGoal()) {
 		nextSceneID_ = SceneID::kClear;
 		sceneChangeRequest_ = true;

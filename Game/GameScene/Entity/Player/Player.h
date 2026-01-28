@@ -118,7 +118,7 @@ private:
 
 	//　待機モーション
 	float standbyFream_ = 0.0f;
-	float standbyAnimationCoolTime_ = 120.0f;
+	float standbyAnimationCoolTime_ = 60.0f;
 	float standbyAnimationFream_ = 0.0f;
 
 	// Standby rotation animation state

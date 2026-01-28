@@ -421,9 +421,9 @@ void Player::DeathAnimation()
 	t = (std::min)(t, 1.0f);
 
 	// 死亡時の色変化（白→黒にフェード、透明度も下げる）
-// 	float colorValue = Lerp(1.0f, 0.0f, t);
-// 	float alpha = Lerp(1.0f, 0.0f, t);
-// 	model_->GetMatrial()->SetColor({ colorValue, colorValue, colorValue, alpha });
+	// 	float colorValue = Lerp(1.0f, 0.0f, t);
+	// 	float alpha = Lerp(1.0f, 0.0f, t);
+	// 	model_->GetMatrial()->SetColor({ colorValue, colorValue, colorValue, alpha });
 
 	// 演出パターン1: 縮みながら回転して消える
 	//transform_.scale = Vector3(
