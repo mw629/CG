@@ -11,6 +11,7 @@ enum class MapChipType {
 	kStopEnemySpawn = 4,//敵のスポーン位置
 	kRunEnemySpawn = 5,//敵のスポーン位置
 	kJumpEnemySpawn = 6,//敵のスポーン位置
+	kBOSSEnemySpawn = 7,//ボスのスポーン位置
 	kNone,
 };
 
