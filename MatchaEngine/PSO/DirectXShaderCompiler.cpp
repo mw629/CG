@@ -1,3 +1,5 @@
+#pragma comment(lib, "dxcompiler.lib")
+
 #include "DirectXShaderCompiler.h"
 #include <cassert>
 
