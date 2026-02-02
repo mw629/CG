@@ -20,7 +20,8 @@ namespace {
 	{"4",MapChipType::kStopEnemySpawn},//敵のスポーン位置
 	{"5", MapChipType::kRunEnemySpawn },
 	{"6", MapChipType::kJumpEnemySpawn },
-	{ "7", MapChipType::kNone },
+	{"7", MapChipType::kBOSSEnemySpawn },
+	{ "8", MapChipType::kNone },
 	};
 }
 

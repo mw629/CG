@@ -87,3 +87,16 @@ std::list<Vector3> MapChipField::GetEnemyPosition(int i)
 	}
 	return vector;
 }
+
+std::list<Vector3> MapChipField::GetBOSSPosition()
+{
+	std::list<Vector3> vector;
+	for (uint32_t y = 0; y < mapChipData_.height; ++y) {
+		for (uint32_t x = 0; x < mapChipData_.width; ++x) {
+			if (mapChipData_.data[y][x] == MapChipType::kBOSSEnemySpawn) {
+				vector.push_back(GetMapChipPositionByIndex(x, y));
+			}
+		}
+	}
+	return vector;
+}

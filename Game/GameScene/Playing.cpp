@@ -19,6 +19,11 @@ Playing::~Playing()
 			delete enemy;
 		}
 	}
+	for (BOSS* boss : boss_) {
+		if (boss) {
+			delete boss;
+		}
+	}
 }
 
 void Playing::ImGui() {
@@ -60,6 +65,8 @@ void Playing::Initialize(int stage) {
 
 	goal_.get()->Initialize(mapChipField_.get()->GetGoalPosition(), viewMatrix_);
 
+
+
 	for (int i = 0; i < bulletNum_; i++) {
 		Bullet* newBullet = new NormalBullet();
 		newBullet->Initialize(mapChipField_.get());
@@ -67,6 +74,8 @@ void Playing::Initialize(int stage) {
 	}
 
 	EnemySpawn();
+
+
 
 	HP_ = std::make_unique<HP>();
 	HP_.get()->Initialize();
@@ -117,6 +126,11 @@ void Playing::Draw() {
 		enemy->Draw();
 	}
 
+	for (BOSS* boss : boss_) {
+		boss->Draw();
+	}
+
+
 	mapchip_.get()->Draw();
 
 	player_.get()->Draw();
@@ -124,7 +138,6 @@ void Playing::Draw() {
 	for (Bullet* bullet : bullet_) {
 		bullet->Draw();
 	}
-	
 
 	goal_.get()->Draw();
 }
@@ -148,6 +161,12 @@ void Playing::EnemySpawn()
 		newEnemy->Initialize(enemyPos, viewMatrix_);
 		newEnemy->SetMapChipField(mapChipField_.get());
 		enemy_.push_back(newEnemy);
+	}
+	for (const auto& enemyPos : mapChipField_.get()->GetBOSSPosition()) {
+		BOSS* newBoss = new BOSS();
+		newBoss->Initialize(enemyPos, viewMatrix_);
+		newBoss->SetMapChipField(mapChipField_.get());
+		boss_.push_back(newBoss);
 	}
 
 }
