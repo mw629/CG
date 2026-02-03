@@ -40,7 +40,7 @@ void BOSS::StartFall()
 {
 	bossState_ = BossState::kFall;
 	velocity_.y = 0.0f;
-	onGround_ = false; // 落下を有効にする（Entity::MapCollision で判定）
+	onGround_ = false; 
 }
 
 void BOSS::UpdateFall()
@@ -49,10 +49,8 @@ void BOSS::UpdateFall()
 	velocity_.y -= gravity_ * kDeltaTime;
 	if (velocity_.y < maxFallSpeed_) velocity_.y = maxFallSpeed_;
 
-	// MapCollision を通して transform_.translate.y を更新（接地判定は Entity 側で行われる）
 	MapCollision();
 
-	// 接地したら帰還へ（縦上昇 → 横移動の二段階）
 	if (onGround_) {
 		fallFream_++;
 	}
@@ -102,7 +100,6 @@ void BOSS::UpdateReturnToReference()
 		if (t > 1.0f) t = 1.0f;
 		float e = EaseInOutCubic(t);
 
-		// Y は ReferencePoint_.y に固定しつつ、X を基準地へ移動
 		transform_.translate.x = Lerp(returnStartPos_.x, ReferencePoint_.x, e);
 		transform_.translate.y = ReferencePoint_.y;
 
@@ -111,7 +108,6 @@ void BOSS::UpdateReturnToReference()
 			bossState_ = BossState::kIdle;
 			velocity_.y = 0.0f;
 			onGround_ = true;
-			// actionStarted_ を false にして外部で再起動可能にする
 			actionStarted_ = false;
 		}
 	}
