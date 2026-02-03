@@ -51,6 +51,14 @@ void Playing::Initialize(int stage) {
 
 	//初期化
 	camera_.get()->Initialize(player_.get());
+
+	// ステージ9は固定カメラにする
+	if (stage == 9) {
+		Transform fixedCam = { {1.0f,1.0f,1.0f}, {0.0f,0.0f,0.0f}, {10.0f, 5.5f, -30.0f} };
+		camera_.get()->SetFixedCamera(fixedCam);
+		camera_.get()->SetFixedMode(true);
+	}
+
 	viewMatrix_ = camera_.get()->GetView();
 
 	mapchip_.get()->Initialize(mapChipField_.get(), viewMatrix_);
@@ -161,6 +169,7 @@ void Playing::EnemySpawn()
 		newBoss->SetMapChipField(mapChipField_.get());
 		enemy_.push_back(newBoss);
 	}
+
 
 }
 

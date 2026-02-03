@@ -45,6 +45,14 @@ void TrackingCamera::Initialize(Player* player)
 
 void TrackingCamera::Update() {
 
+	// if fixed mode is enabled, apply fixed transform and skip tracking
+	if (fixed_) {
+		transform_ = fixedTransform_;
+		camera_.get()->SetTransform(transform_);
+		camera_.get()->Update();
+		return;
+	}
+
 	Transform targetTransform = target_->GetTransform();
 	
 	// プレイヤーの速度を取得
@@ -82,6 +90,14 @@ void TrackingCamera::Update() {
 
 void TrackingCamera::Reset() {
 	if (!target_) return;
+
+	// fixed mode: reset to fixed transform
+	if (fixed_) {
+		transform_ = fixedTransform_;
+		camera_.get()->SetTransform(transform_);
+		camera_.get()->Update();
+		return;
+	}
 
 	Transform targetTransform = target_->GetTransform();
 	transform_.translate = AddVector3(targetTransform.translate, targeOffset);

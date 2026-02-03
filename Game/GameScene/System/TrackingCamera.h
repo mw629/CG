@@ -37,6 +37,10 @@ private:
 	bool hasPrev_;
 	Vector3 prevTargetPos_;
 
+	// fixed camera mode
+	bool fixed_ = false;
+	Transform fixedTransform_{};
+
 public:
 
 	void ImGui();
@@ -53,6 +57,9 @@ public:
 
 	Matrix4x4 GetView() { return camera_.get()->GetViewMatrix(); }
 
+	// fixed camera API
+	void SetFixedCamera(Transform transform) { fixedTransform_ = transform; }
+	void SetFixedMode(bool enable) { fixed_ = enable; }
 
 };
 

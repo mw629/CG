@@ -26,6 +26,8 @@ private:
 	float moveStartX_ = 0.0f;
 	float moveTargetX_ = 0.0f;
 
+	float fallFream_ = 0.0f;
+
 	// 落下用（Entity::velocity_ を使用）
 	float gravity_ = 1.2f;        // 重力加速度（任意調整）
 	float maxFallSpeed_ = -2.0f;  // 端速（下向き）

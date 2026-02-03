@@ -54,6 +54,10 @@ void BOSS::UpdateFall()
 
 	// 接地したら帰還へ（縦上昇 → 横移動の二段階）
 	if (onGround_) {
+		fallFream_++;
+	}
+	if (fallFream_ >= 30.0f) {
+		fallFream_ = 0.0f;
 		StartReturnToReference();
 	}
 }
