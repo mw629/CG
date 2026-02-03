@@ -420,24 +420,10 @@ void Player::DeathAnimation()
 	float t = deathAnimationTimer_ / kDeathAnimationDuration;
 	t = (std::min)(t, 1.0f);
 
-	// 死亡時の色変化（白→黒にフェード、透明度も下げる）
-	// 	float colorValue = Lerp(1.0f, 0.0f, t);
-	// 	float alpha = Lerp(1.0f, 0.0f, t);
-	// 	model_->GetMatrial()->SetColor({ colorValue, colorValue, colorValue, alpha });
+	
 
-	// 演出パターン1: 縮みながら回転して消える
-	//transform_.scale = Vector3(
-	//	Lerp(1.0f, 0.0f, t),
-	//	Lerp(1.0f, 0.0f, t),
-	//	Lerp(1.0f, 0.0f, t)
-	//);
-	//transform_.rotate.y += 0.1f; // 回転	
-
-	// 演出パターン2: 倒れる演出（X軸回転）
 	transform_.rotate.x = Lerp(0.0f, std::numbers::pi_v<float> / 2.0f, t);
 
-	// 演出パターン3: 下に沈む演出
-	// transform_.translate.y -= 0.02f;
 }
 
 void Player::ClearAnimation()
