@@ -47,6 +47,10 @@ private:
 	std::unique_ptr<HP> HP_;
 	std::unique_ptr<Operation> operation_;
 
+	// ボスの存在と討伐処理を追跡するフラグ
+	bool bossSpawned_ = false;           // マップ上にボスが配置されているか
+	bool bossDefeatedHandled_ = false;   // 討伐時の処理を一度だけ行うためのフラグ
+
 
 public:
 	~Playing();

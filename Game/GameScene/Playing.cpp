@@ -84,6 +84,10 @@ void Playing::Initialize(int stage) {
 	// フラグの初期化
 	isGoal_ = false;
 	isGameOver_ = false;
+
+	// ボス関連フラグ初期化
+	bossSpawned_ = false;
+	bossDefeatedHandled_ = false;
 }
 
 
@@ -110,6 +114,8 @@ void Playing::Update() {
 		// BOSS は Enemy を継承しているため、BOSS 固有の Update を呼ぶ必要がある場合は dynamic_cast で判定する
 		if (auto boss = dynamic_cast<BOSS*>(enemy)) {
 			boss->Update(player_.get(), viewMatrix_);
+			// ボスがスポーンしていることを記録
+			bossSpawned_ = true;
 		}
 		else {
 			enemy->Update(viewMatrix_);
@@ -121,6 +127,30 @@ void Playing::Update() {
 
 	camera_.get()->Update();
 	viewMatrix_ = camera_.get()->GetView();
+
+	// ボスが存在しており、まだ討伐処理を行っていない場合はチェック
+	if (bossSpawned_ && !bossDefeatedHandled_) {
+		bool anyBossAlive = false;
+		for (Enemy* enemy : enemy_) {
+			if (auto boss = dynamic_cast<BOSS*>(enemy)) {
+				// BOSS の死亡/演出状態をチェック
+				if (boss->IsActive() && !boss->IsPlayingDeathAnimation() && !boss->IsDead()) {
+					anyBossAlive = true;
+					break;
+				}
+			}
+		}
+
+		// 全てのボスが倒されている場合、プレイヤーのクリア演出を開始
+		if (!anyBossAlive) {
+			// プレイヤーのクリアフラグをtrueにし、演出を開始
+			player_.get()->SetClear(true);
+			// ここで goal と同等の扱いにする（クリア画面への遷移は GameScene が判定）
+			bossDefeatedHandled_ = true;
+		}
+	}
+
+	// 既存のゴール判定とクリア演出完了チェックは GameScene が利用するため残す
 }
 void Playing::Draw() {
 
