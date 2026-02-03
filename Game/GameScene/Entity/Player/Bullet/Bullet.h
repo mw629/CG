@@ -6,6 +6,7 @@
 class MapChipField;
 class Player;
 class Enemy;
+class BOSS;
 
 class Bullet :public Entity
 {
@@ -29,6 +30,7 @@ public:
 	virtual void IsShot(Player* player) {};
 
 	virtual void OnCollision(const Enemy* enemy) {};
+	virtual void OnCollision(const BOSS* boss) {};
 
 	bool IsActiv() { return isActive_; }
 

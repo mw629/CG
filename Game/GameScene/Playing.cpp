@@ -19,11 +19,6 @@ Playing::~Playing()
 			delete enemy;
 		}
 	}
-	for (BOSS* boss : boss_) {
-		if (boss) {
-			delete boss;
-		}
-	}
 }
 
 void Playing::ImGui() {
@@ -65,8 +60,6 @@ void Playing::Initialize(int stage) {
 
 	goal_.get()->Initialize(mapChipField_.get()->GetGoalPosition(), viewMatrix_);
 
-
-
 	for (int i = 0; i < bulletNum_; i++) {
 		Bullet* newBullet = new NormalBullet();
 		newBullet->Initialize(mapChipField_.get());
@@ -74,8 +67,6 @@ void Playing::Initialize(int stage) {
 	}
 
 	EnemySpawn();
-
-
 
 	HP_ = std::make_unique<HP>();
 	HP_.get()->Initialize();
@@ -108,7 +99,13 @@ void Playing::Update() {
 		bullet->Update(viewMatrix_);
 	}
 	for (Enemy* enemy : enemy_) {
-		enemy->Update(viewMatrix_);
+		// BOSS は Enemy を継承しているため、BOSS 固有の Update を呼ぶ必要がある場合は dynamic_cast で判定する
+		if (auto boss = dynamic_cast<BOSS*>(enemy)) {
+			boss->Update(player_.get(), viewMatrix_);
+		}
+		else {
+			enemy->Update(viewMatrix_);
+		}
 	}
 
 	mapchip_.get()->Update(viewMatrix_);
@@ -125,11 +122,6 @@ void Playing::Draw() {
 	for (Enemy* enemy : enemy_) {
 		enemy->Draw();
 	}
-
-	for (BOSS* boss : boss_) {
-		boss->Draw();
-	}
-
 
 	mapchip_.get()->Draw();
 
@@ -163,10 +155,11 @@ void Playing::EnemySpawn()
 		enemy_.push_back(newEnemy);
 	}
 	for (const auto& enemyPos : mapChipField_.get()->GetBOSSPosition()) {
-		BOSS* newBoss = new BOSS();
+		// BOSS は Enemy を継承したので Enemy* リストへ格納する
+		Enemy* newBoss = new BOSS();
 		newBoss->Initialize(enemyPos, viewMatrix_);
 		newBoss->SetMapChipField(mapChipField_.get());
-		boss_.push_back(newBoss);
+		enemy_.push_back(newBoss);
 	}
 
 }
@@ -220,7 +213,7 @@ void Playing::CheckAllCollisions() {
 
 		aabb1 = bullet->GetAABB();
 		for (Enemy* enemy : enemy_) {
-			// 死亡演出中または非アクティブな敵はスキップ
+			// 死亡演出中または非アクティブな敵はスキップ（BOSS もここに含まれる）
 			if (!enemy->IsActive() || enemy->IsPlayingDeathAnimation()) {
 				continue;
 			}

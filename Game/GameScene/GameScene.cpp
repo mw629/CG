@@ -63,7 +63,7 @@ void GameScene::Update() {
 	ChangeState();
 	StateUpdate();
 
-	skyDome_.get()->Update();
+	skyDome_.get()->Update(g_stage);
 }
 
 void GameScene::Draw() {

@@ -41,7 +41,7 @@ public:
 	bool IsActive() { return isActive_; }
 	bool IsDead() const { return isDead_; }
 	bool IsPlayingDeathAnimation() const { return isPlayingDeathAnimation_; }
-
-	void OnCollision(const Bullet* bullet);
+	
+	virtual void OnCollision(const Bullet* bullet);
 
 };

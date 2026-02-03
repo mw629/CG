@@ -21,6 +21,8 @@ public:
 
 	void Update(Matrix4x4 viewMatrix);
 
+	void Update(int stage);
+
 	void Update();
 
 	void Draw();

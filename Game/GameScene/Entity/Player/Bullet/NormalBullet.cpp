@@ -1,6 +1,7 @@
 #include "NormalBullet.h"
 #include "../Player.h"
 
+
 void NormalBullet::Initialize(MapChipField* mapChipField)
 {
 	ModelData modelData = LoadObjFile("resources/Bullet", "Bullet.obj");
@@ -54,6 +55,14 @@ void NormalBullet::HitWall()
 }
 
 void NormalBullet::OnCollision(const Enemy* enemy)
+{
+	(enemy);
+	if (isActive_) {
+		isActive_ = false;
+	}
+}
+
+void NormalBullet::OnCollision(const BOSS* enemy)
 {
 	(enemy);
 	if (isActive_) {

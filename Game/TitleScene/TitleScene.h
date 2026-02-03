@@ -25,6 +25,11 @@ private:
 	float titleBounceRate_ = 0.5f;    // 反発係数（0.0〜1.0）
 	bool titleLanded_ = false;        // 着地完了フラグ
 
+	// タイトル着地後の上下（ボビング）アニメーション用
+	float titleBobTimer_ = 0.0f;      // ボビング用タイマー（ラジアン単位）
+	float titleBobAmplitude_ = 8.0f;  // 振幅（ピクセル）
+	float titleBobSpeed_ = 0.10f;     // 1フレームあたりの角速度（ラジアン）
+
 public:
 
 	void ImGui()override;

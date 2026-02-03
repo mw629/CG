@@ -42,6 +42,18 @@ void SkyDome::Update(Matrix4x4 viewMatrix) {
 	fogModel->SettingWvp(viewMatrix);
 }
 
+void SkyDome::Update(int stage) {
+	skydomeModel->SetTransform(objTransform);
+	skydomeModel->SettingWvp(camera_.get()->GetViewMatrix());
+	if (stage == 9) {
+		skydomeModel->GetMatrial()->SetColor({ 1.0f,0.0f,0.0f,1.0f });
+	}
+	fogTransform.rotate.y += 3.14 / (60.0f * 10.0f);
+
+	fogModel->SetTransform(fogTransform);
+	fogModel->SettingWvp(camera_.get()->GetViewMatrix());
+}
+
 void SkyDome::Update() {
 
 	skydomeModel->SetTransform(objTransform);

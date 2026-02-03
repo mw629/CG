@@ -27,6 +27,7 @@ void TitleScene::Initialize()
 	titleCurrentY_ = -200.0f;
 	titleVelocityY_ = 0.0f;
 	titleLanded_ = false;
+	titleBobTimer_ = 0.0f; // ボビングタイマー初期化
 	Vector2 spritePos[2] = { {384.0f, titleCurrentY_}, {896.0f, titleCurrentY_ + 128.0f} };
 
 	backImage_.get()->SetSize(spritePos[0], spritePos[1]);
@@ -77,8 +78,21 @@ void TitleScene::Update()
 			if (std::abs(titleVelocityY_) < 1.0f) {
 				titleVelocityY_ = 0.0f;
 				titleLanded_ = true;
+				// 着地後にボビングを始めるためタイマーをリセット（任意)
+				titleBobTimer_ = 0.0f;
 			}
 		}
+
+		// スプライトの位置を更新
+		Vector2 spritePos[2] = { {384.0f, titleCurrentY_}, {896.0f, titleCurrentY_ + 128.0f} };
+		backImage_.get()->SetSize(spritePos[0], spritePos[1]);
+		backImage_->SettingWvp();
+	}
+	else {
+		// 着地後の上下（ボビング）アニメーション
+		titleBobTimer_ += titleBobSpeed_;
+		float bobOffset = std::sin(titleBobTimer_) * titleBobAmplitude_;
+		titleCurrentY_ = titleTargetY_ + bobOffset;
 
 		// スプライトの位置を更新
 		Vector2 spritePos[2] = { {384.0f, titleCurrentY_}, {896.0f, titleCurrentY_ + 128.0f} };

@@ -17,6 +17,7 @@ public:
 	void HitWall()override;
 
 	void OnCollision(const Enemy* enemy)override;
+	void OnCollision(const BOSS* enemy)override;
 
 };
 

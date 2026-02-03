@@ -285,7 +285,7 @@
     <ClCompile Include="Game\GameScene\UI\Operation.cpp">
       <Filter>ソース ファイル</Filter>
     </ClCompile>
-    <ClCompile Include="Game\GameScene\Entity\BOSS\BOSS.cpp">
+    <ClCompile Include="Game\GameScene\Entity\Enemy\BOSS\BOSS.cpp">
       <Filter>ソース ファイル</Filter>
     </ClCompile>
   </ItemGroup>
@@ -562,7 +562,7 @@
     <ClInclude Include="Game\GameScene\UI\Operation.h">
       <Filter>ヘッダー ファイル</Filter>
     </ClInclude>
-    <ClInclude Include="Game\GameScene\Entity\BOSS\BOSS.h">
+    <ClInclude Include="Game\GameScene\Entity\Enemy\BOSS\BOSS.h">
       <Filter>ヘッダー ファイル</Filter>
     </ClInclude>
   </ItemGroup>
