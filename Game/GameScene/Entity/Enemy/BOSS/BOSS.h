@@ -7,7 +7,7 @@ class Bullet;
 class BOSS : public Enemy
 {
 private:
-	int HP_ = 10;
+	int HP_ = 1;
 	Vector3 ReferencePoint_;
 
 	// ボスの状態

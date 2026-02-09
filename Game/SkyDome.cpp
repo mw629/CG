@@ -43,6 +43,9 @@ void SkyDome::Update(Matrix4x4 viewMatrix) {
 }
 
 void SkyDome::Update(int stage) {
+
+	objTransform.rotate.y -= 3.14 / (60.0f * 100.0f);
+
 	skydomeModel->SetTransform(objTransform);
 	skydomeModel->SettingWvp(camera_.get()->GetViewMatrix());
 	if (stage == 9) {
@@ -56,8 +59,11 @@ void SkyDome::Update(int stage) {
 
 void SkyDome::Update() {
 
+	objTransform.rotate.y -= 3.14 / (60.0f * 100.0f);
+
 	skydomeModel->SetTransform(objTransform);
 	skydomeModel->SettingWvp(camera_.get()->GetViewMatrix());
+
 
 	fogTransform.rotate.y += 3.14 / (60.0f * 10.0f);
 
