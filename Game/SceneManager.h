@@ -7,11 +7,11 @@ class SceneManager
 {
 private:
 
-	IScene* scene_;
+	std::unique_ptr<IScene> scene_;
 
 public:
 	SceneManager();
-	~SceneManager();
+	~SceneManager() = default;
 
 	void ImGui();
 
@@ -21,7 +21,9 @@ public:
 
 	void Draw();
 
-	IScene* CreateScene(int sceneID);
+	void Run();
+
+	std::unique_ptr<IScene> CreateScene(int sceneID);
 
 };
 

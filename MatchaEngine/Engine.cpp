@@ -170,6 +170,9 @@ void Engine::Setting()
 void Engine::PostDraw()
 {
 #ifdef _USE_IMGUI
+	//ImGuiの内部コマンドを生成
+	ImGui::Render();
+
 	//ImGuiの描画コマンド
 	ImGui_ImplDX12_RenderDrawData(ImGui::GetDrawData(), command->GetCommandList());
 #endif // _USE_IMGUI
@@ -209,6 +212,8 @@ void Engine::NewFrame() {
 }
 
 void Engine::EndFrame() {
+
+	PostDraw();
 
 	//コマンドリストの内容を確定させる。すべてのコマンドを積んでからCloseすること
 	hr_ = command->GetCommandList()->Close();

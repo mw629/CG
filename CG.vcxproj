@@ -142,6 +142,7 @@ copy "$(WindowsSdkDir)bin\$(TargetPlatformVersion)\x64\dxil.dll" "$(TargetDir)dx
     </Link>
   </ItemDefinitionGroup>
   <ItemGroup>
+    <ClCompile Include="Game\GameApplication.cpp" />
     <ClCompile Include="MatchaEngine\GameObjects\Object\Animation\CharacterAnimator.cpp" />
     <ClCompile Include="MatchaEngine\GameObjects\Light\LightManeger.cpp" />
     <ClCompile Include="MatchaEngine\GameObjects\Light\PointLight.cpp" />
@@ -286,6 +287,7 @@ copy "$(WindowsSdkDir)bin\$(TargetPlatformVersion)\x64\dxil.dll" "$(TargetDir)dx
     </FxCompile>
   </ItemGroup>
   <ItemGroup>
+    <ClInclude Include="Game\GameApplication.h" />
     <ClInclude Include="MatchaEngine\GameObjects\Object\Animation\CharacterAnimator.h" />
     <ClInclude Include="MatchaEngine\GameObjects\Light\LightManeger.h" />
     <ClInclude Include="MatchaEngine\GameObjects\Light\PointLight.h" />
