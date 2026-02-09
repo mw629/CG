@@ -6,7 +6,11 @@
 #include <imgui.h>
 #endif // _USE_IMGUI
 
-ID3D12Device* Camera::device_ = nullptr;
+
+Camera::Camera()
+{
+	Initialize();
+}
 
 void Camera::ImGui()
 {
@@ -25,7 +29,7 @@ void Camera::Initialize() {
 	viewMatrix_ = Inverse(MakeAffineMatrix(transform_.translate,transform_.scale,transform_.rotate));
 	
 	// カメラ用のConstantBufferを作成
-	cameraResource_ = GraphicsDevice::CreateBufferResource(device_, sizeof(CameraForGPU));
+	cameraResource_ = GraphicsDevice::CreateBufferResource(sizeof(CameraForGPU));
 	cameraResource_->Map(0, nullptr, reinterpret_cast<void**>(&cameraData_));
 	
 	// 初期値を設定

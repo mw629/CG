@@ -70,7 +70,7 @@ public:
 	void SetBillboard(bool flag) { isBillboard_ = flag; }
 
 	ModelData GetModelData() { return modelData_; }
-	MaterialFactory* GetMatrial() { return material_.get(); }
+	MaterialFactory* GetMartial() { return material_.get(); }
 	D3D12_GPU_DESCRIPTOR_HANDLE GetTextureSrvHandleGPU()const { return textureSrvHandleGPU_; }
 
 	D3D12_VERTEX_BUFFER_VIEW* GetVertexBufferView() { return &vertexBufferView_; }

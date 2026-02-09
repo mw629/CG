@@ -24,7 +24,7 @@ public:
 
 	void ImGui();
 
-	void CreatePointLight(ID3D12Device* device);
+	void CreatePointLight();
 
 	ID3D12Resource* GetDirectinalLightResource() { return spotLightResource_.Get(); }
 	SpotLightData* GetDirectinalLightData() { return spotLightData_; }

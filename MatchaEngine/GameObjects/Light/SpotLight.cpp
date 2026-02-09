@@ -38,9 +38,9 @@ void SpotLight::ImGui()
 #endif // _USE_IMGUI
 }
 
-void SpotLight::CreatePointLight(ID3D12Device* device)
+void SpotLight::CreatePointLight()
 {
-	spotLightResource_ = GraphicsDevice::CreateBufferResource(device, sizeof(SpotLightData));
+	spotLightResource_ = GraphicsDevice::CreateBufferResource( sizeof(SpotLightData));
 	spotLightData_ = nullptr;
 	spotLightResource_->Map(0, nullptr, reinterpret_cast<void**>(&spotLightData_));
 

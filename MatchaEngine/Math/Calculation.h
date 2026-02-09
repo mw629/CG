@@ -71,6 +71,8 @@ Vector3 Cross(const Vector3& v1, const Vector3& v2);
 
 
 float Lerp(float a, float b, float t);
+Vector3 Lerp(const Vector3& a, const Vector3& b, float t);
+Quaternion Lerp(const Quaternion& a, const Quaternion& b, float t);
 
 //行列の計算
 
@@ -194,6 +196,8 @@ Matrix4x4 IdentityMatrix();
 /// <param name="angle">回転角度</param>
 /// <returns>アフィン行列</returns>
 Matrix4x4 MakeAffineMatrix(Vector3 pos, Vector3 scale, Vector3 angle);
+
+Matrix4x4 MakeAffineMatrix(Vector3 pos, Vector3 scale,Quaternion  roteta);
 
 
 Matrix4x4 MakeAffineMatrix(Matrix4x4 translationMatrix, Vector3 scale, Matrix4x4 rotationMatrix);

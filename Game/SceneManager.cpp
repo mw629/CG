@@ -4,12 +4,8 @@
 
 SceneManager::SceneManager()
 {
-	scene_ = new GameScene();
-}
-
-SceneManager::~SceneManager()
-{
-	delete scene_;
+	scene_ = std::make_unique<GameScene>();
+	Initialize();
 }
 
 void SceneManager::ImGui() {
@@ -24,7 +20,6 @@ void SceneManager::Update() {
 	
 	if (scene_->GetSceneChangeRequest()) {
 		int NexrScene = scene_->GetNextSceneID();
-		delete  scene_;
 		scene_ = CreateScene(NexrScene);
 		scene_->Initialize();
 	}
@@ -36,11 +31,18 @@ void SceneManager::Draw() {
 	scene_->Draw();
 }
 
-IScene* SceneManager::CreateScene(int sceneID)
+void SceneManager::Run()
+{
+	ImGui();
+	Update();
+	Draw();
+}
+
+std::unique_ptr<IScene> SceneManager::CreateScene(int sceneID)
 {
 	switch (sceneID) {
-	case SceneID::Title: return new TitleScene();
-	case SceneID::Game:  return new GameScene();
+	case SceneID::Title: return std::make_unique<TitleScene>();
+	case SceneID::Game:  return std::make_unique<GameScene>();
 	default: return nullptr;
 	}
 }

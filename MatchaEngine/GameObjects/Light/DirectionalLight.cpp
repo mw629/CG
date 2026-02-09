@@ -29,9 +29,9 @@ void DirectionalLight::ImGui()
 
 
 
-void DirectionalLight::CreateDirectionalLight(ID3D12Device* device)
+void DirectionalLight::CreateDirectionalLight()
 {
-	directionalLightResource_ = GraphicsDevice::CreateBufferResource(device, sizeof(DirectionalLight));
+	directionalLightResource_ = GraphicsDevice::CreateBufferResource(sizeof(DirectionalLight));
 	directionalLightData_ = nullptr;
 	directionalLightResource_->Map(0, nullptr, reinterpret_cast<void**>(&directionalLightData_));
 

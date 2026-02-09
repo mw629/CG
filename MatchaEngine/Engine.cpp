@@ -116,11 +116,11 @@ void Engine::Setting()
 	graphicsPipelineState.get()->ALLPSOCreate(logStream, graphics.get()->GetDevice());
 
 	directionalLight = std::make_unique<DirectionalLight>();
-	directionalLight.get()->CreateDirectionalLight(graphics->GetDevice());
+	directionalLight.get()->CreateDirectionalLight();
 	pointLight = std::make_unique<PointLight>();
-	pointLight.get()->CreatePointLight(graphics->GetDevice());
+	pointLight.get()->CreatePointLight();
 	spotLight = std::make_unique<SpotLight>();
-	spotLight.get()->CreatePointLight(graphics->GetDevice());
+	spotLight.get()->CreatePointLight();
 
 	//ビューポート
 	viewportScissor->CreateViewPort();
@@ -150,30 +150,29 @@ void Engine::Setting()
 		directionalLight.get(), pointLight.get(), spotLight.get());
 	Texture::Initalize(graphics->GetDevice(), command->GetCommandList(), descriptorHeap.get(), textureLoader.get());
 
-	Camera::SetDevice(graphics.get()->GetDevice());
-	Line::SetDevice(graphics.get()->GetDevice());
-	Grid::SetDevice(graphics.get()->GetDevice());
-	Model::SetDevice(graphics.get()->GetDevice());
-	Particle::SetDevice(graphics.get()->GetDevice());
-	Triangle::SetDevice(graphics.get()->GetDevice());
-	Sprite::SetDevice(graphics.get()->GetDevice());
-	Sphere::SetDevice(graphics.get()->GetDevice());
+	CharacterAnimator::SetData(graphics.get()->GetDevice(), descriptorHeap.get());
+	//TransformAnimation::SetData(graphics.get()->GetDevice(), descriptorHeap.get());
 
-	Line::SetScreenSize({ (float)kClientWidth_,(float)kClientHeight_ });
-	Grid::SetScreenSize({ (float)kClientWidth_,(float)kClientHeight_ });
-	Model::SetScreenSize({ (float)kClientWidth_,(float)kClientHeight_ });
-	Particle::SetScreenSize({ (float)kClientWidth_,(float)kClientHeight_ });
-	Triangle::SetScreenSize({ (float)kClientWidth_,(float)kClientHeight_ });
-	Sprite::SetScreenSize({ (float)kClientWidth_,(float)kClientHeight_ });
-	Sphere::SetScreenSize({ (float)kClientWidth_,(float)kClientHeight_ });
+
+	Vector2 Client = { (float)kClientWidth_,(float)kClientHeight_ };
+	ObjectBase::SetObjectResource(Client);
+	Line::SetScreenSize(Client);
+	Grid::SetScreenSize(Client);
+	Particle::SetScreenSize(Client);
+	Triangle::SetScreenSize(Client);
+	Sprite::SetScreenSize(Client);
 
 	Particle::SetDescriptorHeap(descriptorHeap.get());
+	Particle::SetDevice(graphics.get()->GetDevice());
 }
 
 
 void Engine::PostDraw()
 {
 #ifdef _USE_IMGUI
+	//ImGuiの内部コマンドを生成
+	ImGui::Render();
+
 	//ImGuiの描画コマンド
 	ImGui_ImplDX12_RenderDrawData(ImGui::GetDrawData(), command->GetCommandList());
 #endif // _USE_IMGUI
@@ -213,6 +212,8 @@ void Engine::NewFrame() {
 }
 
 void Engine::EndFrame() {
+
+	PostDraw();
 
 	//コマンドリストの内容を確定させる。すべてのコマンドを積んでからCloseすること
 	hr_ = command->GetCommandList()->Close();

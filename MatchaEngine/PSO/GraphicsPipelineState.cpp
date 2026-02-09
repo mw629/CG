@@ -16,6 +16,10 @@ void GraphicsPipelineState::CreatePSO(ShaderName shaderName, BlendMode blendmode
 	std::unique_ptr<ShaderCompile>  shaderCompile = std::make_unique<ShaderCompile>();
 	std::unique_ptr<DepthStencilState> depthStencilState = std::make_unique<DepthStencilState>();
 
+	std::string info = std::string("CreatePSO: shader=") + ShaderNameToString(shaderName) +
+		", blend=" + BlendModeToString(blendmode) + "\n";
+	Log(os, info);
+
 
 	Log(os, "///PSOの生成///\n");
 	//DXCの初期化//

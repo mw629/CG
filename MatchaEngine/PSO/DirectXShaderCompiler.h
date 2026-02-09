@@ -1,6 +1,9 @@
 #pragma once
 #include <wrl.h>
 #include <dxcapi.h>
+
+#pragma comment(lib, "dxcompiler.lib")
+
 class DirectXShaderCompiler
 {
 private:

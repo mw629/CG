@@ -32,9 +32,9 @@ void PointLight::ImGui()
 #endif // _USE_IMGUI
 }
 
-void PointLight::CreatePointLight(ID3D12Device* device)
+void PointLight::CreatePointLight()
 {
-	pointLightResource_ = GraphicsDevice::CreateBufferResource(device, sizeof(PointLightData));
+	pointLightResource_ = GraphicsDevice::CreateBufferResource(sizeof(PointLightData));
 	pointLightData_ = nullptr;
 	pointLightResource_->Map(0, nullptr, reinterpret_cast<void**>(&pointLightData_));
 
