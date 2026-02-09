@@ -149,9 +149,7 @@ copy "$(WindowsSdkDir)bin\$(TargetPlatformVersion)\x64\dxil.dll" "$(TargetDir)dx
     <ClCompile Include="MatchaEngine\GameObjects\Primitive.cpp" />
     <ClCompile Include="MatchaEngine\GameObjects\Object\ObjectBase.cpp" />
     <ClCompile Include="Shared\ParticleManager.cpp" />
-    <ClCompile Include="Game\GameScene\Entity\Enemy.cpp" />
     <ClCompile Include="Game\Fade.cpp" />
-    <ClCompile Include="Game\GameScene\Entity\Entity.cpp" />
     <ClCompile Include="MatchaEngine\GameObjects\Camera\Camera.cpp" />
     <ClCompile Include="Game\GameScene.cpp" />
     <ClCompile Include="MatchaEngine\Input\GamePadInput.cpp" />
@@ -222,7 +220,6 @@ copy "$(WindowsSdkDir)bin\$(TargetPlatformVersion)\x64\dxil.dll" "$(TargetDir)dx
     <ClCompile Include="Game\SceneManager.cpp" />
     <ClCompile Include="MatchaEngine\Resource\ModelManager.cpp" />
     <ClCompile Include="MatchaEngine\GameObjects\Particle.cpp" />
-    <ClCompile Include="Game\GameScene\Entity\Player.cpp" />
     <ClCompile Include="MatchaEngine\GameObjects\Light\SpotLight.cpp" />
     <ClCompile Include="MatchaEngine\GameObjects\Object\Animation\TransformAnimation.cpp" />
   </ItemGroup>
@@ -294,10 +291,7 @@ copy "$(WindowsSdkDir)bin\$(TargetPlatformVersion)\x64\dxil.dll" "$(TargetDir)dx
     <ClInclude Include="MatchaEngine\GameObjects\Primitive.h" />
     <ClInclude Include="MatchaEngine\GameObjects\Object\ObjectBase.h" />
     <ClInclude Include="Shared\ParticleManager.h" />
-    <ClInclude Include="Game\GameScene\Entity\Enemy.h" />
     <ClInclude Include="Game\Fade.h" />
-    <ClInclude Include="Game\GameScene\Entity\Entity.h" />
-    <ClInclude Include="Game\GameScene\System\GameState.h" />
     <ClInclude Include="Game\IScene.h" />
     <ClInclude Include="MatchaEngine\GameObjects\Camera\Camera.h" />
     <ClInclude Include="Game\GameScene.h" />
@@ -359,7 +353,6 @@ copy "$(WindowsSdkDir)bin\$(TargetPlatformVersion)\x64\dxil.dll" "$(TargetDir)dx
     <ClInclude Include="Game\SceneManager.h" />
     <ClInclude Include="MatchaEngine\Resource\ModelManager.h" />
     <ClInclude Include="MatchaEngine\GameObjects\Particle.h" />
-    <ClInclude Include="Game\GameScene\Entity\Player.h" />
     <ClInclude Include="MatchaEngine\GameObjects\Light\SpotLight.h" />
     <ClInclude Include="MatchaEngine\GameObjects\Object\Animation\TransformAnimation.h" />
   </ItemGroup>
