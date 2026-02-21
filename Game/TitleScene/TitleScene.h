@@ -1,6 +1,6 @@
 #pragma once
 #include <Engine.h>
-#include "IScene.h"
+#include "../IScene.h"
 
 class TitleScene:public IScene
 {

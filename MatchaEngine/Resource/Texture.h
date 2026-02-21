@@ -11,7 +11,7 @@ class Texture
 {
 public:
 
-	static void Initalize(ID3D12Device* graphicsDevice, ID3D12GraphicsCommandList* commandList, DescriptorHeap* descriptorHeap, TextureLoader* textureLoader);
+	static void Initialize(ID3D12Device* graphicsDevice, ID3D12GraphicsCommandList* commandList, DescriptorHeap* descriptorHeap, TextureLoader* textureLoader);
 
 	int CreateTexture(const std::string& filePath);
 

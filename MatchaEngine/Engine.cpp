@@ -148,7 +148,7 @@ void Engine::Setting()
 
 	Draw::Initialize(command.get()->GetCommandList(), graphicsPipelineState.get(),
 		directionalLight.get(), pointLight.get(), spotLight.get());
-	Texture::Initalize(graphics->GetDevice(), command->GetCommandList(), descriptorHeap.get(), textureLoader.get());
+	Texture::Initialize(graphics->GetDevice(), command->GetCommandList(), descriptorHeap.get(), textureLoader.get());
 
 	CharacterAnimator::SetData(graphics.get()->GetDevice(), descriptorHeap.get());
 	//TransformAnimation::SetData(graphics.get()->GetDevice(), descriptorHeap.get());
