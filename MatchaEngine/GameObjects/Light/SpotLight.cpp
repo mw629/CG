@@ -12,13 +12,13 @@ void SpotLight::ImGui()
 	if (::ImGui::TreeNode("SpotLight"))
 	{
 		::ImGui::ColorEdit3("Color", &color_.x);
-		::ImGui::DragFloat3("Position", &position_.x, 0.01f, -100.0f, 100.0f);
-		::ImGui::DragFloat("Intensity", &intensity_, 0.01f, 0.0f, 10.0f);
-		::ImGui::DragFloat3("Direction", &direction_.x, 0.01f, -100.0f, 100.0f);
-		::ImGui::DragFloat("Distance", &distance_, 0.01f, -100.0f, 100.0f);
-		::ImGui::DragFloat("Decay", &decay_, 0.01f, -100.0f, 100.0f);
-		::ImGui::DragFloat("CosAngle", &cosAngle_, 0.01f, -100.0f, 100.0f);
-		::ImGui::DragFloat("CosFalloffStart", &cosFalloffStart_, 0.01f, -100.0f, 100.0f);
+		::ImGui::DragFloat3("Position", &position_.x, 0.01f, -100.0f, 100.0f, "%.2f");
+		::ImGui::DragFloat("Intensity", &intensity_, 0.01f, 0.0f, 10.0f, "%.2f");
+		::ImGui::DragFloat3("Direction", &direction_.x, 0.01f, -100.0f, 100.0f, "%.2f");
+		::ImGui::DragFloat("Distance", &distance_, 0.01f, -100.0f, 100.0f, "%.2f");
+		::ImGui::DragFloat("Decay", &decay_, 0.01f, -100.0f, 100.0f, "%.2f");
+		::ImGui::DragFloat("CosAngle", &cosAngle_, 0.01f, -100.0f, 100.0f, "%.2f");
+		::ImGui::DragFloat("CosFalloffStart", &cosFalloffStart_, 0.01f, -100.0f, 100.0f, "%.2f");
 
 		// バッファに反映
 		if (spotLightData_)

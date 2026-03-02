@@ -18,18 +18,19 @@ void ParticleManager::ImGui() {
 	oss << "Particle###" << static_cast<const void*>(this);
 	const std::string windowTitle = oss.str();
 
+	ImGui::SetNextWindowSize(ImVec2(350, 300), ImGuiCond_FirstUseEver);
 	if (ImGui::Begin(windowTitle.c_str())) {
 		ImGui::PushID(this);
 
 		if (ImGui::CollapsingHeader("Emitter")) {
 			if (ImGui::CollapsingHeader("Transform")) {
-				ImGui::DragFloat3("Position", &emitter_.transform.translate.x, 0.01f);
-				ImGui::DragFloat3("Rotation", &emitter_.transform.rotate.x, 0.01f);
-				ImGui::DragFloat3("Scale", &emitter_.transform.scale.x, 0.01f);
+				ImGui::DragFloat3("Position", &emitter_.transform.translate.x, 0.01f, -FLT_MAX, FLT_MAX, "%.2f");
+				ImGui::DragFloat3("Rotation", &emitter_.transform.rotate.x, 0.01f, -FLT_MAX, FLT_MAX, "%.2f");
+				ImGui::DragFloat3("Scale", &emitter_.transform.scale.x, 0.01f, -FLT_MAX, FLT_MAX, "%.2f");
 			}
 			ImGui::DragInt("Count", reinterpret_cast<int*>(&emitter_.count), 1, 0, 10000);
-			ImGui::DragFloat("Frequency", &emitter_.frequency, 0.01f, 0.0f, 10.0f);
-			ImGui::DragFloat("Frequency Time", &emitter_.frequencyTime, 0.01f, 0.0f, 9999.0f);
+			ImGui::DragFloat("Frequency", &emitter_.frequency, 0.01f, 0.0f, 10.0f, "%.2f");
+			ImGui::DragFloat("Frequency Time", &emitter_.frequencyTime, 0.01f, 0.0f, 9999.0f, "%.2f");
 		}
 
 		if (ImGui::Button("Add Particle")) {

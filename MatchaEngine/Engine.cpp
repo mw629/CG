@@ -293,15 +293,11 @@ void Engine::Debug()
 {
 #ifdef _USE_IMGUI
 
+	ImGui::SetNextWindowSize(ImVec2(400, 200), ImGuiCond_FirstUseEver);
 	ImGui::Begin("Debug Info");
 
-	//フレームレート (FPS)
 	ImGui::Text("FPS: %.1f", ImGui::GetIO().Framerate);
 
-	// 1フレームあたりの時間 (ms)
-	//ImGui::Text("Frame Time: %.3f ms", 1000.0f / ImGui::GetIO().Framerate);
-
-	//現在のフレーム数(自分でカウントする必要あり)
 	static int frameCount = 0;
 	frameCount++;
 	ImGui::Text("Frame Count: %d", frameCount);
@@ -313,7 +309,6 @@ void Engine::Debug()
 
 	ImGui::End();
 
-	// F1キーでDirectionalLightの表示をトグル
 	static bool showLight = false;
 	if (ImGui::IsKeyPressed(ImGuiKey_F1))
 	{

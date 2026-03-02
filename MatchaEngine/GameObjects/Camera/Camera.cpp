@@ -16,9 +16,9 @@ void Camera::ImGui()
 {
 #ifdef _USE_IMGUI
 	if (ImGui::CollapsingHeader("Camera")) {
-		ImGui::DragFloat3("CameraPos", &transform_.translate.x);
-		ImGui::DragFloat3("CameraSize", &transform_.scale.x);
-		ImGui::DragFloat3("CameraRotate", &transform_.rotate.x);
+		ImGui::DragFloat3("CameraPos", &transform_.translate.x, 0.01f, -FLT_MAX, FLT_MAX, "%.2f");
+		ImGui::DragFloat3("CameraSize", &transform_.scale.x, 0.01f, -FLT_MAX, FLT_MAX, "%.2f");
+		ImGui::DragFloat3("CameraRotate", &transform_.rotate.x, 0.01f, -FLT_MAX, FLT_MAX, "%.2f");
 	}
 	ImGui::Checkbox("debugCamera", &isDebugCamera_);
 #endif // _USE_IMGUI

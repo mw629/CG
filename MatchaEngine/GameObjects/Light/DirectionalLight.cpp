@@ -11,8 +11,8 @@ void DirectionalLight::ImGui()
 	if (::ImGui::TreeNode("DirectionalLight"))
 	{
 		::ImGui::ColorEdit3("Color", &color.x);
-		::ImGui::DragFloat3("Direction", &direction.x, 0.01f, -1.0f, 1.0f);
-		::ImGui::DragFloat("Intensity", &intensity, 0.01f, 0.0f, 10.0f);
+		::ImGui::DragFloat3("Direction", &direction.x, 0.01f, -1.0f, 1.0f, "%.2f");
+		::ImGui::DragFloat("Intensity", &intensity, 0.01f, 0.0f, 10.0f, "%.2f");
 
 		// バッファに反映
 		if (directionalLightData_)

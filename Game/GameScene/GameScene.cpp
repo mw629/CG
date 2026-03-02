@@ -14,7 +14,7 @@ void GameScene::ImGui()
 	for (int i = 0, n = static_cast<int>(particle_.size()); i < n; ++i) {
 		particle_[i].get()->ImGui();
 	}
-	ImGui::DragFloat3("SpritePos", &spriteData_.transform.translate.x);
+	ImGui::DragFloat3("SpritePos", &spriteData_.transform.translate.x, 0.01f, -FLT_MAX, FLT_MAX, "%.2f");
 
 	model_.get()->ImGui();
 #endif // _USE_IMGUI
