@@ -1,4 +1,3 @@
-
 #pragma once
 
 #include <xaudio2.h>
@@ -9,6 +8,7 @@
 #include <vector>
 #include <string>
 #include <cassert>
+#include <memory>
 
 // 必要なライブラリをリンク
 #pragma comment(lib, "xaudio2.lib")
@@ -24,7 +24,7 @@ private:
     // 音声データを格納する構造体
     struct SoundData {
         WAVEFORMATEX wfex{};
-        BYTE* pBuffer = nullptr;
+        std::unique_ptr<BYTE[]> pBuffer;
         unsigned int bufferSize = 0;
         IXAudio2SourceVoice* pSourceVoice = nullptr;
         std::string filePath;

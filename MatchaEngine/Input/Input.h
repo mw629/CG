@@ -1,7 +1,8 @@
 #pragma once  
 #define DIRECTINPUT_VERSION 0x0800  
 #include <dinput.h>  
-#include <cstdint>  
+#include <cstdint>
+#include <wrl.h>
 #include "../Core/VariableTypes.h" 
 
 #pragma comment(lib,"dinput8.lib")  
@@ -10,14 +11,14 @@
 class Input  
 {  
 private:  
-	IDirectInput8* directInput_{};
+	Microsoft::WRL::ComPtr<IDirectInput8> directInput_;
 	HRESULT result{};
-	IDirectInputDevice8* keyboard{};
+	Microsoft::WRL::ComPtr<IDirectInputDevice8> keyboard_;
 	
 	BYTE key_[256] = {};  
 	BYTE prevKey_[256] = {};  
 
-	IDirectInputDevice8* mouse{};
+	Microsoft::WRL::ComPtr<IDirectInputDevice8> mouse_;
 
 	DIMOUSESTATE mouseState{};  
 	DIMOUSESTATE prevMouseState{};  

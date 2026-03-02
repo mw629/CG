@@ -34,12 +34,10 @@ Sprite::~Sprite()
 	if (wvpData_) {
 		wvpResource_->Unmap(0, nullptr);
 	}
-	// ComPtrは自動的に解放される
+	// ComPtrとunique_ptrは自動的に解放される
 	vertexResource_.Reset();
 	indexResource_.Reset();
 	wvpResource_.Reset();
-
-	delete material_;
 }
 
 void Sprite::Initialize(SpriteData spriteData, int textureHandle)
@@ -52,7 +50,7 @@ void Sprite::Initialize(SpriteData spriteData, int textureHandle)
 	SetTextureArea(spriteData.textureArea);
 
 
-	material_ = new MaterialFactory();
+	material_ = std::make_unique<MaterialFactory>();
 	material_->CreateMatrial();
 	CreateSprite();
 }

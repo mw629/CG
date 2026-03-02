@@ -26,6 +26,12 @@ void Audio::Finalize() {
         Unload(static_cast<int>(i));
     }
 
+    // マスターボイスの破棄
+    if (sMasterVoice) {
+        sMasterVoice->DestroyVoice();
+        sMasterVoice = nullptr;
+    }
+
     // XAudio2の解放 
     sXaudio2.Reset();
 
@@ -96,11 +102,11 @@ int Audio::Load(const std::string& filePath) {
     data.wfex = *pFormat;
     CoTaskMemFree(pFormat); // WAVEFORMATEXを解放
     data.bufferSize = static_cast<UINT32>(mediaData.size());
-    data.pBuffer = new BYTE[data.bufferSize];
+    data.pBuffer = std::make_unique<BYTE[]>(data.bufferSize);
     data.filePath = filePath;
-    memcpy(data.pBuffer, mediaData.data(), data.bufferSize);
+    memcpy(data.pBuffer.get(), mediaData.data(), data.bufferSize);
 
-    sSoundData.push_back(data);
+    sSoundData.push_back(std::move(data));
 
     return static_cast<int>(sSoundData.size() - 1);
 }
@@ -110,8 +116,7 @@ void Audio::Unload(int soundHandle) {
 
     Stop(soundHandle); // 再生中なら停止してボイスを破棄
 
-    delete[] sSoundData[soundHandle].pBuffer;
-    sSoundData[soundHandle].pBuffer = nullptr;
+    sSoundData[soundHandle].pBuffer.reset();
     sSoundData[soundHandle].bufferSize = 0;
 }
 
@@ -134,7 +139,7 @@ int Audio::Play(int soundHandle, bool loop, float volume) {
 
     // 2. オーディオバッファの設定
     XAUDIO2_BUFFER buffer = {};
-    buffer.pAudioData = data.pBuffer;
+    buffer.pAudioData = data.pBuffer.get();
     buffer.AudioBytes = data.bufferSize;
     buffer.Flags = XAUDIO2_END_OF_STREAM;
     buffer.LoopCount = loop ? XAUDIO2_LOOP_INFINITE : 0;

@@ -1,6 +1,7 @@
 #pragma once
 #include <wrl.h>
 #include <d3d12.h>
+#include <memory>
 #include "Core/VariableTypes.h"
 #include "MaterialFactory.h"
 #include "RenderState.h"
@@ -16,7 +17,7 @@ class Sprite
 private:
 
 	Transform transform_;
-	MaterialFactory* material_;
+	std::unique_ptr<MaterialFactory> material_;
 	D3D12_GPU_DESCRIPTOR_HANDLE textureSrvHandleGPU_;
 
 	Microsoft::WRL::ComPtr<ID3D12Resource> vertexResource_;
@@ -78,7 +79,7 @@ public:
 
 	Transform& GetTransform() { return transform_; }
 	
-	MaterialFactory* GetMartial() { return material_; }
+	MaterialFactory* GetMartial() { return material_.get(); }
 	D3D12_GPU_DESCRIPTOR_HANDLE GetTextureSrvHandleGPU() { return textureSrvHandleGPU_; }
 
 private:
@@ -90,5 +91,6 @@ public:
 	BlendMode GetBlend() { return blend_; }
 
 };
+
 
 

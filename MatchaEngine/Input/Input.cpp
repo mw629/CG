@@ -12,10 +12,9 @@ namespace {
 }
 
 void Input::Initialize(WNDCLASS wc, HWND hwnd) {
-	directInput_=nullptr;
 	result = DirectInput8Create(
 		wc.hInstance, DIRECTINPUT_VERSION, IID_IDirectInput8,
-		(void**)&directInput_, nullptr);
+		reinterpret_cast<void**>(directInput_.GetAddressOf()), nullptr);
 	assert(SUCCEEDED(result));
 	CreateInpuDevice();
 	SetInputType();
@@ -24,29 +23,27 @@ void Input::Initialize(WNDCLASS wc, HWND hwnd) {
 
 void Input::CreateInpuDevice()
 {
-	keyboard = nullptr;
-	result = directInput_->CreateDevice(GUID_SysKeyboard, &keyboard, NULL);
+	result = directInput_->CreateDevice(GUID_SysKeyboard, keyboard_.GetAddressOf(), NULL);
 	assert(SUCCEEDED(result));
-	mouse = nullptr;
-	result = directInput_->CreateDevice(GUID_SysMouse, &mouse, NULL);
+	result = directInput_->CreateDevice(GUID_SysMouse, mouse_.GetAddressOf(), NULL);
 	assert(SUCCEEDED(result));
 }
 
 void Input::SetInputType()
 {
 	//入力データ形式のセット
-	result = keyboard->SetDataFormat(&c_dfDIKeyboard);//標準形式
+	result = keyboard_->SetDataFormat(&c_dfDIKeyboard);//標準形式
 	assert(SUCCEEDED(result));
-	result = mouse->SetDataFormat(&c_dfDIMouse);
+	result = mouse_->SetDataFormat(&c_dfDIMouse);
 	assert(SUCCEEDED(result));
 }
 
 void Input::SetExclusionLevel(HWND hwnd)
 {
 	DWORD flags = DISCL_FOREGROUND | DISCL_NONEXCLUSIVE | DISCL_NOWINKEY;
-	result = keyboard->SetCooperativeLevel(hwnd, flags);
+	result = keyboard_->SetCooperativeLevel(hwnd, flags);
 	assert(SUCCEEDED(result));
-	result = mouse->SetCooperativeLevel(hwnd, flags);
+	result = mouse_->SetCooperativeLevel(hwnd, flags);
 	assert(SUCCEEDED(result));
 }
 
@@ -54,12 +51,12 @@ void Input::Updata()
 {
 	//kyeの取得
 	std::memcpy(prevKey_, key_, sizeof(key_));
-	keyboard->Acquire();
-	keyboard->GetDeviceState(sizeof(key_), key_);
+	keyboard_->Acquire();
+	keyboard_->GetDeviceState(sizeof(key_), key_);
 	//マウスの取得
 	std::memcpy(&prevMouseState,&mouseState, sizeof(mouseState));
-	mouse->Acquire();
-	mouse->GetDeviceState(sizeof(DIMOUSESTATE), &mouseState);
+	mouse_->Acquire();
+	mouse_->GetDeviceState(sizeof(DIMOUSESTATE), &mouseState);
 	SetKey();
 }
 
