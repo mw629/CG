@@ -17,7 +17,6 @@ Triangle::~Triangle()
 	vertexResource_.Reset();
 	wvpResource_.Reset();
 
-	delete material_;
 }
 
 namespace {
@@ -39,8 +38,8 @@ void Triangle::Initialize(D3D12_GPU_DESCRIPTOR_HANDLE textureSrvHandleGPU) {
 	vertex_[1] = { 0.0f,0.1f,0.0f,1.0f };
 	vertex_[2] = { 0.1f,-0.1f,0.0f,1.0f };
 
-	material_ = new MaterialFactory();
-	material_->CreateMatrial();
+	material_ = std::make_unique<MaterialFactory>();
+	material_.get()->CreateMatrial();
 
 }
 
@@ -114,7 +113,7 @@ void Triangle::SetShape()
 }
 
 
-void Triangle::SetTrandform(Transform transform)
+void Triangle::SetTransform(Transform transform)
 {
 	transform_.translate = transform.translate;
 	transform_.scale = transform.scale;

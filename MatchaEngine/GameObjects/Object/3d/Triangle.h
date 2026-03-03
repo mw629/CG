@@ -2,6 +2,7 @@
 #include "VariableTypes.h"
 #include "MaterialFactory.h"
 #include "RenderState.h"
+#include <memory>
 
 class Triangle
 {
@@ -9,7 +10,7 @@ private:
 
 	Transform transform_{};
 	Vector4 vertex_[3];
-	MaterialFactory* material_{};
+	std::unique_ptr<MaterialFactory> material_{};
 	D3D12_GPU_DESCRIPTOR_HANDLE textureSrvHandleGPU_{};
 
 	Microsoft::WRL::ComPtr<ID3D12Resource> vertexResource_{};
@@ -39,13 +40,13 @@ public:
 
 
 	void SetShape();
-	void SetTrandform(Transform transform);
+	void SetTransform(Transform transform);
 	void SetVertex(Vector4 vertex[3]);
-	void SetMaterialLighting(bool isActiv) { material_->SetMaterialLighting(isActiv); }
+	void SetMaterialLighting(bool isActive) { material_.get()->SetMaterialLighting(isActive); }
 
 	D3D12_VERTEX_BUFFER_VIEW* GetVertexBufferView() { return &vertexBufferView_; }
 	ID3D12Resource* GetVertexResource()const { return wvpResource_.Get(); }
-	MaterialFactory* GetMartial()const { return material_; }
+	MaterialFactory* GetMartial()const { return material_.get(); }
 	D3D12_GPU_DESCRIPTOR_HANDLE GetTextureSrvHandleGPU()const { return textureSrvHandleGPU_; }
 
 private:

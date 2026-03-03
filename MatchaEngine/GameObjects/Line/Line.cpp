@@ -85,7 +85,7 @@ void Line::SettingWvp(Matrix4x4 viewMatrix)
 
 
 
-void Line::SetTrandform(Transform transform)
+void Line::SetTransform(Transform transform)
 {
 	transform_.translate = transform.translate;
 	transform_.scale = transform.scale;

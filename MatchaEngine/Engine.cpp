@@ -75,7 +75,7 @@ void Engine::Setting()
 
 	//エラー・警告、即ちに停止//
 #ifdef _DEBUG
-	ID3D12InfoQueue* infoQueue = nullptr;
+	Microsoft::WRL::ComPtr <ID3D12InfoQueue> infoQueue = nullptr;
 	if (SUCCEEDED(graphics->GetDevice()->QueryInterface(IID_PPV_ARGS(&infoQueue)))) {
 		//やばいエラー時に止まる
 		infoQueue->SetBreakOnSeverity(D3D12_MESSAGE_SEVERITY_CORRUPTION, true);
@@ -100,7 +100,6 @@ void Engine::Setting()
 		//指定したメッセージの表示を抑制
 		infoQueue->PushStorageFilter(&filter);
 
-		infoQueue->Release();
 	}
 #endif
 

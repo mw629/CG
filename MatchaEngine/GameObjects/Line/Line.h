@@ -34,7 +34,7 @@ public:
 
 	void SettingWvp(Matrix4x4 viewMatrix);
 
-	void SetTrandform(Transform transform);
+	void SetTransform(Transform transform);
 
 	void SetVertex(LineVertexData vertex[2]);
 
