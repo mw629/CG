@@ -18,7 +18,7 @@ private:
 
 	std::unique_ptr<Sprite> sprite_ = std::make_unique<Sprite>();
 	SpriteData spriteData_{
-		{ {1.0f, 1.0f, 1.0f}, {0.0f, 0.0f, 0.0f}, {400.0f, 100.0f, 0.0f} }, // transform
+		{ {1.0f, 1.0f, 1.0f}, {0.0f, 0.0f, 0.0f}, {100.0f, 100.0f, 0.0f} }, // transform
 		{ 300, 300 }, // size
 		{ {0.0f, 0.0f}, {0.1f, 0.1f} } // texxtureArea
 	};

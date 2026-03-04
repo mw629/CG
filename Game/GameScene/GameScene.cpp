@@ -14,7 +14,14 @@ void GameScene::ImGui()
 	for (int i = 0, n = static_cast<int>(particle_.size()); i < n; ++i) {
 		particle_[i].get()->ImGui();
 	}
-	ImGui::DragFloat3("SpritePos", &spriteData_.transform.translate.x, 0.01f, -FLT_MAX, FLT_MAX, "%.2f");
+	// スライダーで座標を操作（表示・編集ともに小数第1桁）
+	// 範囲は整数部4桁を許容する -9999.9 〜 9999.9
+	ImGui::Spacing();
+	ImGui::Text("SpritePos");
+	ImGui::SliderFloat2("##sprite_pos_slider", &spriteData_.transform.translate.x, -9999.9f, 9999.9f, "%.1f");
+
+	// 表示は整数部4桁・小数1桁風に（幅指定で揃える）
+	ImGui::Text("Pos: %4.1f, %4.1f", spriteData_.transform.translate.x, spriteData_.transform.translate.y);
 
 	model_.get()->ImGui();
 #endif // _USE_IMGUI
@@ -109,5 +116,5 @@ void GameScene::Draw() {
 	for (int i = 0, n = static_cast<int>(particle_.size()); i < n; ++i) {
 		particle_[i].get()->Draw();
 	}
-	//Draw::DrawSprite(sprite_.get(), camera_.get());
+	Draw::DrawSprite(sprite_.get(), camera_.get());
 }

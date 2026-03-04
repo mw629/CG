@@ -81,6 +81,9 @@ class Engine
 {
 private:
 
+	Vector2 finalPos = { 100.0f, 100.0f }; 
+	bool showFinalWindow = true;
+
 	HRESULT hr_;
 	std::chrono::steady_clock::time_point reference_;
 
