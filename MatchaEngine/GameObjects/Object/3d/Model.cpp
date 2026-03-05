@@ -16,9 +16,12 @@ Model::~Model()
 
 void Model::Initialize(ModelData modelData)
 {
-	
-	modelData_ = modelData;
+
+	modelNumber_ = modelData.modelNumber;
 	textureSrvHandleGPU_ = texture->TextureData(modelData.textureIndex);
+
+	//アニメーション
+	rootNode_ = modelData.rootNode;
 
 	material_ = std::make_unique<MaterialFactory>();
 	material_->CreateMartial();
@@ -34,27 +37,15 @@ void Model::SettingWvp(Matrix4x4 viewMatrix) {
 	Matrix4x4 worldInverseTranspose = TransposeMatrix4x4(Inverse(worldMatrixObj));
 
 
-	wvpData_->WVP = MultiplyMatrix4x4(modelData_.rootNode.localMatrix, worldViewProjectionMatrixObj);
-	wvpData_->World = MultiplyMatrix4x4(modelData_.rootNode.localMatrix, worldMatrixObj);
+	wvpData_->WVP = MultiplyMatrix4x4(rootNode_.localMatrix, worldViewProjectionMatrixObj);
+	wvpData_->World = MultiplyMatrix4x4(rootNode_.localMatrix, worldMatrixObj);
 	wvpData_->WorldInverseTranspose = worldInverseTranspose;
 }
 
-void Model::CreateIndexResource()
-{
-	indexResource_ = GraphicsDevice::CreateBufferResource(sizeof(uint32_t) * modelData_.indices.size());
 
-	indexBufferView_.BufferLocation = indexResource_->GetGPUVirtualAddress();
-	indexBufferView_.SizeInBytes = sizeof(uint32_t) * modelData_.indices.size();
-	indexBufferView_.Format = DXGI_FORMAT_R32_UINT;
-
-	indexResource_->Map(0, nullptr, reinterpret_cast<void**>(&indexData_));
-	std::memcpy(indexData_, modelData_.indices.data(), sizeof(uint32_t) * modelData_.indices.size());
-
-}
 
 void Model::CreateObject()
 {
 	CreateWVP();
-	CreateIndexResource();
 }
 

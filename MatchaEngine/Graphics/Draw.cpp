@@ -1,7 +1,7 @@
 #include "Draw.h"
 #include "Graphics/GraphicsDevice.h"
 #include <cassert>
-
+#include "ModelManager.h"
 
 namespace {
 	ID3D12GraphicsCommandList* commandList_{};
@@ -42,10 +42,11 @@ void Draw::DrawObj(ObjectBase* obj)
 {
 	preDraw(obj->GetShader(), obj->GetBlend());
 
-	Mesh mesh = obj->GetMesh();
+	Mesh mesh = ModelManager::GetModelData(obj.);
+
 
 	//objectの描画
-	commandList_->IASetIndexBuffer(obj->GetIndexBufferView());
+	commandList_->IASetIndexBuffer(&mesh.indexBufferView_);
 	commandList_->IASetVertexBuffers(0, 1, &mesh.vertexBufferView);  
 	commandList_->SetGraphicsRootConstantBufferView(0, obj->GetMartial()->GetMaterialResource()->GetGPUVirtualAddress());
 	commandList_->SetGraphicsRootConstantBufferView(1, obj->GetWvpDataResource()->GetGPUVirtualAddress());

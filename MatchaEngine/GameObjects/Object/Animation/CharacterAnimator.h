@@ -49,7 +49,6 @@ public:
 	void Update(Matrix4x4 viewMatrix);
 
 	ModelData GetModelData() { return modelData_; }
-	int GetIndexSize()override { return modelData_.indices.size(); }
 
 	Vector3 CalculateValue(const std::vector<KeyframeVector3>& keyframe, float time);
 	Quaternion CalculateValue(const std::vector<KeyframeQuaternion>& keyframe, float time);

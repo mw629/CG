@@ -110,9 +110,10 @@ struct Material
 };
 
 struct Mesh {
-	Microsoft::WRL::ComPtr<ID3D12Resource> vertexResource;
+	
 	D3D12_VERTEX_BUFFER_VIEW vertexBufferView;
 	int vertexSize;
+	D3D12_INDEX_BUFFER_VIEW indexBufferView_{};
 };
 
 struct DirectionalLightData {
@@ -174,13 +175,13 @@ struct JointWeightData
 
 struct ModelData
 {
+	int modelNumber;
 	Mesh mesh;
 	MaterialData material;
 	int textureIndex;
 
 	//アニメーション
 	Node rootNode;
-	std::vector<int32_t>indices;
 	std::map<std::string, JointWeightData> skinClusterData;
 };
 

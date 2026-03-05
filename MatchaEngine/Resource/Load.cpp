@@ -140,6 +140,7 @@ ModelData LoadObjFile(const std::string& directoryPath, const std::string& filen
 	assert(scene->HasMeshes());
 
 	std::vector<VertexData> vertices;
+	std::vector<int32_t>indices;
 
 	for (uint32_t meshIndex = 0; meshIndex < scene->mNumMeshes; ++meshIndex) {
 		aiMesh* mesh = scene->mMeshes[meshIndex];
@@ -183,7 +184,7 @@ ModelData LoadObjFile(const std::string& directoryPath, const std::string& filen
 
 			for (uint32_t element = 0; element < fence.mNumIndices; ++element) {
 				uint32_t vertexIndex = fence.mIndices[element];
-				modelData.indices.push_back(vertexIndex);
+				indices.push_back(vertexIndex);
 			}
 
 		}
@@ -203,7 +204,7 @@ ModelData LoadObjFile(const std::string& directoryPath, const std::string& filen
 	std::unique_ptr<Texture> texture = std::make_unique<Texture>();
 
 	modelData.textureIndex = texture->CreateTexture(modelData.material.textureDilePath);
-	modelData.mesh = objManager.get()->CreateVertexData(vertices);
+	modelData.mesh = objManager.get()->CreateMesh(vertices, indices);
 	objManager.get()->SetModelList(modelData, directoryPath, filename);
 
 	return modelData;
@@ -220,6 +221,7 @@ ModelData AssimpLoadObjFile(const std::string& directoryPath, const std::string&
 
 	ModelData modelData;
 	std::vector<VertexData> vertices;
+	std::vector<int32_t>indices;
 
 	Assimp::Importer impoter;
 	std::string filePath = directoryPath + "/" + filename;
@@ -268,7 +270,7 @@ ModelData AssimpLoadObjFile(const std::string& directoryPath, const std::string&
 
 			for (uint32_t element = 0; element < fence.mNumIndices; ++element) {
 				uint32_t vertexIndex = fence.mIndices[element];
-				modelData.indices.push_back(vertexIndex);
+				indices.push_back(vertexIndex);
 			}
 
 		}
@@ -288,7 +290,7 @@ ModelData AssimpLoadObjFile(const std::string& directoryPath, const std::string&
 	std::unique_ptr<Texture> texture = std::make_unique<Texture>();
 
 	modelData.textureIndex = texture->CreateTexture(modelData.material.textureDilePath);
-	modelData.mesh = objManager.get()->CreateVertexData(vertices);
+	modelData.mesh = objManager.get()->CreateMesh(vertices, indices);
 	objManager.get()->SetModelList(modelData, directoryPath, filename);
 
 

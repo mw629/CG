@@ -99,6 +99,7 @@ Mesh ObjectBase::GetMesh()
 	Mesh mesh;
 	mesh.vertexBufferView = vertexBufferView_;
 	mesh.vertexSize = vertexSize_;
+	mesh.indexBufferView_ = indexBufferView_;
 	return mesh;
 }
 

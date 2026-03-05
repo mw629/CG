@@ -12,14 +12,9 @@ class ModelManager
 private:
 	
 	ModelList modelList_;
+	Mesh mesh_;
 
 	//頂点データ
-	Microsoft::WRL::ComPtr<ID3D12Resource> vertexResource_;
-	D3D12_VERTEX_BUFFER_VIEW vertexBufferView_{};
-	VertexData* vertexData_ = nullptr;
-	Microsoft::WRL::ComPtr<ID3D12Resource> wvpDataResource_;
-	TransformationMatrix* wvpData_ = nullptr;
-	int vertexSize_ = 0;
 
 public:
 	ModelManager();
@@ -30,6 +25,10 @@ public:
 
 	ModelData DuplicateReturn(const std::string& directoryPath, const std::string& filename);
 
-	Mesh CreateVertexData(std::vector<VertexData> vertices);
+	static ModelData GetModelData(int modelNumber);
+
+	Mesh CreateMesh(std::vector<VertexData> vertices, std::vector<int32_t>indices);
+	void CreateVertexData(std::vector<VertexData> vertices);
+	void CreateIndexResource(std::vector<int32_t>indices);
 };
 
