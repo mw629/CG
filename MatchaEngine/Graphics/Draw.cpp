@@ -42,7 +42,7 @@ void Draw::DrawObj(ObjectBase* obj)
 {
 	preDraw(obj->GetShader(), obj->GetBlend());
 
-	Mesh mesh = ModelManager::GetModelData(obj.);
+	Mesh mesh = obj->GetMesh();
 
 
 	//objectの描画
@@ -91,11 +91,13 @@ void Draw::DrawAnimation(CharacterAnimator* obj)
 }
 
 
-void Draw::DrawModel(Model* model, Camera* camera)
+void Draw::DrawModel(Model* model)
 {
 	preDraw(model->GetShader(), model->GetBlend());
 
-	Mesh mesh = model->GetMesh();
+	Mesh mesh = ModelManager::GetModelData(model->GetModelNumber()).mesh;
+
+
 	//objectの描画
 	commandList_->IASetVertexBuffers(0, 1, &mesh.vertexBufferView);  // アドレスを渡す
 	commandList_->SetGraphicsRootConstantBufferView(0, model->GetMartial()->GetMaterialResource()->GetGPUVirtualAddress());
@@ -127,7 +129,7 @@ void Draw::DrawParticle(Particle* particle)
 
 }
 
-void Draw::DrawSprite(Sprite* sprite, Camera* camera)
+void Draw::DrawSprite(Sprite* sprite)
 {
 	preDraw(sprite->GetShader(), sprite->GetBlend());
 	commandList_->SetGraphicsRootConstantBufferView(3, directionalLight_->GetDirectinalLightResource()->GetGPUVirtualAddress());
@@ -145,7 +147,7 @@ void Draw::DrawSprite(Sprite* sprite, Camera* camera)
 	commandList_->DrawIndexedInstanced(6, 1, 0, 0, 0);
 }
 
-void Draw::DrawSphere(Sphere* sphere, Camera* camera)
+void Draw::DrawSphere(Sphere* sphere)
 {
 
 	preDraw(sphere->GetShader(), sphere->GetBlend());
@@ -164,7 +166,7 @@ void Draw::DrawSphere(Sphere* sphere, Camera* camera)
 	commandList_->DrawInstanced(static_cast<UINT>(pow(sphere->GetSubdivision(), 2) * 6), 1, 0, 0);
 }
 
-void Draw::DrawTriangle(Triangle* triangle, Camera* camera)
+void Draw::DrawTriangle(Triangle* triangle)
 {
 	preDraw(triangle->GetShader(), triangle->GetBlend());
 

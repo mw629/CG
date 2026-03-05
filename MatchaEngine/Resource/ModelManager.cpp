@@ -92,7 +92,7 @@ void ModelManager::CreateIndexResource(std::vector<int32_t>indices)
 	mesh_.indexBufferView_.Format = DXGI_FORMAT_R32_UINT;
 
 	uint32_t* indexData_ = nullptr; 
-	indexResource->Map(0, nullptr, reinterpret_cast<void**>(indexData_));
+	indexResource->Map(0, nullptr, reinterpret_cast<void**>(&indexData_));
 	std::memcpy(indexData_, indices.data(), sizeof(uint32_t) * indices.size());
 
 }

@@ -36,15 +36,15 @@ public:
 
 	static void DrawAnimation(CharacterAnimator* obj);
 
-	static void DrawModel(Model* model, Camera* camera);
+	static void DrawModel(Model* model);
 
 	static void DrawParticle(Particle* particle);
 
-	static void DrawSprite(Sprite* sprite, Camera* camera);
+	static void DrawSprite(Sprite* sprite);
 
-	static void DrawSphere(Sphere* sphere, Camera* camera);
+	static void DrawSphere(Sphere* sphere);
 
-	static void DrawTriangle(Triangle* triangle, Camera* camera);
+	static void DrawTriangle(Triangle* triangle);
 
 	static void DrawLine(Line* line);
 

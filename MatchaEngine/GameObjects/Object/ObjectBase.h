@@ -46,7 +46,7 @@ public:
 
 	virtual void CreateVertexData();
 	virtual void CreateWVP();
-	virtual void CreateIndexResource() = 0;
+	virtual void CreateIndexResource();
 
 	virtual void CreateObject();
 

@@ -18,9 +18,9 @@ public:
 	void Initialize(ModelData modelData);
 
 	void SettingWvp(Matrix4x4 viewMatrix) override;
-	void CreateIndexResource()override;
 	
 	void CreateObject()override;
 
+	int GetModelNumber() { return modelNumber_; }
 };
 
