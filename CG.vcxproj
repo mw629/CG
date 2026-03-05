@@ -143,6 +143,8 @@ copy "$(WindowsSdkDir)bin\$(TargetPlatformVersion)\x64\dxil.dll" "$(TargetDir)dx
   </ItemDefinitionGroup>
   <ItemGroup>
     <ClCompile Include="Game\GameApplication.cpp" />
+    <ClCompile Include="MatchaEngine\GameObjects\Object\3d\Sphere.cpp" />
+    <ClCompile Include="MatchaEngine\GameObjects\Object\3d\Triangle.cpp" />
     <ClCompile Include="MatchaEngine\GameObjects\Object\Animation\CharacterAnimator.cpp" />
     <ClCompile Include="MatchaEngine\GameObjects\Light\LightManeger.cpp" />
     <ClCompile Include="MatchaEngine\GameObjects\Light\PointLight.cpp" />
@@ -211,11 +213,9 @@ copy "$(WindowsSdkDir)bin\$(TargetPlatformVersion)\x64\dxil.dll" "$(TargetDir)dx
     <ClCompile Include="MatchaEngine\Graphics\RenderTargetView.cpp" />
     <ClCompile Include="MatchaEngine\PSO\Sampler.cpp" />
     <ClCompile Include="MatchaEngine\Graphics\ResourceBarrierHelper.cpp" />
-    <ClCompile Include="MatchaEngine\GameObjects\Object\3d\Sphere.cpp" />
     <ClCompile Include="MatchaEngine\Graphics\SwapChain.cpp" />
     <ClCompile Include="MatchaEngine\Resource\Texture.cpp" />
     <ClCompile Include="MatchaEngine\Graphics\ViewportScissor.cpp" />
-    <ClCompile Include="MatchaEngine\GameObjects\Object\3d\Triangle.cpp" />
     <ClCompile Include="Game\TitleScene\TitleScene.cpp" />
     <ClCompile Include="Game\SceneManager.cpp" />
     <ClCompile Include="MatchaEngine\Resource\ModelManager.cpp" />
@@ -293,6 +293,8 @@ copy "$(WindowsSdkDir)bin\$(TargetPlatformVersion)\x64\dxil.dll" "$(TargetDir)dx
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="Game\GameApplication.h" />
+    <ClInclude Include="MatchaEngine\GameObjects\Object\3d\Sphere.h" />
+    <ClInclude Include="MatchaEngine\GameObjects\Object\3d\Triangle.h" />
     <ClInclude Include="MatchaEngine\GameObjects\Object\Animation\CharacterAnimator.h" />
     <ClInclude Include="MatchaEngine\GameObjects\Light\LightManeger.h" />
     <ClInclude Include="MatchaEngine\GameObjects\Light\PointLight.h" />
@@ -351,11 +353,9 @@ copy "$(WindowsSdkDir)bin\$(TargetPlatformVersion)\x64\dxil.dll" "$(TargetDir)dx
     <ClInclude Include="MatchaEngine\Graphics\RenderTargetView.h" />
     <ClInclude Include="MatchaEngine\PSO\Sampler.h" />
     <ClInclude Include="MatchaEngine\Graphics\ResourceBarrierHelper.h" />
-    <ClInclude Include="MatchaEngine\GameObjects\Object\3d\Sphere.h" />
     <ClInclude Include="MatchaEngine\Graphics\SwapChain.h" />
     <ClInclude Include="MatchaEngine\Resource\Texture.h" />
     <ClInclude Include="MatchaEngine\Graphics\ViewportScissor.h" />
-    <ClInclude Include="MatchaEngine\GameObjects\Object\3d\Triangle.h" />
     <ClInclude Include="MatchaEngine\Core\VariableTypes\Vector2.h" />
     <ClInclude Include="Game\TitleScene\TitleScene.h" />
     <ClInclude Include="Game\SceneManager.h" />

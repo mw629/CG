@@ -16,7 +16,7 @@ void Sphere::Initialize(int textureSrvHandle)
 	textureSrvHandleGPU_ = texture.get()->TextureData(textureSrvHandle);
 
 	material_ = std::make_unique<MaterialFactory>();
-	material_->CreateMatrial();
+	material_->CreateMartial();
 	
 	CreateObject(); // この行を追加
 }

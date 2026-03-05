@@ -23,27 +23,11 @@ void TransformAnimation::Initialize(const std::string& directoryPath, const std:
 	skeleton_ = CreateSkeleton(modelData_.rootNode);
 
 	material_ = std::make_unique<MaterialFactory>();
-	material_->CreateMatrial();
+	material_->CreateMartial();
 	CreateObject();
 }
 
-void TransformAnimation::CreateVertexData()
-{
-	//頂点リソースを作る
-	vertexResource_ = GraphicsDevice::CreateBufferResource(sizeof(VertexData) * modelData_.vertices.size());
-	//頂点バッファービューを作成する
-	//リソースの先頭アドレスから使う
-	vertexBufferView_.BufferLocation = vertexResource_->GetGPUVirtualAddress();
-	//使用するリソースのサイズは頂点6つ分のサイズ
-	vertexBufferView_.SizeInBytes = static_cast<UINT>(sizeof(VertexData) * modelData_.vertices.size());
-	//1頂点当たりのサイズ
-	vertexBufferView_.StrideInBytes = sizeof(VertexData);
-	//頂点リソースにデータを書き込む
-	vertexResource_->Map(0, nullptr, reinterpret_cast<void**>(&vertexData_));
-	std::memcpy(vertexData_, modelData_.vertices.data(), sizeof(VertexData) * modelData_.vertices.size());
 
-	vertexSize_ = modelData_.vertices.size();
-}
 
 void TransformAnimation::CreateIndexResource()
 {
@@ -186,7 +170,7 @@ SkinCluster TransformAnimation::CreateSkinCluster(ID3D12DescriptorHeap* descript
 	paletteSrvDesc.Buffer.StructureByteStride = sizeof(WellForGPU);
 	device->CreateShaderResourceView(skinCluster.paletteResource.Get(), &paletteSrvDesc, skinCluster.paletteSrvHandle.first);
 
-	skinCluster.influenceResource = GraphicsDevice::CreateBufferResource(sizeof(VertexInfluence) * modelData_.vertices.size());
+	skinCluster.influenceResource = GraphicsDevice::CreateBufferResource(sizeof(VertexInfluence) * modelData_.mesh.vertexSize);
 
 
 	return skinCluster;

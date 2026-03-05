@@ -22,9 +22,9 @@ void Draw::Initialize(ID3D12GraphicsCommandList* commandList, GraphicsPipelineSt
 	spotLight_ = spotLight;
 }
 
-void Draw::SetCamera(Camera* setcamera)
+void Draw::SetCamera(Camera* setCamera)
 {
-	camera = setcamera;
+	camera = setCamera;
 }
 
 void Draw::preDraw(ShaderName shader, BlendMode blend)
@@ -89,7 +89,7 @@ void Draw::DrawModel(Model* model, Camera* camera)
 	preDraw(model->GetShader(), model->GetBlend());
 
 	//objectの描画
-	commandList_->IASetVertexBuffers(0, 1, model->GetVertexBufferView());//VBVを設定
+	commandList_->IASetVertexBuffers(0, 1, model->GetMesh().vertexBufferView);//VBVを設定
 	commandList_->SetGraphicsRootConstantBufferView(0, model->GetMartial()->GetMaterialResource()->GetGPUVirtualAddress());
 	commandList_->SetGraphicsRootConstantBufferView(1, model->GetWvpDataResource()->GetGPUVirtualAddress());
 	commandList_->SetGraphicsRootDescriptorTable(2, model->GetTextureSrvHandleGPU());
@@ -98,7 +98,7 @@ void Draw::DrawModel(Model* model, Camera* camera)
 	commandList_->SetGraphicsRootConstantBufferView(5, pointLight_->GetDirectinalLightResource()->GetGPUVirtualAddress());
 	commandList_->SetGraphicsRootConstantBufferView(6, spotLight_->GetDirectinalLightResource()->GetGPUVirtualAddress());
 
-	commandList_->DrawInstanced(UINT(model->GetModelData().vertices.size()), 1, 0, 0);
+	commandList_->DrawInstanced(UINT(model->GetMesh().vertexSize), 1, 0, 0);
 }
 
 void Draw::DrawParticle(Particle* particle)

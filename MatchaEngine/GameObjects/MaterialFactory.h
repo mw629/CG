@@ -12,10 +12,10 @@ private:
 public:
 	~MaterialFactory();
 
-	void CreateMatrial(bool Lighting = true);
+	void CreateMartial(bool Lighting = true);
 
 	void SetColor(Vector4 color) { materialData_->color = color; }
-	void SetMaterialLighting(bool isActiv) { materialData_->endbleLighting = isActiv; }
+	void SetMaterialLighting(bool isActive) { materialData_->enableLighting = isActive; }
 
 	ID3D12Resource* GetMaterialResource() { return materialResource_.Get(); }
 	Material* GetMaterialData() { return materialData_; }

@@ -43,7 +43,7 @@ void Particle::Initialize()
 	textureSrvHandleGPU_ = texture.get()->TextureData(texture.get()->CreateTexture("resources/circle.png"));
 
 	material_ = std::make_unique<MaterialFactory>();
-	material_->CreateMatrial(false);
+	material_->CreateMartial(false);
 	CreateParticle();
 }
 
@@ -53,19 +53,21 @@ void Particle::Initialize(int TextureHandle)
 	textureSrvHandleGPU_ = texture.get()->TextureData(TextureHandle);
 
 	material_ = std::make_unique<MaterialFactory>();
-	material_->CreateMatrial();
+	material_->CreateMartial();
 	CreateParticle();
 }
 
 void Particle::CreateVertexData()
 {
-	modelData_.vertices.push_back({ .position = { -1.0f,  1.0f, 0.0f, 1.0f }, .texcoord = {0.0f,0.0f}, .normal = {0.0f,0.0f,1.0f} }); // 左上
-	modelData_.vertices.push_back({ .position = {  1.0f,  1.0f, 0.0f, 1.0f }, .texcoord = {1.0f,0.0f}, .normal = {0.0f,0.0f,1.0f} }); // 右上
-	modelData_.vertices.push_back({ .position = { -1.0f, -1.0f, 0.0f, 1.0f }, .texcoord = {0.0f,1.0f}, .normal = {0.0f,0.0f,1.0f} }); // 左下
+	std::vector<VertexData> vertices;
 
-	modelData_.vertices.push_back({ .position = { -1.0f, -1.0f, 0.0f, 1.0f }, .texcoord = {0.0f,1.0f}, .normal = {0.0f,0.0f,1.0f} }); // 左下
-	modelData_.vertices.push_back({ .position = {  1.0f,  1.0f, 0.0f, 1.0f }, .texcoord = {1.0f,0.0f}, .normal = {0.0f,0.0f,1.0f} }); // 右上
-	modelData_.vertices.push_back({ .position = {  1.0f, -1.0f, 0.0f, 1.0f }, .texcoord = {1.0f,1.0f}, .normal = {0.0f,0.0f,1.0f} }); // 右下
+	vertices.push_back({ .position = { -1.0f,  1.0f, 0.0f, 1.0f }, .texcoord = {0.0f,0.0f}, .normal = {0.0f,0.0f,1.0f} }); // 左上
+	vertices.push_back({ .position = {  1.0f,  1.0f, 0.0f, 1.0f }, .texcoord = {1.0f,0.0f}, .normal = {0.0f,0.0f,1.0f} }); // 右上
+	vertices.push_back({ .position = { -1.0f, -1.0f, 0.0f, 1.0f }, .texcoord = {0.0f,1.0f}, .normal = {0.0f,0.0f,1.0f} }); // 左下
+
+	vertices.push_back({ .position = { -1.0f, -1.0f, 0.0f, 1.0f }, .texcoord = {0.0f,1.0f}, .normal = {0.0f,0.0f,1.0f} }); // 左下
+	vertices.push_back({ .position = {  1.0f,  1.0f, 0.0f, 1.0f }, .texcoord = {1.0f,0.0f}, .normal = {0.0f,0.0f,1.0f} }); // 右上
+	vertices.push_back({ .position = {  1.0f, -1.0f, 0.0f, 1.0f }, .texcoord = {1.0f,1.0f}, .normal = {0.0f,0.0f,1.0f} }); // 右下
 
 	//頂点リソースを作る
 	vertexResource_ = GraphicsDevice::CreateBufferResource(sizeof(VertexData) * 6);
@@ -78,7 +80,7 @@ void Particle::CreateVertexData()
 	vertexBufferView_.StrideInBytes = sizeof(VertexData);
 	//頂点リソースにデータを書き込む
 	vertexResource_->Map(0, nullptr, reinterpret_cast<void**>(&vertexData_));
-	std::memcpy(vertexData_, modelData_.vertices.data(), sizeof(VertexData) * 6);
+	std::memcpy(vertexData_, vertices.data(), sizeof(VertexData) * 6);
 }
 
 

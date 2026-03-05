@@ -29,7 +29,6 @@ public:
 
 	void Initialize(const std::string& directoryPath, const std::string& filename);
 
-	void CreateVertexData()override;
 
 	void CreateIndexResource()override;
 
@@ -50,5 +49,7 @@ public:
 	Quaternion CalculateValue(const std::vector<KeyframeQuaternion>& keyframe, float time);
 
 	SkinCluster CreateSkinCluster(ID3D12DescriptorHeap* descriptorHeap, uint32_t descriprtorSize);
+
+	Mesh GetMesh()override { return modelData_.mesh; }
 };
 

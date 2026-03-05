@@ -84,7 +84,6 @@ void ObjectBase::SettingWvp(Matrix4x4 viewMatrix)
 
 void ObjectBase::CreateObject()
 {
-	CreateVertexData();
 	CreateWVP();
 	CreateIndexResource();
 }

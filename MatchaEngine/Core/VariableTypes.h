@@ -103,10 +103,15 @@ struct LineVertexData {
 struct Material
 {
 	Vector4 color;
-	int32_t endbleLighting;
-	float paddinmg[3];
+	int32_t enableLighting;
+	float padding[3];
 	Matrix4x4 uvTransform;
 	float shininess;
+};
+
+struct Mesh {
+	D3D12_VERTEX_BUFFER_VIEW *vertexBufferView;
+	int vertexSize;
 };
 
 struct DirectionalLightData {
@@ -168,7 +173,7 @@ struct JointWeightData
 
 struct ModelData
 {
-	std::vector<VertexData> vertices;
+	Mesh mesh;
 	MaterialData material;
 	int textureIndex;
 

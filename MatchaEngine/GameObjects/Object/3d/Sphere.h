@@ -2,7 +2,7 @@
 #include "ObjectBase.h"
 
 
-class Sphere :public ObjectBase
+class Sphere : public ObjectBase
 {
 private:
 	uint32_t kSubdivision_ = 16;
