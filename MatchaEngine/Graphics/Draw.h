@@ -34,7 +34,7 @@ public:
 
 	static void DrawObj(ObjectBase *obj);
 
-	static void DrawAnimtion(CharacterAnimator* obj);
+	static void DrawAnimation(CharacterAnimator* obj);
 
 	static void DrawModel(Model* model, Camera* camera);
 
@@ -42,7 +42,7 @@ public:
 
 	static void DrawSprite(Sprite* sprite, Camera* camera);
 
-	static void DrawShpere(Sphere* sphere, Camera* camera);
+	static void DrawSphere(Sphere* sphere, Camera* camera);
 
 	static void DrawTriangle(Triangle* triangle, Camera* camera);
 

@@ -15,7 +15,6 @@ public:
 
 	void Initialize(ModelData modelData);
 
-	void CreateVertexData()override;
 	void SettingWvp(Matrix4x4 viewMatrix) override;
 	void CreateIndexResource()override;
 	

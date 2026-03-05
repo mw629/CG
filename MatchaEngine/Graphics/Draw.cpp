@@ -42,9 +42,11 @@ void Draw::DrawObj(ObjectBase* obj)
 {
 	preDraw(obj->GetShader(), obj->GetBlend());
 
+	Mesh mesh = obj->GetMesh();
+
 	//objectの描画
 	commandList_->IASetIndexBuffer(obj->GetIndexBufferView());
-	commandList_->IASetVertexBuffers(0, 1, obj->GetVertexBufferView());//VBVを設定
+	commandList_->IASetVertexBuffers(0, 1, &mesh.vertexBufferView);  
 	commandList_->SetGraphicsRootConstantBufferView(0, obj->GetMartial()->GetMaterialResource()->GetGPUVirtualAddress());
 	commandList_->SetGraphicsRootConstantBufferView(1, obj->GetWvpDataResource()->GetGPUVirtualAddress());
 	commandList_->SetGraphicsRootDescriptorTable(2, obj->GetTextureSrvHandleGPU());
@@ -53,11 +55,11 @@ void Draw::DrawObj(ObjectBase* obj)
 	commandList_->SetGraphicsRootConstantBufferView(5, pointLight_->GetDirectinalLightResource()->GetGPUVirtualAddress());
 	commandList_->SetGraphicsRootConstantBufferView(6, spotLight_->GetDirectinalLightResource()->GetGPUVirtualAddress());
 
-	commandList_->DrawIndexedInstanced(obj->GetIndexSize(), 1, 0, 0, 0);
+	commandList_->DrawIndexedInstanced(UINT(mesh.vertexSize), 1, 0, 0, 0);
 
 }
 
-void Draw::DrawAnimtion(CharacterAnimator* obj)
+void Draw::DrawAnimation(CharacterAnimator* obj)
 {
 	preDraw(obj->GetShader(), obj->GetBlend());
 
@@ -65,10 +67,14 @@ void Draw::DrawAnimtion(CharacterAnimator* obj)
 	commandList_->IASetIndexBuffer(obj->GetIndexBufferView());
 
 	// VBV を複数渡す（頂点データ + インフルエンスデータ）
+	Mesh mesh = obj->GetMesh();
+
 	D3D12_VERTEX_BUFFER_VIEW vbvs[2];
-	vbvs[0] = *obj->GetVertexBufferView();
+	vbvs[0] = mesh.vertexBufferView;
 	vbvs[1] = *obj->GetInfluenceBufferView();
 	commandList_->IASetVertexBuffers(0, 2, vbvs);
+
+
 
 	// ルートをアニメーション用レイアウトに合わせて設定
 	commandList_->SetGraphicsRootConstantBufferView(0, obj->GetMartial()->GetMaterialResource()->GetGPUVirtualAddress()); // material (pixel b0)
@@ -88,8 +94,9 @@ void Draw::DrawModel(Model* model, Camera* camera)
 {
 	preDraw(model->GetShader(), model->GetBlend());
 
+	Mesh mesh = model->GetMesh();
 	//objectの描画
-	commandList_->IASetVertexBuffers(0, 1, model->GetMesh().vertexBufferView);//VBVを設定
+	commandList_->IASetVertexBuffers(0, 1, &mesh.vertexBufferView);  // アドレスを渡す
 	commandList_->SetGraphicsRootConstantBufferView(0, model->GetMartial()->GetMaterialResource()->GetGPUVirtualAddress());
 	commandList_->SetGraphicsRootConstantBufferView(1, model->GetWvpDataResource()->GetGPUVirtualAddress());
 	commandList_->SetGraphicsRootDescriptorTable(2, model->GetTextureSrvHandleGPU());
@@ -98,7 +105,7 @@ void Draw::DrawModel(Model* model, Camera* camera)
 	commandList_->SetGraphicsRootConstantBufferView(5, pointLight_->GetDirectinalLightResource()->GetGPUVirtualAddress());
 	commandList_->SetGraphicsRootConstantBufferView(6, spotLight_->GetDirectinalLightResource()->GetGPUVirtualAddress());
 
-	commandList_->DrawInstanced(UINT(model->GetMesh().vertexSize), 1, 0, 0);
+	commandList_->DrawInstanced(UINT(mesh.vertexSize), 1, 0, 0);
 }
 
 void Draw::DrawParticle(Particle* particle)
@@ -137,13 +144,13 @@ void Draw::DrawSprite(Sprite* sprite, Camera* camera)
 	commandList_->DrawIndexedInstanced(6, 1, 0, 0, 0);
 }
 
-void Draw::DrawShpere(Sphere* sphere, Camera* camera)
+void Draw::DrawSphere(Sphere* sphere, Camera* camera)
 {
 
 	preDraw(sphere->GetShader(), sphere->GetBlend());
 
 
-	//commandList_->IASetIndexBuffer(shpere->GetIndexBufferView());//IBVを設定
+	//commandList_->IASetIndexBuffer(sphere->GetIndexBufferView());//IBVを設定
 	commandList_->IASetVertexBuffers(0, 1, sphere->GetVertexBufferView());//VBVを設定
 	commandList_->SetGraphicsRootConstantBufferView(0, sphere->GetMartial()->GetMaterialResource()->GetGPUVirtualAddress());
 	commandList_->SetGraphicsRootConstantBufferView(1, sphere->GetWvpDataResource()->GetGPUVirtualAddress());

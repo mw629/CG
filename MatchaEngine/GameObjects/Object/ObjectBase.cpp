@@ -84,6 +84,25 @@ void ObjectBase::SettingWvp(Matrix4x4 viewMatrix)
 
 void ObjectBase::CreateObject()
 {
+	CreateVertexData();
 	CreateWVP();
 	CreateIndexResource();
+}
+
+void ObjectBase::CreateVertexData()
+{
+	// 基底クラスのデフォルト実装（派生クラスでオーバーライドされる）
+}
+
+Mesh ObjectBase::GetMesh()
+{
+	Mesh mesh;
+	mesh.vertexBufferView = vertexBufferView_;
+	mesh.vertexSize = vertexSize_;
+	return mesh;
+}
+
+D3D12_VERTEX_BUFFER_VIEW* ObjectBase::GetVertexBufferView()
+{
+	return &vertexBufferView_;
 }

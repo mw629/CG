@@ -103,7 +103,7 @@ void GameScene::Draw() {
 	//Draw::DrawObj(model_.get());
 	Draw::DrawObj(floor.get());
 	//Draw::DrawObj(nodeanimation_.get());
-	Draw::DrawAnimtion(animation_.get());
+	Draw::DrawAnimation(animation_.get());
 
 	Draw::DrawObj(sphere_.get());
 	for (int i = 0, n = static_cast<int>(particle_.size()); i < n; ++i) {
