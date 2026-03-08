@@ -30,5 +30,11 @@ public:
 	Mesh CreateMesh(std::vector<VertexData> vertices, std::vector<int32_t>indices);
 	void CreateVertexData(std::vector<VertexData> vertices);
 	void CreateIndexResource(std::vector<int32_t>indices);
+
+
+	int32_t CreateJoint(const Node& node, const std::optional<int32_t>& parent, std::vector<Joint>& joints);
+	Skeleton CreateSkeleton(const Node& rootNode);
+	void CreateInfluenceResource(std::vector<int32_t> indices);
+
 };
 

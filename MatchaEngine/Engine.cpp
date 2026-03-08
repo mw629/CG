@@ -158,7 +158,6 @@ void Engine::Setting()
 	Line::SetScreenSize(Client);
 	Grid::SetScreenSize(Client);
 	Particle::SetScreenSize(Client);
-	Triangle::SetScreenSize(Client);
 	Sprite::SetScreenSize(Client);
 
 	Particle::SetDescriptorHeap(descriptorHeap.get());

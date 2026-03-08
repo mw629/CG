@@ -30,8 +30,6 @@ public:
 	void Initialize(const std::string& directoryPath, const std::string& filename);
 
 
-	void CreateIndexResource()override;
-
 	void SettingWvp(Matrix4x4 viewMatrix) override;
 
 	Skeleton CreateSkeleton(const Node& rootNode);
@@ -49,6 +47,5 @@ public:
 
 	SkinCluster CreateSkinCluster(ID3D12DescriptorHeap* descriptorHeap, uint32_t descriprtorSize);
 
-	Mesh GetMesh()override { return modelData_.mesh; }
 };
 

@@ -25,8 +25,8 @@ void CharacterAnimator::SetData(ID3D12Device* SetDevice, DescriptorHeap* SetDesc
 
 void CharacterAnimator::Initialize(const std::string& directoryPath, const std::string& filename)
 {
-	modelData_ = AssimpLoadObjFile(directoryPath, filename);
-	animation_ = LoadAnimationFile(directoryPath, filename);
+	//modelData_ = AssimpLoadObjFile(directoryPath, filename);
+	//animation_ = LoadAnimationFile(directoryPath, filename);
 	textureSrvHandleGPU_ = texture->TextureData(modelData_.textureIndex);
 
 	skeleton_ = CreateSkeleton(modelData_.rootNode);

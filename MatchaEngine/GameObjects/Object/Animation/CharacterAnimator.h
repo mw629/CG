@@ -31,9 +31,6 @@ public:
 
 	void Initialize(const std::string& directoryPath, const std::string& filename);
 
-
-	void CreateIndexResource()override;
-
 	void SettingWvp(Matrix4x4 viewMatrix) override;
 
 	Skeleton CreateSkeleton(const Node& rootNode);
@@ -62,6 +59,5 @@ public:
 	// 追加: スキンパレット SRV の GPU ハンドルを取得
 	D3D12_GPU_DESCRIPTOR_HANDLE GetPaletteSrvHandleGPU() const { return skinCluster_.paletteSrvHandle.second; }
 
-	Mesh GetMesh()override { return modelData_.mesh; }
 };
 

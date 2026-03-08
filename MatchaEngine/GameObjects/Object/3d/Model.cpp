@@ -6,6 +6,7 @@
 #include <fstream>
 #include <sstream>
 
+#include "ModelManager.h"
 
 Model::~Model()
 {
@@ -14,15 +15,15 @@ Model::~Model()
 }
 
 
-void Model::Initialize(ModelData modelData)
+void Model::Initialize(int modelData)
 {
 
-	modelNumber_ = modelData.modelNumber;
-	textureSrvHandleGPU_ = texture->TextureData(modelData.textureIndex);
+	modelNumber_ = modelData;
+
+	textureSrvHandleGPU_ = texture->TextureData(ModelManager::GetModelData(modelNumber_).textureIndex);
 
 	//アニメーション
-	rootNode_ = modelData.rootNode;
-
+	
 	material_ = std::make_unique<MaterialFactory>();
 	material_->CreateMartial();
 	CreateObject();
@@ -37,8 +38,8 @@ void Model::SettingWvp(Matrix4x4 viewMatrix) {
 	Matrix4x4 worldInverseTranspose = TransposeMatrix4x4(Inverse(worldMatrixObj));
 
 
-	wvpData_->WVP = MultiplyMatrix4x4(rootNode_.localMatrix, worldViewProjectionMatrixObj);
-	wvpData_->World = MultiplyMatrix4x4(rootNode_.localMatrix, worldMatrixObj);
+	wvpData_->WVP = MultiplyMatrix4x4(ModelManager::GetModelData(modelNumber_).rootNode.localMatrix, worldViewProjectionMatrixObj);
+	wvpData_->World = MultiplyMatrix4x4(ModelManager::GetModelData(modelNumber_).rootNode.localMatrix, worldMatrixObj);
 	wvpData_->WorldInverseTranspose = worldInverseTranspose;
 }
 

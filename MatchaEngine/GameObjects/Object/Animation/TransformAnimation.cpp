@@ -16,8 +16,8 @@ TransformAnimation::TransformAnimation()
 
 void TransformAnimation::Initialize(const std::string& directoryPath, const std::string& filename)
 {
-	modelData_ = LoadObjFile(directoryPath, filename);
-	animation_ = LoadAnimationFile(directoryPath, filename);
+	//modelData_ = LoadObjFile(directoryPath, filename);
+	//animation_ = LoadAnimationFile(directoryPath, filename);
 	textureSrvHandleGPU_ = texture->TextureData(modelData_.textureIndex);
 
 	skeleton_ = CreateSkeleton(modelData_.rootNode);
@@ -155,8 +155,7 @@ SkinCluster TransformAnimation::CreateSkinCluster(ID3D12DescriptorHeap* descript
 	paletteSrvDesc.Buffer.StructureByteStride = sizeof(WellForGPU);
 	device->CreateShaderResourceView(skinCluster.paletteResource.Get(), &paletteSrvDesc, skinCluster.paletteSrvHandle.first);
 
-	skinCluster.influenceResource = GraphicsDevice::CreateBufferResource(sizeof(VertexInfluence) * modelData_.mesh.vertexSize);
-
+	
 
 	return skinCluster;
 }

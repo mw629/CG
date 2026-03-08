@@ -31,9 +31,7 @@
 #include "CharacterAnimator.h"
 #include "TransformAnimation.h"
 #include "Particle.h"
-#include "Sphere.h"
 #include "Sprite.h"
-#include "Triangle.h"
 #include "Line.h"
 #include "Grid.h"
 

@@ -16,25 +16,17 @@ protected:
 	Transform transform_;
 
 	//objectResource
-
+	int modelNumber_;
 
 	//マテリアルデータ
 	std::unique_ptr<Texture> texture = std::make_unique<Texture>();
 	std::unique_ptr<MaterialFactory> material_{};
 	D3D12_GPU_DESCRIPTOR_HANDLE textureSrvHandleGPU_{};
 
-	//頂点データ
-	Microsoft::WRL::ComPtr<ID3D12Resource> vertexResource_;
-	D3D12_VERTEX_BUFFER_VIEW vertexBufferView_{};
-	VertexData* vertexData_ = nullptr;
 	Microsoft::WRL::ComPtr<ID3D12Resource> wvpDataResource_;
 	TransformationMatrix* wvpData_ = nullptr;
 	int vertexSize_ = 0;
 
-	Microsoft::WRL::ComPtr<ID3D12Resource> indexResource_;
-	D3D12_INDEX_BUFFER_VIEW indexBufferView_{};
-	uint32_t* indexData_ = nullptr;
-	int indexSize_;
 
 public:
 
@@ -44,9 +36,7 @@ public:
 
 	static void SetObjectResource(Vector2 ClientSize);
 
-	virtual void CreateVertexData();
 	virtual void CreateWVP();
-	virtual void CreateIndexResource() = 0;
 
 	virtual void CreateObject();
 
@@ -62,17 +52,12 @@ public:
 	MaterialFactory* GetMartial() { return material_.get(); }
 	D3D12_GPU_DESCRIPTOR_HANDLE GetTextureSrvHandleGPU()const { return textureSrvHandleGPU_; }
 
-	virtual Mesh GetMesh();
+	int GetModelNumber() { return modelNumber_; }
 
 	D3D12_VERTEX_BUFFER_VIEW* GetVertexBufferView();
 	ID3D12Resource* GetWvpDataResource() { return wvpDataResource_.Get(); }
 	int GetVertexSize() { return vertexSize_; }
 	TransformationMatrix* GetWvpData() { return wvpData_; }
-
-	ID3D12Resource* GetIndexResource() { return indexResource_.Get(); }
-	D3D12_INDEX_BUFFER_VIEW* GetIndexBufferView() { return &indexBufferView_; }
-
-	virtual int GetIndexSize() { return indexSize_; }
 
 private:
 	ShaderName shader_ = ShaderName::ObjectShader;

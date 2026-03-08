@@ -9,7 +9,9 @@
 #include "ModelManager.h"
 
 
-
+namespace {
+	int modelNumber = 0;
+}
 
 /// オブジェクトの読み込み///
 
@@ -123,12 +125,12 @@ MaterialData LoadMaterialTemplateFile(const std::string& directoryPath, const st
 //
 //}
 
-ModelData LoadObjFile(const std::string& directoryPath, const std::string& filename)//NodeAnimationで使う
+int LoadObjFile(const std::string& directoryPath, const std::string& filename)//NodeAnimationで使う
 {
 	std::unique_ptr<ModelManager> objManager = std::make_unique<ModelManager>();
 
 	if (objManager.get()->DuplicateConfirmation(directoryPath, filename)) {
-		return objManager.get()->DuplicateReturn(directoryPath, filename);
+		return objManager.get()->DuplicateReturn(directoryPath, filename).modelNumber;
 	}
 
 	ModelData modelData;
@@ -204,19 +206,23 @@ ModelData LoadObjFile(const std::string& directoryPath, const std::string& filen
 	std::unique_ptr<Texture> texture = std::make_unique<Texture>();
 
 	modelData.textureIndex = texture->CreateTexture(modelData.material.textureDilePath);
+	
 	modelData.mesh = objManager.get()->CreateMesh(vertices, indices);
+	modelData.modelNumber = modelNumber;
+	modelNumber++;
+
 	objManager.get()->SetModelList(modelData, directoryPath, filename);
 
-	return modelData;
+	return modelData.modelNumber;
 
 }
 
-ModelData AssimpLoadObjFile(const std::string& directoryPath, const std::string& filename)
+int AssimpLoadObjFile(const std::string& directoryPath, const std::string& filename)
 {
 	std::unique_ptr<ModelManager> objManager = std::make_unique<ModelManager>();
 
 	if (objManager.get()->DuplicateConfirmation(directoryPath, filename)) {
-		return objManager.get()->DuplicateReturn(directoryPath, filename);
+		return objManager.get()->DuplicateReturn(directoryPath, filename).modelNumber;
 	}
 
 	ModelData modelData;
@@ -291,10 +297,12 @@ ModelData AssimpLoadObjFile(const std::string& directoryPath, const std::string&
 
 	modelData.textureIndex = texture->CreateTexture(modelData.material.textureDilePath);
 	modelData.mesh = objManager.get()->CreateMesh(vertices, indices);
+	modelData.modelNumber = modelNumber;
+	modelNumber++;
 	objManager.get()->SetModelList(modelData, directoryPath, filename);
 
 
-	return modelData;
+	return modelData.modelNumber;
 
 }
 
