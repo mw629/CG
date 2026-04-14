@@ -1,8 +1,9 @@
 #include "ModelManager.h"
 #include "GraphicsDevice.h"
+#include <unordered_map>
 
 namespace {
-	std::vector<ModelList> modelList;
+	std::unordered_map<std::string, ModelData> modelMap;
 	int modelNumber=0;
 }
 
@@ -12,46 +13,36 @@ ModelManager::ModelManager()
 
 void ModelManager::SetModelList(ModelData modelData, const std::string& directoryPath, const std::string& filename)
 {
-	modelList_.modelData = modelData;
-	modelList_.directoryPath = directoryPath;
-	modelList_.filename = filename;
-	modelList_.modelData.modelNumber = modelNumber;
+	modelData.modelNumber = modelNumber;
+	std::string key = directoryPath + "/" + filename;
+	modelMap[key] = modelData;
 	modelNumber++;
-	modelList.push_back(modelList_);
 }
 
 bool ModelManager::DuplicateConfirmation(const std::string& directoryPath, const std::string& filename)
 {
-	for (int i = 0; i < modelList.size(); i++) {
-		if (modelList[i].directoryPath == directoryPath) {
-			if (modelList[i].filename == filename) {
-				return true;
-			}
-		}
-	}
-	return false;
+	std::string key = directoryPath + "/" + filename;
+	return modelMap.find(key) != modelMap.end();
 }
 
 ModelData ModelManager::DuplicateReturn(const std::string& directoryPath, const std::string& filename)
 {
-	for (int i = 0; i < modelList.size(); i++) {
-		if (modelList[i].directoryPath == directoryPath) {
-			if (modelList[i].filename == filename) {
-				return modelList[i].modelData;
-			}
-		}
+	std::string key = directoryPath + "/" + filename;
+	auto it = modelMap.find(key);
+	if (it != modelMap.end()) {
+		return it->second;
 	}
-	return modelList[0].modelData;
+	return modelMap.begin()->second;
 }
 
 ModelData ModelManager::GetModelData(int modelNumber)
 {
-	for (int i = 0; i < modelList.size(); i++) {
-		if (modelList[i].modelData.modelNumber == modelNumber) {
-			return modelList[i].modelData;
+	for (auto& pair : modelMap) {
+		if (pair.second.modelNumber == modelNumber) {
+			return pair.second;
 		}
 	}
-	return modelList[0].modelData;
+	return modelMap.begin()->second;
 }
 
 Mesh ModelManager::CreateMesh(std::vector<VertexData> vertices, std::vector<int32_t>indices)

@@ -1,17 +1,12 @@
 #pragma once
 #include "Core/VariableTypes.h"
 
-struct ModelList{
-	ModelData modelData;
-	std::string directoryPath;
-	std::string filename;
-};
+#include <unordered_map>
 
 class ModelManager
 {
 private:
-	
-	ModelList modelList_;
+
 	Mesh mesh_;
 
 	//頂点データ

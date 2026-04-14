@@ -1,5 +1,9 @@
 #pragma once
 #include <d3dx12.h>
+#include <string>
+#include <unordered_map>
+#include <vector>
+
 class TextureLoader
 {
 private:
@@ -14,7 +18,8 @@ private:
 		Microsoft::WRL::ComPtr<ID3D12Resource> intermediateResource;
 	};
 
-	std::vector<Texture> texture_;
+	std::unordered_map<std::string, Texture> textureMap_;
+	std::vector<std::string> textureKeys_; // For fast index lookup and draw
 
 public:
 
@@ -30,7 +35,7 @@ public:
 
 	void Draw();
 
-	int GetLastIndex() { return static_cast<int>(texture_.size()); }
+	int GetLastIndex() { return static_cast<int>(textureKeys_.size()); }
 
 	int GetTextureIndex(const std::string& filePath);
 	D3D12_GPU_DESCRIPTOR_HANDLE GetTexture(const std::string& filePath);
