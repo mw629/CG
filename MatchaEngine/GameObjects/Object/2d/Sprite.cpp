@@ -51,7 +51,7 @@ void Sprite::Initialize(SpriteData spriteData, int textureHandle)
 
 
 	material_ = std::make_unique<MaterialFactory>();
-	material_->CreateMatrial(false);
+	material_.get()->CreateMartial(false);
 	CreateSprite();
 }
 
