@@ -14,7 +14,7 @@ private:
 public:
 	ModelManager();
 
-	void SetModelList(ModelData modelData,const std::string& directoryPath, const std::string& filename);
+	void SetModelList(ModelData& modelData,const std::string& directoryPath, const std::string& filename);
 
 	bool DuplicateConfirmation(const std::string& directoryPath, const std::string& filename);
 

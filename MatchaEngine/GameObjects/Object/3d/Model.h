@@ -21,6 +21,8 @@ public:
 	
 	void CreateObject()override;
 
+	Mesh GetMesh() override;
+
 	int GetModelNumber() { return modelNumber_; }
 };
 

@@ -100,12 +100,12 @@ void GameScene::Draw() {
 
 	Draw::SetCamera(camera_.get());
 
-	//Draw::DrawObj(model_.get());
+	Draw::DrawObj(model_.get());
 	Draw::DrawObj(floor.get());
 	//Draw::DrawObj(nodeanimation_.get());
 	//Draw::DrawAnimation(animation_.get());
 
-	Draw::DrawObj(sphere_.get());
+	//Draw::DrawObj(sphere_.get());
 	for (int i = 0, n = static_cast<int>(particle_.size()); i < n; ++i) {
 		particle_[i].get()->Draw();
 	}

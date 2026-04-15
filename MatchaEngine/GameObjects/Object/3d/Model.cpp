@@ -3,6 +3,7 @@
 #include "Calculation.h"
 #include "Load.h"
 #include "Texture.h"
+#include "ModelManager.h"
 #include <fstream>
 #include <sstream>
 
@@ -47,5 +48,11 @@ void Model::SettingWvp(Matrix4x4 viewMatrix) {
 void Model::CreateObject()
 {
 	CreateWVP();
+}
+
+Mesh Model::GetMesh()
+{
+	ModelData data = ModelManager::GetModelData(modelNumber_);
+	return data.mesh;
 }
 

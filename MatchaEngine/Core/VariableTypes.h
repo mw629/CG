@@ -110,7 +110,10 @@ struct Material
 };
 
 struct Mesh {
-	
+
+	Microsoft::WRL::ComPtr<ID3D12Resource> vertexResource;
+	Microsoft::WRL::ComPtr<ID3D12Resource> indexResource;
+
 	D3D12_VERTEX_BUFFER_VIEW vertexBufferView;
 	int vertexSize;
 	D3D12_INDEX_BUFFER_VIEW indexBufferView_{};
