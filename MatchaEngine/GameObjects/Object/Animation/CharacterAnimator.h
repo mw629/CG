@@ -29,7 +29,7 @@ public:
 
 	static void SetData(ID3D12Device* SetDevice, DescriptorHeap* SetDescriptorHeap);
 
-	void Initialize(const std::string& directoryPath, const std::string& filename);
+	void Initialize(ModelData modelData, const std::string& directoryPath, const std::string& filename);
 
 	void SettingWvp(Matrix4x4 viewMatrix) override;
 

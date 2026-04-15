@@ -14,9 +14,9 @@ TransformAnimation::TransformAnimation()
 {
 }
 
-void TransformAnimation::Initialize(const std::string& directoryPath, const std::string& filename)
+void TransformAnimation::Initialize(ModelData modelData, const std::string& directoryPath, const std::string& filename)
 {
-	modelData_ = LoadObjFile(directoryPath, filename);
+	modelData_ = modelData;
 	animation_ = LoadAnimationFile(directoryPath, filename);
 	textureSrvHandleGPU_ = texture->TextureData(modelData_.textureIndex);
 

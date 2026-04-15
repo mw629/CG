@@ -497,5 +497,6 @@
     <None Include="resources\Shader\SkinningObject3d.hlsli" />
     <None Include="resources\Shader\SkyBox.PS.hlsl" />
     <None Include="resources\Shader\SkyBox.hlsli" />
+    <None Include=".github\copilot-instructions.md" />
   </ItemGroup>
 </Project>

@@ -27,7 +27,7 @@ public:
 	~TransformAnimation()override;
 	TransformAnimation();
 
-	void Initialize(const std::string& directoryPath, const std::string& filename);
+	void Initialize(ModelData modelData, const std::string& directoryPath, const std::string& filename);
 
 	void SettingWvp(Matrix4x4 viewMatrix) override;
 
