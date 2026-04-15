@@ -44,9 +44,9 @@ public:
 
 	static void SetObjectResource(Vector2 ClientSize);
 
-	virtual void CreateVertexData() = 0;
+	virtual void CreateVertexData();
 	virtual void CreateWVP();
-	virtual void CreateIndexResource() = 0;
+	virtual void CreateIndexResource();
 
 	virtual void CreateObject();
 
@@ -62,7 +62,9 @@ public:
 	MaterialFactory* GetMartial() { return material_.get(); }
 	D3D12_GPU_DESCRIPTOR_HANDLE GetTextureSrvHandleGPU()const { return textureSrvHandleGPU_; }
 
-	D3D12_VERTEX_BUFFER_VIEW* GetVertexBufferView() { return &vertexBufferView_; }
+	virtual Mesh GetMesh();
+
+	D3D12_VERTEX_BUFFER_VIEW* GetVertexBufferView();
 	ID3D12Resource* GetWvpDataResource() { return wvpDataResource_.Get(); }
 	int GetVertexSize() { return vertexSize_; }
 	TransformationMatrix* GetWvpData() { return wvpData_; }

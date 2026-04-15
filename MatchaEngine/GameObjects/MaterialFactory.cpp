@@ -10,7 +10,7 @@ MaterialFactory::~MaterialFactory(){
 	}
 }
 
-void MaterialFactory::CreateMatrial(bool Lighting)
+void MaterialFactory::CreateMartial(bool Lighting)
 {
 	//マテリアル用のリソースを作る。今回はcolor1つ分のサイズを用意する
 	materialResource_ = GraphicsDevice::CreateBufferResource(sizeof(Material));
@@ -18,7 +18,7 @@ void MaterialFactory::CreateMatrial(bool Lighting)
 	materialResource_->Map(0, nullptr, reinterpret_cast<void**>(&materialData_));
 	//今回は書き込んでみる
 	materialData_->color = Vector4(1.0f, 1.0f, 1.0f, 1.0f);
-	materialData_->endbleLighting = Lighting;
+	materialData_->enableLighting = Lighting;
 	materialData_->uvTransform = IdentityMatrix();
 	materialData_->shininess = 30.0f;
 }

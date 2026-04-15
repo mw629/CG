@@ -88,3 +88,22 @@ void ObjectBase::CreateObject()
 	CreateWVP();
 	CreateIndexResource();
 }
+
+void ObjectBase::CreateVertexData()
+{
+	// 基底クラスのデフォルト実装（派生クラスでオーバーライドされる）
+}
+
+Mesh ObjectBase::GetMesh()
+{
+	Mesh mesh;
+	mesh.vertexBufferView = vertexBufferView_;
+	mesh.vertexSize = vertexSize_;
+	mesh.indexBufferView_ = indexBufferView_;
+	return mesh;
+}
+
+D3D12_VERTEX_BUFFER_VIEW* ObjectBase::GetVertexBufferView()
+{
+	return &vertexBufferView_;
+}

@@ -14,50 +14,19 @@ TransformAnimation::TransformAnimation()
 {
 }
 
-void TransformAnimation::Initialize(const std::string& directoryPath, const std::string& filename)
+void TransformAnimation::Initialize(ModelData modelData, const std::string& directoryPath, const std::string& filename)
 {
-	modelData_ = LoadObjFile(directoryPath, filename);
+	modelData_ = modelData;
 	animation_ = LoadAnimationFile(directoryPath, filename);
 	textureSrvHandleGPU_ = texture->TextureData(modelData_.textureIndex);
 
 	skeleton_ = CreateSkeleton(modelData_.rootNode);
 
 	material_ = std::make_unique<MaterialFactory>();
-	material_->CreateMatrial();
+	material_->CreateMartial();
 	CreateObject();
 }
 
-void TransformAnimation::CreateVertexData()
-{
-	//頂点リソースを作る
-	vertexResource_ = GraphicsDevice::CreateBufferResource(sizeof(VertexData) * modelData_.vertices.size());
-	//頂点バッファービューを作成する
-	//リソースの先頭アドレスから使う
-	vertexBufferView_.BufferLocation = vertexResource_->GetGPUVirtualAddress();
-	//使用するリソースのサイズは頂点6つ分のサイズ
-	vertexBufferView_.SizeInBytes = static_cast<UINT>(sizeof(VertexData) * modelData_.vertices.size());
-	//1頂点当たりのサイズ
-	vertexBufferView_.StrideInBytes = sizeof(VertexData);
-	//頂点リソースにデータを書き込む
-	vertexResource_->Map(0, nullptr, reinterpret_cast<void**>(&vertexData_));
-	std::memcpy(vertexData_, modelData_.vertices.data(), sizeof(VertexData) * modelData_.vertices.size());
-
-	vertexSize_ = modelData_.vertices.size();
-}
-
-void TransformAnimation::CreateIndexResource()
-{
-	indexResource_ = GraphicsDevice::CreateBufferResource(sizeof(uint32_t) * modelData_.indices.size());
-
-	indexBufferView_.BufferLocation = indexResource_->GetGPUVirtualAddress();
-	indexBufferView_.SizeInBytes = sizeof(uint32_t) * modelData_.indices.size();
-	indexBufferView_.Format = DXGI_FORMAT_R32_UINT;
-
-	indexResource_->Map(0, nullptr, reinterpret_cast<void**>(&indexData_));
-	std::memcpy(indexData_, modelData_.indices.data(), sizeof(uint32_t) * modelData_.indices.size());
-
-
-}
 
 void TransformAnimation::SettingWvp(Matrix4x4 viewMatrix) {
 	Matrix4x4 projectionMatrix = MakePerspectiveFovMatrix(0.45f, float(kClientWidth_) / float(kClientHeight_), 0.1f, 10000.0f);
@@ -186,7 +155,7 @@ SkinCluster TransformAnimation::CreateSkinCluster(ID3D12DescriptorHeap* descript
 	paletteSrvDesc.Buffer.StructureByteStride = sizeof(WellForGPU);
 	device->CreateShaderResourceView(skinCluster.paletteResource.Get(), &paletteSrvDesc, skinCluster.paletteSrvHandle.first);
 
-	skinCluster.influenceResource = GraphicsDevice::CreateBufferResource(sizeof(VertexInfluence) * modelData_.vertices.size());
+	skinCluster.influenceResource = GraphicsDevice::CreateBufferResource(sizeof(VertexInfluence) * modelData_.mesh.vertexSize);
 
 
 	return skinCluster;

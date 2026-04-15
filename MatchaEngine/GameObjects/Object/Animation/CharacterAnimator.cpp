@@ -23,9 +23,9 @@ void CharacterAnimator::SetData(ID3D12Device* SetDevice, DescriptorHeap* SetDesc
 	descriptorHeap = SetDescriptorHeap;
 }
 
-void CharacterAnimator::Initialize(const std::string& directoryPath, const std::string& filename)
+void CharacterAnimator::Initialize(ModelData modelData, const std::string& directoryPath, const std::string& filename)
 {
-	modelData_ = AssimpLoadObjFile(directoryPath, filename);
+	modelData_ = modelData;
 	animation_ = LoadAnimationFile(directoryPath, filename);
 	textureSrvHandleGPU_ = texture->TextureData(modelData_.textureIndex);
 
@@ -33,44 +33,15 @@ void CharacterAnimator::Initialize(const std::string& directoryPath, const std::
 	CreateSkinCluster();
 
 	material_ = std::make_unique<MaterialFactory>();
-	material_->CreateMatrial();
+	material_->CreateMartial();
 	CreateObject();
 
 	SetShader(AnimationObj);
 
 }
 
-void CharacterAnimator::CreateVertexData()
-{
-	//頂点リソースを作る
-	vertexResource_ = GraphicsDevice::CreateBufferResource(sizeof(VertexData) * modelData_.vertices.size());
-	//頂点バッファービューを作成する
-	//リソースの先頭アドレスから使う
-	vertexBufferView_.BufferLocation = vertexResource_->GetGPUVirtualAddress();
-	//使用するリソースのサイズは頂点6つ分のサイズ
-	vertexBufferView_.SizeInBytes = static_cast<UINT>(sizeof(VertexData) * modelData_.vertices.size());
-	//1頂点当たりのサイズ
-	vertexBufferView_.StrideInBytes = sizeof(VertexData);
-	//頂点リソースにデータを書き込む
-	vertexResource_->Map(0, nullptr, reinterpret_cast<void**>(&vertexData_));
-	std::memcpy(vertexData_, modelData_.vertices.data(), sizeof(VertexData) * modelData_.vertices.size());
-
-	vertexSize_ = modelData_.vertices.size();
-}
-
-void CharacterAnimator::CreateIndexResource()
-{
-	indexResource_ = GraphicsDevice::CreateBufferResource(sizeof(uint32_t) * modelData_.indices.size());
-
-	indexBufferView_.BufferLocation = indexResource_->GetGPUVirtualAddress();
-	indexBufferView_.SizeInBytes = sizeof(uint32_t) * modelData_.indices.size();
-	indexBufferView_.Format = DXGI_FORMAT_R32_UINT;
-
-	indexResource_->Map(0, nullptr, reinterpret_cast<void**>(&indexData_));
-	std::memcpy(indexData_, modelData_.indices.data(), sizeof(uint32_t) * modelData_.indices.size());
 
 
-}
 
 void CharacterAnimator::SettingWvp(Matrix4x4 viewMatrix) {
 	Matrix4x4 projectionMatrix = MakePerspectiveFovMatrix(0.45f, float(kClientWidth_) / float(kClientHeight_), 0.1f, 10000.0f);
@@ -252,15 +223,16 @@ void CharacterAnimator::CreateSkinCluster()
 	device->CreateShaderResourceView(skinCluster_.paletteResource.Get(), &paletteSrvDesc, skinCluster_.paletteSrvHandle.first);
 
 	//influence用のResourceを確保。頂点ごとにinfluence情報をついかできるようにする
-	skinCluster_.influenceResource = GraphicsDevice::CreateBufferResource(sizeof(VertexInfluence) * modelData_.vertices.size());
+	skinCluster_.influenceResource = GraphicsDevice::CreateBufferResource(sizeof(VertexInfluence) * modelData_.mesh.vertexSize);
 	VertexInfluence* mappedInfluence = nullptr;
 	skinCluster_.influenceResource->Map(0, nullptr, reinterpret_cast<void**>(&mappedInfluence));
-	std::memset(mappedInfluence, 0, sizeof(VertexInfluence) * modelData_.vertices.size());//0梅wightを0にしておく
-	skinCluster_.mappedInfluence = { mappedInfluence,modelData_.vertices.size() };
+	std::memset(mappedInfluence, 0, sizeof(VertexInfluence) * modelData_.mesh.vertexSize);//0梅wightを0にしておく
+	//skinCluster_.mappedInfluence = { mappedInfluence, modelData_.mesh.vertexSize };
+	skinCluster_.mappedInfluence = { mappedInfluence, static_cast<std::span<VertexInfluence>::size_type>(modelData_.mesh.vertexSize) };
 
 	//Influence用のVBVを作成
 	skinCluster_.influenceBufferView.BufferLocation = skinCluster_.influenceResource->GetGPUVirtualAddress();
-	skinCluster_.influenceBufferView.SizeInBytes = UINT(sizeof(VertexInfluence) * modelData_.vertices.size());
+	skinCluster_.influenceBufferView.SizeInBytes = UINT(sizeof(VertexInfluence) * modelData_.mesh.vertexSize);
 	skinCluster_.influenceBufferView.StrideInBytes = sizeof(VertexInfluence);
 
 	//InverseBindPoseMatrixを格納する場所を作成して、単位行列で埋める

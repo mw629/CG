@@ -139,20 +139,24 @@ ModelData LoadObjFile(const std::string& directoryPath, const std::string& filen
 		aiProcess_FlipWindingOrder | aiProcess_FlipUVs);
 	assert(scene->HasMeshes());
 
+	std::vector<VertexData> vertices;
+	std::vector<int32_t>indices;
+
 	for (uint32_t meshIndex = 0; meshIndex < scene->mNumMeshes; ++meshIndex) {
 		aiMesh* mesh = scene->mMeshes[meshIndex];
 		assert(mesh->HasNormals());//法線がないMeshは今回非対称
 		assert(mesh->HasTextureCoords(0));//TexcoordがないMeshは今回非対応
-		modelData.vertices.resize(mesh->mNumVertices);
+		
+		vertices.resize(mesh->mNumVertices);
 
 		for (uint32_t vertexIndex = 0; vertexIndex < mesh->mNumVertices; ++vertexIndex) {
 			aiVector3D& position = mesh->mVertices[vertexIndex];
 			aiVector3D& normal = mesh->mNormals[vertexIndex];
 			aiVector3D& texcord = mesh->mTextureCoords[0][vertexIndex];
 
-			modelData.vertices[vertexIndex].position = { -position.x,position.y,position.z,1.0f };
-			modelData.vertices[vertexIndex].normal = { -normal.x,normal.y,normal.z };
-			modelData.vertices[vertexIndex].texcoord = { texcord.x,texcord.y };
+			vertices[vertexIndex].position = { -position.x,position.y,position.z,1.0f };
+			vertices[vertexIndex].normal = { -normal.x,normal.y,normal.z };
+			vertices[vertexIndex].texcoord = { texcord.x,texcord.y };
 		}
 		for (uint32_t boneIndex = 0; boneIndex < mesh->mNumBones; ++boneIndex) {
 			aiBone* bone = mesh->mBones[boneIndex];
@@ -180,7 +184,7 @@ ModelData LoadObjFile(const std::string& directoryPath, const std::string& filen
 
 			for (uint32_t element = 0; element < fence.mNumIndices; ++element) {
 				uint32_t vertexIndex = fence.mIndices[element];
-				modelData.indices.push_back(vertexIndex);
+				indices.push_back(vertexIndex);
 			}
 
 		}
@@ -200,7 +204,7 @@ ModelData LoadObjFile(const std::string& directoryPath, const std::string& filen
 	std::unique_ptr<Texture> texture = std::make_unique<Texture>();
 
 	modelData.textureIndex = texture->CreateTexture(modelData.material.textureDilePath);
-
+	modelData.mesh = objManager.get()->CreateMesh(vertices, indices);
 	objManager.get()->SetModelList(modelData, directoryPath, filename);
 
 	return modelData;
@@ -216,6 +220,8 @@ ModelData AssimpLoadObjFile(const std::string& directoryPath, const std::string&
 	}
 
 	ModelData modelData;
+	std::vector<VertexData> vertices;
+	std::vector<int32_t>indices;
 
 	Assimp::Importer impoter;
 	std::string filePath = directoryPath + "/" + filename;
@@ -227,16 +233,16 @@ ModelData AssimpLoadObjFile(const std::string& directoryPath, const std::string&
 		aiMesh* mesh = scene->mMeshes[meshIndex];
 		//assert(mesh->HasNormals());//法線がないMeshは今回非対称
 		//assert(mesh->HasTextureCoords(0));//TexcoordがないMeshは今回非対応
-		modelData.vertices.resize(mesh->mNumVertices);
+		vertices.resize(mesh->mNumVertices);
 
 		for (uint32_t vertexIndex = 0; vertexIndex < mesh->mNumVertices; ++vertexIndex) {
 			aiVector3D& position = mesh->mVertices[vertexIndex];
 			aiVector3D& normal = mesh->mNormals[vertexIndex];
 			aiVector3D& texcord = mesh->mTextureCoords[0][vertexIndex];
 
-			modelData.vertices[vertexIndex].position = { -position.x,position.y,position.z,1.0f };
-			modelData.vertices[vertexIndex].normal = { -normal.x,normal.y,normal.z };
-			modelData.vertices[vertexIndex].texcoord = { texcord.x,texcord.y };
+			vertices[vertexIndex].position = { -position.x,position.y,position.z,1.0f };
+			vertices[vertexIndex].normal = { -normal.x,normal.y,normal.z };
+			vertices[vertexIndex].texcoord = { texcord.x,texcord.y };
 		}
 		for (uint32_t boneIndex = 0; boneIndex < mesh->mNumBones; ++boneIndex) {
 			aiBone* bone = mesh->mBones[boneIndex];
@@ -264,7 +270,7 @@ ModelData AssimpLoadObjFile(const std::string& directoryPath, const std::string&
 
 			for (uint32_t element = 0; element < fence.mNumIndices; ++element) {
 				uint32_t vertexIndex = fence.mIndices[element];
-				modelData.indices.push_back(vertexIndex);
+				indices.push_back(vertexIndex);
 			}
 
 		}
@@ -284,8 +290,9 @@ ModelData AssimpLoadObjFile(const std::string& directoryPath, const std::string&
 	std::unique_ptr<Texture> texture = std::make_unique<Texture>();
 
 	modelData.textureIndex = texture->CreateTexture(modelData.material.textureDilePath);
-
+	modelData.mesh = objManager.get()->CreateMesh(vertices, indices);
 	objManager.get()->SetModelList(modelData, directoryPath, filename);
+
 
 	return modelData;
 

@@ -129,13 +129,7 @@
     <ClCompile Include="MatchaEngine\GameObjects\Object\3d\Model.cpp">
       <Filter>MatchaEngine\GameObjects</Filter>
     </ClCompile>
-    <ClCompile Include="MatchaEngine\GameObjects\Object\3d\Sphere.cpp">
-      <Filter>MatchaEngine\GameObjects</Filter>
-    </ClCompile>
     <ClCompile Include="MatchaEngine\GameObjects\Object\2d\Sprite.cpp">
-      <Filter>MatchaEngine\GameObjects</Filter>
-    </ClCompile>
-    <ClCompile Include="MatchaEngine\GameObjects\Object\3d\Triangle.cpp">
       <Filter>MatchaEngine\GameObjects</Filter>
     </ClCompile>
     <ClCompile Include="MatchaEngine\Input\GamePadInput.cpp">
@@ -244,6 +238,12 @@
       <Filter>ソース ファイル</Filter>
     </ClCompile>
     <ClCompile Include="Game\GameApplication.cpp">
+      <Filter>ソース ファイル</Filter>
+    </ClCompile>
+    <ClCompile Include="MatchaEngine\GameObjects\Object\3d\Sphere.cpp">
+      <Filter>ソース ファイル</Filter>
+    </ClCompile>
+    <ClCompile Include="MatchaEngine\GameObjects\Object\3d\Triangle.cpp">
       <Filter>ソース ファイル</Filter>
     </ClCompile>
   </ItemGroup>
@@ -360,13 +360,7 @@
     <ClInclude Include="MatchaEngine\GameObjects\Object\3d\Model.h">
       <Filter>MatchaEngine\GameObjects</Filter>
     </ClInclude>
-    <ClInclude Include="MatchaEngine\GameObjects\Object\3d\Sphere.h">
-      <Filter>MatchaEngine\GameObjects</Filter>
-    </ClInclude>
     <ClInclude Include="MatchaEngine\GameObjects\Object\2d\Sprite.h">
-      <Filter>MatchaEngine\GameObjects</Filter>
-    </ClInclude>
-    <ClInclude Include="MatchaEngine\GameObjects\Object\3d\Triangle.h">
       <Filter>MatchaEngine\GameObjects</Filter>
     </ClInclude>
     <ClInclude Include="MatchaEngine\Input\GamePadInput.h">
@@ -480,6 +474,12 @@
     <ClInclude Include="Game\GameApplication.h">
       <Filter>ヘッダー ファイル</Filter>
     </ClInclude>
+    <ClInclude Include="MatchaEngine\GameObjects\Object\3d\Triangle.h">
+      <Filter>ヘッダー ファイル</Filter>
+    </ClInclude>
+    <ClInclude Include="MatchaEngine\GameObjects\Object\3d\Sphere.h">
+      <Filter>ヘッダー ファイル</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <Text Include="externals\imgui\LICENSE.txt">
@@ -497,5 +497,6 @@
     <None Include="resources\Shader\SkinningObject3d.hlsli" />
     <None Include="resources\Shader\SkyBox.PS.hlsl" />
     <None Include="resources\Shader\SkyBox.hlsli" />
+    <None Include=".github\copilot-instructions.md" />
   </ItemGroup>
 </Project>

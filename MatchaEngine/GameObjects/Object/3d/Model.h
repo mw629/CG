@@ -5,8 +5,10 @@
 class Model	:public ObjectBase
 {
 private:
-	ModelData modelData_{};
-	
+	int modelNumber_;
+
+	//アニメーション
+	Node rootNode_;
 
 public:
 	
@@ -15,13 +17,12 @@ public:
 
 	void Initialize(ModelData modelData);
 
-	void CreateVertexData()override;
 	void SettingWvp(Matrix4x4 viewMatrix) override;
-	void CreateIndexResource()override;
+	
+	void CreateObject()override;
 
+	Mesh GetMesh() override;
 
-	ModelData GetModelData() { return modelData_; }
-	int GetIndexSize()override { return modelData_.indices.size(); }
-
+	int GetModelNumber() { return modelNumber_; }
 };
 

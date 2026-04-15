@@ -27,11 +27,7 @@ public:
 	~TransformAnimation()override;
 	TransformAnimation();
 
-	void Initialize(const std::string& directoryPath, const std::string& filename);
-
-	void CreateVertexData()override;
-
-	void CreateIndexResource()override;
+	void Initialize(ModelData modelData, const std::string& directoryPath, const std::string& filename);
 
 	void SettingWvp(Matrix4x4 viewMatrix) override;
 
@@ -44,11 +40,12 @@ public:
 	void Update(Matrix4x4 viewMatrix);
 
 	ModelData GetModelData() { return modelData_; }
-	int GetIndexSize()override { return modelData_.indices.size(); }
 
 	Vector3 CalculateValue(const std::vector<KeyframeVector3>& keyframe, float time);
 	Quaternion CalculateValue(const std::vector<KeyframeQuaternion>& keyframe, float time);
 
 	SkinCluster CreateSkinCluster(ID3D12DescriptorHeap* descriptorHeap, uint32_t descriprtorSize);
+
+	Mesh GetMesh()override { return modelData_.mesh; }
 };
 

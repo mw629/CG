@@ -39,7 +39,7 @@ void Triangle::Initialize(D3D12_GPU_DESCRIPTOR_HANDLE textureSrvHandleGPU) {
 	vertex_[2] = { 0.1f,-0.1f,0.0f,1.0f };
 
 	material_ = std::make_unique<MaterialFactory>();
-	material_.get()->CreateMatrial();
+	material_.get()->CreateMartial();
 
 }
 

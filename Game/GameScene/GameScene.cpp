@@ -40,8 +40,11 @@ void GameScene::Initialize() {
 	model_.get()->SetTransform(modelTransform_);
 
 
-	animation_.get()->Initialize("resources/human", "sneakWalk.gltf");
-	nodeanimation_.get()->Initialize("resources/AnimatedCube", "AnimatedCube.gltf");
+	ModelData animModel = AssimpLoadObjFile("resources/human", "sneakWalk.gltf");
+	animation_.get()->Initialize(animModel, "resources/human", "sneakWalk.gltf");
+
+	ModelData cubeModel = AssimpLoadObjFile("resources/AnimatedCube", "AnimatedCube.gltf");
+	nodeanimation_.get()->Initialize(cubeModel, "resources/AnimatedCube", "AnimatedCube.gltf");
 
 
 	int texture1 = texture_.get()->CreateTexture("resources/monsterBall.png");
@@ -107,14 +110,14 @@ void GameScene::Draw() {
 
 	Draw::SetCamera(camera_.get());
 
-	//Draw::DrawObj(model_.get());
+	Draw::DrawObj(model_.get());
 	Draw::DrawObj(floor.get());
 	//Draw::DrawObj(nodeanimation_.get());
-	Draw::DrawAnimtion(animation_.get());
+	Draw::DrawAnimation(animation_.get());
 
 	Draw::DrawObj(sphere_.get());
 	for (int i = 0, n = static_cast<int>(particle_.size()); i < n; ++i) {
 		particle_[i].get()->Draw();
 	}
-	Draw::DrawSprite(sprite_.get(), camera_.get());
+	//Draw::DrawSprite(sprite_.get());
 }
