@@ -56,7 +56,7 @@ void Draw::DrawObj(ObjectBase* obj)
 	commandList_->SetGraphicsRootConstantBufferView(5, pointLight_->GetDirectinalLightResource()->GetGPUVirtualAddress());
 	commandList_->SetGraphicsRootConstantBufferView(6, spotLight_->GetDirectinalLightResource()->GetGPUVirtualAddress());
 
-	commandList_->DrawIndexedInstanced(UINT(mesh.vertexSize), 1, 0, 0, 0);
+	commandList_->DrawIndexedInstanced(UINT(mesh.indexBufferView_.SizeInBytes / sizeof(uint32_t)), 1, 0, 0, 0);
 
 }
 
@@ -64,12 +64,12 @@ void Draw::DrawAnimation(CharacterAnimator* obj)
 {
 	preDraw(obj->GetShader(), obj->GetBlend());
 
-	// インデックス設定
-	commandList_->IASetIndexBuffer(obj->GetIndexBufferView());
-
-	// VBV を複数渡す（頂点データ + インフルエンスデータ）
 	Mesh mesh = obj->GetMesh();
 
+	// インデックス設定
+	commandList_->IASetIndexBuffer(&mesh.indexBufferView_);
+
+	// VBV を複数渡す（頂点データ + インフルエンスデータ）
 	D3D12_VERTEX_BUFFER_VIEW vbvs[2];
 	vbvs[0] = mesh.vertexBufferView;
 	vbvs[1] = *obj->GetInfluenceBufferView();
@@ -87,7 +87,7 @@ void Draw::DrawAnimation(CharacterAnimator* obj)
 	commandList_->SetGraphicsRootConstantBufferView(6, pointLight_->GetDirectinalLightResource()->GetGPUVirtualAddress());
 	commandList_->SetGraphicsRootConstantBufferView(7, spotLight_->GetDirectinalLightResource()->GetGPUVirtualAddress());
 
-	commandList_->DrawIndexedInstanced(obj->GetIndexSize(), 1, 0, 0, 0);
+	commandList_->DrawIndexedInstanced(UINT(mesh.indexBufferView_.SizeInBytes / sizeof(uint32_t)), 1, 0, 0, 0);
 }
 
 
