@@ -22,12 +22,14 @@ private:
 
 public:
 
-	void CreatePSO(ShaderName shaderName, BlendMode blendmode, std::ostream& os, ID3D12Device* device);
+	void CreatePSO(ShaderName shaderName, BlendMode blendMode, std::ostream& os, ID3D12Device* device);
+
+	void CreateGraphicsPSO(ShaderName shaderName, BlendMode blendMode, std::ostream& os, ID3D12Device* device);
 
 	void ALLPSOCreate(std::ostream& os, ID3D12Device* device);
 
-	D3D12_GRAPHICS_PIPELINE_STATE_DESC GetGraphicsPipelineStateDesc(ShaderName shaderName, BlendMode blendmode)const { return graphicsPipelineStateDesc_[shaderName][blendmode]; }
-	ID3D12PipelineState* GetGraphicsPipelineState(ShaderName shaderName, BlendMode blendmode) { return graphicsPipelineState_[shaderName][blendmode].Get(); }
-	RootSignature* GetRootSignature(ShaderName shaderName, BlendMode blendmode) { return rootSignature_[shaderName][blendmode].get(); }
+	D3D12_GRAPHICS_PIPELINE_STATE_DESC GetGraphicsPipelineStateDesc(ShaderName shaderName, BlendMode blendMode)const { return graphicsPipelineStateDesc_[shaderName][blendMode]; }
+	ID3D12PipelineState* GetGraphicsPipelineState(ShaderName shaderName, BlendMode blendMode) { return graphicsPipelineState_[shaderName][blendMode].Get(); }
+	RootSignature* GetRootSignature(ShaderName shaderName, BlendMode blendMode) { return rootSignature_[shaderName][blendMode].get(); }
 };
 

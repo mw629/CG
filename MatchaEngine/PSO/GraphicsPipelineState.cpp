@@ -4,7 +4,7 @@
 
 
 
-void GraphicsPipelineState::CreatePSO(ShaderName shaderName, BlendMode blendmode, std::ostream& os, ID3D12Device* device)
+void GraphicsPipelineState::CreatePSO(ShaderName shaderName, BlendMode blendMode, std::ostream& os, ID3D12Device* device)
 {
 	DirectXShaderCompiler directXShaderCompiler{};
 	std::unique_ptr<RootSignature> rootSignature = std::make_unique<RootSignature>();
@@ -17,7 +17,7 @@ void GraphicsPipelineState::CreatePSO(ShaderName shaderName, BlendMode blendmode
 	std::unique_ptr<DepthStencilState> depthStencilState = std::make_unique<DepthStencilState>();
 
 	std::string info = std::string("CreatePSO: shader=") + ShaderNameToString(shaderName) +
-		", blend=" + BlendModeToString(blendmode) + "\n";
+		", blend=" + BlendModeToString(blendMode) + "\n";
 	Log(os, info);
 
 
@@ -38,7 +38,7 @@ void GraphicsPipelineState::CreatePSO(ShaderName shaderName, BlendMode blendmode
 	inputLayout->CreateInputLayout(shaderName);
 	Log(os, "InputLayoutの生成完了\n");
 	//BlendStateの設定を行う//
-	blendState->CreateBlendDesc(blendmode);
+	blendState->CreateBlendDesc(blendMode);
 	Log(os, "BlendStateの生成完了\n");
 	//RasterizerStateの設定を行う//
 	rasterizerState->CreateRasterizerState(shaderName);
@@ -52,37 +52,101 @@ void GraphicsPipelineState::CreatePSO(ShaderName shaderName, BlendMode blendmode
 
 
 
-	graphicsPipelineStateDesc_[shaderName][blendmode].pRootSignature = rootSignature->GetRootSignature();//RootSignature
-	graphicsPipelineStateDesc_[shaderName][blendmode].InputLayout = inputLayout->GetInputLayoutDesc();//InputLayout
-	graphicsPipelineStateDesc_[shaderName][blendmode].VS = { shaderCompile->GetVertexShaderBlob()->GetBufferPointer(),
+	graphicsPipelineStateDesc_[shaderName][blendMode].pRootSignature = rootSignature->GetRootSignature();//RootSignature
+	graphicsPipelineStateDesc_[shaderName][blendMode].InputLayout = inputLayout->GetInputLayoutDesc();//InputLayout
+	graphicsPipelineStateDesc_[shaderName][blendMode].VS = { shaderCompile->GetVertexShaderBlob()->GetBufferPointer(),
 	 shaderCompile->GetVertexShaderBlob()->GetBufferSize() };//VertexShader
-	graphicsPipelineStateDesc_[shaderName][blendmode].PS = { shaderCompile->GetPixelShaderBlob()->GetBufferPointer(),
+	graphicsPipelineStateDesc_[shaderName][blendMode].PS = { shaderCompile->GetPixelShaderBlob()->GetBufferPointer(),
 	shaderCompile->GetPixelShaderBlob()->GetBufferSize() };//PixelShader
-	graphicsPipelineStateDesc_[shaderName][blendmode].BlendState = blendState->GetBlendDesc();//BlenderState
-	graphicsPipelineStateDesc_[shaderName][blendmode].RasterizerState = rasterizerState->GetRasterizerDesc();//RasterizerState
+	graphicsPipelineStateDesc_[shaderName][blendMode].BlendState = blendState->GetBlendDesc();//BlenderState
+	graphicsPipelineStateDesc_[shaderName][blendMode].RasterizerState = rasterizerState->GetRasterizerDesc();//RasterizerState
 	//書き込むRTVの情報
-	graphicsPipelineStateDesc_[shaderName][blendmode].NumRenderTargets = 1;
-	graphicsPipelineStateDesc_[shaderName][blendmode].RTVFormats[0] = DXGI_FORMAT_R8G8B8A8_UNORM_SRGB;
+	graphicsPipelineStateDesc_[shaderName][blendMode].NumRenderTargets = 1;
+	graphicsPipelineStateDesc_[shaderName][blendMode].RTVFormats[0] = DXGI_FORMAT_R8G8B8A8_UNORM_SRGB;
 	//利用するトポロジ（形状）のタイプ。三角形
-	graphicsPipelineStateDesc_[shaderName][blendmode].PrimitiveTopologyType =
+	graphicsPipelineStateDesc_[shaderName][blendMode].PrimitiveTopologyType =
 		D3D12_PRIMITIVE_TOPOLOGY_TYPE_TRIANGLE;
 	//どのように画面に色を打ち込むのかの設定(気にしなくていい)
-	graphicsPipelineStateDesc_[shaderName][blendmode].SampleDesc.Count = 1;
-	graphicsPipelineStateDesc_[shaderName][blendmode].SampleMask = D3D12_DEFAULT_SAMPLE_MASK;
+	graphicsPipelineStateDesc_[shaderName][blendMode].SampleDesc.Count = 1;
+	graphicsPipelineStateDesc_[shaderName][blendMode].SampleMask = D3D12_DEFAULT_SAMPLE_MASK;
 
 	//作成したらPSOに代入、DSCのFormatを設定する//
-	graphicsPipelineStateDesc_[shaderName][blendmode].DepthStencilState = depthStencilState->GetDepthStencilDesc();
-	graphicsPipelineStateDesc_[shaderName][blendmode].DSVFormat = DXGI_FORMAT_D24_UNORM_S8_UINT;
+	graphicsPipelineStateDesc_[shaderName][blendMode].DepthStencilState = depthStencilState->GetDepthStencilDesc();
+	graphicsPipelineStateDesc_[shaderName][blendMode].DSVFormat = DXGI_FORMAT_D24_UNORM_S8_UINT;
 
 	//実際に生成
-	rootSignature_[shaderName][blendmode] = std::move(rootSignature);
+	rootSignature_[shaderName][blendMode] = std::move(rootSignature);
 
-	hr_ = device->CreateGraphicsPipelineState(&graphicsPipelineStateDesc_[shaderName][blendmode],
-		IID_PPV_ARGS(&graphicsPipelineState_[shaderName][blendmode]));
+	hr_ = device->CreateGraphicsPipelineState(&graphicsPipelineStateDesc_[shaderName][blendMode],
+		IID_PPV_ARGS(&graphicsPipelineState_[shaderName][blendMode]));
 	assert(SUCCEEDED(hr_));
 
 	Log(os, "///PSOの生成///\n");
 }
+
+void GraphicsPipelineState::CreateGraphicsPSO(ShaderName shaderName, BlendMode blendMode, std::ostream& os, ID3D12Device* device)
+{
+	//宣言
+	DirectXShaderCompiler directXShaderCompiler{};
+	std::unique_ptr<RootSignature> rootSignature = std::make_unique<RootSignature>();
+	std::unique_ptr<RootParameter> rootParameter = std::make_unique<RootParameter>();
+	std::unique_ptr<Sampler> sampler = std::make_unique<Sampler>();
+	std::unique_ptr<InputLayout> inputLayout = std::make_unique<InputLayout>();
+	std::unique_ptr<BlendState> blendState = std::make_unique<BlendState>();
+	std::unique_ptr<RasterizerState> rasterizerState = std::make_unique<RasterizerState>();
+	std::unique_ptr<ShaderCompile>  shaderCompile = std::make_unique<ShaderCompile>();
+	std::unique_ptr<DepthStencilState> depthStencilState = std::make_unique<DepthStencilState>();
+
+	std::string info = std::string("CreatePSO: shader=") + ShaderNameToString(shaderName) +
+		", blend=" + BlendModeToString(blendMode) + "\n";
+	Log(os, info);
+
+
+
+	//1.	VS / PS を先にコンパイル
+	
+	//2.	シェーダーリフレクションで b / t / s / u の使用状況を取得
+	
+	//3.	その情報から RootParameter / DescriptorRange を自動生成
+	
+	//4.	RootSignature を生成
+	
+	//5.	PSO を生成
+
+
+	graphicsPipelineStateDesc_[shaderName][blendMode].pRootSignature = rootSignature->GetRootSignature();//RootSignature
+	graphicsPipelineStateDesc_[shaderName][blendMode].InputLayout = inputLayout->GetInputLayoutDesc();//InputLayout
+	graphicsPipelineStateDesc_[shaderName][blendMode].VS = { shaderCompile->GetVertexShaderBlob()->GetBufferPointer(),
+	 shaderCompile->GetVertexShaderBlob()->GetBufferSize() };//VertexShader
+	graphicsPipelineStateDesc_[shaderName][blendMode].PS = { shaderCompile->GetPixelShaderBlob()->GetBufferPointer(),
+	shaderCompile->GetPixelShaderBlob()->GetBufferSize() };//PixelShader
+	graphicsPipelineStateDesc_[shaderName][blendMode].BlendState = blendState->GetBlendDesc();//BlenderState
+	graphicsPipelineStateDesc_[shaderName][blendMode].RasterizerState = rasterizerState->GetRasterizerDesc();//RasterizerState
+	//書き込むRTVの情報
+	graphicsPipelineStateDesc_[shaderName][blendMode].NumRenderTargets = 1;
+	graphicsPipelineStateDesc_[shaderName][blendMode].RTVFormats[0] = DXGI_FORMAT_R8G8B8A8_UNORM_SRGB;
+	//利用するトポロジ（形状）のタイプ。三角形
+	graphicsPipelineStateDesc_[shaderName][blendMode].PrimitiveTopologyType =
+		D3D12_PRIMITIVE_TOPOLOGY_TYPE_TRIANGLE;
+	//どのように画面に色を打ち込むのかの設定(気にしなくていい)
+	graphicsPipelineStateDesc_[shaderName][blendMode].SampleDesc.Count = 1;
+	graphicsPipelineStateDesc_[shaderName][blendMode].SampleMask = D3D12_DEFAULT_SAMPLE_MASK;
+
+	//作成したらPSOに代入、DSCのFormatを設定する//
+	graphicsPipelineStateDesc_[shaderName][blendMode].DepthStencilState = depthStencilState->GetDepthStencilDesc();
+	graphicsPipelineStateDesc_[shaderName][blendMode].DSVFormat = DXGI_FORMAT_D24_UNORM_S8_UINT;
+
+	//実際に生成
+	rootSignature_[shaderName][blendMode] = std::move(rootSignature);
+
+	hr_ = device->CreateGraphicsPipelineState(&graphicsPipelineStateDesc_[shaderName][blendMode],
+		IID_PPV_ARGS(&graphicsPipelineState_[shaderName][blendMode]));
+	assert(SUCCEEDED(hr_));
+
+	Log(os, "///PSOの生成///\n");
+
+}
+
 
 void GraphicsPipelineState::ALLPSOCreate(std::ostream& os, ID3D12Device* device)
 {
