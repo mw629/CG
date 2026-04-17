@@ -30,6 +30,7 @@ private:
 	Transform Transform_{ {1.0f,1.0f,1.0f},{0.0f,0.0f,0.0f,},{0.0f,2.0f,1.5f} };
 
 	std::unique_ptr<Cube> skyBox_ = std::make_unique<Cube>();
+	int skyBoxTexture_;
 	Transform skyBoxTransform_{ {500.0f,500.0f,500.0f},{0.0f,0.0f,0.0f},{0.0f,0.0f,0.0f} };
 
 	std::unique_ptr<Model> floor = std::make_unique<Model>();

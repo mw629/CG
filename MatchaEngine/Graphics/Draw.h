@@ -30,6 +30,7 @@ public:
 		DirectionalLight* directionalLight, PointLight *pointLight, SpotLight* spotLight);
 
 	static void SetCamera(Camera* setcamera);
+	static void SetEnvironmentTexture(int textureHandel);
 
 	static void preDraw(ShaderName shader, BlendMode blend);
 

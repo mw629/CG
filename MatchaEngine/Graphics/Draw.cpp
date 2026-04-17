@@ -10,6 +10,7 @@ namespace {
 	PointLight* pointLight_;
 	SpotLight* spotLight_;
 	Camera* camera;
+	D3D12_GPU_DESCRIPTOR_HANDLE environmentTextureSrvHandleGPU_{};
 }
 
 void Draw::Initialize(ID3D12GraphicsCommandList* commandList, GraphicsPipelineState* graphicsPipelineState,
@@ -25,6 +26,12 @@ void Draw::Initialize(ID3D12GraphicsCommandList* commandList, GraphicsPipelineSt
 void Draw::SetCamera(Camera* setCamera)
 {
 	camera = setCamera;
+}
+
+void Draw::SetEnvironmentTexture(int handle)
+{
+	std::unique_ptr<Texture> texture_ = std::make_unique<Texture>();
+	environmentTextureSrvHandleGPU_ = texture_.get()->TextureData(handle);
 }
 
 void Draw::preDraw(ShaderName shader, BlendMode blend)
@@ -55,6 +62,7 @@ void Draw::DrawObj(ObjectBase* obj)
 	commandList_->SetGraphicsRootConstantBufferView(4, directionalLight_->GetDirectinalLightResource()->GetGPUVirtualAddress());
 	commandList_->SetGraphicsRootConstantBufferView(5, pointLight_->GetDirectinalLightResource()->GetGPUVirtualAddress());
 	commandList_->SetGraphicsRootConstantBufferView(6, spotLight_->GetDirectinalLightResource()->GetGPUVirtualAddress());
+	commandList_->SetGraphicsRootDescriptorTable(7, environmentTextureSrvHandleGPU_);
 
 	commandList_->DrawIndexedInstanced(UINT(mesh.indexBufferView_.SizeInBytes / sizeof(uint32_t)), 1, 0, 0, 0);
 
@@ -107,6 +115,7 @@ void Draw::DrawModel(Model* model)
 	commandList_->SetGraphicsRootConstantBufferView(4, directionalLight_->GetDirectinalLightResource()->GetGPUVirtualAddress());
 	commandList_->SetGraphicsRootConstantBufferView(5, pointLight_->GetDirectinalLightResource()->GetGPUVirtualAddress());
 	commandList_->SetGraphicsRootConstantBufferView(6, spotLight_->GetDirectinalLightResource()->GetGPUVirtualAddress());
+	commandList_->SetGraphicsRootDescriptorTable(7, environmentTextureSrvHandleGPU_);
 
 	commandList_->DrawInstanced(UINT(mesh.vertexSize), 1, 0, 0);
 }
@@ -143,6 +152,7 @@ void Draw::DrawSprite(Sprite* sprite)
 	commandList_->SetGraphicsRootConstantBufferView(4, directionalLight_->GetDirectinalLightResource()->GetGPUVirtualAddress());
 	commandList_->SetGraphicsRootConstantBufferView(5, pointLight_->GetDirectinalLightResource()->GetGPUVirtualAddress());
 	commandList_->SetGraphicsRootConstantBufferView(6, spotLight_->GetDirectinalLightResource()->GetGPUVirtualAddress());
+	commandList_->SetGraphicsRootDescriptorTable(7, environmentTextureSrvHandleGPU_);
 
 	commandList_->DrawIndexedInstanced(6, 1, 0, 0, 0);
 }
@@ -162,6 +172,7 @@ void Draw::DrawSphere(Sphere* sphere)
 	commandList_->SetGraphicsRootConstantBufferView(4, directionalLight_->GetDirectinalLightResource()->GetGPUVirtualAddress());
 	commandList_->SetGraphicsRootConstantBufferView(5, pointLight_->GetDirectinalLightResource()->GetGPUVirtualAddress());
 	commandList_->SetGraphicsRootConstantBufferView(6, spotLight_->GetDirectinalLightResource()->GetGPUVirtualAddress());
+	commandList_->SetGraphicsRootDescriptorTable(7, environmentTextureSrvHandleGPU_);
 
 	commandList_->DrawInstanced(static_cast<UINT>(pow(sphere->GetSubdivision(), 2) * 6), 1, 0, 0);
 }
@@ -178,6 +189,7 @@ void Draw::DrawTriangle(Triangle* triangle)
 	commandList_->SetGraphicsRootConstantBufferView(4, directionalLight_->GetDirectinalLightResource()->GetGPUVirtualAddress());
 	commandList_->SetGraphicsRootConstantBufferView(5, pointLight_->GetDirectinalLightResource()->GetGPUVirtualAddress());
 	commandList_->SetGraphicsRootConstantBufferView(6, spotLight_->GetDirectinalLightResource()->GetGPUVirtualAddress());
+	commandList_->SetGraphicsRootDescriptorTable(7, environmentTextureSrvHandleGPU_);
 
 
 	commandList_->DrawInstanced(3, 1, 0, 0);

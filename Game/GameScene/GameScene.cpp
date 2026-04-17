@@ -51,8 +51,8 @@ void GameScene::Initialize() {
 	sphere_.get()->Initialize(texture1);
 	sphere_.get()->SetTransform(modelTransform_);
 
-	int skyBoxTexture = texture_.get()->CreateTexture("resources/skybox.dds");
-	skyBox_.get()->Initialize(skyBoxTexture);
+	skyBoxTexture_ = texture_.get()->CreateTexture("resources/rostock_laage_airport_4k.dds");
+	skyBox_.get()->Initialize(skyBoxTexture_);
 	skyBox_.get()->SetShader(ShaderName::SkyBoxShader);
 	skyBox_.get()->SetLighting(false);
 	skyBox_.get()->SetTransform(skyBoxTransform_);
@@ -116,6 +116,8 @@ void GameScene::Update() {
 void GameScene::Draw() {
 
 	Draw::SetCamera(camera_.get());
+	// Set the SkyBox texture as environment map
+	Draw::SetEnvironmentTexture(skyBoxTexture_);
 
 	Draw::DrawObj(skyBox_.get());
 	//Draw::DrawObj(model_.get());

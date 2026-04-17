@@ -65,9 +65,19 @@ void RootParameter::CreateOBJRootParameter(D3D12_ROOT_SIGNATURE_DESC& descriptio
 	rootParameter[6].ShaderVisibility = D3D12_SHADER_VISIBILITY_PIXEL;//PixelShaderで行う
 	rootParameter[6].Descriptor.ShaderRegister = 4;//レジスタ番号1とバインド
 
+	descriptorRange_[1].BaseShaderRegister = 1;//1から始まる
+	descriptorRange_[1].NumDescriptors = 1;//1から始まる
+	descriptorRange_[1].RangeType = D3D12_DESCRIPTOR_RANGE_TYPE_SRV;//SRVを使う
+	descriptorRange_[1].OffsetInDescriptorsFromTableStart = D3D12_DESCRIPTOR_RANGE_OFFSET_APPEND;//Offsetを自動計算
+
+	rootParameter[7].ParameterType = D3D12_ROOT_PARAMETER_TYPE_DESCRIPTOR_TABLE;//DescriptorTebleを使う
+	rootParameter[7].ShaderVisibility = D3D12_SHADER_VISIBILITY_PIXEL;//PixelShaderで行う
+	rootParameter[7].DescriptorTable.pDescriptorRanges = &descriptorRange_[1];//Tableの中身の配列を指定
+	rootParameter[7].DescriptorTable.NumDescriptorRanges = 1;
+
 
 	descriptionRootSignature.pParameters = rootParameter;//ルートパラメータ配列へのポインタ
-	descriptionRootSignature.NumParameters = 7;//配列の長さ
+	descriptionRootSignature.NumParameters = 8;//配列の長さ
 }
 
 void RootParameter::CreateAnimationRootParameter(D3D12_ROOT_SIGNATURE_DESC& descriptionRootSignature, ShaderName shader)
