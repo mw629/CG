@@ -1,10 +1,12 @@
 #include "SceneManager.h"
 #include "GameScene.h"
 #include "TitleScene.h"
+#include "TestScene.h"
 
 SceneManager::SceneManager()
 {
-	scene_ = std::make_unique<GameScene>();
+	// 最初のシーンをTestSceneに設定
+	scene_ = std::make_unique<TestScene>();
 	Initialize();
 }
 
@@ -19,8 +21,8 @@ void SceneManager::Initialize() {
 void SceneManager::Update() {
 	
 	if (scene_->GetSceneChangeRequest()) {
-		int NexrScene = scene_->GetNextSceneID();
-		scene_ = CreateScene(NexrScene);
+		int NextScene = scene_->GetNextSceneID();
+		scene_ = CreateScene(NextScene);
 		scene_->Initialize();
 	}
 	
@@ -41,8 +43,9 @@ void SceneManager::Run()
 std::unique_ptr<IScene> SceneManager::CreateScene(int sceneID)
 {
 	switch (sceneID) {
+	case SceneID::Test:  return std::make_unique<TestScene>();
 	case SceneID::Title: return std::make_unique<TitleScene>();
-	case SceneID::Game:  return std::make_unique<GameScene>();
+	case SceneID::Game:  return std::make_unique<GameScene>(); 
 	default: return nullptr;
 	}
 }

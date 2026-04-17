@@ -2,11 +2,12 @@
 
 enum SceneID
 {
-	Title = 0,
-	StageSelect = 1,
-	Game = 2,
-	Clear = 3,
-	GameOver = 4
+	Test = 0,
+	Title = 1,
+	StageSelect = 2,
+	Game = 3,
+	Clear = 4,
+	GameOver = 5
 };
 
 class IScene
@@ -18,8 +19,8 @@ protected:
 	bool sceneChangeRequest_;
 
 public:
-	
-	virtual ~IScene(){};
+
+	virtual ~IScene() {};
 
 	virtual void ImGui() = 0;
 
