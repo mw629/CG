@@ -55,6 +55,7 @@ Engine::Engine(int32_t kClientWidth, int32_t kClientHeight)
 	//描画
 	debugCamera = std::make_unique<DebugCamera>();
 	depthStencil = std::make_unique<DepthStencil>();
+	renderTexture = std::make_unique<RenderTexture>();
 	draw = std::make_unique<Draw>();
 	textureLoader = std::make_unique<TextureLoader>();
 	//バリア
@@ -111,6 +112,7 @@ void Engine::Setting()
 
 	depthStencil->CreateDepthStencil(graphics->GetDevice(), kClientWidth_, kClientHeight_);
 
+	renderTexture->Initialize(graphics->GetDevice(), kClientWidth_, kClientHeight_, descriptorHeap->GetSrvDescriptorHeap(), descriptorHeap->GetDescriptorSizeSRV());
 
 	graphicsPipelineState.get()->ALLPSOCreate(logStream, graphics.get()->GetDevice());
 
@@ -174,6 +176,17 @@ void Engine::Setting()
 
 void Engine::PostDraw()
 {
+	//Scene描画が終わったRenderTextureをShaderResourceへ
+	renderTexture->TransitionToShaderResource(command->GetCommandList());
+
+	//SwapchainをRenderTargetへ
+	resourceBarrierHelper->Transition(command->GetCommandList(), swapChain.get());
+	//RenderTargetの設定とClear（DepthStencilは設定・クリアしない）
+	renderTargetView->SetAndClear(command->GetCommandList(), swapChain->GetSwapChain()->GetCurrentBackBufferIndex());
+
+	command->GetCommandList()->RSSetViewports(1, viewportScissor->GetViewport());
+	command->GetCommandList()->RSSetScissorRects(1, viewportScissor->GetScissorRect());
+
 #ifdef _USE_IMGUI
 	//ImGuiの内部コマンドを生成
 	ImGui::Render();
@@ -197,10 +210,12 @@ void Engine::NewFrame() {
 #endif // _USE_IMGUI
 
 	//コマンドを積み込んで確定させる//
-	resourceBarrierHelper->Transition(command->GetCommandList(), swapChain.get());
-	renderTargetView->SetAndClear(command->GetCommandList(), swapChain->GetSwapChain()->GetCurrentBackBufferIndex());
+	renderTexture->TransitionToRenderTarget(command->GetCommandList());
+	renderTexture->Clear(command->GetCommandList());
+
+	D3D12_CPU_DESCRIPTOR_HANDLE rtvHandle = renderTexture->GetRtvHandle();
 	//DSVを設定する
-	depthStencil->SetDSV(command->GetCommandList(), renderTargetView->GetRtvHandles(swapChain->GetSwapChain()->GetCurrentBackBufferIndex()));
+	depthStencil->SetDSV(command->GetCommandList(), &rtvHandle);
 	//コマンドを積む//
 
 	ID3D12DescriptorHeap* descriptorHeaps[] = { descriptorHeap->GetSrvDescriptorHeap() };
@@ -312,6 +327,11 @@ void Engine::Debug()
 
 	textureLoader.get()->Draw();
 
+	ImGui::End();
+
+	ImGui::Begin("Scene");
+	ImVec2 sceneWindowSize = ImGui::GetContentRegionAvail();
+	ImGui::Image((ImTextureID)renderTexture->GetSrvHandleGPU().ptr, sceneWindowSize);
 	ImGui::End();
 
 	static bool showLight = false;

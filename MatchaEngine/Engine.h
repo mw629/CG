@@ -48,6 +48,7 @@
 #include "ResourceBarrierHelper.h"
 #include "SwapChain.h"
 #include "ViewportScissor.h"
+#include "RenderTexture.h"
 //PSO
 #include "BlendState.h"
 #include "DepthStencilState.h"
@@ -106,6 +107,7 @@ private:
 
 	std::unique_ptr<DebugCamera> debugCamera;
 	std::unique_ptr<DepthStencil> depthStencil;
+	std::unique_ptr<RenderTexture> renderTexture;
 
 	std::unique_ptr<Draw> draw;
 	std::unique_ptr<TextureLoader> textureLoader;
