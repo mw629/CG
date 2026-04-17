@@ -17,11 +17,14 @@ ObjectBase::~ObjectBase()
 
 void ObjectBase::ImGui() {
 #ifdef _USE_IMGUI
+	ImGui::PushID(this);
 	if (ImGui::CollapsingHeader("Transform")) {
 		ImGui::DragFloat3("Position", reinterpret_cast<float*>(&transform_.translate), 0.01f, -FLT_MAX, FLT_MAX, "%.2f");
 		ImGui::DragFloat3("Rotation", reinterpret_cast<float*>(&transform_.rotate), 0.01f, -FLT_MAX, FLT_MAX, "%.2f");
 		ImGui::DragFloat3("Scale", reinterpret_cast<float*>(&transform_.scale), 0.01f, -FLT_MAX, FLT_MAX, "%.2f");
 	}
+	material_.get()->ImGui();
+	ImGui::PopID();
 #endif // _USE_IMGUI
 }
 

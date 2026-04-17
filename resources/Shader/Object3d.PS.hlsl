@@ -121,8 +121,8 @@ PixelShaderOutput main(VertexShaderOutput input)
     {
         output.color = gMaterial.color * textureColor;
     }
-    
-    output.color.rgb += environmentColor.rgb;
+    //環境マッピングの色を加算
+    output.color.rgb += environmentColor.rgb * gMaterial.environmentCoefficient;
     
     if (output.color.a <= 0.5f)
     {

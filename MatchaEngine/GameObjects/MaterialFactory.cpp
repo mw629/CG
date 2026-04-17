@@ -1,12 +1,25 @@
 #include "MaterialFactory.h"
 #include "Graphics/GraphicsDevice.h"
 #include "Math/Calculation.h"
+#include <imgui.h>
 
 
 MaterialFactory::~MaterialFactory(){
 	if (materialResource_) {
 		materialResource_->Unmap(0, nullptr);
 		materialResource_.Reset();
+	}
+}
+
+void MaterialFactory::ImGui() {
+	if (ImGui::CollapsingHeader("MaterialFactory")) {
+		ImGui::ColorEdit4("Color", &materialData_->color.x);
+		bool enableLighting = materialData_->enableLighting != 0;
+		if (ImGui::Checkbox("Enable Lighting", &enableLighting)) {
+			materialData_->enableLighting = enableLighting ? 1 : 0;
+		}
+		ImGui::SliderFloat("Shininess", &materialData_->shininess, 0.0f, 100.0f);
+		ImGui::SliderFloat("Environment Coefficient", &materialData_->environmentCoefficient, 0.0f, 1.0f);
 	}
 }
 
@@ -18,7 +31,8 @@ void MaterialFactory::CreateMartial(bool Lighting)
 	materialResource_->Map(0, nullptr, reinterpret_cast<void**>(&materialData_));
 	//今回は書き込んでみる
 	materialData_->color = Vector4(1.0f, 1.0f, 1.0f, 1.0f);
-	materialData_->enableLighting = Lighting;
+	materialData_->enableLighting = Lighting ? 1 : 0;
 	materialData_->uvTransform = IdentityMatrix();
 	materialData_->shininess = 30.0f;
+	materialData_->environmentCoefficient = 1.0f;
 }

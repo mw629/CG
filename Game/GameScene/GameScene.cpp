@@ -23,7 +23,10 @@ void GameScene::ImGui()
 	// 表示は整数部4桁・小数1桁風に（幅指定で揃える）
 	ImGui::Text("Pos: %4.1f, %4.1f", spriteData_.transform.translate.x, spriteData_.transform.translate.y);
 
-	model_.get()->ImGui();
+	//skyBox_.get()->ImGui();
+	sphere_.get()->ImGui();
+	//animation_.get()->ImGui();	
+	//model_.get()->ImGui();
 #endif // _USE_IMGUI
 }
 
