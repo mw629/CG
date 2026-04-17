@@ -119,6 +119,15 @@ void ShaderCompile::CreateShaderCompile(ShaderName shaderName, std::ostream& os,
 			L"ps_6_0", dxcUtils, dxcCompiler, includeHandler);
 		assert(pixelShaderBlob_ != nullptr);
 		break;
+	case SkyBoxShader:
+		vertexShaderBlob_ = CompileShader(os, L"resources/Shader/SkyBox.VS.hlsl",
+			L"vs_6_0", dxcUtils, dxcCompiler, includeHandler);
+		assert(vertexShaderBlob_ != nullptr);
+
+		pixelShaderBlob_ = CompileShader(os, L"resources/Shader/SkyBox.PS.hlsl",
+			L"ps_6_0", dxcUtils, dxcCompiler, includeHandler);
+		assert(pixelShaderBlob_ != nullptr);
+		break;
 	default:
 		break;
 	}

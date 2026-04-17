@@ -1,33 +1,32 @@
-
-
 struct TransformationMatrix
 {
-    float32_t4x4 WVP;
-    float32_t4x4 World;
-    float32_t4x4 WorldInverseTranspose;
+    float4x4 WVP;
+    float4x4 World;
+    float4x4 WorldInverseTranspose;
 };
 
 struct VertexShaderInput
 {
-    float32_t4 position : SV_POSITION;
-    float32_t3 texcoord : TEXCOORD0;
+    float4 position : POSITION0;
+    float2 texcoord : TEXCOORD0;
+    float3 normal : NORMAL0;
 };
 
 struct VertexShaderOutput
 {
-    float32_t4 position : SV_POSITION;
-    float32_t3 texcoord : TEXCOORD0;
+    float4 position : SV_POSITION;
+    float3 texcoord : TEXCOORD0;
 };
 
 struct PixelShaderOutput
 {
-    float32_t4 color : SV_TARGET0;
+    float4 color : SV_TARGET0;
 };
 
 struct Material
 {
-    float32_t4 color;
-    int32_t enableLighting;
-    float32_t4x4 uvTransform;
-    float32_t shininess;
+    float4 color;
+    int enableLighting;
+    float4x4 uvTransform;
+    float shininess;
 };

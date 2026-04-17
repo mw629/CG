@@ -10,6 +10,7 @@
 #include "Model.h"
 #include "Particle.h"
 #include "Sprite.h"
+#include "Cube.h"
 #include "Sphere.h"
 #include "Triangle.h"
 #include "Line.h"

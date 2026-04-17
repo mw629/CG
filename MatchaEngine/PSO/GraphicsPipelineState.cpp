@@ -41,7 +41,7 @@ void GraphicsPipelineState::CreatePSO(ShaderName shaderName, BlendMode blendmode
 	blendState->CreateBlendDesc(blendmode);
 	Log(os, "BlendStateの生成完了\n");
 	//RasterizerStateの設定を行う//
-	rasterizerState->CreateRasterizerState();
+	rasterizerState->CreateRasterizerState(shaderName);
 	Log(os, "RasterizerStateの生成完了\n");
 	//ShaderをCompileする//
 	shaderCompile->CreateShaderCompile(shaderName, os, directXShaderCompiler.GetDxcUtils(), directXShaderCompiler.GetDxcCompiler(), directXShaderCompiler.GetIncludeHandler());

@@ -9,6 +9,9 @@ void RootParameter::CreateRootParameter(D3D12_ROOT_SIGNATURE_DESC& descriptionRo
 	case ObjectShader:
 		CreateOBJRootParameter(descriptionRootSignature);
 		break;
+	case SkyBoxShader:
+		CreateOBJRootParameter(descriptionRootSignature);
+		break;
 	case AnimationObj:
 		CreateAnimationRootParameter(descriptionRootSignature, shader);
 
@@ -189,6 +192,8 @@ void RootParameter::CreateLineRootParameter(D3D12_ROOT_SIGNATURE_DESC& descripti
 	descriptionRootSignature.pParameters = rootParameter;//ルートパラメータ配列へのポインタ
 	descriptionRootSignature.NumParameters = 1;//配列の長さ
 }
+
+
 
 
 

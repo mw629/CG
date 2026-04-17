@@ -51,6 +51,12 @@ void GameScene::Initialize() {
 	sphere_.get()->Initialize(texture1);
 	sphere_.get()->SetTransform(modelTransform_);
 
+	int skyBoxTexture = texture_.get()->CreateTexture("resources/rostock_laage_airport_4k.dds");
+	skyBox_.get()->Initialize(skyBoxTexture);
+	skyBox_.get()->SetShader(ShaderName::SkyBoxShader);
+	skyBox_.get()->SetLighting(false);
+	skyBox_.get()->SetTransform(skyBoxTransform_);
+
 	modelData = AssimpLoadObjFile("resources/Ground", "Ground.obj");
 	floor.get()->Initialize(modelData);
 	floor.get()->SetTransform(floorT);
@@ -96,6 +102,7 @@ void GameScene::Update() {
 	floor->SettingWvp(view);
 
 	sphere_.get()->SettingWvp(view);
+	skyBox_.get()->SettingWvp(view);
 
 	particle_[1].get()->EmitSize();
 
@@ -110,14 +117,15 @@ void GameScene::Draw() {
 
 	Draw::SetCamera(camera_.get());
 
-	Draw::DrawObj(model_.get());
-	Draw::DrawObj(floor.get());
+	Draw::DrawObj(skyBox_.get());
+	//Draw::DrawObj(model_.get());
+	//Draw::DrawObj(floor.get());
 	//Draw::DrawObj(nodeanimation_.get());
 	Draw::DrawAnimation(animation_.get());
 
 	Draw::DrawObj(sphere_.get());
 	for (int i = 0, n = static_cast<int>(particle_.size()); i < n; ++i) {
-		particle_[i].get()->Draw();
+		//particle_[i].get()->Draw();
 	}
 	//Draw::DrawSprite(sprite_.get());
 }

@@ -5,6 +5,7 @@ void DepthStencilState::CreateDepthStencilState(ShaderName shader)
 	switch (shader)
 	{
 	case ParticleShader:
+	case SkyBoxShader:
 		//Depthの機能の有効化
 		depthStencilDesc_.DepthEnable = true;
 		//書き込みします
