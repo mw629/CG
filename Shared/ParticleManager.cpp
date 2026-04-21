@@ -115,7 +115,7 @@ void ParticleManager::Update(Matrix4x4 viewMatrix) {
 	particle_.get()->Updata(viewMatrix, particleData_);
 }
 
-void ParticleManager::Update(Matrix4x4 viewMatrix, int a)
+void ParticleManager::Update(Matrix4x4 viewMatrix, std::function<ParticleData(const ParticleData&)> moveBehavior)
 {
 	int i = 0;
 	for (std::list<ParticleData>::iterator particleIterator = particleData_.begin();
@@ -128,12 +128,9 @@ void ParticleManager::Update(Matrix4x4 viewMatrix, int a)
 		}
 
 		// 外部のムーブ関数で更新結果を受け取る
-		ParticleData updated;
-		if (a == 0) {
-			updated = particleMoveFire(*particleIterator);
-		}
-		if (a == 1) {
-			updated = particleMove(*particleIterator);
+		ParticleData updated = *particleIterator;
+		if (moveBehavior) {
+			updated = moveBehavior(*particleIterator);
 		}
 		// 必要なフィールドを反映
 		particleIterator->velocity = updated.velocity;
@@ -170,7 +167,7 @@ void ParticleManager::Update(Matrix4x4 viewMatrix, int a)
 	particle_.get()->Updata(viewMatrix, particleData_);
 }
 
-void ParticleManager::Update(Emitter emitter, Matrix4x4 viewMatrix, int a)
+void ParticleManager::Update(Emitter emitter, Matrix4x4 viewMatrix, std::function<ParticleData(const ParticleData&)> moveBehavior)
 {
 	emitter_ = emitter;
 
@@ -185,12 +182,9 @@ void ParticleManager::Update(Emitter emitter, Matrix4x4 viewMatrix, int a)
 		}
 
 		// 外部のムーブ関数で更新結果を受け取る
-		ParticleData updated;
-		if (a == 0) {
-			updated = particleMoveFire(*particleIterator);
-		}
-		if (a == 1) {
-			updated = particleMove(*particleIterator);
+		ParticleData updated = *particleIterator;
+		if (moveBehavior) {
+			updated = moveBehavior(*particleIterator);
 		}
 		// 必要なフィールドを反映
 		particleIterator->velocity = updated.velocity;
@@ -260,6 +254,11 @@ ParticleData ParticleManager::MakeNewParticle()
 	Vector3 possion = { distribution(randomEngine),distribution(randomEngine) ,distribution(randomEngine) };
 	data.transform.translate = possion * emitter_.transform.scale + emitter_.transform.translate;
 	data.velocity = { distribution(randomEngine) / 60.0f ,distribution(randomEngine) / 60.0f ,distribution(randomEngine) / 60.0f };
+
+	if (generatorBehavior) {
+		generatorBehavior(data);
+	}
+
 	return data;
 }
 
@@ -275,6 +274,11 @@ ParticleData ParticleManager::MakeNewParticle(Vector3 scale)
 	data.color = { 1.0f, 1.0f, 1.0f, 1.0f }; // 色を初期化
 	data.lifeTime = 3.0f; // ライフタイムを設定
 	data.currentTime = 0.0f;
+
+	if (generatorBehavior) {
+		generatorBehavior(data);
+	}
+
 	return data;
 }
 

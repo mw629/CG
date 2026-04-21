@@ -66,31 +66,28 @@ void TestScene::Initialize() {
 
 	Emitter emitter;
 	emitter.transform = modelTransform_;
-	emitter.transform.translate.y += 1.5f;
 	emitter.transform.scale = { 0.2f,0.2f,0.2f };
 	emitter.count = 20;
 	ParticleData data;
-	//int texture = texture_.get()->CreateTexture("resources/white64x64.png");
-	data.transform.scale = { 0.5f,0.5f,0.5f };
+	data.transform.scale = { 0.05f,1.0f,1.0f };
 	data.color = { 1.0f,0.0f,0.0f,1.0f };
 	data.lifeTime = 1.0f;
 	std::unique_ptr<ParticleManager> particle = std::make_unique<ParticleManager>();
 	particle.get()->Initialize(emitter, data);
+
+	// ランダムな角度(0度 or 45度など)で出現させ、その場から動かさない設定
+	particle->generatorBehavior = [](ParticleData& p) {
+		p.velocity = { 0.0f, 0.0f, 0.0f }; // 動かさない
+
+		// 例として、Z軸の角度をランダムに設定 (0〜360度)
+		float randomAngleDegrees = (float)(rand() % 360);
+		p.transform.rotate.z = randomAngleDegrees * (3.14159265f / 180.0f);
+	};
+
 	particle_.push_back(std::move(particle));
 
-	Emitter emitter1;
-	emitter1.transform.translate.y += 2.0f;
-	emitter1.transform.scale = { 4.0f,0.2f,0.2f };
-	emitter1.count = 20;
-	ParticleData data1;
-	int texture = texture_.get()->CreateTexture("resources/white64x64.png");
-	data1.transform.scale = { 0.01f,0.01f,0.01f };
-	data1.lifeTime = 5.0f;
-	std::unique_ptr<ParticleManager> particle1 = std::make_unique<ParticleManager>();
-	particle1.get()->Initialize(emitter1, data1, texture);
-	particle_.push_back(std::move(particle1));
 
-	texture = texture_.get()->CreateTexture("resources/uvChecker.png");
+	int texture = texture_.get()->CreateTexture("resources/uvChecker.png");
 	sprite_.get()->Initialize(spriteData_, texture);
 }
 
@@ -107,10 +104,7 @@ void TestScene::Update() {
 	sphere_.get()->SettingWvp(view);
 	skyBox_.get()->SettingWvp(view);
 
-	particle_[1].get()->EmitSize();
-
 	particle_[0].get()->Update(view);
-	particle_[1].get()->Update(view);
 
 	animation_.get()->Update(view);
 	nodeAnimation_.get()->Update(view);
@@ -122,15 +116,15 @@ void TestScene::Draw() {
 	// Set the SkyBox texture as environment map
 	Draw::SetEnvironmentTexture(skyBoxTexture_);
 
-	Draw::DrawObj(skyBox_.get());
+	//Draw::DrawObj(skyBox_.get());
 	//Draw::DrawObj(model_.get());
 	//Draw::DrawObj(floor.get());
 	//Draw::DrawObj(nodeAnimation_.get());
 	Draw::DrawAnimation(animation_.get());
 
-	Draw::DrawObj(sphere_.get());
+	//Draw::DrawObj(sphere_.get());
 	for (int i = 0, n = static_cast<int>(particle_.size()); i < n; ++i) {
-		//particle_[i].get()->Draw();
+		particle_[i].get()->Draw();
 	}
 	//Draw::DrawSprite(sprite_.get());
 }

@@ -1,6 +1,7 @@
 #pragma once
 #include <random>
 #include <Engine.h>
+#include <functional>
 
 struct Emitter {
 	Transform transform = { {1.0f,1.0f,1.0f} ,{0.0f,0.0f,0.0f},{0.0f,0.0f,0.0f} };//エミッタのTransform
@@ -37,6 +38,9 @@ private:
 
 public:
 
+	// 生成時の振る舞いを注入する関数
+	std::function<void(ParticleData&)> generatorBehavior = nullptr;
+
 	void ImGui();
 
 	void Initialize();
@@ -46,8 +50,8 @@ public:
 	void Initialize(Emitter emitter, ParticleData particleData,int TextureHandle);
 
 	void Update(Matrix4x4 viewMatrix);
-	void Update(Matrix4x4 viewMatrix, int a);//動きに変化をつけたい場合
-	void Update(Emitter emitter, Matrix4x4 viewMatrix, int a);//動きに変化をつけたい場合
+	void Update(Matrix4x4 viewMatrix, std::function<ParticleData(const ParticleData&)> moveBehavior);//動きに変化をつけたい場合
+	void Update(Emitter emitter, Matrix4x4 viewMatrix, std::function<ParticleData(const ParticleData&)> moveBehavior);//動きに変化をつけたい場合
 	void Update(Matrix4x4 viewMatrix, Vector3 scale);
 
 	void Draw();
