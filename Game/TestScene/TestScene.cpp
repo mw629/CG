@@ -49,6 +49,7 @@ void TestScene::Initialize() {
 	ModelData cubeModel = AssimpLoadObjFile("resources/AnimatedCube", "AnimatedCube.gltf");
 	nodeAnimation_.get()->Initialize(cubeModel, "resources/AnimatedCube", "AnimatedCube.gltf");
 
+	
 
 	int texture1 = texture_.get()->CreateTexture("resources/monsterBall.png");
 	sphere_.get()->Initialize(texture1);
@@ -89,6 +90,8 @@ void TestScene::Initialize() {
 
 	int texture = texture_.get()->CreateTexture("resources/uvChecker.png");
 	sprite_.get()->Initialize(spriteData_, texture);
+
+	ring_.get()->Initialize(texture);
 }
 
 void TestScene::Update() {
@@ -97,6 +100,7 @@ void TestScene::Update() {
 	Matrix4x4 view = camera_.get()->GetViewMatrix();
 
 	sprite_.get()->Update(spriteData_);
+	ring_.get()->SettingWvp(view);
 
 	model_->SettingWvp(view);
 	floor->SettingWvp(view);
@@ -116,7 +120,9 @@ void TestScene::Draw() {
 	// Set the SkyBox texture as environment map
 	Draw::SetEnvironmentTexture(skyBoxTexture_);
 
-	//Draw::DrawObj(skyBox_.get());
+	Draw::DrawObj(ring_.get());
+
+	Draw::DrawObj(skyBox_.get());
 	//Draw::DrawObj(model_.get());
 	//Draw::DrawObj(floor.get());
 	//Draw::DrawObj(nodeAnimation_.get());

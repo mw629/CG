@@ -34,6 +34,7 @@
 #include "Sphere.h"
 #include "Sprite.h"
 #include "Triangle.h"
+#include "Ring.h"
 #include "Cube.h"
 #include "Line.h"
 #include "Grid.h"

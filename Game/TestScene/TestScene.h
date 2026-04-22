@@ -29,6 +29,9 @@ private:
 	std::unique_ptr<Sphere> sphere_ = std::make_unique<Sphere>();
 	Transform Transform_{ {1.0f,1.0f,1.0f},{0.0f,0.0f,0.0f,},{0.0f,2.0f,1.5f} };
 
+	std::unique_ptr<Ring> ring_ = std::make_unique<Ring>();
+	Transform ringTransform_{ {1.0f,1.0f,1.0f},{0.0f,0.0f,0.0f,},{0.0f,2.0f,1.5f} };
+
 	std::unique_ptr<Cube> skyBox_ = std::make_unique<Cube>();
 	int skyBoxTexture_;
 	Transform skyBoxTransform_{ {500.0f,500.0f,500.0f},{0.0f,0.0f,0.0f},{0.0f,0.0f,0.0f} };

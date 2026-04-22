@@ -167,6 +167,7 @@ void Engine::Setting()
 	Triangle::SetScreenSize(Client);
 	Sprite::SetScreenSize(Client);
 
+
 	Particle::SetDescriptorHeap(descriptorHeap.get());
 	Particle::SetDevice(graphics.get()->GetDevice());
 }
