@@ -149,11 +149,10 @@ copy "$(WindowsSdkDir)bin\$(TargetPlatformVersion)\x64\dxil.dll" "$(TargetDir)dx
     <ClCompile Include="MatchaEngine\GameObjects\Object\Animation\CharacterAnimator.cpp" />
     <ClCompile Include="MatchaEngine\GameObjects\Light\LightManeger.cpp" />
     <ClCompile Include="MatchaEngine\GameObjects\Light\PointLight.cpp" />
-    <ClCompile Include="MatchaEngine\GameObjects\Primitive.cpp" />
     <ClCompile Include="MatchaEngine\GameObjects\Object\ObjectBase.cpp" />
     <ClCompile Include="MatchaEngine\Graphics\RenderTexture.cpp" />
     <ClCompile Include="MatchaEngine\GameObjects\Object\3d\Ring.cpp" />
-    <ClCompile Include="Shared\ParticleManager.cpp" />
+    <ClCompile Include="MatchaEngine\GameObjects\Effect\ParticleManager.cpp" />
     <ClCompile Include="Game\Direction\Fade.cpp" />
     <ClCompile Include="MatchaEngine\GameObjects\Camera\Camera.cpp" />
     <ClCompile Include="Game\GameScene\GameScene.cpp" />
@@ -222,7 +221,7 @@ copy "$(WindowsSdkDir)bin\$(TargetPlatformVersion)\x64\dxil.dll" "$(TargetDir)dx
     <ClCompile Include="Game\TitleScene\TitleScene.cpp" />
     <ClCompile Include="Game\SceneManager.cpp" />
     <ClCompile Include="MatchaEngine\Resource\ModelManager.cpp" />
-    <ClCompile Include="MatchaEngine\GameObjects\Particle.cpp" />
+    <ClCompile Include="MatchaEngine\GameObjects\Effect\Particle.cpp" />
     <ClCompile Include="MatchaEngine\GameObjects\Light\SpotLight.cpp" />
     <ClCompile Include="MatchaEngine\GameObjects\Object\Animation\TransformAnimation.cpp" />
     <ClCompile Include="Game\TestScene\TestScene.cpp" />
@@ -303,11 +302,10 @@ copy "$(WindowsSdkDir)bin\$(TargetPlatformVersion)\x64\dxil.dll" "$(TargetDir)dx
     <ClInclude Include="MatchaEngine\GameObjects\Object\Animation\CharacterAnimator.h" />
     <ClInclude Include="MatchaEngine\GameObjects\Light\LightManeger.h" />
     <ClInclude Include="MatchaEngine\GameObjects\Light\PointLight.h" />
-    <ClInclude Include="MatchaEngine\GameObjects\Primitive.h" />
     <ClInclude Include="MatchaEngine\GameObjects\Object\ObjectBase.h" />
     <ClInclude Include="MatchaEngine\Graphics\RenderTexture.h" />
     <ClInclude Include="MatchaEngine\GameObjects\Object\3d\Ring.h" />
-    <ClInclude Include="Shared\ParticleManager.h" />
+    <ClInclude Include="MatchaEngine\GameObjects\Effect\ParticleManager.h" />
     <ClInclude Include="Game\Direction\Fade.h" />
     <ClInclude Include="Game\IScene.h" />
     <ClInclude Include="MatchaEngine\GameObjects\Camera\Camera.h" />
@@ -367,7 +365,7 @@ copy "$(WindowsSdkDir)bin\$(TargetPlatformVersion)\x64\dxil.dll" "$(TargetDir)dx
     <ClInclude Include="Game\TitleScene\TitleScene.h" />
     <ClInclude Include="Game\SceneManager.h" />
     <ClInclude Include="MatchaEngine\Resource\ModelManager.h" />
-    <ClInclude Include="MatchaEngine\GameObjects\Particle.h" />
+    <ClInclude Include="MatchaEngine\GameObjects\Effect\Particle.h" />
     <ClInclude Include="MatchaEngine\GameObjects\Light\SpotLight.h" />
     <ClInclude Include="MatchaEngine\GameObjects\Object\Animation\TransformAnimation.h" />
     <ClInclude Include="Game\TestScene\TestScene.h" />
