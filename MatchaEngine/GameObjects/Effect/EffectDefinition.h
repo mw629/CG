@@ -6,7 +6,7 @@
 #include "MaterialFactory.h"
 #include "RenderState.h"
 
-struct ParticleData {
+struct EffectDefinitionData {
 	Transform transform = { {1.0f,1.0f,1.0f},{0.0f,0.0f,0.0f}, {0.0f,0.0f,0.0f} };
 	Vector3 velocity = {0.0f,0.0f,0.0f};
 	Vector4 color = {1.0f,1.0f,1.0f,1.0f};
@@ -14,7 +14,7 @@ struct ParticleData {
 	float currentTime = 0.0f;
 };
 
-class Particle
+class EffectDefinition
 {
 private:
 
@@ -35,10 +35,10 @@ private:
 
 
 
-	int particleMaxNum_ = 10000;
-	int particleNum_;
+	int effectDefinitionMaxNum_ = 10000;
+	int effectDefinitionNum_;
 	
-	std::list<ParticleData> particleData_;
+	std::list<EffectDefinitionData> effectDefinitionData_;
 
 	bool isBillboard_ = true;
 	
@@ -59,9 +59,9 @@ public:
 	void CreateSRV();
 
 	void SettingWvp(Matrix4x4 viewMatrix);
-	void SetData(std::list<ParticleData> particleData);
+	void SetData(std::list<EffectDefinitionData> effectDefinitionData);
 
-	void Updata(Matrix4x4 viewMatrix, std::list<ParticleData> particleData);
+	void Updata(Matrix4x4 viewMatrix, std::list<EffectDefinitionData> effectDefinitionData);
 
 	void CreateParticle();
 
@@ -79,9 +79,9 @@ public:
 	D3D12_CPU_DESCRIPTOR_HANDLE GetInstancingSrvHandleCPU() { return instancingSrvHandleCPU_; }
 	D3D12_GPU_DESCRIPTOR_HANDLE GetInstancingSrvHandleGPU() { return instancingSrvHandleGPU_; }
 
-	int GetParticleNum() { return particleNum_; }
+	int GetEffectDefinitionNum() { return effectDefinitionNum_; }
 
-	std::list<ParticleData> GetParticleData() { return particleData_; }
+	std::list<EffectDefinitionData> GetEffectDefinitionData() { return effectDefinitionData_; }
 
 private:
 	ShaderName shader_ = ShaderName::ParticleShader;

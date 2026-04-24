@@ -2,7 +2,7 @@
 #include <Engine.h>
 #include "Camera.h"
 #include "../IScene.h"
-#include "ParticleManager.h"
+#include "Emitter.h"
 #include <memory>
 
 class TestScene :public IScene
@@ -13,8 +13,7 @@ private:
 	std::unique_ptr<Camera>camera_ = std::make_unique<Camera>();
 	Transform cameraTransform_{ {1.0f,1.0f,1.0f},{0.0f,0.0f,0.0f,},{0.0f,2.0f,-5.0f} };
 
-	std::vector<std::unique_ptr<ParticleManager>> particle_;
-	Emitter particleEmitter_;
+    std::vector<std::unique_ptr<Emitter>> particle_;
 
 	std::unique_ptr<Sprite> sprite_ = std::make_unique<Sprite>();
 	SpriteData spriteData_{

@@ -30,7 +30,7 @@
 #include "Model.h"
 #include "CharacterAnimator.h"
 #include "TransformAnimation.h"
-#include "Particle.h"
+#include "EffectDefinition.h"
 #include "Sphere.h"
 #include "Sprite.h"
 #include "Triangle.h"

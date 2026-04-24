@@ -1,6 +1,6 @@
 #define NOMINMAX
 
-#include "Particle.h"
+#include "EffectDefinition.h"
 #include <Math/Calculation.h>
 #include "Graphics/GraphicsDevice.h"
 #include "Sprite.h"
@@ -18,25 +18,25 @@ namespace {
 	DescriptorHeap* descriptorHeap_;
 }
 
-int Particle::DescriptorNum = 5;
+int EffectDefinition::DescriptorNum = 5;
 
-void Particle::SetDevice(ID3D12Device* device)
+void EffectDefinition::SetDevice(ID3D12Device* device)
 {
 	device_ = device;
 }
 
-void Particle::SetScreenSize(Vector2 screenSize)
+void EffectDefinition::SetScreenSize(Vector2 screenSize)
 {
 	kClientWidth = screenSize.x;
 	kClientHeight = screenSize.y;
 }
 
-void Particle::SetDescriptorHeap(DescriptorHeap* descriptorHeap)
+void EffectDefinition::SetDescriptorHeap(DescriptorHeap* descriptorHeap)
 {
 	descriptorHeap_ = descriptorHeap;
 }
 
-void Particle::Initialize()
+void EffectDefinition::Initialize()
 {
 
 	std::unique_ptr<Texture> texture = std::make_unique<Texture>();
@@ -47,7 +47,7 @@ void Particle::Initialize()
 	CreateParticle();
 }
 
-void Particle::Initialize(int TextureHandle)
+void EffectDefinition::Initialize(int TextureHandle)
 {
 	std::unique_ptr<Texture> texture = std::make_unique<Texture>();
 	textureSrvHandleGPU_ = texture.get()->TextureData(TextureHandle);
@@ -57,7 +57,7 @@ void Particle::Initialize(int TextureHandle)
 	CreateParticle();
 }
 
-void Particle::CreateVertexData()
+void EffectDefinition::CreateVertexData()
 {
 	std::vector<VertexData> vertices;
 
@@ -84,30 +84,30 @@ void Particle::CreateVertexData()
 }
 
 
-void Particle::CreateWVP()
+void EffectDefinition::CreateWVP()
 {
 
 	//Sprite用ののTransformationMatrix用のリソースを作る。Matrix4x41つ分のサイズを用意する
-	instancingResource_ = GraphicsDevice::CreateBufferResource(sizeof(ParticleForGPU) * particleMaxNum_);
+	instancingResource_ = GraphicsDevice::CreateBufferResource(sizeof(ParticleForGPU) * effectDefinitionMaxNum_);
 	//データを書き込む
 	//書き込むためのアドレスを取得
 	instancingResource_->Map(0, nullptr, reinterpret_cast<void**>(&instancingData_));
 	//単位行列をかきこんでおく
-	for (int i = 0; i < particleMaxNum_; i++) {
+	for (int i = 0; i < effectDefinitionMaxNum_; i++) {
 		instancingData_[i].WVP = IdentityMatrix();
 		instancingData_[i].World = IdentityMatrix();
 		instancingData_[i].color = Vector4(1.0f, 1.0f, 1.0f, 1.0f);
 	}
 }
 
-void Particle::CreateSRV()
+void EffectDefinition::CreateSRV()
 {
 	instancingSrvDesc_.Format = DXGI_FORMAT_UNKNOWN;
 	instancingSrvDesc_.Shader4ComponentMapping = D3D12_DEFAULT_SHADER_4_COMPONENT_MAPPING;
 	instancingSrvDesc_.ViewDimension = D3D12_SRV_DIMENSION_BUFFER;
 	instancingSrvDesc_.Buffer.FirstElement = 0;
 	instancingSrvDesc_.Buffer.Flags = D3D12_BUFFER_SRV_FLAG_NONE;
-	instancingSrvDesc_.Buffer.NumElements = particleMaxNum_;
+	instancingSrvDesc_.Buffer.NumElements = effectDefinitionMaxNum_;
 	instancingSrvDesc_.Buffer.StructureByteStride = sizeof(ParticleForGPU);
 	instancingSrvHandleCPU_ = GetCPUDescriptorHandle(descriptorHeap_->GetSrvDescriptorHeap(), descriptorHeap_->GetDescriptorSizeSRV());
 	instancingSrvHandleGPU_ = GetGPUDescriptorHandle(descriptorHeap_->GetSrvDescriptorHeap(), descriptorHeap_->GetDescriptorSizeSRV());
@@ -117,7 +117,7 @@ void Particle::CreateSRV()
 
 
 
-void Particle::CreateParticle()
+void EffectDefinition::CreateParticle()
 {
 	CreateVertexData();
 	CreateWVP();
@@ -125,12 +125,12 @@ void Particle::CreateParticle()
 	DescriptorNum++;
 }
 
-void Particle::DeleteParticle(int ParticleNum)
+void EffectDefinition::DeleteParticle(int ParticleNum)
 {
 	int index = 0;
-	for (auto it = particleData_.begin(); it != particleData_.end(); ) {
+	for (auto it = effectDefinitionData_.begin(); it != effectDefinitionData_.end(); ) {
 		if (index == ParticleNum) {
-			it = particleData_.erase(it);
+			it = effectDefinitionData_.erase(it);
 			return;
 		}
 		++it;
@@ -139,7 +139,7 @@ void Particle::DeleteParticle(int ParticleNum)
 }
 
 
-void Particle::SettingWvp(Matrix4x4 viewMatrix)
+void EffectDefinition::SettingWvp(Matrix4x4 viewMatrix)
 {
     Matrix4x4 billboard = viewMatrix;
     billboard = Inverse(billboard);
@@ -147,11 +147,11 @@ void Particle::SettingWvp(Matrix4x4 viewMatrix)
 
     Matrix4x4 projectionMatri = MakePerspectiveFovMatrix(0.45f, float(kClientWidth) / float(kClientHeight), 0.1f, 100.0f);
 
-    auto particleIter = particleData_.begin();
+    auto particleIter = effectDefinitionData_.begin();
     auto instancingIter = instancingData_;
 
     int i = 0;
-    while (particleIter != particleData_.end() && i < particleMaxNum_) {
+    while (particleIter != effectDefinitionData_.end() && i < effectDefinitionMaxNum_) {
         Matrix4x4 worldMatrixObj;
         if (!isBillboard_) {
             worldMatrixObj = MakeAffineMatrix(particleIter->transform.translate, particleIter->transform.scale, particleIter->transform.rotate);
@@ -169,22 +169,22 @@ void Particle::SettingWvp(Matrix4x4 viewMatrix)
     }
 
     // 実際に書き込んだ要素数を反映
-    particleNum_ = i;
+	effectDefinitionNum_ = i;
 }
 
-void Particle::SetData(std::list<ParticleData> particleData)
+void EffectDefinition::SetData(std::list<EffectDefinitionData> effectDefinitionData)
 {
-	particleData_ = std::move(particleData);
+	effectDefinitionData_ = std::move(effectDefinitionData);
 }
 
-void Particle::Updata(Matrix4x4 viewMatrix, std::list<ParticleData> particleData)
+void EffectDefinition::Updata(Matrix4x4 viewMatrix, std::list<EffectDefinitionData> effectDefinitionData)
 {
-    SetData(particleData);
+    SetData(effectDefinitionData);
 
     // 寿命切れを削除
-    for (auto it = particleData_.begin(); it != particleData_.end(); ) {
+    for (auto it = effectDefinitionData_.begin(); it != effectDefinitionData_.end(); ) {
         if (it->lifeTime <= it->currentTime) {
-            it = particleData_.erase(it);
+            it = effectDefinitionData_.erase(it);
         } else {
             ++it;
         }

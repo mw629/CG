@@ -107,6 +107,7 @@ void Draw::DrawModel(Model* model)
 
 
 	//objectの描画
+ commandList_->IASetIndexBuffer(&mesh.indexBufferView_);
 	commandList_->IASetVertexBuffers(0, 1, &mesh.vertexBufferView);  // アドレスを渡す
 	commandList_->SetGraphicsRootConstantBufferView(0, model->GetMartial()->GetMaterialResource()->GetGPUVirtualAddress());
 	commandList_->SetGraphicsRootConstantBufferView(1, model->GetWvpDataResource()->GetGPUVirtualAddress());
@@ -117,13 +118,13 @@ void Draw::DrawModel(Model* model)
 	commandList_->SetGraphicsRootConstantBufferView(6, spotLight_->GetDirectinalLightResource()->GetGPUVirtualAddress());
 	commandList_->SetGraphicsRootDescriptorTable(7, environmentTextureSrvHandleGPU_);
 
-	commandList_->DrawInstanced(UINT(mesh.vertexSize), 1, 0, 0);
+    commandList_->DrawIndexedInstanced(UINT(mesh.indexBufferView_.SizeInBytes / sizeof(uint32_t)), 1, 0, 0, 0);
 }
 
-void Draw::DrawParticle(Particle* particle)
+void Draw::DrawParticle(EffectDefinition* particle)
 {
 	// インスタンス数が0なら描画しない
-	const UINT instanceCount = static_cast<UINT>(particle->GetParticleNum());
+   const UINT instanceCount = static_cast<UINT>(particle->GetEffectDefinitionNum());
 	if (instanceCount == 0) {
 		return;
 	}

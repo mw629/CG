@@ -8,7 +8,7 @@
 #include "ObjectBase.h"
 
 #include "Model.h"
-#include "Particle.h"
+#include "EffectDefinition.h"
 #include "Sprite.h"
 #include "Cube.h"
 #include "Sphere.h"
@@ -40,7 +40,7 @@ public:
 
 	static void DrawModel(Model* model);
 
-	static void DrawParticle(Particle* particle);
+   static void DrawParticle(EffectDefinition* particle);
 
 	static void DrawSprite(Sprite* sprite);
 

@@ -207,13 +207,13 @@
     <ClCompile Include="MatchaEngine\Resource\ModelManager.cpp">
       <Filter>ソース ファイル</Filter>
     </ClCompile>
-    <ClCompile Include="MatchaEngine\GameObjects\Effect\Particle.cpp">
+    <ClCompile Include="MatchaEngine\GameObjects\Effect\EffectDefinition.cpp">
       <Filter>ソース ファイル</Filter>
     </ClCompile>
     <ClCompile Include="Game\Direction\Fade.cpp">
       <Filter>ソース ファイル</Filter>
     </ClCompile>
-    <ClCompile Include="MatchaEngine\GameObjects\Effect\ParticleManager.cpp">
+    <ClCompile Include="MatchaEngine\GameObjects\Effect\Emitter.cpp">
       <Filter>ソース ファイル</Filter>
     </ClCompile>
     <ClCompile Include="MatchaEngine\GameObjects\Light\PointLight.cpp">
@@ -253,6 +253,9 @@
       <Filter>ソース ファイル</Filter>
     </ClCompile>
     <ClCompile Include="MatchaEngine\GameObjects\Object\3d\Ring.cpp">
+      <Filter>ソース ファイル</Filter>
+    </ClCompile>
+    <ClCompile Include="MatchaEngine\GameObjects\Object\3d\Cylinder.cpp">
       <Filter>ソース ファイル</Filter>
     </ClCompile>
   </ItemGroup>
@@ -447,7 +450,7 @@
     <ClInclude Include="MatchaEngine\Resource\ModelManager.h">
       <Filter>ヘッダー ファイル</Filter>
     </ClInclude>
-    <ClInclude Include="MatchaEngine\GameObjects\Effect\Particle.h">
+    <ClInclude Include="MatchaEngine\GameObjects\Effect\EffectDefinition.h">
       <Filter>ヘッダー ファイル</Filter>
     </ClInclude>
     <ClInclude Include="Game\IScene.h">
@@ -456,7 +459,7 @@
     <ClInclude Include="Game\Direction\Fade.h">
       <Filter>ヘッダー ファイル</Filter>
     </ClInclude>
-    <ClInclude Include="MatchaEngine\GameObjects\Effect\ParticleManager.h">
+    <ClInclude Include="MatchaEngine\GameObjects\Effect\Emitter.h">
       <Filter>ヘッダー ファイル</Filter>
     </ClInclude>
     <ClInclude Include="MatchaEngine\GameObjects\Light\PointLight.h">
@@ -496,6 +499,9 @@
       <Filter>ヘッダー ファイル</Filter>
     </ClInclude>
     <ClInclude Include="MatchaEngine\GameObjects\Object\3d\Ring.h">
+      <Filter>ヘッダー ファイル</Filter>
+    </ClInclude>
+    <ClInclude Include="MatchaEngine\GameObjects\Object\3d\Cylinder.h">
       <Filter>ヘッダー ファイル</Filter>
     </ClInclude>
   </ItemGroup>

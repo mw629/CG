@@ -1,5 +1,8 @@
-#include "ParticleManager.h"
+#include "Emitter.h"
 #include <functional>
+#include "Input.h"
+#include "Calculation.h"
+#include "Draw.h"
 
 #ifdef _USE_IMGUI
 #include <imgui.h>
@@ -9,7 +12,7 @@
 
 
 
-void ParticleManager::ImGui() {
+void Emitter::ImGui() {
 #ifdef _USE_IMGUI
 
 	
@@ -39,7 +42,7 @@ void ParticleManager::ImGui() {
 		ImGui::Checkbox("stop", &isStop_);
 		ImGui::Checkbox("IsHit", &isHit_);
 		ImGui::Separator();
-		ImGui::Text("Active Particles: %d", particle_.get()->GetParticleNum());
+		ImGui::Text("Active Particles: %d", effectDefinition_.get()->GetEffectDefinitionNum());
 		ImGui::PopID();
 	}
 	ImGui::End();
@@ -47,51 +50,50 @@ void ParticleManager::ImGui() {
 
 }
 
-void ParticleManager::Initialize() {
+void Emitter::Initialize() {
 
 
 	randomEngine.seed(seedGenerator_());
 
-	particle_.get()->Initialize();
+	effectDefinition_.get()->Initialize();
 
 }
 
-void ParticleManager::Initialize(Emitter emitter)
+void Emitter::Initialize(EmitterData emitter)
 {
 	emitter_ = emitter;
 
 	randomEngine.seed(seedGenerator_());
 
-	particle_.get()->Initialize();
+	effectDefinition_.get()->Initialize();
 }
 
-void ParticleManager::Initialize(Emitter emitter, ParticleData particleData)
+void Emitter::Initialize(EmitterData emitter, EffectDefinitionData effectDefinitionData)
 {
 	emitter_ = emitter;
 
-	SetParticleData_ = particleData;
-
+	SetEffectDefinitionData_ = effectDefinitionData;
 	randomEngine.seed(seedGenerator_());
 
-	particle_.get()->Initialize();
+	effectDefinition_.get()->Initialize();
 }
 
-void ParticleManager::Initialize(Emitter emitter, ParticleData particleData, int TextureHandle)
+void Emitter::Initialize(EmitterData emitter, EffectDefinitionData particleData, int TextureHandle)
 {
 	emitter_ = emitter;
-	SetParticleData_ = particleData;
+	SetEffectDefinitionData_ = particleData;
 	randomEngine.seed(seedGenerator_());
-	particle_.get()->Initialize(TextureHandle);
+	effectDefinition_.get()->Initialize();
 }
 
-void ParticleManager::Update(Matrix4x4 viewMatrix) {
+void Emitter::Update(Matrix4x4 viewMatrix) {
 
-	for (std::list<ParticleData>::iterator particleIterator = particleData_.begin();
-		particleIterator != particleData_.end(); ) {
+	for (std::list<EffectDefinitionData>::iterator particleIterator = effectDefinitionData_.begin();
+		particleIterator != effectDefinitionData_.end(); ) {
 
 		// ループの先頭に追加
 		if (particleIterator->currentTime >= particleIterator->lifeTime) {
-			particleIterator = particleData_.erase(particleIterator);
+			particleIterator = effectDefinitionData_.erase(particleIterator);
 			continue;
 		}
 
@@ -112,23 +114,23 @@ void ParticleManager::Update(Matrix4x4 viewMatrix) {
 		}
 	}
 
-	particle_.get()->Updata(viewMatrix, particleData_);
+	effectDefinition_.get()->Updata(viewMatrix, effectDefinitionData_);
 }
 
-void ParticleManager::Update(Matrix4x4 viewMatrix, std::function<ParticleData(const ParticleData&)> moveBehavior)
+void Emitter::Update(Matrix4x4 viewMatrix, std::function<EffectDefinitionData(const EffectDefinitionData&)> moveBehavior)
 {
 	int i = 0;
-	for (std::list<ParticleData>::iterator particleIterator = particleData_.begin();
-		particleIterator != particleData_.end(); ) {
+	for (std::list<EffectDefinitionData>::iterator particleIterator = effectDefinitionData_.begin();
+		particleIterator != effectDefinitionData_.end(); ) {
 
 		// ループの先頭に追加
 		if (particleIterator->currentTime >= particleIterator->lifeTime) {
-			particleIterator = particleData_.erase(particleIterator);
+			particleIterator = effectDefinitionData_.erase(particleIterator);
 			continue;
 		}
 
 		// 外部のムーブ関数で更新結果を受け取る
-		ParticleData updated = *particleIterator;
+		EffectDefinitionData updated = *particleIterator;
 		if (moveBehavior) {
 			updated = moveBehavior(*particleIterator);
 		}
@@ -164,25 +166,25 @@ void ParticleManager::Update(Matrix4x4 viewMatrix, std::function<ParticleData(co
 	
 
 
-	particle_.get()->Updata(viewMatrix, particleData_);
+	effectDefinition_.get()->Updata(viewMatrix, effectDefinitionData_);
 }
 
-void ParticleManager::Update(Emitter emitter, Matrix4x4 viewMatrix, std::function<ParticleData(const ParticleData&)> moveBehavior)
+void Emitter::Update(EmitterData emitter, Matrix4x4 viewMatrix, std::function<EffectDefinitionData(const EffectDefinitionData&)> moveBehavior)
 {
 	emitter_ = emitter;
 
 	int i = 0;
-	for (std::list<ParticleData>::iterator particleIterator = particleData_.begin();
-		particleIterator != particleData_.end(); ) {
+	for (std::list<EffectDefinitionData>::iterator particleIterator = effectDefinitionData_.begin();
+		particleIterator != effectDefinitionData_.end(); ) {
 
 		// ループの先頭に追加
 		if (particleIterator->currentTime >= particleIterator->lifeTime) {
-			particleIterator = particleData_.erase(particleIterator);
+			particleIterator = effectDefinitionData_.erase(particleIterator);
 			continue;
 		}
 
 		// 外部のムーブ関数で更新結果を受け取る
-		ParticleData updated = *particleIterator;
+		EffectDefinitionData updated = *particleIterator;
 		if (moveBehavior) {
 			updated = moveBehavior(*particleIterator);
 		}
@@ -207,17 +209,17 @@ void ParticleManager::Update(Emitter emitter, Matrix4x4 viewMatrix, std::functio
 		}
 	}
 	
-	particle_.get()->Updata(viewMatrix, particleData_);
+	effectDefinition_.get()->Updata(viewMatrix, effectDefinitionData_);
 }
 
-void ParticleManager::Update(Matrix4x4 viewMatrix, Vector3 scale)
+void Emitter::Update(Matrix4x4 viewMatrix, Vector3 scale)
 {
-	for (std::list<ParticleData>::iterator particleIterator = particleData_.begin();
-		particleIterator != particleData_.end(); ) {
+	for (std::list<EffectDefinitionData>::iterator particleIterator = effectDefinitionData_.begin();
+		particleIterator != effectDefinitionData_.end(); ) {
 
 		// ループの先頭に追加
 		if (particleIterator->currentTime >= particleIterator->lifeTime) {
-			particleIterator = particleData_.erase(particleIterator);
+			particleIterator = effectDefinitionData_.erase(particleIterator);
 			continue;
 		}
 		else {
@@ -239,18 +241,18 @@ void ParticleManager::Update(Matrix4x4 viewMatrix, Vector3 scale)
 		}
 	}
 
-	particle_.get()->Updata(viewMatrix, particleData_);
+	effectDefinition_.get()->Updata(viewMatrix, effectDefinitionData_);
 }
 
-void ParticleManager::Draw() {
-	Draw::DrawParticle(particle_.get());
+void Emitter::Draw() {
+	Draw::DrawParticle(effectDefinition_.get());
 }
 
-ParticleData ParticleManager::MakeNewParticle()
+EffectDefinitionData Emitter::MakeNewParticle()
 {
 	std::uniform_real_distribution<float> distribution(-1.0f, 1.0f);
-	ParticleData data;
-	data = SetParticleData_;
+	EffectDefinitionData data;
+	data = SetEffectDefinitionData_;
 	Vector3 possion = { distribution(randomEngine),distribution(randomEngine) ,distribution(randomEngine) };
 	data.transform.translate = possion * emitter_.transform.scale + emitter_.transform.translate;
 	data.velocity = { distribution(randomEngine) / 60.0f ,distribution(randomEngine) / 60.0f ,distribution(randomEngine) / 60.0f };
@@ -262,10 +264,10 @@ ParticleData ParticleManager::MakeNewParticle()
 	return data;
 }
 
-ParticleData ParticleManager::MakeNewParticle(Vector3 scale)
+EffectDefinitionData Emitter::MakeNewParticle(Vector3 scale)
 {
 	std::uniform_real_distribution<float> distribution(-1.0f, 1.0f);
-	ParticleData data;
+	EffectDefinitionData data;
 	data.transform = { {1.0f,1.0f,1.0f},{0.0f,0.0f,0.0f},{0.0f,0.0f,0.0f} };
 	Vector3 possion = { distribution(randomEngine),distribution(randomEngine) ,distribution(randomEngine) };
 	data.transform.translate = possion * emitter_.transform.scale + emitter_.transform.translate;
@@ -282,14 +284,14 @@ ParticleData ParticleManager::MakeNewParticle(Vector3 scale)
 	return data;
 }
 
-ParticleData ParticleManager::particleMove(ParticleData p)
+EffectDefinitionData Emitter::particleMove(EffectDefinitionData p)
 {
 	p.velocity = { 0.0f,0.0f,0.0f };
 	p.velocity.y -= 0.01f;
 	return p;
 }
 
-ParticleData ParticleManager::particleMoveFire(ParticleData p)
+EffectDefinitionData Emitter::particleMoveFire(EffectDefinitionData p)
 {
 	// 上昇力（炎が上に伸びる）
 	p.velocity.y += 0.01f / 60.0f;
@@ -308,7 +310,7 @@ ParticleData ParticleManager::particleMoveFire(ParticleData p)
 
 }
 
-void ParticleManager::EmitSize()
+void Emitter::EmitSize()
 {
 	if (Input::PressKey(DIK_A)) {
 		emitter_.transform.scale.x -= 0.01f;
@@ -321,7 +323,7 @@ void ParticleManager::EmitSize()
 	}
 }
 
-bool ParticleManager::OnCollision(ParticleData particleData)
+bool Emitter::OnCollision(EffectDefinitionData particleData)
 {
 	AABB aabb1 = accelerationFiled_.area;
 	AABB aabb2 = GetAABB(particleData.transform, particleData.transform.scale.x, particleData.transform.scale.z);
@@ -334,10 +336,10 @@ bool ParticleManager::OnCollision(ParticleData particleData)
 
 }
 
-void ParticleManager::Emit()
+void Emitter::Emit()
 {
 	for (uint32_t count = 0; count < emitter_.count; ++count) {
-		particleData_.push_back(MakeNewParticle());
+		effectDefinitionData_.push_back(MakeNewParticle());
 	}
 }
 

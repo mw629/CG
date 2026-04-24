@@ -163,13 +163,13 @@ void Engine::Setting()
 	ObjectBase::SetObjectResource(Client);
 	Line::SetScreenSize(Client);
 	Grid::SetScreenSize(Client);
-	Particle::SetScreenSize(Client);
+    EffectDefinition::SetScreenSize(Client);
 	Triangle::SetScreenSize(Client);
 	Sprite::SetScreenSize(Client);
 
 
-	Particle::SetDescriptorHeap(descriptorHeap.get());
-	Particle::SetDevice(graphics.get()->GetDevice());
+  EffectDefinition::SetDescriptorHeap(descriptorHeap.get());
+	EffectDefinition::SetDevice(graphics.get()->GetDevice());
 }
 
 

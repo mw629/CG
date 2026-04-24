@@ -65,19 +65,19 @@ void TestScene::Initialize() {
 	floor.get()->Initialize(modelData);
 	floor.get()->SetTransform(floorT);
 
-	Emitter emitter;
+    EmitterData emitter;
 	emitter.transform = modelTransform_;
-	emitter.transform.scale = { 0.2f,0.2f,0.2f };
-	emitter.count = 20;
-	ParticleData data;
+	emitter.transform.scale = { 0.01f,0.01f,0.01f };
+	emitter.count = 5;
+	EffectDefinitionData data;
 	data.transform.scale = { 0.05f,1.0f,1.0f };
 	data.color = { 1.0f,0.0f,0.0f,1.0f };
 	data.lifeTime = 1.0f;
-	std::unique_ptr<ParticleManager> particle = std::make_unique<ParticleManager>();
+	std::unique_ptr<Emitter> particle = std::make_unique<Emitter>();
 	particle.get()->Initialize(emitter, data);
 
 	// ランダムな角度(0度 or 45度など)で出現させ、その場から動かさない設定
-	particle->generatorBehavior = [](ParticleData& p) {
+ particle->generatorBehavior = [](EffectDefinitionData& p) {
 		p.velocity = { 0.0f, 0.0f, 0.0f }; // 動かさない
 
 		// 例として、Z軸の角度をランダムに設定 (0〜360度)
@@ -122,7 +122,7 @@ void TestScene::Draw() {
 
 	Draw::DrawObj(ring_.get());
 
-	Draw::DrawObj(skyBox_.get());
+	//Draw::DrawObj(skyBox_.get());
 	//Draw::DrawObj(model_.get());
 	//Draw::DrawObj(floor.get());
 	//Draw::DrawObj(nodeAnimation_.get());

@@ -1,21 +1,18 @@
 #pragma once
 #include "ObjectBase.h"
 
-class Ring : public ObjectBase
+class Cylinder : public ObjectBase
 {
 private:
-	uint32_t kRingDivide_ = 32;
-	float outerRadius_ = 1.0f;
-	float innerRadius_ = 0.5f;
+	uint32_t kDivide_ = 32;
+	float radius_ = 1.0f;
+	float height_ = 2.0f;
 	float radianPerDivide_;
-
 public:
-	~Ring()override;
-
+	void ImGui()override;
+	~Cylinder()override;
 	void Initialize(int textureSrvHandle);
-
 	void CreateVertexData()override;
 	void CreateIndexResource()override;
-
 };
 
