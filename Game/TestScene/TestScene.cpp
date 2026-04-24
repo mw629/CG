@@ -92,6 +92,8 @@ void TestScene::Initialize() {
 	sprite_.get()->Initialize(spriteData_, texture);
 
 	ring_.get()->Initialize(texture);
+   cylinder_.get()->Initialize(texture);
+	cylinder_.get()->SetTransform(cylinderTransform_);
 }
 
 void TestScene::Update() {
@@ -101,6 +103,7 @@ void TestScene::Update() {
 
 	sprite_.get()->Update(spriteData_);
 	ring_.get()->SettingWvp(view);
+	cylinder_.get()->SettingWvp(view);
 
 	model_->SettingWvp(view);
 	floor->SettingWvp(view);
@@ -120,13 +123,14 @@ void TestScene::Draw() {
 	// Set the SkyBox texture as environment map
 	Draw::SetEnvironmentTexture(skyBoxTexture_);
 
-	Draw::DrawObj(ring_.get());
+	//Draw::DrawObj(ring_.get());
+	Draw::DrawObj(cylinder_.get());
 
 	//Draw::DrawObj(skyBox_.get());
 	//Draw::DrawObj(model_.get());
 	//Draw::DrawObj(floor.get());
 	//Draw::DrawObj(nodeAnimation_.get());
-	Draw::DrawAnimation(animation_.get());
+	//Draw::DrawAnimation(animation_.get());
 
 	//Draw::DrawObj(sphere_.get());
 	for (int i = 0, n = static_cast<int>(particle_.size()); i < n; ++i) {

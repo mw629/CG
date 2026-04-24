@@ -4,10 +4,12 @@
 class Cylinder : public ObjectBase
 {
 private:
-	uint32_t kDivide_ = 32;
-	float radius_ = 1.0f;
-	float height_ = 2.0f;
+	uint32_t divide_;
+	float topRadius_;
+	float bottomRadius_;
+	float height_;
 	float radianPerDivide_;
+
 public:
 	void ImGui()override;
 	~Cylinder()override;

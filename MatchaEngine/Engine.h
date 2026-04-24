@@ -32,6 +32,7 @@
 #include "TransformAnimation.h"
 #include "EffectDefinition.h"
 #include "Sphere.h"
+#include "Cylinder.h"
 #include "Sprite.h"
 #include "Triangle.h"
 #include "Ring.h"
