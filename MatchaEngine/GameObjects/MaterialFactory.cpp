@@ -1,7 +1,9 @@
 #include "MaterialFactory.h"
 #include "Graphics/GraphicsDevice.h"
 #include "Math/Calculation.h"
+#ifdef _USE_IMGUI
 #include <imgui.h>
+#endif
 
 
 MaterialFactory::~MaterialFactory(){
@@ -12,6 +14,7 @@ MaterialFactory::~MaterialFactory(){
 }
 
 void MaterialFactory::ImGui() {
+   #ifdef _USE_IMGUI
 	if (ImGui::CollapsingHeader("MaterialFactory")) {
 		ImGui::ColorEdit4("Color", &materialData_->color.x);
 		bool enableLighting = materialData_->enableLighting != 0;
@@ -21,6 +24,7 @@ void MaterialFactory::ImGui() {
 		ImGui::SliderFloat("Shininess", &materialData_->shininess, 0.0f, 100.0f);
 		ImGui::SliderFloat("Environment Coefficient", &materialData_->environmentCoefficient, 0.0f, 1.0f);
 	}
+   #endif
 }
 
 void MaterialFactory::CreateMartial(bool Lighting)
