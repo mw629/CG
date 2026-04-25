@@ -1,4 +1,5 @@
 #include "Cylinder.h"
+#include <numbers>
 
 void Cylinder::ImGui()
 {
@@ -14,8 +15,8 @@ void Cylinder::Initialize(int textureSrvHandle)
 	divide_ = 32;
 	topRadius_ = 1.0f;
 	bottomRadius_ = 1.0f;
-	height_ = 2.0f;
-	radianPerDivide_ = 2.0f * 3.14f / float(divide_);
+ height_ = 3.0f;
+	radianPerDivide_ = 2.0f * std::numbers::pi_v<float> / float(divide_);
 
 	textureSrvHandleGPU_ = texture.get()->TextureData(textureSrvHandle);
 
@@ -58,25 +59,25 @@ void Cylinder::CreateVertexData()
 
 		uint32_t startIndex = index * 6;
 
-		VertexData a;
-       a.position = { -sin * topRadius_, cos * topRadius_, halfHeight, 1.0f };
+       VertexData a;
+		a.position = { -sin * topRadius_, halfHeight, cos * topRadius_, 1.0f };
 		a.texcoord = { u, 0.0f };
-       a.normal = { -sin, cos, 0.0f };
+		a.normal = { -sin, 0.0f, cos };
 
 		VertexData b;
-       b.position = { -sinNext * topRadius_, cosNext * topRadius_, halfHeight, 1.0f };
+      b.position = { -sinNext * topRadius_, halfHeight, cosNext * topRadius_, 1.0f };
 		b.texcoord = { uNext, 0.0f };
-       b.normal = { -sinNext, cosNext, 0.0f };
+      b.normal = { -sinNext, 0.0f, cosNext };
 
 		VertexData c;
-     c.position = { -sin * bottomRadius_, cos * bottomRadius_, -halfHeight, 1.0f };
+     c.position = { -sin * bottomRadius_, -halfHeight, cos * bottomRadius_, 1.0f };
 		c.texcoord = { u, 1.0f };
-       c.normal = { -sin, cos, 0.0f };
+      c.normal = { -sin, 0.0f, cos };
 
 		VertexData d;
-     d.position = { -sinNext * bottomRadius_, cosNext * bottomRadius_, -halfHeight, 1.0f };
+     d.position = { -sinNext * bottomRadius_, -halfHeight, cosNext * bottomRadius_, 1.0f };
 		d.texcoord = { uNext, 1.0f };
-       d.normal = { -sinNext, cosNext, 0.0f };
+      d.normal = { -sinNext, 0.0f, cosNext };
 
 		//頂点にデータを入力する。基準点a
 		vertexData_[startIndex] = b;
