@@ -34,7 +34,7 @@ public:
 
 	IDxcBlob* GetPixelShaderBlob() { return pixelShaderBlob_.Get(); }
 
-
+	IDxcBlob* GetComputeShaderBlob();
 
 };
 
