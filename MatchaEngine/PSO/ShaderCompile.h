@@ -24,7 +24,7 @@ public:
 		Microsoft::WRL::ComPtr<IDxcCompiler3> dxcCompiler,
 		Microsoft::WRL::ComPtr<IDxcIncludeHandler> includeHandler);
 
-	void CreateShaderCompile(ShaderName shaderName,std::ostream& os,
+	void CreateShaderCompile(const std::string& shaderName,std::ostream& os,
 		Microsoft::WRL::ComPtr<IDxcUtils> dxcUtils,
 		Microsoft::WRL::ComPtr<IDxcCompiler3> dxcCompiler,
 		Microsoft::WRL::ComPtr<IDxcIncludeHandler> includeHandler);

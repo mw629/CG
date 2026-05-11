@@ -12,28 +12,7 @@ enum BlendMode {
 };
 
 
-enum ShaderName {
-	ObjectShader,
-	AnimationObj,
-	ParticleShader,
-	LineShader,
-	SkyBoxShader,
-
-	ShaderNum,
-};
-
-
-static const char* ShaderNameToString(ShaderName name)
-{
-	switch (name) {
-	case ObjectShader:  return "ObjectShader";
-	case AnimationObj:  return "AnimationObj";
-	case ParticleShader: return "ParticleShader";
-	case LineShader: return "LineShader";
-	case SkyBoxShader: return "SkyBoxShader";
-	default: return "UnknownShader";
-	}
-}
+// ShaderName was removed to use string IDs
 
 static const char* BlendModeToString(BlendMode mode)
 {

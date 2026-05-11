@@ -1,0 +1,58 @@
+externals\imgui\imgui_impl_dx12.cpp:143:    ctx->SetGraphicsRootSignature(bd->pRootSignature);
+externals\imgui\imgui_impl_dx12.cpp:144:    ctx->SetGraphicsRoot32BitConstants(0, 16, &vertex_constant_buffer, 0);
+externals\imgui\imgui_impl_dx12.cpp:276:                ctx->SetGraphicsRootDescriptorTable(1, texture_handle);
+MatchaEngine\Graphics\Draw.cpp:43:	commandList_->SetGraphicsRootSignature(graphicsPipelineState_->GetRootSignature(shader, blend)->GetRootSignature());
+MatchaEngine\Graphics\Draw.cpp:58:	commandList_->SetGraphicsRootConstantBufferView(0, obj->GetMartial()->GetMaterialResource()->GetGPUVirtualAddress());
+MatchaEngine\Graphics\Draw.cpp:59:	commandList_->SetGraphicsRootConstantBufferView(1, obj->GetWvpDataResource()->GetGPUVirtualAddress());
+MatchaEngine\Graphics\Draw.cpp:60:	commandList_->SetGraphicsRootDescriptorTable(2, obj->GetTextureSrvHandleGPU());
+MatchaEngine\Graphics\Draw.cpp:61:	commandList_->SetGraphicsRootConstantBufferView(3, camera->GetCameraResource()->GetGPUVirtualAddress());
+MatchaEngine\Graphics\Draw.cpp:62:	commandList_->SetGraphicsRootConstantBufferView(4, directionalLight_->GetDirectinalLightResource()->GetGPUVirtualAddress());
+MatchaEngine\Graphics\Draw.cpp:63:	commandList_->SetGraphicsRootConstantBufferView(5, pointLight_->GetDirectinalLightResource()->GetGPUVirtualAddress());
+MatchaEngine\Graphics\Draw.cpp:64:	commandList_->SetGraphicsRootConstantBufferView(6, spotLight_->GetDirectinalLightResource()->GetGPUVirtualAddress());
+MatchaEngine\Graphics\Draw.cpp:65:	commandList_->SetGraphicsRootDescriptorTable(7, environmentTextureSrvHandleGPU_);
+MatchaEngine\Graphics\Draw.cpp:89:	commandList_->SetGraphicsRootConstantBufferView(0, obj->GetMartial()->GetMaterialResource()->GetGPUVirtualAddress()); // material (pixel b0)
+MatchaEngine\Graphics\Draw.cpp:90:	commandList_->SetGraphicsRootConstantBufferView(1, obj->GetWvpDataResource()->GetGPUVirtualAddress()); // wvp (vertex b0)
+MatchaEngine\Graphics\Draw.cpp:91:	commandList_->SetGraphicsRootDescriptorTable(2, obj->GetPaletteSrvHandleGPU()); // matrix palette SRV (t0)
+MatchaEngine\Graphics\Draw.cpp:92:	commandList_->SetGraphicsRootDescriptorTable(3, obj->GetTextureSrvHandleGPU()); // texture SRV (t1)
+MatchaEngine\Graphics\Draw.cpp:93:	commandList_->SetGraphicsRootConstantBufferView(4, camera->GetCameraResource()->GetGPUVirtualAddress());
+MatchaEngine\Graphics\Draw.cpp:94:	commandList_->SetGraphicsRootConstantBufferView(5, directionalLight_->GetDirectinalLightResource()->GetGPUVirtualAddress());
+MatchaEngine\Graphics\Draw.cpp:95:	commandList_->SetGraphicsRootConstantBufferView(6, pointLight_->GetDirectinalLightResource()->GetGPUVirtualAddress());
+MatchaEngine\Graphics\Draw.cpp:96:	commandList_->SetGraphicsRootConstantBufferView(7, spotLight_->GetDirectinalLightResource()->GetGPUVirtualAddress());
+MatchaEngine\Graphics\Draw.cpp:111:	commandList_->SetGraphicsRootConstantBufferView(0, model->GetMartial()->GetMaterialResource()->GetGPUVirtualAddress());
+MatchaEngine\Graphics\Draw.cpp:112:	commandList_->SetGraphicsRootConstantBufferView(1, model->GetWvpDataResource()->GetGPUVirtualAddress());
+MatchaEngine\Graphics\Draw.cpp:113:	commandList_->SetGraphicsRootDescriptorTable(2, model->GetTextureSrvHandleGPU());
+MatchaEngine\Graphics\Draw.cpp:114:	commandList_->SetGraphicsRootConstantBufferView(3, camera->GetCameraResource()->GetGPUVirtualAddress());
+MatchaEngine\Graphics\Draw.cpp:115:	commandList_->SetGraphicsRootConstantBufferView(4, directionalLight_->GetDirectinalLightResource()->GetGPUVirtualAddress());
+MatchaEngine\Graphics\Draw.cpp:116:	commandList_->SetGraphicsRootConstantBufferView(5, pointLight_->GetDirectinalLightResource()->GetGPUVirtualAddress());
+MatchaEngine\Graphics\Draw.cpp:117:	commandList_->SetGraphicsRootConstantBufferView(6, spotLight_->GetDirectinalLightResource()->GetGPUVirtualAddress());
+MatchaEngine\Graphics\Draw.cpp:118:	commandList_->SetGraphicsRootDescriptorTable(7, environmentTextureSrvHandleGPU_);
+MatchaEngine\Graphics\Draw.cpp:134:	commandList_->SetGraphicsRootConstantBufferView(0, particle->GetMartial()->GetMaterialResource()->GetGPUVirtualAddress());
+MatchaEngine\Graphics\Draw.cpp:135:	commandList_->SetGraphicsRootDescriptorTable(1, particle->GetInstancingSrvHandleGPU());
+MatchaEngine\Graphics\Draw.cpp:136:	commandList_->SetGraphicsRootDescriptorTable(2, particle->GetTextureSrvHandleGPU());
+MatchaEngine\Graphics\Draw.cpp:144:	commandList_->SetGraphicsRootConstantBufferView(3, directionalLight_->GetDirectinalLightResource()->GetGPUVirtualAddress());
+MatchaEngine\Graphics\Draw.cpp:148:	commandList_->SetGraphicsRootConstantBufferView(0, sprite->GetMartial()->GetMaterialResource()->GetGPUVirtualAddress());
+MatchaEngine\Graphics\Draw.cpp:149:	commandList_->SetGraphicsRootConstantBufferView(1, sprite->GetVertexResource()->GetGPUVirtualAddress());
+MatchaEngine\Graphics\Draw.cpp:150:	commandList_->SetGraphicsRootDescriptorTable(2, sprite->GetTextureSrvHandleGPU());
+MatchaEngine\Graphics\Draw.cpp:151:	commandList_->SetGraphicsRootConstantBufferView(3, camera->GetCameraResource()->GetGPUVirtualAddress());
+MatchaEngine\Graphics\Draw.cpp:152:	commandList_->SetGraphicsRootConstantBufferView(4, directionalLight_->GetDirectinalLightResource()->GetGPUVirtualAddress());
+MatchaEngine\Graphics\Draw.cpp:153:	commandList_->SetGraphicsRootConstantBufferView(5, pointLight_->GetDirectinalLightResource()->GetGPUVirtualAddress());
+MatchaEngine\Graphics\Draw.cpp:154:	commandList_->SetGraphicsRootConstantBufferView(6, spotLight_->GetDirectinalLightResource()->GetGPUVirtualAddress());
+MatchaEngine\Graphics\Draw.cpp:155:	commandList_->SetGraphicsRootDescriptorTable(7, environmentTextureSrvHandleGPU_);
+MatchaEngine\Graphics\Draw.cpp:168:	commandList_->SetGraphicsRootConstantBufferView(0, sphere->GetMartial()->GetMaterialResource()->GetGPUVirtualAddress());
+MatchaEngine\Graphics\Draw.cpp:169:	commandList_->SetGraphicsRootConstantBufferView(1, sphere->GetWvpDataResource()->GetGPUVirtualAddress());
+MatchaEngine\Graphics\Draw.cpp:170:	commandList_->SetGraphicsRootDescriptorTable(2, sphere->GetTextureSrvHandleGPU());
+MatchaEngine\Graphics\Draw.cpp:171:	commandList_->SetGraphicsRootConstantBufferView(3, camera->GetCameraResource()->GetGPUVirtualAddress());
+MatchaEngine\Graphics\Draw.cpp:172:	commandList_->SetGraphicsRootConstantBufferView(4, directionalLight_->GetDirectinalLightResource()->GetGPUVirtualAddress());
+MatchaEngine\Graphics\Draw.cpp:173:	commandList_->SetGraphicsRootConstantBufferView(5, pointLight_->GetDirectinalLightResource()->GetGPUVirtualAddress());
+MatchaEngine\Graphics\Draw.cpp:174:	commandList_->SetGraphicsRootConstantBufferView(6, spotLight_->GetDirectinalLightResource()->GetGPUVirtualAddress());
+MatchaEngine\Graphics\Draw.cpp:175:	commandList_->SetGraphicsRootDescriptorTable(7, environmentTextureSrvHandleGPU_);
+MatchaEngine\Graphics\Draw.cpp:185:	commandList_->SetGraphicsRootConstantBufferView(0, triangle->GetMartial()->GetMaterialResource()->GetGPUVirtualAddress());
+MatchaEngine\Graphics\Draw.cpp:186:	commandList_->SetGraphicsRootConstantBufferView(1, triangle->GetVertexResource()->GetGPUVirtualAddress());
+MatchaEngine\Graphics\Draw.cpp:187:	commandList_->SetGraphicsRootDescriptorTable(2, triangle->GetTextureSrvHandleGPU());
+MatchaEngine\Graphics\Draw.cpp:188:	commandList_->SetGraphicsRootConstantBufferView(3, camera->GetCameraResource()->GetGPUVirtualAddress());
+MatchaEngine\Graphics\Draw.cpp:189:	commandList_->SetGraphicsRootConstantBufferView(4, directionalLight_->GetDirectinalLightResource()->GetGPUVirtualAddress());
+MatchaEngine\Graphics\Draw.cpp:190:	commandList_->SetGraphicsRootConstantBufferView(5, pointLight_->GetDirectinalLightResource()->GetGPUVirtualAddress());
+MatchaEngine\Graphics\Draw.cpp:191:	commandList_->SetGraphicsRootConstantBufferView(6, spotLight_->GetDirectinalLightResource()->GetGPUVirtualAddress());
+MatchaEngine\Graphics\Draw.cpp:192:	commandList_->SetGraphicsRootDescriptorTable(7, environmentTextureSrvHandleGPU_);
+MatchaEngine\Graphics\Draw.cpp:203:	commandList_->SetGraphicsRootConstantBufferView(0, line->GetVertexResource()->GetGPUVirtualAddress());
+MatchaEngine\Graphics\Draw.cpp:210:	commandList_->SetGraphicsRootConstantBufferView(0, grid->GetVertexResource()->GetGPUVirtualAddress());

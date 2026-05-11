@@ -1,4 +1,4 @@
-﻿<?xml version="1.0" encoding="utf-8"?>
+<?xml version="1.0" encoding="utf-8"?>
 <Project DefaultTargets="Build" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
   <ItemGroup Label="ProjectConfigurations">
     <ProjectConfiguration Include="Debug|x64">
@@ -167,6 +167,7 @@ copy "$(WindowsSdkDir)bin\$(TargetPlatformVersion)\x64\dxil.dll" "$(TargetDir)dx
     <ClCompile Include="MatchaEngine\Graphics\GpuSyncManager.cpp" />
     <ClCompile Include="MatchaEngine\GameObjects\Camera\DebugCamera.cpp" />
     <ClCompile Include="MatchaEngine\GameObjects\Object\2d\Sprite.cpp" />
+    <ClCompile Include="MatchaEngine\PSO\RootParameter.cpp" />
     <ClCompile Include="MatchaEngine\Resource\Audio.cpp" />
     <ClCompile Include="MatchaEngine\Input\Input.cpp" />
     <ClCompile Include="MatchaEngine\Engine.cpp" />
@@ -206,7 +207,6 @@ copy "$(WindowsSdkDir)bin\$(TargetPlatformVersion)\x64\dxil.dll" "$(TargetDir)dx
       <WholeProgramOptimization Condition="'$(Configuration)|$(Platform)'=='Development|x64'">true</WholeProgramOptimization>
     </ClCompile>
     <ClCompile Include="MatchaEngine\PSO\RasterizerState.cpp" />
-    <ClCompile Include="MatchaEngine\PSO\RootParameter.cpp" />
     <ClCompile Include="MatchaEngine\PSO\RootSignature.cpp" />
     <ClCompile Include="MatchaEngine\PSO\ShaderCompile.cpp" />
     <ClCompile Include="MatchaEngine\Core\WindowConfig.cpp" />
@@ -278,6 +278,7 @@ copy "$(WindowsSdkDir)bin\$(TargetPlatformVersion)\x64\dxil.dll" "$(TargetDir)dx
       <ShaderModel Condition="'$(Configuration)|$(Platform)'=='Release|x64'">4.0</ShaderModel>
       <ShaderType Condition="'$(Configuration)|$(Platform)'=='Development|x64'">Compute</ShaderType>
       <ShaderModel Condition="'$(Configuration)|$(Platform)'=='Development|x64'">4.0</ShaderModel>
+      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">true</ExcludedFromBuild>
     </FxCompile>
     <FxCompile Include="resources\Shader\SkinningObject3d.PS.hlsl">
       <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Development|x64'">true</ExcludedFromBuild>
@@ -359,7 +360,6 @@ copy "$(WindowsSdkDir)bin\$(TargetPlatformVersion)\x64\dxil.dll" "$(TargetDir)dx
     <ClInclude Include="MatchaEngine\PSO\InputLayout.h" />
     <ClInclude Include="MatchaEngine\Core\LogHandler.h" />
     <ClInclude Include="MatchaEngine\PSO\RasterizerState.h" />
-    <ClInclude Include="MatchaEngine\PSO\RootParameter.h" />
     <ClInclude Include="MatchaEngine\PSO\RootSignature.h" />
     <ClInclude Include="MatchaEngine\PSO\ShaderCompile.h" />
     <ClInclude Include="MatchaEngine\Core\VariableTypes.h" />

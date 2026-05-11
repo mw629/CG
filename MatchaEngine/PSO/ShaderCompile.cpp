@@ -75,61 +75,22 @@ Microsoft::WRL::ComPtr<IDxcBlob> ShaderCompile::CompileShader(std::ostream& os,
 
 }
 
-void ShaderCompile::CreateShaderCompile(ShaderName shaderName, std::ostream& os, Microsoft::WRL::ComPtr<IDxcUtils> dxcUtils, Microsoft::WRL::ComPtr<IDxcCompiler3> dxcCompiler, Microsoft::WRL::ComPtr<IDxcIncludeHandler> includeHandler)
+void ShaderCompile::CreateShaderCompile(const std::string& shaderName, std::ostream& os, Microsoft::WRL::ComPtr<IDxcUtils> dxcUtils, Microsoft::WRL::ComPtr<IDxcCompiler3> dxcCompiler, Microsoft::WRL::ComPtr<IDxcIncludeHandler> includeHandler)
 {
-	switch (shaderName)
-	{
-	case ObjectShader:
-		//Shaderをコンパイルする
-		vertexShaderBlob_ = CompileShader(os, L"resources/Shader/Object3D.VS.hlsl",
-			L"vs_6_0", dxcUtils, dxcCompiler, includeHandler);
-		assert(vertexShaderBlob_ != nullptr);
+	// 文字列ID（shaderName）からHLSLのファイルパスを動的に生成します
+	// 例: shaderNameが "Object3d" の場合、"resources/Shader/Object3d.VS.hlsl" となります
+	std::wstring wShaderName = ConvertString(shaderName);
+	std::wstring vsPath = L"resources/Shader/" + wShaderName + L".VS.hlsl";
+	std::wstring psPath = L"resources/Shader/" + wShaderName + L".PS.hlsl";
 
-		pixelShaderBlob_ = CompileShader(os, L"resources/Shader/Object3D.PS.hlsl",
-			L"ps_6_0", dxcUtils, dxcCompiler, includeHandler);
-		assert(pixelShaderBlob_ != nullptr);
-		break;
-	case AnimationObj:
-		//Shaderをコンパイルする
-		vertexShaderBlob_ = CompileShader(os, L"resources/Shader/SkinningObject3d.VS.hlsl",
-			L"vs_6_0", dxcUtils, dxcCompiler, includeHandler);
-		assert(vertexShaderBlob_ != nullptr);
+	// 頂点シェーダーのコンパイル
+	vertexShaderBlob_ = CompileShader(os, vsPath,
+		L"vs_6_0", dxcUtils, dxcCompiler, includeHandler);
+	assert(vertexShaderBlob_ != nullptr);
 
-		pixelShaderBlob_ = CompileShader(os, L"resources/Shader/SkinningObject3d.PS.hlsl",
-			L"ps_6_0", dxcUtils, dxcCompiler, includeHandler);
-		assert(pixelShaderBlob_ != nullptr);
-		break;
-	case ParticleShader:
-		//Shaderをコンパイルする
-		vertexShaderBlob_ = CompileShader(os, L"resources/Shader/Particle.VS.hlsl",
-			L"vs_6_0", dxcUtils, dxcCompiler, includeHandler);
-		assert(vertexShaderBlob_ != nullptr);
-
-		pixelShaderBlob_ = CompileShader(os, L"resources/Shader/Particle.PS.hlsl",
-			L"ps_6_0", dxcUtils, dxcCompiler, includeHandler);
-		assert(pixelShaderBlob_ != nullptr);
-		break;
-	case LineShader:
-		//Shaderをコンパイルする
-		vertexShaderBlob_ = CompileShader(os, L"resources/Shader/Line.VS.hlsl",
-			L"vs_6_0", dxcUtils, dxcCompiler, includeHandler);
-		assert(vertexShaderBlob_ != nullptr);
-
-		pixelShaderBlob_ = CompileShader(os, L"resources/Shader/Line.PS.hlsl",
-			L"ps_6_0", dxcUtils, dxcCompiler, includeHandler);
-		assert(pixelShaderBlob_ != nullptr);
-		break;
-	case SkyBoxShader:
-		vertexShaderBlob_ = CompileShader(os, L"resources/Shader/SkyBox.VS.hlsl",
-			L"vs_6_0", dxcUtils, dxcCompiler, includeHandler);
-		assert(vertexShaderBlob_ != nullptr);
-
-		pixelShaderBlob_ = CompileShader(os, L"resources/Shader/SkyBox.PS.hlsl",
-			L"ps_6_0", dxcUtils, dxcCompiler, includeHandler);
-		assert(pixelShaderBlob_ != nullptr);
-		break;
-	default:
-		break;
-	}
+	// ピクセルシェーダーのコンパイル
+	pixelShaderBlob_ = CompileShader(os, psPath,
+		L"ps_6_0", dxcUtils, dxcCompiler, includeHandler);
+	assert(pixelShaderBlob_ != nullptr);
 }
 

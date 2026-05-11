@@ -11,6 +11,19 @@ namespace {
 	SpotLight* spotLight_;
 	Camera* camera;
 	D3D12_GPU_DESCRIPTOR_HANDLE environmentTextureSrvHandleGPU_{};
+
+	// シェーダーリフレクションで取得した変数名（name）から自動的にRootParameterのインデックスを検索し、CBVをセットするヘルパー関数
+	void SetCBV(const std::string& shader, BlendMode blend, const std::string& name, D3D12_GPU_VIRTUAL_ADDRESS address) {
+		UINT index = graphicsPipelineState_->GetRootParameterIndex(shader, blend, name);
+		// シェーダー内に該当の変数が存在する場合のみ設定を行う（新しくシェーダーを追加・変更しても安全に動作する）
+		if (index != static_cast<UINT>(-1)) commandList_->SetGraphicsRootConstantBufferView(index, address);
+	}
+
+	// 同様に、変数名からインデックスを検索し、DescriptorTable（SRV, UAVなど）をセットするヘルパー関数
+	void SetTable(const std::string& shader, BlendMode blend, const std::string& name, D3D12_GPU_DESCRIPTOR_HANDLE handle) {
+		UINT index = graphicsPipelineState_->GetRootParameterIndex(shader, blend, name);
+		if (index != static_cast<UINT>(-1)) commandList_->SetGraphicsRootDescriptorTable(index, handle);
+	}
 }
 
 void Draw::Initialize(ID3D12GraphicsCommandList* commandList, GraphicsPipelineState* graphicsPipelineState,
@@ -34,7 +47,7 @@ void Draw::SetEnvironmentTexture(int handle)
 	environmentTextureSrvHandleGPU_ = texture_.get()->TextureData(handle);
 }
 
-void Draw::preDraw(ShaderName shader, BlendMode blend)
+void Draw::preDraw(const std::string& shader, BlendMode blend)
 {
 	commandList_->SetPipelineState(graphicsPipelineState_->GetGraphicsPipelineState(shader, blend));//PSOを設定
 	//形状を設定。PSOに設定しているものとはまた別。同じものを設定すると考えておけばいい
@@ -55,14 +68,15 @@ void Draw::DrawObj(ObjectBase* obj)
 	//objectの描画
 	commandList_->IASetIndexBuffer(&mesh.indexBufferView_);
 	commandList_->IASetVertexBuffers(0, 1, &mesh.vertexBufferView);  
-	commandList_->SetGraphicsRootConstantBufferView(0, obj->GetMartial()->GetMaterialResource()->GetGPUVirtualAddress());
-	commandList_->SetGraphicsRootConstantBufferView(1, obj->GetWvpDataResource()->GetGPUVirtualAddress());
-	commandList_->SetGraphicsRootDescriptorTable(2, obj->GetTextureSrvHandleGPU());
-	commandList_->SetGraphicsRootConstantBufferView(3, camera->GetCameraResource()->GetGPUVirtualAddress());
-	commandList_->SetGraphicsRootConstantBufferView(4, directionalLight_->GetDirectinalLightResource()->GetGPUVirtualAddress());
-	commandList_->SetGraphicsRootConstantBufferView(5, pointLight_->GetDirectinalLightResource()->GetGPUVirtualAddress());
-	commandList_->SetGraphicsRootConstantBufferView(6, spotLight_->GetDirectinalLightResource()->GetGPUVirtualAddress());
-	commandList_->SetGraphicsRootDescriptorTable(7, environmentTextureSrvHandleGPU_);
+
+	SetCBV(obj->GetShader(), obj->GetBlend(), "gMaterial", obj->GetMartial()->GetMaterialResource()->GetGPUVirtualAddress());
+	SetCBV(obj->GetShader(), obj->GetBlend(), "gTransformationMatrix", obj->GetWvpDataResource()->GetGPUVirtualAddress());
+	SetTable(obj->GetShader(), obj->GetBlend(), "gTexture", obj->GetTextureSrvHandleGPU());
+	SetCBV(obj->GetShader(), obj->GetBlend(), "gCamera", camera->GetCameraResource()->GetGPUVirtualAddress());
+	SetCBV(obj->GetShader(), obj->GetBlend(), "gDirectionalLight", directionalLight_->GetDirectinalLightResource()->GetGPUVirtualAddress());
+	SetCBV(obj->GetShader(), obj->GetBlend(), "gPointLight", pointLight_->GetDirectinalLightResource()->GetGPUVirtualAddress());
+	SetCBV(obj->GetShader(), obj->GetBlend(), "gSpotLight", spotLight_->GetDirectinalLightResource()->GetGPUVirtualAddress());
+	SetTable(obj->GetShader(), obj->GetBlend(), "gEnvironmentTexture", environmentTextureSrvHandleGPU_);
 
 	commandList_->DrawIndexedInstanced(UINT(mesh.indexBufferView_.SizeInBytes / sizeof(uint32_t)), 1, 0, 0, 0);
 
@@ -86,14 +100,14 @@ void Draw::DrawAnimation(CharacterAnimator* obj)
 
 
 	// ルートをアニメーション用レイアウトに合わせて設定
-	commandList_->SetGraphicsRootConstantBufferView(0, obj->GetMartial()->GetMaterialResource()->GetGPUVirtualAddress()); // material (pixel b0)
-	commandList_->SetGraphicsRootConstantBufferView(1, obj->GetWvpDataResource()->GetGPUVirtualAddress()); // wvp (vertex b0)
-	commandList_->SetGraphicsRootDescriptorTable(2, obj->GetPaletteSrvHandleGPU()); // matrix palette SRV (t0)
-	commandList_->SetGraphicsRootDescriptorTable(3, obj->GetTextureSrvHandleGPU()); // texture SRV (t1)
-	commandList_->SetGraphicsRootConstantBufferView(4, camera->GetCameraResource()->GetGPUVirtualAddress());
-	commandList_->SetGraphicsRootConstantBufferView(5, directionalLight_->GetDirectinalLightResource()->GetGPUVirtualAddress());
-	commandList_->SetGraphicsRootConstantBufferView(6, pointLight_->GetDirectinalLightResource()->GetGPUVirtualAddress());
-	commandList_->SetGraphicsRootConstantBufferView(7, spotLight_->GetDirectinalLightResource()->GetGPUVirtualAddress());
+	SetCBV(obj->GetShader(), obj->GetBlend(), "gMaterial", obj->GetMartial()->GetMaterialResource()->GetGPUVirtualAddress()); // material (pixel b0)
+	SetCBV(obj->GetShader(), obj->GetBlend(), "gTransformationMatrix", obj->GetWvpDataResource()->GetGPUVirtualAddress()); // wvp (vertex b0)
+	SetTable(obj->GetShader(), obj->GetBlend(), "gMatrixPalette", obj->GetPaletteSrvHandleGPU()); // matrix palette SRV (t0)
+	SetTable(obj->GetShader(), obj->GetBlend(), "gTexture", obj->GetTextureSrvHandleGPU()); // texture SRV (t1)
+	SetCBV(obj->GetShader(), obj->GetBlend(), "gCamera", camera->GetCameraResource()->GetGPUVirtualAddress());
+	SetCBV(obj->GetShader(), obj->GetBlend(), "gDirectionalLight", directionalLight_->GetDirectinalLightResource()->GetGPUVirtualAddress());
+	SetCBV(obj->GetShader(), obj->GetBlend(), "gPointLight", pointLight_->GetDirectinalLightResource()->GetGPUVirtualAddress());
+	SetCBV(obj->GetShader(), obj->GetBlend(), "gSpotLight", spotLight_->GetDirectinalLightResource()->GetGPUVirtualAddress());
 
 	commandList_->DrawIndexedInstanced(UINT(mesh.indexBufferView_.SizeInBytes / sizeof(uint32_t)), 1, 0, 0, 0);
 }
@@ -108,14 +122,14 @@ void Draw::DrawModel(Model* model)
 
 	//objectの描画
 	commandList_->IASetVertexBuffers(0, 1, &mesh.vertexBufferView);  // アドレスを渡す
-	commandList_->SetGraphicsRootConstantBufferView(0, model->GetMartial()->GetMaterialResource()->GetGPUVirtualAddress());
-	commandList_->SetGraphicsRootConstantBufferView(1, model->GetWvpDataResource()->GetGPUVirtualAddress());
-	commandList_->SetGraphicsRootDescriptorTable(2, model->GetTextureSrvHandleGPU());
-	commandList_->SetGraphicsRootConstantBufferView(3, camera->GetCameraResource()->GetGPUVirtualAddress());
-	commandList_->SetGraphicsRootConstantBufferView(4, directionalLight_->GetDirectinalLightResource()->GetGPUVirtualAddress());
-	commandList_->SetGraphicsRootConstantBufferView(5, pointLight_->GetDirectinalLightResource()->GetGPUVirtualAddress());
-	commandList_->SetGraphicsRootConstantBufferView(6, spotLight_->GetDirectinalLightResource()->GetGPUVirtualAddress());
-	commandList_->SetGraphicsRootDescriptorTable(7, environmentTextureSrvHandleGPU_);
+	SetCBV(model->GetShader(), model->GetBlend(), "gMaterial", model->GetMartial()->GetMaterialResource()->GetGPUVirtualAddress());
+	SetCBV(model->GetShader(), model->GetBlend(), "gTransformationMatrix", model->GetWvpDataResource()->GetGPUVirtualAddress());
+	SetTable(model->GetShader(), model->GetBlend(), "gTexture", model->GetTextureSrvHandleGPU());
+	SetCBV(model->GetShader(), model->GetBlend(), "gCamera", camera->GetCameraResource()->GetGPUVirtualAddress());
+	SetCBV(model->GetShader(), model->GetBlend(), "gDirectionalLight", directionalLight_->GetDirectinalLightResource()->GetGPUVirtualAddress());
+	SetCBV(model->GetShader(), model->GetBlend(), "gPointLight", pointLight_->GetDirectinalLightResource()->GetGPUVirtualAddress());
+	SetCBV(model->GetShader(), model->GetBlend(), "gSpotLight", spotLight_->GetDirectinalLightResource()->GetGPUVirtualAddress());
+	SetTable(model->GetShader(), model->GetBlend(), "gEnvironmentTexture", environmentTextureSrvHandleGPU_);
 
 	commandList_->DrawInstanced(UINT(mesh.vertexSize), 1, 0, 0);
 }
@@ -131,9 +145,9 @@ void Draw::DrawParticle(EffectDefinition* particle)
 	preDraw(particle->GetShader(), particle->GetBlend());
 
 	commandList_->IASetVertexBuffers(0, 1, particle->GetVertexBufferView());//VBVを設定
-	commandList_->SetGraphicsRootConstantBufferView(0, particle->GetMartial()->GetMaterialResource()->GetGPUVirtualAddress());
-	commandList_->SetGraphicsRootDescriptorTable(1, particle->GetInstancingSrvHandleGPU());
-	commandList_->SetGraphicsRootDescriptorTable(2, particle->GetTextureSrvHandleGPU());
+	SetCBV(particle->GetShader(), particle->GetBlend(), "gMaterial", particle->GetMartial()->GetMaterialResource()->GetGPUVirtualAddress());
+	SetTable(particle->GetShader(), particle->GetBlend(), "gParticle", particle->GetInstancingSrvHandleGPU());
+	SetTable(particle->GetShader(), particle->GetBlend(), "gTexture", particle->GetTextureSrvHandleGPU());
 	commandList_->DrawInstanced(6, instanceCount, 0, 0);
 
 }
@@ -141,18 +155,17 @@ void Draw::DrawParticle(EffectDefinition* particle)
 void Draw::DrawSprite(Sprite* sprite)
 {
 	preDraw(sprite->GetShader(), sprite->GetBlend());
-	commandList_->SetGraphicsRootConstantBufferView(3, directionalLight_->GetDirectinalLightResource()->GetGPUVirtualAddress());
 
 	commandList_->IASetIndexBuffer(sprite->GetIndexBufferView());//IBVを設定
 	commandList_->IASetVertexBuffers(0, 1, sprite->GetVertexBufferView());//VBVを設定
-	commandList_->SetGraphicsRootConstantBufferView(0, sprite->GetMartial()->GetMaterialResource()->GetGPUVirtualAddress());
-	commandList_->SetGraphicsRootConstantBufferView(1, sprite->GetVertexResource()->GetGPUVirtualAddress());
-	commandList_->SetGraphicsRootDescriptorTable(2, sprite->GetTextureSrvHandleGPU());
-	commandList_->SetGraphicsRootConstantBufferView(3, camera->GetCameraResource()->GetGPUVirtualAddress());
-	commandList_->SetGraphicsRootConstantBufferView(4, directionalLight_->GetDirectinalLightResource()->GetGPUVirtualAddress());
-	commandList_->SetGraphicsRootConstantBufferView(5, pointLight_->GetDirectinalLightResource()->GetGPUVirtualAddress());
-	commandList_->SetGraphicsRootConstantBufferView(6, spotLight_->GetDirectinalLightResource()->GetGPUVirtualAddress());
-	commandList_->SetGraphicsRootDescriptorTable(7, environmentTextureSrvHandleGPU_);
+	SetCBV(sprite->GetShader(), sprite->GetBlend(), "gMaterial", sprite->GetMartial()->GetMaterialResource()->GetGPUVirtualAddress());
+	SetCBV(sprite->GetShader(), sprite->GetBlend(), "gTransformationMatrix", sprite->GetVertexResource()->GetGPUVirtualAddress());
+	SetTable(sprite->GetShader(), sprite->GetBlend(), "gTexture", sprite->GetTextureSrvHandleGPU());
+	SetCBV(sprite->GetShader(), sprite->GetBlend(), "gCamera", camera->GetCameraResource()->GetGPUVirtualAddress());
+	SetCBV(sprite->GetShader(), sprite->GetBlend(), "gDirectionalLight", directionalLight_->GetDirectinalLightResource()->GetGPUVirtualAddress());
+	SetCBV(sprite->GetShader(), sprite->GetBlend(), "gPointLight", pointLight_->GetDirectinalLightResource()->GetGPUVirtualAddress());
+	SetCBV(sprite->GetShader(), sprite->GetBlend(), "gSpotLight", spotLight_->GetDirectinalLightResource()->GetGPUVirtualAddress());
+	SetTable(sprite->GetShader(), sprite->GetBlend(), "gEnvironmentTexture", environmentTextureSrvHandleGPU_);
 
 	commandList_->DrawIndexedInstanced(6, 1, 0, 0, 0);
 }
@@ -165,14 +178,14 @@ void Draw::DrawSphere(Sphere* sphere)
 
 	//commandList_->IASetIndexBuffer(sphere->GetIndexBufferView());//IBVを設定
 	commandList_->IASetVertexBuffers(0, 1, sphere->GetVertexBufferView());//VBVを設定
-	commandList_->SetGraphicsRootConstantBufferView(0, sphere->GetMartial()->GetMaterialResource()->GetGPUVirtualAddress());
-	commandList_->SetGraphicsRootConstantBufferView(1, sphere->GetWvpDataResource()->GetGPUVirtualAddress());
-	commandList_->SetGraphicsRootDescriptorTable(2, sphere->GetTextureSrvHandleGPU());
-	commandList_->SetGraphicsRootConstantBufferView(3, camera->GetCameraResource()->GetGPUVirtualAddress());
-	commandList_->SetGraphicsRootConstantBufferView(4, directionalLight_->GetDirectinalLightResource()->GetGPUVirtualAddress());
-	commandList_->SetGraphicsRootConstantBufferView(5, pointLight_->GetDirectinalLightResource()->GetGPUVirtualAddress());
-	commandList_->SetGraphicsRootConstantBufferView(6, spotLight_->GetDirectinalLightResource()->GetGPUVirtualAddress());
-	commandList_->SetGraphicsRootDescriptorTable(7, environmentTextureSrvHandleGPU_);
+	SetCBV(sphere->GetShader(), sphere->GetBlend(), "gMaterial", sphere->GetMartial()->GetMaterialResource()->GetGPUVirtualAddress());
+	SetCBV(sphere->GetShader(), sphere->GetBlend(), "gTransformationMatrix", sphere->GetWvpDataResource()->GetGPUVirtualAddress());
+	SetTable(sphere->GetShader(), sphere->GetBlend(), "gTexture", sphere->GetTextureSrvHandleGPU());
+	SetCBV(sphere->GetShader(), sphere->GetBlend(), "gCamera", camera->GetCameraResource()->GetGPUVirtualAddress());
+	SetCBV(sphere->GetShader(), sphere->GetBlend(), "gDirectionalLight", directionalLight_->GetDirectinalLightResource()->GetGPUVirtualAddress());
+	SetCBV(sphere->GetShader(), sphere->GetBlend(), "gPointLight", pointLight_->GetDirectinalLightResource()->GetGPUVirtualAddress());
+	SetCBV(sphere->GetShader(), sphere->GetBlend(), "gSpotLight", spotLight_->GetDirectinalLightResource()->GetGPUVirtualAddress());
+	SetTable(sphere->GetShader(), sphere->GetBlend(), "gEnvironmentTexture", environmentTextureSrvHandleGPU_);
 
 	commandList_->DrawInstanced(static_cast<UINT>(pow(sphere->GetSubdivision(), 2) * 6), 1, 0, 0);
 }
@@ -182,14 +195,14 @@ void Draw::DrawTriangle(Triangle* triangle)
 	preDraw(triangle->GetShader(), triangle->GetBlend());
 
 	commandList_->IASetVertexBuffers(0, 1, triangle->GetVertexBufferView());//VBVを設定
-	commandList_->SetGraphicsRootConstantBufferView(0, triangle->GetMartial()->GetMaterialResource()->GetGPUVirtualAddress());
-	commandList_->SetGraphicsRootConstantBufferView(1, triangle->GetVertexResource()->GetGPUVirtualAddress());
-	commandList_->SetGraphicsRootDescriptorTable(2, triangle->GetTextureSrvHandleGPU());
-	commandList_->SetGraphicsRootConstantBufferView(3, camera->GetCameraResource()->GetGPUVirtualAddress());
-	commandList_->SetGraphicsRootConstantBufferView(4, directionalLight_->GetDirectinalLightResource()->GetGPUVirtualAddress());
-	commandList_->SetGraphicsRootConstantBufferView(5, pointLight_->GetDirectinalLightResource()->GetGPUVirtualAddress());
-	commandList_->SetGraphicsRootConstantBufferView(6, spotLight_->GetDirectinalLightResource()->GetGPUVirtualAddress());
-	commandList_->SetGraphicsRootDescriptorTable(7, environmentTextureSrvHandleGPU_);
+	SetCBV(triangle->GetShader(), triangle->GetBlend(), "gMaterial", triangle->GetMartial()->GetMaterialResource()->GetGPUVirtualAddress());
+	SetCBV(triangle->GetShader(), triangle->GetBlend(), "gTransformationMatrix", triangle->GetVertexResource()->GetGPUVirtualAddress());
+	SetTable(triangle->GetShader(), triangle->GetBlend(), "gTexture", triangle->GetTextureSrvHandleGPU());
+	SetCBV(triangle->GetShader(), triangle->GetBlend(), "gCamera", camera->GetCameraResource()->GetGPUVirtualAddress());
+	SetCBV(triangle->GetShader(), triangle->GetBlend(), "gDirectionalLight", directionalLight_->GetDirectinalLightResource()->GetGPUVirtualAddress());
+	SetCBV(triangle->GetShader(), triangle->GetBlend(), "gPointLight", pointLight_->GetDirectinalLightResource()->GetGPUVirtualAddress());
+	SetCBV(triangle->GetShader(), triangle->GetBlend(), "gSpotLight", spotLight_->GetDirectinalLightResource()->GetGPUVirtualAddress());
+	SetTable(triangle->GetShader(), triangle->GetBlend(), "gEnvironmentTexture", environmentTextureSrvHandleGPU_);
 
 
 	commandList_->DrawInstanced(3, 1, 0, 0);
@@ -200,14 +213,16 @@ void Draw::DrawTriangle(Triangle* triangle)
 void Draw::DrawLine(Line* line)
 {
 	commandList_->IASetVertexBuffers(0, 1, line->GetVertexBufferView());//VBVを設定
-	commandList_->SetGraphicsRootConstantBufferView(0, line->GetVertexResource()->GetGPUVirtualAddress());
+	// シェーダー名を文字列ID（"Line"）で直接指定してリソースをバインドします
+	SetCBV("Line", kBlendModeNormal, "gTransformationMatrix", line->GetVertexResource()->GetGPUVirtualAddress());
 	commandList_->DrawInstanced(2, 1, 0, 0);
 }
 
 void Draw::DrawGrid(Grid* grid)
 {
 	commandList_->IASetVertexBuffers(0, 1, grid->GetVertexBufferView());//VBVを設定
-	commandList_->SetGraphicsRootConstantBufferView(0, grid->GetVertexResource()->GetGPUVirtualAddress());
+	// Gridも同様に "Line" シェーダーを使用するように指定しています
+	SetCBV("Line", kBlendModeNormal, "gTransformationMatrix", grid->GetVertexResource()->GetGPUVirtualAddress()); // Assuming Grid uses LineShader
 	commandList_->DrawInstanced(grid->GetSubdivision() * 4, 1, 0, 0);
 }
 

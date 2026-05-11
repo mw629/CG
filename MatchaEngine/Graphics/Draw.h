@@ -32,7 +32,7 @@ public:
 	static void SetCamera(Camera* setcamera);
 	static void SetEnvironmentTexture(int textureHandel);
 
-	static void preDraw(ShaderName shader, BlendMode blend);
+	static void preDraw(const std::string& shader, BlendMode blend);
 
 	static void DrawObj(ObjectBase *obj);
 

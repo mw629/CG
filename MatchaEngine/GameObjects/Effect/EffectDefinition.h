@@ -84,11 +84,11 @@ public:
 	std::list<EffectDefinitionData> GetEffectDefinitionData() { return effectDefinitionData_; }
 
 private:
-	ShaderName shader_ = ShaderName::ParticleShader;
+	std::string shader_ = "Particle";
 	BlendMode blend_ = BlendMode::kBlendModeAdd;
 public:
 	void SetBlend(BlendMode blend) { blend_ = blend; }
-	ShaderName GetShader() { return shader_; }
+	std::string GetShader() { return shader_; }
 	BlendMode GetBlend() { return blend_; }
 
 

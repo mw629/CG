@@ -1,0 +1,55 @@
+43:	commandList_->SetGraphicsRootSignature(graphicsPipelineState_->GetRootSignature(shader, blend)->GetRootSignature());
+58:	commandList_->SetGraphicsRootConstantBufferView(0, obj->GetMartial()->GetMaterialResource()->GetGPUVirtualAddress());
+59:	commandList_->SetGraphicsRootConstantBufferView(1, obj->GetWvpDataResource()->GetGPUVirtualAddress());
+60:	commandList_->SetGraphicsRootDescriptorTable(2, obj->GetTextureSrvHandleGPU());
+61:	commandList_->SetGraphicsRootConstantBufferView(3, camera->GetCameraResource()->GetGPUVirtualAddress());
+62:	commandList_->SetGraphicsRootConstantBufferView(4, directionalLight_->GetDirectinalLightResource()->GetGPUVirtualAddress());
+63:	commandList_->SetGraphicsRootConstantBufferView(5, pointLight_->GetDirectinalLightResource()->GetGPUVirtualAddress());
+64:	commandList_->SetGraphicsRootConstantBufferView(6, spotLight_->GetDirectinalLightResource()->GetGPUVirtualAddress());
+65:	commandList_->SetGraphicsRootDescriptorTable(7, environmentTextureSrvHandleGPU_);
+89:	commandList_->SetGraphicsRootConstantBufferView(0, obj->GetMartial()->GetMaterialResource()->GetGPUVirtualAddress()); // material (pixel b0)
+90:	commandList_->SetGraphicsRootConstantBufferView(1, obj->GetWvpDataResource()->GetGPUVirtualAddress()); // wvp (vertex b0)
+91:	commandList_->SetGraphicsRootDescriptorTable(2, obj->GetPaletteSrvHandleGPU()); // matrix palette SRV (t0)
+92:	commandList_->SetGraphicsRootDescriptorTable(3, obj->GetTextureSrvHandleGPU()); // texture SRV (t1)
+93:	commandList_->SetGraphicsRootConstantBufferView(4, camera->GetCameraResource()->GetGPUVirtualAddress());
+94:	commandList_->SetGraphicsRootConstantBufferView(5, directionalLight_->GetDirectinalLightResource()->GetGPUVirtualAddress());
+95:	commandList_->SetGraphicsRootConstantBufferView(6, pointLight_->GetDirectinalLightResource()->GetGPUVirtualAddress());
+96:	commandList_->SetGraphicsRootConstantBufferView(7, spotLight_->GetDirectinalLightResource()->GetGPUVirtualAddress());
+111:	commandList_->SetGraphicsRootConstantBufferView(0, model->GetMartial()->GetMaterialResource()->GetGPUVirtualAddress());
+112:	commandList_->SetGraphicsRootConstantBufferView(1, model->GetWvpDataResource()->GetGPUVirtualAddress());
+113:	commandList_->SetGraphicsRootDescriptorTable(2, model->GetTextureSrvHandleGPU());
+114:	commandList_->SetGraphicsRootConstantBufferView(3, camera->GetCameraResource()->GetGPUVirtualAddress());
+115:	commandList_->SetGraphicsRootConstantBufferView(4, directionalLight_->GetDirectinalLightResource()->GetGPUVirtualAddress());
+116:	commandList_->SetGraphicsRootConstantBufferView(5, pointLight_->GetDirectinalLightResource()->GetGPUVirtualAddress());
+117:	commandList_->SetGraphicsRootConstantBufferView(6, spotLight_->GetDirectinalLightResource()->GetGPUVirtualAddress());
+118:	commandList_->SetGraphicsRootDescriptorTable(7, environmentTextureSrvHandleGPU_);
+134:	commandList_->SetGraphicsRootConstantBufferView(0, particle->GetMartial()->GetMaterialResource()->GetGPUVirtualAddress());
+135:	commandList_->SetGraphicsRootDescriptorTable(1, particle->GetInstancingSrvHandleGPU());
+136:	commandList_->SetGraphicsRootDescriptorTable(2, particle->GetTextureSrvHandleGPU());
+144:	commandList_->SetGraphicsRootConstantBufferView(3, directionalLight_->GetDirectinalLightResource()->GetGPUVirtualAddress());
+148:	commandList_->SetGraphicsRootConstantBufferView(0, sprite->GetMartial()->GetMaterialResource()->GetGPUVirtualAddress());
+149:	commandList_->SetGraphicsRootConstantBufferView(1, sprite->GetVertexResource()->GetGPUVirtualAddress());
+150:	commandList_->SetGraphicsRootDescriptorTable(2, sprite->GetTextureSrvHandleGPU());
+151:	commandList_->SetGraphicsRootConstantBufferView(3, camera->GetCameraResource()->GetGPUVirtualAddress());
+152:	commandList_->SetGraphicsRootConstantBufferView(4, directionalLight_->GetDirectinalLightResource()->GetGPUVirtualAddress());
+153:	commandList_->SetGraphicsRootConstantBufferView(5, pointLight_->GetDirectinalLightResource()->GetGPUVirtualAddress());
+154:	commandList_->SetGraphicsRootConstantBufferView(6, spotLight_->GetDirectinalLightResource()->GetGPUVirtualAddress());
+155:	commandList_->SetGraphicsRootDescriptorTable(7, environmentTextureSrvHandleGPU_);
+168:	commandList_->SetGraphicsRootConstantBufferView(0, sphere->GetMartial()->GetMaterialResource()->GetGPUVirtualAddress());
+169:	commandList_->SetGraphicsRootConstantBufferView(1, sphere->GetWvpDataResource()->GetGPUVirtualAddress());
+170:	commandList_->SetGraphicsRootDescriptorTable(2, sphere->GetTextureSrvHandleGPU());
+171:	commandList_->SetGraphicsRootConstantBufferView(3, camera->GetCameraResource()->GetGPUVirtualAddress());
+172:	commandList_->SetGraphicsRootConstantBufferView(4, directionalLight_->GetDirectinalLightResource()->GetGPUVirtualAddress());
+173:	commandList_->SetGraphicsRootConstantBufferView(5, pointLight_->GetDirectinalLightResource()->GetGPUVirtualAddress());
+174:	commandList_->SetGraphicsRootConstantBufferView(6, spotLight_->GetDirectinalLightResource()->GetGPUVirtualAddress());
+175:	commandList_->SetGraphicsRootDescriptorTable(7, environmentTextureSrvHandleGPU_);
+185:	commandList_->SetGraphicsRootConstantBufferView(0, triangle->GetMartial()->GetMaterialResource()->GetGPUVirtualAddress());
+186:	commandList_->SetGraphicsRootConstantBufferView(1, triangle->GetVertexResource()->GetGPUVirtualAddress());
+187:	commandList_->SetGraphicsRootDescriptorTable(2, triangle->GetTextureSrvHandleGPU());
+188:	commandList_->SetGraphicsRootConstantBufferView(3, camera->GetCameraResource()->GetGPUVirtualAddress());
+189:	commandList_->SetGraphicsRootConstantBufferView(4, directionalLight_->GetDirectinalLightResource()->GetGPUVirtualAddress());
+190:	commandList_->SetGraphicsRootConstantBufferView(5, pointLight_->GetDirectinalLightResource()->GetGPUVirtualAddress());
+191:	commandList_->SetGraphicsRootConstantBufferView(6, spotLight_->GetDirectinalLightResource()->GetGPUVirtualAddress());
+192:	commandList_->SetGraphicsRootDescriptorTable(7, environmentTextureSrvHandleGPU_);
+203:	commandList_->SetGraphicsRootConstantBufferView(0, line->GetVertexResource()->GetGPUVirtualAddress());
+210:	commandList_->SetGraphicsRootConstantBufferView(0, grid->GetVertexResource()->GetGPUVirtualAddress());

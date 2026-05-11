@@ -1,11 +1,11 @@
 #include "InputLayout.h"
 
-void InputLayout::CreateInputLayout(ShaderName shader)
+
+void InputLayout::CreateInputLayout(const std::string& shader)
 {
-	switch (shader)
+	// 以前の列挙型 switch 文から、文字列比較による判定に変更しました
+	if (shader == "Object3d" || shader == "SkyBox")
 	{
-	case ObjectShader:
-	case SkyBoxShader:
 		inputElementDescs_[0].SemanticName = "POSITION";
 		inputElementDescs_[0].SemanticIndex = 0;
 		inputElementDescs_[0].Format = DXGI_FORMAT_R32G32B32A32_FLOAT;
@@ -23,9 +23,9 @@ void InputLayout::CreateInputLayout(ShaderName shader)
 
 		inputLayoutDesc_.pInputElementDescs = inputElementDescs_;
 		inputLayoutDesc_.NumElements = 3;
-		break;
-	case AnimationObj:
-
+	}
+	else if (shader == "SkinningObject3d")
+	{
 		inputElementDescs_[0].SemanticName = "POSITION";
 		inputElementDescs_[0].SemanticIndex = 0;
 		inputElementDescs_[0].Format = DXGI_FORMAT_R32G32B32A32_FLOAT;
@@ -55,9 +55,9 @@ void InputLayout::CreateInputLayout(ShaderName shader)
 
 		inputLayoutDesc_.pInputElementDescs = inputElementDescs_;
 		inputLayoutDesc_.NumElements = 5;
-
-		break;
-	case ParticleShader:
+	}
+	else if (shader == "Particle")
+	{
 		inputElementDescs_[0].SemanticName = "POSITION";
 		inputElementDescs_[0].SemanticIndex = 0;
 		inputElementDescs_[0].Format = DXGI_FORMAT_R32G32B32A32_FLOAT;
@@ -75,8 +75,9 @@ void InputLayout::CreateInputLayout(ShaderName shader)
 
 		inputLayoutDesc_.pInputElementDescs = inputElementDescs_;
 		inputLayoutDesc_.NumElements = 3;
-		break;
-	case LineShader:
+	}
+	else if (shader == "Line")
+	{
 		inputElementDescs_[0].SemanticName = "POSITION";
 		inputElementDescs_[0].SemanticIndex = 0;
 		inputElementDescs_[0].Format = DXGI_FORMAT_R32G32B32_FLOAT;
@@ -89,10 +90,5 @@ void InputLayout::CreateInputLayout(ShaderName shader)
 
 		inputLayoutDesc_.pInputElementDescs = inputElementDescs_;
 		inputLayoutDesc_.NumElements = 2;
-		break;
-	case ShaderNum:
-		break;
-	default:
-		break;
 	}
 }

@@ -36,7 +36,7 @@ void CharacterAnimator::Initialize(ModelData modelData, const std::string& direc
 	material_->CreateMartial();
 	CreateObject();
 
-	SetShader(AnimationObj);
+	SetShader("SkinningObject3d");
 
 }
 

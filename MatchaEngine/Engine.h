@@ -59,7 +59,6 @@
 #include "InputLayout.h"
 #include "RasterizerState.h"
 #include "RootSignature.h"
-#include "RootParameter.h"
 #include "Sampler.h"
 #include "ShaderCompile.h"
 

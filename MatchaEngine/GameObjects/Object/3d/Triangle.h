@@ -50,11 +50,11 @@ public:
 	D3D12_GPU_DESCRIPTOR_HANDLE GetTextureSrvHandleGPU()const { return textureSrvHandleGPU_; }
 
 private:
-	ShaderName shader_ = ShaderName::ObjectShader;
+	std::string shader_ = "Object3d";
 	BlendMode blend_ = BlendMode::kBlendModeNone;
 public:
 	BlendMode SetBlend(BlendMode blend) { blend_ = blend; }
-	ShaderName GetShader() { return shader_; }
+	std::string GetShader() { return shader_; }
 	BlendMode GetBlend() { return blend_; }
 
 

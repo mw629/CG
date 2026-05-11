@@ -75,14 +75,14 @@ public:
 	virtual int GetIndexSize() { return indexSize_; }
 
 private:
-	ShaderName shader_ = ShaderName::ObjectShader;
+	std::string shader_ = "Object3d";
 	BlendMode blend_ = BlendMode::kBlendModeNone;
 public:
 
-	void SetShader(ShaderName shader) { shader_ = shader; }
+	void SetShader(const std::string& shader) { shader_ = shader; }
 	void SetBlend(BlendMode blend) { blend_ = blend; }
 
-	ShaderName GetShader() { return shader_; }
+	std::string GetShader() { return shader_; }
 	BlendMode GetBlend() { return blend_; }
 
 
