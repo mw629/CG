@@ -1,7 +1,5 @@
 #include "Player.h"
 
-#include "StageSettings.h"
-
 Player::Player()
 {
 }
@@ -10,8 +8,10 @@ Player::~Player()
 {
 }
 
-void Player::Initialize()
+void Player::Initialize(ModelData modelData)
 {
+	model_.get()->Initialize(modelData);
+	model_.get()->SetTransform(transform_);
 }
 
 void Player::Update(Matrix4x4 view)

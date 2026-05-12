@@ -34,7 +34,7 @@ public:
 	Player();
 	~Player();
 
-	void Initialize();
+	void Initialize(ModelData modelData);
 
 	void Update(Matrix4x4 view);
 
