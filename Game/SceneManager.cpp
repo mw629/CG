@@ -6,7 +6,7 @@
 SceneManager::SceneManager()
 {
 	// 最初のシーンをTestSceneに設定
-	scene_ = std::make_unique<GameScene>();
+	scene_ = std::make_unique<TestScene>();
 	Initialize();
 }
 

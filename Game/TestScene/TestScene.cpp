@@ -126,11 +126,11 @@ void TestScene::Draw() {
 	//Draw::DrawObj(ring_.get());
 	Draw::DrawObj(cylinder_.get());
 
-	//Draw::DrawObj(skyBox_.get());
-	//Draw::DrawObj(model_.get());
-	//Draw::DrawObj(floor.get());
-	//Draw::DrawObj(nodeAnimation_.get());
-	//Draw::DrawAnimation(animation_.get());
+	Draw::DrawObj(skyBox_.get());
+	Draw::DrawObj(model_.get());
+	Draw::DrawObj(floor.get());
+	Draw::DrawObj(nodeAnimation_.get());
+	Draw::DrawAnimation(animation_.get());
 
 	//Draw::DrawObj(sphere_.get());
 	for (int i = 0, n = static_cast<int>(particle_.size()); i < n; ++i) {
