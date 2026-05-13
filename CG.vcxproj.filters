@@ -268,7 +268,7 @@
     <FxCompile Include="resources\Shader\SkinningObject3d.PS.hlsl" />
     <FxCompile Include="resources\Shader\SkinningObject3d.VS.hlsl" />
     <FxCompile Include="resources\Shader\SkyBox.VS.hlsl" />
-    <FxCompile Include="resources\Shader\CopyImage.vs.hlsl" />
+    <FxCompile Include="resources\Shader\CopyImage.VS.hlsl" />
     <FxCompile Include="resources\Shader\CopyImage.PS.hlsl" />
   </ItemGroup>
   <ItemGroup>
