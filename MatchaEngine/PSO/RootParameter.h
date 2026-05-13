@@ -22,5 +22,7 @@ public:
 
 	void CreateParticleParameter(D3D12_ROOT_SIGNATURE_DESC& descriptionRootSignature);
 
+	void CreateCopyRootParameter(D3D12_ROOT_SIGNATURE_DESC& descriptionRootSignature);
+
 };
 

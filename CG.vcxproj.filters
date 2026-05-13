@@ -258,6 +258,9 @@
     <ClCompile Include="MatchaEngine\GameObjects\Object\3d\Cylinder.cpp">
       <Filter>ソース ファイル</Filter>
     </ClCompile>
+    <ClCompile Include="Game\GameScene\Entity\Player.cpp">
+      <Filter>ソース ファイル</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <FxCompile Include="resources\Shader\Object3d.VS.hlsl">
@@ -277,6 +280,8 @@
     <FxCompile Include="resources\Shader\SkinningObject3d.PS.hlsl" />
     <FxCompile Include="resources\Shader\SkinningObject3d.VS.hlsl" />
     <FxCompile Include="resources\Shader\SkyBox.VS.hlsl" />
+    <FxCompile Include="resources\Shader\CopyImage.VS.hlsl" />
+    <FxCompile Include="resources\Shader\CopyImage.PS.hlsl" />
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="externals\imgui\imconfig.h">
@@ -504,6 +509,9 @@
     <ClInclude Include="MatchaEngine\GameObjects\Object\3d\Cylinder.h">
       <Filter>ヘッダー ファイル</Filter>
     </ClInclude>
+    <ClInclude Include="Game\GameScene\Entity\Player.h">
+      <Filter>ヘッダー ファイル</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <Text Include="externals\imgui\LICENSE.txt">
@@ -522,5 +530,6 @@
     <None Include="resources\Shader\SkyBox.PS.hlsl" />
     <None Include="resources\Shader\SkyBox.hlsli" />
     <None Include=".github\copilot-instructions.md" />
+    <None Include="resources\Shader\CopyImage.hlsli" />
   </ItemGroup>
 </Project>
