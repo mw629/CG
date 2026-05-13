@@ -277,6 +277,8 @@
     <FxCompile Include="resources\Shader\SkinningObject3d.PS.hlsl" />
     <FxCompile Include="resources\Shader\SkinningObject3d.VS.hlsl" />
     <FxCompile Include="resources\Shader\SkyBox.VS.hlsl" />
+    <FxCompile Include="resources\Shader\CopyImage.VS.hlsl" />
+    <FxCompile Include="resources\Shader\CopyImage.PS.hlsl" />
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="externals\imgui\imconfig.h">
@@ -522,5 +524,6 @@
     <None Include="resources\Shader\SkyBox.PS.hlsl" />
     <None Include="resources\Shader\SkyBox.hlsli" />
     <None Include=".github\copilot-instructions.md" />
+    <None Include="resources\Shader\CopyImage.hlsli" />
   </ItemGroup>
 </Project>

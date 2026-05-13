@@ -19,6 +19,7 @@ enum ShaderName {
 	LineShader,
 	SkyBoxShader,
 
+	CopyImageShader,
 	ShaderNum,
 };
 
@@ -31,6 +32,7 @@ static const char* ShaderNameToString(ShaderName name)
 	case ParticleShader: return "ParticleShader";
 	case LineShader: return "LineShader";
 	case SkyBoxShader: return "SkyBoxShader";
+	case CopyImageShader: return "CopyImageShader";
 	default: return "UnknownShader";
 	}
 }
