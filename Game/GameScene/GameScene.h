@@ -2,7 +2,6 @@
 #include <Engine.h>
 #include "Camera.h"
 #include "../IScene.h"
-#include "ParticleManager.h"
 #include <memory>
 #include <Player.h>
 

@@ -128,6 +128,16 @@ void ShaderCompile::CreateShaderCompile(ShaderName shaderName, std::ostream& os,
 			L"ps_6_0", dxcUtils, dxcCompiler, includeHandler);
 		assert(pixelShaderBlob_ != nullptr);
 		break;
+	case CopyImageShader:
+		//Shaderをコンパイルする
+		vertexShaderBlob_ = CompileShader(os, L"resources/Shader/CopyImage.VS.hlsl",
+			L"vs_6_0", dxcUtils, dxcCompiler, includeHandler);
+		assert(vertexShaderBlob_ != nullptr);
+
+		pixelShaderBlob_ = CompileShader(os, L"resources/Shader/CopyImage.PS.hlsl",
+			L"ps_6_0", dxcUtils, dxcCompiler, includeHandler);
+		assert(pixelShaderBlob_ != nullptr);
+		break;
 	default:
 		break;
 	}

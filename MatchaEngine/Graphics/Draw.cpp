@@ -120,10 +120,10 @@ void Draw::DrawModel(Model* model)
 	commandList_->DrawInstanced(UINT(mesh.vertexSize), 1, 0, 0);
 }
 
-void Draw::DrawParticle(Particle* particle)
+void Draw::DrawParticle(EffectDefinition* particle)
 {
 	// インスタンス数が0なら描画しない
-	const UINT instanceCount = static_cast<UINT>(particle->GetParticleNum());
+   const UINT instanceCount = static_cast<UINT>(particle->GetEffectDefinitionNum());
 	if (instanceCount == 0) {
 		return;
 	}
@@ -210,4 +210,12 @@ void Draw::DrawGrid(Grid* grid)
 	commandList_->SetGraphicsRootConstantBufferView(0, grid->GetVertexResource()->GetGPUVirtualAddress());
 	commandList_->DrawInstanced(grid->GetSubdivision() * 4, 1, 0, 0);
 }
+
+void Draw::DrawCopy(D3D12_GPU_DESCRIPTOR_HANDLE textureHandle)
+{
+	preDraw(CopyImageShader, BlendMode::kBlendModeNone);
+	commandList_->SetGraphicsRootDescriptorTable(0, textureHandle);
+	commandList_->DrawInstanced(3, 1, 0, 0);
+}
+
 

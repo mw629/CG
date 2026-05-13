@@ -22,6 +22,9 @@ void RootParameter::CreateRootParameter(D3D12_ROOT_SIGNATURE_DESC& descriptionRo
 	case LineShader:
 		CreateLineRootParameter(descriptionRootSignature);
 		break;
+	case CopyImageShader:
+		CreateCopyRootParameter(descriptionRootSignature);
+		break;
 	case ShaderNum:
 		break;
 	default:
@@ -183,6 +186,24 @@ void RootParameter::CreateParticleParameter(D3D12_ROOT_SIGNATURE_DESC& descripti
 	//descriptionRootSignature.pParameters = rootParameter;
 	//descriptionRootSignature.NumParameters = 3;
 
+}
+
+void RootParameter::CreateCopyRootParameter(D3D12_ROOT_SIGNATURE_DESC& descriptionRootSignature)
+{
+	descriptorRange_[0].BaseShaderRegister = 0;//0から始まる
+	descriptorRange_[0].NumDescriptors = 1;//1から始まる
+	descriptorRange_[0].RangeType = D3D12_DESCRIPTOR_RANGE_TYPE_SRV;//SRVを使う
+	descriptorRange_[0].OffsetInDescriptorsFromTableStart = D3D12_DESCRIPTOR_RANGE_OFFSET_APPEND;//Offsetを自動計算
+
+	// ルートパラメータ0: DescriptorTable (SRV)
+	rootParameter[0].ParameterType = D3D12_ROOT_PARAMETER_TYPE_DESCRIPTOR_TABLE;
+	rootParameter[0].ShaderVisibility = D3D12_SHADER_VISIBILITY_PIXEL; // PixelShaderから参照
+	rootParameter[0].DescriptorTable.pDescriptorRanges = &descriptorRange_[0];
+	rootParameter[0].DescriptorTable.NumDescriptorRanges = 1;
+
+
+	descriptionRootSignature.pParameters = rootParameter;//ルートパラメータ配列へのポインタ
+	descriptionRootSignature.NumParameters = 1;//配列の長さ
 }
 
 void RootParameter::CreateLineRootParameter(D3D12_ROOT_SIGNATURE_DESC& descriptionRootSignature)

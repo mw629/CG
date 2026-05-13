@@ -207,22 +207,19 @@
     <ClCompile Include="MatchaEngine\Resource\ModelManager.cpp">
       <Filter>ソース ファイル</Filter>
     </ClCompile>
-    <ClCompile Include="MatchaEngine\GameObjects\Particle.cpp">
+    <ClCompile Include="MatchaEngine\GameObjects\Effect\EffectDefinition.cpp">
       <Filter>ソース ファイル</Filter>
     </ClCompile>
     <ClCompile Include="Game\Direction\Fade.cpp">
       <Filter>ソース ファイル</Filter>
     </ClCompile>
-    <ClCompile Include="Shared\ParticleManager.cpp">
+    <ClCompile Include="MatchaEngine\GameObjects\Effect\Emitter.cpp">
       <Filter>ソース ファイル</Filter>
     </ClCompile>
     <ClCompile Include="MatchaEngine\GameObjects\Light\PointLight.cpp">
       <Filter>ソース ファイル</Filter>
     </ClCompile>
     <ClCompile Include="MatchaEngine\GameObjects\Light\SpotLight.cpp">
-      <Filter>ソース ファイル</Filter>
-    </ClCompile>
-    <ClCompile Include="MatchaEngine\GameObjects\Primitive.cpp">
       <Filter>ソース ファイル</Filter>
     </ClCompile>
     <ClCompile Include="MatchaEngine\GameObjects\Object\ObjectBase.cpp">
@@ -255,10 +252,10 @@
     <ClCompile Include="MatchaEngine\Graphics\RenderTexture.cpp">
       <Filter>ソース ファイル</Filter>
     </ClCompile>
-    <ClCompile Include="Game\GameScene\Entity\Player.cpp">
+    <ClCompile Include="MatchaEngine\GameObjects\Object\3d\Ring.cpp">
       <Filter>ソース ファイル</Filter>
     </ClCompile>
-    <ClCompile Include="Game\GameScene\Stage\StageSettings.cpp">
+    <ClCompile Include="MatchaEngine\GameObjects\Object\3d\Cylinder.cpp">
       <Filter>ソース ファイル</Filter>
     </ClCompile>
   </ItemGroup>
@@ -280,6 +277,8 @@
     <FxCompile Include="resources\Shader\SkinningObject3d.PS.hlsl" />
     <FxCompile Include="resources\Shader\SkinningObject3d.VS.hlsl" />
     <FxCompile Include="resources\Shader\SkyBox.VS.hlsl" />
+    <FxCompile Include="resources\Shader\CopyImage.VS.hlsl" />
+    <FxCompile Include="resources\Shader\CopyImage.PS.hlsl" />
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="externals\imgui\imconfig.h">
@@ -453,7 +452,7 @@
     <ClInclude Include="MatchaEngine\Resource\ModelManager.h">
       <Filter>ヘッダー ファイル</Filter>
     </ClInclude>
-    <ClInclude Include="MatchaEngine\GameObjects\Particle.h">
+    <ClInclude Include="MatchaEngine\GameObjects\Effect\EffectDefinition.h">
       <Filter>ヘッダー ファイル</Filter>
     </ClInclude>
     <ClInclude Include="Game\IScene.h">
@@ -462,16 +461,13 @@
     <ClInclude Include="Game\Direction\Fade.h">
       <Filter>ヘッダー ファイル</Filter>
     </ClInclude>
-    <ClInclude Include="Shared\ParticleManager.h">
+    <ClInclude Include="MatchaEngine\GameObjects\Effect\Emitter.h">
       <Filter>ヘッダー ファイル</Filter>
     </ClInclude>
     <ClInclude Include="MatchaEngine\GameObjects\Light\PointLight.h">
       <Filter>ヘッダー ファイル</Filter>
     </ClInclude>
     <ClInclude Include="MatchaEngine\GameObjects\Light\SpotLight.h">
-      <Filter>ヘッダー ファイル</Filter>
-    </ClInclude>
-    <ClInclude Include="MatchaEngine\GameObjects\Primitive.h">
       <Filter>ヘッダー ファイル</Filter>
     </ClInclude>
     <ClInclude Include="MatchaEngine\GameObjects\Object\ObjectBase.h">
@@ -504,10 +500,10 @@
     <ClInclude Include="MatchaEngine\Graphics\RenderTexture.h">
       <Filter>ヘッダー ファイル</Filter>
     </ClInclude>
-    <ClInclude Include="Game\GameScene\Entity\Player.h">
+    <ClInclude Include="MatchaEngine\GameObjects\Object\3d\Ring.h">
       <Filter>ヘッダー ファイル</Filter>
     </ClInclude>
-    <ClInclude Include="Game\GameScene\Stage\StageSettings.h">
+    <ClInclude Include="MatchaEngine\GameObjects\Object\3d\Cylinder.h">
       <Filter>ヘッダー ファイル</Filter>
     </ClInclude>
   </ItemGroup>
@@ -528,5 +524,6 @@
     <None Include="resources\Shader\SkyBox.PS.hlsl" />
     <None Include="resources\Shader\SkyBox.hlsli" />
     <None Include=".github\copilot-instructions.md" />
+    <None Include="resources\Shader\CopyImage.hlsli" />
   </ItemGroup>
 </Project>

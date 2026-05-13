@@ -49,6 +49,7 @@ void TestScene::Initialize() {
 	ModelData cubeModel = AssimpLoadObjFile("resources/AnimatedCube", "AnimatedCube.gltf");
 	nodeAnimation_.get()->Initialize(cubeModel, "resources/AnimatedCube", "AnimatedCube.gltf");
 
+	
 
 	int texture1 = texture_.get()->CreateTexture("resources/monsterBall.png");
 	sphere_.get()->Initialize(texture1);
@@ -64,19 +65,19 @@ void TestScene::Initialize() {
 	floor.get()->Initialize(modelData);
 	floor.get()->SetTransform(floorT);
 
-	Emitter emitter;
+    EmitterData emitter;
 	emitter.transform = modelTransform_;
-	emitter.transform.scale = { 0.2f,0.2f,0.2f };
-	emitter.count = 20;
-	ParticleData data;
+	emitter.transform.scale = { 0.01f,0.01f,0.01f };
+	emitter.count = 5;
+	EffectDefinitionData data;
 	data.transform.scale = { 0.05f,1.0f,1.0f };
 	data.color = { 1.0f,0.0f,0.0f,1.0f };
 	data.lifeTime = 1.0f;
-	std::unique_ptr<ParticleManager> particle = std::make_unique<ParticleManager>();
+	std::unique_ptr<Emitter> particle = std::make_unique<Emitter>();
 	particle.get()->Initialize(emitter, data);
 
 	// ランダムな角度(0度 or 45度など)で出現させ、その場から動かさない設定
-	particle->generatorBehavior = [](ParticleData& p) {
+ particle->generatorBehavior = [](EffectDefinitionData& p) {
 		p.velocity = { 0.0f, 0.0f, 0.0f }; // 動かさない
 
 		// 例として、Z軸の角度をランダムに設定 (0〜360度)
@@ -89,6 +90,10 @@ void TestScene::Initialize() {
 
 	int texture = texture_.get()->CreateTexture("resources/uvChecker.png");
 	sprite_.get()->Initialize(spriteData_, texture);
+
+	ring_.get()->Initialize(texture);
+   cylinder_.get()->Initialize(texture);
+	cylinder_.get()->SetTransform(cylinderTransform_);
 }
 
 void TestScene::Update() {
@@ -97,6 +102,8 @@ void TestScene::Update() {
 	Matrix4x4 view = camera_.get()->GetViewMatrix();
 
 	sprite_.get()->Update(spriteData_);
+	ring_.get()->SettingWvp(view);
+	cylinder_.get()->SettingWvp(view);
 
 	model_->SettingWvp(view);
 	floor->SettingWvp(view);
@@ -116,11 +123,14 @@ void TestScene::Draw() {
 	// Set the SkyBox texture as environment map
 	Draw::SetEnvironmentTexture(skyBoxTexture_);
 
+	//Draw::DrawObj(ring_.get());
+	Draw::DrawObj(cylinder_.get());
+
 	//Draw::DrawObj(skyBox_.get());
 	//Draw::DrawObj(model_.get());
 	//Draw::DrawObj(floor.get());
 	//Draw::DrawObj(nodeAnimation_.get());
-	Draw::DrawAnimation(animation_.get());
+	//Draw::DrawAnimation(animation_.get());
 
 	//Draw::DrawObj(sphere_.get());
 	for (int i = 0, n = static_cast<int>(particle_.size()); i < n; ++i) {
