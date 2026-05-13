@@ -17,7 +17,7 @@ enum ShaderName {
 	AnimationObj,
 	ParticleShader,
 	LineShader,
-
+	CopyImageShader,
 	ShaderNum,
 };
 
@@ -29,6 +29,7 @@ static const char* ShaderNameToString(ShaderName name)
 	case AnimationObj:  return "AnimationObj";
 	case ParticleShader: return "ParticleShader";
 	case LineShader: return "LineShader";
+	case CopyImageShader: return "CopyImageShader";
 	default: return "UnknownShader";
 	}
 }

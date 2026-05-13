@@ -187,6 +187,8 @@ void Engine::PostDraw()
 	command->GetCommandList()->RSSetViewports(1, viewportScissor->GetViewport());
 	command->GetCommandList()->RSSetScissorRects(1, viewportScissor->GetScissorRect());
 
+	Draw::DrawCopy(renderTexture.get()->GetSrvHandleGPU());
+
 #ifdef _USE_IMGUI
 	//ImGuiの内部コマンドを生成
 	ImGui::Render();
