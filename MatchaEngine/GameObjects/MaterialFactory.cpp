@@ -23,7 +23,7 @@ void MaterialFactory::ImGui() {
 	}
 }
 
-void MaterialFactory::CreateMartial(bool Lighting)
+void MaterialFactory::CreateMartial(bool Lighting, float environmentCoefficient)
 {
 	//マテリアル用のリソースを作る。今回はcolor1つ分のサイズを用意する
 	materialResource_ = GraphicsDevice::CreateBufferResource(sizeof(Material));
@@ -34,5 +34,5 @@ void MaterialFactory::CreateMartial(bool Lighting)
 	materialData_->enableLighting = Lighting ? 1 : 0;
 	materialData_->uvTransform = IdentityMatrix();
 	materialData_->shininess = 30.0f;
-	materialData_->environmentCoefficient = 1.0f;
+	materialData_->environmentCoefficient = environmentCoefficient;
 }
