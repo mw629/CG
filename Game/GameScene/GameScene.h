@@ -3,7 +3,7 @@
 #include "Camera.h"
 #include "../IScene.h"
 #include <memory>
-#include <Player.h>
+#include <Entity/Player.h>
 
 class GameScene :public IScene
 {
