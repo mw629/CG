@@ -25,6 +25,10 @@ void GameScene::Initialize() {
 	ModelData modelData = AssimpLoadObjFile("resources/player", "player.obj");
 	player_->Initialize(modelData);
 
+	//modelData = AssimpLoadObjFile("resources/Plane", "Plane.obj");
+	//road_->Initialize(modelData);
+	//road_->SetTexture(texture_->TextureData("resources/Ground/road.png"));
+	//road_->SetTransform(roadT_);
 
 }
 
@@ -34,6 +38,7 @@ void GameScene::Update() {
 	Matrix4x4 view = camera_->GetViewMatrix();
 
 	player_->Update(view);
+	//road_->SettingWvp(view);
 
 }
 
@@ -44,5 +49,5 @@ void GameScene::Draw() {
 	Draw::SetEnvironmentTexture(texture_.get()->CreateTexture("resources/rostock_laage_airport_4k.dds"));
 
 	player_->Draw();
-
+	//Draw::DrawObj(road_.get());
 }
