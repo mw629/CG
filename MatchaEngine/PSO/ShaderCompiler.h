@@ -1,9 +1,25 @@
 #pragma once
-
 #include <wrl.h>
-#include <ostream>
 #include <dxcapi.h>
-#include "RenderState.h"
+#include <ostream>
+#include "PipelineState.h"
+
+#pragma comment(lib, "dxcompiler.lib")
+
+class DirectXShaderCompiler
+{
+private:
+	Microsoft::WRL::ComPtr<IDxcUtils> dxcUtils_ = nullptr;
+	Microsoft::WRL::ComPtr<IDxcCompiler3> dxcCompiler_ = nullptr;
+	Microsoft::WRL::ComPtr<IDxcIncludeHandler> includeHandler_ = nullptr;
+	HRESULT hr_{};
+public:
+	void CreateDXC();
+
+	IDxcUtils* GetDxcUtils() { return dxcUtils_.Get(); }
+	IDxcCompiler3* GetDxcCompiler() { return dxcCompiler_.Get(); }
+	IDxcIncludeHandler* GetIncludeHandler() { return includeHandler_.Get(); }
+};
 
 class ShaderCompile
 {
@@ -24,7 +40,7 @@ public:
 		Microsoft::WRL::ComPtr<IDxcCompiler3> dxcCompiler,
 		Microsoft::WRL::ComPtr<IDxcIncludeHandler> includeHandler);
 
-	void CreateShaderCompile(ShaderName shaderName,std::ostream& os,
+	void CreateShaderCompile(const PipelineConfig& config, std::ostream& os,
 		Microsoft::WRL::ComPtr<IDxcUtils> dxcUtils,
 		Microsoft::WRL::ComPtr<IDxcCompiler3> dxcCompiler,
 		Microsoft::WRL::ComPtr<IDxcIncludeHandler> includeHandler);
@@ -34,7 +50,6 @@ public:
 
 	IDxcBlob* GetPixelShaderBlob() { return pixelShaderBlob_.Get(); }
 
-
+	IDxcBlob* GetComputeShaderBlob();
 
 };
-

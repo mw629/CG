@@ -4,7 +4,7 @@
 #include "VariableTypes.h"
 #include "Texture.h"
 #include "MaterialFactory.h"
-#include "RenderState.h"
+#include "PipelineState.h"
 
 struct EffectDefinitionData {
 	Transform transform = { {1.0f,1.0f,1.0f},{0.0f,0.0f,0.0f}, {0.0f,0.0f,0.0f} };
@@ -84,7 +84,7 @@ public:
 	std::list<EffectDefinitionData> GetEffectDefinitionData() { return effectDefinitionData_; }
 
 private:
-	ShaderName shader_ = ShaderName::ParticleShader;
+	ShaderName shader_ = "ParticleShader";
 	BlendMode blend_ = BlendMode::kBlendModeAdd;
 public:
 	void SetBlend(BlendMode blend) { blend_ = blend; }

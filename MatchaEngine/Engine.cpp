@@ -116,6 +116,7 @@ void Engine::Setting()
 
 	graphicsPipelineState.get()->ALLPSOCreate(logStream, graphics.get()->GetDevice());
 
+
 	directionalLight = std::make_unique<DirectionalLight>();
 	directionalLight.get()->CreateDirectionalLight();
 	pointLight = std::make_unique<PointLight>();

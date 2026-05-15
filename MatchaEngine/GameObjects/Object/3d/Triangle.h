@@ -1,7 +1,7 @@
 #pragma once
 #include "VariableTypes.h"
 #include "MaterialFactory.h"
-#include "RenderState.h"
+#include "PipelineState.h"
 #include <memory>
 
 class Triangle
@@ -50,7 +50,7 @@ public:
 	D3D12_GPU_DESCRIPTOR_HANDLE GetTextureSrvHandleGPU()const { return textureSrvHandleGPU_; }
 
 private:
-	ShaderName shader_ = ShaderName::ObjectShader;
+	ShaderName shader_ = "ObjectShader";
 	BlendMode blend_ = BlendMode::kBlendModeNone;
 public:
 	BlendMode SetBlend(BlendMode blend) { blend_ = blend; }
