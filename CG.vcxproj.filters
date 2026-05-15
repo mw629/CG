@@ -496,5 +496,6 @@
     <None Include="resources\Shader\SkyBox.PS.hlsl" />
     <None Include="resources\Shader\SkyBox.hlsli" />
     <None Include=".github\copilot-instructions.md" />
+    <None Include="resources\Shader\CopyImage.hlsli" />
   </ItemGroup>
 </Project>

@@ -23,6 +23,7 @@ const ShaderName AnimationObj = "AnimationObj";
 const ShaderName ParticleShader = "ParticleShader";
 const ShaderName LineShader = "LineShader";
 const ShaderName SkyBoxShader = "SkyBoxShader";
+const ShaderName CopyImageShader = "CopyImageShader";
 
 static const char* ShaderNameToString(const ShaderName& name)
 {
