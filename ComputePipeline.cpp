@@ -2,8 +2,8 @@
 
 void ComputePipeline::CreatePipeline(std::ostream& os, ID3D12Device* device)
 {
-	computePipelineStateDesc_.CS{
+	/*computePipelineStateDesc_.CS{
 		.pShaderByteCode = 
-	}
+	}*/
 
 }

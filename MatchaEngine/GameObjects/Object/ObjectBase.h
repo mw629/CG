@@ -4,7 +4,7 @@
 #include "VariableTypes.h"
 #include "Texture.h"
 #include "MaterialFactory.h"
-#include "RenderState.h"
+#include "PipelineState.h"
 
 class ObjectBase
 {
@@ -75,7 +75,7 @@ public:
 	virtual int GetIndexSize() { return indexSize_; }
 
 private:
-	ShaderName shader_ = ShaderName::ObjectShader;
+	ShaderName shader_ = "ObjectShader";
 	BlendMode blend_ = BlendMode::kBlendModeNone;
 public:
 

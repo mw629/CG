@@ -2,6 +2,8 @@
 #include <d3d12.h> 
 #include <wrl.h>
 #include <fstream>
+#include "PipelineState.h"
+
 
 class RootSignature
 {
@@ -12,8 +14,6 @@ private:
 	Microsoft::WRL::ComPtr<ID3D12RootSignature> rootSignature_ = nullptr;
 	Microsoft::WRL::ComPtr<ID3DBlob> signatureBlob_ = nullptr;
 	Microsoft::WRL::ComPtr<ID3DBlob> errorBlob_ = nullptr;
-
-
 
 public:
 	RootSignature();
@@ -26,7 +26,4 @@ public:
 	ID3D12RootSignature* GetRootSignature() { return rootSignature_.Get(); }
 	ID3DBlob* GetsignatureBlob() { return signatureBlob_.Get(); }
 	ID3DBlob* GeterrorBlob() { return errorBlob_.Get(); }
-
-	
 };
-

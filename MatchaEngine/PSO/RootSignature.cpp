@@ -4,6 +4,10 @@
 
 
 
+// ---------------------------------------------------------
+// RootSignature
+// ---------------------------------------------------------
+
 RootSignature::RootSignature()
 {
 	descriptionRootSignature_.Flags =
@@ -43,5 +47,3 @@ void RootSignature::Error(std::ostream& os)
 	}
 	Log(os, errorMsg);
 }
-
-

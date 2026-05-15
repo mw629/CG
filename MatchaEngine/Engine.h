@@ -52,16 +52,11 @@
 #include "SwapChain.h"
 #include "ViewportScissor.h"
 //PSO
-#include "BlendState.h"
-#include "DepthStencilState.h"
-#include "DirectXShaderCompiler.h"
+#include "PipelineState.h"
+#include "ShaderCompiler.h"
 #include "GraphicsPipelineState.h"
-#include "InputLayout.h"
-#include "RasterizerState.h"
 #include "RootSignature.h"
-#include "RootParameter.h"
 #include "Sampler.h"
-#include "ShaderCompile.h"
 
 //Input
 

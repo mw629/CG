@@ -4,7 +4,7 @@
 #include <memory>
 #include "Core/VariableTypes.h"
 #include "MaterialFactory.h"
-#include "RenderState.h"
+#include "PipelineState.h"
 
 struct SpriteData{
 	Transform transform;
@@ -83,7 +83,7 @@ public:
 	D3D12_GPU_DESCRIPTOR_HANDLE GetTextureSrvHandleGPU() { return textureSrvHandleGPU_; }
 
 private:
-	ShaderName shader_ = ShaderName::ObjectShader;
+	ShaderName shader_ = "ObjectShader";
 	BlendMode blend_ = BlendMode::kBlendModeNormal;
 public:
 	void SetBlend(BlendMode blend) { blend_ = blend; }
