@@ -1,4 +1,8 @@
-#include "BlendState.h"
+#include "PipelineState.h"
+
+// ---------------------------------------------------------
+// BlendState
+// ---------------------------------------------------------
 
 D3D12_BLEND_DESC BlendState::CreateBlendDesc(BlendMode mode)
 {
@@ -58,17 +62,46 @@ D3D12_BLEND_DESC BlendState::CreateBlendDesc(BlendMode mode)
 	}
 
 	// アルファブレンドの設定
-	/*rt.SrcBlendAlpha = D3D12_BLEND_ONE;
-	rt.BlendOpAlpha = D3D12_BLEND_OP_ADD;
-	rt.DestBlendAlpha = D3D12_BLEND_ZERO;*/
 	rt.SrcBlendAlpha = D3D12_BLEND_SRC_ALPHA;
 	rt.DestBlendAlpha = D3D12_BLEND_INV_SRC_ALPHA;
 	rt.BlendOpAlpha = D3D12_BLEND_OP_ADD;
 
 	return blendDesc_;
-
 }
 
+// ---------------------------------------------------------
+// DepthStencilState
+// ---------------------------------------------------------
 
+void DepthStencilState::CreateDepthStencilState(const PipelineConfig& config)
+{
+	depthStencilDesc_.DepthEnable = config.depthEnable;
+	depthStencilDesc_.DepthWriteMask = config.depthWriteMask;
+	depthStencilDesc_.DepthFunc = config.depthFunc;
+}
 
+// ---------------------------------------------------------
+// InputLayout
+// ---------------------------------------------------------
 
+void InputLayout::CreateInputLayout(const PipelineConfig& config)
+{
+	inputElementDescs_ = config.inputElements;
+	if (inputElementDescs_.empty()) {
+		inputLayoutDesc_.pInputElementDescs = nullptr;
+		inputLayoutDesc_.NumElements = 0;
+	} else {
+		inputLayoutDesc_.pInputElementDescs = inputElementDescs_.data();
+		inputLayoutDesc_.NumElements = static_cast<UINT>(inputElementDescs_.size());
+	}
+}
+
+// ---------------------------------------------------------
+// RasterizerState
+// ---------------------------------------------------------
+
+void RasterizerState::CreateRasterizerState(const PipelineConfig& config)
+{
+	rasterizerDesc_.CullMode = config.cullMode;
+	rasterizerDesc_.FillMode = config.fillMode;
+}

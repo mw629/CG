@@ -57,7 +57,7 @@ void TestScene::Initialize() {
 
 	skyBoxTexture_ = texture_.get()->CreateTexture("resources/rostock_laage_airport_4k.dds");
 	skyBox_.get()->Initialize(skyBoxTexture_);
-	skyBox_.get()->SetShader(ShaderName::SkyBoxShader);
+	skyBox_.get()->SetShader("SkyBoxShader");
 	skyBox_.get()->SetLighting(false);
 	skyBox_.get()->SetTransform(skyBoxTransform_);
 
