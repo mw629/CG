@@ -30,6 +30,16 @@ private:
 	float startX_ = 0.0f;   // 移動開始時のX座標
 	MoveDirection moveDirection_ = MoveDirection::None; // 移動方向
 
+	// アクション用の変数
+	bool isJumping_ = false;
+	float velocityY_ = 0.0f;
+	float gravity_ = 0.02f;
+	float jumpPower_ = 0.4f;
+	float baseHeight_ = 0.0f; // 地面の高さ（Y座標）
+
+	bool isRolling_ = false;
+	float rollTimer_ = 0.0f;
+	float rollDuration_ = 30.0f; // 転がりの継続フレーム数
 
 public:
 
@@ -44,6 +54,7 @@ public:
 
 	void Draw();
 
-
+	const Transform& GetTransform() const { return transform_; }
+	bool GetIsRolling() const { return isRolling_; }
 };
 

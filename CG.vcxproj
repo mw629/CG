@@ -1,4 +1,4 @@
-﻿<?xml version="1.0" encoding="utf-8"?>
+<?xml version="1.0" encoding="utf-8"?>
 <Project DefaultTargets="Build" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
   <ItemGroup Label="ProjectConfigurations">
     <ProjectConfiguration Include="Debug|x64">
@@ -143,6 +143,8 @@ copy "$(WindowsSdkDir)bin\$(TargetPlatformVersion)\x64\dxil.dll" "$(TargetDir)dx
   </ItemDefinitionGroup>
   <ItemGroup>
     <ClCompile Include="Game\GameScene\Entity\Player.cpp" />
+    <ClCompile Include="Game\GameScene\Entity\Collision.cpp" />
+    <ClCompile Include="Game\GameScene\Entity\Obstacle.cpp" />
     <ClCompile Include="Game\GameScene\Stage\StageSettings.cpp" />
     <ClCompile Include="MatchaEngine\GameObjects\Object\3d\Cylinder.cpp" />
     <ClCompile Include="Game\GameApplication.cpp" />
@@ -303,6 +305,8 @@ copy "$(WindowsSdkDir)bin\$(TargetPlatformVersion)\x64\dxil.dll" "$(TargetDir)dx
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="Game\GameScene\Entity\Player.h" />
+    <ClInclude Include="Game\GameScene\Entity\Collision.h" />
+    <ClInclude Include="Game\GameScene\Entity\Obstacle.h" />
     <ClInclude Include="Game\GameScene\Stage\StageSettings.h" />
     <ClInclude Include="MatchaEngine\GameObjects\Object\3d\Cylinder.h" />
     <ClInclude Include="Game\GameApplication.h" />

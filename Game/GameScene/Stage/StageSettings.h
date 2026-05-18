@@ -1,26 +1,66 @@
 #pragma once
+#include <memory>
+#include <vector>
+#include <Engine.h>
+#include <Entity/Obstacle.h>
 
-
+/// <summary>
+/// ステージの無限スクロールと障害物の管理を行うクラス
+/// 道路チャンクを手前に移動させ、画面外に出たチャンクを奥に再配置する
+/// </summary>
 class StageSettings
 {
 private:
 
-	//レーンの管理
-	int minLaneIndex = 1;
-	int maxLaneIndex = 1;
-	float laneWidth = 1.0f;
+	// レーンの管理
+	int minLaneIndex_ = -1;
+	int maxLaneIndex_ = 1;
+	float laneWidth_ = 2.0f;
+
+	// スクロール速度
+	float scrollSpeed_ = 0.2f;
+
+	// 道路チャンク
+	static const int kChunkCount_ = 5;      // チャンクの数
+	float chunkLength_ = 10.0f;              // 1チャンクの奥行き（Z軸方向のサイズ）
+
+	std::unique_ptr<Model> roadChunks_[kChunkCount_];
+	Transform roadTransforms_[kChunkCount_];
+
+	// テクスチャ
+	std::unique_ptr<Texture> texture_ = std::make_unique<Texture>();
+
+	// 障害物管理
+	static const int kMaxObstacles_ = 20;
+	std::unique_ptr<Obstacle> obstacles_[kMaxObstacles_];
+	int nextObstacleIndex_ = 0;
+
+	// ゲームオーバーフラグ
+	bool isGameOver_ = false;
+
+	// 障害物をスポーンする
+	void SpawnObstaclesOnChunk(float chunkZ);
 
 public:
 
-	void Initialize();
-	void Update();
+	void Initialize(ModelData roadModelData, ModelData obstacleModelData);
+	void Update(Matrix4x4 view);
 	void Draw();
 
+	// ゲッター
+	int GetMinLaneIndex() const { return minLaneIndex_; }
+	int GetMaxLaneIndex() const { return maxLaneIndex_; }
+	float GetLaneWidth() const { return laneWidth_; }
+	float GetScrollSpeed() const { return scrollSpeed_; }
+	bool GetIsGameOver() const { return isGameOver_; }
 
-	//ゲッター
-	int GetMinLaneIndex() { return minLaneIndex; }
-	int GetMaxLaneIndex() { return maxLaneIndex; }
+	// ゲームオーバー設定
+	void SetGameOver(bool isGameOver) { isGameOver_ = isGameOver; }
 
+	// 障害物リストへのアクセス（当たり判定用）
+	Obstacle* GetObstacle(int index) { return obstacles_[index].get(); }
+	int GetMaxObstacles() const { return kMaxObstacles_; }
 
+	// リセット
+	void Reset();
 };
-

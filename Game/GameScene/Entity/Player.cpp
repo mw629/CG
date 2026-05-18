@@ -65,6 +65,47 @@ void Player::PlayerMove()
 		}
 	}
 
+	// === アクション（ジャンプと転がり） ===
+	// 地上にいて何もしていない時のみアクション可能
+	if (!isJumping_ && !isRolling_) {
+		if (Input::PushKey(DIK_W) || Input::PushKey(DIK_SPACE)) {
+			isJumping_ = true;
+			velocityY_ = jumpPower_;
+		}
+		else if (Input::PushKey(DIK_S)) {
+			isRolling_ = true;
+			rollTimer_ = rollDuration_;
+			// 転がり中はスケールYを半分にして伏せるようにする
+			transform_.scale.y = 0.5f;
+			// 重心が変わる分、Y座標を少し下げる（原点が中心の場合）
+			transform_.translate.y = baseHeight_ - 0.5f; 
+		}
+	}
+
+	// ジャンプ処理
+	if (isJumping_) {
+		transform_.translate.y += velocityY_;
+		velocityY_ -= gravity_;
+
+		// 地面に着地
+		if (transform_.translate.y <= baseHeight_) {
+			transform_.translate.y = baseHeight_;
+			isJumping_ = false;
+			velocityY_ = 0.0f;
+		}
+	}
+
+	// 転がり処理
+	if (isRolling_) {
+		rollTimer_ -= 1.0f;
+		if (rollTimer_ <= 0.0f) {
+			isRolling_ = false;
+			// 姿勢を元に戻す
+			transform_.scale.y = 1.0f;
+			transform_.translate.y = baseHeight_;
+		}
+	}
+
 	// トランスフォームをモデルに適用
 	model_.get()->SetTransform(transform_);
 }

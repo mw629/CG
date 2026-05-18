@@ -31,6 +31,7 @@ public:
 	Matrix4x4 GetViewMatrix()const { return viewMatrix_; }
 
 	void SetTransform(Transform transform) { transform_ = transform; }
+	void SetDebugCamera(bool isDebug) { isDebugCamera_ = isDebug; }
 	
 	ID3D12Resource* GetCameraResource() const { return cameraResource_.Get(); }
 
