@@ -110,6 +110,7 @@ void GameScene::CheckCollisions()
 			// 衝突！ゲームオーバー
 			isGameOver_ = true;
 			stageSettings_->SetGameOver(true);
+			Engine::ChangePostEffect(Engine::PostEffectType::GrayScale);
 			break;
 		}
 	}
