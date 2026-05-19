@@ -124,6 +124,8 @@ private:
 
 	static bool isEnd_;
 
+	static ShaderName activePostEffect_;
+
 public:
 
 	~Engine();
@@ -146,6 +148,29 @@ public:
 	void Debug();
 
 	Input* GetInput() { return input.get(); }
+
+	enum class PostEffectType {
+		Normal,
+		GrayScale,
+		Sepia,
+		OutLine,
+		Smoothing,
+		Vignetting
+	};
+
+	static void SetActivePostEffect(const ShaderName& effect) { activePostEffect_ = effect; }
+	static ShaderName GetActivePostEffect() { return activePostEffect_; }
+
+	static void ChangePostEffect(PostEffectType type) {
+		switch (type) {
+		case PostEffectType::Normal: activePostEffect_ = "CopyShader"; break;
+		case PostEffectType::GrayScale: activePostEffect_ = "GrayScaleShader"; break;
+		case PostEffectType::Sepia: activePostEffect_ = "GrayScaleSepiaToneShader"; break;
+		case PostEffectType::OutLine: activePostEffect_ = "OutLineShader"; break;
+		case PostEffectType::Smoothing: activePostEffect_ = "SmoothingShader"; break;
+		case PostEffectType::Vignetting: activePostEffect_ = "VignettingShader"; break;
+		}
+	}
 
 	static void SetEnd(bool isEnd) { isEnd_ = isEnd; }
 	static bool IsEnd() { return isEnd_; }
