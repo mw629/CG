@@ -24,6 +24,11 @@ const ShaderName ParticleShader = "ParticleShader";
 const ShaderName LineShader = "LineShader";
 const ShaderName SkyBoxShader = "SkyBoxShader";
 const ShaderName CopyImageShader = "CopyShader";
+const ShaderName GrayScaleShader = "GrayScaleShader";
+const ShaderName GrayScaleSepiaToneShader = "GrayScaleSepiaToneShader";
+const ShaderName OutLineShader = "OutLineShader";
+const ShaderName SmoothingShader = "SmoothingShader";
+const ShaderName VignettingShader = "VignettingShader";
 
 static const char* ShaderNameToString(const ShaderName& name)
 {
