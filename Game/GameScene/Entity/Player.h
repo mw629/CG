@@ -35,7 +35,7 @@ private:
 	float velocityY_ = 0.0f;
 	float gravity_ = 0.02f;
 	float jumpPower_ = 0.4f;
-	float baseHeight_ = 0.0f; // 地面の高さ（Y座標）
+	float baseHeight_ = 2.0f; // 地面の高さ（Y座標）
 
 	bool isRolling_ = false;
 	float rollTimer_ = 0.0f;

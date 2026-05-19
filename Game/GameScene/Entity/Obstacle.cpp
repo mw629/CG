@@ -22,6 +22,7 @@ void Obstacle::Initialize(ModelData modelData, Type type)
 		collisionHeight_ = 0.5f;
 		collisionDepth_ = 1.0f;
 		transform_.scale = { 0.8f, 0.3f, 0.8f };
+		model_->GetMartial()->SetColor({ 0.0f, 0.0f, 1.0f, 1.0f });
 		break;
 	case Type::High:
 		// 転がりで避ける高い障害物（上に浮いている）
@@ -29,6 +30,7 @@ void Obstacle::Initialize(ModelData modelData, Type type)
 		collisionHeight_ = 2.0f;
 		collisionDepth_ = 1.0f;
 		transform_.scale = { 0.8f, 1.0f, 0.8f };
+		model_->GetMartial()->SetColor({ 1.0f, 0.0f, 0.0f, 1.0f });
 		break;
 	case Type::Wall:
 		// レーン移動で避ける壁
@@ -36,6 +38,7 @@ void Obstacle::Initialize(ModelData modelData, Type type)
 		collisionHeight_ = 2.0f;
 		collisionDepth_ = 1.0f;
 		transform_.scale = { 0.8f, 1.0f, 0.8f };
+		model_->GetMartial()->SetColor({ 0.0f, 0.0f, 1.0f, 1.0f });
 		break;
 	}
 
