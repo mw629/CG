@@ -10,6 +10,7 @@ Player::~Player()
 
 void Player::Initialize(ModelData modelData)
 {
+	transform_.translate.y = baseHeight_;
 	model_.get()->Initialize(modelData);
 	model_.get()->SetTransform(transform_);
 }
