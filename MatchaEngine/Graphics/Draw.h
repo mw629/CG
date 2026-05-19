@@ -52,6 +52,6 @@ public:
 
 	static void DrawGrid(Grid* grid);
 
-	static void DrawCopy(D3D12_GPU_DESCRIPTOR_HANDLE textureHandle);
+	static void DrawCopy(D3D12_GPU_DESCRIPTOR_HANDLE textureHandle, ShaderName shader = "CopyShader");
 
 };
