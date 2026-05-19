@@ -15,6 +15,7 @@
 #pragma comment(lib,"winmm.lib")
 
 bool Engine::isEnd_ = false;
+ShaderName Engine::activePostEffect_ = "CopyShader";
 
 Engine::~Engine()
 {
@@ -189,7 +190,7 @@ void Engine::PostDraw()
 	command->GetCommandList()->RSSetViewports(1, viewportScissor->GetViewport());
 	command->GetCommandList()->RSSetScissorRects(1, viewportScissor->GetScissorRect());
 
-	Draw::DrawCopy(renderTexture.get()->GetSrvHandleGPU());
+	Draw::DrawCopy(renderTexture.get()->GetSrvHandleGPU(), activePostEffect_);
 
 #ifdef _USE_IMGUI
 	//ImGuiの内部コマンドを生成
@@ -317,7 +318,7 @@ void Engine::Debug()
 {
 #ifdef _USE_IMGUI
 
-	ImGui::SetNextWindowSize(ImVec2(400, 200), ImGuiCond_FirstUseEver);
+	ImGui::SetNextWindowSize(ImVec2(400, 250), ImGuiCond_FirstUseEver);
 	ImGui::Begin("Debug Info");
 
 	ImGui::Text("FPS: %.1f", ImGui::GetIO().Framerate);
@@ -330,6 +331,15 @@ void Engine::Debug()
 	ImGui::Text("Memory Usage: %.2f MB", mem / (1024.0f * 1024.0f));
 
 	textureLoader.get()->Draw();
+
+	// ポストエフェクト切り替え UI
+	static int currentEffectIndex = 0;
+	const char* effectNames[] = { "Normal", "GrayScale", "Sepia", "OutLine", "Smoothing", "Vignetting" };
+	
+	if (ImGui::Combo("Post Effect", &currentEffectIndex, effectNames, IM_ARRAYSIZE(effectNames)))
+	{
+		ChangePostEffect(static_cast<PostEffectType>(currentEffectIndex));
+	}
 
 	ImGui::End();
 
