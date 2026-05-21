@@ -20,6 +20,7 @@ void GameScene::ImGui()
 		if (ImGui::Button("Reset Game")) {
 			isGameOver_ = false;
 			stageSettings_->Reset();
+			player_->Reset();
 		}
 	}
 
@@ -29,6 +30,8 @@ void GameScene::ImGui()
 void GameScene::Initialize() {
 
 	sceneID_ = SceneID::Game;
+	isGameOver_ = false;
+	sceneChangeRequest_ = false;
 
 	camera_->SetDebugCamera(false); // ゲーム用カメラを使う
 	camera_->SetTransform(cameraTransform_);
@@ -57,10 +60,16 @@ void GameScene::Update() {
 		CheckCollisions();
 	}
 	else {
-		// ゲームオーバー中にキーでリスタート
-		if (Input::PushKey(DIK_R)) {
+		// 1でリスタート
+		if (Input::PushKey(DIK_1)) {
 			isGameOver_ = false;
 			stageSettings_->Reset();
+			player_->Reset();
+		}
+		// 2でタイトルへ
+		if (Input::PushKey(DIK_2)) {
+			nextSceneID_ = SceneID::Title;
+			sceneChangeRequest_ = true;
 		}
 	}
 }

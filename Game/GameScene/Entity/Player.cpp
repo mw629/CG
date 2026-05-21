@@ -14,6 +14,26 @@ void Player::Initialize(ModelData modelData)
 	model_.get()->SetTransform(transform_);
 }
 
+void Player::Reset()
+{
+	transform_.scale = { 1.0f, 1.0f, 1.0f };
+	transform_.rotate = { 0.0f, 0.0f, 0.0f };
+	transform_.translate = { 0.0f, baseHeight_, 0.0f };
+
+	laneIndex_ = 0;
+	targetLaneIndex_ = 0;
+	lerpTime_ = 0.0f;
+	startX_ = 0.0f;
+	moveDirection_ = MoveDirection::None;
+
+	isJumping_ = false;
+	velocityY_ = 0.0f;
+	isRolling_ = false;
+	rollTimer_ = 0.0f;
+
+	model_.get()->SetTransform(transform_);
+}
+
 void Player::Update(Matrix4x4 view)
 {
 	PlayerMove();
