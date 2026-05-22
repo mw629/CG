@@ -64,6 +64,7 @@ void GameScene::Update() {
 		if (Input::PushKey(DIK_1)) {
 			isGameOver_ = false;
 			stageSettings_->Reset();
+			Engine::ChangePostEffect(Engine::PostEffectType::Normal);
 			player_->Reset();
 		}
 		// 2でタイトルへ
