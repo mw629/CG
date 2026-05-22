@@ -34,7 +34,7 @@ void GraphicsPipelineState::CreateGraphicsPSO(const ShaderName& shaderName, cons
 	//1.	VS / PS を先にコンパイル
 	directXShaderCompiler.CreateDXC();
 	shaderCompile->CreateShaderCompile(config, os, directXShaderCompiler.GetDxcUtils(), directXShaderCompiler.GetDxcCompiler(), directXShaderCompiler.GetIncludeHandler());
-	
+
 	//2.	シェーダーリフレクションで b / t / s / u の使用状況を取得
 	//3.	その情報から RootParameter / DescriptorRange を自動生成
 	std::vector<D3D12_ROOT_PARAMETER> rootParams;
@@ -59,7 +59,7 @@ void GraphicsPipelineState::CreateGraphicsPSO(const ShaderName& shaderName, cons
 		for (UINT i = 0; i < shaderDesc.BoundResources; ++i) {
 			D3D12_SHADER_INPUT_BIND_DESC bindDesc;
 			reflection->GetResourceBindingDesc(i, &bindDesc);
-			
+
 			// すでに登録済みのリソースならスキップするかVisibilityをALLにする
 			if (nameMap.find(bindDesc.Name) != nameMap.end()) {
 				rootParams[nameMap[bindDesc.Name]].ShaderVisibility = D3D12_SHADER_VISIBILITY_ALL;
@@ -72,10 +72,11 @@ void GraphicsPipelineState::CreateGraphicsPSO(const ShaderName& shaderName, cons
 				param.ShaderVisibility = visibility;
 				param.Descriptor.ShaderRegister = bindDesc.BindPoint;
 				param.Descriptor.RegisterSpace = bindDesc.Space;
-				
+
 				nameMap[bindDesc.Name] = static_cast<UINT>(rootParams.size());
 				rootParams.push_back(param);
-			} else if (bindDesc.Type == D3D_SIT_TEXTURE || bindDesc.Type == D3D_SIT_UAV_RWTYPED || bindDesc.Type == D3D_SIT_UAV_RWSTRUCTURED || bindDesc.Type == D3D_SIT_STRUCTURED) {
+			}
+			else if (bindDesc.Type == D3D_SIT_TEXTURE || bindDesc.Type == D3D_SIT_UAV_RWTYPED || bindDesc.Type == D3D_SIT_UAV_RWSTRUCTURED || bindDesc.Type == D3D_SIT_STRUCTURED) {
 				D3D12_DESCRIPTOR_RANGE range = {};
 				range.RangeType = (bindDesc.Type == D3D_SIT_TEXTURE || bindDesc.Type == D3D_SIT_STRUCTURED) ? D3D12_DESCRIPTOR_RANGE_TYPE_SRV : D3D12_DESCRIPTOR_RANGE_TYPE_UAV;
 				range.BaseShaderRegister = bindDesc.BindPoint;
@@ -89,12 +90,12 @@ void GraphicsPipelineState::CreateGraphicsPSO(const ShaderName& shaderName, cons
 				param.ShaderVisibility = visibility;
 				param.DescriptorTable.NumDescriptorRanges = 1;
 				param.DescriptorTable.pDescriptorRanges = &ranges.back();
-				
+
 				nameMap[bindDesc.Name] = static_cast<UINT>(rootParams.size());
 				rootParams.push_back(param);
 			}
 		}
-	};
+		};
 
 	processReflection(shaderCompile->GetVertexShaderBlob(), D3D12_SHADER_VISIBILITY_VERTEX);
 	processReflection(shaderCompile->GetPixelShaderBlob(), D3D12_SHADER_VISIBILITY_PIXEL);
@@ -185,6 +186,7 @@ void GraphicsPipelineState::ALLPSOCreate(std::ostream& os, ID3D12Device* device)
 		{ GrayScaleSepiaToneShader, { L"resources/Shader/PostEffect/GrayScale.VS.hlsl", L"resources/Shader/PostEffect/GrayScaleSepiaTone.PS.hlsl", lineInput, false, D3D12_DEPTH_WRITE_MASK_ZERO, D3D12_COMPARISON_FUNC_ALWAYS, D3D12_CULL_MODE_NONE, D3D12_FILL_MODE_SOLID } },
 		{ OutLineShader, { L"resources/Shader/PostEffect/OutLine.VS.hlsl", L"resources/Shader/PostEffect/OutLine.PS.hlsl", lineInput, false, D3D12_DEPTH_WRITE_MASK_ZERO, D3D12_COMPARISON_FUNC_ALWAYS, D3D12_CULL_MODE_NONE, D3D12_FILL_MODE_SOLID } },
 		{ SmoothingShader, { L"resources/Shader/PostEffect/Smoothing.VS.hlsl", L"resources/Shader/PostEffect/Smoothing.PS.hlsl", lineInput, false, D3D12_DEPTH_WRITE_MASK_ZERO, D3D12_COMPARISON_FUNC_ALWAYS, D3D12_CULL_MODE_NONE, D3D12_FILL_MODE_SOLID } },
+		{ GaussianFilterShader, { L"resources/Shader/PostEffect/GaussianFilter.VS.hlsl", L"resources/Shader/PostEffect/GaussianFilter.PS.hlsl", lineInput, false, D3D12_DEPTH_WRITE_MASK_ZERO, D3D12_COMPARISON_FUNC_ALWAYS, D3D12_CULL_MODE_NONE, D3D12_FILL_MODE_SOLID } },
 		{ VignettingShader, { L"resources/Shader/PostEffect/Vignetting.VS.hlsl", L"resources/Shader/PostEffect/Vignetting.PS.hlsl", lineInput, false, D3D12_DEPTH_WRITE_MASK_ZERO, D3D12_COMPARISON_FUNC_ALWAYS, D3D12_CULL_MODE_NONE, D3D12_FILL_MODE_SOLID } }
 	};
 

@@ -334,7 +334,7 @@ void Engine::Debug()
 
 	// ポストエフェクト切り替え UI
 	static int currentEffectIndex = 0;
-	const char* effectNames[] = { "Normal", "GrayScale", "Sepia", "OutLine", "Smoothing", "Vignetting" };
+	const char* effectNames[] = { "Normal", "GrayScale", "Sepia", "OutLine", "Smoothing", "GaussianFilter" ,"Vignetting"};
 	
 	if (ImGui::Combo("Post Effect", &currentEffectIndex, effectNames, IM_ARRAYSIZE(effectNames)))
 	{

@@ -28,6 +28,7 @@ const ShaderName GrayScaleShader = "GrayScaleShader";
 const ShaderName GrayScaleSepiaToneShader = "GrayScaleSepiaToneShader";
 const ShaderName OutLineShader = "OutLineShader";
 const ShaderName SmoothingShader = "SmoothingShader";
+const ShaderName GaussianFilterShader = "GaussianFilterShader";
 const ShaderName VignettingShader = "VignettingShader";
 
 static const char* ShaderNameToString(const ShaderName& name)
