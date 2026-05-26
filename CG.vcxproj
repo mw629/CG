@@ -159,6 +159,7 @@ copy "$(WindowsSdkDir)bin\$(TargetPlatformVersion)\x64\dxil.dll" "$(TargetDir)dx
     <ClCompile Include="Game\Direction\Fade.cpp" />
     <ClCompile Include="MatchaEngine\GameObjects\Camera\Camera.cpp" />
     <ClCompile Include="Game\GameScene\GameScene.cpp" />
+    <ClCompile Include="MatchaEngine\Graphics\Render\PostEffect.cpp" />
     <ClCompile Include="MatchaEngine\Input\GamePadInput.cpp" />
     <ClCompile Include="MatchaEngine\GameObjects\Line\Line.cpp" />
     <ClCompile Include="MatchaEngine\GameObjects\Line\Grid.cpp" />
@@ -175,7 +176,7 @@ copy "$(WindowsSdkDir)bin\$(TargetPlatformVersion)\x64\dxil.dll" "$(TargetDir)dx
     <ClCompile Include="MatchaEngine\Engine.cpp" />
     <ClCompile Include="MatchaEngine\Math\Calculation.cpp" />
     <ClCompile Include="MatchaEngine\Common\CommandContext.cpp" />
-    <ClCompile Include="MatchaEngine\Graphics\Draw.cpp" />
+    <ClCompile Include="MatchaEngine\Graphics\Render\Draw.cpp" />
     <ClCompile Include="externals\imgui\imgui.cpp">
       <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Release|x64'">true</ExcludedFromBuild>
     </ClCompile>
@@ -324,6 +325,7 @@ copy "$(WindowsSdkDir)bin\$(TargetPlatformVersion)\x64\dxil.dll" "$(TargetDir)dx
     <ClInclude Include="MatchaEngine\Core\VariableTypes\Vector3.h" />
     <ClInclude Include="MatchaEngine\Core\VariableTypes\Vector2Int.h" />
     <ClInclude Include="MatchaEngine\Core\VariableTypes\Vector3Int.h" />
+    <ClInclude Include="MatchaEngine\Graphics\Render\PostEffect.h" />
     <ClInclude Include="MatchaEngine\Input\GamePadInput.h" />
     <ClInclude Include="MatchaEngine\GameObjects\Line\Line.h" />
     <ClInclude Include="MatchaEngine\GameObjects\Line\Grid.h" />
@@ -341,7 +343,7 @@ copy "$(WindowsSdkDir)bin\$(TargetPlatformVersion)\x64\dxil.dll" "$(TargetDir)dx
     <ClInclude Include="MatchaEngine\Engine.h" />
     <ClInclude Include="MatchaEngine\Math\Calculation.h" />
     <ClInclude Include="MatchaEngine\Common\CommandContext.h" />
-    <ClInclude Include="MatchaEngine\Graphics\Draw.h" />
+    <ClInclude Include="MatchaEngine\Graphics\Render\Draw.h" />
     <ClInclude Include="externals\imgui\imconfig.h" />
     <ClInclude Include="externals\imgui\imgui.h" />
     <ClInclude Include="externals\imgui\imgui_impl_dx12.h" />

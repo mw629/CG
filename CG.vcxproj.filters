@@ -141,7 +141,7 @@
     <ClCompile Include="MatchaEngine\GameObjects\Light\DirectionalLight.cpp">
       <Filter>MatchaEngine\Graphics</Filter>
     </ClCompile>
-    <ClCompile Include="MatchaEngine\Graphics\Draw.cpp">
+    <ClCompile Include="MatchaEngine\Graphics\Render\Draw.cpp">
       <Filter>MatchaEngine\Graphics</Filter>
     </ClCompile>
     <ClCompile Include="MatchaEngine\Graphics\GpuSyncManager.cpp">
@@ -247,6 +247,9 @@
       <Filter>ソース ファイル</Filter>
     </ClCompile>
     <ClCompile Include="Game\GameScene\Stage\StageSettings.cpp">
+      <Filter>ソース ファイル</Filter>
+    </ClCompile>
+    <ClCompile Include="MatchaEngine\Graphics\Render\PostEffect.cpp">
       <Filter>ソース ファイル</Filter>
     </ClCompile>
   </ItemGroup>
@@ -376,7 +379,7 @@
     <ClInclude Include="MatchaEngine\GameObjects\Light\DirectionalLight.h">
       <Filter>MatchaEngine\Graphics</Filter>
     </ClInclude>
-    <ClInclude Include="MatchaEngine\Graphics\Draw.h">
+    <ClInclude Include="MatchaEngine\Graphics\Render\Draw.h">
       <Filter>MatchaEngine\Graphics</Filter>
     </ClInclude>
     <ClInclude Include="MatchaEngine\Graphics\GpuSyncManager.h">
@@ -482,6 +485,9 @@
       <Filter>ヘッダー ファイル</Filter>
     </ClInclude>
     <ClInclude Include="Game\GameScene\Stage\StageSettings.h">
+      <Filter>ヘッダー ファイル</Filter>
+    </ClInclude>
+    <ClInclude Include="MatchaEngine\Graphics\Render\PostEffect.h">
       <Filter>ヘッダー ファイル</Filter>
     </ClInclude>
   </ItemGroup>
