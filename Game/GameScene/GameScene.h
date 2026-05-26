@@ -6,22 +6,39 @@
 #include <Entity/Player.h>
 #include <Entity/Collision.h>
 #include <Stage/StageSettings.h>
+#include <System/PauseSystem.h>
+
 
 class GameScene :public IScene
 {
 private:
+
+	enum GameState 
+	{
+		Playing,
+		Paused,
+		GameClear,
+		GameOver
+	};
+
+
 	std::unique_ptr<Texture> texture_ = std::make_unique<Texture>();
 
 	std::unique_ptr<Camera>camera_ = std::make_unique<Camera>();
 	Transform cameraTransform_{ {0.5f,0.5f,0.5f},{0.4f,0.0f,0.0f,},{0.0f,10.0f,-15.0f} };
+	Matrix4x4 view;
 
+	// ゲーム状態
+	GameState gameState_ = GameState::Playing;
+
+	//<< Playing >>//
+	// プレイヤー管理
 	std::unique_ptr<Player>player_ = std::make_unique<Player>();
-
 	// ステージ管理
 	std::unique_ptr<StageSettings> stageSettings_ = std::make_unique<StageSettings>();
 
-	// ゲーム状態
-	bool isGameOver_ = false;
+	//<< Paused >>//
+	std::unique_ptr<PauseSystem> pauseSystem_ = std::make_unique<PauseSystem>();
 
 	// 当たり判定処理
 	void CheckCollisions();
@@ -36,5 +53,12 @@ public:
 	void Update()override;
 
 	void Draw()override;
+
+
+	void PlayingUpdate();
+	
+	void PausedUpdate();
+
+
 
 };

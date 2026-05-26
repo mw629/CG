@@ -35,6 +35,20 @@ void StageSettings::Update(Matrix4x4 view)
 {
 	if (isGameOver_) return;
 
+	// スクロール速度の加速（最大速度まで徐々に上がる）
+	if (scrollSpeed_ < maxScrollSpeed_) {
+		scrollSpeed_ += scrollAcceleration_;
+		if (scrollSpeed_ > maxScrollSpeed_) {
+			scrollSpeed_ = maxScrollSpeed_;
+		}
+	}
+	if (scrollSpeed_ > maxScrollSpeed_ / 2) {
+		Engine::ChangePostEffect(Engine::PostEffectType::Vignetting);
+	}
+	else {
+		Engine::ChangePostEffect(Engine::PostEffectType::Normal);
+	}
+
 	// 道路チャンクのスクロール
 	for (int i = 0; i < kChunkCount_; i++) {
 		roadTransforms_[i].translate.z -= scrollSpeed_;
@@ -107,6 +121,9 @@ void StageSettings::SpawnObstaclesOnChunk(float chunkZ)
 void StageSettings::Reset()
 {
 	isGameOver_ = false;
+
+	// スクロール速度を初期値にリセット
+	scrollSpeed_ = baseScrollSpeed_;
 
 	// 道路チャンクの位置をリセット
 	for (int i = 0; i < kChunkCount_; i++) {

@@ -225,6 +225,7 @@ copy "$(WindowsSdkDir)bin\$(TargetPlatformVersion)\x64\dxil.dll" "$(TargetDir)dx
     <ClCompile Include="MatchaEngine\GameObjects\Light\SpotLight.cpp" />
     <ClCompile Include="MatchaEngine\GameObjects\Object\Animation\TransformAnimation.cpp" />
     <ClCompile Include="Game\TestScene\TestScene.cpp" />
+    <ClCompile Include="Game\GameScene\System\PauseSystem.cpp" />
   </ItemGroup>
   <ItemGroup>
     <FxCompile Include="resources\Shader\Particle.PS.hlsl">
@@ -377,6 +378,7 @@ copy "$(WindowsSdkDir)bin\$(TargetPlatformVersion)\x64\dxil.dll" "$(TargetDir)dx
     <ClInclude Include="MatchaEngine\GameObjects\Light\SpotLight.h" />
     <ClInclude Include="MatchaEngine\GameObjects\Object\Animation\TransformAnimation.h" />
     <ClInclude Include="Game\TestScene\TestScene.h" />
+    <ClInclude Include="Game\GameScene\System\PauseSystem.h" />
   </ItemGroup>
   <ItemGroup>
     <Text Include="externals\imgui\LICENSE.txt" />

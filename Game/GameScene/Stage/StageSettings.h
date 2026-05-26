@@ -18,7 +18,10 @@ private:
 	float laneWidth_ = 2.0f;
 
 	// スクロール速度
-	float scrollSpeed_ = 0.2f;
+	float scrollSpeed_ = 0.2f;          // 現在のスクロール速度
+	float baseScrollSpeed_ = 0.2f;      // 初期スクロール速度
+	float maxScrollSpeed_ = 1.0f;       // 最大スクロール速度
+	float scrollAcceleration_ = 0.001f; // 毎フレームの加速量
 
 	// 道路チャンク
 	static const int kChunkCount_ = 5;      // チャンクの数
@@ -52,6 +55,14 @@ public:
 	int GetMaxLaneIndex() const { return maxLaneIndex_; }
 	float GetLaneWidth() const { return laneWidth_; }
 	float GetScrollSpeed() const { return scrollSpeed_; }
+	float GetBaseScrollSpeed() const { return baseScrollSpeed_; }
+	float GetMaxScrollSpeed() const { return maxScrollSpeed_; }
+
+	// スクロール速度の設定
+	void SetBaseScrollSpeed(float speed) { baseScrollSpeed_ = speed; scrollSpeed_ = speed; }
+	void SetMaxScrollSpeed(float speed) { maxScrollSpeed_ = speed; }
+	void SetScrollAcceleration(float accel) { scrollAcceleration_ = accel; }
+	float GetScrollAcceleration() const { return scrollAcceleration_; }
 	bool GetIsGameOver() const { return isGameOver_; }
 
 	// ゲームオーバー設定
