@@ -12,15 +12,59 @@ void GameScene::ImGui()
 
 	camera_.get()->ImGui();
 
-	if (ImGui::CollapsingHeader("Game Info")) {
-		ImGui::Text("Game Over: %s", isGameOver_ ? "YES" : "NO");
-		ImGui::Text("Player Y: %.2f", player_->GetTransform().translate.y);
-		ImGui::Text("Rolling: %s", player_->GetIsRolling() ? "YES" : "NO");
+	if (ImGui::CollapsingHeader("Game State", ImGuiTreeNodeFlags_DefaultOpen)) {
+		const char* stateNames[] = { "Playing", "Paused", "GameClear", "GameOver" };
+		ImGui::Text("Game State: %s", stateNames[gameState_]);
+		ImGui::Separator();
 
-		if (ImGui::Button("Reset Game")) {
-			isGameOver_ = false;
+		// プレイヤー情報
+		if (ImGui::TreeNode("Player Info")) {
+			const Transform& playerTransform = player_->GetTransform();
+			ImGui::Text("Position: (%.2f, %.2f, %.2f)", 
+				playerTransform.translate.x, 
+				playerTransform.translate.y, 
+				playerTransform.translate.z);
+			ImGui::Text("Rolling: %s", player_->GetIsRolling() ? "YES" : "NO");
+			ImGui::TreePop();
+		}
+
+		// ステージ情報
+		if (ImGui::TreeNode("Stage Info")) {
+			ImGui::Text("Scroll Speed: %.3f", stageSettings_->GetScrollSpeed());
+			ImGui::Text("Base Scroll Speed: %.3f", stageSettings_->GetBaseScrollSpeed());
+			ImGui::Text("Max Scroll Speed: %.3f", stageSettings_->GetMaxScrollSpeed());
+			ImGui::Text("Lane Index: Min=%d, Max=%d", 
+				stageSettings_->GetMinLaneIndex(), 
+				stageSettings_->GetMaxLaneIndex());
+			ImGui::Text("Lane Width: %.2f", stageSettings_->GetLaneWidth());
+			ImGui::TreePop();
+		}
+
+		ImGui::Separator();
+
+		// ゲーム制御
+		if (ImGui::Button("Reset Game", ImVec2(120, 0))) {
+			gameState_ = GameState::Playing;
 			stageSettings_->Reset();
 			player_->Reset();
+		}
+	}
+
+	// ステージ設定のデバッグパネル
+	if (ImGui::CollapsingHeader("Stage Settings Debug")) {
+		float baseSpeed = stageSettings_->GetBaseScrollSpeed();
+		if (ImGui::SliderFloat("Base Scroll Speed", &baseSpeed, 0.0f, 1.0f)) {
+			stageSettings_->SetBaseScrollSpeed(baseSpeed);
+		}
+
+		float maxSpeed = stageSettings_->GetMaxScrollSpeed();
+		if (ImGui::SliderFloat("Max Scroll Speed", &maxSpeed, baseSpeed, 2.0f)) {
+			stageSettings_->SetMaxScrollSpeed(maxSpeed);
+		}
+
+		float accel = stageSettings_->GetScrollAcceleration();
+		if (ImGui::SliderFloat("Scroll Acceleration", &accel, 0.0f, 0.01f)) {
+			stageSettings_->SetScrollAcceleration(accel);
 		}
 	}
 
@@ -30,7 +74,7 @@ void GameScene::ImGui()
 void GameScene::Initialize() {
 
 	sceneID_ = SceneID::Game;
-	isGameOver_ = false;
+	gameState_ = GameState::Playing;
 	sceneChangeRequest_ = false;
 
 	camera_->SetDebugCamera(false); // ゲーム用カメラを使う
@@ -50,19 +94,25 @@ void GameScene::Initialize() {
 void GameScene::Update() {
 
 	camera_->Update();
-	Matrix4x4 view = camera_->GetViewMatrix();
+	view = camera_->GetViewMatrix();
 
-	if (!isGameOver_) {
-		player_->Update(view);
-		stageSettings_->Update(view);
+	if (gameState_ == GameState::Playing) {
+		PlayingUpdate();
 
-		// 当たり判定チェック
-		CheckCollisions();
+		if(Input::PushKey(DIK_ESCAPE)){
+			gameState_ = GameState::Paused;
+		}
 	}
-	else {
+	else if (gameState_ == GameState::Paused) {
+		PausedUpdate();
+		if (Input::PushKey(DIK_ESCAPE)) {
+			gameState_ = GameState::Playing;
+		}
+	}
+	else if(gameState_ == GameState::GameOver){
 		// 1でリスタート
 		if (Input::PushKey(DIK_1)) {
-			isGameOver_ = false;
+			gameState_ = GameState::Playing;
 			stageSettings_->Reset();
 			Engine::ChangePostEffect(Engine::PostEffectType::Normal);
 			player_->Reset();
@@ -86,6 +136,27 @@ void GameScene::Draw() {
 
 	// プレイヤー描画
 	player_->Draw();
+
+	// ポーズ中の描画
+	if (gameState_ == GameState::Paused) {
+		pauseSystem_->Draw();
+	}
+
+
+}
+
+void GameScene::PlayingUpdate()
+{
+	player_->Update(view);
+	stageSettings_->Update(view);
+
+	// 当たり判定チェック
+	CheckCollisions();
+}
+
+void GameScene::PausedUpdate()
+{
+	pauseSystem_->Update();
 }
 
 void GameScene::CheckCollisions()
@@ -109,7 +180,7 @@ void GameScene::CheckCollisions()
 
 		if (Collision::CheckAABB(playerAABB, obstacleAABB)) {
 			// 衝突！ゲームオーバー
-			isGameOver_ = true;
+			gameState_ = GameState::GameOver;
 			stageSettings_->SetGameOver(true);
 			Engine::ChangePostEffect(Engine::PostEffectType::GrayScale);
 			break;

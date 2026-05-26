@@ -43,7 +43,7 @@ void StageSettings::Update(Matrix4x4 view)
 		}
 	}
 	if (scrollSpeed_ > maxScrollSpeed_ / 2) {
-		Engine::ChangePostEffect(Engine::PostEffectType::OutLine);
+		Engine::ChangePostEffect(Engine::PostEffectType::Vignetting);
 	}
 	else {
 		Engine::ChangePostEffect(Engine::PostEffectType::Normal);

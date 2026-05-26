@@ -62,6 +62,7 @@ public:
 	void SetBaseScrollSpeed(float speed) { baseScrollSpeed_ = speed; scrollSpeed_ = speed; }
 	void SetMaxScrollSpeed(float speed) { maxScrollSpeed_ = speed; }
 	void SetScrollAcceleration(float accel) { scrollAcceleration_ = accel; }
+	float GetScrollAcceleration() const { return scrollAcceleration_; }
 	bool GetIsGameOver() const { return isGameOver_; }
 
 	// ゲームオーバー設定
