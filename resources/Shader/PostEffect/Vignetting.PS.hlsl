@@ -1,8 +1,10 @@
-#include "Vignetting.hlsli"
+#include "PostEffect.hlsli"
 
 Texture2D<float32_t4> gTexture : register(t0);
 sampler gSampler : register(s0);
 
+
+ConstantBuffer<PostEffectData> gPostEffect : register(b0);
 
 PixelShaderOutput main(VertexShaderOutput input)
 {
@@ -13,8 +15,9 @@ PixelShaderOutput main(VertexShaderOutput input)
     float32_t2 correct = input.texcoord * (1.0f - input.texcoord.yx);
     //currectだけで計算すると中心のサイファ位置が0.0635で暗すぎるのでScaleで調整
     float vignette = correct.x * correct.y * 16.0f;
-    //とりあえず0.8乗でそれっぽく
-    vignette = saturate(pow(vignette, 0.8f));
+    //時間経過と強さ(ratio)を反映して累乗値を調整
+    float vignettePower = (0.8f + 0.2f * sin(gPostEffect.time * 3.0f)) * gPostEffect.ratio;
+    vignette = saturate(pow(vignette, vignettePower));
     //係数として乗算
     output.color.rgb *= vignette;
         

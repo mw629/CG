@@ -141,7 +141,7 @@
     <ClCompile Include="MatchaEngine\GameObjects\Light\DirectionalLight.cpp">
       <Filter>MatchaEngine\Graphics</Filter>
     </ClCompile>
-    <ClCompile Include="MatchaEngine\Graphics\Draw.cpp">
+    <ClCompile Include="MatchaEngine\Graphics\Render\Draw.cpp">
       <Filter>MatchaEngine\Graphics</Filter>
     </ClCompile>
     <ClCompile Include="MatchaEngine\Graphics\GpuSyncManager.cpp">
@@ -256,6 +256,9 @@
       <Filter>ソース ファイル</Filter>
     </ClCompile>
     <ClCompile Include="Game\GameScene\System\PauseSystem.cpp">
+      <Filter>ソース ファイル</Filter>
+    </ClCompile>
+    <ClCompile Include="MatchaEngine\Graphics\Render\PostEffect.cpp">
       <Filter>ソース ファイル</Filter>
     </ClCompile>
   </ItemGroup>
@@ -385,7 +388,7 @@
     <ClInclude Include="MatchaEngine\GameObjects\Light\DirectionalLight.h">
       <Filter>MatchaEngine\Graphics</Filter>
     </ClInclude>
-    <ClInclude Include="MatchaEngine\Graphics\Draw.h">
+    <ClInclude Include="MatchaEngine\Graphics\Render\Draw.h">
       <Filter>MatchaEngine\Graphics</Filter>
     </ClInclude>
     <ClInclude Include="MatchaEngine\Graphics\GpuSyncManager.h">
@@ -502,6 +505,9 @@
     <ClInclude Include="Game\GameScene\System\PauseSystem.h">
       <Filter>ヘッダー ファイル</Filter>
     </ClInclude>
+    <ClInclude Include="MatchaEngine\Graphics\Render\PostEffect.h">
+      <Filter>ヘッダー ファイル</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <Text Include="externals\imgui\LICENSE.txt">
@@ -520,5 +526,6 @@
     <None Include="resources\Shader\SkyBox.PS.hlsl" />
     <None Include="resources\Shader\SkyBox.hlsli" />
     <None Include=".github\copilot-instructions.md" />
+    <None Include="resources\Shader\PostEffect\PostEffect.hlsli" />
   </ItemGroup>
 </Project>

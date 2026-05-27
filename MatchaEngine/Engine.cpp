@@ -15,7 +15,6 @@
 #pragma comment(lib,"winmm.lib")
 
 bool Engine::isEnd_ = false;
-ShaderName Engine::activePostEffect_ = "CopyShader";
 
 Engine::~Engine()
 {
@@ -173,7 +172,10 @@ void Engine::Setting()
 
 
   EffectDefinition::SetDescriptorHeap(descriptorHeap.get());
-	EffectDefinition::SetDevice(graphics.get()->GetDevice());
+  EffectDefinition::SetDevice(graphics.get()->GetDevice());
+
+  postEffect_ = std::make_unique<PostEffect>();
+  postEffect_->Initialize();
 }
 
 
@@ -190,7 +192,7 @@ void Engine::PostDraw()
 	command->GetCommandList()->RSSetViewports(1, viewportScissor->GetViewport());
 	command->GetCommandList()->RSSetScissorRects(1, viewportScissor->GetScissorRect());
 
-	Draw::DrawCopy(renderTexture.get()->GetSrvHandleGPU(), activePostEffect_);
+	Draw::DrawCopy(renderTexture.get()->GetSrvHandleGPU(), PostEffect::GetActiveShaderName(), postEffect_.get());
 
 #ifdef _USE_IMGUI
 	//ImGuiの内部コマンドを生成
@@ -234,6 +236,10 @@ void Engine::NewFrame() {
 	input.get()->Updata();
 
 	gamePadInput.get()->Update();
+
+	if (postEffect_) {
+		postEffect_->Update(1.0f / 60.0f);
+	}
 }
 
 void Engine::EndFrame() {
@@ -332,14 +338,8 @@ void Engine::Debug()
 
 	textureLoader.get()->Draw();
 
-	// ポストエフェクト切り替え UI
-	static int currentEffectIndex = 0;
-	const char* effectNames[] = { "Normal", "GrayScale", "Sepia", "OutLine", "Smoothing", "Vignetting" };
-	
-	if (ImGui::Combo("Post Effect", &currentEffectIndex, effectNames, IM_ARRAYSIZE(effectNames)))
-	{
-		ChangePostEffect(static_cast<PostEffectType>(currentEffectIndex));
-	}
+	// PostEffect parameters and UI
+	postEffect_->ImGuiWindow();
 
 	ImGui::End();
 

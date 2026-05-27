@@ -114,7 +114,7 @@ void GameScene::Update() {
 		if (Input::PushKey(DIK_1)) {
 			gameState_ = GameState::Playing;
 			stageSettings_->Reset();
-			Engine::ChangePostEffect(Engine::PostEffectType::Normal);
+			PostEffect::SetActivePostEffect(PostEffect::Type::Normal);
 			player_->Reset();
 		}
 		// 2でタイトルへ
@@ -182,7 +182,7 @@ void GameScene::CheckCollisions()
 			// 衝突！ゲームオーバー
 			gameState_ = GameState::GameOver;
 			stageSettings_->SetGameOver(true);
-			Engine::ChangePostEffect(Engine::PostEffectType::GrayScale);
+			PostEffect::SetActivePostEffect(PostEffect::Type::GrayScale);
 			break;
 		}
 	}

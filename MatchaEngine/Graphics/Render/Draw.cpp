@@ -2,6 +2,8 @@
 #include "Graphics/GraphicsDevice.h"
 #include <cassert>
 #include "ModelManager.h"
+#include "PostEffect.h"
+#include "Texture.h"
 
 namespace {
 	ID3D12GraphicsCommandList* commandList_{};
@@ -236,11 +238,38 @@ void Draw::DrawGrid(Grid* grid)
 	commandList_->DrawInstanced(grid->GetSubdivision() * 4, 1, 0, 0);
 }
 
-void Draw::DrawCopy(D3D12_GPU_DESCRIPTOR_HANDLE textureHandle, ShaderName shader)
+void Draw::DrawCopy(D3D12_GPU_DESCRIPTOR_HANDLE textureHandle, ShaderName shader, PostEffect* postEffect)
 {
 	preDraw(shader, BlendMode::kBlendModeNone);
-	commandList_->SetGraphicsRootDescriptorTable(0, textureHandle);
+	
+	// Bind main screen texture using reflection name "gTexture" if present, otherwise fallback to slot 0
+	UINT gTexIndex = graphicsPipelineState_->GetRootParameterIndex(shader, BlendMode::kBlendModeNone, "gTexture");
+	if (gTexIndex != static_cast<UINT>(-1)) {
+		commandList_->SetGraphicsRootDescriptorTable(gTexIndex, textureHandle);
+	} else {
+		commandList_->SetGraphicsRootDescriptorTable(0, textureHandle);
+	}
+
+	if (postEffect) {
+		// Bind post effect parameters constant buffer
+		UINT cbIndex = graphicsPipelineState_->GetRootParameterIndex(shader, BlendMode::kBlendModeNone, "gPostEffect");
+		if (cbIndex != static_cast<UINT>(-1) && postEffect->GetConstantBufferResource()) {
+			commandList_->SetGraphicsRootConstantBufferView(cbIndex, postEffect->GetConstantBufferResource()->GetGPUVirtualAddress());
+		}
+
+		// Bind any additional textures registered in the post effect
+		for (const auto& [name, path] : postEffect->GetTexturePaths()) {
+			UINT texIndex = graphicsPipelineState_->GetRootParameterIndex(shader, BlendMode::kBlendModeNone, name);
+			if (texIndex != static_cast<UINT>(-1)) {
+				Texture texture;
+				D3D12_GPU_DESCRIPTOR_HANDLE handle = texture.TextureData(path);
+				commandList_->SetGraphicsRootDescriptorTable(texIndex, handle);
+			}
+		}
+	}
+
 	commandList_->DrawInstanced(3, 1, 0, 0);
 }
+
 
 

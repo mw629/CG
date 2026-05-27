@@ -76,6 +76,8 @@
 #include "TextureLoader.h"
 
 
+#include "Graphics/Render/PostEffect.h"
+
 class Engine
 {
 private:
@@ -109,6 +111,7 @@ private:
 
 	std::unique_ptr<Draw> draw;
 	std::unique_ptr<TextureLoader> textureLoader;
+	std::unique_ptr<PostEffect> postEffect_;
 
 	GpuSyncManager gpuSyncManager;
 
@@ -123,8 +126,6 @@ private:
 	ID3D12DescriptorHeap* descriptorHeaps[1];
 
 	static bool isEnd_;
-
-	static ShaderName activePostEffect_;
 
 public:
 
@@ -148,31 +149,10 @@ public:
 	void Debug();
 
 	Input* GetInput() { return input.get(); }
-
-	enum class PostEffectType {
-		Normal,
-		GrayScale,
-		Sepia,
-		OutLine,
-		Smoothing,
-		Vignetting
-	};
-
-	static void SetActivePostEffect(const ShaderName& effect) { activePostEffect_ = effect; }
-	static ShaderName GetActivePostEffect() { return activePostEffect_; }
-
-	static void ChangePostEffect(PostEffectType type) {
-		switch (type) {
-		case PostEffectType::Normal: activePostEffect_ = "CopyShader"; break;
-		case PostEffectType::GrayScale: activePostEffect_ = "GrayScaleShader"; break;
-		case PostEffectType::Sepia: activePostEffect_ = "GrayScaleSepiaToneShader"; break;
-		case PostEffectType::OutLine: activePostEffect_ = "OutLineShader"; break;
-		case PostEffectType::Smoothing: activePostEffect_ = "SmoothingShader"; break;
-		case PostEffectType::Vignetting: activePostEffect_ = "VignettingShader"; break;
-		}
-	}
+	PostEffect* GetPostEffect() { return postEffect_.get(); }
 
 	static void SetEnd(bool isEnd) { isEnd_ = isEnd; }
 	static bool IsEnd() { return isEnd_; }
 };
+
 

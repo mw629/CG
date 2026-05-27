@@ -1,4 +1,4 @@
-#include "CopyImage.hlsli"
+#include "PostEffect.hlsli"
 
 Texture2D<float32_t4> gTexture : register(t0);
 sampler gSampler : register(s0);
