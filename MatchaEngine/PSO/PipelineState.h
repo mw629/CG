@@ -30,6 +30,8 @@ const ShaderName OutLineShader = "OutLineShader";
 const ShaderName SmoothingShader = "SmoothingShader";
 const ShaderName GaussianFilterShader = "GaussianFilterShader";
 const ShaderName VignettingShader = "VignettingShader";
+const ShaderName RadialBlurShader = "RadialBlurShader";
+const ShaderName DissolveShader = "DissolveShader";
 
 static const char* ShaderNameToString(const ShaderName& name)
 {

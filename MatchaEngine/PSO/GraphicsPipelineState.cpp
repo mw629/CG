@@ -181,13 +181,17 @@ void GraphicsPipelineState::ALLPSOCreate(std::ostream& os, ID3D12Device* device)
 		{ ParticleShader, { L"resources/Shader/Particle.VS.hlsl", L"resources/Shader/Particle.PS.hlsl", particleInput, true, D3D12_DEPTH_WRITE_MASK_ZERO, D3D12_COMPARISON_FUNC_LESS_EQUAL, D3D12_CULL_MODE_NONE, D3D12_FILL_MODE_SOLID } },
 		{ LineShader, { L"resources/Shader/Line.VS.hlsl", L"resources/Shader/Line.PS.hlsl", lineInput, true, D3D12_DEPTH_WRITE_MASK_ALL, D3D12_COMPARISON_FUNC_LESS_EQUAL, D3D12_CULL_MODE_NONE, D3D12_FILL_MODE_SOLID } },
 		{ SkyBoxShader, { L"resources/Shader/SkyBox.VS.hlsl", L"resources/Shader/SkyBox.PS.hlsl", objInput, true, D3D12_DEPTH_WRITE_MASK_ZERO, D3D12_COMPARISON_FUNC_LESS_EQUAL, D3D12_CULL_MODE_FRONT, D3D12_FILL_MODE_SOLID } },
-		{ CopyImageShader, { L"resources/Shader/CopyImage.VS.hlsl", L"resources/Shader/CopyImage.PS.hlsl", lineInput, false, D3D12_DEPTH_WRITE_MASK_ZERO, D3D12_COMPARISON_FUNC_ALWAYS, D3D12_CULL_MODE_NONE, D3D12_FILL_MODE_SOLID } },
-		{ GrayScaleShader, { L"resources/Shader/PostEffect/GrayScale.VS.hlsl", L"resources/Shader/PostEffect/GrayScale.PS.hlsl", lineInput, false, D3D12_DEPTH_WRITE_MASK_ZERO, D3D12_COMPARISON_FUNC_ALWAYS, D3D12_CULL_MODE_NONE, D3D12_FILL_MODE_SOLID } },
-		{ GrayScaleSepiaToneShader, { L"resources/Shader/PostEffect/GrayScale.VS.hlsl", L"resources/Shader/PostEffect/GrayScaleSepiaTone.PS.hlsl", lineInput, false, D3D12_DEPTH_WRITE_MASK_ZERO, D3D12_COMPARISON_FUNC_ALWAYS, D3D12_CULL_MODE_NONE, D3D12_FILL_MODE_SOLID } },
-		{ OutLineShader, { L"resources/Shader/PostEffect/OutLine.VS.hlsl", L"resources/Shader/PostEffect/OutLine.PS.hlsl", lineInput, false, D3D12_DEPTH_WRITE_MASK_ZERO, D3D12_COMPARISON_FUNC_ALWAYS, D3D12_CULL_MODE_NONE, D3D12_FILL_MODE_SOLID } },
-		{ SmoothingShader, { L"resources/Shader/PostEffect/Smoothing.VS.hlsl", L"resources/Shader/PostEffect/Smoothing.PS.hlsl", lineInput, false, D3D12_DEPTH_WRITE_MASK_ZERO, D3D12_COMPARISON_FUNC_ALWAYS, D3D12_CULL_MODE_NONE, D3D12_FILL_MODE_SOLID } },
-		{ GaussianFilterShader, { L"resources/Shader/PostEffect/GaussianFilter.VS.hlsl", L"resources/Shader/PostEffect/GaussianFilter.PS.hlsl", lineInput, false, D3D12_DEPTH_WRITE_MASK_ZERO, D3D12_COMPARISON_FUNC_ALWAYS, D3D12_CULL_MODE_NONE, D3D12_FILL_MODE_SOLID } },
-		{ VignettingShader, { L"resources/Shader/PostEffect/Vignetting.VS.hlsl", L"resources/Shader/PostEffect/Vignetting.PS.hlsl", lineInput, false, D3D12_DEPTH_WRITE_MASK_ZERO, D3D12_COMPARISON_FUNC_ALWAYS, D3D12_CULL_MODE_NONE, D3D12_FILL_MODE_SOLID } }
+
+		//ポストエフェクト用のシェーダーは全て同じ入力レイアウトを使用する
+		{ CopyImageShader, {  L"resources/Shader/PostEffect/PostEffect.VS.hlsl", L"resources/Shader/PostEffect/CopyImage.PS.hlsl", lineInput, false, D3D12_DEPTH_WRITE_MASK_ZERO, D3D12_COMPARISON_FUNC_ALWAYS, D3D12_CULL_MODE_NONE, D3D12_FILL_MODE_SOLID } },
+		{ GrayScaleShader, {  L"resources/Shader/PostEffect/PostEffect.VS.hlsl", L"resources/Shader/PostEffect/GrayScale.PS.hlsl", lineInput, false, D3D12_DEPTH_WRITE_MASK_ZERO, D3D12_COMPARISON_FUNC_ALWAYS, D3D12_CULL_MODE_NONE, D3D12_FILL_MODE_SOLID } },
+		{ GrayScaleSepiaToneShader, { L"resources/Shader/PostEffect/PostEffect.VS.hlsl", L"resources/Shader/PostEffect/GrayScaleSepiaTone.PS.hlsl", lineInput, false, D3D12_DEPTH_WRITE_MASK_ZERO, D3D12_COMPARISON_FUNC_ALWAYS, D3D12_CULL_MODE_NONE, D3D12_FILL_MODE_SOLID } },
+		{ OutLineShader,{ L"resources/Shader/PostEffect/PostEffect.VS.hlsl", L"resources/Shader/PostEffect/OutLine.PS.hlsl", lineInput, false, D3D12_DEPTH_WRITE_MASK_ZERO, D3D12_COMPARISON_FUNC_ALWAYS, D3D12_CULL_MODE_NONE, D3D12_FILL_MODE_SOLID } },
+		{ SmoothingShader, { L"resources/Shader/PostEffect/PostEffect.VS.hlsl", L"resources/Shader/PostEffect/Smoothing.PS.hlsl", lineInput, false, D3D12_DEPTH_WRITE_MASK_ZERO, D3D12_COMPARISON_FUNC_ALWAYS, D3D12_CULL_MODE_NONE, D3D12_FILL_MODE_SOLID } },
+		{ GaussianFilterShader, { L"resources/Shader/PostEffect/PostEffect.VS.hlsl", L"resources/Shader/PostEffect/GaussianFilter.PS.hlsl", lineInput, false, D3D12_DEPTH_WRITE_MASK_ZERO, D3D12_COMPARISON_FUNC_ALWAYS, D3D12_CULL_MODE_NONE, D3D12_FILL_MODE_SOLID } },
+		{ VignettingShader, { L"resources/Shader/PostEffect/PostEffect.VS.hlsl", L"resources/Shader/PostEffect/Vignetting.PS.hlsl", lineInput, false, D3D12_DEPTH_WRITE_MASK_ZERO, D3D12_COMPARISON_FUNC_ALWAYS, D3D12_CULL_MODE_NONE, D3D12_FILL_MODE_SOLID } },
+		{ RadialBlurShader, { L"resources/Shader/PostEffect/PostEffect.VS.hlsl", L"resources/Shader/PostEffect/RadialBlur.PS.hlsl", lineInput, false, D3D12_DEPTH_WRITE_MASK_ZERO, D3D12_COMPARISON_FUNC_ALWAYS, D3D12_CULL_MODE_NONE, D3D12_FILL_MODE_SOLID } },
+		{ DissolveShader, { L"resources/Shader/PostEffect/PostEffect.VS.hlsl", L"resources/Shader/PostEffect/Dissolve.PS.hlsl", lineInput, false, D3D12_DEPTH_WRITE_MASK_ZERO, D3D12_COMPARISON_FUNC_ALWAYS, D3D12_CULL_MODE_NONE, D3D12_FILL_MODE_SOLID } }
 	};
 
 	for (const auto& pair : configs) {

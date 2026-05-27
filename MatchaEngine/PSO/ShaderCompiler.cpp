@@ -32,12 +32,20 @@ Microsoft::WRL::ComPtr<IDxcBlob> ShaderCompile::CompileShader(std::ostream& os,
 
 	//hldlファイルを読み込む//
 
+	//Shaderのファイル名を取得
+	std::wstring shaderName = filePath.substr(filePath.find_last_of(L"\\/") + 1);
+
 	//これからシェーダーをコンパイルする旨をログに出す
-	Log(os, ConvertString(std::format(L"Begin CompileShader,path:{},profile:{}\n", filePath, profile)));
+	Log(os, ConvertString(std::format(L"Begin CompileShader,[{}],path:{},profile:{}\n", shaderName, filePath, profile)));
 	//hlslファイルを読む
 	Microsoft::WRL::ComPtr<IDxcBlobEncoding> shaderSource = nullptr;
 	HRESULT hr = dxcUtils.Get()->LoadFile(filePath.c_str(), nullptr, &shaderSource);
 	//読めなかったら止める
+	if (SUCCEEDED(hr)) {
+		Log(os, ConvertString(std::format(L"File loaded successfully,[{}]\n", shaderName)));
+	} else {
+		Log(os, ConvertString(std::format(L"Failed to load file,[{}]\n", shaderName)));
+	}
 	assert(SUCCEEDED(hr));
 	//読み込んだファイルの内容を設定する
 	DxcBuffer shaderSourceBuffer;
@@ -46,6 +54,7 @@ Microsoft::WRL::ComPtr<IDxcBlob> ShaderCompile::CompileShader(std::ostream& os,
 	shaderSourceBuffer.Encoding = DXC_CP_UTF8;//UTF8の文字コードであることを通知
 
 	//Compilする//
+	Log(os, ConvertString(std::format(L"Starting compilation,[{}],profile:{}\n", shaderName, profile)));
 
 	LPCWSTR arguments[] = {
 		filePath.c_str(),//コンパイル対象のhlslファイル名
@@ -65,6 +74,11 @@ Microsoft::WRL::ComPtr<IDxcBlob> ShaderCompile::CompileShader(std::ostream& os,
 		IID_PPV_ARGS(&shaderResult)//コンパイル結果
 	);
 	//コンパイルエラーではなくdxcが起動できないなど致命的な結果
+	if (SUCCEEDED(hr)) {
+		Log(os, ConvertString(std::format(L"Compilation process succeeded,[{}]\n", shaderName)));
+	} else {
+		Log(os, ConvertString(std::format(L"Compilation process failed,[{}]\n", shaderName)));
+	}
 	assert(SUCCEEDED(hr));
 
 	//警告・エラーが出ていないか確認する//
@@ -73,9 +87,13 @@ Microsoft::WRL::ComPtr<IDxcBlob> ShaderCompile::CompileShader(std::ostream& os,
 	Microsoft::WRL::ComPtr<IDxcBlobUtf8> shaderError = nullptr;
 	shaderResult->GetOutput(DXC_OUT_ERRORS, IID_PPV_ARGS(&shaderError), nullptr);
 	if (shaderError != nullptr && shaderError->GetStringLength() != 0) {
+		Log(os, ConvertString(std::format(L"\n=== COMPILATION ERROR in [{}] ===\n", shaderName)));
 		Log(os, shaderError->GetStringPointer());
+		Log(os, ConvertString(std::format(L"=== END ERROR [{}] ===\n", shaderName)));
 		//警告・エラーダメゼッタイ
 		assert(false);
+	} else {
+		Log(os, ConvertString(std::format(L"No errors or warnings detected,[{}]\n", shaderName)));
 	}
 
 	//Compile結果を受け取って返す//
@@ -83,9 +101,14 @@ Microsoft::WRL::ComPtr<IDxcBlob> ShaderCompile::CompileShader(std::ostream& os,
 	//コンパイル結果から実行用のバイナリ部分を取得
 	Microsoft::WRL::ComPtr<IDxcBlob> shaderBlob = nullptr;
 	hr = shaderResult->GetOutput(DXC_OUT_OBJECT, IID_PPV_ARGS(&shaderBlob), nullptr);
+	if (SUCCEEDED(hr)) {
+		Log(os, ConvertString(std::format(L"Binary blob obtained successfully,[{}]\n", shaderName)));
+	} else {
+		Log(os, ConvertString(std::format(L"Failed to obtain binary blob,[{}]\n", shaderName)));
+	}
 	assert(SUCCEEDED(hr));
 	//成功したログを出す
-	Log(os, ConvertString(std::format(L"Compile Succeeded,path:{},profile:{}\n", filePath, profile)));
+	Log(os, ConvertString(std::format(L"Compile Succeeded,[{}],path:{},profile:{}\n", shaderName, filePath, profile)));
 	//実行用のバイナリを返却
 	return shaderBlob;
 
@@ -93,9 +116,25 @@ Microsoft::WRL::ComPtr<IDxcBlob> ShaderCompile::CompileShader(std::ostream& os,
 
 void ShaderCompile::CreateShaderCompile(const PipelineConfig& config, std::ostream& os, Microsoft::WRL::ComPtr<IDxcUtils> dxcUtils, Microsoft::WRL::ComPtr<IDxcCompiler3> dxcCompiler, Microsoft::WRL::ComPtr<IDxcIncludeHandler> includeHandler)
 {
+	Log(os, "====== CreateShaderCompile Start ======\n");
+
+	Log(os, "Compiling Vertex Shader...\n");
 	vertexShaderBlob_ = CompileShader(os, config.vsPath, L"vs_6_0", dxcUtils, dxcCompiler, includeHandler);
+	if (vertexShaderBlob_ != nullptr) {
+		Log(os, "Vertex Shader compiled successfully\n");
+	} else {
+		Log(os, "Vertex Shader compilation failed\n");
+	}
 	assert(vertexShaderBlob_ != nullptr);
 
+	Log(os, "Compiling Pixel Shader...\n");
 	pixelShaderBlob_ = CompileShader(os, config.psPath, L"ps_6_0", dxcUtils, dxcCompiler, includeHandler);
+	if (pixelShaderBlob_ != nullptr) {
+		Log(os, "Pixel Shader compiled successfully\n");
+	} else {
+		Log(os, "Pixel Shader compilation failed\n");
+	}
 	assert(pixelShaderBlob_ != nullptr);
+
+	Log(os, "====== CreateShaderCompile End ======\n");
 }

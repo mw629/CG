@@ -1,4 +1,4 @@
-#include "CopyImage.hlsli"
+#include "PostEffect.hlsli"
 
 Texture2D<float32_t4> gTexture : register(t0);
 Texture2D<float32_t> gMaskTexture : register(t1);
@@ -19,6 +19,8 @@ PixelShaderOutput main(VertexShaderOutput input)
         discard;
     }
     output.color.rgb = edge * float32_t3(1.0f, 0.4f, 0.3f);
+    output.color.a = 1.0f;
+    
     
     return output;
 }
