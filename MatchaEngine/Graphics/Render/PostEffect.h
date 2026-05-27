@@ -48,16 +48,28 @@ public:
 	void Update(float deltaTime);
 
 	// Getters and Setters
-	void SetTime(float time) { time_ = time; }
+	void SetTime(float time) { 
+		time_ = time;
+		if (cbData_) cbData_->time = time_;
+	}
 	float GetTime() const { return time_; }
 
-	void SetRatio(float ratio) { ratio_ = ratio; }
+	void SetRatio(float ratio) { 
+		ratio_ = ratio;
+		if (cbData_) cbData_->ratio = ratio_;
+	}
 	float GetRatio() const { return ratio_; }
 
-	void SetValue1(float val) { value1_ = val; }
+	void SetValue1(float val) { 
+		value1_ = val;
+		if (cbData_) cbData_->value1 = value1_;
+	}
 	float GetValue1() const { return value1_; }
 
-	void SetValue2(float val) { value2_ = val; }
+	void SetValue2(float val) { 
+		value2_ = val;
+		if (cbData_) cbData_->value2 = value2_;
+	}
 	float GetValue2() const { return value2_; }
 
 	void SetTexturePath(const std::string& name, const std::string& filePath);
@@ -83,4 +95,18 @@ public:
 	static void SetActivePostEffectByName(const std::string& name) { activeShaderName_ = name; }
 	static Type GetActivePostEffect() { return activeType_; }
 	static std::string GetActiveShaderName() { return activeShaderName_; }
+
+	// Convenience method to set all parameters at once
+	void SetPostEffectParameters(float time, float ratio, float value1, float value2) {
+		time_ = time;
+		ratio_ = ratio;
+		value1_ = value1;
+		value2_ = value2;
+		if (cbData_) {
+			cbData_->time = time_;
+			cbData_->ratio = ratio_;
+			cbData_->value1 = value1_;
+			cbData_->value2 = value2_;
+		}
+	}
 };
