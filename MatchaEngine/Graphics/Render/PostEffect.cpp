@@ -5,7 +5,7 @@
 
 // Static member initialization
 PostEffect::Type PostEffect::activeType_ = PostEffect::Type::Normal;
-std::string PostEffect::activeShaderName_ = "GaussianFilterShader";
+std::string PostEffect::activeShaderName_ = "CopyShader";
 
 PostEffect::PostEffect() {
 }

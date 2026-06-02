@@ -77,6 +77,8 @@ void GameScene::Initialize() {
 	gameState_ = GameState::Playing;
 	sceneChangeRequest_ = false;
 
+
+
 	camera_->SetDebugCamera(false); // ゲーム用カメラを使う
 	camera_->SetTransform(cameraTransform_);
 	camera_->Update();
@@ -92,6 +94,8 @@ void GameScene::Initialize() {
 }
 
 void GameScene::Update() {
+
+	PostEffect::SetActivePostEffect(PostEffect::Type::GaussianFilter);
 
 	camera_->Update();
 	view = camera_->GetViewMatrix();
