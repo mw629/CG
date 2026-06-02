@@ -10,21 +10,21 @@ void TestScene::ImGui()
 {
 #ifdef _USE_IMGUI
 
-	camera_.get()->ImGui();
-	for (int i = 0, n = static_cast<int>(particle_.size()); i < n; ++i) {
-		particle_[i].get()->ImGui();
-	}
-	// スライダーで座標を操作（表示・編集ともに小数第1桁）
-	// 範囲は整数部4桁を許容する -9999.9 〜 9999.9
-	ImGui::Spacing();
-	ImGui::Text("SpritePos");
-	ImGui::SliderFloat2("##sprite_pos_slider", &spriteData_.transform.translate.x, -9999.9f, 9999.9f, "%.1f");
+	//camera_.get()->ImGui();
+	//for (int i = 0, n = static_cast<int>(particle_.size()); i < n; ++i) {
+	//	particle_[i].get()->ImGui();
+	//}
+	//// スライダーで座標を操作（表示・編集ともに小数第1桁）
+	//// 範囲は整数部4桁を許容する -9999.9 〜 9999.9
+	//ImGui::Spacing();
+	//ImGui::Text("SpritePos");
+	//ImGui::SliderFloat2("##sprite_pos_slider", &spriteData_.transform.translate.x, -9999.9f, 9999.9f, "%.1f");
 
-	// 表示は整数部4桁・小数1桁風に（幅指定で揃える） 
-	ImGui::Text("Pos: %4.1f, %4.1f", spriteData_.transform.translate.x, spriteData_.transform.translate.y);
+	//// 表示は整数部4桁・小数1桁風に（幅指定で揃える） 
+	//ImGui::Text("Pos: %4.1f, %4.1f", spriteData_.transform.translate.x, spriteData_.transform.translate.y);
 
 	//skyBox_.get()->ImGui();
-	sphere_.get()->ImGui();
+	//sphere_.get()->ImGui();
 	//animation_.get()->ImGui();	
 	//model_.get()->ImGui();
 #endif // _USE_IMGUI

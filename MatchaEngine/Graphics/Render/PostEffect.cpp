@@ -68,7 +68,7 @@ void PostEffect::ImGuiWindow() {
 	// Post Effect type selection
 	if (ImGui::TreeNode("Post Effect Selection")) {
 		static int currentEffectIndex = static_cast<int>(activeType_);
-		const char* effectNames[] = { "Normal", "GrayScale", "Sepia", "OutLine", "Smoothing", "Vignetting", "RadialBlur", "Dissolve", "GaussianFilter" };
+		const char* effectNames[] = { "Normal", "GrayScale", "Sepia", "OutLine", "Smoothing", "Vignetting", "RadialBlur", "Dissolve", "GaussianFilter","Random"};
 
 		if (ImGui::Combo("Post Effect", &currentEffectIndex, effectNames, IM_ARRAYSIZE(effectNames))) {
 			SetActivePostEffect(static_cast<Type>(currentEffectIndex));
@@ -90,6 +90,7 @@ void PostEffect::SetActivePostEffect(Type type) {
 	case Type::RadialBlur: activeShaderName_ = "RadialBlurShader"; break;
 	case Type::Dissolve: activeShaderName_ = "DissolveShader"; break;
 	case Type::GaussianFilter: activeShaderName_ = "GaussianFilterShader"; break;
+	case Type::Random: activeShaderName_ = "RandomShader"; break;
 	}
 }
 
