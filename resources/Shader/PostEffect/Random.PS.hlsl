@@ -13,7 +13,7 @@ float rand2dTo1d(float2 value, float time)
 }
 
 PixelShaderOutput main(VertexShaderOutput input)
-{   
+{
     PixelShaderOutput output;
     
     // 元のシーンのカラーをサンプリングします
@@ -45,6 +45,6 @@ PixelShaderOutput main(VertexShaderOutput input)
     // ratio に基づいて元のカラーとノイズをブレンドします（ratio=1.0 のとき完全なノイズ塗りつぶしになります）
     output.color.rgb = lerp(color.rgb, noiseColor, gPostEffect.ratio);
     output.color.a = color.a;
-    
+  
     return output;
 }
