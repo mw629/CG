@@ -32,6 +32,7 @@ const ShaderName GaussianFilterShader = "GaussianFilterShader";
 const ShaderName VignettingShader = "VignettingShader";
 const ShaderName RadialBlurShader = "RadialBlurShader";
 const ShaderName DissolveShader = "DissolveShader";
+const ShaderName RandomShader = "RandomShader";
 
 static const char* ShaderNameToString(const ShaderName& name)
 {

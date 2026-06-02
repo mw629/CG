@@ -22,7 +22,8 @@ public:
 		Vignetting,
 		RadialBlur,
 		Dissolve,
-		GaussianFilter
+		GaussianFilter,
+		Random
 	};
 
 private:
