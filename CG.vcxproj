@@ -171,6 +171,7 @@ copy "$(WindowsSdkDir)bin\$(TargetPlatformVersion)\x64\dxil.dll" "$(TargetDir)dx
     <ClCompile Include="MatchaEngine\Graphics\GpuSyncManager.cpp" />
     <ClCompile Include="MatchaEngine\GameObjects\Camera\DebugCamera.cpp" />
     <ClCompile Include="MatchaEngine\GameObjects\Object\2d\Sprite.cpp" />
+    <ClCompile Include="MatchaEngine\PSO\ComputePipeline.cpp" />
     <ClCompile Include="MatchaEngine\PSO\PipelineState.cpp" />
     <ClCompile Include="MatchaEngine\PSO\ShaderCompiler.cpp" />
     <ClCompile Include="MatchaEngine\Resource\Audio.cpp" />
@@ -339,6 +340,7 @@ copy "$(WindowsSdkDir)bin\$(TargetPlatformVersion)\x64\dxil.dll" "$(TargetDir)dx
     <ClInclude Include="MatchaEngine\GameObjects\Light\DirectionalLight.h" />
     <ClInclude Include="MatchaEngine\Graphics\GpuSyncManager.h" />
     <ClInclude Include="MatchaEngine\GameObjects\Object\2d\Sprite.h" />
+    <ClInclude Include="MatchaEngine\PSO\ComputePipeline.h" />
     <ClInclude Include="MatchaEngine\PSO\PipelineState.h" />
     <ClInclude Include="MatchaEngine\PSO\ShaderCompiler.h" />
     <ClInclude Include="MatchaEngine\Resource\Load.h" />
