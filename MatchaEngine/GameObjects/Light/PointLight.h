@@ -7,14 +7,22 @@ class PointLight
 {
 private:
 	Microsoft::WRL::ComPtr<ID3D12Resource> pointLightResource_;
-	PointLightData*pointLightData_ = nullptr;
+	PointLightData* pointLightData_ = nullptr;
 
+	static const int kNumLights = 4;
 
-	Vector4 color_ = { 1.0f,1.0f,1.0f,1.0f };
-	Vector3 position_ = { 0.0f,2.0f,0.0f };
-	float intensity_ = 1.0f;
-	float radius_ = 10.0f;
-	float decay_ = 2.0f;
+	Vector4 color_[kNumLights] = {
+		{1.0f,1.0f,1.0f,1.0f}, {1.0f,1.0f,1.0f,1.0f},
+		{1.0f,1.0f,1.0f,1.0f}, {1.0f,1.0f,1.0f,1.0f}
+	};
+	Vector3 position_[kNumLights] = {
+		{0.0f,2.0f,0.0f}, {0.0f,2.0f,0.0f},
+		{0.0f,2.0f,0.0f}, {0.0f,2.0f,0.0f}
+	};
+	float intensity_[kNumLights] = { 1.0f, 0.0f, 0.0f, 0.0f };
+	float radius_[kNumLights] = { 10.0f, 10.0f, 10.0f, 10.0f };
+	float decay_[kNumLights] = { 2.0f, 2.0f, 2.0f, 2.0f };
+	bool active_[kNumLights] = { true, false, false, false };
 
 public:
 

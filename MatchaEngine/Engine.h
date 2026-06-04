@@ -16,10 +16,7 @@
 //GameObjects
 
 //Light
-
-#include "DirectionalLight.h"
-#include "PointLight.h"
-#include "SpotLight.h"
+#include "LightManager.h"
 
 //Camera
 
@@ -120,10 +117,7 @@ private:
 	std::unique_ptr<ResourceBarrierHelper> resourceBarrierHelper;
 
 	std::unique_ptr<GraphicsPipelineState> graphicsPipelineState;
-
-	std::unique_ptr<DirectionalLight> directionalLight;
-	std::unique_ptr<PointLight> pointLight;
-	std::unique_ptr<SpotLight> spotLight;
+	std::unique_ptr<LightManager> lightManager;
 
 	ID3D12DescriptorHeap* descriptorHeaps[1];
 

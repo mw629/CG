@@ -121,30 +121,53 @@ struct Mesh {
 };
 
 struct DirectionalLightData {
-	Vector4 color;//ライトの色
-	Vector3 direction;//ライトの向き
-	float intensity;//輝度
+	Vector4 color; //!< ライトの色
+	Vector3 direction; //!< ライトの向き
+	float intensity; //!< 輝度
+	int32_t active;
+	float padding[3];
 };
 
 struct PointLightData {
-	Vector4 color;//ライトの色
-	Vector3 position;//ライトの向き
-	float intensity;//輝度
-	float radius;//ライトの届く最大距離
-	float decay;//減衰率
-	float padding[2];
+	Vector4 color; //!< ライトの色
+	Vector3 position; //!< ライトの位置
+	float intensity; //!< 輝度
+	float radius; //!< ライトの届く最大距離
+	float decay; //!< 減衰率
+	int32_t active;
+	float padding;
 };
 
 struct SpotLightData {
-	Vector4 color;//ライトの色
-	Vector3 position;//ライトの向き
-	float intensity;//輝度
-	Vector3 direction;//ライトの向き
-	float distance;//ライトの届く最大距離
-	float decay;//減衰率
-	float cosAngle;//スポットライトの余弦
-	float cosFalloffStart;//Falloの開始角度
-	float padding[2];
+	Vector4 color; //!< ライトの色
+	Vector3 position; //!< ライトの位置
+	float intensity; //!< 輝度
+	Vector3 direction; //!< ライトの向き
+	float distance; //!< ライトの届く最大距離
+	float decay; //!< 減衰率
+	float cosAngle; //!< スポットライトの余弦
+	float cosFalloffStart; //!< Falloffの開始角度
+	int32_t active;
+};
+
+const int kMaxLightCount = 64;
+
+struct DirectionalLightGroupData {
+	int32_t numLights;
+	float padding[3];
+	DirectionalLightData lights[kMaxLightCount];
+};
+
+struct PointLightGroupData {
+	int32_t numLights;
+	float padding[3];
+	PointLightData lights[kMaxLightCount];
+};
+
+struct SpotLightGroupData {
+	int32_t numLights;
+	float padding[3];
+	SpotLightData lights[kMaxLightCount];
 };
 
 struct MaterialData

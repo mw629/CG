@@ -117,12 +117,8 @@ void Engine::Setting()
 	graphicsPipelineState.get()->ALLPSOCreate(logStream, graphics.get()->GetDevice());
 
 
-	directionalLight = std::make_unique<DirectionalLight>();
-	directionalLight.get()->CreateDirectionalLight();
-	pointLight = std::make_unique<PointLight>();
-	pointLight.get()->CreatePointLight();
-	spotLight = std::make_unique<SpotLight>();
-	spotLight.get()->CreatePointLight();
+	lightManager = std::make_unique<LightManager>();
+	lightManager->Initialize();
 
 	//ビューポート
 	viewportScissor->CreateViewPort();
@@ -155,7 +151,7 @@ void Engine::Setting()
 	Audio::Initialize();
 
 	Draw::Initialize(command.get()->GetCommandList(), graphicsPipelineState.get(),
-		directionalLight.get(), pointLight.get(), spotLight.get());
+		lightManager.get());
 	Texture::Initialize(graphics->GetDevice(), command->GetCommandList(), descriptorHeap.get(), textureLoader.get());
 
 	CharacterAnimator::SetData(graphics.get()->GetDevice(), descriptorHeap.get());
@@ -345,9 +341,7 @@ void Engine::Debug()
 			
 			if (showLight)
 			{
-				directionalLight->ImGui();
-				pointLight.get()->ImGui();
-				spotLight.get()->ImGui();
+				lightManager->ImGui();
 			}
 
 			ImGui::EndTabItem();

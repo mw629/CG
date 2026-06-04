@@ -152,7 +152,7 @@ copy "$(WindowsSdkDir)bin\$(TargetPlatformVersion)\x64\dxil.dll" "$(TargetDir)dx
     <ClCompile Include="MatchaEngine\GameObjects\Object\3d\Sphere.cpp" />
     <ClCompile Include="MatchaEngine\GameObjects\Object\3d\Triangle.cpp" />
     <ClCompile Include="MatchaEngine\GameObjects\Object\Animation\CharacterAnimator.cpp" />
-    <ClCompile Include="MatchaEngine\GameObjects\Light\LightManeger.cpp" />
+    <ClCompile Include="MatchaEngine\GameObjects\Light\LightManager.cpp" />
     <ClCompile Include="MatchaEngine\GameObjects\Light\PointLight.cpp" />
     <ClCompile Include="MatchaEngine\GameObjects\Object\ObjectBase.cpp" />
     <ClCompile Include="MatchaEngine\Graphics\RenderTexture.cpp" />
@@ -318,7 +318,7 @@ copy "$(WindowsSdkDir)bin\$(TargetPlatformVersion)\x64\dxil.dll" "$(TargetDir)dx
     <ClInclude Include="MatchaEngine\GameObjects\Object\3d\Sphere.h" />
     <ClInclude Include="MatchaEngine\GameObjects\Object\3d\Triangle.h" />
     <ClInclude Include="MatchaEngine\GameObjects\Object\Animation\CharacterAnimator.h" />
-    <ClInclude Include="MatchaEngine\GameObjects\Light\LightManeger.h" />
+    <ClInclude Include="MatchaEngine\GameObjects\Light\LightManager.h" />
     <ClInclude Include="MatchaEngine\GameObjects\Light\PointLight.h" />
     <ClInclude Include="MatchaEngine\GameObjects\Object\ObjectBase.h" />
     <ClInclude Include="MatchaEngine\Graphics\RenderTexture.h" />

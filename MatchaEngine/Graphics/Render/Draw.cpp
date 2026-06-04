@@ -8,9 +8,7 @@
 namespace {
 	ID3D12GraphicsCommandList* commandList_{};
 	GraphicsPipelineState* graphicsPipelineState_;
-	DirectionalLight* directionalLight_;
-	PointLight* pointLight_;
-	SpotLight* spotLight_;
+	LightManager* lightManager_;
 	Camera* camera;
 	D3D12_GPU_DESCRIPTOR_HANDLE environmentTextureSrvHandleGPU_{};
 
@@ -26,13 +24,11 @@ namespace {
 }
 
 void Draw::Initialize(ID3D12GraphicsCommandList* commandList, GraphicsPipelineState* graphicsPipelineState,
-	DirectionalLight* directionalLight, PointLight* pointLight, SpotLight* spotLight)
+	LightManager* lightManager)
 {
 	commandList_ = commandList;
 	graphicsPipelineState_ = graphicsPipelineState;
-	directionalLight_ = directionalLight;
-	pointLight_ = pointLight;
-	spotLight_ = spotLight;
+	lightManager_ = lightManager;
 }
 
 void Draw::SetCamera(Camera* setCamera)
@@ -74,9 +70,9 @@ void Draw::DrawObj(ObjectBase* obj)
 	SetCBV(shader, blend, "gTransformationMatrix", obj->GetWvpDataResource()->GetGPUVirtualAddress());
 	SetTable(shader, blend, "gTexture", obj->GetTextureSrvHandleGPU());
 	SetCBV(shader, blend, "gCamera", camera->GetCameraResource()->GetGPUVirtualAddress());
-	SetCBV(shader, blend, "gDirectionalLight", directionalLight_->GetDirectinalLightResource()->GetGPUVirtualAddress());
-	SetCBV(shader, blend, "gPointLight", pointLight_->GetDirectinalLightResource()->GetGPUVirtualAddress());
-	SetCBV(shader, blend, "gSpotLight", spotLight_->GetDirectinalLightResource()->GetGPUVirtualAddress());
+	SetCBV(shader, blend, "gDirectionalLightGroup", lightManager_->GetDirectionalLightResource()->GetGPUVirtualAddress());
+	SetCBV(shader, blend, "gPointLightGroup", lightManager_->GetPointLightResource()->GetGPUVirtualAddress());
+	SetCBV(shader, blend, "gSpotLightGroup", lightManager_->GetSpotLightResource()->GetGPUVirtualAddress());
 	SetTable(shader, blend, "gEnvironmentTexture", environmentTextureSrvHandleGPU_);
 
 	commandList_->DrawIndexedInstanced(UINT(mesh.indexBufferView_.SizeInBytes / sizeof(uint32_t)), 1, 0, 0, 0);
@@ -108,9 +104,9 @@ void Draw::DrawAnimation(CharacterAnimator* obj)
 	SetTable(shader, blend, "gMatrixPalette", obj->GetPaletteSrvHandleGPU());
 	SetTable(shader, blend, "gTexture", obj->GetTextureSrvHandleGPU());
 	SetCBV(shader, blend, "gCamera", camera->GetCameraResource()->GetGPUVirtualAddress());
-	SetCBV(shader, blend, "gDirectionalLight", directionalLight_->GetDirectinalLightResource()->GetGPUVirtualAddress());
-	SetCBV(shader, blend, "gPointLight", pointLight_->GetDirectinalLightResource()->GetGPUVirtualAddress());
-	SetCBV(shader, blend, "gSpotLight", spotLight_->GetDirectinalLightResource()->GetGPUVirtualAddress());
+	SetCBV(shader, blend, "gDirectionalLightGroup", lightManager_->GetDirectionalLightResource()->GetGPUVirtualAddress());
+	SetCBV(shader, blend, "gPointLightGroup", lightManager_->GetPointLightResource()->GetGPUVirtualAddress());
+	SetCBV(shader, blend, "gSpotLightGroup", lightManager_->GetSpotLightResource()->GetGPUVirtualAddress());
 
 	commandList_->DrawIndexedInstanced(UINT(mesh.indexBufferView_.SizeInBytes / sizeof(uint32_t)), 1, 0, 0, 0);
 }
@@ -131,9 +127,9 @@ void Draw::DrawModel(Model* model)
 	SetCBV(shader, blend, "gTransformationMatrix", model->GetWvpDataResource()->GetGPUVirtualAddress());
 	SetTable(shader, blend, "gTexture", model->GetTextureSrvHandleGPU());
 	SetCBV(shader, blend, "gCamera", camera->GetCameraResource()->GetGPUVirtualAddress());
-	SetCBV(shader, blend, "gDirectionalLight", directionalLight_->GetDirectinalLightResource()->GetGPUVirtualAddress());
-	SetCBV(shader, blend, "gPointLight", pointLight_->GetDirectinalLightResource()->GetGPUVirtualAddress());
-	SetCBV(shader, blend, "gSpotLight", spotLight_->GetDirectinalLightResource()->GetGPUVirtualAddress());
+	SetCBV(shader, blend, "gDirectionalLightGroup", lightManager_->GetDirectionalLightResource()->GetGPUVirtualAddress());
+	SetCBV(shader, blend, "gPointLightGroup", lightManager_->GetPointLightResource()->GetGPUVirtualAddress());
+	SetCBV(shader, blend, "gSpotLightGroup", lightManager_->GetSpotLightResource()->GetGPUVirtualAddress());
 	SetTable(shader, blend, "gEnvironmentTexture", environmentTextureSrvHandleGPU_);
 
 	commandList_->DrawInstanced(UINT(mesh.vertexSize), 1, 0, 0);
@@ -172,9 +168,9 @@ void Draw::DrawSprite(Sprite* sprite)
 	SetCBV(shader, blend, "gTransformationMatrix", sprite->GetVertexResource()->GetGPUVirtualAddress());
 	SetTable(shader, blend, "gTexture", sprite->GetTextureSrvHandleGPU());
 	SetCBV(shader, blend, "gCamera", camera->GetCameraResource()->GetGPUVirtualAddress());
-	SetCBV(shader, blend, "gDirectionalLight", directionalLight_->GetDirectinalLightResource()->GetGPUVirtualAddress());
-	SetCBV(shader, blend, "gPointLight", pointLight_->GetDirectinalLightResource()->GetGPUVirtualAddress());
-	SetCBV(shader, blend, "gSpotLight", spotLight_->GetDirectinalLightResource()->GetGPUVirtualAddress());
+	SetCBV(shader, blend, "gDirectionalLightGroup", lightManager_->GetDirectionalLightResource()->GetGPUVirtualAddress());
+	SetCBV(shader, blend, "gPointLightGroup", lightManager_->GetPointLightResource()->GetGPUVirtualAddress());
+	SetCBV(shader, blend, "gSpotLightGroup", lightManager_->GetSpotLightResource()->GetGPUVirtualAddress());
 	SetTable(shader, blend, "gEnvironmentTexture", environmentTextureSrvHandleGPU_);
 
 	commandList_->DrawIndexedInstanced(6, 1, 0, 0, 0);
@@ -194,9 +190,9 @@ void Draw::DrawSphere(Sphere* sphere)
 	SetCBV(shader, blend, "gTransformationMatrix", sphere->GetWvpDataResource()->GetGPUVirtualAddress());
 	SetTable(shader, blend, "gTexture", sphere->GetTextureSrvHandleGPU());
 	SetCBV(shader, blend, "gCamera", camera->GetCameraResource()->GetGPUVirtualAddress());
-	SetCBV(shader, blend, "gDirectionalLight", directionalLight_->GetDirectinalLightResource()->GetGPUVirtualAddress());
-	SetCBV(shader, blend, "gPointLight", pointLight_->GetDirectinalLightResource()->GetGPUVirtualAddress());
-	SetCBV(shader, blend, "gSpotLight", spotLight_->GetDirectinalLightResource()->GetGPUVirtualAddress());
+	SetCBV(shader, blend, "gDirectionalLightGroup", lightManager_->GetDirectionalLightResource()->GetGPUVirtualAddress());
+	SetCBV(shader, blend, "gPointLightGroup", lightManager_->GetPointLightResource()->GetGPUVirtualAddress());
+	SetCBV(shader, blend, "gSpotLightGroup", lightManager_->GetSpotLightResource()->GetGPUVirtualAddress());
 	SetTable(shader, blend, "gEnvironmentTexture", environmentTextureSrvHandleGPU_);
 
 	commandList_->DrawInstanced(static_cast<UINT>(pow(sphere->GetSubdivision(), 2) * 6), 1, 0, 0);
@@ -213,9 +209,9 @@ void Draw::DrawTriangle(Triangle* triangle)
 	SetCBV(shader, blend, "gTransformationMatrix", triangle->GetVertexResource()->GetGPUVirtualAddress());
 	SetTable(shader, blend, "gTexture", triangle->GetTextureSrvHandleGPU());
 	SetCBV(shader, blend, "gCamera", camera->GetCameraResource()->GetGPUVirtualAddress());
-	SetCBV(shader, blend, "gDirectionalLight", directionalLight_->GetDirectinalLightResource()->GetGPUVirtualAddress());
-	SetCBV(shader, blend, "gPointLight", pointLight_->GetDirectinalLightResource()->GetGPUVirtualAddress());
-	SetCBV(shader, blend, "gSpotLight", spotLight_->GetDirectinalLightResource()->GetGPUVirtualAddress());
+	SetCBV(shader, blend, "gDirectionalLightGroup", lightManager_->GetDirectionalLightResource()->GetGPUVirtualAddress());
+	SetCBV(shader, blend, "gPointLightGroup", lightManager_->GetPointLightResource()->GetGPUVirtualAddress());
+	SetCBV(shader, blend, "gSpotLightGroup", lightManager_->GetSpotLightResource()->GetGPUVirtualAddress());
 	SetTable(shader, blend, "gEnvironmentTexture", environmentTextureSrvHandleGPU_);
 
 

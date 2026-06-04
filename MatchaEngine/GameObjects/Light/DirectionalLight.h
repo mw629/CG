@@ -9,10 +9,18 @@ private:
 	Microsoft::WRL::ComPtr<ID3D12Resource> directionalLightResource_;
 	DirectionalLightData* directionalLightData_ = nullptr;
 
+	static const int kNumLights = 4;
 
-	Vector4 color = { 1.0f,1.0f,1.0f,1.0f };
-	Vector3 direction = { 0.0f,-1.0f,0.0f };
-	float intensity=1.0f;
+	Vector4 color_[kNumLights] = {
+		{1.0f,1.0f,1.0f,1.0f}, {1.0f,1.0f,1.0f,1.0f},
+		{1.0f,1.0f,1.0f,1.0f}, {1.0f,1.0f,1.0f,1.0f}
+	};
+	Vector3 direction_[kNumLights] = {
+		{0.0f,-1.0f,0.0f}, {0.0f,-1.0f,0.0f},
+		{0.0f,-1.0f,0.0f}, {0.0f,-1.0f,0.0f}
+	};
+	float intensity_[kNumLights] = { 1.0f, 0.0f, 0.0f, 0.0f };
+	bool active_[kNumLights] = { true, false, false, false };
 
 public:
 

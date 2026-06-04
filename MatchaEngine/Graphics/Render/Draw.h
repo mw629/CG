@@ -19,15 +19,13 @@
 
 #include "CharacterAnimator.h"
 
-#include "DirectionalLight.h"
-#include "PointLight.h"
-#include "SpotLight.h"
+#include "LightManager.h"
 
 class Draw {
 public:
 
 	static void Initialize(ID3D12GraphicsCommandList* commandList, GraphicsPipelineState* graphicsPipelineState, 
-		DirectionalLight* directionalLight, PointLight *pointLight, SpotLight* spotLight);
+		LightManager* lightManager);
 
 	static void SetCamera(Camera* setcamera);
 	static void SetEnvironmentTexture(int textureHandel);
