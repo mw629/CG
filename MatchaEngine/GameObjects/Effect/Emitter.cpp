@@ -50,40 +50,32 @@ void Emitter::ImGui() {
 
 }
 
-void Emitter::Initialize() {
-
-
+void Emitter::Initialize(EffectShape shape) {
 	randomEngine.seed(seedGenerator_());
-
-	effectDefinition_.get()->Initialize();
-
+	effectDefinition_.get()->Initialize(shape);
 }
 
-void Emitter::Initialize(EmitterData emitter)
+void Emitter::Initialize(EmitterData emitter, EffectShape shape)
 {
 	emitter_ = emitter;
-
 	randomEngine.seed(seedGenerator_());
-
-	effectDefinition_.get()->Initialize();
+	effectDefinition_.get()->Initialize(shape);
 }
 
-void Emitter::Initialize(EmitterData emitter, EffectDefinitionData effectDefinitionData)
+void Emitter::Initialize(EmitterData emitter, EffectDefinitionData effectDefinitionData, EffectShape shape)
 {
 	emitter_ = emitter;
-
 	SetEffectDefinitionData_ = effectDefinitionData;
 	randomEngine.seed(seedGenerator_());
-
-	effectDefinition_.get()->Initialize();
+	effectDefinition_.get()->Initialize(shape);
 }
 
-void Emitter::Initialize(EmitterData emitter, EffectDefinitionData particleData, int TextureHandle)
+void Emitter::Initialize(EmitterData emitter, EffectDefinitionData particleData, int TextureHandle, EffectShape shape)
 {
 	emitter_ = emitter;
 	SetEffectDefinitionData_ = particleData;
 	randomEngine.seed(seedGenerator_());
-	effectDefinition_.get()->Initialize();
+	effectDefinition_.get()->Initialize(TextureHandle, shape);
 }
 
 void Emitter::Update(Matrix4x4 viewMatrix) {

@@ -36,9 +36,9 @@ void EffectDefinition::SetDescriptorHeap(DescriptorHeap* descriptorHeap)
 	descriptorHeap_ = descriptorHeap;
 }
 
-void EffectDefinition::Initialize()
+void EffectDefinition::Initialize(EffectShape shape)
 {
-
+	shape_ = shape;
 	std::unique_ptr<Texture> texture = std::make_unique<Texture>();
 	textureSrvHandleGPU_ = texture.get()->TextureData(texture.get()->CreateTexture("resources/circle.png"));
 
@@ -47,8 +47,9 @@ void EffectDefinition::Initialize()
 	CreateParticle();
 }
 
-void EffectDefinition::Initialize(int TextureHandle)
+void EffectDefinition::Initialize(int TextureHandle, EffectShape shape)
 {
+	shape_ = shape;
 	std::unique_ptr<Texture> texture = std::make_unique<Texture>();
 	textureSrvHandleGPU_ = texture.get()->TextureData(TextureHandle);
 
@@ -61,26 +62,83 @@ void EffectDefinition::CreateVertexData()
 {
 	std::vector<VertexData> vertices;
 
-	vertices.push_back({ .position = { -1.0f,  1.0f, 0.0f, 1.0f }, .texcoord = {0.0f,0.0f}, .normal = {0.0f,0.0f,1.0f} }); // 左上
-	vertices.push_back({ .position = {  1.0f,  1.0f, 0.0f, 1.0f }, .texcoord = {1.0f,0.0f}, .normal = {0.0f,0.0f,1.0f} }); // 右上
-	vertices.push_back({ .position = { -1.0f, -1.0f, 0.0f, 1.0f }, .texcoord = {0.0f,1.0f}, .normal = {0.0f,0.0f,1.0f} }); // 左下
+	if (shape_ == EffectShape::Plane) {
+		vertexSize_ = 6;
+		vertices.push_back({ .position = { -1.0f,  1.0f, 0.0f, 1.0f }, .texcoord = {0.0f,0.0f}, .normal = {0.0f,0.0f,1.0f} }); // 左上
+		vertices.push_back({ .position = {  1.0f,  1.0f, 0.0f, 1.0f }, .texcoord = {1.0f,0.0f}, .normal = {0.0f,0.0f,1.0f} }); // 右上
+		vertices.push_back({ .position = { -1.0f, -1.0f, 0.0f, 1.0f }, .texcoord = {0.0f,1.0f}, .normal = {0.0f,0.0f,1.0f} }); // 左下
 
-	vertices.push_back({ .position = { -1.0f, -1.0f, 0.0f, 1.0f }, .texcoord = {0.0f,1.0f}, .normal = {0.0f,0.0f,1.0f} }); // 左下
-	vertices.push_back({ .position = {  1.0f,  1.0f, 0.0f, 1.0f }, .texcoord = {1.0f,0.0f}, .normal = {0.0f,0.0f,1.0f} }); // 右上
-	vertices.push_back({ .position = {  1.0f, -1.0f, 0.0f, 1.0f }, .texcoord = {1.0f,1.0f}, .normal = {0.0f,0.0f,1.0f} }); // 右下
+		vertices.push_back({ .position = { -1.0f, -1.0f, 0.0f, 1.0f }, .texcoord = {0.0f,1.0f}, .normal = {0.0f,0.0f,1.0f} }); // 左下
+		vertices.push_back({ .position = {  1.0f,  1.0f, 0.0f, 1.0f }, .texcoord = {1.0f,0.0f}, .normal = {0.0f,0.0f,1.0f} }); // 右上
+		vertices.push_back({ .position = {  1.0f, -1.0f, 0.0f, 1.0f }, .texcoord = {1.0f,1.0f}, .normal = {0.0f,0.0f,1.0f} }); // 右下
+	} else if (shape_ == EffectShape::Cylinder) {
+		int divide = 32;
+		vertexSize_ = divide * 6;
+		float topRadius = 1.0f;
+		float bottomRadius = 1.0f;
+		float height = 3.0f;
+		float radianPerDivide = 2.0f * 3.141592654f / float(divide);
+		for (int index = 0; index < divide; ++index) {
+			float sin = std::sin(radianPerDivide * index);
+			float cos = std::cos(radianPerDivide * index);
+			float sinNext = std::sin(radianPerDivide * (index + 1));
+			float cosNext = std::cos(radianPerDivide * (index + 1));
+			float halfHeight = height * 0.5f;
+			float u = float(index) / float(divide);
+			float uNext = float(index + 1) / float(divide);
+
+			VertexData a = { { -sin * topRadius, halfHeight, cos * topRadius, 1.0f }, { u, 0.0f }, { -sin, 0.0f, cos } };
+			VertexData b = { { -sinNext * topRadius, halfHeight, cosNext * topRadius, 1.0f }, { uNext, 0.0f }, { -sinNext, 0.0f, cosNext } };
+			VertexData c = { { -sin * bottomRadius, -halfHeight, cos * bottomRadius, 1.0f }, { u, 1.0f }, { -sin, 0.0f, cos } };
+			VertexData d = { { -sinNext * bottomRadius, -halfHeight, cosNext * bottomRadius, 1.0f }, { uNext, 1.0f }, { -sinNext, 0.0f, cosNext } };
+
+			vertices.push_back(b);
+			vertices.push_back(c);
+			vertices.push_back(a);
+			vertices.push_back(d);
+			vertices.push_back(c);
+			vertices.push_back(b);
+		}
+	} else if (shape_ == EffectShape::Ring) {
+		int kRingDivide = 32;
+		vertexSize_ = kRingDivide * 6;
+		float outerRadius = 1.0f;
+		float innerRadius = 0.8f;
+		float radianPerDivide = 2.0f * 3.141592654f / float(kRingDivide);
+		for (int index = 0; index < kRingDivide; ++index) {
+			float sin = std::sin(radianPerDivide * index);
+			float cos = std::cos(radianPerDivide * index);
+			float sinNext = std::sin(radianPerDivide * (index + 1));
+			float cosNext = std::cos(radianPerDivide * (index + 1));
+			float u = float(index) / float(kRingDivide);
+			float uNext = float(index + 1) / float(kRingDivide);
+
+			VertexData a = { { -sin * outerRadius, cos * outerRadius, 0.0f, 1.0f }, { u, 0.0f }, { 0.0f, 0.0f, -1.0f } };
+			VertexData b = { { -sinNext * outerRadius, cosNext * outerRadius, 0.0f, 1.0f }, { uNext, 0.0f }, { 0.0f, 0.0f, -1.0f } };
+			VertexData c = { { -sin * innerRadius, cos * innerRadius, 0.0f, 1.0f }, { u, 1.0f }, { 0.0f, 0.0f, -1.0f } };
+			VertexData d = { { -sinNext * innerRadius, cosNext * innerRadius, 0.0f, 1.0f }, { uNext, 1.0f }, { 0.0f, 0.0f, -1.0f } };
+
+			vertices.push_back(b);
+			vertices.push_back(c);
+			vertices.push_back(a);
+			vertices.push_back(d);
+			vertices.push_back(c);
+			vertices.push_back(b);
+		}
+	}
 
 	//頂点リソースを作る
-	vertexResource_ = GraphicsDevice::CreateBufferResource(sizeof(VertexData) * 6);
+	vertexResource_ = GraphicsDevice::CreateBufferResource(sizeof(VertexData) * vertexSize_);
 	//頂点バッファービューを作成する
 	//リソースの先頭アドレスから使う
 	vertexBufferView_.BufferLocation = vertexResource_->GetGPUVirtualAddress();
 	//使用するリソースのサイズは頂点6つ分のサイズ
-	vertexBufferView_.SizeInBytes = static_cast<UINT>(sizeof(VertexData) * 6);
+	vertexBufferView_.SizeInBytes = static_cast<UINT>(sizeof(VertexData) * vertexSize_);
 	//1頂点当たりのサイズ
 	vertexBufferView_.StrideInBytes = sizeof(VertexData);
 	//頂点リソースにデータを書き込む
 	vertexResource_->Map(0, nullptr, reinterpret_cast<void**>(&vertexData_));
-	std::memcpy(vertexData_, vertices.data(), sizeof(VertexData) * 6);
+	std::memcpy(vertexData_, vertices.data(), sizeof(VertexData) * vertexSize_);
 }
 
 
@@ -156,7 +214,11 @@ void EffectDefinition::SettingWvp(Matrix4x4 viewMatrix)
         if (!isBillboard_) {
             worldMatrixObj = MakeAffineMatrix(particleIter->transform.translate, particleIter->transform.scale, particleIter->transform.rotate);
         } else {
-            worldMatrixObj = MultiplyMatrix4x4(MakeAffineMatrix(particleIter->transform.translate, particleIter->transform.scale, particleIter->transform.rotate), billboard);
+            Matrix4x4 scaleRot = MakeAffineMatrix({0.0f, 0.0f, 0.0f}, particleIter->transform.scale, particleIter->transform.rotate);
+            worldMatrixObj = MultiplyMatrix4x4(scaleRot, billboard);
+            worldMatrixObj.m[3][0] = particleIter->transform.translate.x;
+            worldMatrixObj.m[3][1] = particleIter->transform.translate.y;
+            worldMatrixObj.m[3][2] = particleIter->transform.translate.z;
         }
         Matrix4x4 worldViewProjectionMatrixObj = MultiplyMatrix4x4(worldMatrixObj, MultiplyMatrix4x4(viewMatrix, projectionMatri));
 

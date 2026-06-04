@@ -14,6 +14,12 @@ struct EffectDefinitionData {
 	float currentTime = 0.0f;
 };
 
+enum class EffectShape {
+	Plane,
+	Cylinder,
+	Ring
+};
+
 class EffectDefinition
 {
 private:
@@ -42,6 +48,8 @@ private:
 
 	bool isBillboard_ = true;
 	
+	EffectShape shape_ = EffectShape::Plane;
+	uint32_t vertexSize_ = 6;
 
 	static int DescriptorNum;
 
@@ -51,8 +59,8 @@ public:
 	static void SetScreenSize(Vector2 screenSize);
 	static void SetDescriptorHeap(DescriptorHeap* descriptorHeap);
 
-	void Initialize();
-	void Initialize(int TextureHandle);
+	void Initialize(EffectShape shape = EffectShape::Plane);
+	void Initialize(int TextureHandle, EffectShape shape = EffectShape::Plane);
 
 	void CreateVertexData();
 	void CreateWVP();
@@ -80,6 +88,7 @@ public:
 	D3D12_GPU_DESCRIPTOR_HANDLE GetInstancingSrvHandleGPU() { return instancingSrvHandleGPU_; }
 
 	int GetEffectDefinitionNum() { return effectDefinitionNum_; }
+	uint32_t GetVertexSize() const { return vertexSize_; }
 
 	std::list<EffectDefinitionData> GetEffectDefinitionData() { return effectDefinitionData_; }
 

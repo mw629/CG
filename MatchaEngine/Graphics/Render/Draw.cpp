@@ -155,7 +155,7 @@ void Draw::DrawParticle(EffectDefinition* particle)
 	SetCBV(shader, blend, "gMaterial", particle->GetMartial()->GetMaterialResource()->GetGPUVirtualAddress());
 	SetTable(shader, blend, "gParticle", particle->GetInstancingSrvHandleGPU());
 	SetTable(shader, blend, "gTexture", particle->GetTextureSrvHandleGPU());
-	commandList_->DrawInstanced(6, instanceCount, 0, 0);
+	commandList_->DrawInstanced(particle->GetVertexSize(), instanceCount, 0, 0);
 
 }
 

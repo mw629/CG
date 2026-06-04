@@ -43,11 +43,11 @@ public:
 
 	void ImGui();
 
-	void Initialize();
+	void Initialize(EffectShape shape = EffectShape::Plane);
 
-	void Initialize(EmitterData emitter);
-	void Initialize(EmitterData emitter,EffectDefinitionData particleData);
-	void Initialize(EmitterData emitter, EffectDefinitionData particleData,int TextureHandle);
+	void Initialize(EmitterData emitter, EffectShape shape = EffectShape::Plane);
+	void Initialize(EmitterData emitter,EffectDefinitionData particleData, EffectShape shape = EffectShape::Plane);
+	void Initialize(EmitterData emitter, EffectDefinitionData particleData,int TextureHandle, EffectShape shape = EffectShape::Plane);
 
 	void Update(Matrix4x4 viewMatrix);
 	void Update(Matrix4x4 viewMatrix, std::function<EffectDefinitionData(const EffectDefinitionData&)> moveBehavior);//動きに変化をつけたい場合

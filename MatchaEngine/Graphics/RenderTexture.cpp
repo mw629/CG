@@ -4,7 +4,7 @@
 
 RenderTexture::RenderTexture()
 {
-	clearColor_[0] = 1.0f;
+	clearColor_[0] = 0.0f;
 	clearColor_[1] = 0.0f;
 	clearColor_[2] = 0.0f;
 	clearColor_[3] = 1.0f;
