@@ -9,6 +9,7 @@ GameScene::~GameScene()
 void GameScene::ImGui()
 {
 #ifdef _USE_IMGUI
+	ImGui::Begin("GameScene");
 
 	camera_.get()->ImGui();
 
@@ -67,6 +68,8 @@ void GameScene::ImGui()
 			stageSettings_->SetScrollAcceleration(accel);
 		}
 	}
+
+	ImGui::End();
 
 #endif // _USE_IMGUI
 }

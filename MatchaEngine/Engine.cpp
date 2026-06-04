@@ -315,22 +315,56 @@ void Engine::Debug()
 {
 #ifdef _USE_IMGUI
 
-	ImGui::SetNextWindowSize(ImVec2(400, 250), ImGuiCond_FirstUseEver);
+	ImGui::SetNextWindowSize(ImVec2(500, 400), ImGuiCond_FirstUseEver);
 	ImGui::Begin("Debug Info");
 
-	ImGui::Text("FPS: %.1f", ImGui::GetIO().Framerate);
+	if (ImGui::BeginTabBar("DebugTabs")) {
+		if (ImGui::BeginTabItem("System Data")) {
+			ImGui::Text("--- Performance ---");
+			ImGui::Text("FPS: %.1f (%.3f ms/frame)", ImGui::GetIO().Framerate, 1000.0f / ImGui::GetIO().Framerate);
 
-	static int frameCount = 0;
-	frameCount++;
-	ImGui::Text("Frame Count: %d", frameCount);
+			static int frameCount = 0;
+			frameCount++;
+			ImGui::Text("Frame Count: %d", frameCount);
 
-	size_t mem = GetProcessMemoryUsage();
-	ImGui::Text("Memory Usage: %.2f MB", mem / (1024.0f * 1024.0f));
+			size_t mem = GetProcessMemoryUsage();
+			ImGui::Text("Memory Usage: %.2f MB", mem / (1024.0f * 1024.0f));
+			ImGui::Spacing();
 
-	textureLoader.get()->Draw();
+			ImGui::Text("--- Application ---");
+			ImGui::Text("Resolution: %d x %d", kClientWidth_, kClientHeight_);
+			ImGui::Spacing();
 
-	// PostEffect parameters and UI
-	postEffect_->ImGuiWindow();
+			ImGui::Text("--- Light Settings ---");
+			static bool showLight = false;
+			ImGui::Checkbox("Enable Light Settings (Shortcut: F1)", &showLight);
+			if (ImGui::IsKeyPressed(ImGuiKey_F1))
+			{
+				showLight = !showLight;
+			}
+			
+			if (showLight)
+			{
+				directionalLight->ImGui();
+				pointLight.get()->ImGui();
+				spotLight.get()->ImGui();
+			}
+
+			ImGui::EndTabItem();
+		}
+
+		if (ImGui::BeginTabItem("Post Effect")) {
+			postEffect_->ImGuiWindow();
+			ImGui::EndTabItem();
+		}
+
+		if (ImGui::BeginTabItem("Resource List")) {
+			textureLoader.get()->Draw();
+			ImGui::EndTabItem();
+		}
+
+		ImGui::EndTabBar();
+	}
 
 	ImGui::End();
 
@@ -338,20 +372,6 @@ void Engine::Debug()
 	ImVec2 sceneWindowSize = ImGui::GetContentRegionAvail();
 	ImGui::Image((ImTextureID)renderTexture->GetSrvHandleGPU().ptr, sceneWindowSize);
 	ImGui::End();
-
-	static bool showLight = false;
-	if (ImGui::IsKeyPressed(ImGuiKey_F1))
-	{
-		showLight = !showLight;
-	}
-
-	if (showLight)
-	{
-		directionalLight->ImGui();
-		pointLight.get()->ImGui();
-		spotLight.get()->ImGui();
-
-	}
 
 #endif
 }

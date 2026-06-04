@@ -37,6 +37,7 @@ private:
 
 
 public:
+	std::string name_ = "Particle";
 
 	// 生成時の振る舞いを注入する関数
 	std::function<void(EffectDefinitionData&)> generatorBehavior = nullptr;

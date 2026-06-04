@@ -37,6 +37,7 @@ protected:
 	int indexSize_;
 
 public:
+	std::string name_ = "Object";
 
 	virtual ~ObjectBase();
 

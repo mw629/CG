@@ -29,15 +29,21 @@ bool TextureLoader::StockTextureData(const std::string& filePath,
 
 void TextureLoader::Draw() {
 #ifdef _USE_IMGUI
-	//if (ImGui::Begin("Texture List")) {
+	if (ImGui::BeginTable("TextureTable", 2, ImGuiTableFlags_Borders | ImGuiTableFlags_RowBg | ImGuiTableFlags_Resizable)) {
+		ImGui::TableSetupColumn("Index", ImGuiTableColumnFlags_WidthFixed, 50.0f);
+		ImGui::TableSetupColumn("File Path", ImGuiTableColumnFlags_WidthStretch);
+		ImGui::TableHeadersRow();
 
-	ImGui::Text("\n\nTexture List:");
-	for (const auto& key : textureKeys_) {
-		const auto& tex = textureMap_[key];
-		ImGui::Text("%d | %s", tex.index, tex.filePath.c_str());
+		for (const auto& key : textureKeys_) {
+			const auto& tex = textureMap_[key];
+			ImGui::TableNextRow();
+			ImGui::TableSetColumnIndex(0);
+			ImGui::Text("%d", tex.index);
+			ImGui::TableSetColumnIndex(1);
+			ImGui::Text("%s", tex.filePath.c_str());
+		}
+		ImGui::EndTable();
 	}
-
-	//ImGui::End();
 #endif // _USE_IMGUI
 }
 

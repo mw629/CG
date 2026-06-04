@@ -9,24 +9,32 @@ TestScene::~TestScene()
 void TestScene::ImGui()
 {
 #ifdef _USE_IMGUI
+	ImGui::Begin("TestScene");
 
 	camera_.get()->ImGui();
-	for (int i = 0, n = static_cast<int>(particle_.size()); i < n; ++i) {
-		particle_[i].get()->ImGui();
-	}
+	
 	// スライダーで座標を操作（表示・編集ともに小数第1桁）
 	// 範囲は整数部4桁を許容する -9999.9 〜 9999.9
-	ImGui::Spacing();
-	ImGui::Text("SpritePos");
-	ImGui::SliderFloat2("##sprite_pos_slider", &spriteData_.transform.translate.x, -9999.9f, 9999.9f, "%.1f");
+	if (ImGui::CollapsingHeader("Sprite Settings", ImGuiTreeNodeFlags_DefaultOpen)) {
+		ImGui::Spacing();
+		ImGui::Text("SpritePos");
+		ImGui::SliderFloat2("##sprite_pos_slider", &spriteData_.transform.translate.x, -9999.9f, 9999.9f, "%.1f");
 
-	// 表示は整数部4桁・小数1桁風に（幅指定で揃える） 
-	ImGui::Text("Pos: %4.1f, %4.1f", spriteData_.transform.translate.x, spriteData_.transform.translate.y);
+		// 表示は整数部4桁・小数1桁風に（幅指定で揃える） 
+		ImGui::Text("Pos: %4.1f, %4.1f", spriteData_.transform.translate.x, spriteData_.transform.translate.y);
+	}
 
 	skyBox_.get()->ImGui();
 	sphere_.get()->ImGui();
 	animation_.get()->ImGui();	
 	model_.get()->ImGui();
+
+	for (int i = 0, n = static_cast<int>(particle_.size()); i < n; ++i) {
+		particle_[i].get()->ImGui();
+	}
+
+	ImGui::End();
+
 #endif // _USE_IMGUI
 }
 
@@ -41,29 +49,35 @@ void TestScene::Initialize() {
 
 	model_.get()->Initialize(modelData);
 	model_.get()->SetTransform(modelTransform_);
+	model_.get()->name_ = "Sphere Model";
 
 
 	ModelData animModel = AssimpLoadObjFile("resources/human", "sneakWalk.gltf");
 	animation_.get()->Initialize(animModel, "resources/human", "sneakWalk.gltf");
+	animation_.get()->name_ = "Animation Model";
 
 	ModelData cubeModel = AssimpLoadObjFile("resources/AnimatedCube", "AnimatedCube.gltf");
 	nodeAnimation_.get()->Initialize(cubeModel, "resources/AnimatedCube", "AnimatedCube.gltf");
+	nodeAnimation_.get()->name_ = "Node Animation Cube";
 
 	
 
 	int texture1 = texture_.get()->CreateTexture("resources/monsterBall.png");
 	sphere_.get()->Initialize(texture1);
 	sphere_.get()->SetTransform(modelTransform_);
+	sphere_.get()->name_ = "MonsterBall Sphere";
 
 	skyBoxTexture_ = texture_.get()->CreateTexture("resources/rostock_laage_airport_4k.dds");
 	skyBox_.get()->Initialize(skyBoxTexture_);
 	skyBox_.get()->SetShader("SkyBoxShader");
 	skyBox_.get()->SetLighting(false);
 	skyBox_.get()->SetTransform(skyBoxTransform_);
+	skyBox_.get()->name_ = "SkyBox";
 
 	modelData = AssimpLoadObjFile("resources/Ground", "Ground.obj");
 	floor.get()->Initialize(modelData);
 	floor.get()->SetTransform(floorT);
+	floor.get()->name_ = "Floor";
 
     EmitterData emitter;
 	emitter.transform = modelTransform_;
@@ -84,6 +98,7 @@ void TestScene::Initialize() {
 	dataPlane.lifeTime = 2.0f;
 	dataPlane.transform.scale = { 0.1f, 0.1f, 0.1f };
 	particlePlane.get()->Initialize(emitterPlane, dataPlane, EffectShape::Plane);
+	particlePlane.get()->name_ = "Particle (Snow/Sparkles)";
 	particlePlane->generatorBehavior = [](EffectDefinitionData& p) {
 		float randX = ((float)rand() / RAND_MAX - 0.5f) * 2.0f;
 		float randY = ((float)rand() / RAND_MAX - 0.5f) * 2.0f;
@@ -106,6 +121,7 @@ void TestScene::Initialize() {
 	dataCylinder.lifeTime = 0.8f;
 	dataCylinder.transform.scale = { 0.15f, 1.5f, 0.15f }; // Long vertical shape
 	particleCylinder.get()->Initialize(emitterCylinder, dataCylinder, EffectShape::Cylinder);
+	particleCylinder.get()->name_ = "Particle (Upward Fire)";
 	particleCylinder->generatorBehavior = [](EffectDefinitionData& p) {
 		float randX = ((float)rand() / RAND_MAX - 0.5f) * 0.1f;
 		float randZ = ((float)rand() / RAND_MAX - 0.5f) * 0.1f;
@@ -126,6 +142,7 @@ void TestScene::Initialize() {
 	dataRing.lifeTime = 1.0f;
 	dataRing.transform.scale = { 0.1f, 0.1f, 0.1f }; // Start small
 	particleRing.get()->Initialize(emitterRing, dataRing, EffectShape::Ring);
+	particleRing.get()->name_ = "Particle (Shockwave)";
 	particleRing->generatorBehavior = [](EffectDefinitionData& p) {
 		p.velocity = { 0.0f, 0.0f, 0.0f }; // Stay in place
 	};
