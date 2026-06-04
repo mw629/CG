@@ -9,7 +9,7 @@ public:
 	ImGuiManager() = default;
 	~ImGuiManager() = default;
 
-	void Initialize(HWND hwnd, ID3D12Device* device, int bufferCount, DXGI_FORMAT rtvFormat, ID3D12DescriptorHeap* srvDescriptorHeap, D3D12_CPU_DESCRIPTOR_HANDLE cpuHandle, D3D12_GPU_DESCRIPTOR_HANDLE gpuHandle);
+	void Initialize(HWND hwnd, ID3D12Device* device, int bufferCount, DXGI_FORMAT rtvFormat, ID3D12DescriptorHeap* srvDescriptorHeap, UINT descriptorSizeSRV, ID3D12CommandQueue* commandQueue);
 	void NewFrame();
 	void Render(ID3D12GraphicsCommandList* commandList);
 	void Shutdown();

@@ -133,7 +133,15 @@ void Engine::Setting()
 
 
 #ifdef _USE_IMGUI
-	imGuiManager->Initialize(window.GetHwnd(), graphics->GetDevice(), swapChain->GetSwapChainDesc().BufferCount, renderTargetView->GetRtvDesc().Format, descriptorHeap->GetSrvDescriptorHeap(), descriptorHeap->GetSrvDescriptorHeap()->GetCPUDescriptorHandleForHeapStart(), descriptorHeap->GetSrvDescriptorHeap()->GetGPUDescriptorHandleForHeapStart());
+	imGuiManager->Initialize(
+		window.GetHwnd(), 
+		graphics->GetDevice(), 
+		swapChain->GetSwapChainDesc().BufferCount, 
+		renderTargetView->GetRtvDesc().Format, 
+		descriptorHeap->GetSrvDescriptorHeap(), 
+		descriptorHeap->GetDescriptorSizeSRV(), 
+		command->GetCommandQueue()
+	);
 
 
 	// 初回表示位置・サイズを厳密に指定（ImGuiCond_Once または ImGuiCond_Always に変更可能）
