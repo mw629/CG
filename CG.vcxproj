@@ -210,6 +210,7 @@ copy "$(WindowsSdkDir)bin\$(TargetPlatformVersion)\x64\dxil.dll" "$(TargetDir)dx
     </ClCompile>
     <ClCompile Include="MatchaEngine\PSO\RootSignature.cpp" />
     <ClCompile Include="MatchaEngine\Core\WindowConfig.cpp" />
+    <ClCompile Include="MatchaEngine\Core\ImGuiManager.cpp" />
     <ClCompile Include="MatchaEngine\GameObjects\MaterialFactory.cpp" />
     <ClCompile Include="MatchaEngine\GameObjects\Object\3d\Model.cpp" />
     <ClCompile Include="MatchaEngine\Resource\Load.cpp" />
@@ -365,6 +366,7 @@ copy "$(WindowsSdkDir)bin\$(TargetPlatformVersion)\x64\dxil.dll" "$(TargetDir)dx
     <ClInclude Include="MatchaEngine\PSO\RootSignature.h" />
     <ClInclude Include="MatchaEngine\Core\VariableTypes.h" />
     <ClInclude Include="MatchaEngine\Core\WindowConfig.h" />
+    <ClInclude Include="MatchaEngine\Core\ImGuiManager.h" />
     <ClInclude Include="MatchaEngine\GameObjects\MaterialFactory.h" />
     <ClInclude Include="MatchaEngine\GameObjects\Object\3d\Model.h" />
     <ClInclude Include="MatchaEngine\Resource\TextureLoader.h" />

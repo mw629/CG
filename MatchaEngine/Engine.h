@@ -11,6 +11,7 @@
 #include "LogHandler.h"
 #include "VariableTypes.h"
 #include "WindowConfig.h"
+#include "ImGuiManager.h"
 
 //GameObjects
 
@@ -112,6 +113,7 @@ private:
 	std::unique_ptr<Draw> draw;
 	std::unique_ptr<TextureLoader> textureLoader;
 	std::unique_ptr<PostEffect> postEffect_;
+	std::unique_ptr<ImGuiManager> imGuiManager;
 
 	GpuSyncManager gpuSyncManager;
 

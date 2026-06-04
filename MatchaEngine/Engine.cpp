@@ -6,8 +6,7 @@
 
 #ifdef _USE_IMGUI
 #include "../externals/imgui/imgui.h"
-#include "../externals/imgui/imgui_impl_dx12.h"
-#include "../externals/imgui/imgui_impl_win32.h"
+#include "ImGuiManager.h"
 #endif // _USE_IMGUI
 
 #include <thread>
@@ -60,6 +59,7 @@ Engine::Engine(int32_t kClientWidth, int32_t kClientHeight)
 	textureLoader = std::make_unique<TextureLoader>();
 	//バリア
 	resourceBarrierHelper = std::make_unique<ResourceBarrierHelper>();
+	imGuiManager = std::make_unique<ImGuiManager>();
 
 	graphicsPipelineState = std::make_unique<GraphicsPipelineState>();
 
@@ -133,16 +133,8 @@ void Engine::Setting()
 
 
 #ifdef _USE_IMGUI
-	IMGUI_CHECKVERSION();
-	ImGui::CreateContext();
-	ImGui::StyleColorsDark();
-	ImGui_ImplWin32_Init(window.GetHwnd());
-	ImGui_ImplDX12_Init(graphics->GetDevice(),
-		swapChain->GetSwapChainDesc().BufferCount,
-		renderTargetView->GetRtvDesc().Format,
-		descriptorHeap->GetSrvDescriptorHeap(),
-		descriptorHeap->GetSrvDescriptorHeap()->GetCPUDescriptorHandleForHeapStart(),
-		descriptorHeap->GetSrvDescriptorHeap()->GetGPUDescriptorHandleForHeapStart());
+	imGuiManager->Initialize(window.GetHwnd(), graphics->GetDevice(), swapChain->GetSwapChainDesc().BufferCount, renderTargetView->GetRtvDesc().Format, descriptorHeap->GetSrvDescriptorHeap(), descriptorHeap->GetSrvDescriptorHeap()->GetCPUDescriptorHandleForHeapStart(), descriptorHeap->GetSrvDescriptorHeap()->GetGPUDescriptorHandleForHeapStart());
+
 
 	// 初回表示位置・サイズを厳密に指定（ImGuiCond_Once または ImGuiCond_Always に変更可能）
 	ImGui::SetNextWindowPos(ImVec2(finalPos.x, finalPos.y), ImGuiCond_Once);
@@ -195,11 +187,7 @@ void Engine::PostDraw()
 	Draw::DrawCopy(renderTexture.get()->GetSrvHandleGPU(), PostEffect::GetActiveShaderName(), postEffect_.get());
 
 #ifdef _USE_IMGUI
-	//ImGuiの内部コマンドを生成
-	ImGui::Render();
-
-	//ImGuiの描画コマンド
-	ImGui_ImplDX12_RenderDrawData(ImGui::GetDrawData(), command->GetCommandList());
+	imGuiManager->Render(command->GetCommandList());
 #endif // _USE_IMGUI
 
 	//画面に描く処理はすべて終わり、画面に映すので、状態を遷移
@@ -211,9 +199,7 @@ void Engine::PostDraw()
 void Engine::NewFrame() {
 
 #ifdef _USE_IMGUI
-	ImGui_ImplDX12_NewFrame();
-	ImGui_ImplWin32_NewFrame();
-	ImGui::NewFrame();
+	imGuiManager->NewFrame();
 #endif // _USE_IMGUI
 
 	//コマンドを積み込んで確定させる//
@@ -281,10 +267,7 @@ void Engine::End() {
 	Audio::Finalize();
 
 #ifdef _USE_IMGUI
-	//ImGuiの終了処理
-	ImGui_ImplDX12_Shutdown();
-	ImGui_ImplWin32_Shutdown();
-	ImGui::DestroyContext();
+	imGuiManager->Shutdown();
 #endif // _USE_IMGUI
 
 	window.Finalize();
