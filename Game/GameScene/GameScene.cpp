@@ -87,7 +87,7 @@ void GameScene::Initialize() {
 	camera_->Update();
 
 	// プレイヤーの初期化
-	ModelData modelData = AssimpLoadObjFile("resources/player", "player.obj");
+	ModelData modelData = AssimpLoadObjFile("resources/Model/Player", "player.obj");
 	player_->Initialize(modelData);
 
 	// ステージの初期化
@@ -136,7 +136,7 @@ void GameScene::Draw() {
 	//カメラの設定
 	Draw::SetCamera(camera_.get());
 	//背景の設定
-	Draw::SetEnvironmentTexture(texture_.get()->CreateTexture("resources/rostock_laage_airport_4k.dds"));
+	Draw::SetEnvironmentTexture(texture_.get()->CreateTexture("resources/DDS/rostock_laage_airport_4k.dds"));
 
 	// ステージ描画（道路 + 障害物）
 	stageSettings_->Draw();

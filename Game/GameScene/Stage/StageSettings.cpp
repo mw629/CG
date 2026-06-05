@@ -11,7 +11,7 @@ void StageSettings::Initialize(ModelData roadModelData, ModelData obstacleModelD
 	for (int i = 0; i < kChunkCount_; i++) {
 		roadChunks_[i] = std::make_unique<Model>();
 		roadChunks_[i]->Initialize(roadModelData);
-		roadChunks_[i]->SetTexture(texture_->TextureData("resources/Ground/road.png"));
+		roadChunks_[i]->SetTexture(texture_->TextureData("resources/Model/Ground/road.png"));
 
 		// Z軸方向に並べて配置（手前から奥へ）
 		roadTransforms_[i].scale = { 5.0f, 5.0f, 5.0f };
@@ -103,12 +103,14 @@ void StageSettings::SpawnObstaclesOnChunk(float chunkZ)
 		float x = static_cast<float>(lane) * laneWidth_;
 		float z = chunkZ + static_cast<float>(std::rand() % static_cast<int>(chunkLength_));
 
-		// Y座標はタイプに応じて変える（高さ2のplayerを基準にする）
-		float baseHeight = 2.0f;
-		float y = baseHeight;
+		// Y座標はタイプに応じて変える
+		float y = 1.5f; // Lowの場合（地面の高さ1.0f + 障害物半分の高さ0.5f）
 		Obstacle::Type type = obstacles_[nextObstacleIndex_]->GetType();
 		if (type == Obstacle::Type::High) {
-			y = baseHeight + 1.0f; // 高い障害物は少し上に浮かせる
+			y = 2.5f; // 高い障害物
+		}
+		else if (type == Obstacle::Type::Wall) {
+			y = 2.5f; // 壁は高さ3.0なので中心は2.5f
 		}
 
 		obstacles_[nextObstacleIndex_]->Spawn(x, y, z);
