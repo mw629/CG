@@ -33,8 +33,8 @@ private:
 	// アクション用の変数
 	bool isJumping_ = false;
 	float velocityY_ = 0.0f;
-	float gravity_ = 0.02f;
-	float jumpPower_ = 0.4f;
+	float gravity_ = 0.015f;
+	float jumpPower_ = 0.25f;
 	float baseHeight_ = 2.0f; // 地面の高さ（Y座標）
 
 	bool isRolling_ = false;
