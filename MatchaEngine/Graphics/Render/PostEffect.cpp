@@ -27,10 +27,14 @@ void PostEffect::Initialize() {
 		cbData_->value1 = value1_;
 		cbData_->value2 = value2_;
 	}
+
+	SetMaskTexturePath(maskTexturePath_);
 }
 
 void PostEffect::Update(float deltaTime) {
-	time_ += deltaTime;
+	if (isTimerRunning_) {
+		time_ += deltaTime;
+	}
 
 	if (cbData_) {
 		cbData_->time = time_;
@@ -48,9 +52,20 @@ void PostEffect::SetTexturePath(const std::string& name, const std::string& file
 	texture.CreateTexture(filePath);
 }
 
+void PostEffect::SetMaskTexturePath(const std::string& filePath) {
+	maskTexturePath_ = filePath;
+	SetTexturePath("gMaskTexture", filePath);
+}
+
 void PostEffect::ImGuiWindow() {
 	if (ImGui::TreeNode("Post Effect Parameters")) {
 		ImGui::SliderFloat("Time##PostEffect", &time_, 0.0f, 100.0f);
+		
+		ImGui::Checkbox("Timer Running", &isTimerRunning_);
+		if (ImGui::Button("Start Timer")) { StartTimer(); }
+		ImGui::SameLine();
+		if (ImGui::Button("Stop Timer")) { StopTimer(); }
+
 		ImGui::SliderFloat("Ratio##PostEffect", &ratio_, 0.0f, 1.0f);
 		ImGui::SliderFloat("Value1##PostEffect", &value1_, 0.0f, 10.0f);
 		ImGui::SliderFloat("Value2##PostEffect", &value2_, 0.0f, 10.0f);
@@ -60,6 +75,14 @@ void PostEffect::ImGuiWindow() {
 			cbData_->ratio = ratio_;
 			cbData_->value1 = value1_;
 			cbData_->value2 = value2_;
+		}
+
+		if (activeType_ == Type::Dissolve) {
+			char buffer[256];
+			strcpy_s(buffer, sizeof(buffer), maskTexturePath_.c_str());
+			if (ImGui::InputText("Mask Texture##PostEffect", buffer, sizeof(buffer), ImGuiInputTextFlags_EnterReturnsTrue)) {
+				SetMaskTexturePath(buffer);
+			}
 		}
 
 		ImGui::TreePop();

@@ -34,8 +34,11 @@ private:
 	float ratio_ = 1.0f;
 	float value1_ = 0.0f;
 	float value2_ = 0.0f;
+	
+	bool isTimerRunning_ = true;
 
 	std::unordered_map<std::string, std::string> texturePaths_;
+	std::string maskTexturePath_ = "resources/Texture/noise0.png";
 
 	Type currentType_ = Type::Normal;
 	static Type activeType_;
@@ -47,6 +50,9 @@ public:
 
 	void Initialize();
 	void Update(float deltaTime);
+
+	void StartTimer() { isTimerRunning_ = true; }
+	void StopTimer() { isTimerRunning_ = false; }
 
 	// Getters and Setters
 	void SetTime(float time) { 
@@ -82,6 +88,9 @@ public:
 		}
 		return "";
 	}
+
+	void SetMaskTexturePath(const std::string& filePath);
+	std::string GetMaskTexturePath() const { return maskTexturePath_; }
 
 	const std::unordered_map<std::string, std::string>& GetTexturePaths() const {
 		return texturePaths_;
