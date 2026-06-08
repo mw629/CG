@@ -234,7 +234,7 @@ void Draw::DrawGrid(Grid* grid)
 	commandList_->DrawInstanced(grid->GetSubdivision() * 4, 1, 0, 0);
 }
 
-void Draw::DrawCopy(D3D12_GPU_DESCRIPTOR_HANDLE textureHandle, ShaderName shader, PostEffect* postEffect)
+void Draw::DrawPostEffect(D3D12_GPU_DESCRIPTOR_HANDLE textureHandle, ShaderName shader, PostEffect* postEffect)
 {
 	preDraw(shader, BlendMode::kBlendModeNone);
 	
