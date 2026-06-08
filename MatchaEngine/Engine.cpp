@@ -188,7 +188,7 @@ void Engine::PostDraw()
 	command->GetCommandList()->RSSetViewports(1, viewportScissor->GetViewport());
 	command->GetCommandList()->RSSetScissorRects(1, viewportScissor->GetScissorRect());
 
-	Draw::DrawCopy(renderTexture.get()->GetSrvHandleGPU(), PostEffect::GetActiveShaderName(), postEffect_.get());
+	Draw::DrawPostEffect(renderTexture.get()->GetSrvHandleGPU(), PostEffect::GetActiveShaderName(), postEffect_.get());
 
 #ifdef _USE_IMGUI
 	imGuiManager->Render(command->GetCommandList());
