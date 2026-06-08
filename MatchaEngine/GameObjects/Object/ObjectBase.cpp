@@ -25,6 +25,22 @@ void ObjectBase::ImGui() {
 			ImGui::DragFloat3("Scale", reinterpret_cast<float*>(&transform_.scale), 0.01f, -FLT_MAX, FLT_MAX, "%.2f");
 			ImGui::TreePop();
 		}
+		
+		if (ImGui::TreeNode("Shader")) {
+			const char* shaders[] = { "ObjectShader", "IceShader", "AnimationObj", "SkyBoxShader" };
+			int current_item = 0;
+			for (int i = 0; i < IM_ARRAYSIZE(shaders); ++i) {
+				if (shader_ == shaders[i]) {
+					current_item = i;
+					break;
+				}
+			}
+			if (ImGui::Combo("Shader Selection", &current_item, shaders, IM_ARRAYSIZE(shaders))) {
+				shader_ = shaders[current_item];
+			}
+			ImGui::TreePop();
+		}
+
 		material_.get()->ImGui();
 	}
 	ImGui::PopID();
