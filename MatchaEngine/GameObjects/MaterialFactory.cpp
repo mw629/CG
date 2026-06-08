@@ -15,7 +15,7 @@ MaterialFactory::~MaterialFactory(){
 
 void MaterialFactory::ImGui() {
    #ifdef _USE_IMGUI
-	if (ImGui::CollapsingHeader("MaterialFactory")) {
+	if (ImGui::TreeNode("MaterialFactory")) {
 		ImGui::ColorEdit4("Color", &materialData_->color.x);
 		bool enableLighting = materialData_->enableLighting != 0;
 		if (ImGui::Checkbox("Enable Lighting", &enableLighting)) {
@@ -23,6 +23,7 @@ void MaterialFactory::ImGui() {
 		}
 		ImGui::SliderFloat("Shininess", &materialData_->shininess, 0.0f, 100.0f);
 		ImGui::SliderFloat("Environment Coefficient", &materialData_->environmentCoefficient, 0.0f, 1.0f);
+		ImGui::TreePop();
 	}
    #endif
 }
