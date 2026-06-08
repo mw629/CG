@@ -16,4 +16,11 @@ struct PostEffectData
     float32_t ratio;
     float32_t value1;
     float32_t value2;
+    float32_t blurStrength;
+    int32_t kernelSize;
+    float32_t2 padding;
+    float32_t kernel3x3[3][3];
+    float32_t kernel5x5[5][5];
+    float32_t2 index3x3[3][3];
+    float32_t2 index5x5[5][5];
 };
