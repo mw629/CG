@@ -242,8 +242,6 @@ void Draw::DrawPostEffect(D3D12_GPU_DESCRIPTOR_HANDLE textureHandle, ShaderName 
 	UINT gTexIndex = graphicsPipelineState_->GetRootParameterIndex(shader, BlendMode::kBlendModeNone, "gTexture");
 	if (gTexIndex != static_cast<UINT>(-1)) {
 		commandList_->SetGraphicsRootDescriptorTable(gTexIndex, textureHandle);
-	} else {
-		commandList_->SetGraphicsRootDescriptorTable(0, textureHandle);
 	}
 
 	if (postEffect) {
