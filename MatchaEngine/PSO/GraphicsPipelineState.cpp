@@ -176,11 +176,21 @@ void GraphicsPipelineState::ALLPSOCreate(std::ostream& os, ID3D12Device* device)
 	};
 
 	std::vector<std::pair<ShaderName, PipelineConfig>> configs = {
-		{ ObjectShader, { L"resources/Shader/Object3D.VS.hlsl", L"resources/Shader/Object3D.PS.hlsl", objInput, true, D3D12_DEPTH_WRITE_MASK_ALL, D3D12_COMPARISON_FUNC_LESS_EQUAL, D3D12_CULL_MODE_NONE, D3D12_FILL_MODE_SOLID } },
-		{ AnimationObj, { L"resources/Shader/SkinningObject3d.VS.hlsl", L"resources/Shader/SkinningObject3d.PS.hlsl", animInput, true, D3D12_DEPTH_WRITE_MASK_ALL, D3D12_COMPARISON_FUNC_LESS_EQUAL, D3D12_CULL_MODE_NONE, D3D12_FILL_MODE_SOLID } },
-		{ ParticleShader, { L"resources/Shader/Particle.VS.hlsl", L"resources/Shader/Particle.PS.hlsl", particleInput, true, D3D12_DEPTH_WRITE_MASK_ZERO, D3D12_COMPARISON_FUNC_LESS_EQUAL, D3D12_CULL_MODE_NONE, D3D12_FILL_MODE_SOLID } },
-		{ LineShader, { L"resources/Shader/Line.VS.hlsl", L"resources/Shader/Line.PS.hlsl", lineInput, true, D3D12_DEPTH_WRITE_MASK_ALL, D3D12_COMPARISON_FUNC_LESS_EQUAL, D3D12_CULL_MODE_NONE, D3D12_FILL_MODE_SOLID } },
-		{ SkyBoxShader, { L"resources/Shader/SkyBox.VS.hlsl", L"resources/Shader/SkyBox.PS.hlsl", objInput, true, D3D12_DEPTH_WRITE_MASK_ZERO, D3D12_COMPARISON_FUNC_LESS_EQUAL, D3D12_CULL_MODE_FRONT, D3D12_FILL_MODE_SOLID } },
+		//ObjectShaderは通常の3Dオブジェクト用のシェーダー。アニメーションなし
+		{ ObjectShader, { L"resources/Shader/ObjectShader/Object3D.VS.hlsl", L"resources/Shader/ObjectShader/Object3D.PS.hlsl", objInput, true, D3D12_DEPTH_WRITE_MASK_ALL, D3D12_COMPARISON_FUNC_LESS_EQUAL, D3D12_CULL_MODE_NONE, D3D12_FILL_MODE_SOLID } },
+		{IceShader, { L"resources/Shader/ObjectShader/Object3D.VS.hlsl", L"resources/Shader/ObjectShader/IceShader.PS.hlsl", objInput, true, D3D12_DEPTH_WRITE_MASK_ALL, D3D12_COMPARISON_FUNC_LESS_EQUAL, D3D12_CULL_MODE_NONE, D3D12_FILL_MODE_SOLID } },
+
+		//AnimationObjはスキニングアニメーション用のシェーダー。アニメーションあり
+		{ AnimationObj, { L"resources/Shader/SkinningShader/SkinningObject3d.VS.hlsl", L"resources/Shader/SkinningShader/SkinningObject3d.PS.hlsl", animInput, true, D3D12_DEPTH_WRITE_MASK_ALL, D3D12_COMPARISON_FUNC_LESS_EQUAL, D3D12_CULL_MODE_NONE, D3D12_FILL_MODE_SOLID } },
+		
+		//ParticleShaderはパーティクル用のシェーダー。描画モードはポイントリストで、頂点バッファの内容をそのままスクリーンに打ち込むようなイメージ。深度は書き込まない
+		{ ParticleShader, { L"resources/Shader/ParticleShader/Particle.VS.hlsl", L"resources/Shader/ParticleShader/Particle.PS.hlsl", particleInput, true, D3D12_DEPTH_WRITE_MASK_ZERO, D3D12_COMPARISON_FUNC_LESS_EQUAL, D3D12_CULL_MODE_NONE, D3D12_FILL_MODE_SOLID } },
+		
+		//LineShaderはライン描画用のシェーダー。描画モードはラインリストで、頂点バッファの内容をそのままスクリーンに打ち込むようなイメージ。深度は書き込む
+		{ LineShader, { L"resources/Shader/LineShader/Line.VS.hlsl", L"resources/Shader/LineShader/Line.PS.hlsl", lineInput, true, D3D12_DEPTH_WRITE_MASK_ALL, D3D12_COMPARISON_FUNC_LESS_EQUAL, D3D12_CULL_MODE_NONE, D3D12_FILL_MODE_SOLID } },
+		
+		//SkyBoxShaderはスカイボックス用のシェーダー。描画モードは三角形で、頂点バッファの内容をそのままスクリーンに打ち込むようなイメージ。深度は書き込まないが、比較は通常の3Dオブジェクトと同じにすることで、スカイボックスが常に一番奥に描画されるようにする
+		{ SkyBoxShader, { L"resources/Shader/SkyBoxShader/SkyBox.VS.hlsl", L"resources/Shader/SkyBoxShader/SkyBox.PS.hlsl", objInput, true, D3D12_DEPTH_WRITE_MASK_ZERO, D3D12_COMPARISON_FUNC_LESS_EQUAL, D3D12_CULL_MODE_FRONT, D3D12_FILL_MODE_SOLID } },
 
 		//ポストエフェクト用のシェーダーは全て同じ入力レイアウトを使用する
 		{ CopyImageShader, {  L"resources/Shader/PostEffect/PostEffect.VS.hlsl", L"resources/Shader/PostEffect/CopyImage.PS.hlsl", lineInput, false, D3D12_DEPTH_WRITE_MASK_ZERO, D3D12_COMPARISON_FUNC_ALWAYS, D3D12_CULL_MODE_NONE, D3D12_FILL_MODE_SOLID } },
