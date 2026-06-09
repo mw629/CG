@@ -16,7 +16,7 @@ void StageSettings::Initialize(ModelData roadModelData, ModelData obstacleModelD
 		// Z軸方向に並べて配置（手前から奥へ）
 		roadTransforms_[i].scale = { 5.0f, 5.0f, 5.0f };
 		roadTransforms_[i].rotate = { 0.0f, 0.0f, 0.0f };
-		roadTransforms_[i].translate = { 0.0f, 0.0f, static_cast<float>(i) * chunkLength_ };
+		roadTransforms_[i].translate = { 0.0f, 2.0f, static_cast<float>(i) * chunkLength_ };
 
 		roadChunks_[i]->SetTransform(roadTransforms_[i]);
 	}
@@ -104,13 +104,13 @@ void StageSettings::SpawnObstaclesOnChunk(float chunkZ)
 		float z = chunkZ + static_cast<float>(std::rand() % static_cast<int>(chunkLength_));
 
 		// Y座標はタイプに応じて変える
-		float y = 1.5f; // Lowの場合（地面の高さ1.0f + 障害物半分の高さ0.5f）
+		float y = 2.5f; // Lowの場合（地面の高さ2.0f + 障害物半分の高さ0.5f）
 		Obstacle::Type type = obstacles_[nextObstacleIndex_]->GetType();
 		if (type == Obstacle::Type::High) {
-			y = 2.5f; // 高い障害物
+			y = 4.6f; // 高い障害物（下をくぐるため下端3.1fにする。高さ3.0なので中心4.6f）
 		}
 		else if (type == Obstacle::Type::Wall) {
-			y = 2.5f; // 壁は高さ3.0なので中心は2.5f
+			y = 3.5f; // 壁は高さ3.0なので中心は2.0 + 1.5 = 3.5f
 		}
 
 		obstacles_[nextObstacleIndex_]->Spawn(x, y, z);
@@ -129,7 +129,7 @@ void StageSettings::Reset()
 
 	// 道路チャンクの位置をリセット
 	for (int i = 0; i < kChunkCount_; i++) {
-		roadTransforms_[i].translate = { 0.0f, 0.0f, static_cast<float>(i) * chunkLength_ };
+		roadTransforms_[i].translate = { 0.0f, 2.0f, static_cast<float>(i) * chunkLength_ };
 		roadChunks_[i]->SetTransform(roadTransforms_[i]);
 	}
 

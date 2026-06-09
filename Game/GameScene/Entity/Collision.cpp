@@ -15,12 +15,12 @@ AABB Collision::MakeAABB(const Transform& transform, float width, float height, 
 	AABB aabb;
 	aabb.min = {
 		transform.translate.x - width / 2.0f,
-		transform.translate.y,
+		transform.translate.y - height / 2.0f,
 		transform.translate.z - depth / 2.0f
 	};
 	aabb.max = {
 		transform.translate.x + width / 2.0f,
-		transform.translate.y + height,
+		transform.translate.y + height / 2.0f,
 		transform.translate.z + depth / 2.0f
 	};
 	return aabb;
