@@ -45,15 +45,15 @@ void TestScene::Initialize() {
 	camera_.get()->SetTransform(cameraTransform_);
 	camera_.get()->Update();
 
-	ModelData modelData = AssimpLoadObjFile("resources/obj", "sphere.obj");
+	ModelData modelData = AssimpLoadObjFile("resources/Model/obj", "sphere.obj");
 
 	model_.get()->Initialize(modelData);
 	model_.get()->SetTransform(modelTransform_);
 	model_.get()->name_ = "Sphere Model";
 
 
-	ModelData animModel = AssimpLoadObjFile("resources/human", "sneakWalk.gltf");
-	animation_.get()->Initialize(animModel, "resources/human", "sneakWalk.gltf");
+	ModelData animModel = AssimpLoadObjFile("resources/Model/human", "sneakWalk.gltf");
+	animation_.get()->Initialize(animModel, "resources/Model/human", "sneakWalk.gltf");
 	animation_.get()->name_ = "Animation Model";
 
 	ModelData cubeModel = AssimpLoadObjFile("resources/AnimatedCube", "AnimatedCube.gltf");
@@ -62,19 +62,19 @@ void TestScene::Initialize() {
 
 	
 
-	int texture1 = texture_.get()->CreateTexture("resources/monsterBall.png");
+	int texture1 = texture_.get()->CreateTexture("resources/Texture/monsterBall.png");
 	sphere_.get()->Initialize(texture1);
 	sphere_.get()->SetTransform(modelTransform_);
 	sphere_.get()->name_ = "MonsterBall Sphere";
 
-	skyBoxTexture_ = texture_.get()->CreateTexture("resources/rostock_laage_airport_4k.dds");
+	skyBoxTexture_ = texture_.get()->CreateTexture("resources/DDS/rostock_laage_airport_4k.dds");
 	skyBox_.get()->Initialize(skyBoxTexture_);
 	skyBox_.get()->SetShader("SkyBoxShader");
 	skyBox_.get()->SetLighting(false);
 	skyBox_.get()->SetTransform(skyBoxTransform_);
 	skyBox_.get()->name_ = "SkyBox";
 
-	modelData = AssimpLoadObjFile("resources/Ground", "Ground.obj");
+	modelData = AssimpLoadObjFile("resources/Model/Ground", "Ground.obj");
 	floor.get()->Initialize(modelData);
 	floor.get()->SetTransform(floorT);
 	floor.get()->name_ = "Floor";
@@ -149,7 +149,7 @@ void TestScene::Initialize() {
 	particle_.push_back(std::move(particleRing));
 
 
-	int texture = texture_.get()->CreateTexture("resources/uvChecker.png");
+	int texture = texture_.get()->CreateTexture("resources/Texture/uvChecker.png");
 	sprite_.get()->Initialize(spriteData_, texture);
 
 	ring_.get()->Initialize(texture);

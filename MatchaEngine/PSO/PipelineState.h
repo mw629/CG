@@ -19,6 +19,7 @@ enum BlendMode {
 // シェーダーの名前を定数で管理
 using ShaderName = std::string;
 const ShaderName ObjectShader = "ObjectShader";
+const ShaderName IceShader = "IceShader";
 const ShaderName AnimationObj = "AnimationObj";
 const ShaderName ParticleShader = "ParticleShader";
 const ShaderName LineShader = "LineShader";
