@@ -46,6 +46,7 @@ void Obstacle::SetType(Type type)
 		transform_.scale = { 1.5f, 3.0f, 1.0f };
 		model_->GetMartial()->SetColor({ 1.0f, 1.0f, 1.0f, 1.0f }); // 白色
 		model_->SetShader("IceShader");
+		model_->SetBlend(BlendMode::kBlendModeNormal); // 半透明を有効にする
 		break;
 	}
 

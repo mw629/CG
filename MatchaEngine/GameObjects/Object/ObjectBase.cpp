@@ -41,6 +41,33 @@ void ObjectBase::ImGui() {
 			ImGui::TreePop();
 		}
 
+		if (ImGui::TreeNode("BlendMode")) {
+			const char* blendModes[] = { "None", "Normal", "Add", "Subtract", "Multiply", "Screen" };
+			int current_item = static_cast<int>(blend_);
+			if (ImGui::Combo("BlendMode Selection", &current_item, blendModes, IM_ARRAYSIZE(blendModes))) {
+				blend_ = static_cast<BlendMode>(current_item);
+			}
+			ImGui::TreePop();
+		}
+
+		if (ImGui::TreeNode("Texture")) {
+			const std::vector<std::string>& keys = Texture::GetTextureKeys();
+			if (!keys.empty()) {
+				std::vector<const char*> items;
+				int current_item = 0;
+				for (int i = 0; i < keys.size(); ++i) {
+					items.push_back(keys[i].c_str());
+					if (texture->TextureData(keys[i]).ptr == textureSrvHandleGPU_.ptr) {
+						current_item = i;
+					}
+				}
+				if (ImGui::Combo("Texture Selection", &current_item, items.data(), static_cast<int>(items.size()))) {
+					textureSrvHandleGPU_ = texture->TextureData(keys[current_item]);
+				}
+			}
+			ImGui::TreePop();
+		}
+
 		material_.get()->ImGui();
 	}
 	ImGui::PopID();

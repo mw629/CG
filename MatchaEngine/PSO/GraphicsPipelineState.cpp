@@ -114,7 +114,13 @@ void GraphicsPipelineState::CreateGraphicsPSO(const ShaderName& shaderName, cons
 	inputLayout->CreateInputLayout(config);
 	blendState->CreateBlendDesc(blendMode);
 	rasterizerState->CreateRasterizerState(config);
-	depthStencilState->CreateDepthStencilState(config);
+	
+	// 半透明ブレンド時は深度書き込みを無効化する（奥にあるものが消えるのを防ぐため）
+	PipelineConfig modifiedConfig = config;
+	if (blendMode != BlendMode::kBlendModeNone) {
+		modifiedConfig.depthWriteMask = D3D12_DEPTH_WRITE_MASK_ZERO;
+	}
+	depthStencilState->CreateDepthStencilState(modifiedConfig);
 
 
 	graphicsPipelineStateDesc_[shaderName][blendMode].pRootSignature = rootSignature->GetRootSignature();//RootSignature

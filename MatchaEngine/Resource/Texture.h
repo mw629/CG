@@ -20,5 +20,6 @@ public:
 	D3D12_GPU_DESCRIPTOR_HANDLE TextureData(const std::string& filePath);
 	D3D12_GPU_DESCRIPTOR_HANDLE TextureData(int index);
 
+	static const std::vector<std::string>& GetTextureKeys();
 
 };

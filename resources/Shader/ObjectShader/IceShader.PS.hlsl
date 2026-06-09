@@ -138,12 +138,14 @@ PixelShaderOutput main(VertexShaderOutput input)
     // 屈折成分も入っているので少し透明感が出る
     output.color.rgb += environmentColor.rgb * gMaterial.environmentCoefficient * 1.2f;
     
-    // 中心に近いほど透明に、外側を水色に
-    float dist = distance(input.texcoord, float2(0.5f, 0.5f));
-    float radialAlpha = smoothstep(0.0f, 0.5f, dist);
+    // 視線と法線の内積を元に、正面（中心）を透明に、外側（輪郭）を不透明・水色にする
+    float viewDot = saturate(dot(toEye, normal));
+    float rimFactor = 1.0f - viewDot; // 正面で0、輪郭で1
     
-    output.color.a *= radialAlpha;
-    output.color.rgb = lerp(output.color.rgb, float3(0.4f, 0.8f, 1.0f), smoothstep(0.2f, 0.5f, dist));
+    float edgeAlpha = smoothstep(0.0f, 0.6f, rimFactor);
+    output.color.a *= edgeAlpha;
+    
+    output.color.rgb = lerp(output.color.rgb, float3(0.4f, 0.8f, 1.0f), smoothstep(0.2f, 0.8f, rimFactor));
     
     if (output.color.a <= 0.0f)
     {

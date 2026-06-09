@@ -71,3 +71,7 @@ D3D12_GPU_DESCRIPTOR_HANDLE Texture::TextureData(int index) {
 	return textureLoader_->GetTexture(index);
 }
 
+const std::vector<std::string>& Texture::GetTextureKeys()
+{
+	return textureLoader_->GetTextureKeys();
+}
