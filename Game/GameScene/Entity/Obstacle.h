@@ -32,6 +32,7 @@ public:
 	~Obstacle();
 
 	void Initialize(ModelData modelData, Type type);
+	void SetType(Type type);
 
 	/// <summary>
 	/// 障害物を指定位置に配置しアクティブにする

@@ -67,6 +67,13 @@ void Player::PlayerMove()
 		if (targetLaneIndex_ != laneIndex_) {
 			startX_ = transform_.translate.x;
 			lerpTime_ = 0.0f;
+
+			// 横移動時にしゃがみ（転がり）をキャンセルして硬直をなくす
+			if (isRolling_) {
+				isRolling_ = false;
+				transform_.scale.y = 1.0f;
+				transform_.translate.y = baseHeight_;
+			}
 		}
 	}
 	// レーンの移動中だったら
@@ -87,13 +94,20 @@ void Player::PlayerMove()
 	}
 
 	// === アクション（ジャンプと転がり） ===
-	// 地上にいて何もしていない時のみアクション可能
-	if (!isJumping_ && !isRolling_) {
+	// 地上にいてジャンプ中でなければアクション可能（転がり中でもジャンプでキャンセル可能）
+	if (!isJumping_) {
 		if (Input::PushKey(DIK_W) || Input::PushKey(DIK_SPACE)) {
 			isJumping_ = true;
 			velocityY_ = jumpPower_;
+
+			// ジャンプ時にしゃがみをキャンセル
+			if (isRolling_) {
+				isRolling_ = false;
+				transform_.scale.y = 1.0f;
+				transform_.translate.y = baseHeight_;
+			}
 		}
-		else if (Input::PushKey(DIK_S)) {
+		else if (!isRolling_ && Input::PushKey(DIK_S)) {
 			isRolling_ = true;
 			rollTimer_ = rollDuration_;
 			// 転がり中はスケールYを半分にして伏せるようにする

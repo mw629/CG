@@ -10,8 +10,13 @@ Obstacle::~Obstacle()
 
 void Obstacle::Initialize(ModelData modelData, Type type)
 {
-	type_ = type;
 	model_->Initialize(modelData);
+	SetType(type);
+}
+
+void Obstacle::SetType(Type type)
+{
+	type_ = type;
 	model_->SetShader("ObjectShader");
 
 	// タイプに応じて当たり判定サイズとスケールを設定

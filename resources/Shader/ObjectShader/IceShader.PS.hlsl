@@ -138,6 +138,14 @@ PixelShaderOutput main(VertexShaderOutput input)
     // 屈折成分も入っているので少し透明感が出る
     output.color.rgb += environmentColor.rgb * gMaterial.environmentCoefficient * 1.2f;
     
+    // 中心に近いほど透明に、外側を水色に
+    float dist = distance(input.texcoord, float2(0.5f, 0.5f));
+    float radialAlpha = smoothstep(0.0f, 0.5f, dist);
+    
+    output.color.a *= radialAlpha;
+    output.color.rgb = lerp(output.color.rgb, float3(0.4f, 0.8f, 1.0f), smoothstep(0.2f, 0.5f, dist));
+    
+    if (output.color.a <= 0.0f)
     {
         discard;
     }

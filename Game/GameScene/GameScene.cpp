@@ -67,6 +67,11 @@ void GameScene::ImGui()
 		if (ImGui::SliderFloat("Scroll Acceleration", &accel, 0.0f, 0.01f)) {
 			stageSettings_->SetScrollAcceleration(accel);
 		}
+
+		float interval = stageSettings_->GetObstacleInterval();
+		if (ImGui::SliderFloat("Obstacle Interval", &interval, 5.0f, 50.0f)) {
+			stageSettings_->SetObstacleInterval(interval);
+		}
 	}
 
 	ImGui::End();
