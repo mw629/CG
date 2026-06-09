@@ -38,7 +38,7 @@ private:
 	std::unique_ptr<Obstacle> obstacles_[kMaxObstacles_];
 	int nextObstacleIndex_ = 0;
 
-	float obstacleInterval_ = 25.0f; // 障害物の生成間隔
+	float obstacleInterval_ = 30.0f; // 障害物の生成間隔
 	float distanceSinceLastSpawn_ = 0.0f; // 前回生成からの移動距離
 
 	// ゲームオーバーフラグ
