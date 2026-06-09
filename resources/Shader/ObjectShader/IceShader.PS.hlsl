@@ -138,19 +138,6 @@ PixelShaderOutput main(VertexShaderOutput input)
     // 屈折成分も入っているので少し透明感が出る
     output.color.rgb += environmentColor.rgb * gMaterial.environmentCoefficient * 1.2f;
     
-    // エッジの判定 (0.0: 中心, 1.0: 外側)
-    float edgeFactor = 1.0f - saturate(dot(toEye, normal));
-    
-    // 外側を水色がかった色にする
-    float32_t3 outerCyanColor = float32_t3(0.3f, 0.8f, 1.0f);
-    output.color.rgb = lerp(output.color.rgb, outerCyanColor, edgeFactor * 0.6f);
-    
-    // 中心部分に近づくに連れて半透明になるようにする (中心のα値: 0.2, 外側のα値: 1.0)
-    float alphaFactor = lerp(0.2f, 1.0f, edgeFactor);
-    output.color.a *= alphaFactor;
-    
-    // α値が0以下の場合はピクセルを破棄
-    if (output.color.a <= 0.0f)
     {
         discard;
     }
