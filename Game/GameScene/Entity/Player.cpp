@@ -31,6 +31,7 @@ void Player::Reset()
 	velocityY_ = 0.0f;
 	isRolling_ = false;
 	rollTimer_ = 0.0f;
+	keepRolling_ = false;
 
 	model_.get()->SetTransform(transform_);
 }
@@ -69,7 +70,7 @@ void Player::PlayerMove(float speedMultiplier)
 			lerpTime_ = 0.0f;
 
 			// 横移動時にしゃがみ（転がり）をキャンセルして硬直をなくす
-			if (isRolling_) {
+			if (isRolling_ && !keepRolling_) {
 				isRolling_ = false;
 				transform_.scale.y = 1.0f;
 				transform_.translate.y = baseHeight_;
@@ -97,14 +98,16 @@ void Player::PlayerMove(float speedMultiplier)
 	// 地上にいてジャンプ中でなければアクション可能（転がり中でもジャンプでキャンセル可能）
 	if (!isJumping_) {
 		if (Input::PushKey(DIK_W) || Input::PushKey(DIK_SPACE)||Input::PushKey(DIK_UP)) {
-			isJumping_ = true;
-			velocityY_ = jumpPower_ * speedMultiplier;
+			if (!(isRolling_ && keepRolling_)) {
+				isJumping_ = true;
+				velocityY_ = jumpPower_ * speedMultiplier;
 
-			// ジャンプ時にしゃがみをキャンセル
-			if (isRolling_) {
-				isRolling_ = false;
-				transform_.scale.y = 1.0f;
-				transform_.translate.y = baseHeight_;
+				// ジャンプ時にしゃがみをキャンセル
+				if (isRolling_) {
+					isRolling_ = false;
+					transform_.scale.y = 1.0f;
+					transform_.translate.y = baseHeight_;
+				}
 			}
 		}
 		else if (!isRolling_ && (Input::PushKey(DIK_S) || Input::PushKey(DIK_DOWN))) {
@@ -133,7 +136,7 @@ void Player::PlayerMove(float speedMultiplier)
 	// 転がり処理
 	if (isRolling_) {
 		rollTimer_ -= speedMultiplier;
-		if (rollTimer_ <= 0.0f) {
+		if (rollTimer_ <= 0.0f && !keepRolling_) {
 			isRolling_ = false;
 			// 姿勢を元に戻す
 			transform_.scale.y = 1.0f;

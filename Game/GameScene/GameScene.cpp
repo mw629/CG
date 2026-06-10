@@ -43,11 +43,27 @@ void GameScene::ImGui()
 
 		ImGui::Separator();
 
+		// スコアとランキング
+		ImGui::Text("Current Distance: %.2f m", currentDistance_);
+		if (ImGui::TreeNode("Top 3 Ranking")) {
+			for (int i = 0; i < 3; i++) {
+				if (topRankings_[i] > 0.0f) {
+					ImGui::Text("Rank %d: %.2f m", i + 1, topRankings_[i]);
+				} else {
+					ImGui::Text("Rank %d: ---", i + 1);
+				}
+			}
+			ImGui::TreePop();
+		}
+
+		ImGui::Separator();
+
 		// ゲーム制御
 		if (ImGui::Button("Reset Game", ImVec2(120, 0))) {
 			gameState_ = GameState::Playing;
 			stageSettings_->Reset();
 			player_->Reset();
+			currentDistance_ = 0.0f;
 		}
 	}
 
@@ -76,6 +92,57 @@ void GameScene::ImGui()
 
 	ImGui::End();
 
+	// ポーズメニュー
+	if (gameState_ == GameState::Paused) {
+		ImGuiIO& io = ImGui::GetIO();
+		ImGui::SetNextWindowPos(ImVec2(io.DisplaySize.x * 0.5f, io.DisplaySize.y * 0.5f), ImGuiCond_Always, ImVec2(0.5f, 0.5f));
+		ImGui::Begin("Pause Menu", nullptr, ImGuiWindowFlags_NoResize | ImGuiWindowFlags_AlwaysAutoResize | ImGuiWindowFlags_NoCollapse);
+		ImGui::Text("PAUSED");
+		ImGui::Separator();
+		if (ImGui::Button("Resume (ESC)", ImVec2(200, 40))) {
+			gameState_ = GameState::Playing;
+		}
+		if (ImGui::Button("Return to Title", ImVec2(200, 40))) {
+			nextSceneID_ = SceneID::Title;
+			sceneChangeRequest_ = true;
+		}
+		ImGui::End();
+	}
+
+	// ゲームオーバーメニュー
+	if (gameState_ == GameState::GameOver) {
+		ImGuiIO& io = ImGui::GetIO();
+		ImGui::SetNextWindowPos(ImVec2(io.DisplaySize.x * 0.5f, io.DisplaySize.y * 0.5f), ImGuiCond_Always, ImVec2(0.5f, 0.5f));
+		ImGui::Begin("Game Over Menu", nullptr, ImGuiWindowFlags_NoResize | ImGuiWindowFlags_AlwaysAutoResize | ImGuiWindowFlags_NoCollapse);
+		ImGui::Text("GAME OVER");
+		ImGui::Separator();
+
+		ImGui::Text("Your Score: %.2f m", currentDistance_);
+		ImGui::Separator();
+		ImGui::Text("--- TOP 3 RANKING ---");
+		for (int i = 0; i < 3; i++) {
+			if (topRankings_[i] > 0.0f) {
+				ImGui::Text("  %d. %.2f m", i + 1, topRankings_[i]);
+			} else {
+				ImGui::Text("  %d. ---", i + 1);
+			}
+		}
+		ImGui::Separator();
+
+		if (ImGui::Button("Restart (1)", ImVec2(200, 40))) {
+			gameState_ = GameState::Playing;
+			stageSettings_->Reset();
+			PostEffect::SetActivePostEffect(PostEffect::Type::Normal);
+			player_->Reset();
+			currentDistance_ = 0.0f;
+		}
+		if (ImGui::Button("Return to Title (2)", ImVec2(200, 40))) {
+			nextSceneID_ = SceneID::Title;
+			sceneChangeRequest_ = true;
+		}
+		ImGui::End();
+	}
+
 #endif // _USE_IMGUI
 }
 
@@ -99,6 +166,8 @@ void GameScene::Initialize() {
 	ModelData roadModelData = AssimpLoadObjFile("resources/Plane", "Plane.gltf");
 	ModelData obstacleModelData = AssimpLoadObjFile("resources/Block", "Block.obj");
 	stageSettings_->Initialize(roadModelData, obstacleModelData);
+
+	currentDistance_ = 0.0f;
 }
 
 void GameScene::Update() {
@@ -128,6 +197,7 @@ void GameScene::Update() {
 			stageSettings_->Reset();
 			PostEffect::SetActivePostEffect(PostEffect::Type::Normal);
 			player_->Reset();
+			currentDistance_ = 0.0f;
 		}
 		// 2でタイトルへ
 		if (Input::PushKey(DIK_2)) {
@@ -164,6 +234,9 @@ void GameScene::PlayingUpdate()
 		speedMultiplier = stageSettings_->GetScrollSpeed() / stageSettings_->GetBaseScrollSpeed();
 	}
 
+	currentDistance_ += stageSettings_->GetScrollSpeed();
+
+	CheckKeepRolling();
 	player_->Update(view, speedMultiplier);
 	stageSettings_->Update(view);
 
@@ -200,7 +273,60 @@ void GameScene::CheckCollisions()
 			gameState_ = GameState::GameOver;
 			stageSettings_->SetGameOver(true);
 			PostEffect::SetActivePostEffect(PostEffect::Type::GrayScale);
+			
+			// ランキング更新
+			UpdateRanking();
+			
 			break;
 		}
 	}
+}
+
+void GameScene::UpdateRanking()
+{
+	// 降順ソートでトップ3を保持
+	for (int i = 0; i < 3; i++) {
+		if (currentDistance_ > topRankings_[i]) {
+			// シフト
+			for (int j = 2; j > i; j--) {
+				topRankings_[j] = topRankings_[j - 1];
+			}
+			topRankings_[i] = currentDistance_;
+			break;
+		}
+	}
+}
+
+void GameScene::CheckKeepRolling()
+{
+	bool keepRolling = false;
+	if (player_->GetIsRolling()) {
+		// Calculate a "standing up" AABB for the player
+		const Transform& playerTransform = player_->GetTransform();
+		AABB standingAABB = Collision::MakeAABB(playerTransform, 0.8f, 1.5f, 0.8f);
+
+		for (int i = 0; i < stageSettings_->GetMaxObstacles(); i++) {
+			Obstacle* obstacle = stageSettings_->GetObstacle(i);
+			if (!obstacle->GetIsActive()) continue;
+
+			if (obstacle->GetType() == Obstacle::Type::High) {
+				AABB obstacleAABB = Collision::MakeAABB(
+					obstacle->GetTransform(),
+					obstacle->GetCollisionWidth(),
+					obstacle->GetCollisionHeight(),
+					obstacle->GetCollisionDepth()
+				);
+
+				// もし立ち上がったら当たる位置にいるか？
+				if (Collision::CheckAABB(standingAABB, obstacleAABB)) {
+					// プレイヤーの中心が障害物の中心より奥（Z座標が大きい）なら
+					if (playerTransform.translate.z > obstacle->GetTransform().translate.z) {
+						keepRolling = true;
+						break;
+					}
+				}
+			}
+		}
+	}
+	player_->SetKeepRolling(keepRolling);
 }

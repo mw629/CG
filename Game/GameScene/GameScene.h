@@ -42,6 +42,12 @@ private:
 
 	// 当たり判定処理
 	void CheckCollisions();
+	void CheckKeepRolling();
+
+	// スコア・ランキング
+	float currentDistance_ = 0.0f;
+	float topRankings_[3] = { 0.0f, 0.0f, 0.0f };
+	void UpdateRanking();
 
 public:
 	~GameScene()override;

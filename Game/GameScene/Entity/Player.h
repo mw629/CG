@@ -40,6 +40,7 @@ private:
 	bool isRolling_ = false;
 	float rollTimer_ = 0.0f;
 	float rollDuration_ = 45.0f; // 転がりの継続フレーム数
+	bool keepRolling_ = false; // 強制的にしゃがみを維持するフラグ
 
 public:
 
@@ -57,5 +58,6 @@ public:
 
 	const Transform& GetTransform() const { return transform_; }
 	bool GetIsRolling() const { return isRolling_; }
+	void SetKeepRolling(bool keep) { keepRolling_ = keep; }
 };
 
