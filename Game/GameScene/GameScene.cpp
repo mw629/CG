@@ -159,7 +159,12 @@ void GameScene::Draw() {
 
 void GameScene::PlayingUpdate()
 {
-	player_->Update(view);
+	float speedMultiplier = 1.0f;
+	if (stageSettings_->GetBaseScrollSpeed() > 0.0f) {
+		speedMultiplier = stageSettings_->GetScrollSpeed() / stageSettings_->GetBaseScrollSpeed();
+	}
+
+	player_->Update(view, speedMultiplier);
 	stageSettings_->Update(view);
 
 	// 当たり判定チェック

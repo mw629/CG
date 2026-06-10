@@ -35,15 +35,15 @@ void Player::Reset()
 	model_.get()->SetTransform(transform_);
 }
 
-void Player::Update(Matrix4x4 view)
+void Player::Update(Matrix4x4 view, float speedMultiplier)
 {
-	PlayerMove();
+	PlayerMove(speedMultiplier);
 
 
 	model_.get()->SettingWvp(view);
 }
 
-void Player::PlayerMove()
+void Player::PlayerMove(float speedMultiplier)
 {
 	const float kLaneWidth = 2.0f; // レーンの横幅
 	const int kMinLane = -1;       // 一番左のレーン
@@ -52,10 +52,10 @@ void Player::PlayerMove()
 	// レーンの移動中ではなかったら
 	if (laneIndex_ == targetLaneIndex_) {
 		// キー入力で目標レーンを設定
-		if (Input::PushKey(DIK_A)) {
+		if (Input::PushKey(DIK_A)||Input::PushKey(DIK_LEFT)) {
 			targetLaneIndex_ = laneIndex_ - 1;
 		}
-		if (Input::PushKey(DIK_D)) {
+		if (Input::PushKey(DIK_D)||Input::PushKey(DIK_RIGHT)) {
 			targetLaneIndex_ = laneIndex_ + 1;
 		}
 
@@ -79,7 +79,7 @@ void Player::PlayerMove()
 	// レーンの移動中だったら
 	else {
 		// 線形補間で移動
-		lerpTime_ += laneChangeSpeed_;
+		lerpTime_ += laneChangeSpeed_ * speedMultiplier;
 		if (lerpTime_ > 1.0f) {
 			lerpTime_ = 1.0f;
 		}
@@ -96,9 +96,9 @@ void Player::PlayerMove()
 	// === アクション（ジャンプと転がり） ===
 	// 地上にいてジャンプ中でなければアクション可能（転がり中でもジャンプでキャンセル可能）
 	if (!isJumping_) {
-		if (Input::PushKey(DIK_W) || Input::PushKey(DIK_SPACE)) {
+		if (Input::PushKey(DIK_W) || Input::PushKey(DIK_SPACE)||Input::PushKey(DIK_UP)) {
 			isJumping_ = true;
-			velocityY_ = jumpPower_;
+			velocityY_ = jumpPower_ * speedMultiplier;
 
 			// ジャンプ時にしゃがみをキャンセル
 			if (isRolling_) {
@@ -107,7 +107,7 @@ void Player::PlayerMove()
 				transform_.translate.y = baseHeight_;
 			}
 		}
-		else if (!isRolling_ && Input::PushKey(DIK_S)) {
+		else if (!isRolling_ && (Input::PushKey(DIK_S) || Input::PushKey(DIK_DOWN))) {
 			isRolling_ = true;
 			rollTimer_ = rollDuration_;
 			// 転がり中はスケールYを半分にして伏せるようにする
@@ -120,7 +120,7 @@ void Player::PlayerMove()
 	// ジャンプ処理
 	if (isJumping_) {
 		transform_.translate.y += velocityY_;
-		velocityY_ -= gravity_;
+		velocityY_ -= gravity_ * (speedMultiplier * speedMultiplier);
 
 		// 地面に着地
 		if (transform_.translate.y <= baseHeight_) {
@@ -132,7 +132,7 @@ void Player::PlayerMove()
 
 	// 転がり処理
 	if (isRolling_) {
-		rollTimer_ -= 1.0f;
+		rollTimer_ -= speedMultiplier;
 		if (rollTimer_ <= 0.0f) {
 			isRolling_ = false;
 			// 姿勢を元に戻す
