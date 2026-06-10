@@ -267,6 +267,33 @@
     <ClCompile Include="MatchaEngine\PSO\ComputePipeline.cpp">
       <Filter>ソース ファイル</Filter>
     </ClCompile>
+    <ClCompile Include="HapiColi\HapiColi.cpp">
+      <Filter>ソース ファイル</Filter>
+    </ClCompile>
+    <ClCompile Include="HapiColi\HapiColiManager\HapiColi_Recorder.cpp">
+      <Filter>ソース ファイル</Filter>
+    </ClCompile>
+    <ClCompile Include="HapiColi\HapiColiManager\Recorder_Analyzer.cpp">
+      <Filter>ソース ファイル</Filter>
+    </ClCompile>
+    <ClCompile Include="HapiColi\HapiColiManager\HapiColi_Optimizer.cpp">
+      <Filter>ソース ファイル</Filter>
+    </ClCompile>
+    <ClCompile Include="HapiColi\HapiColiManager\HapiColi_LogManager.cpp">
+      <Filter>ソース ファイル</Filter>
+    </ClCompile>
+    <ClCompile Include="HapiColi\HapiColiManager\HapiColi_UIManager.cpp">
+      <Filter>ソース ファイル</Filter>
+    </ClCompile>
+    <ClCompile Include="HapiColi\HapiColiManager\HapiColi_TestRunner.cpp">
+      <Filter>ソース ファイル</Filter>
+    </ClCompile>
+    <ClCompile Include="HapiColi\HapiColiManager\HapiColi_TestRule.cpp">
+      <Filter>ソース ファイル</Filter>
+    </ClCompile>
+    <ClCompile Include="HapiColi\HapiColiManager\HapiColi_JsonSerializer.cpp">
+      <Filter>ソース ファイル</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <FxCompile Include="resources\Shader\Object3d.VS.hlsl">
@@ -520,6 +547,39 @@
     <ClInclude Include="MatchaEngine\PSO\ComputePipeline.h">
       <Filter>ヘッダー ファイル</Filter>
     </ClInclude>
+    <ClInclude Include="HapiColi\HapiColi.h">
+      <Filter>ヘッダー ファイル</Filter>
+    </ClInclude>
+    <ClInclude Include="HapiColi\HapiColiManager\HapiColi_Recorder.h">
+      <Filter>ヘッダー ファイル</Filter>
+    </ClInclude>
+    <ClInclude Include="HapiColi\HapiColiManager\Recorder_Analyzer.h">
+      <Filter>ヘッダー ファイル</Filter>
+    </ClInclude>
+    <ClInclude Include="HapiColi\HapiColiManager\HapiColi_Optimizer.h">
+      <Filter>ヘッダー ファイル</Filter>
+    </ClInclude>
+    <ClInclude Include="HapiColi\HapiColiManager\HapiColi_LogManager.h">
+      <Filter>ヘッダー ファイル</Filter>
+    </ClInclude>
+    <ClInclude Include="HapiColi\HapiColiManager\HapiColi_UIManager.h">
+      <Filter>ヘッダー ファイル</Filter>
+    </ClInclude>
+    <ClInclude Include="HapiColi\HapiColiManager\HapiColi_TestRunner.h">
+      <Filter>ヘッダー ファイル</Filter>
+    </ClInclude>
+    <ClInclude Include="HapiColi\HapiColiManager\HapiColi_TestRule.h">
+      <Filter>ヘッダー ファイル</Filter>
+    </ClInclude>
+    <ClInclude Include="HapiColi\HapiColiManager\HapiColi_FrameData.h">
+      <Filter>ヘッダー ファイル</Filter>
+    </ClInclude>
+    <ClInclude Include="HapiColi\HapiColiManager\HapiColi_TestResult.h">
+      <Filter>ヘッダー ファイル</Filter>
+    </ClInclude>
+    <ClInclude Include="HapiColi\HapiColiManager\HapiColi_JsonSerializer.h">
+      <Filter>ヘッダー ファイル</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <Text Include="externals\imgui\LICENSE.txt">
@@ -539,5 +599,6 @@
     <None Include="resources\Shader\SkyBox.hlsli" />
     <None Include=".github\copilot-instructions.md" />
     <None Include="resources\Shader\PostEffect\PostEffect.hlsli" />
+    <None Include="HapiColi\HapiColiManual.md" />
   </ItemGroup>
 </Project>
