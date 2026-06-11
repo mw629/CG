@@ -270,10 +270,11 @@ namespace HapiColi
             {
                 m_isSaving = true;
                 
-                auto framesToSave = m_manager->GetRecorder()->GetRecordedFrames();
+                auto framesToSave  = m_manager->GetRecorder()->GetRecordedFrames();
+                auto resultsToSave = m_manager->GetAnalyzer()->GetResults(); // Unhappy抽出用
                 LogManager* logManager = m_manager->GetLogManager();
                 
-                std::thread([logManager, framesToSave, this]() {
+                std::thread([logManager, framesToSave, resultsToSave, this]() {
                     auto now = std::chrono::system_clock::now();
                     auto time = std::chrono::system_clock::to_time_t(now);
                     struct tm timeinfo;
@@ -282,19 +283,25 @@ namespace HapiColi
 #else
                     timeinfo = *std::localtime(&time);
 #endif
-                    char timeBuf[256];
-                    snprintf(timeBuf, sizeof(timeBuf), (const char*)u8"%02d年%02d月%02d日%02d時%02d分DebugLog", 
-                             timeinfo.tm_year % 100, 
-                             timeinfo.tm_mon + 1, 
-                             timeinfo.tm_mday, 
-                             timeinfo.tm_hour, 
+                    char timeBuf[64];
+                    snprintf(timeBuf, sizeof(timeBuf), "%02d_%02d_%02d_%02d_%02d",
+                             timeinfo.tm_year % 100,
+                             timeinfo.tm_mon + 1,
+                             timeinfo.tm_mday,
+                             timeinfo.tm_hour,
                              timeinfo.tm_min);
                     
-                    std::string logDir = "c:\\TechnicalSchool\\MyEngine\\HapiColi\\Log";
+                    std::string logDir  = "c:\\TechnicalSchool\\MyEngine\\HapiColi\\Log";
                     std::string logPath = logDir + "\\" + timeBuf + ".json";
+                    std::string unhappyPath = logDir + "\\" + timeBuf + "_Unhappy.json";
                     
                     system(("mkdir \"" + logDir + "\" 2> nul").c_str());
+
+                    // 全フレームを保存
                     logManager->SaveFrames(logPath, framesToSave);
+
+                    // Unhappy な結果 + 対応フレームを別ファイルに保存
+                    logManager->SaveUnhappyReport(unhappyPath, resultsToSave, framesToSave);
                     
                     m_isSaving = false;
                 }).detach();

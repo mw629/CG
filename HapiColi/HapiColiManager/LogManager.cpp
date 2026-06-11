@@ -24,6 +24,26 @@ namespace HapiColi
         return true;
     }
 
+    bool LogManager::SaveUnhappyReport(
+        const std::string& filepath,
+        const std::vector<TestResult>& results,
+        const std::vector<FrameData>& frames)
+    {
+#if defined(_MSC_VER) && _HAS_CXX17
+        std::filesystem::path path_u8 = std::filesystem::path(reinterpret_cast<const char8_t*>(filepath.c_str()));
+        std::ofstream file(path_u8);
+#else
+        std::ofstream file(filepath);
+#endif
+        if (!file.is_open())
+            return false;
+
+        std::string jsonStr = JsonSerializer::SerializeUnhappyReport(results, frames);
+        file << jsonStr;
+        file.close();
+        return true;
+    }
+
     bool LogManager::LoadFrames(const std::string& filepath, std::vector<FrameData>& outFrames)
     {
         std::ifstream file(filepath);

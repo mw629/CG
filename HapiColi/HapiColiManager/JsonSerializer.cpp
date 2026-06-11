@@ -1,14 +1,17 @@
 #include "JsonSerializer.h"
 #include <sstream>
+#include <unordered_map>
 
 namespace HapiColi
 {
-    std::string JsonSerializer::EscapeString(const std::string& str)
+    // ---------------------------------------------------------------
+    //  ファイルスコープ ヘルパー
+    // ---------------------------------------------------------------
+    static std::string EscapeStr(const std::string& str)
     {
         std::string escaped = str;
-        // Basic escaping (could be expanded if needed)
         size_t pos = 0;
-        while ((pos = escaped.find('\"', pos)) != std::string::npos)
+        while ((pos = escaped.find('"', pos)) != std::string::npos)
         {
             escaped.replace(pos, 1, "\\\"");
             pos += 2;
@@ -16,72 +19,176 @@ namespace HapiColi
         return escaped;
     }
 
-    std::string JsonSerializer::SerializeFrameData(const FrameData& data)
+    static std::string Indent(int depth)
+    {
+        return std::string(depth * 2, ' ');
+    }
+
+    // ---------------------------------------------------------------
+    //  ObjectData（インデント付き）
+    // ---------------------------------------------------------------
+    static std::string SerializeObject(const ObjectData& obj, int depth)
     {
         std::ostringstream oss;
-        oss << "{";
-        oss << "\"frame\":" << data.frame << ",";
-        oss << "\"deltaTime\":" << data.deltaTime << ",";
-        oss << "\"objects\":[";
+        const std::string i0 = Indent(depth);
+        const std::string i1 = Indent(depth + 1);
+        const std::string i2 = Indent(depth + 2);
+
+        oss << i0 << "{\n";
+        oss << i1 << "\"id\": \""   << EscapeStr(obj.id)   << "\",\n";
+        oss << i1 << "\"type\": \"" << EscapeStr(obj.type) << "\",\n";
+        oss << i1 << "\"position\": ["
+            << obj.position.x << ", "
+            << obj.position.y << ", "
+            << obj.position.z << "],\n";
+        oss << i1 << "\"velocity\": ["
+            << obj.velocity.x << ", "
+            << obj.velocity.y << ", "
+            << obj.velocity.z << "],\n";
+        oss << i1 << "\"collision\": {\n";
+        oss << i2 << "\"isColliding\": "      << (obj.collision.isColliding ? "true" : "false") << ",\n";
+        oss << i2 << "\"collidedWithId\": \"" << EscapeStr(obj.collision.collidedWithId) << "\"\n";
+        oss << i1 << "}\n";
+        oss << i0 << "}";
+        return oss.str();
+    }
+
+    // ---------------------------------------------------------------
+    //  FrameData（インデント深さ指定）
+    // ---------------------------------------------------------------
+    static std::string SerializeFrameDataAt(const FrameData& data, int depth)
+    {
+        std::ostringstream oss;
+        const std::string i0 = Indent(depth);
+        const std::string i1 = Indent(depth + 1);
+
+        oss << i0 << "{\n";
+        oss << i1 << "\"frame\": "     << data.frame     << ",\n";
+        oss << i1 << "\"deltaTime\": " << data.deltaTime << ",\n";
+        oss << i1 << "\"objects\": [\n";
+
         for (size_t i = 0; i < data.objects.size(); ++i)
         {
-            const auto& obj = data.objects[i];
-            oss << "{";
-            oss << "\"id\":\"" << EscapeString(obj.id) << "\",";
-            oss << "\"type\":\"" << EscapeString(obj.type) << "\",";
-            oss << "\"position\":[" << obj.position.x << "," << obj.position.y << "," << obj.position.z << "],";
-            oss << "\"velocity\":[" << obj.velocity.x << "," << obj.velocity.y << "," << obj.velocity.z << "],";
-            oss << "\"collision\":{";
-            oss << "\"isColliding\":" << (obj.collision.isColliding ? "true" : "false") << ",";
-            oss << "\"collidedWithId\":\"" << EscapeString(obj.collision.collidedWithId) << "\"";
-            oss << "}";
-            oss << "}";
-            if (i < data.objects.size() - 1)
-            {
-                oss << ",";
-            }
+            oss << SerializeObject(data.objects[i], depth + 2);
+            if (i < data.objects.size() - 1) oss << ",";
+            oss << "\n";
         }
-        oss << "]";
-        oss << "}";
+
+        oss << i1 << "]\n";
+        oss << i0 << "}";
         return oss.str();
+    }
+
+    // ---------------------------------------------------------------
+    //  公開 API
+    // ---------------------------------------------------------------
+
+    // private helper – keep signature for header
+    std::string JsonSerializer::EscapeString(const std::string& str)
+    {
+        return EscapeStr(str);
+    }
+
+    std::string JsonSerializer::SerializeFrameData(const FrameData& data)
+    {
+        return SerializeFrameDataAt(data, 0);
     }
 
     std::string JsonSerializer::SerializeTestResult(const TestResult& result)
     {
         std::ostringstream oss;
-        oss << "{";
-        oss << "\"frame\":" << result.frame << ",";
-        oss << "\"happy\":" << (result.happy ? "true" : "false") << ",";
-        oss << "\"expected\":\"" << EscapeString(result.expected) << "\",";
-        oss << "\"actual\":\"" << EscapeString(result.actual) << "\",";
-        oss << "\"reason\":\"" << EscapeString(result.reason) << "\"";
-        oss << "}";
+        oss << "{\n";
+        oss << "    \"frame\": "      << result.frame << ",\n";
+        oss << "    \"happy\": "      << (result.happy ? "true" : "false") << ",\n";
+        oss << "    \"expected\": \"" << EscapeStr(result.expected) << "\",\n";
+        oss << "    \"actual\": \""   << EscapeStr(result.actual)   << "\",\n";
+        oss << "    \"reason\": \""   << EscapeStr(result.reason)   << "\"\n";
+        oss << "  }";
         return oss.str();
     }
 
     std::string JsonSerializer::SerializeFrames(const std::vector<FrameData>& frames)
     {
         std::ostringstream oss;
-        oss << "[";
+        oss << "[\n";
         for (size_t i = 0; i < frames.size(); ++i)
         {
-            oss << SerializeFrameData(frames[i]);
-            if (i < frames.size() - 1)
-            {
-                oss << ",";
-            }
+            oss << SerializeFrameDataAt(frames[i], 1);
+            if (i < frames.size() - 1) oss << ",";
+            oss << "\n";
         }
-        oss << "]";
+        oss << "]\n";
         return oss.str();
     }
 
-    // A full JSON parser without external library is complex. 
-    // This is a minimal placeholder for the required reading logic.
+    std::string JsonSerializer::SerializeUnhappyReport(
+        const std::vector<TestResult>& results,
+        const std::vector<FrameData>& frames)
+    {
+        std::unordered_map<uint32_t, const FrameData*> frameMap;
+        for (const auto& f : frames)
+        {
+            if (frameMap.find(f.frame) == frameMap.end())
+                frameMap[f.frame] = &f;
+        }
+
+        // 集計
+        int totalTests  = (int)results.size();
+        int unhappyCount = 0;
+        for (const auto& r : results)
+            if (!r.happy) ++unhappyCount;
+        int happyCount = totalTests - unhappyCount;
+        float successRate = (totalTests > 0) ? (float)happyCount / totalTests * 100.0f : 0.0f;
+
+        std::ostringstream oss;
+        oss << "{\n";
+
+        // ── 結論（サマリー）を先頭に ──────────────────────
+        oss << "  \"summary\": {\n";
+        oss << "    \"total_tests\": "   << totalTests   << ",\n";
+        oss << "    \"happy\": "         << happyCount   << ",\n";
+        oss << "    \"unhappy\": "       << unhappyCount << ",\n";
+
+        // 小数点1桁で出力
+        char rateBuf[32];
+        snprintf(rateBuf, sizeof(rateBuf), "%.1f", successRate);
+        oss << "    \"success_rate\": \"" << rateBuf << "%\"\n";
+        oss << "  },\n";
+
+        // ── 失敗詳細 ──────────────────────────────────────
+        oss << "  \"unhappy_report\": [\n";
+
+        bool first = true;
+        for (const auto& result : results)
+        {
+            if (result.happy) continue;
+
+            if (!first) oss << ",\n";
+            first = false;
+
+            oss << "  {\n";
+            oss << "    \"result\": " << SerializeTestResult(result) << ",\n";
+
+            auto it = frameMap.find(result.frame);
+            if (it != frameMap.end())
+            {
+                oss << "    \"frame_data\":\n";
+                oss << SerializeFrameDataAt(*it->second, 2) << "\n";
+            }
+            else
+            {
+                oss << "    \"frame_data\": null\n";
+            }
+
+            oss << "  }";
+        }
+
+        oss << "\n  ]\n}\n";
+        return oss.str();
+    }
+
     bool JsonSerializer::DeserializeFrameData(const std::string& jsonStr, FrameData& outData)
     {
-        // For a true engine-independent robust tool, we would integrate a single-header
-        // JSON library like picojson or nlohmann json here.
-        // For now, we will assume write-only or manual parsing if necessary.
         return false;
     }
 }

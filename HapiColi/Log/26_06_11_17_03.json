@@ -1,0 +1,7158 @@
+[
+  {
+    "frame": 0,
+    "deltaTime": 0.0166667,
+    "objects": [
+      {
+        "id": "Player",
+        "type": "",
+        "position": [0, 2, 0],
+        "velocity": [0, 0, 0],
+        "collision": {
+          "isColliding": false,
+          "collidedWithId": ""
+        }
+      }
+    ]
+  },
+  {
+    "frame": 1,
+    "deltaTime": 0.0166667,
+    "objects": [
+      {
+        "id": "Player",
+        "type": "",
+        "position": [0, 2, 0],
+        "velocity": [0, 0, 0],
+        "collision": {
+          "isColliding": false,
+          "collidedWithId": ""
+        }
+      }
+    ]
+  },
+  {
+    "frame": 2,
+    "deltaTime": 0.0166667,
+    "objects": [
+      {
+        "id": "Obstacle_0",
+        "type": "",
+        "position": [0, 2.5, 46.965],
+        "velocity": [0, 0, 0],
+        "collision": {
+          "isColliding": false,
+          "collidedWithId": ""
+        }
+      },
+      {
+        "id": "Player",
+        "type": "",
+        "position": [0, 2, 0],
+        "velocity": [0, 0, 0],
+        "collision": {
+          "isColliding": false,
+          "collidedWithId": ""
+        }
+      }
+    ]
+  },
+  {
+    "frame": 3,
+    "deltaTime": 0.0166667,
+    "objects": [
+      {
+        "id": "Obstacle_0",
+        "type": "",
+        "position": [0, 2.5, 46.719],
+        "velocity": [0, 0, 0],
+        "collision": {
+          "isColliding": false,
+          "collidedWithId": ""
+        }
+      },
+      {
+        "id": "Player",
+        "type": "",
+        "position": [0, 2, 0],
+        "velocity": [0, 0, 0],
+        "collision": {
+          "isColliding": false,
+          "collidedWithId": ""
+        }
+      }
+    ]
+  },
+  {
+    "frame": 4,
+    "deltaTime": 0.0166667,
+    "objects": [
+      {
+        "id": "Obstacle_0",
+        "type": "",
+        "position": [0, 2.5, 46.472],
+        "velocity": [0, 0, 0],
+        "collision": {
+          "isColliding": false,
+          "collidedWithId": ""
+        }
+      },
+      {
+        "id": "Player",
+        "type": "",
+        "position": [0, 2, 0],
+        "velocity": [0, 0, 0],
+        "collision": {
+          "isColliding": false,
+          "collidedWithId": ""
+        }
+      }
+    ]
+  },
+  {
+    "frame": 5,
+    "deltaTime": 0.0166667,
+    "objects": [
+      {
+        "id": "Obstacle_0",
+        "type": "",
+        "position": [0, 2.5, 46.224],
+        "velocity": [0, 0, 0],
+        "collision": {
+          "isColliding": false,
+          "collidedWithId": ""
+        }
+      },
+      {
+        "id": "Player",
+        "type": "",
+        "position": [0, 2, 0],
+        "velocity": [0, 0, 0],
+        "collision": {
+          "isColliding": false,
+          "collidedWithId": ""
+        }
+      }
+    ]
+  },
+  {
+    "frame": 6,
+    "deltaTime": 0.0166667,
+    "objects": [
+      {
+        "id": "Obstacle_0",
+        "type": "",
+        "position": [0, 2.5, 45.975],
+        "velocity": [0, 0, 0],
+        "collision": {
+          "isColliding": false,
+          "collidedWithId": ""
+        }
+      },
+      {
+        "id": "Player",
+        "type": "",
+        "position": [0, 2, 0],
+        "velocity": [0, 0, 0],
+        "collision": {
+          "isColliding": false,
+          "collidedWithId": ""
+        }
+      }
+    ]
+  },
+  {
+    "frame": 7,
+    "deltaTime": 0.0166667,
+    "objects": [
+      {
+        "id": "Obstacle_0",
+        "type": "",
+        "position": [0, 2.5, 45.725],
+        "velocity": [0, 0, 0],
+        "collision": {
+          "isColliding": false,
+          "collidedWithId": ""
+        }
+      },
+      {
+        "id": "Player",
+        "type": "",
+        "position": [0, 2, 0],
+        "velocity": [0, 0, 0],
+        "collision": {
+          "isColliding": false,
+          "collidedWithId": ""
+        }
+      }
+    ]
+  },
+  {
+    "frame": 8,
+    "deltaTime": 0.0166667,
+    "objects": [
+      {
+        "id": "Obstacle_0",
+        "type": "",
+        "position": [0, 2.5, 45.474],
+        "velocity": [0, 0, 0],
+        "collision": {
+          "isColliding": false,
+          "collidedWithId": ""
+        }
+      },
+      {
+        "id": "Player",
+        "type": "",
+        "position": [0, 2, 0],
+        "velocity": [0, 0, 0],
+        "collision": {
+          "isColliding": false,
+          "collidedWithId": ""
+        }
+      }
+    ]
+  },
+  {
+    "frame": 9,
+    "deltaTime": 0.0166667,
+    "objects": [
+      {
+        "id": "Obstacle_0",
+        "type": "",
+        "position": [0, 2.5, 45.222],
+        "velocity": [0, 0, 0],
+        "collision": {
+          "isColliding": false,
+          "collidedWithId": ""
+        }
+      },
+      {
+        "id": "Player",
+        "type": "",
+        "position": [0, 2, 0],
+        "velocity": [0, 0, 0],
+        "collision": {
+          "isColliding": false,
+          "collidedWithId": ""
+        }
+      }
+    ]
+  },
+  {
+    "frame": 10,
+    "deltaTime": 0.0166667,
+    "objects": [
+      {
+        "id": "Obstacle_0",
+        "type": "",
+        "position": [0, 2.5, 44.969],
+        "velocity": [0, 0, 0],
+        "collision": {
+          "isColliding": false,
+          "collidedWithId": ""
+        }
+      },
+      {
+        "id": "Player",
+        "type": "",
+        "position": [0, 2, 0],
+        "velocity": [0, 0, 0],
+        "collision": {
+          "isColliding": false,
+          "collidedWithId": ""
+        }
+      }
+    ]
+  },
+  {
+    "frame": 11,
+    "deltaTime": 0.0166667,
+    "objects": [
+      {
+        "id": "Obstacle_0",
+        "type": "",
+        "position": [0, 2.5, 44.715],
+        "velocity": [0, 0, 0],
+        "collision": {
+          "isColliding": false,
+          "collidedWithId": ""
+        }
+      },
+      {
+        "id": "Player",
+        "type": "",
+        "position": [0, 2, 0],
+        "velocity": [0, 0, 0],
+        "collision": {
+          "isColliding": false,
+          "collidedWithId": ""
+        }
+      }
+    ]
+  },
+  {
+    "frame": 12,
+    "deltaTime": 0.0166667,
+    "objects": [
+      {
+        "id": "Obstacle_0",
+        "type": "",
+        "position": [0, 2.5, 44.46],
+        "velocity": [0, 0, 0],
+        "collision": {
+          "isColliding": false,
+          "collidedWithId": ""
+        }
+      },
+      {
+        "id": "Player",
+        "type": "",
+        "position": [0, 2, 0],
+        "velocity": [0, 0, 0],
+        "collision": {
+          "isColliding": false,
+          "collidedWithId": ""
+        }
+      }
+    ]
+  },
+  {
+    "frame": 13,
+    "deltaTime": 0.0166667,
+    "objects": [
+      {
+        "id": "Obstacle_0",
+        "type": "",
+        "position": [0, 2.5, 44.204],
+        "velocity": [0, 0, 0],
+        "collision": {
+          "isColliding": false,
+          "collidedWithId": ""
+        }
+      },
+      {
+        "id": "Player",
+        "type": "",
+        "position": [0, 2, 0],
+        "velocity": [0, 0, 0],
+        "collision": {
+          "isColliding": false,
+          "collidedWithId": ""
+        }
+      }
+    ]
+  },
+  {
+    "frame": 14,
+    "deltaTime": 0.0166667,
+    "objects": [
+      {
+        "id": "Obstacle_0",
+        "type": "",
+        "position": [0, 2.5, 43.947],
+        "velocity": [0, 0, 0],
+        "collision": {
+          "isColliding": false,
+          "collidedWithId": ""
+        }
+      },
+      {
+        "id": "Player",
+        "type": "",
+        "position": [0, 2, 0],
+        "velocity": [0, 0, 0],
+        "collision": {
+          "isColliding": false,
+          "collidedWithId": ""
+        }
+      }
+    ]
+  },
+  {
+    "frame": 15,
+    "deltaTime": 0.0166667,
+    "objects": [
+      {
+        "id": "Obstacle_0",
+        "type": "",
+        "position": [0, 2.5, 43.689],
+        "velocity": [0, 0, 0],
+        "collision": {
+          "isColliding": false,
+          "collidedWithId": ""
+        }
+      },
+      {
+        "id": "Player",
+        "type": "",
+        "position": [0, 2, 0],
+        "velocity": [0, 0, 0],
+        "collision": {
+          "isColliding": false,
+          "collidedWithId": ""
+        }
+      }
+    ]
+  },
+  {
+    "frame": 16,
+    "deltaTime": 0.0166667,
+    "objects": [
+      {
+        "id": "Obstacle_0",
+        "type": "",
+        "position": [0, 2.5, 43.43],
+        "velocity": [0, 0, 0],
+        "collision": {
+          "isColliding": false,
+          "collidedWithId": ""
+        }
+      },
+      {
+        "id": "Player",
+        "type": "",
+        "position": [0, 2, 0],
+        "velocity": [0, 0, 0],
+        "collision": {
+          "isColliding": false,
+          "collidedWithId": ""
+        }
+      }
+    ]
+  },
+  {
+    "frame": 17,
+    "deltaTime": 0.0166667,
+    "objects": [
+      {
+        "id": "Obstacle_0",
+        "type": "",
+        "position": [0, 2.5, 43.17],
+        "velocity": [0, 0, 0],
+        "collision": {
+          "isColliding": false,
+          "collidedWithId": ""
+        }
+      },
+      {
+        "id": "Player",
+        "type": "",
+        "position": [0, 2, 0],
+        "velocity": [0, 0, 0],
+        "collision": {
+          "isColliding": false,
+          "collidedWithId": ""
+        }
+      }
+    ]
+  },
+  {
+    "frame": 18,
+    "deltaTime": 0.0166667,
+    "objects": [
+      {
+        "id": "Obstacle_0",
+        "type": "",
+        "position": [0, 2.5, 42.909],
+        "velocity": [0, 0, 0],
+        "collision": {
+          "isColliding": false,
+          "collidedWithId": ""
+        }
+      },
+      {
+        "id": "Player",
+        "type": "",
+        "position": [0, 2, 0],
+        "velocity": [0, 0, 0],
+        "collision": {
+          "isColliding": false,
+          "collidedWithId": ""
+        }
+      }
+    ]
+  },
+  {
+    "frame": 19,
+    "deltaTime": 0.0166667,
+    "objects": [
+      {
+        "id": "Obstacle_0",
+        "type": "",
+        "position": [0, 2.5, 42.647],
+        "velocity": [0, 0, 0],
+        "collision": {
+          "isColliding": false,
+          "collidedWithId": ""
+        }
+      },
+      {
+        "id": "Player",
+        "type": "",
+        "position": [0, 2, 0],
+        "velocity": [0, 0, 0],
+        "collision": {
+          "isColliding": false,
+          "collidedWithId": ""
+        }
+      }
+    ]
+  },
+  {
+    "frame": 20,
+    "deltaTime": 0.0166667,
+    "objects": [
+      {
+        "id": "Obstacle_0",
+        "type": "",
+        "position": [0, 2.5, 42.384],
+        "velocity": [0, 0, 0],
+        "collision": {
+          "isColliding": false,
+          "collidedWithId": ""
+        }
+      },
+      {
+        "id": "Player",
+        "type": "",
+        "position": [0, 2, 0],
+        "velocity": [0, 0, 0],
+        "collision": {
+          "isColliding": false,
+          "collidedWithId": ""
+        }
+      }
+    ]
+  },
+  {
+    "frame": 21,
+    "deltaTime": 0.0166667,
+    "objects": [
+      {
+        "id": "Obstacle_0",
+        "type": "",
+        "position": [0, 2.5, 42.12],
+        "velocity": [0, 0, 0],
+        "collision": {
+          "isColliding": false,
+          "collidedWithId": ""
+        }
+      },
+      {
+        "id": "Player",
+        "type": "",
+        "position": [0, 2, 0],
+        "velocity": [0, 0, 0],
+        "collision": {
+          "isColliding": false,
+          "collidedWithId": ""
+        }
+      }
+    ]
+  },
+  {
+    "frame": 22,
+    "deltaTime": 0.0166667,
+    "objects": [
+      {
+        "id": "Obstacle_0",
+        "type": "",
+        "position": [0, 2.5, 41.855],
+        "velocity": [0, 0, 0],
+        "collision": {
+          "isColliding": false,
+          "collidedWithId": ""
+        }
+      },
+      {
+        "id": "Player",
+        "type": "",
+        "position": [0, 2, 0],
+        "velocity": [0, 0, 0],
+        "collision": {
+          "isColliding": false,
+          "collidedWithId": ""
+        }
+      }
+    ]
+  },
+  {
+    "frame": 23,
+    "deltaTime": 0.0166667,
+    "objects": [
+      {
+        "id": "Obstacle_0",
+        "type": "",
+        "position": [0, 2.5, 41.589],
+        "velocity": [0, 0, 0],
+        "collision": {
+          "isColliding": false,
+          "collidedWithId": ""
+        }
+      },
+      {
+        "id": "Player",
+        "type": "",
+        "position": [0, 2, 0],
+        "velocity": [0, 0, 0],
+        "collision": {
+          "isColliding": false,
+          "collidedWithId": ""
+        }
+      }
+    ]
+  },
+  {
+    "frame": 24,
+    "deltaTime": 0.0166667,
+    "objects": [
+      {
+        "id": "Obstacle_0",
+        "type": "",
+        "position": [0, 2.5, 41.322],
+        "velocity": [0, 0, 0],
+        "collision": {
+          "isColliding": false,
+          "collidedWithId": ""
+        }
+      },
+      {
+        "id": "Player",
+        "type": "",
+        "position": [0, 2, 0],
+        "velocity": [0, 0, 0],
+        "collision": {
+          "isColliding": false,
+          "collidedWithId": ""
+        }
+      }
+    ]
+  },
+  {
+    "frame": 25,
+    "deltaTime": 0.0166667,
+    "objects": [
+      {
+        "id": "Obstacle_0",
+        "type": "",
+        "position": [0, 2.5, 41.054],
+        "velocity": [0, 0, 0],
+        "collision": {
+          "isColliding": false,
+          "collidedWithId": ""
+        }
+      },
+      {
+        "id": "Player",
+        "type": "",
+        "position": [0, 2, 0],
+        "velocity": [0, 0, 0],
+        "collision": {
+          "isColliding": false,
+          "collidedWithId": ""
+        }
+      }
+    ]
+  },
+  {
+    "frame": 26,
+    "deltaTime": 0.0166667,
+    "objects": [
+      {
+        "id": "Obstacle_0",
+        "type": "",
+        "position": [0, 2.5, 40.785],
+        "velocity": [0, 0, 0],
+        "collision": {
+          "isColliding": false,
+          "collidedWithId": ""
+        }
+      },
+      {
+        "id": "Player",
+        "type": "",
+        "position": [0, 2, 0],
+        "velocity": [0, 0, 0],
+        "collision": {
+          "isColliding": false,
+          "collidedWithId": ""
+        }
+      }
+    ]
+  },
+  {
+    "frame": 27,
+    "deltaTime": 0.0166667,
+    "objects": [
+      {
+        "id": "Obstacle_0",
+        "type": "",
+        "position": [0, 2.5, 40.515],
+        "velocity": [0, 0, 0],
+        "collision": {
+          "isColliding": false,
+          "collidedWithId": ""
+        }
+      },
+      {
+        "id": "Player",
+        "type": "",
+        "position": [0, 2, 0],
+        "velocity": [0, 0, 0],
+        "collision": {
+          "isColliding": false,
+          "collidedWithId": ""
+        }
+      }
+    ]
+  },
+  {
+    "frame": 28,
+    "deltaTime": 0.0166667,
+    "objects": [
+      {
+        "id": "Obstacle_0",
+        "type": "",
+        "position": [0, 2.5, 40.244],
+        "velocity": [0, 0, 0],
+        "collision": {
+          "isColliding": false,
+          "collidedWithId": ""
+        }
+      },
+      {
+        "id": "Player",
+        "type": "",
+        "position": [0, 2, 0],
+        "velocity": [0, 0, 0],
+        "collision": {
+          "isColliding": false,
+          "collidedWithId": ""
+        }
+      }
+    ]
+  },
+  {
+    "frame": 29,
+    "deltaTime": 0.0166667,
+    "objects": [
+      {
+        "id": "Obstacle_0",
+        "type": "",
+        "position": [0, 2.5, 39.972],
+        "velocity": [0, 0, 0],
+        "collision": {
+          "isColliding": false,
+          "collidedWithId": ""
+        }
+      },
+      {
+        "id": "Player",
+        "type": "",
+        "position": [0, 2, 0],
+        "velocity": [0, 0, 0],
+        "collision": {
+          "isColliding": false,
+          "collidedWithId": ""
+        }
+      }
+    ]
+  },
+  {
+    "frame": 30,
+    "deltaTime": 0.0166667,
+    "objects": [
+      {
+        "id": "Obstacle_0",
+        "type": "",
+        "position": [0, 2.5, 39.699],
+        "velocity": [0, 0, 0],
+        "collision": {
+          "isColliding": false,
+          "collidedWithId": ""
+        }
+      },
+      {
+        "id": "Player",
+        "type": "",
+        "position": [0, 2, 0],
+        "velocity": [0, 0, 0],
+        "collision": {
+          "isColliding": false,
+          "collidedWithId": ""
+        }
+      }
+    ]
+  },
+  {
+    "frame": 31,
+    "deltaTime": 0.0166667,
+    "objects": [
+      {
+        "id": "Obstacle_0",
+        "type": "",
+        "position": [0, 2.5, 39.425],
+        "velocity": [0, 0, 0],
+        "collision": {
+          "isColliding": false,
+          "collidedWithId": ""
+        }
+      },
+      {
+        "id": "Player",
+        "type": "",
+        "position": [0, 2, 0],
+        "velocity": [0, 0, 0],
+        "collision": {
+          "isColliding": false,
+          "collidedWithId": ""
+        }
+      }
+    ]
+  },
+  {
+    "frame": 32,
+    "deltaTime": 0.0166667,
+    "objects": [
+      {
+        "id": "Obstacle_0",
+        "type": "",
+        "position": [0, 2.5, 39.15],
+        "velocity": [0, 0, 0],
+        "collision": {
+          "isColliding": false,
+          "collidedWithId": ""
+        }
+      },
+      {
+        "id": "Player",
+        "type": "",
+        "position": [0, 2, 0],
+        "velocity": [0, 0, 0],
+        "collision": {
+          "isColliding": false,
+          "collidedWithId": ""
+        }
+      }
+    ]
+  },
+  {
+    "frame": 33,
+    "deltaTime": 0.0166667,
+    "objects": [
+      {
+        "id": "Obstacle_0",
+        "type": "",
+        "position": [0, 2.5, 38.874],
+        "velocity": [0, 0, 0],
+        "collision": {
+          "isColliding": false,
+          "collidedWithId": ""
+        }
+      },
+      {
+        "id": "Player",
+        "type": "",
+        "position": [0, 2, 0],
+        "velocity": [0, 0, 0],
+        "collision": {
+          "isColliding": false,
+          "collidedWithId": ""
+        }
+      }
+    ]
+  },
+  {
+    "frame": 34,
+    "deltaTime": 0.0166667,
+    "objects": [
+      {
+        "id": "Obstacle_0",
+        "type": "",
+        "position": [0, 2.5, 38.597],
+        "velocity": [0, 0, 0],
+        "collision": {
+          "isColliding": false,
+          "collidedWithId": ""
+        }
+      },
+      {
+        "id": "Player",
+        "type": "",
+        "position": [0, 2, 0],
+        "velocity": [0, 0, 0],
+        "collision": {
+          "isColliding": false,
+          "collidedWithId": ""
+        }
+      }
+    ]
+  },
+  {
+    "frame": 35,
+    "deltaTime": 0.0166667,
+    "objects": [
+      {
+        "id": "Obstacle_0",
+        "type": "",
+        "position": [0, 2.5, 38.319],
+        "velocity": [0, 0, 0],
+        "collision": {
+          "isColliding": false,
+          "collidedWithId": ""
+        }
+      },
+      {
+        "id": "Player",
+        "type": "",
+        "position": [0, 2, 0],
+        "velocity": [0, 0, 0],
+        "collision": {
+          "isColliding": false,
+          "collidedWithId": ""
+        }
+      }
+    ]
+  },
+  {
+    "frame": 36,
+    "deltaTime": 0.0166667,
+    "objects": [
+      {
+        "id": "Obstacle_0",
+        "type": "",
+        "position": [0, 2.5, 38.04],
+        "velocity": [0, 0, 0],
+        "collision": {
+          "isColliding": false,
+          "collidedWithId": ""
+        }
+      },
+      {
+        "id": "Player",
+        "type": "",
+        "position": [0, 2, 0],
+        "velocity": [0, 0, 0],
+        "collision": {
+          "isColliding": false,
+          "collidedWithId": ""
+        }
+      }
+    ]
+  },
+  {
+    "frame": 37,
+    "deltaTime": 0.0166667,
+    "objects": [
+      {
+        "id": "Obstacle_0",
+        "type": "",
+        "position": [0, 2.5, 37.76],
+        "velocity": [0, 0, 0],
+        "collision": {
+          "isColliding": false,
+          "collidedWithId": ""
+        }
+      },
+      {
+        "id": "Player",
+        "type": "",
+        "position": [0, 2, 0],
+        "velocity": [0, 0, 0],
+        "collision": {
+          "isColliding": false,
+          "collidedWithId": ""
+        }
+      }
+    ]
+  },
+  {
+    "frame": 38,
+    "deltaTime": 0.0166667,
+    "objects": [
+      {
+        "id": "Obstacle_0",
+        "type": "",
+        "position": [0, 2.5, 37.479],
+        "velocity": [0, 0, 0],
+        "collision": {
+          "isColliding": false,
+          "collidedWithId": ""
+        }
+      },
+      {
+        "id": "Player",
+        "type": "",
+        "position": [0, 2, 0],
+        "velocity": [0, 0, 0],
+        "collision": {
+          "isColliding": false,
+          "collidedWithId": ""
+        }
+      }
+    ]
+  },
+  {
+    "frame": 39,
+    "deltaTime": 0.0166667,
+    "objects": [
+      {
+        "id": "Obstacle_0",
+        "type": "",
+        "position": [0, 2.5, 37.197],
+        "velocity": [0, 0, 0],
+        "collision": {
+          "isColliding": false,
+          "collidedWithId": ""
+        }
+      },
+      {
+        "id": "Player",
+        "type": "",
+        "position": [0, 2, 0],
+        "velocity": [0, 0, 0],
+        "collision": {
+          "isColliding": false,
+          "collidedWithId": ""
+        }
+      }
+    ]
+  },
+  {
+    "frame": 40,
+    "deltaTime": 0.0166667,
+    "objects": [
+      {
+        "id": "Obstacle_0",
+        "type": "",
+        "position": [0, 2.5, 36.914],
+        "velocity": [0, 0, 0],
+        "collision": {
+          "isColliding": false,
+          "collidedWithId": ""
+        }
+      },
+      {
+        "id": "Obstacle_1",
+        "type": "",
+        "position": [0, 1.5, 46.876],
+        "velocity": [0, 0, 0],
+        "collision": {
+          "isColliding": false,
+          "collidedWithId": ""
+        }
+      },
+      {
+        "id": "Player",
+        "type": "",
+        "position": [0, 2, 0],
+        "velocity": [0, 0, 0],
+        "collision": {
+          "isColliding": false,
+          "collidedWithId": ""
+        }
+      }
+    ]
+  },
+  {
+    "frame": 41,
+    "deltaTime": 0.0166667,
+    "objects": [
+      {
+        "id": "Obstacle_0",
+        "type": "",
+        "position": [0, 2.5, 36.63],
+        "velocity": [0, 0, 0],
+        "collision": {
+          "isColliding": false,
+          "collidedWithId": ""
+        }
+      },
+      {
+        "id": "Obstacle_1",
+        "type": "",
+        "position": [0, 1.5, 46.592],
+        "velocity": [0, 0, 0],
+        "collision": {
+          "isColliding": false,
+          "collidedWithId": ""
+        }
+      },
+      {
+        "id": "Player",
+        "type": "",
+        "position": [0, 2, 0],
+        "velocity": [0, 0, 0],
+        "collision": {
+          "isColliding": false,
+          "collidedWithId": ""
+        }
+      }
+    ]
+  },
+  {
+    "frame": 42,
+    "deltaTime": 0.0166667,
+    "objects": [
+      {
+        "id": "Obstacle_0",
+        "type": "",
+        "position": [0, 2.5, 36.345],
+        "velocity": [0, 0, 0],
+        "collision": {
+          "isColliding": false,
+          "collidedWithId": ""
+        }
+      },
+      {
+        "id": "Obstacle_1",
+        "type": "",
+        "position": [0, 1.5, 46.307],
+        "velocity": [0, 0, 0],
+        "collision": {
+          "isColliding": false,
+          "collidedWithId": ""
+        }
+      },
+      {
+        "id": "Player",
+        "type": "",
+        "position": [0, 2, 0],
+        "velocity": [0, 0, 0],
+        "collision": {
+          "isColliding": false,
+          "collidedWithId": ""
+        }
+      }
+    ]
+  },
+  {
+    "frame": 43,
+    "deltaTime": 0.0166667,
+    "objects": [
+      {
+        "id": "Obstacle_0",
+        "type": "",
+        "position": [0, 2.5, 36.059],
+        "velocity": [0, 0, 0],
+        "collision": {
+          "isColliding": false,
+          "collidedWithId": ""
+        }
+      },
+      {
+        "id": "Obstacle_1",
+        "type": "",
+        "position": [0, 1.5, 46.021],
+        "velocity": [0, 0, 0],
+        "collision": {
+          "isColliding": false,
+          "collidedWithId": ""
+        }
+      },
+      {
+        "id": "Player",
+        "type": "",
+        "position": [0, 2, 0],
+        "velocity": [0, 0, 0],
+        "collision": {
+          "isColliding": false,
+          "collidedWithId": ""
+        }
+      }
+    ]
+  },
+  {
+    "frame": 44,
+    "deltaTime": 0.0166667,
+    "objects": [
+      {
+        "id": "Obstacle_0",
+        "type": "",
+        "position": [0, 2.5, 35.772],
+        "velocity": [0, 0, 0],
+        "collision": {
+          "isColliding": false,
+          "collidedWithId": ""
+        }
+      },
+      {
+        "id": "Obstacle_1",
+        "type": "",
+        "position": [0, 1.5, 45.734],
+        "velocity": [0, 0, 0],
+        "collision": {
+          "isColliding": false,
+          "collidedWithId": ""
+        }
+      },
+      {
+        "id": "Player",
+        "type": "",
+        "position": [0, 2, 0],
+        "velocity": [0, 0, 0],
+        "collision": {
+          "isColliding": false,
+          "collidedWithId": ""
+        }
+      }
+    ]
+  },
+  {
+    "frame": 45,
+    "deltaTime": 0.0166667,
+    "objects": [
+      {
+        "id": "Obstacle_0",
+        "type": "",
+        "position": [0, 2.5, 35.484],
+        "velocity": [0, 0, 0],
+        "collision": {
+          "isColliding": false,
+          "collidedWithId": ""
+        }
+      },
+      {
+        "id": "Obstacle_1",
+        "type": "",
+        "position": [0, 1.5, 45.446],
+        "velocity": [0, 0, 0],
+        "collision": {
+          "isColliding": false,
+          "collidedWithId": ""
+        }
+      },
+      {
+        "id": "Player",
+        "type": "",
+        "position": [0, 2, 0],
+        "velocity": [0, 0, 0],
+        "collision": {
+          "isColliding": false,
+          "collidedWithId": ""
+        }
+      }
+    ]
+  },
+  {
+    "frame": 46,
+    "deltaTime": 0.0166667,
+    "objects": [
+      {
+        "id": "Obstacle_0",
+        "type": "",
+        "position": [0, 2.5, 35.195],
+        "velocity": [0, 0, 0],
+        "collision": {
+          "isColliding": false,
+          "collidedWithId": ""
+        }
+      },
+      {
+        "id": "Obstacle_1",
+        "type": "",
+        "position": [0, 1.5, 45.157],
+        "velocity": [0, 0, 0],
+        "collision": {
+          "isColliding": false,
+          "collidedWithId": ""
+        }
+      },
+      {
+        "id": "Player",
+        "type": "",
+        "position": [0, 2, 0],
+        "velocity": [0, 0, 0],
+        "collision": {
+          "isColliding": false,
+          "collidedWithId": ""
+        }
+      }
+    ]
+  },
+  {
+    "frame": 47,
+    "deltaTime": 0.0166667,
+    "objects": [
+      {
+        "id": "Obstacle_0",
+        "type": "",
+        "position": [0, 2.5, 34.905],
+        "velocity": [0, 0, 0],
+        "collision": {
+          "isColliding": false,
+          "collidedWithId": ""
+        }
+      },
+      {
+        "id": "Obstacle_1",
+        "type": "",
+        "position": [0, 1.5, 44.867],
+        "velocity": [0, 0, 0],
+        "collision": {
+          "isColliding": false,
+          "collidedWithId": ""
+        }
+      },
+      {
+        "id": "Player",
+        "type": "",
+        "position": [0, 2, 0],
+        "velocity": [0, 0, 0],
+        "collision": {
+          "isColliding": false,
+          "collidedWithId": ""
+        }
+      }
+    ]
+  },
+  {
+    "frame": 48,
+    "deltaTime": 0.0166667,
+    "objects": [
+      {
+        "id": "Obstacle_0",
+        "type": "",
+        "position": [0, 2.5, 34.614],
+        "velocity": [0, 0, 0],
+        "collision": {
+          "isColliding": false,
+          "collidedWithId": ""
+        }
+      },
+      {
+        "id": "Obstacle_1",
+        "type": "",
+        "position": [0, 1.5, 44.576],
+        "velocity": [0, 0, 0],
+        "collision": {
+          "isColliding": false,
+          "collidedWithId": ""
+        }
+      },
+      {
+        "id": "Player",
+        "type": "",
+        "position": [0, 2, 0],
+        "velocity": [0, 0, 0],
+        "collision": {
+          "isColliding": false,
+          "collidedWithId": ""
+        }
+      }
+    ]
+  },
+  {
+    "frame": 49,
+    "deltaTime": 0.0166667,
+    "objects": [
+      {
+        "id": "Obstacle_0",
+        "type": "",
+        "position": [0, 2.5, 34.322],
+        "velocity": [0, 0, 0],
+        "collision": {
+          "isColliding": false,
+          "collidedWithId": ""
+        }
+      },
+      {
+        "id": "Obstacle_1",
+        "type": "",
+        "position": [0, 1.5, 44.284],
+        "velocity": [0, 0, 0],
+        "collision": {
+          "isColliding": false,
+          "collidedWithId": ""
+        }
+      },
+      {
+        "id": "Player",
+        "type": "",
+        "position": [0, 2, 0],
+        "velocity": [0, 0, 0],
+        "collision": {
+          "isColliding": false,
+          "collidedWithId": ""
+        }
+      }
+    ]
+  },
+  {
+    "frame": 50,
+    "deltaTime": 0.0166667,
+    "objects": [
+      {
+        "id": "Obstacle_0",
+        "type": "",
+        "position": [0, 2.5, 34.029],
+        "velocity": [0, 0, 0],
+        "collision": {
+          "isColliding": false,
+          "collidedWithId": ""
+        }
+      },
+      {
+        "id": "Obstacle_1",
+        "type": "",
+        "position": [0, 1.5, 43.991],
+        "velocity": [0, 0, 0],
+        "collision": {
+          "isColliding": false,
+          "collidedWithId": ""
+        }
+      },
+      {
+        "id": "Player",
+        "type": "",
+        "position": [0, 2, 0],
+        "velocity": [0, 0, 0],
+        "collision": {
+          "isColliding": false,
+          "collidedWithId": ""
+        }
+      }
+    ]
+  },
+  {
+    "frame": 51,
+    "deltaTime": 0.0166667,
+    "objects": [
+      {
+        "id": "Obstacle_0",
+        "type": "",
+        "position": [0, 2.5, 33.735],
+        "velocity": [0, 0, 0],
+        "collision": {
+          "isColliding": false,
+          "collidedWithId": ""
+        }
+      },
+      {
+        "id": "Obstacle_1",
+        "type": "",
+        "position": [0, 1.5, 43.697],
+        "velocity": [0, 0, 0],
+        "collision": {
+          "isColliding": false,
+          "collidedWithId": ""
+        }
+      },
+      {
+        "id": "Player",
+        "type": "",
+        "position": [0, 2, 0],
+        "velocity": [0, 0, 0],
+        "collision": {
+          "isColliding": false,
+          "collidedWithId": ""
+        }
+      }
+    ]
+  },
+  {
+    "frame": 52,
+    "deltaTime": 0.0166667,
+    "objects": [
+      {
+        "id": "Obstacle_0",
+        "type": "",
+        "position": [0, 2.5, 33.44],
+        "velocity": [0, 0, 0],
+        "collision": {
+          "isColliding": false,
+          "collidedWithId": ""
+        }
+      },
+      {
+        "id": "Obstacle_1",
+        "type": "",
+        "position": [0, 1.5, 43.402],
+        "velocity": [0, 0, 0],
+        "collision": {
+          "isColliding": false,
+          "collidedWithId": ""
+        }
+      },
+      {
+        "id": "Player",
+        "type": "",
+        "position": [0, 2, 0],
+        "velocity": [0, 0, 0],
+        "collision": {
+          "isColliding": false,
+          "collidedWithId": ""
+        }
+      }
+    ]
+  },
+  {
+    "frame": 53,
+    "deltaTime": 0.0166667,
+    "objects": [
+      {
+        "id": "Obstacle_0",
+        "type": "",
+        "position": [0, 2.5, 33.144],
+        "velocity": [0, 0, 0],
+        "collision": {
+          "isColliding": false,
+          "collidedWithId": ""
+        }
+      },
+      {
+        "id": "Obstacle_1",
+        "type": "",
+        "position": [0, 1.5, 43.106],
+        "velocity": [0, 0, 0],
+        "collision": {
+          "isColliding": false,
+          "collidedWithId": ""
+        }
+      },
+      {
+        "id": "Player",
+        "type": "",
+        "position": [0, 2, 0],
+        "velocity": [0, 0, 0],
+        "collision": {
+          "isColliding": false,
+          "collidedWithId": ""
+        }
+      }
+    ]
+  },
+  {
+    "frame": 54,
+    "deltaTime": 0.0166667,
+    "objects": [
+      {
+        "id": "Obstacle_0",
+        "type": "",
+        "position": [0, 2.5, 32.847],
+        "velocity": [0, 0, 0],
+        "collision": {
+          "isColliding": false,
+          "collidedWithId": ""
+        }
+      },
+      {
+        "id": "Obstacle_1",
+        "type": "",
+        "position": [0, 1.5, 42.809],
+        "velocity": [0, 0, 0],
+        "collision": {
+          "isColliding": false,
+          "collidedWithId": ""
+        }
+      },
+      {
+        "id": "Player",
+        "type": "",
+        "position": [0, 2, 0],
+        "velocity": [0, 0, 0],
+        "collision": {
+          "isColliding": false,
+          "collidedWithId": ""
+        }
+      }
+    ]
+  },
+  {
+    "frame": 55,
+    "deltaTime": 0.0166667,
+    "objects": [
+      {
+        "id": "Obstacle_0",
+        "type": "",
+        "position": [0, 2.5, 32.549],
+        "velocity": [0, 0, 0],
+        "collision": {
+          "isColliding": false,
+          "collidedWithId": ""
+        }
+      },
+      {
+        "id": "Obstacle_1",
+        "type": "",
+        "position": [0, 1.5, 42.511],
+        "velocity": [0, 0, 0],
+        "collision": {
+          "isColliding": false,
+          "collidedWithId": ""
+        }
+      },
+      {
+        "id": "Player",
+        "type": "",
+        "position": [0, 2, 0],
+        "velocity": [0, 0, 0],
+        "collision": {
+          "isColliding": false,
+          "collidedWithId": ""
+        }
+      }
+    ]
+  },
+  {
+    "frame": 56,
+    "deltaTime": 0.0166667,
+    "objects": [
+      {
+        "id": "Obstacle_0",
+        "type": "",
+        "position": [0, 2.5, 32.25],
+        "velocity": [0, 0, 0],
+        "collision": {
+          "isColliding": false,
+          "collidedWithId": ""
+        }
+      },
+      {
+        "id": "Obstacle_1",
+        "type": "",
+        "position": [0, 1.5, 42.212],
+        "velocity": [0, 0, 0],
+        "collision": {
+          "isColliding": false,
+          "collidedWithId": ""
+        }
+      },
+      {
+        "id": "Player",
+        "type": "",
+        "position": [0, 2, 0],
+        "velocity": [0, 0, 0],
+        "collision": {
+          "isColliding": false,
+          "collidedWithId": ""
+        }
+      }
+    ]
+  },
+  {
+    "frame": 57,
+    "deltaTime": 0.0166667,
+    "objects": [
+      {
+        "id": "Obstacle_0",
+        "type": "",
+        "position": [0, 2.5, 31.95],
+        "velocity": [0, 0, 0],
+        "collision": {
+          "isColliding": false,
+          "collidedWithId": ""
+        }
+      },
+      {
+        "id": "Obstacle_1",
+        "type": "",
+        "position": [0, 1.5, 41.912],
+        "velocity": [0, 0, 0],
+        "collision": {
+          "isColliding": false,
+          "collidedWithId": ""
+        }
+      },
+      {
+        "id": "Player",
+        "type": "",
+        "position": [0, 2, 0],
+        "velocity": [0, 0, 0],
+        "collision": {
+          "isColliding": false,
+          "collidedWithId": ""
+        }
+      }
+    ]
+  },
+  {
+    "frame": 58,
+    "deltaTime": 0.0166667,
+    "objects": [
+      {
+        "id": "Obstacle_0",
+        "type": "",
+        "position": [0, 2.5, 31.649],
+        "velocity": [0, 0, 0],
+        "collision": {
+          "isColliding": false,
+          "collidedWithId": ""
+        }
+      },
+      {
+        "id": "Obstacle_1",
+        "type": "",
+        "position": [0, 1.5, 41.611],
+        "velocity": [0, 0, 0],
+        "collision": {
+          "isColliding": false,
+          "collidedWithId": ""
+        }
+      },
+      {
+        "id": "Player",
+        "type": "",
+        "position": [0, 2, 0],
+        "velocity": [0, 0, 0],
+        "collision": {
+          "isColliding": false,
+          "collidedWithId": ""
+        }
+      }
+    ]
+  },
+  {
+    "frame": 59,
+    "deltaTime": 0.0166667,
+    "objects": [
+      {
+        "id": "Obstacle_0",
+        "type": "",
+        "position": [0, 2.5, 31.347],
+        "velocity": [0, 0, 0],
+        "collision": {
+          "isColliding": false,
+          "collidedWithId": ""
+        }
+      },
+      {
+        "id": "Obstacle_1",
+        "type": "",
+        "position": [0, 1.5, 41.309],
+        "velocity": [0, 0, 0],
+        "collision": {
+          "isColliding": false,
+          "collidedWithId": ""
+        }
+      },
+      {
+        "id": "Player",
+        "type": "",
+        "position": [0, 2, 0],
+        "velocity": [0, 0, 0],
+        "collision": {
+          "isColliding": false,
+          "collidedWithId": ""
+        }
+      }
+    ]
+  },
+  {
+    "frame": 60,
+    "deltaTime": 0.0166667,
+    "objects": [
+      {
+        "id": "Obstacle_0",
+        "type": "",
+        "position": [0, 2.5, 31.044],
+        "velocity": [0, 0, 0],
+        "collision": {
+          "isColliding": false,
+          "collidedWithId": ""
+        }
+      },
+      {
+        "id": "Obstacle_1",
+        "type": "",
+        "position": [0, 1.5, 41.006],
+        "velocity": [0, 0, 0],
+        "collision": {
+          "isColliding": false,
+          "collidedWithId": ""
+        }
+      },
+      {
+        "id": "Player",
+        "type": "",
+        "position": [0, 2, 0],
+        "velocity": [0, 0, 0],
+        "collision": {
+          "isColliding": false,
+          "collidedWithId": ""
+        }
+      }
+    ]
+  },
+  {
+    "frame": 61,
+    "deltaTime": 0.0166667,
+    "objects": [
+      {
+        "id": "Obstacle_0",
+        "type": "",
+        "position": [0, 2.5, 30.74],
+        "velocity": [0, 0, 0],
+        "collision": {
+          "isColliding": false,
+          "collidedWithId": ""
+        }
+      },
+      {
+        "id": "Obstacle_1",
+        "type": "",
+        "position": [0, 1.5, 40.702],
+        "velocity": [0, 0, 0],
+        "collision": {
+          "isColliding": false,
+          "collidedWithId": ""
+        }
+      },
+      {
+        "id": "Player",
+        "type": "",
+        "position": [0, 2, 0],
+        "velocity": [0, 0, 0],
+        "collision": {
+          "isColliding": false,
+          "collidedWithId": ""
+        }
+      }
+    ]
+  },
+  {
+    "frame": 62,
+    "deltaTime": 0.0166667,
+    "objects": [
+      {
+        "id": "Obstacle_0",
+        "type": "",
+        "position": [0, 2.5, 30.435],
+        "velocity": [0, 0, 0],
+        "collision": {
+          "isColliding": false,
+          "collidedWithId": ""
+        }
+      },
+      {
+        "id": "Obstacle_1",
+        "type": "",
+        "position": [0, 1.5, 40.397],
+        "velocity": [0, 0, 0],
+        "collision": {
+          "isColliding": false,
+          "collidedWithId": ""
+        }
+      },
+      {
+        "id": "Player",
+        "type": "",
+        "position": [0, 2, 0],
+        "velocity": [0, 0, 0],
+        "collision": {
+          "isColliding": false,
+          "collidedWithId": ""
+        }
+      }
+    ]
+  },
+  {
+    "frame": 63,
+    "deltaTime": 0.0166667,
+    "objects": [
+      {
+        "id": "Obstacle_0",
+        "type": "",
+        "position": [0, 2.5, 30.129],
+        "velocity": [0, 0, 0],
+        "collision": {
+          "isColliding": false,
+          "collidedWithId": ""
+        }
+      },
+      {
+        "id": "Obstacle_1",
+        "type": "",
+        "position": [0, 1.5, 40.091],
+        "velocity": [0, 0, 0],
+        "collision": {
+          "isColliding": false,
+          "collidedWithId": ""
+        }
+      },
+      {
+        "id": "Player",
+        "type": "",
+        "position": [0, 2, 0],
+        "velocity": [0, 0, 0],
+        "collision": {
+          "isColliding": false,
+          "collidedWithId": ""
+        }
+      }
+    ]
+  },
+  {
+    "frame": 64,
+    "deltaTime": 0.0166667,
+    "objects": [
+      {
+        "id": "Obstacle_0",
+        "type": "",
+        "position": [0, 2.5, 29.822],
+        "velocity": [0, 0, 0],
+        "collision": {
+          "isColliding": false,
+          "collidedWithId": ""
+        }
+      },
+      {
+        "id": "Obstacle_1",
+        "type": "",
+        "position": [0, 1.5, 39.784],
+        "velocity": [0, 0, 0],
+        "collision": {
+          "isColliding": false,
+          "collidedWithId": ""
+        }
+      },
+      {
+        "id": "Player",
+        "type": "",
+        "position": [0, 2, 0],
+        "velocity": [0, 0, 0],
+        "collision": {
+          "isColliding": false,
+          "collidedWithId": ""
+        }
+      }
+    ]
+  },
+  {
+    "frame": 65,
+    "deltaTime": 0.0166667,
+    "objects": [
+      {
+        "id": "Obstacle_0",
+        "type": "",
+        "position": [0, 2.5, 29.514],
+        "velocity": [0, 0, 0],
+        "collision": {
+          "isColliding": false,
+          "collidedWithId": ""
+        }
+      },
+      {
+        "id": "Obstacle_1",
+        "type": "",
+        "position": [0, 1.5, 39.476],
+        "velocity": [0, 0, 0],
+        "collision": {
+          "isColliding": false,
+          "collidedWithId": ""
+        }
+      },
+      {
+        "id": "Player",
+        "type": "",
+        "position": [0, 2, 0],
+        "velocity": [0, 0, 0],
+        "collision": {
+          "isColliding": false,
+          "collidedWithId": ""
+        }
+      }
+    ]
+  },
+  {
+    "frame": 66,
+    "deltaTime": 0.0166667,
+    "objects": [
+      {
+        "id": "Obstacle_0",
+        "type": "",
+        "position": [0, 2.5, 29.205],
+        "velocity": [0, 0, 0],
+        "collision": {
+          "isColliding": false,
+          "collidedWithId": ""
+        }
+      },
+      {
+        "id": "Obstacle_1",
+        "type": "",
+        "position": [0, 1.5, 39.167],
+        "velocity": [0, 0, 0],
+        "collision": {
+          "isColliding": false,
+          "collidedWithId": ""
+        }
+      },
+      {
+        "id": "Player",
+        "type": "",
+        "position": [0, 2, 0],
+        "velocity": [0, 0, 0],
+        "collision": {
+          "isColliding": false,
+          "collidedWithId": ""
+        }
+      }
+    ]
+  },
+  {
+    "frame": 67,
+    "deltaTime": 0.0166667,
+    "objects": [
+      {
+        "id": "Obstacle_0",
+        "type": "",
+        "position": [0, 2.5, 28.895],
+        "velocity": [0, 0, 0],
+        "collision": {
+          "isColliding": false,
+          "collidedWithId": ""
+        }
+      },
+      {
+        "id": "Obstacle_1",
+        "type": "",
+        "position": [0, 1.5, 38.857],
+        "velocity": [0, 0, 0],
+        "collision": {
+          "isColliding": false,
+          "collidedWithId": ""
+        }
+      },
+      {
+        "id": "Player",
+        "type": "",
+        "position": [0, 2, 0],
+        "velocity": [0, 0, 0],
+        "collision": {
+          "isColliding": false,
+          "collidedWithId": ""
+        }
+      }
+    ]
+  },
+  {
+    "frame": 68,
+    "deltaTime": 0.0166667,
+    "objects": [
+      {
+        "id": "Obstacle_0",
+        "type": "",
+        "position": [0, 2.5, 28.584],
+        "velocity": [0, 0, 0],
+        "collision": {
+          "isColliding": false,
+          "collidedWithId": ""
+        }
+      },
+      {
+        "id": "Obstacle_1",
+        "type": "",
+        "position": [0, 1.5, 38.546],
+        "velocity": [0, 0, 0],
+        "collision": {
+          "isColliding": false,
+          "collidedWithId": ""
+        }
+      },
+      {
+        "id": "Player",
+        "type": "",
+        "position": [0, 2, 0],
+        "velocity": [0, 0, 0],
+        "collision": {
+          "isColliding": false,
+          "collidedWithId": ""
+        }
+      }
+    ]
+  },
+  {
+    "frame": 69,
+    "deltaTime": 0.0166667,
+    "objects": [
+      {
+        "id": "Obstacle_0",
+        "type": "",
+        "position": [0, 2.5, 28.272],
+        "velocity": [0, 0, 0],
+        "collision": {
+          "isColliding": false,
+          "collidedWithId": ""
+        }
+      },
+      {
+        "id": "Obstacle_1",
+        "type": "",
+        "position": [0, 1.5, 38.234],
+        "velocity": [0, 0, 0],
+        "collision": {
+          "isColliding": false,
+          "collidedWithId": ""
+        }
+      },
+      {
+        "id": "Player",
+        "type": "",
+        "position": [0, 2, 0],
+        "velocity": [0, 0, 0],
+        "collision": {
+          "isColliding": false,
+          "collidedWithId": ""
+        }
+      }
+    ]
+  },
+  {
+    "frame": 70,
+    "deltaTime": 0.0166667,
+    "objects": [
+      {
+        "id": "Obstacle_0",
+        "type": "",
+        "position": [0, 2.5, 27.959],
+        "velocity": [0, 0, 0],
+        "collision": {
+          "isColliding": false,
+          "collidedWithId": ""
+        }
+      },
+      {
+        "id": "Obstacle_1",
+        "type": "",
+        "position": [0, 1.5, 37.921],
+        "velocity": [0, 0, 0],
+        "collision": {
+          "isColliding": false,
+          "collidedWithId": ""
+        }
+      },
+      {
+        "id": "Player",
+        "type": "",
+        "position": [0, 2, 0],
+        "velocity": [0, 0, 0],
+        "collision": {
+          "isColliding": false,
+          "collidedWithId": ""
+        }
+      }
+    ]
+  },
+  {
+    "frame": 71,
+    "deltaTime": 0.0166667,
+    "objects": [
+      {
+        "id": "Obstacle_0",
+        "type": "",
+        "position": [0, 2.5, 27.645],
+        "velocity": [0, 0, 0],
+        "collision": {
+          "isColliding": false,
+          "collidedWithId": ""
+        }
+      },
+      {
+        "id": "Obstacle_1",
+        "type": "",
+        "position": [0, 1.5, 37.607],
+        "velocity": [0, 0, 0],
+        "collision": {
+          "isColliding": false,
+          "collidedWithId": ""
+        }
+      },
+      {
+        "id": "Player",
+        "type": "",
+        "position": [0, 2, 0],
+        "velocity": [0, 0, 0],
+        "collision": {
+          "isColliding": false,
+          "collidedWithId": ""
+        }
+      }
+    ]
+  },
+  {
+    "frame": 72,
+    "deltaTime": 0.0166667,
+    "objects": [
+      {
+        "id": "Obstacle_0",
+        "type": "",
+        "position": [0, 2.5, 27.33],
+        "velocity": [0, 0, 0],
+        "collision": {
+          "isColliding": false,
+          "collidedWithId": ""
+        }
+      },
+      {
+        "id": "Obstacle_1",
+        "type": "",
+        "position": [0, 1.5, 37.292],
+        "velocity": [0, 0, 0],
+        "collision": {
+          "isColliding": false,
+          "collidedWithId": ""
+        }
+      },
+      {
+        "id": "Player",
+        "type": "",
+        "position": [0, 2, 0],
+        "velocity": [0, 0, 0],
+        "collision": {
+          "isColliding": false,
+          "collidedWithId": ""
+        }
+      }
+    ]
+  },
+  {
+    "frame": 73,
+    "deltaTime": 0.0166667,
+    "objects": [
+      {
+        "id": "Obstacle_0",
+        "type": "",
+        "position": [0, 2.5, 27.014],
+        "velocity": [0, 0, 0],
+        "collision": {
+          "isColliding": false,
+          "collidedWithId": ""
+        }
+      },
+      {
+        "id": "Obstacle_1",
+        "type": "",
+        "position": [0, 1.5, 36.976],
+        "velocity": [0, 0, 0],
+        "collision": {
+          "isColliding": false,
+          "collidedWithId": ""
+        }
+      },
+      {
+        "id": "Player",
+        "type": "",
+        "position": [0, 2, 0],
+        "velocity": [0, 0, 0],
+        "collision": {
+          "isColliding": false,
+          "collidedWithId": ""
+        }
+      }
+    ]
+  },
+  {
+    "frame": 74,
+    "deltaTime": 0.0166667,
+    "objects": [
+      {
+        "id": "Obstacle_0",
+        "type": "",
+        "position": [0, 2.5, 26.697],
+        "velocity": [0, 0, 0],
+        "collision": {
+          "isColliding": false,
+          "collidedWithId": ""
+        }
+      },
+      {
+        "id": "Obstacle_1",
+        "type": "",
+        "position": [0, 1.5, 36.659],
+        "velocity": [0, 0, 0],
+        "collision": {
+          "isColliding": false,
+          "collidedWithId": ""
+        }
+      },
+      {
+        "id": "Obstacle_2",
+        "type": "",
+        "position": [-2, 2.5, 42.625],
+        "velocity": [0, 0, 0],
+        "collision": {
+          "isColliding": false,
+          "collidedWithId": ""
+        }
+      },
+      {
+        "id": "Obstacle_3",
+        "type": "",
+        "position": [0, 2.5, 40.625],
+        "velocity": [0, 0, 0],
+        "collision": {
+          "isColliding": false,
+          "collidedWithId": ""
+        }
+      },
+      {
+        "id": "Player",
+        "type": "",
+        "position": [0, 2, 0],
+        "velocity": [0, 0, 0],
+        "collision": {
+          "isColliding": false,
+          "collidedWithId": ""
+        }
+      }
+    ]
+  },
+  {
+    "frame": 75,
+    "deltaTime": 0.0166667,
+    "objects": [
+      {
+        "id": "Obstacle_0",
+        "type": "",
+        "position": [0, 2.5, 26.379],
+        "velocity": [0, 0, 0],
+        "collision": {
+          "isColliding": false,
+          "collidedWithId": ""
+        }
+      },
+      {
+        "id": "Obstacle_1",
+        "type": "",
+        "position": [0, 1.5, 36.341],
+        "velocity": [0, 0, 0],
+        "collision": {
+          "isColliding": false,
+          "collidedWithId": ""
+        }
+      },
+      {
+        "id": "Obstacle_2",
+        "type": "",
+        "position": [-2, 2.5, 42.307],
+        "velocity": [0, 0, 0],
+        "collision": {
+          "isColliding": false,
+          "collidedWithId": ""
+        }
+      },
+      {
+        "id": "Obstacle_3",
+        "type": "",
+        "position": [0, 2.5, 40.307],
+        "velocity": [0, 0, 0],
+        "collision": {
+          "isColliding": false,
+          "collidedWithId": ""
+        }
+      },
+      {
+        "id": "Player",
+        "type": "",
+        "position": [0, 2, 0],
+        "velocity": [0, 0, 0],
+        "collision": {
+          "isColliding": false,
+          "collidedWithId": ""
+        }
+      }
+    ]
+  },
+  {
+    "frame": 76,
+    "deltaTime": 0.0166667,
+    "objects": [
+      {
+        "id": "Obstacle_0",
+        "type": "",
+        "position": [0, 2.5, 26.06],
+        "velocity": [0, 0, 0],
+        "collision": {
+          "isColliding": false,
+          "collidedWithId": ""
+        }
+      },
+      {
+        "id": "Obstacle_1",
+        "type": "",
+        "position": [0, 1.5, 36.022],
+        "velocity": [0, 0, 0],
+        "collision": {
+          "isColliding": false,
+          "collidedWithId": ""
+        }
+      },
+      {
+        "id": "Obstacle_2",
+        "type": "",
+        "position": [-2, 2.5, 41.988],
+        "velocity": [0, 0, 0],
+        "collision": {
+          "isColliding": false,
+          "collidedWithId": ""
+        }
+      },
+      {
+        "id": "Obstacle_3",
+        "type": "",
+        "position": [0, 2.5, 39.988],
+        "velocity": [0, 0, 0],
+        "collision": {
+          "isColliding": false,
+          "collidedWithId": ""
+        }
+      },
+      {
+        "id": "Player",
+        "type": "",
+        "position": [0, 2, 0],
+        "velocity": [0, 0, 0],
+        "collision": {
+          "isColliding": false,
+          "collidedWithId": ""
+        }
+      }
+    ]
+  },
+  {
+    "frame": 77,
+    "deltaTime": 0.0166667,
+    "objects": [
+      {
+        "id": "Obstacle_0",
+        "type": "",
+        "position": [0, 2.5, 25.74],
+        "velocity": [0, 0, 0],
+        "collision": {
+          "isColliding": false,
+          "collidedWithId": ""
+        }
+      },
+      {
+        "id": "Obstacle_1",
+        "type": "",
+        "position": [0, 1.5, 35.702],
+        "velocity": [0, 0, 0],
+        "collision": {
+          "isColliding": false,
+          "collidedWithId": ""
+        }
+      },
+      {
+        "id": "Obstacle_2",
+        "type": "",
+        "position": [-2, 2.5, 41.668],
+        "velocity": [0, 0, 0],
+        "collision": {
+          "isColliding": false,
+          "collidedWithId": ""
+        }
+      },
+      {
+        "id": "Obstacle_3",
+        "type": "",
+        "position": [0, 2.5, 39.668],
+        "velocity": [0, 0, 0],
+        "collision": {
+          "isColliding": false,
+          "collidedWithId": ""
+        }
+      },
+      {
+        "id": "Player",
+        "type": "",
+        "position": [0, 2, 0],
+        "velocity": [0, 0, 0],
+        "collision": {
+          "isColliding": false,
+          "collidedWithId": ""
+        }
+      }
+    ]
+  },
+  {
+    "frame": 78,
+    "deltaTime": 0.0166667,
+    "objects": [
+      {
+        "id": "Obstacle_0",
+        "type": "",
+        "position": [0, 2.5, 25.419],
+        "velocity": [0, 0, 0],
+        "collision": {
+          "isColliding": false,
+          "collidedWithId": ""
+        }
+      },
+      {
+        "id": "Obstacle_1",
+        "type": "",
+        "position": [0, 1.5, 35.381],
+        "velocity": [0, 0, 0],
+        "collision": {
+          "isColliding": false,
+          "collidedWithId": ""
+        }
+      },
+      {
+        "id": "Obstacle_2",
+        "type": "",
+        "position": [-2, 2.5, 41.347],
+        "velocity": [0, 0, 0],
+        "collision": {
+          "isColliding": false,
+          "collidedWithId": ""
+        }
+      },
+      {
+        "id": "Obstacle_3",
+        "type": "",
+        "position": [0, 2.5, 39.347],
+        "velocity": [0, 0, 0],
+        "collision": {
+          "isColliding": false,
+          "collidedWithId": ""
+        }
+      },
+      {
+        "id": "Player",
+        "type": "",
+        "position": [0, 2, 0],
+        "velocity": [0, 0, 0],
+        "collision": {
+          "isColliding": false,
+          "collidedWithId": ""
+        }
+      }
+    ]
+  },
+  {
+    "frame": 79,
+    "deltaTime": 0.0166667,
+    "objects": [
+      {
+        "id": "Obstacle_0",
+        "type": "",
+        "position": [0, 2.5, 25.097],
+        "velocity": [0, 0, 0],
+        "collision": {
+          "isColliding": false,
+          "collidedWithId": ""
+        }
+      },
+      {
+        "id": "Obstacle_1",
+        "type": "",
+        "position": [0, 1.5, 35.059],
+        "velocity": [0, 0, 0],
+        "collision": {
+          "isColliding": false,
+          "collidedWithId": ""
+        }
+      },
+      {
+        "id": "Obstacle_2",
+        "type": "",
+        "position": [-2, 2.5, 41.025],
+        "velocity": [0, 0, 0],
+        "collision": {
+          "isColliding": false,
+          "collidedWithId": ""
+        }
+      },
+      {
+        "id": "Obstacle_3",
+        "type": "",
+        "position": [0, 2.5, 39.025],
+        "velocity": [0, 0, 0],
+        "collision": {
+          "isColliding": false,
+          "collidedWithId": ""
+        }
+      },
+      {
+        "id": "Player",
+        "type": "",
+        "position": [0, 2, 0],
+        "velocity": [0, 0, 0],
+        "collision": {
+          "isColliding": false,
+          "collidedWithId": ""
+        }
+      }
+    ]
+  },
+  {
+    "frame": 80,
+    "deltaTime": 0.0166667,
+    "objects": [
+      {
+        "id": "Obstacle_0",
+        "type": "",
+        "position": [0, 2.5, 24.774],
+        "velocity": [0, 0, 0],
+        "collision": {
+          "isColliding": false,
+          "collidedWithId": ""
+        }
+      },
+      {
+        "id": "Obstacle_1",
+        "type": "",
+        "position": [0, 1.5, 34.736],
+        "velocity": [0, 0, 0],
+        "collision": {
+          "isColliding": false,
+          "collidedWithId": ""
+        }
+      },
+      {
+        "id": "Obstacle_2",
+        "type": "",
+        "position": [-2, 2.5, 40.702],
+        "velocity": [0, 0, 0],
+        "collision": {
+          "isColliding": false,
+          "collidedWithId": ""
+        }
+      },
+      {
+        "id": "Obstacle_3",
+        "type": "",
+        "position": [0, 2.5, 38.702],
+        "velocity": [0, 0, 0],
+        "collision": {
+          "isColliding": false,
+          "collidedWithId": ""
+        }
+      },
+      {
+        "id": "Player",
+        "type": "",
+        "position": [0, 2, 0],
+        "velocity": [0, 0, 0],
+        "collision": {
+          "isColliding": false,
+          "collidedWithId": ""
+        }
+      }
+    ]
+  },
+  {
+    "frame": 81,
+    "deltaTime": 0.0166667,
+    "objects": [
+      {
+        "id": "Obstacle_0",
+        "type": "",
+        "position": [0, 2.5, 24.45],
+        "velocity": [0, 0, 0],
+        "collision": {
+          "isColliding": false,
+          "collidedWithId": ""
+        }
+      },
+      {
+        "id": "Obstacle_1",
+        "type": "",
+        "position": [0, 1.5, 34.412],
+        "velocity": [0, 0, 0],
+        "collision": {
+          "isColliding": false,
+          "collidedWithId": ""
+        }
+      },
+      {
+        "id": "Obstacle_2",
+        "type": "",
+        "position": [-2, 2.5, 40.378],
+        "velocity": [0, 0, 0],
+        "collision": {
+          "isColliding": false,
+          "collidedWithId": ""
+        }
+      },
+      {
+        "id": "Obstacle_3",
+        "type": "",
+        "position": [0, 2.5, 38.378],
+        "velocity": [0, 0, 0],
+        "collision": {
+          "isColliding": false,
+          "collidedWithId": ""
+        }
+      },
+      {
+        "id": "Player",
+        "type": "",
+        "position": [0, 2, 0],
+        "velocity": [0, 0, 0],
+        "collision": {
+          "isColliding": false,
+          "collidedWithId": ""
+        }
+      }
+    ]
+  },
+  {
+    "frame": 82,
+    "deltaTime": 0.0166667,
+    "objects": [
+      {
+        "id": "Obstacle_0",
+        "type": "",
+        "position": [0, 2.5, 24.125],
+        "velocity": [0, 0, 0],
+        "collision": {
+          "isColliding": false,
+          "collidedWithId": ""
+        }
+      },
+      {
+        "id": "Obstacle_1",
+        "type": "",
+        "position": [0, 1.5, 34.087],
+        "velocity": [0, 0, 0],
+        "collision": {
+          "isColliding": false,
+          "collidedWithId": ""
+        }
+      },
+      {
+        "id": "Obstacle_2",
+        "type": "",
+        "position": [-2, 2.5, 40.053],
+        "velocity": [0, 0, 0],
+        "collision": {
+          "isColliding": false,
+          "collidedWithId": ""
+        }
+      },
+      {
+        "id": "Obstacle_3",
+        "type": "",
+        "position": [0, 2.5, 38.053],
+        "velocity": [0, 0, 0],
+        "collision": {
+          "isColliding": false,
+          "collidedWithId": ""
+        }
+      },
+      {
+        "id": "Player",
+        "type": "",
+        "position": [0, 2, 0],
+        "velocity": [0, 0, 0],
+        "collision": {
+          "isColliding": false,
+          "collidedWithId": ""
+        }
+      }
+    ]
+  },
+  {
+    "frame": 83,
+    "deltaTime": 0.0166667,
+    "objects": [
+      {
+        "id": "Obstacle_0",
+        "type": "",
+        "position": [0, 2.5, 23.799],
+        "velocity": [0, 0, 0],
+        "collision": {
+          "isColliding": false,
+          "collidedWithId": ""
+        }
+      },
+      {
+        "id": "Obstacle_1",
+        "type": "",
+        "position": [0, 1.5, 33.761],
+        "velocity": [0, 0, 0],
+        "collision": {
+          "isColliding": false,
+          "collidedWithId": ""
+        }
+      },
+      {
+        "id": "Obstacle_2",
+        "type": "",
+        "position": [-2, 2.5, 39.727],
+        "velocity": [0, 0, 0],
+        "collision": {
+          "isColliding": false,
+          "collidedWithId": ""
+        }
+      },
+      {
+        "id": "Obstacle_3",
+        "type": "",
+        "position": [0, 2.5, 37.727],
+        "velocity": [0, 0, 0],
+        "collision": {
+          "isColliding": false,
+          "collidedWithId": ""
+        }
+      },
+      {
+        "id": "Player",
+        "type": "",
+        "position": [0, 2, 0],
+        "velocity": [0, 0, 0],
+        "collision": {
+          "isColliding": false,
+          "collidedWithId": ""
+        }
+      }
+    ]
+  },
+  {
+    "frame": 84,
+    "deltaTime": 0.0166667,
+    "objects": [
+      {
+        "id": "Obstacle_0",
+        "type": "",
+        "position": [0, 2.5, 23.472],
+        "velocity": [0, 0, 0],
+        "collision": {
+          "isColliding": false,
+          "collidedWithId": ""
+        }
+      },
+      {
+        "id": "Obstacle_1",
+        "type": "",
+        "position": [0, 1.5, 33.434],
+        "velocity": [0, 0, 0],
+        "collision": {
+          "isColliding": false,
+          "collidedWithId": ""
+        }
+      },
+      {
+        "id": "Obstacle_2",
+        "type": "",
+        "position": [-2, 2.5, 39.4],
+        "velocity": [0, 0, 0],
+        "collision": {
+          "isColliding": false,
+          "collidedWithId": ""
+        }
+      },
+      {
+        "id": "Obstacle_3",
+        "type": "",
+        "position": [0, 2.5, 37.4],
+        "velocity": [0, 0, 0],
+        "collision": {
+          "isColliding": false,
+          "collidedWithId": ""
+        }
+      },
+      {
+        "id": "Player",
+        "type": "",
+        "position": [0, 2, 0],
+        "velocity": [0, 0, 0],
+        "collision": {
+          "isColliding": false,
+          "collidedWithId": ""
+        }
+      }
+    ]
+  },
+  {
+    "frame": 85,
+    "deltaTime": 0.0166667,
+    "objects": [
+      {
+        "id": "Obstacle_0",
+        "type": "",
+        "position": [0, 2.5, 23.144],
+        "velocity": [0, 0, 0],
+        "collision": {
+          "isColliding": false,
+          "collidedWithId": ""
+        }
+      },
+      {
+        "id": "Obstacle_1",
+        "type": "",
+        "position": [0, 1.5, 33.106],
+        "velocity": [0, 0, 0],
+        "collision": {
+          "isColliding": false,
+          "collidedWithId": ""
+        }
+      },
+      {
+        "id": "Obstacle_2",
+        "type": "",
+        "position": [-2, 2.5, 39.072],
+        "velocity": [0, 0, 0],
+        "collision": {
+          "isColliding": false,
+          "collidedWithId": ""
+        }
+      },
+      {
+        "id": "Obstacle_3",
+        "type": "",
+        "position": [0, 2.5, 37.072],
+        "velocity": [0, 0, 0],
+        "collision": {
+          "isColliding": false,
+          "collidedWithId": ""
+        }
+      },
+      {
+        "id": "Player",
+        "type": "",
+        "position": [0, 2, 0],
+        "velocity": [0, 0, 0],
+        "collision": {
+          "isColliding": false,
+          "collidedWithId": ""
+        }
+      }
+    ]
+  },
+  {
+    "frame": 86,
+    "deltaTime": 0.0166667,
+    "objects": [
+      {
+        "id": "Obstacle_0",
+        "type": "",
+        "position": [0, 2.5, 22.815],
+        "velocity": [0, 0, 0],
+        "collision": {
+          "isColliding": false,
+          "collidedWithId": ""
+        }
+      },
+      {
+        "id": "Obstacle_1",
+        "type": "",
+        "position": [0, 1.5, 32.777],
+        "velocity": [0, 0, 0],
+        "collision": {
+          "isColliding": false,
+          "collidedWithId": ""
+        }
+      },
+      {
+        "id": "Obstacle_2",
+        "type": "",
+        "position": [-2, 2.5, 38.743],
+        "velocity": [0, 0, 0],
+        "collision": {
+          "isColliding": false,
+          "collidedWithId": ""
+        }
+      },
+      {
+        "id": "Obstacle_3",
+        "type": "",
+        "position": [0, 2.5, 36.743],
+        "velocity": [0, 0, 0],
+        "collision": {
+          "isColliding": false,
+          "collidedWithId": ""
+        }
+      },
+      {
+        "id": "Player",
+        "type": "",
+        "position": [0, 2, 0],
+        "velocity": [0, 0, 0],
+        "collision": {
+          "isColliding": false,
+          "collidedWithId": ""
+        }
+      }
+    ]
+  },
+  {
+    "frame": 87,
+    "deltaTime": 0.0166667,
+    "objects": [
+      {
+        "id": "Obstacle_0",
+        "type": "",
+        "position": [0, 2.5, 22.485],
+        "velocity": [0, 0, 0],
+        "collision": {
+          "isColliding": false,
+          "collidedWithId": ""
+        }
+      },
+      {
+        "id": "Obstacle_1",
+        "type": "",
+        "position": [0, 1.5, 32.447],
+        "velocity": [0, 0, 0],
+        "collision": {
+          "isColliding": false,
+          "collidedWithId": ""
+        }
+      },
+      {
+        "id": "Obstacle_2",
+        "type": "",
+        "position": [-2, 2.5, 38.413],
+        "velocity": [0, 0, 0],
+        "collision": {
+          "isColliding": false,
+          "collidedWithId": ""
+        }
+      },
+      {
+        "id": "Obstacle_3",
+        "type": "",
+        "position": [0, 2.5, 36.413],
+        "velocity": [0, 0, 0],
+        "collision": {
+          "isColliding": false,
+          "collidedWithId": ""
+        }
+      },
+      {
+        "id": "Player",
+        "type": "",
+        "position": [0, 2, 0],
+        "velocity": [0, 0, 0],
+        "collision": {
+          "isColliding": false,
+          "collidedWithId": ""
+        }
+      }
+    ]
+  },
+  {
+    "frame": 88,
+    "deltaTime": 0.0166667,
+    "objects": [
+      {
+        "id": "Obstacle_0",
+        "type": "",
+        "position": [0, 2.5, 22.154],
+        "velocity": [0, 0, 0],
+        "collision": {
+          "isColliding": false,
+          "collidedWithId": ""
+        }
+      },
+      {
+        "id": "Obstacle_1",
+        "type": "",
+        "position": [0, 1.5, 32.116],
+        "velocity": [0, 0, 0],
+        "collision": {
+          "isColliding": false,
+          "collidedWithId": ""
+        }
+      },
+      {
+        "id": "Obstacle_2",
+        "type": "",
+        "position": [-2, 2.5, 38.082],
+        "velocity": [0, 0, 0],
+        "collision": {
+          "isColliding": false,
+          "collidedWithId": ""
+        }
+      },
+      {
+        "id": "Obstacle_3",
+        "type": "",
+        "position": [0, 2.5, 36.082],
+        "velocity": [0, 0, 0],
+        "collision": {
+          "isColliding": false,
+          "collidedWithId": ""
+        }
+      },
+      {
+        "id": "Player",
+        "type": "",
+        "position": [0, 2, 0],
+        "velocity": [0, 0, 0],
+        "collision": {
+          "isColliding": false,
+          "collidedWithId": ""
+        }
+      }
+    ]
+  },
+  {
+    "frame": 89,
+    "deltaTime": 0.0166667,
+    "objects": [
+      {
+        "id": "Obstacle_0",
+        "type": "",
+        "position": [0, 2.5, 21.822],
+        "velocity": [0, 0, 0],
+        "collision": {
+          "isColliding": false,
+          "collidedWithId": ""
+        }
+      },
+      {
+        "id": "Obstacle_1",
+        "type": "",
+        "position": [0, 1.5, 31.784],
+        "velocity": [0, 0, 0],
+        "collision": {
+          "isColliding": false,
+          "collidedWithId": ""
+        }
+      },
+      {
+        "id": "Obstacle_2",
+        "type": "",
+        "position": [-2, 2.5, 37.75],
+        "velocity": [0, 0, 0],
+        "collision": {
+          "isColliding": false,
+          "collidedWithId": ""
+        }
+      },
+      {
+        "id": "Obstacle_3",
+        "type": "",
+        "position": [0, 2.5, 35.75],
+        "velocity": [0, 0, 0],
+        "collision": {
+          "isColliding": false,
+          "collidedWithId": ""
+        }
+      },
+      {
+        "id": "Player",
+        "type": "",
+        "position": [0, 2, 0],
+        "velocity": [0, 0, 0],
+        "collision": {
+          "isColliding": false,
+          "collidedWithId": ""
+        }
+      }
+    ]
+  },
+  {
+    "frame": 90,
+    "deltaTime": 0.0166667,
+    "objects": [
+      {
+        "id": "Obstacle_0",
+        "type": "",
+        "position": [0, 2.5, 21.489],
+        "velocity": [0, 0, 0],
+        "collision": {
+          "isColliding": false,
+          "collidedWithId": ""
+        }
+      },
+      {
+        "id": "Obstacle_1",
+        "type": "",
+        "position": [0, 1.5, 31.451],
+        "velocity": [0, 0, 0],
+        "collision": {
+          "isColliding": false,
+          "collidedWithId": ""
+        }
+      },
+      {
+        "id": "Obstacle_2",
+        "type": "",
+        "position": [-2, 2.5, 37.417],
+        "velocity": [0, 0, 0],
+        "collision": {
+          "isColliding": false,
+          "collidedWithId": ""
+        }
+      },
+      {
+        "id": "Obstacle_3",
+        "type": "",
+        "position": [0, 2.5, 35.417],
+        "velocity": [0, 0, 0],
+        "collision": {
+          "isColliding": false,
+          "collidedWithId": ""
+        }
+      },
+      {
+        "id": "Player",
+        "type": "",
+        "position": [0, 2, 0],
+        "velocity": [0, 0, 0],
+        "collision": {
+          "isColliding": false,
+          "collidedWithId": ""
+        }
+      }
+    ]
+  },
+  {
+    "frame": 91,
+    "deltaTime": 0.0166667,
+    "objects": [
+      {
+        "id": "Obstacle_0",
+        "type": "",
+        "position": [0, 2.5, 21.155],
+        "velocity": [0, 0, 0],
+        "collision": {
+          "isColliding": false,
+          "collidedWithId": ""
+        }
+      },
+      {
+        "id": "Obstacle_1",
+        "type": "",
+        "position": [0, 1.5, 31.117],
+        "velocity": [0, 0, 0],
+        "collision": {
+          "isColliding": false,
+          "collidedWithId": ""
+        }
+      },
+      {
+        "id": "Obstacle_2",
+        "type": "",
+        "position": [-2, 2.5, 37.083],
+        "velocity": [0, 0, 0],
+        "collision": {
+          "isColliding": false,
+          "collidedWithId": ""
+        }
+      },
+      {
+        "id": "Obstacle_3",
+        "type": "",
+        "position": [0, 2.5, 35.083],
+        "velocity": [0, 0, 0],
+        "collision": {
+          "isColliding": false,
+          "collidedWithId": ""
+        }
+      },
+      {
+        "id": "Player",
+        "type": "",
+        "position": [0, 2, 0],
+        "velocity": [0, 0, 0],
+        "collision": {
+          "isColliding": false,
+          "collidedWithId": ""
+        }
+      }
+    ]
+  },
+  {
+    "frame": 92,
+    "deltaTime": 0.0166667,
+    "objects": [
+      {
+        "id": "Obstacle_0",
+        "type": "",
+        "position": [0, 2.5, 20.82],
+        "velocity": [0, 0, 0],
+        "collision": {
+          "isColliding": false,
+          "collidedWithId": ""
+        }
+      },
+      {
+        "id": "Obstacle_1",
+        "type": "",
+        "position": [0, 1.5, 30.782],
+        "velocity": [0, 0, 0],
+        "collision": {
+          "isColliding": false,
+          "collidedWithId": ""
+        }
+      },
+      {
+        "id": "Obstacle_2",
+        "type": "",
+        "position": [-2, 2.5, 36.748],
+        "velocity": [0, 0, 0],
+        "collision": {
+          "isColliding": false,
+          "collidedWithId": ""
+        }
+      },
+      {
+        "id": "Obstacle_3",
+        "type": "",
+        "position": [0, 2.5, 34.748],
+        "velocity": [0, 0, 0],
+        "collision": {
+          "isColliding": false,
+          "collidedWithId": ""
+        }
+      },
+      {
+        "id": "Player",
+        "type": "",
+        "position": [0, 2, 0],
+        "velocity": [0, 0, 0],
+        "collision": {
+          "isColliding": false,
+          "collidedWithId": ""
+        }
+      }
+    ]
+  },
+  {
+    "frame": 93,
+    "deltaTime": 0.0166667,
+    "objects": [
+      {
+        "id": "Obstacle_0",
+        "type": "",
+        "position": [0, 2.5, 20.484],
+        "velocity": [0, 0, 0],
+        "collision": {
+          "isColliding": false,
+          "collidedWithId": ""
+        }
+      },
+      {
+        "id": "Obstacle_1",
+        "type": "",
+        "position": [0, 1.5, 30.446],
+        "velocity": [0, 0, 0],
+        "collision": {
+          "isColliding": false,
+          "collidedWithId": ""
+        }
+      },
+      {
+        "id": "Obstacle_2",
+        "type": "",
+        "position": [-2, 2.5, 36.412],
+        "velocity": [0, 0, 0],
+        "collision": {
+          "isColliding": false,
+          "collidedWithId": ""
+        }
+      },
+      {
+        "id": "Obstacle_3",
+        "type": "",
+        "position": [0, 2.5, 34.412],
+        "velocity": [0, 0, 0],
+        "collision": {
+          "isColliding": false,
+          "collidedWithId": ""
+        }
+      },
+      {
+        "id": "Player",
+        "type": "",
+        "position": [0, 2, 0],
+        "velocity": [0, 0, 0],
+        "collision": {
+          "isColliding": false,
+          "collidedWithId": ""
+        }
+      }
+    ]
+  },
+  {
+    "frame": 94,
+    "deltaTime": 0.0166667,
+    "objects": [
+      {
+        "id": "Obstacle_0",
+        "type": "",
+        "position": [0, 2.5, 20.147],
+        "velocity": [0, 0, 0],
+        "collision": {
+          "isColliding": false,
+          "collidedWithId": ""
+        }
+      },
+      {
+        "id": "Obstacle_1",
+        "type": "",
+        "position": [0, 1.5, 30.109],
+        "velocity": [0, 0, 0],
+        "collision": {
+          "isColliding": false,
+          "collidedWithId": ""
+        }
+      },
+      {
+        "id": "Obstacle_2",
+        "type": "",
+        "position": [-2, 2.5, 36.075],
+        "velocity": [0, 0, 0],
+        "collision": {
+          "isColliding": false,
+          "collidedWithId": ""
+        }
+      },
+      {
+        "id": "Obstacle_3",
+        "type": "",
+        "position": [0, 2.5, 34.075],
+        "velocity": [0, 0, 0],
+        "collision": {
+          "isColliding": false,
+          "collidedWithId": ""
+        }
+      },
+      {
+        "id": "Player",
+        "type": "",
+        "position": [0, 2, 0],
+        "velocity": [0, 0, 0],
+        "collision": {
+          "isColliding": false,
+          "collidedWithId": ""
+        }
+      }
+    ]
+  },
+  {
+    "frame": 95,
+    "deltaTime": 0.0166667,
+    "objects": [
+      {
+        "id": "Obstacle_0",
+        "type": "",
+        "position": [0, 2.5, 19.809],
+        "velocity": [0, 0, 0],
+        "collision": {
+          "isColliding": false,
+          "collidedWithId": ""
+        }
+      },
+      {
+        "id": "Obstacle_1",
+        "type": "",
+        "position": [0, 1.5, 29.771],
+        "velocity": [0, 0, 0],
+        "collision": {
+          "isColliding": false,
+          "collidedWithId": ""
+        }
+      },
+      {
+        "id": "Obstacle_2",
+        "type": "",
+        "position": [-2, 2.5, 35.737],
+        "velocity": [0, 0, 0],
+        "collision": {
+          "isColliding": false,
+          "collidedWithId": ""
+        }
+      },
+      {
+        "id": "Obstacle_3",
+        "type": "",
+        "position": [0, 2.5, 33.737],
+        "velocity": [0, 0, 0],
+        "collision": {
+          "isColliding": false,
+          "collidedWithId": ""
+        }
+      },
+      {
+        "id": "Player",
+        "type": "",
+        "position": [0, 2, 0],
+        "velocity": [0, 0, 0],
+        "collision": {
+          "isColliding": false,
+          "collidedWithId": ""
+        }
+      }
+    ]
+  },
+  {
+    "frame": 96,
+    "deltaTime": 0.0166667,
+    "objects": [
+      {
+        "id": "Obstacle_0",
+        "type": "",
+        "position": [0, 2.5, 19.47],
+        "velocity": [0, 0, 0],
+        "collision": {
+          "isColliding": false,
+          "collidedWithId": ""
+        }
+      },
+      {
+        "id": "Obstacle_1",
+        "type": "",
+        "position": [0, 1.5, 29.432],
+        "velocity": [0, 0, 0],
+        "collision": {
+          "isColliding": false,
+          "collidedWithId": ""
+        }
+      },
+      {
+        "id": "Obstacle_2",
+        "type": "",
+        "position": [-2, 2.5, 35.398],
+        "velocity": [0, 0, 0],
+        "collision": {
+          "isColliding": false,
+          "collidedWithId": ""
+        }
+      },
+      {
+        "id": "Obstacle_3",
+        "type": "",
+        "position": [0, 2.5, 33.398],
+        "velocity": [0, 0, 0],
+        "collision": {
+          "isColliding": false,
+          "collidedWithId": ""
+        }
+      },
+      {
+        "id": "Player",
+        "type": "",
+        "position": [0, 2, 0],
+        "velocity": [0, 0, 0],
+        "collision": {
+          "isColliding": false,
+          "collidedWithId": ""
+        }
+      }
+    ]
+  },
+  {
+    "frame": 97,
+    "deltaTime": 0.0166667,
+    "objects": [
+      {
+        "id": "Obstacle_0",
+        "type": "",
+        "position": [0, 2.5, 19.13],
+        "velocity": [0, 0, 0],
+        "collision": {
+          "isColliding": false,
+          "collidedWithId": ""
+        }
+      },
+      {
+        "id": "Obstacle_1",
+        "type": "",
+        "position": [0, 1.5, 29.092],
+        "velocity": [0, 0, 0],
+        "collision": {
+          "isColliding": false,
+          "collidedWithId": ""
+        }
+      },
+      {
+        "id": "Obstacle_2",
+        "type": "",
+        "position": [-2, 2.5, 35.058],
+        "velocity": [0, 0, 0],
+        "collision": {
+          "isColliding": false,
+          "collidedWithId": ""
+        }
+      },
+      {
+        "id": "Obstacle_3",
+        "type": "",
+        "position": [0, 2.5, 33.058],
+        "velocity": [0, 0, 0],
+        "collision": {
+          "isColliding": false,
+          "collidedWithId": ""
+        }
+      },
+      {
+        "id": "Player",
+        "type": "",
+        "position": [0, 2, 0],
+        "velocity": [0, 0, 0],
+        "collision": {
+          "isColliding": false,
+          "collidedWithId": ""
+        }
+      }
+    ]
+  },
+  {
+    "frame": 98,
+    "deltaTime": 0.0166667,
+    "objects": [
+      {
+        "id": "Obstacle_0",
+        "type": "",
+        "position": [0, 2.5, 18.789],
+        "velocity": [0, 0, 0],
+        "collision": {
+          "isColliding": false,
+          "collidedWithId": ""
+        }
+      },
+      {
+        "id": "Obstacle_1",
+        "type": "",
+        "position": [0, 1.5, 28.751],
+        "velocity": [0, 0, 0],
+        "collision": {
+          "isColliding": false,
+          "collidedWithId": ""
+        }
+      },
+      {
+        "id": "Obstacle_2",
+        "type": "",
+        "position": [-2, 2.5, 34.717],
+        "velocity": [0, 0, 0],
+        "collision": {
+          "isColliding": false,
+          "collidedWithId": ""
+        }
+      },
+      {
+        "id": "Obstacle_3",
+        "type": "",
+        "position": [0, 2.5, 32.717],
+        "velocity": [0, 0, 0],
+        "collision": {
+          "isColliding": false,
+          "collidedWithId": ""
+        }
+      },
+      {
+        "id": "Player",
+        "type": "",
+        "position": [0, 2, 0],
+        "velocity": [0, 0, 0],
+        "collision": {
+          "isColliding": false,
+          "collidedWithId": ""
+        }
+      }
+    ]
+  },
+  {
+    "frame": 99,
+    "deltaTime": 0.0166667,
+    "objects": [
+      {
+        "id": "Obstacle_0",
+        "type": "",
+        "position": [0, 2.5, 18.447],
+        "velocity": [0, 0, 0],
+        "collision": {
+          "isColliding": false,
+          "collidedWithId": ""
+        }
+      },
+      {
+        "id": "Obstacle_1",
+        "type": "",
+        "position": [0, 1.5, 28.409],
+        "velocity": [0, 0, 0],
+        "collision": {
+          "isColliding": false,
+          "collidedWithId": ""
+        }
+      },
+      {
+        "id": "Obstacle_2",
+        "type": "",
+        "position": [-2, 2.5, 34.375],
+        "velocity": [0, 0, 0],
+        "collision": {
+          "isColliding": false,
+          "collidedWithId": ""
+        }
+      },
+      {
+        "id": "Obstacle_3",
+        "type": "",
+        "position": [0, 2.5, 32.375],
+        "velocity": [0, 0, 0],
+        "collision": {
+          "isColliding": false,
+          "collidedWithId": ""
+        }
+      },
+      {
+        "id": "Player",
+        "type": "",
+        "position": [0, 2, 0],
+        "velocity": [0, 0, 0],
+        "collision": {
+          "isColliding": false,
+          "collidedWithId": ""
+        }
+      }
+    ]
+  },
+  {
+    "frame": 100,
+    "deltaTime": 0.0166667,
+    "objects": [
+      {
+        "id": "Obstacle_0",
+        "type": "",
+        "position": [0, 2.5, 18.104],
+        "velocity": [0, 0, 0],
+        "collision": {
+          "isColliding": false,
+          "collidedWithId": ""
+        }
+      },
+      {
+        "id": "Obstacle_1",
+        "type": "",
+        "position": [0, 1.5, 28.066],
+        "velocity": [0, 0, 0],
+        "collision": {
+          "isColliding": false,
+          "collidedWithId": ""
+        }
+      },
+      {
+        "id": "Obstacle_2",
+        "type": "",
+        "position": [-2, 2.5, 34.032],
+        "velocity": [0, 0, 0],
+        "collision": {
+          "isColliding": false,
+          "collidedWithId": ""
+        }
+      },
+      {
+        "id": "Obstacle_3",
+        "type": "",
+        "position": [0, 2.5, 32.032],
+        "velocity": [0, 0, 0],
+        "collision": {
+          "isColliding": false,
+          "collidedWithId": ""
+        }
+      },
+      {
+        "id": "Player",
+        "type": "",
+        "position": [0, 2, 0],
+        "velocity": [0, 0, 0],
+        "collision": {
+          "isColliding": false,
+          "collidedWithId": ""
+        }
+      }
+    ]
+  },
+  {
+    "frame": 101,
+    "deltaTime": 0.0166667,
+    "objects": [
+      {
+        "id": "Obstacle_0",
+        "type": "",
+        "position": [0, 2.5, 17.76],
+        "velocity": [0, 0, 0],
+        "collision": {
+          "isColliding": false,
+          "collidedWithId": ""
+        }
+      },
+      {
+        "id": "Obstacle_1",
+        "type": "",
+        "position": [0, 1.5, 27.722],
+        "velocity": [0, 0, 0],
+        "collision": {
+          "isColliding": false,
+          "collidedWithId": ""
+        }
+      },
+      {
+        "id": "Obstacle_2",
+        "type": "",
+        "position": [-2, 2.5, 33.688],
+        "velocity": [0, 0, 0],
+        "collision": {
+          "isColliding": false,
+          "collidedWithId": ""
+        }
+      },
+      {
+        "id": "Obstacle_3",
+        "type": "",
+        "position": [0, 2.5, 31.688],
+        "velocity": [0, 0, 0],
+        "collision": {
+          "isColliding": false,
+          "collidedWithId": ""
+        }
+      },
+      {
+        "id": "Player",
+        "type": "",
+        "position": [0, 2, 0],
+        "velocity": [0, 0, 0],
+        "collision": {
+          "isColliding": false,
+          "collidedWithId": ""
+        }
+      }
+    ]
+  },
+  {
+    "frame": 102,
+    "deltaTime": 0.0166667,
+    "objects": [
+      {
+        "id": "Obstacle_0",
+        "type": "",
+        "position": [0, 2.5, 17.415],
+        "velocity": [0, 0, 0],
+        "collision": {
+          "isColliding": false,
+          "collidedWithId": ""
+        }
+      },
+      {
+        "id": "Obstacle_1",
+        "type": "",
+        "position": [0, 1.5, 27.377],
+        "velocity": [0, 0, 0],
+        "collision": {
+          "isColliding": false,
+          "collidedWithId": ""
+        }
+      },
+      {
+        "id": "Obstacle_2",
+        "type": "",
+        "position": [-2, 2.5, 33.343],
+        "velocity": [0, 0, 0],
+        "collision": {
+          "isColliding": false,
+          "collidedWithId": ""
+        }
+      },
+      {
+        "id": "Obstacle_3",
+        "type": "",
+        "position": [0, 2.5, 31.343],
+        "velocity": [0, 0, 0],
+        "collision": {
+          "isColliding": false,
+          "collidedWithId": ""
+        }
+      },
+      {
+        "id": "Player",
+        "type": "",
+        "position": [0, 2, 0],
+        "velocity": [0, 0, 0],
+        "collision": {
+          "isColliding": false,
+          "collidedWithId": ""
+        }
+      }
+    ]
+  },
+  {
+    "frame": 103,
+    "deltaTime": 0.0166667,
+    "objects": [
+      {
+        "id": "Obstacle_0",
+        "type": "",
+        "position": [0, 2.5, 17.069],
+        "velocity": [0, 0, 0],
+        "collision": {
+          "isColliding": false,
+          "collidedWithId": ""
+        }
+      },
+      {
+        "id": "Obstacle_1",
+        "type": "",
+        "position": [0, 1.5, 27.031],
+        "velocity": [0, 0, 0],
+        "collision": {
+          "isColliding": false,
+          "collidedWithId": ""
+        }
+      },
+      {
+        "id": "Obstacle_2",
+        "type": "",
+        "position": [-2, 2.5, 32.997],
+        "velocity": [0, 0, 0],
+        "collision": {
+          "isColliding": false,
+          "collidedWithId": ""
+        }
+      },
+      {
+        "id": "Obstacle_3",
+        "type": "",
+        "position": [0, 2.5, 30.997],
+        "velocity": [0, 0, 0],
+        "collision": {
+          "isColliding": false,
+          "collidedWithId": ""
+        }
+      },
+      {
+        "id": "Player",
+        "type": "",
+        "position": [0, 2, 0],
+        "velocity": [0, 0, 0],
+        "collision": {
+          "isColliding": false,
+          "collidedWithId": ""
+        }
+      }
+    ]
+  },
+  {
+    "frame": 104,
+    "deltaTime": 0.0166667,
+    "objects": [
+      {
+        "id": "Obstacle_0",
+        "type": "",
+        "position": [0, 2.5, 16.722],
+        "velocity": [0, 0, 0],
+        "collision": {
+          "isColliding": false,
+          "collidedWithId": ""
+        }
+      },
+      {
+        "id": "Obstacle_1",
+        "type": "",
+        "position": [0, 1.5, 26.684],
+        "velocity": [0, 0, 0],
+        "collision": {
+          "isColliding": false,
+          "collidedWithId": ""
+        }
+      },
+      {
+        "id": "Obstacle_2",
+        "type": "",
+        "position": [-2, 2.5, 32.65],
+        "velocity": [0, 0, 0],
+        "collision": {
+          "isColliding": false,
+          "collidedWithId": ""
+        }
+      },
+      {
+        "id": "Obstacle_3",
+        "type": "",
+        "position": [0, 2.5, 30.65],
+        "velocity": [0, 0, 0],
+        "collision": {
+          "isColliding": false,
+          "collidedWithId": ""
+        }
+      },
+      {
+        "id": "Obstacle_4",
+        "type": "",
+        "position": [2, 2.5, 40.62],
+        "velocity": [0, 0, 0],
+        "collision": {
+          "isColliding": false,
+          "collidedWithId": ""
+        }
+      },
+      {
+        "id": "Player",
+        "type": "",
+        "position": [0, 2, 0],
+        "velocity": [0, 0, 0],
+        "collision": {
+          "isColliding": false,
+          "collidedWithId": ""
+        }
+      }
+    ]
+  },
+  {
+    "frame": 105,
+    "deltaTime": 0.0166667,
+    "objects": [
+      {
+        "id": "Obstacle_0",
+        "type": "",
+        "position": [0, 2.5, 16.374],
+        "velocity": [0, 0, 0],
+        "collision": {
+          "isColliding": false,
+          "collidedWithId": ""
+        }
+      },
+      {
+        "id": "Obstacle_1",
+        "type": "",
+        "position": [0, 1.5, 26.3361],
+        "velocity": [0, 0, 0],
+        "collision": {
+          "isColliding": false,
+          "collidedWithId": ""
+        }
+      },
+      {
+        "id": "Obstacle_2",
+        "type": "",
+        "position": [-2, 2.5, 32.302],
+        "velocity": [0, 0, 0],
+        "collision": {
+          "isColliding": false,
+          "collidedWithId": ""
+        }
+      },
+      {
+        "id": "Obstacle_3",
+        "type": "",
+        "position": [0, 2.5, 30.302],
+        "velocity": [0, 0, 0],
+        "collision": {
+          "isColliding": false,
+          "collidedWithId": ""
+        }
+      },
+      {
+        "id": "Obstacle_4",
+        "type": "",
+        "position": [2, 2.5, 40.272],
+        "velocity": [0, 0, 0],
+        "collision": {
+          "isColliding": false,
+          "collidedWithId": ""
+        }
+      },
+      {
+        "id": "Player",
+        "type": "",
+        "position": [0, 2, 0],
+        "velocity": [0, 0, 0],
+        "collision": {
+          "isColliding": false,
+          "collidedWithId": ""
+        }
+      }
+    ]
+  },
+  {
+    "frame": 106,
+    "deltaTime": 0.0166667,
+    "objects": [
+      {
+        "id": "Obstacle_0",
+        "type": "",
+        "position": [0, 2.5, 16.025],
+        "velocity": [0, 0, 0],
+        "collision": {
+          "isColliding": false,
+          "collidedWithId": ""
+        }
+      },
+      {
+        "id": "Obstacle_1",
+        "type": "",
+        "position": [0, 1.5, 25.9871],
+        "velocity": [0, 0, 0],
+        "collision": {
+          "isColliding": false,
+          "collidedWithId": ""
+        }
+      },
+      {
+        "id": "Obstacle_2",
+        "type": "",
+        "position": [-2, 2.5, 31.953],
+        "velocity": [0, 0, 0],
+        "collision": {
+          "isColliding": false,
+          "collidedWithId": ""
+        }
+      },
+      {
+        "id": "Obstacle_3",
+        "type": "",
+        "position": [0, 2.5, 29.9531],
+        "velocity": [0, 0, 0],
+        "collision": {
+          "isColliding": false,
+          "collidedWithId": ""
+        }
+      },
+      {
+        "id": "Obstacle_4",
+        "type": "",
+        "position": [2, 2.5, 39.923],
+        "velocity": [0, 0, 0],
+        "collision": {
+          "isColliding": false,
+          "collidedWithId": ""
+        }
+      },
+      {
+        "id": "Player",
+        "type": "",
+        "position": [0, 2, 0],
+        "velocity": [0, 0, 0],
+        "collision": {
+          "isColliding": false,
+          "collidedWithId": ""
+        }
+      }
+    ]
+  },
+  {
+    "frame": 107,
+    "deltaTime": 0.0166667,
+    "objects": [
+      {
+        "id": "Obstacle_0",
+        "type": "",
+        "position": [0, 2.5, 15.675],
+        "velocity": [0, 0, 0],
+        "collision": {
+          "isColliding": false,
+          "collidedWithId": ""
+        }
+      },
+      {
+        "id": "Obstacle_1",
+        "type": "",
+        "position": [0, 1.5, 25.6371],
+        "velocity": [0, 0, 0],
+        "collision": {
+          "isColliding": false,
+          "collidedWithId": ""
+        }
+      },
+      {
+        "id": "Obstacle_2",
+        "type": "",
+        "position": [-2, 2.5, 31.6031],
+        "velocity": [0, 0, 0],
+        "collision": {
+          "isColliding": false,
+          "collidedWithId": ""
+        }
+      },
+      {
+        "id": "Obstacle_3",
+        "type": "",
+        "position": [0, 2.5, 29.6031],
+        "velocity": [0, 0, 0],
+        "collision": {
+          "isColliding": false,
+          "collidedWithId": ""
+        }
+      },
+      {
+        "id": "Obstacle_4",
+        "type": "",
+        "position": [2, 2.5, 39.5731],
+        "velocity": [0, 0, 0],
+        "collision": {
+          "isColliding": false,
+          "collidedWithId": ""
+        }
+      },
+      {
+        "id": "Player",
+        "type": "",
+        "position": [0, 2, 0],
+        "velocity": [0, 0, 0],
+        "collision": {
+          "isColliding": false,
+          "collidedWithId": ""
+        }
+      }
+    ]
+  },
+  {
+    "frame": 108,
+    "deltaTime": 0.0166667,
+    "objects": [
+      {
+        "id": "Obstacle_0",
+        "type": "",
+        "position": [0, 2.5, 15.324],
+        "velocity": [0, 0, 0],
+        "collision": {
+          "isColliding": false,
+          "collidedWithId": ""
+        }
+      },
+      {
+        "id": "Obstacle_1",
+        "type": "",
+        "position": [0, 1.5, 25.2861],
+        "velocity": [0, 0, 0],
+        "collision": {
+          "isColliding": false,
+          "collidedWithId": ""
+        }
+      },
+      {
+        "id": "Obstacle_2",
+        "type": "",
+        "position": [-2, 2.5, 31.2521],
+        "velocity": [0, 0, 0],
+        "collision": {
+          "isColliding": false,
+          "collidedWithId": ""
+        }
+      },
+      {
+        "id": "Obstacle_3",
+        "type": "",
+        "position": [0, 2.5, 29.2521],
+        "velocity": [0, 0, 0],
+        "collision": {
+          "isColliding": false,
+          "collidedWithId": ""
+        }
+      },
+      {
+        "id": "Obstacle_4",
+        "type": "",
+        "position": [2, 2.5, 39.2221],
+        "velocity": [0, 0, 0],
+        "collision": {
+          "isColliding": false,
+          "collidedWithId": ""
+        }
+      },
+      {
+        "id": "Player",
+        "type": "",
+        "position": [0, 2, 0],
+        "velocity": [0, 0, 0],
+        "collision": {
+          "isColliding": false,
+          "collidedWithId": ""
+        }
+      }
+    ]
+  },
+  {
+    "frame": 109,
+    "deltaTime": 0.0166667,
+    "objects": [
+      {
+        "id": "Obstacle_0",
+        "type": "",
+        "position": [0, 2.5, 14.9721],
+        "velocity": [0, 0, 0],
+        "collision": {
+          "isColliding": false,
+          "collidedWithId": ""
+        }
+      },
+      {
+        "id": "Obstacle_1",
+        "type": "",
+        "position": [0, 1.5, 24.9341],
+        "velocity": [0, 0, 0],
+        "collision": {
+          "isColliding": false,
+          "collidedWithId": ""
+        }
+      },
+      {
+        "id": "Obstacle_2",
+        "type": "",
+        "position": [-2, 2.5, 30.9001],
+        "velocity": [0, 0, 0],
+        "collision": {
+          "isColliding": false,
+          "collidedWithId": ""
+        }
+      },
+      {
+        "id": "Obstacle_3",
+        "type": "",
+        "position": [0, 2.5, 28.9001],
+        "velocity": [0, 0, 0],
+        "collision": {
+          "isColliding": false,
+          "collidedWithId": ""
+        }
+      },
+      {
+        "id": "Obstacle_4",
+        "type": "",
+        "position": [2, 2.5, 38.8701],
+        "velocity": [0, 0, 0],
+        "collision": {
+          "isColliding": false,
+          "collidedWithId": ""
+        }
+      },
+      {
+        "id": "Player",
+        "type": "",
+        "position": [0, 2, 0],
+        "velocity": [0, 0, 0],
+        "collision": {
+          "isColliding": false,
+          "collidedWithId": ""
+        }
+      }
+    ]
+  },
+  {
+    "frame": 110,
+    "deltaTime": 0.0166667,
+    "objects": [
+      {
+        "id": "Obstacle_0",
+        "type": "",
+        "position": [0, 2.5, 14.6191],
+        "velocity": [0, 0, 0],
+        "collision": {
+          "isColliding": false,
+          "collidedWithId": ""
+        }
+      },
+      {
+        "id": "Obstacle_1",
+        "type": "",
+        "position": [0, 1.5, 24.5811],
+        "velocity": [0, 0, 0],
+        "collision": {
+          "isColliding": false,
+          "collidedWithId": ""
+        }
+      },
+      {
+        "id": "Obstacle_2",
+        "type": "",
+        "position": [-2, 2.5, 30.5471],
+        "velocity": [0, 0, 0],
+        "collision": {
+          "isColliding": false,
+          "collidedWithId": ""
+        }
+      },
+      {
+        "id": "Obstacle_3",
+        "type": "",
+        "position": [0, 2.5, 28.5471],
+        "velocity": [0, 0, 0],
+        "collision": {
+          "isColliding": false,
+          "collidedWithId": ""
+        }
+      },
+      {
+        "id": "Obstacle_4",
+        "type": "",
+        "position": [2, 2.5, 38.5171],
+        "velocity": [0, 0, 0],
+        "collision": {
+          "isColliding": false,
+          "collidedWithId": ""
+        }
+      },
+      {
+        "id": "Player",
+        "type": "",
+        "position": [0, 2, 0],
+        "velocity": [0, 0, 0],
+        "collision": {
+          "isColliding": false,
+          "collidedWithId": ""
+        }
+      }
+    ]
+  },
+  {
+    "frame": 111,
+    "deltaTime": 0.0166667,
+    "objects": [
+      {
+        "id": "Obstacle_0",
+        "type": "",
+        "position": [0, 2.5, 14.2651],
+        "velocity": [0, 0, 0],
+        "collision": {
+          "isColliding": false,
+          "collidedWithId": ""
+        }
+      },
+      {
+        "id": "Obstacle_1",
+        "type": "",
+        "position": [0, 1.5, 24.2271],
+        "velocity": [0, 0, 0],
+        "collision": {
+          "isColliding": false,
+          "collidedWithId": ""
+        }
+      },
+      {
+        "id": "Obstacle_2",
+        "type": "",
+        "position": [-2, 2.5, 30.1931],
+        "velocity": [0, 0, 0],
+        "collision": {
+          "isColliding": false,
+          "collidedWithId": ""
+        }
+      },
+      {
+        "id": "Obstacle_3",
+        "type": "",
+        "position": [0, 2.5, 28.1931],
+        "velocity": [0, 0, 0],
+        "collision": {
+          "isColliding": false,
+          "collidedWithId": ""
+        }
+      },
+      {
+        "id": "Obstacle_4",
+        "type": "",
+        "position": [2, 2.5, 38.1631],
+        "velocity": [0, 0, 0],
+        "collision": {
+          "isColliding": false,
+          "collidedWithId": ""
+        }
+      },
+      {
+        "id": "Player",
+        "type": "",
+        "position": [0, 2, 0],
+        "velocity": [0, 0, 0],
+        "collision": {
+          "isColliding": false,
+          "collidedWithId": ""
+        }
+      }
+    ]
+  },
+  {
+    "frame": 112,
+    "deltaTime": 0.0166667,
+    "objects": [
+      {
+        "id": "Obstacle_0",
+        "type": "",
+        "position": [0, 2.5, 13.9101],
+        "velocity": [0, 0, 0],
+        "collision": {
+          "isColliding": false,
+          "collidedWithId": ""
+        }
+      },
+      {
+        "id": "Obstacle_1",
+        "type": "",
+        "position": [0, 1.5, 23.8721],
+        "velocity": [0, 0, 0],
+        "collision": {
+          "isColliding": false,
+          "collidedWithId": ""
+        }
+      },
+      {
+        "id": "Obstacle_2",
+        "type": "",
+        "position": [-2, 2.5, 29.8381],
+        "velocity": [0, 0, 0],
+        "collision": {
+          "isColliding": false,
+          "collidedWithId": ""
+        }
+      },
+      {
+        "id": "Obstacle_3",
+        "type": "",
+        "position": [0, 2.5, 27.8381],
+        "velocity": [0, 0, 0],
+        "collision": {
+          "isColliding": false,
+          "collidedWithId": ""
+        }
+      },
+      {
+        "id": "Obstacle_4",
+        "type": "",
+        "position": [2, 2.5, 37.8081],
+        "velocity": [0, 0, 0],
+        "collision": {
+          "isColliding": false,
+          "collidedWithId": ""
+        }
+      },
+      {
+        "id": "Player",
+        "type": "",
+        "position": [0, 2, 0],
+        "velocity": [0, 0, 0],
+        "collision": {
+          "isColliding": false,
+          "collidedWithId": ""
+        }
+      }
+    ]
+  },
+  {
+    "frame": 113,
+    "deltaTime": 0.0166667,
+    "objects": [
+      {
+        "id": "Obstacle_0",
+        "type": "",
+        "position": [0, 2.5, 13.5541],
+        "velocity": [0, 0, 0],
+        "collision": {
+          "isColliding": false,
+          "collidedWithId": ""
+        }
+      },
+      {
+        "id": "Obstacle_1",
+        "type": "",
+        "position": [0, 1.5, 23.5161],
+        "velocity": [0, 0, 0],
+        "collision": {
+          "isColliding": false,
+          "collidedWithId": ""
+        }
+      },
+      {
+        "id": "Obstacle_2",
+        "type": "",
+        "position": [-2, 2.5, 29.4821],
+        "velocity": [0, 0, 0],
+        "collision": {
+          "isColliding": false,
+          "collidedWithId": ""
+        }
+      },
+      {
+        "id": "Obstacle_3",
+        "type": "",
+        "position": [0, 2.5, 27.4821],
+        "velocity": [0, 0, 0],
+        "collision": {
+          "isColliding": false,
+          "collidedWithId": ""
+        }
+      },
+      {
+        "id": "Obstacle_4",
+        "type": "",
+        "position": [2, 2.5, 37.4521],
+        "velocity": [0, 0, 0],
+        "collision": {
+          "isColliding": false,
+          "collidedWithId": ""
+        }
+      },
+      {
+        "id": "Player",
+        "type": "",
+        "position": [0, 2, 0],
+        "velocity": [0, 0, 0],
+        "collision": {
+          "isColliding": false,
+          "collidedWithId": ""
+        }
+      }
+    ]
+  },
+  {
+    "frame": 114,
+    "deltaTime": 0.0166667,
+    "objects": [
+      {
+        "id": "Obstacle_0",
+        "type": "",
+        "position": [0, 2.5, 13.1971],
+        "velocity": [0, 0, 0],
+        "collision": {
+          "isColliding": false,
+          "collidedWithId": ""
+        }
+      },
+      {
+        "id": "Obstacle_1",
+        "type": "",
+        "position": [0, 1.5, 23.1591],
+        "velocity": [0, 0, 0],
+        "collision": {
+          "isColliding": false,
+          "collidedWithId": ""
+        }
+      },
+      {
+        "id": "Obstacle_2",
+        "type": "",
+        "position": [-2, 2.5, 29.1251],
+        "velocity": [0, 0, 0],
+        "collision": {
+          "isColliding": false,
+          "collidedWithId": ""
+        }
+      },
+      {
+        "id": "Obstacle_3",
+        "type": "",
+        "position": [0, 2.5, 27.1251],
+        "velocity": [0, 0, 0],
+        "collision": {
+          "isColliding": false,
+          "collidedWithId": ""
+        }
+      },
+      {
+        "id": "Obstacle_4",
+        "type": "",
+        "position": [2, 2.5, 37.0951],
+        "velocity": [0, 0, 0],
+        "collision": {
+          "isColliding": false,
+          "collidedWithId": ""
+        }
+      },
+      {
+        "id": "Player",
+        "type": "",
+        "position": [0, 2, 0],
+        "velocity": [0, 0, 0],
+        "collision": {
+          "isColliding": false,
+          "collidedWithId": ""
+        }
+      }
+    ]
+  },
+  {
+    "frame": 115,
+    "deltaTime": 0.0166667,
+    "objects": [
+      {
+        "id": "Obstacle_0",
+        "type": "",
+        "position": [0, 2.5, 12.8391],
+        "velocity": [0, 0, 0],
+        "collision": {
+          "isColliding": false,
+          "collidedWithId": ""
+        }
+      },
+      {
+        "id": "Obstacle_1",
+        "type": "",
+        "position": [0, 1.5, 22.8011],
+        "velocity": [0, 0, 0],
+        "collision": {
+          "isColliding": false,
+          "collidedWithId": ""
+        }
+      },
+      {
+        "id": "Obstacle_2",
+        "type": "",
+        "position": [-2, 2.5, 28.7671],
+        "velocity": [0, 0, 0],
+        "collision": {
+          "isColliding": false,
+          "collidedWithId": ""
+        }
+      },
+      {
+        "id": "Obstacle_3",
+        "type": "",
+        "position": [0, 2.5, 26.7671],
+        "velocity": [0, 0, 0],
+        "collision": {
+          "isColliding": false,
+          "collidedWithId": ""
+        }
+      },
+      {
+        "id": "Obstacle_4",
+        "type": "",
+        "position": [2, 2.5, 36.7371],
+        "velocity": [0, 0, 0],
+        "collision": {
+          "isColliding": false,
+          "collidedWithId": ""
+        }
+      },
+      {
+        "id": "Player",
+        "type": "",
+        "position": [0, 2, 0],
+        "velocity": [0, 0, 0],
+        "collision": {
+          "isColliding": false,
+          "collidedWithId": ""
+        }
+      }
+    ]
+  },
+  {
+    "frame": 116,
+    "deltaTime": 0.0166667,
+    "objects": [
+      {
+        "id": "Obstacle_0",
+        "type": "",
+        "position": [0, 2.5, 12.4801],
+        "velocity": [0, 0, 0],
+        "collision": {
+          "isColliding": false,
+          "collidedWithId": ""
+        }
+      },
+      {
+        "id": "Obstacle_1",
+        "type": "",
+        "position": [0, 1.5, 22.4421],
+        "velocity": [0, 0, 0],
+        "collision": {
+          "isColliding": false,
+          "collidedWithId": ""
+        }
+      },
+      {
+        "id": "Obstacle_2",
+        "type": "",
+        "position": [-2, 2.5, 28.4081],
+        "velocity": [0, 0, 0],
+        "collision": {
+          "isColliding": false,
+          "collidedWithId": ""
+        }
+      },
+      {
+        "id": "Obstacle_3",
+        "type": "",
+        "position": [0, 2.5, 26.4081],
+        "velocity": [0, 0, 0],
+        "collision": {
+          "isColliding": false,
+          "collidedWithId": ""
+        }
+      },
+      {
+        "id": "Obstacle_4",
+        "type": "",
+        "position": [2, 2.5, 36.3781],
+        "velocity": [0, 0, 0],
+        "collision": {
+          "isColliding": false,
+          "collidedWithId": ""
+        }
+      },
+      {
+        "id": "Player",
+        "type": "",
+        "position": [0, 2, 0],
+        "velocity": [0, 0, 0],
+        "collision": {
+          "isColliding": false,
+          "collidedWithId": ""
+        }
+      }
+    ]
+  },
+  {
+    "frame": 117,
+    "deltaTime": 0.0166667,
+    "objects": [
+      {
+        "id": "Obstacle_0",
+        "type": "",
+        "position": [0, 2.5, 12.1201],
+        "velocity": [0, 0, 0],
+        "collision": {
+          "isColliding": false,
+          "collidedWithId": ""
+        }
+      },
+      {
+        "id": "Obstacle_1",
+        "type": "",
+        "position": [0, 1.5, 22.0821],
+        "velocity": [0, 0, 0],
+        "collision": {
+          "isColliding": false,
+          "collidedWithId": ""
+        }
+      },
+      {
+        "id": "Obstacle_2",
+        "type": "",
+        "position": [-2, 2.5, 28.0481],
+        "velocity": [0, 0, 0],
+        "collision": {
+          "isColliding": false,
+          "collidedWithId": ""
+        }
+      },
+      {
+        "id": "Obstacle_3",
+        "type": "",
+        "position": [0, 2.5, 26.0481],
+        "velocity": [0, 0, 0],
+        "collision": {
+          "isColliding": false,
+          "collidedWithId": ""
+        }
+      },
+      {
+        "id": "Obstacle_4",
+        "type": "",
+        "position": [2, 2.5, 36.0181],
+        "velocity": [0, 0, 0],
+        "collision": {
+          "isColliding": false,
+          "collidedWithId": ""
+        }
+      },
+      {
+        "id": "Player",
+        "type": "",
+        "position": [0, 2, 0],
+        "velocity": [0, 0, 0],
+        "collision": {
+          "isColliding": false,
+          "collidedWithId": ""
+        }
+      }
+    ]
+  },
+  {
+    "frame": 118,
+    "deltaTime": 0.0166667,
+    "objects": [
+      {
+        "id": "Obstacle_0",
+        "type": "",
+        "position": [0, 2.5, 11.7591],
+        "velocity": [0, 0, 0],
+        "collision": {
+          "isColliding": false,
+          "collidedWithId": ""
+        }
+      },
+      {
+        "id": "Obstacle_1",
+        "type": "",
+        "position": [0, 1.5, 21.7211],
+        "velocity": [0, 0, 0],
+        "collision": {
+          "isColliding": false,
+          "collidedWithId": ""
+        }
+      },
+      {
+        "id": "Obstacle_2",
+        "type": "",
+        "position": [-2, 2.5, 27.6871],
+        "velocity": [0, 0, 0],
+        "collision": {
+          "isColliding": false,
+          "collidedWithId": ""
+        }
+      },
+      {
+        "id": "Obstacle_3",
+        "type": "",
+        "position": [0, 2.5, 25.6871],
+        "velocity": [0, 0, 0],
+        "collision": {
+          "isColliding": false,
+          "collidedWithId": ""
+        }
+      },
+      {
+        "id": "Obstacle_4",
+        "type": "",
+        "position": [2, 2.5, 35.6571],
+        "velocity": [0, 0, 0],
+        "collision": {
+          "isColliding": false,
+          "collidedWithId": ""
+        }
+      },
+      {
+        "id": "Player",
+        "type": "",
+        "position": [0, 2, 0],
+        "velocity": [0, 0, 0],
+        "collision": {
+          "isColliding": false,
+          "collidedWithId": ""
+        }
+      }
+    ]
+  },
+  {
+    "frame": 119,
+    "deltaTime": 0.0166667,
+    "objects": [
+      {
+        "id": "Obstacle_0",
+        "type": "",
+        "position": [0, 2.5, 11.3971],
+        "velocity": [0, 0, 0],
+        "collision": {
+          "isColliding": false,
+          "collidedWithId": ""
+        }
+      },
+      {
+        "id": "Obstacle_1",
+        "type": "",
+        "position": [0, 1.5, 21.3591],
+        "velocity": [0, 0, 0],
+        "collision": {
+          "isColliding": false,
+          "collidedWithId": ""
+        }
+      },
+      {
+        "id": "Obstacle_2",
+        "type": "",
+        "position": [-2, 2.5, 27.3251],
+        "velocity": [0, 0, 0],
+        "collision": {
+          "isColliding": false,
+          "collidedWithId": ""
+        }
+      },
+      {
+        "id": "Obstacle_3",
+        "type": "",
+        "position": [0, 2.5, 25.3251],
+        "velocity": [0, 0, 0],
+        "collision": {
+          "isColliding": false,
+          "collidedWithId": ""
+        }
+      },
+      {
+        "id": "Obstacle_4",
+        "type": "",
+        "position": [2, 2.5, 35.2951],
+        "velocity": [0, 0, 0],
+        "collision": {
+          "isColliding": false,
+          "collidedWithId": ""
+        }
+      },
+      {
+        "id": "Player",
+        "type": "",
+        "position": [0, 2, 0],
+        "velocity": [0, 0, 0],
+        "collision": {
+          "isColliding": false,
+          "collidedWithId": ""
+        }
+      }
+    ]
+  },
+  {
+    "frame": 120,
+    "deltaTime": 0.0166667,
+    "objects": [
+      {
+        "id": "Obstacle_0",
+        "type": "",
+        "position": [0, 2.5, 11.0341],
+        "velocity": [0, 0, 0],
+        "collision": {
+          "isColliding": false,
+          "collidedWithId": ""
+        }
+      },
+      {
+        "id": "Obstacle_1",
+        "type": "",
+        "position": [0, 1.5, 20.9961],
+        "velocity": [0, 0, 0],
+        "collision": {
+          "isColliding": false,
+          "collidedWithId": ""
+        }
+      },
+      {
+        "id": "Obstacle_2",
+        "type": "",
+        "position": [-2, 2.5, 26.9621],
+        "velocity": [0, 0, 0],
+        "collision": {
+          "isColliding": false,
+          "collidedWithId": ""
+        }
+      },
+      {
+        "id": "Obstacle_3",
+        "type": "",
+        "position": [0, 2.5, 24.9621],
+        "velocity": [0, 0, 0],
+        "collision": {
+          "isColliding": false,
+          "collidedWithId": ""
+        }
+      },
+      {
+        "id": "Obstacle_4",
+        "type": "",
+        "position": [2, 2.5, 34.9321],
+        "velocity": [0, 0, 0],
+        "collision": {
+          "isColliding": false,
+          "collidedWithId": ""
+        }
+      },
+      {
+        "id": "Player",
+        "type": "",
+        "position": [0, 2, 0],
+        "velocity": [0, 0, 0],
+        "collision": {
+          "isColliding": false,
+          "collidedWithId": ""
+        }
+      }
+    ]
+  },
+  {
+    "frame": 121,
+    "deltaTime": 0.0166667,
+    "objects": [
+      {
+        "id": "Obstacle_0",
+        "type": "",
+        "position": [0, 2.5, 10.6701],
+        "velocity": [0, 0, 0],
+        "collision": {
+          "isColliding": false,
+          "collidedWithId": ""
+        }
+      },
+      {
+        "id": "Obstacle_1",
+        "type": "",
+        "position": [0, 1.5, 20.6321],
+        "velocity": [0, 0, 0],
+        "collision": {
+          "isColliding": false,
+          "collidedWithId": ""
+        }
+      },
+      {
+        "id": "Obstacle_2",
+        "type": "",
+        "position": [-2, 2.5, 26.5981],
+        "velocity": [0, 0, 0],
+        "collision": {
+          "isColliding": false,
+          "collidedWithId": ""
+        }
+      },
+      {
+        "id": "Obstacle_3",
+        "type": "",
+        "position": [0, 2.5, 24.5981],
+        "velocity": [0, 0, 0],
+        "collision": {
+          "isColliding": false,
+          "collidedWithId": ""
+        }
+      },
+      {
+        "id": "Obstacle_4",
+        "type": "",
+        "position": [2, 2.5, 34.5681],
+        "velocity": [0, 0, 0],
+        "collision": {
+          "isColliding": false,
+          "collidedWithId": ""
+        }
+      },
+      {
+        "id": "Player",
+        "type": "",
+        "position": [0, 2, 0],
+        "velocity": [0, 0, 0],
+        "collision": {
+          "isColliding": false,
+          "collidedWithId": ""
+        }
+      }
+    ]
+  },
+  {
+    "frame": 122,
+    "deltaTime": 0.0166667,
+    "objects": [
+      {
+        "id": "Obstacle_0",
+        "type": "",
+        "position": [0, 2.5, 10.3051],
+        "velocity": [0, 0, 0],
+        "collision": {
+          "isColliding": false,
+          "collidedWithId": ""
+        }
+      },
+      {
+        "id": "Obstacle_1",
+        "type": "",
+        "position": [0, 1.5, 20.2671],
+        "velocity": [0, 0, 0],
+        "collision": {
+          "isColliding": false,
+          "collidedWithId": ""
+        }
+      },
+      {
+        "id": "Obstacle_2",
+        "type": "",
+        "position": [-2, 2.5, 26.2331],
+        "velocity": [0, 0, 0],
+        "collision": {
+          "isColliding": false,
+          "collidedWithId": ""
+        }
+      },
+      {
+        "id": "Obstacle_3",
+        "type": "",
+        "position": [0, 2.5, 24.2331],
+        "velocity": [0, 0, 0],
+        "collision": {
+          "isColliding": false,
+          "collidedWithId": ""
+        }
+      },
+      {
+        "id": "Obstacle_4",
+        "type": "",
+        "position": [2, 2.5, 34.2031],
+        "velocity": [0, 0, 0],
+        "collision": {
+          "isColliding": false,
+          "collidedWithId": ""
+        }
+      },
+      {
+        "id": "Player",
+        "type": "",
+        "position": [0, 2, 0],
+        "velocity": [0, 0, 0],
+        "collision": {
+          "isColliding": false,
+          "collidedWithId": ""
+        }
+      }
+    ]
+  },
+  {
+    "frame": 123,
+    "deltaTime": 0.0166667,
+    "objects": [
+      {
+        "id": "Obstacle_0",
+        "type": "",
+        "position": [0, 2.5, 9.93907],
+        "velocity": [0, 0, 0],
+        "collision": {
+          "isColliding": false,
+          "collidedWithId": ""
+        }
+      },
+      {
+        "id": "Obstacle_1",
+        "type": "",
+        "position": [0, 1.5, 19.9011],
+        "velocity": [0, 0, 0],
+        "collision": {
+          "isColliding": false,
+          "collidedWithId": ""
+        }
+      },
+      {
+        "id": "Obstacle_2",
+        "type": "",
+        "position": [-2, 2.5, 25.8671],
+        "velocity": [0, 0, 0],
+        "collision": {
+          "isColliding": false,
+          "collidedWithId": ""
+        }
+      },
+      {
+        "id": "Obstacle_3",
+        "type": "",
+        "position": [0, 2.5, 23.8671],
+        "velocity": [0, 0, 0],
+        "collision": {
+          "isColliding": false,
+          "collidedWithId": ""
+        }
+      },
+      {
+        "id": "Obstacle_4",
+        "type": "",
+        "position": [2, 2.5, 33.8371],
+        "velocity": [0, 0, 0],
+        "collision": {
+          "isColliding": false,
+          "collidedWithId": ""
+        }
+      },
+      {
+        "id": "Player",
+        "type": "",
+        "position": [0, 2, 0],
+        "velocity": [0, 0, 0],
+        "collision": {
+          "isColliding": false,
+          "collidedWithId": ""
+        }
+      }
+    ]
+  },
+  {
+    "frame": 124,
+    "deltaTime": 0.0166667,
+    "objects": [
+      {
+        "id": "Obstacle_0",
+        "type": "",
+        "position": [0, 2.5, 9.57207],
+        "velocity": [0, 0, 0],
+        "collision": {
+          "isColliding": false,
+          "collidedWithId": ""
+        }
+      },
+      {
+        "id": "Obstacle_1",
+        "type": "",
+        "position": [0, 1.5, 19.5341],
+        "velocity": [0, 0, 0],
+        "collision": {
+          "isColliding": false,
+          "collidedWithId": ""
+        }
+      },
+      {
+        "id": "Obstacle_2",
+        "type": "",
+        "position": [-2, 2.5, 25.5001],
+        "velocity": [0, 0, 0],
+        "collision": {
+          "isColliding": false,
+          "collidedWithId": ""
+        }
+      },
+      {
+        "id": "Obstacle_3",
+        "type": "",
+        "position": [0, 2.5, 23.5001],
+        "velocity": [0, 0, 0],
+        "collision": {
+          "isColliding": false,
+          "collidedWithId": ""
+        }
+      },
+      {
+        "id": "Obstacle_4",
+        "type": "",
+        "position": [2, 2.5, 33.4701],
+        "velocity": [0, 0, 0],
+        "collision": {
+          "isColliding": false,
+          "collidedWithId": ""
+        }
+      },
+      {
+        "id": "Player",
+        "type": "",
+        "position": [0, 2, 0],
+        "velocity": [0, 0, 0],
+        "collision": {
+          "isColliding": false,
+          "collidedWithId": ""
+        }
+      }
+    ]
+  },
+  {
+    "frame": 125,
+    "deltaTime": 0.0166667,
+    "objects": [
+      {
+        "id": "Obstacle_0",
+        "type": "",
+        "position": [0, 2.5, 9.20407],
+        "velocity": [0, 0, 0],
+        "collision": {
+          "isColliding": false,
+          "collidedWithId": ""
+        }
+      },
+      {
+        "id": "Obstacle_1",
+        "type": "",
+        "position": [0, 1.5, 19.1661],
+        "velocity": [0, 0, 0],
+        "collision": {
+          "isColliding": false,
+          "collidedWithId": ""
+        }
+      },
+      {
+        "id": "Obstacle_2",
+        "type": "",
+        "position": [-2, 2.5, 25.1321],
+        "velocity": [0, 0, 0],
+        "collision": {
+          "isColliding": false,
+          "collidedWithId": ""
+        }
+      },
+      {
+        "id": "Obstacle_3",
+        "type": "",
+        "position": [0, 2.5, 23.1321],
+        "velocity": [0, 0, 0],
+        "collision": {
+          "isColliding": false,
+          "collidedWithId": ""
+        }
+      },
+      {
+        "id": "Obstacle_4",
+        "type": "",
+        "position": [2, 2.5, 33.1021],
+        "velocity": [0, 0, 0],
+        "collision": {
+          "isColliding": false,
+          "collidedWithId": ""
+        }
+      },
+      {
+        "id": "Player",
+        "type": "",
+        "position": [0, 2, 0],
+        "velocity": [0, 0, 0],
+        "collision": {
+          "isColliding": false,
+          "collidedWithId": ""
+        }
+      }
+    ]
+  },
+  {
+    "frame": 126,
+    "deltaTime": 0.0166667,
+    "objects": [
+      {
+        "id": "Obstacle_0",
+        "type": "",
+        "position": [0, 2.5, 8.83507],
+        "velocity": [0, 0, 0],
+        "collision": {
+          "isColliding": false,
+          "collidedWithId": ""
+        }
+      },
+      {
+        "id": "Obstacle_1",
+        "type": "",
+        "position": [0, 1.5, 18.7971],
+        "velocity": [0, 0, 0],
+        "collision": {
+          "isColliding": false,
+          "collidedWithId": ""
+        }
+      },
+      {
+        "id": "Obstacle_2",
+        "type": "",
+        "position": [-2, 2.5, 24.7631],
+        "velocity": [0, 0, 0],
+        "collision": {
+          "isColliding": false,
+          "collidedWithId": ""
+        }
+      },
+      {
+        "id": "Obstacle_3",
+        "type": "",
+        "position": [0, 2.5, 22.7631],
+        "velocity": [0, 0, 0],
+        "collision": {
+          "isColliding": false,
+          "collidedWithId": ""
+        }
+      },
+      {
+        "id": "Obstacle_4",
+        "type": "",
+        "position": [2, 2.5, 32.7331],
+        "velocity": [0, 0, 0],
+        "collision": {
+          "isColliding": false,
+          "collidedWithId": ""
+        }
+      },
+      {
+        "id": "Player",
+        "type": "",
+        "position": [0, 2, 0],
+        "velocity": [0, 0, 0],
+        "collision": {
+          "isColliding": false,
+          "collidedWithId": ""
+        }
+      }
+    ]
+  },
+  {
+    "frame": 127,
+    "deltaTime": 0.0166667,
+    "objects": [
+      {
+        "id": "Obstacle_0",
+        "type": "",
+        "position": [0, 2.5, 8.46508],
+        "velocity": [0, 0, 0],
+        "collision": {
+          "isColliding": false,
+          "collidedWithId": ""
+        }
+      },
+      {
+        "id": "Obstacle_1",
+        "type": "",
+        "position": [0, 1.5, 18.4271],
+        "velocity": [0, 0, 0],
+        "collision": {
+          "isColliding": false,
+          "collidedWithId": ""
+        }
+      },
+      {
+        "id": "Obstacle_2",
+        "type": "",
+        "position": [-2, 2.5, 24.3931],
+        "velocity": [0, 0, 0],
+        "collision": {
+          "isColliding": false,
+          "collidedWithId": ""
+        }
+      },
+      {
+        "id": "Obstacle_3",
+        "type": "",
+        "position": [0, 2.5, 22.3931],
+        "velocity": [0, 0, 0],
+        "collision": {
+          "isColliding": false,
+          "collidedWithId": ""
+        }
+      },
+      {
+        "id": "Obstacle_4",
+        "type": "",
+        "position": [2, 2.5, 32.3631],
+        "velocity": [0, 0, 0],
+        "collision": {
+          "isColliding": false,
+          "collidedWithId": ""
+        }
+      },
+      {
+        "id": "Player",
+        "type": "",
+        "position": [0, 2, 0],
+        "velocity": [0, 0, 0],
+        "collision": {
+          "isColliding": false,
+          "collidedWithId": ""
+        }
+      }
+    ]
+  },
+  {
+    "frame": 128,
+    "deltaTime": 0.0166667,
+    "objects": [
+      {
+        "id": "Obstacle_0",
+        "type": "",
+        "position": [0, 2.5, 8.09408],
+        "velocity": [0, 0, 0],
+        "collision": {
+          "isColliding": false,
+          "collidedWithId": ""
+        }
+      },
+      {
+        "id": "Obstacle_1",
+        "type": "",
+        "position": [0, 1.5, 18.0561],
+        "velocity": [0, 0, 0],
+        "collision": {
+          "isColliding": false,
+          "collidedWithId": ""
+        }
+      },
+      {
+        "id": "Obstacle_2",
+        "type": "",
+        "position": [-2, 2.5, 24.0221],
+        "velocity": [0, 0, 0],
+        "collision": {
+          "isColliding": false,
+          "collidedWithId": ""
+        }
+      },
+      {
+        "id": "Obstacle_3",
+        "type": "",
+        "position": [0, 2.5, 22.0221],
+        "velocity": [0, 0, 0],
+        "collision": {
+          "isColliding": false,
+          "collidedWithId": ""
+        }
+      },
+      {
+        "id": "Obstacle_4",
+        "type": "",
+        "position": [2, 2.5, 31.9921],
+        "velocity": [0, 0, 0],
+        "collision": {
+          "isColliding": false,
+          "collidedWithId": ""
+        }
+      },
+      {
+        "id": "Player",
+        "type": "",
+        "position": [0, 2, 0],
+        "velocity": [0, 0, 0],
+        "collision": {
+          "isColliding": false,
+          "collidedWithId": ""
+        }
+      }
+    ]
+  },
+  {
+    "frame": 129,
+    "deltaTime": 0.0166667,
+    "objects": [
+      {
+        "id": "Obstacle_0",
+        "type": "",
+        "position": [0, 2.5, 7.72208],
+        "velocity": [0, 0, 0],
+        "collision": {
+          "isColliding": false,
+          "collidedWithId": ""
+        }
+      },
+      {
+        "id": "Obstacle_1",
+        "type": "",
+        "position": [0, 1.5, 17.6841],
+        "velocity": [0, 0, 0],
+        "collision": {
+          "isColliding": false,
+          "collidedWithId": ""
+        }
+      },
+      {
+        "id": "Obstacle_2",
+        "type": "",
+        "position": [-2, 2.5, 23.6501],
+        "velocity": [0, 0, 0],
+        "collision": {
+          "isColliding": false,
+          "collidedWithId": ""
+        }
+      },
+      {
+        "id": "Obstacle_3",
+        "type": "",
+        "position": [0, 2.5, 21.6501],
+        "velocity": [0, 0, 0],
+        "collision": {
+          "isColliding": false,
+          "collidedWithId": ""
+        }
+      },
+      {
+        "id": "Obstacle_4",
+        "type": "",
+        "position": [2, 2.5, 31.6201],
+        "velocity": [0, 0, 0],
+        "collision": {
+          "isColliding": false,
+          "collidedWithId": ""
+        }
+      },
+      {
+        "id": "Player",
+        "type": "",
+        "position": [0, 2, 0],
+        "velocity": [0, 0, 0],
+        "collision": {
+          "isColliding": false,
+          "collidedWithId": ""
+        }
+      }
+    ]
+  },
+  {
+    "frame": 130,
+    "deltaTime": 0.0166667,
+    "objects": [
+      {
+        "id": "Obstacle_0",
+        "type": "",
+        "position": [0, 2.5, 7.34908],
+        "velocity": [0, 0, 0],
+        "collision": {
+          "isColliding": false,
+          "collidedWithId": ""
+        }
+      },
+      {
+        "id": "Obstacle_1",
+        "type": "",
+        "position": [0, 1.5, 17.3111],
+        "velocity": [0, 0, 0],
+        "collision": {
+          "isColliding": false,
+          "collidedWithId": ""
+        }
+      },
+      {
+        "id": "Obstacle_2",
+        "type": "",
+        "position": [-2, 2.5, 23.2771],
+        "velocity": [0, 0, 0],
+        "collision": {
+          "isColliding": false,
+          "collidedWithId": ""
+        }
+      },
+      {
+        "id": "Obstacle_3",
+        "type": "",
+        "position": [0, 2.5, 21.2771],
+        "velocity": [0, 0, 0],
+        "collision": {
+          "isColliding": false,
+          "collidedWithId": ""
+        }
+      },
+      {
+        "id": "Obstacle_4",
+        "type": "",
+        "position": [2, 2.5, 31.2471],
+        "velocity": [0, 0, 0],
+        "collision": {
+          "isColliding": false,
+          "collidedWithId": ""
+        }
+      },
+      {
+        "id": "Player",
+        "type": "",
+        "position": [0, 2, 0],
+        "velocity": [0, 0, 0],
+        "collision": {
+          "isColliding": false,
+          "collidedWithId": ""
+        }
+      }
+    ]
+  },
+  {
+    "frame": 131,
+    "deltaTime": 0.0166667,
+    "objects": [
+      {
+        "id": "Obstacle_0",
+        "type": "",
+        "position": [0, 2.5, 6.97508],
+        "velocity": [0, 0, 0],
+        "collision": {
+          "isColliding": false,
+          "collidedWithId": ""
+        }
+      },
+      {
+        "id": "Obstacle_1",
+        "type": "",
+        "position": [0, 1.5, 16.9371],
+        "velocity": [0, 0, 0],
+        "collision": {
+          "isColliding": false,
+          "collidedWithId": ""
+        }
+      },
+      {
+        "id": "Obstacle_2",
+        "type": "",
+        "position": [-2, 2.5, 22.9031],
+        "velocity": [0, 0, 0],
+        "collision": {
+          "isColliding": false,
+          "collidedWithId": ""
+        }
+      },
+      {
+        "id": "Obstacle_3",
+        "type": "",
+        "position": [0, 2.5, 20.9031],
+        "velocity": [0, 0, 0],
+        "collision": {
+          "isColliding": false,
+          "collidedWithId": ""
+        }
+      },
+      {
+        "id": "Obstacle_4",
+        "type": "",
+        "position": [2, 2.5, 30.8731],
+        "velocity": [0, 0, 0],
+        "collision": {
+          "isColliding": false,
+          "collidedWithId": ""
+        }
+      },
+      {
+        "id": "Obstacle_5",
+        "type": "",
+        "position": [-2, 2.5, 48.8461],
+        "velocity": [0, 0, 0],
+        "collision": {
+          "isColliding": false,
+          "collidedWithId": ""
+        }
+      },
+      {
+        "id": "Obstacle_6",
+        "type": "",
+        "position": [2, 1.5, 45.8461],
+        "velocity": [0, 0, 0],
+        "collision": {
+          "isColliding": false,
+          "collidedWithId": ""
+        }
+      },
+      {
+        "id": "Player",
+        "type": "",
+        "position": [0, 2, 0],
+        "velocity": [0, 0, 0],
+        "collision": {
+          "isColliding": false,
+          "collidedWithId": ""
+        }
+      }
+    ]
+  },
+  {
+    "frame": 132,
+    "deltaTime": 0.0166667,
+    "objects": [
+      {
+        "id": "Obstacle_0",
+        "type": "",
+        "position": [0, 2.5, 6.60008],
+        "velocity": [0, 0, 0],
+        "collision": {
+          "isColliding": false,
+          "collidedWithId": ""
+        }
+      },
+      {
+        "id": "Obstacle_1",
+        "type": "",
+        "position": [0, 1.5, 16.5621],
+        "velocity": [0, 0, 0],
+        "collision": {
+          "isColliding": false,
+          "collidedWithId": ""
+        }
+      },
+      {
+        "id": "Obstacle_2",
+        "type": "",
+        "position": [-2, 2.5, 22.5281],
+        "velocity": [0, 0, 0],
+        "collision": {
+          "isColliding": false,
+          "collidedWithId": ""
+        }
+      },
+      {
+        "id": "Obstacle_3",
+        "type": "",
+        "position": [0, 2.5, 20.5281],
+        "velocity": [0, 0, 0],
+        "collision": {
+          "isColliding": false,
+          "collidedWithId": ""
+        }
+      },
+      {
+        "id": "Obstacle_4",
+        "type": "",
+        "position": [2, 2.5, 30.4981],
+        "velocity": [0, 0, 0],
+        "collision": {
+          "isColliding": false,
+          "collidedWithId": ""
+        }
+      },
+      {
+        "id": "Obstacle_5",
+        "type": "",
+        "position": [-2, 2.5, 48.4711],
+        "velocity": [0, 0, 0],
+        "collision": {
+          "isColliding": false,
+          "collidedWithId": ""
+        }
+      },
+      {
+        "id": "Obstacle_6",
+        "type": "",
+        "position": [2, 1.5, 45.4711],
+        "velocity": [0, 0, 0],
+        "collision": {
+          "isColliding": false,
+          "collidedWithId": ""
+        }
+      },
+      {
+        "id": "Player",
+        "type": "",
+        "position": [0, 2, 0],
+        "velocity": [0, 0, 0],
+        "collision": {
+          "isColliding": false,
+          "collidedWithId": ""
+        }
+      }
+    ]
+  },
+  {
+    "frame": 133,
+    "deltaTime": 0.0166667,
+    "objects": [
+      {
+        "id": "Obstacle_0",
+        "type": "",
+        "position": [0, 2.5, 6.22408],
+        "velocity": [0, 0, 0],
+        "collision": {
+          "isColliding": false,
+          "collidedWithId": ""
+        }
+      },
+      {
+        "id": "Obstacle_1",
+        "type": "",
+        "position": [0, 1.5, 16.1861],
+        "velocity": [0, 0, 0],
+        "collision": {
+          "isColliding": false,
+          "collidedWithId": ""
+        }
+      },
+      {
+        "id": "Obstacle_2",
+        "type": "",
+        "position": [-2, 2.5, 22.1521],
+        "velocity": [0, 0, 0],
+        "collision": {
+          "isColliding": false,
+          "collidedWithId": ""
+        }
+      },
+      {
+        "id": "Obstacle_3",
+        "type": "",
+        "position": [0, 2.5, 20.1521],
+        "velocity": [0, 0, 0],
+        "collision": {
+          "isColliding": false,
+          "collidedWithId": ""
+        }
+      },
+      {
+        "id": "Obstacle_4",
+        "type": "",
+        "position": [2, 2.5, 30.1221],
+        "velocity": [0, 0, 0],
+        "collision": {
+          "isColliding": false,
+          "collidedWithId": ""
+        }
+      },
+      {
+        "id": "Obstacle_5",
+        "type": "",
+        "position": [-2, 2.5, 48.0951],
+        "velocity": [0, 0, 0],
+        "collision": {
+          "isColliding": false,
+          "collidedWithId": ""
+        }
+      },
+      {
+        "id": "Obstacle_6",
+        "type": "",
+        "position": [2, 1.5, 45.0951],
+        "velocity": [0, 0, 0],
+        "collision": {
+          "isColliding": false,
+          "collidedWithId": ""
+        }
+      },
+      {
+        "id": "Player",
+        "type": "",
+        "position": [0, 2, 0],
+        "velocity": [0, 0, 0],
+        "collision": {
+          "isColliding": false,
+          "collidedWithId": ""
+        }
+      }
+    ]
+  },
+  {
+    "frame": 134,
+    "deltaTime": 0.0166667,
+    "objects": [
+      {
+        "id": "Obstacle_0",
+        "type": "",
+        "position": [0, 2.5, 5.84709],
+        "velocity": [0, 0, 0],
+        "collision": {
+          "isColliding": false,
+          "collidedWithId": ""
+        }
+      },
+      {
+        "id": "Obstacle_1",
+        "type": "",
+        "position": [0, 1.5, 15.8091],
+        "velocity": [0, 0, 0],
+        "collision": {
+          "isColliding": false,
+          "collidedWithId": ""
+        }
+      },
+      {
+        "id": "Obstacle_2",
+        "type": "",
+        "position": [-2, 2.5, 21.7751],
+        "velocity": [0, 0, 0],
+        "collision": {
+          "isColliding": false,
+          "collidedWithId": ""
+        }
+      },
+      {
+        "id": "Obstacle_3",
+        "type": "",
+        "position": [0, 2.5, 19.7751],
+        "velocity": [0, 0, 0],
+        "collision": {
+          "isColliding": false,
+          "collidedWithId": ""
+        }
+      },
+      {
+        "id": "Obstacle_4",
+        "type": "",
+        "position": [2, 2.5, 29.7451],
+        "velocity": [0, 0, 0],
+        "collision": {
+          "isColliding": false,
+          "collidedWithId": ""
+        }
+      },
+      {
+        "id": "Obstacle_5",
+        "type": "",
+        "position": [-2, 2.5, 47.7181],
+        "velocity": [0, 0, 0],
+        "collision": {
+          "isColliding": false,
+          "collidedWithId": ""
+        }
+      },
+      {
+        "id": "Obstacle_6",
+        "type": "",
+        "position": [2, 1.5, 44.7181],
+        "velocity": [0, 0, 0],
+        "collision": {
+          "isColliding": false,
+          "collidedWithId": ""
+        }
+      },
+      {
+        "id": "Player",
+        "type": "",
+        "position": [0, 2, 0],
+        "velocity": [0, 0, 0],
+        "collision": {
+          "isColliding": false,
+          "collidedWithId": ""
+        }
+      }
+    ]
+  },
+  {
+    "frame": 135,
+    "deltaTime": 0.0166667,
+    "objects": [
+      {
+        "id": "Obstacle_0",
+        "type": "",
+        "position": [0, 2.5, 5.46909],
+        "velocity": [0, 0, 0],
+        "collision": {
+          "isColliding": false,
+          "collidedWithId": ""
+        }
+      },
+      {
+        "id": "Obstacle_1",
+        "type": "",
+        "position": [0, 1.5, 15.4311],
+        "velocity": [0, 0, 0],
+        "collision": {
+          "isColliding": false,
+          "collidedWithId": ""
+        }
+      },
+      {
+        "id": "Obstacle_2",
+        "type": "",
+        "position": [-2, 2.5, 21.3971],
+        "velocity": [0, 0, 0],
+        "collision": {
+          "isColliding": false,
+          "collidedWithId": ""
+        }
+      },
+      {
+        "id": "Obstacle_3",
+        "type": "",
+        "position": [0, 2.5, 19.3971],
+        "velocity": [0, 0, 0],
+        "collision": {
+          "isColliding": false,
+          "collidedWithId": ""
+        }
+      },
+      {
+        "id": "Obstacle_4",
+        "type": "",
+        "position": [2, 2.5, 29.3671],
+        "velocity": [0, 0, 0],
+        "collision": {
+          "isColliding": false,
+          "collidedWithId": ""
+        }
+      },
+      {
+        "id": "Obstacle_5",
+        "type": "",
+        "position": [-2, 2.5, 47.3401],
+        "velocity": [0, 0, 0],
+        "collision": {
+          "isColliding": false,
+          "collidedWithId": ""
+        }
+      },
+      {
+        "id": "Obstacle_6",
+        "type": "",
+        "position": [2, 1.5, 44.3401],
+        "velocity": [0, 0, 0],
+        "collision": {
+          "isColliding": false,
+          "collidedWithId": ""
+        }
+      },
+      {
+        "id": "Player",
+        "type": "",
+        "position": [0, 2, 0],
+        "velocity": [0, 0, 0],
+        "collision": {
+          "isColliding": false,
+          "collidedWithId": ""
+        }
+      }
+    ]
+  },
+  {
+    "frame": 136,
+    "deltaTime": 0.0166667,
+    "objects": [
+      {
+        "id": "Obstacle_0",
+        "type": "",
+        "position": [0, 2.5, 5.09009],
+        "velocity": [0, 0, 0],
+        "collision": {
+          "isColliding": false,
+          "collidedWithId": ""
+        }
+      },
+      {
+        "id": "Obstacle_1",
+        "type": "",
+        "position": [0, 1.5, 15.0521],
+        "velocity": [0, 0, 0],
+        "collision": {
+          "isColliding": false,
+          "collidedWithId": ""
+        }
+      },
+      {
+        "id": "Obstacle_2",
+        "type": "",
+        "position": [-2, 2.5, 21.0181],
+        "velocity": [0, 0, 0],
+        "collision": {
+          "isColliding": false,
+          "collidedWithId": ""
+        }
+      },
+      {
+        "id": "Obstacle_3",
+        "type": "",
+        "position": [0, 2.5, 19.0181],
+        "velocity": [0, 0, 0],
+        "collision": {
+          "isColliding": false,
+          "collidedWithId": ""
+        }
+      },
+      {
+        "id": "Obstacle_4",
+        "type": "",
+        "position": [2, 2.5, 28.9881],
+        "velocity": [0, 0, 0],
+        "collision": {
+          "isColliding": false,
+          "collidedWithId": ""
+        }
+      },
+      {
+        "id": "Obstacle_5",
+        "type": "",
+        "position": [-2, 2.5, 46.9611],
+        "velocity": [0, 0, 0],
+        "collision": {
+          "isColliding": false,
+          "collidedWithId": ""
+        }
+      },
+      {
+        "id": "Obstacle_6",
+        "type": "",
+        "position": [2, 1.5, 43.9611],
+        "velocity": [0, 0, 0],
+        "collision": {
+          "isColliding": false,
+          "collidedWithId": ""
+        }
+      },
+      {
+        "id": "Player",
+        "type": "",
+        "position": [0, 2, 0],
+        "velocity": [0, 0, 0],
+        "collision": {
+          "isColliding": false,
+          "collidedWithId": ""
+        }
+      }
+    ]
+  },
+  {
+    "frame": 137,
+    "deltaTime": 0.0166667,
+    "objects": [
+      {
+        "id": "Obstacle_0",
+        "type": "",
+        "position": [0, 2.5, 4.71009],
+        "velocity": [0, 0, 0],
+        "collision": {
+          "isColliding": false,
+          "collidedWithId": ""
+        }
+      },
+      {
+        "id": "Obstacle_1",
+        "type": "",
+        "position": [0, 1.5, 14.6721],
+        "velocity": [0, 0, 0],
+        "collision": {
+          "isColliding": false,
+          "collidedWithId": ""
+        }
+      },
+      {
+        "id": "Obstacle_2",
+        "type": "",
+        "position": [-2, 2.5, 20.6381],
+        "velocity": [0, 0, 0],
+        "collision": {
+          "isColliding": false,
+          "collidedWithId": ""
+        }
+      },
+      {
+        "id": "Obstacle_3",
+        "type": "",
+        "position": [0, 2.5, 18.6381],
+        "velocity": [0, 0, 0],
+        "collision": {
+          "isColliding": false,
+          "collidedWithId": ""
+        }
+      },
+      {
+        "id": "Obstacle_4",
+        "type": "",
+        "position": [2, 2.5, 28.6081],
+        "velocity": [0, 0, 0],
+        "collision": {
+          "isColliding": false,
+          "collidedWithId": ""
+        }
+      },
+      {
+        "id": "Obstacle_5",
+        "type": "",
+        "position": [-2, 2.5, 46.5811],
+        "velocity": [0, 0, 0],
+        "collision": {
+          "isColliding": false,
+          "collidedWithId": ""
+        }
+      },
+      {
+        "id": "Obstacle_6",
+        "type": "",
+        "position": [2, 1.5, 43.5811],
+        "velocity": [0, 0, 0],
+        "collision": {
+          "isColliding": false,
+          "collidedWithId": ""
+        }
+      },
+      {
+        "id": "Player",
+        "type": "",
+        "position": [0, 2, 0],
+        "velocity": [0, 0, 0],
+        "collision": {
+          "isColliding": false,
+          "collidedWithId": ""
+        }
+      }
+    ]
+  },
+  {
+    "frame": 138,
+    "deltaTime": 0.0166667,
+    "objects": [
+      {
+        "id": "Obstacle_0",
+        "type": "",
+        "position": [0, 2.5, 4.32909],
+        "velocity": [0, 0, 0],
+        "collision": {
+          "isColliding": false,
+          "collidedWithId": ""
+        }
+      },
+      {
+        "id": "Obstacle_1",
+        "type": "",
+        "position": [0, 1.5, 14.2911],
+        "velocity": [0, 0, 0],
+        "collision": {
+          "isColliding": false,
+          "collidedWithId": ""
+        }
+      },
+      {
+        "id": "Obstacle_2",
+        "type": "",
+        "position": [-2, 2.5, 20.2571],
+        "velocity": [0, 0, 0],
+        "collision": {
+          "isColliding": false,
+          "collidedWithId": ""
+        }
+      },
+      {
+        "id": "Obstacle_3",
+        "type": "",
+        "position": [0, 2.5, 18.2571],
+        "velocity": [0, 0, 0],
+        "collision": {
+          "isColliding": false,
+          "collidedWithId": ""
+        }
+      },
+      {
+        "id": "Obstacle_4",
+        "type": "",
+        "position": [2, 2.5, 28.2271],
+        "velocity": [0, 0, 0],
+        "collision": {
+          "isColliding": false,
+          "collidedWithId": ""
+        }
+      },
+      {
+        "id": "Obstacle_5",
+        "type": "",
+        "position": [-2, 2.5, 46.2001],
+        "velocity": [0, 0, 0],
+        "collision": {
+          "isColliding": false,
+          "collidedWithId": ""
+        }
+      },
+      {
+        "id": "Obstacle_6",
+        "type": "",
+        "position": [2, 1.5, 43.2001],
+        "velocity": [0, 0, 0],
+        "collision": {
+          "isColliding": false,
+          "collidedWithId": ""
+        }
+      },
+      {
+        "id": "Player",
+        "type": "",
+        "position": [0, 2, 0],
+        "velocity": [0, 0, 0],
+        "collision": {
+          "isColliding": false,
+          "collidedWithId": ""
+        }
+      }
+    ]
+  },
+  {
+    "frame": 139,
+    "deltaTime": 0.0166667,
+    "objects": [
+      {
+        "id": "Obstacle_0",
+        "type": "",
+        "position": [0, 2.5, 3.94709],
+        "velocity": [0, 0, 0],
+        "collision": {
+          "isColliding": false,
+          "collidedWithId": ""
+        }
+      },
+      {
+        "id": "Obstacle_1",
+        "type": "",
+        "position": [0, 1.5, 13.9091],
+        "velocity": [0, 0, 0],
+        "collision": {
+          "isColliding": false,
+          "collidedWithId": ""
+        }
+      },
+      {
+        "id": "Obstacle_2",
+        "type": "",
+        "position": [-2, 2.5, 19.8751],
+        "velocity": [0, 0, 0],
+        "collision": {
+          "isColliding": false,
+          "collidedWithId": ""
+        }
+      },
+      {
+        "id": "Obstacle_3",
+        "type": "",
+        "position": [0, 2.5, 17.8751],
+        "velocity": [0, 0, 0],
+        "collision": {
+          "isColliding": false,
+          "collidedWithId": ""
+        }
+      },
+      {
+        "id": "Obstacle_4",
+        "type": "",
+        "position": [2, 2.5, 27.8451],
+        "velocity": [0, 0, 0],
+        "collision": {
+          "isColliding": false,
+          "collidedWithId": ""
+        }
+      },
+      {
+        "id": "Obstacle_5",
+        "type": "",
+        "position": [-2, 2.5, 45.8181],
+        "velocity": [0, 0, 0],
+        "collision": {
+          "isColliding": false,
+          "collidedWithId": ""
+        }
+      },
+      {
+        "id": "Obstacle_6",
+        "type": "",
+        "position": [2, 1.5, 42.8181],
+        "velocity": [0, 0, 0],
+        "collision": {
+          "isColliding": false,
+          "collidedWithId": ""
+        }
+      },
+      {
+        "id": "Player",
+        "type": "",
+        "position": [0, 2, 0],
+        "velocity": [0, 0, 0],
+        "collision": {
+          "isColliding": false,
+          "collidedWithId": ""
+        }
+      }
+    ]
+  },
+  {
+    "frame": 140,
+    "deltaTime": 0.0166667,
+    "objects": [
+      {
+        "id": "Obstacle_0",
+        "type": "",
+        "position": [0, 2.5, 3.5641],
+        "velocity": [0, 0, 0],
+        "collision": {
+          "isColliding": false,
+          "collidedWithId": ""
+        }
+      },
+      {
+        "id": "Obstacle_1",
+        "type": "",
+        "position": [0, 1.5, 13.5261],
+        "velocity": [0, 0, 0],
+        "collision": {
+          "isColliding": false,
+          "collidedWithId": ""
+        }
+      },
+      {
+        "id": "Obstacle_2",
+        "type": "",
+        "position": [-2, 2.5, 19.4921],
+        "velocity": [0, 0, 0],
+        "collision": {
+          "isColliding": false,
+          "collidedWithId": ""
+        }
+      },
+      {
+        "id": "Obstacle_3",
+        "type": "",
+        "position": [0, 2.5, 17.4921],
+        "velocity": [0, 0, 0],
+        "collision": {
+          "isColliding": false,
+          "collidedWithId": ""
+        }
+      },
+      {
+        "id": "Obstacle_4",
+        "type": "",
+        "position": [2, 2.5, 27.4621],
+        "velocity": [0, 0, 0],
+        "collision": {
+          "isColliding": false,
+          "collidedWithId": ""
+        }
+      },
+      {
+        "id": "Obstacle_5",
+        "type": "",
+        "position": [-2, 2.5, 45.4351],
+        "velocity": [0, 0, 0],
+        "collision": {
+          "isColliding": false,
+          "collidedWithId": ""
+        }
+      },
+      {
+        "id": "Obstacle_6",
+        "type": "",
+        "position": [2, 1.5, 42.4351],
+        "velocity": [0, 0, 0],
+        "collision": {
+          "isColliding": false,
+          "collidedWithId": ""
+        }
+      },
+      {
+        "id": "Player",
+        "type": "",
+        "position": [0, 2, 0],
+        "velocity": [0, 0, 0],
+        "collision": {
+          "isColliding": false,
+          "collidedWithId": ""
+        }
+      }
+    ]
+  },
+  {
+    "frame": 141,
+    "deltaTime": 0.0166667,
+    "objects": [
+      {
+        "id": "Obstacle_0",
+        "type": "",
+        "position": [0, 2.5, 3.1801],
+        "velocity": [0, 0, 0],
+        "collision": {
+          "isColliding": false,
+          "collidedWithId": ""
+        }
+      },
+      {
+        "id": "Obstacle_1",
+        "type": "",
+        "position": [0, 1.5, 13.1421],
+        "velocity": [0, 0, 0],
+        "collision": {
+          "isColliding": false,
+          "collidedWithId": ""
+        }
+      },
+      {
+        "id": "Obstacle_2",
+        "type": "",
+        "position": [-2, 2.5, 19.1081],
+        "velocity": [0, 0, 0],
+        "collision": {
+          "isColliding": false,
+          "collidedWithId": ""
+        }
+      },
+      {
+        "id": "Obstacle_3",
+        "type": "",
+        "position": [0, 2.5, 17.1081],
+        "velocity": [0, 0, 0],
+        "collision": {
+          "isColliding": false,
+          "collidedWithId": ""
+        }
+      },
+      {
+        "id": "Obstacle_4",
+        "type": "",
+        "position": [2, 2.5, 27.0781],
+        "velocity": [0, 0, 0],
+        "collision": {
+          "isColliding": false,
+          "collidedWithId": ""
+        }
+      },
+      {
+        "id": "Obstacle_5",
+        "type": "",
+        "position": [-2, 2.5, 45.0511],
+        "velocity": [0, 0, 0],
+        "collision": {
+          "isColliding": false,
+          "collidedWithId": ""
+        }
+      },
+      {
+        "id": "Obstacle_6",
+        "type": "",
+        "position": [2, 1.5, 42.0511],
+        "velocity": [0, 0, 0],
+        "collision": {
+          "isColliding": false,
+          "collidedWithId": ""
+        }
+      },
+      {
+        "id": "Player",
+        "type": "",
+        "position": [0, 2, 0],
+        "velocity": [0, 0, 0],
+        "collision": {
+          "isColliding": false,
+          "collidedWithId": ""
+        }
+      }
+    ]
+  },
+  {
+    "frame": 142,
+    "deltaTime": 0.0166667,
+    "objects": [
+      {
+        "id": "Obstacle_0",
+        "type": "",
+        "position": [0, 2.5, 2.7951],
+        "velocity": [0, 0, 0],
+        "collision": {
+          "isColliding": false,
+          "collidedWithId": ""
+        }
+      },
+      {
+        "id": "Obstacle_1",
+        "type": "",
+        "position": [0, 1.5, 12.7571],
+        "velocity": [0, 0, 0],
+        "collision": {
+          "isColliding": false,
+          "collidedWithId": ""
+        }
+      },
+      {
+        "id": "Obstacle_2",
+        "type": "",
+        "position": [-2, 2.5, 18.7231],
+        "velocity": [0, 0, 0],
+        "collision": {
+          "isColliding": false,
+          "collidedWithId": ""
+        }
+      },
+      {
+        "id": "Obstacle_3",
+        "type": "",
+        "position": [0, 2.5, 16.7231],
+        "velocity": [0, 0, 0],
+        "collision": {
+          "isColliding": false,
+          "collidedWithId": ""
+        }
+      },
+      {
+        "id": "Obstacle_4",
+        "type": "",
+        "position": [2, 2.5, 26.6931],
+        "velocity": [0, 0, 0],
+        "collision": {
+          "isColliding": false,
+          "collidedWithId": ""
+        }
+      },
+      {
+        "id": "Obstacle_5",
+        "type": "",
+        "position": [-2, 2.5, 44.6661],
+        "velocity": [0, 0, 0],
+        "collision": {
+          "isColliding": false,
+          "collidedWithId": ""
+        }
+      },
+      {
+        "id": "Obstacle_6",
+        "type": "",
+        "position": [2, 1.5, 41.6661],
+        "velocity": [0, 0, 0],
+        "collision": {
+          "isColliding": false,
+          "collidedWithId": ""
+        }
+      },
+      {
+        "id": "Player",
+        "type": "",
+        "position": [0, 2, 0],
+        "velocity": [0, 0, 0],
+        "collision": {
+          "isColliding": false,
+          "collidedWithId": ""
+        }
+      }
+    ]
+  },
+  {
+    "frame": 143,
+    "deltaTime": 0.0166667,
+    "objects": [
+      {
+        "id": "Obstacle_0",
+        "type": "",
+        "position": [0, 2.5, 2.4091],
+        "velocity": [0, 0, 0],
+        "collision": {
+          "isColliding": false,
+          "collidedWithId": ""
+        }
+      },
+      {
+        "id": "Obstacle_1",
+        "type": "",
+        "position": [0, 1.5, 12.3711],
+        "velocity": [0, 0, 0],
+        "collision": {
+          "isColliding": false,
+          "collidedWithId": ""
+        }
+      },
+      {
+        "id": "Obstacle_2",
+        "type": "",
+        "position": [-2, 2.5, 18.3371],
+        "velocity": [0, 0, 0],
+        "collision": {
+          "isColliding": false,
+          "collidedWithId": ""
+        }
+      },
+      {
+        "id": "Obstacle_3",
+        "type": "",
+        "position": [0, 2.5, 16.3371],
+        "velocity": [0, 0, 0],
+        "collision": {
+          "isColliding": false,
+          "collidedWithId": ""
+        }
+      },
+      {
+        "id": "Obstacle_4",
+        "type": "",
+        "position": [2, 2.5, 26.3071],
+        "velocity": [0, 0, 0],
+        "collision": {
+          "isColliding": false,
+          "collidedWithId": ""
+        }
+      },
+      {
+        "id": "Obstacle_5",
+        "type": "",
+        "position": [-2, 2.5, 44.2801],
+        "velocity": [0, 0, 0],
+        "collision": {
+          "isColliding": false,
+          "collidedWithId": ""
+        }
+      },
+      {
+        "id": "Obstacle_6",
+        "type": "",
+        "position": [2, 1.5, 41.2801],
+        "velocity": [0, 0, 0],
+        "collision": {
+          "isColliding": false,
+          "collidedWithId": ""
+        }
+      },
+      {
+        "id": "Player",
+        "type": "",
+        "position": [0, 2, 0],
+        "velocity": [0, 0, 0],
+        "collision": {
+          "isColliding": false,
+          "collidedWithId": ""
+        }
+      }
+    ]
+  },
+  {
+    "frame": 144,
+    "deltaTime": 0.0166667,
+    "objects": [
+      {
+        "id": "Obstacle_0",
+        "type": "",
+        "position": [0, 2.5, 2.0221],
+        "velocity": [0, 0, 0],
+        "collision": {
+          "isColliding": false,
+          "collidedWithId": ""
+        }
+      },
+      {
+        "id": "Obstacle_1",
+        "type": "",
+        "position": [0, 1.5, 11.9841],
+        "velocity": [0, 0, 0],
+        "collision": {
+          "isColliding": false,
+          "collidedWithId": ""
+        }
+      },
+      {
+        "id": "Obstacle_2",
+        "type": "",
+        "position": [-2, 2.5, 17.9501],
+        "velocity": [0, 0, 0],
+        "collision": {
+          "isColliding": false,
+          "collidedWithId": ""
+        }
+      },
+      {
+        "id": "Obstacle_3",
+        "type": "",
+        "position": [0, 2.5, 15.9501],
+        "velocity": [0, 0, 0],
+        "collision": {
+          "isColliding": false,
+          "collidedWithId": ""
+        }
+      },
+      {
+        "id": "Obstacle_4",
+        "type": "",
+        "position": [2, 2.5, 25.9201],
+        "velocity": [0, 0, 0],
+        "collision": {
+          "isColliding": false,
+          "collidedWithId": ""
+        }
+      },
+      {
+        "id": "Obstacle_5",
+        "type": "",
+        "position": [-2, 2.5, 43.8931],
+        "velocity": [0, 0, 0],
+        "collision": {
+          "isColliding": false,
+          "collidedWithId": ""
+        }
+      },
+      {
+        "id": "Obstacle_6",
+        "type": "",
+        "position": [2, 1.5, 40.8931],
+        "velocity": [0, 0, 0],
+        "collision": {
+          "isColliding": false,
+          "collidedWithId": ""
+        }
+      },
+      {
+        "id": "Player",
+        "type": "",
+        "position": [0, 2, 0],
+        "velocity": [0, 0, 0],
+        "collision": {
+          "isColliding": false,
+          "collidedWithId": ""
+        }
+      }
+    ]
+  },
+  {
+    "frame": 145,
+    "deltaTime": 0.0166667,
+    "objects": [
+      {
+        "id": "Obstacle_0",
+        "type": "",
+        "position": [0, 2.5, 1.6341],
+        "velocity": [0, 0, 0],
+        "collision": {
+          "isColliding": false,
+          "collidedWithId": ""
+        }
+      },
+      {
+        "id": "Obstacle_1",
+        "type": "",
+        "position": [0, 1.5, 11.5961],
+        "velocity": [0, 0, 0],
+        "collision": {
+          "isColliding": false,
+          "collidedWithId": ""
+        }
+      },
+      {
+        "id": "Obstacle_2",
+        "type": "",
+        "position": [-2, 2.5, 17.5621],
+        "velocity": [0, 0, 0],
+        "collision": {
+          "isColliding": false,
+          "collidedWithId": ""
+        }
+      },
+      {
+        "id": "Obstacle_3",
+        "type": "",
+        "position": [0, 2.5, 15.5621],
+        "velocity": [0, 0, 0],
+        "collision": {
+          "isColliding": false,
+          "collidedWithId": ""
+        }
+      },
+      {
+        "id": "Obstacle_4",
+        "type": "",
+        "position": [2, 2.5, 25.5321],
+        "velocity": [0, 0, 0],
+        "collision": {
+          "isColliding": false,
+          "collidedWithId": ""
+        }
+      },
+      {
+        "id": "Obstacle_5",
+        "type": "",
+        "position": [-2, 2.5, 43.5051],
+        "velocity": [0, 0, 0],
+        "collision": {
+          "isColliding": false,
+          "collidedWithId": ""
+        }
+      },
+      {
+        "id": "Obstacle_6",
+        "type": "",
+        "position": [2, 1.5, 40.5051],
+        "velocity": [0, 0, 0],
+        "collision": {
+          "isColliding": false,
+          "collidedWithId": ""
+        }
+      },
+      {
+        "id": "Player",
+        "type": "",
+        "position": [0, 2, 0],
+        "velocity": [0, 0, 0],
+        "collision": {
+          "isColliding": false,
+          "collidedWithId": ""
+        }
+      }
+    ]
+  },
+  {
+    "frame": 146,
+    "deltaTime": 0.0166667,
+    "objects": [
+      {
+        "id": "Obstacle_0",
+        "type": "",
+        "position": [0, 2.5, 1.24511],
+        "velocity": [0, 0, 0],
+        "collision": {
+          "isColliding": false,
+          "collidedWithId": ""
+        }
+      },
+      {
+        "id": "Obstacle_1",
+        "type": "",
+        "position": [0, 1.5, 11.2071],
+        "velocity": [0, 0, 0],
+        "collision": {
+          "isColliding": false,
+          "collidedWithId": ""
+        }
+      },
+      {
+        "id": "Obstacle_2",
+        "type": "",
+        "position": [-2, 2.5, 17.1731],
+        "velocity": [0, 0, 0],
+        "collision": {
+          "isColliding": false,
+          "collidedWithId": ""
+        }
+      },
+      {
+        "id": "Obstacle_3",
+        "type": "",
+        "position": [0, 2.5, 15.1731],
+        "velocity": [0, 0, 0],
+        "collision": {
+          "isColliding": false,
+          "collidedWithId": ""
+        }
+      },
+      {
+        "id": "Obstacle_4",
+        "type": "",
+        "position": [2, 2.5, 25.1431],
+        "velocity": [0, 0, 0],
+        "collision": {
+          "isColliding": false,
+          "collidedWithId": ""
+        }
+      },
+      {
+        "id": "Obstacle_5",
+        "type": "",
+        "position": [-2, 2.5, 43.1161],
+        "velocity": [0, 0, 0],
+        "collision": {
+          "isColliding": false,
+          "collidedWithId": ""
+        }
+      },
+      {
+        "id": "Obstacle_6",
+        "type": "",
+        "position": [2, 1.5, 40.1161],
+        "velocity": [0, 0, 0],
+        "collision": {
+          "isColliding": false,
+          "collidedWithId": ""
+        }
+      },
+      {
+        "id": "Player",
+        "type": "",
+        "position": [0, 2, 0],
+        "velocity": [0, 0, 0],
+        "collision": {
+          "isColliding": false,
+          "collidedWithId": ""
+        }
+      }
+    ]
+  },
+  {
+    "frame": 147,
+    "deltaTime": 0.0166667,
+    "objects": [
+      {
+        "id": "Obstacle_0",
+        "type": "",
+        "position": [0, 2.5, 0.855107],
+        "velocity": [0, 0, 0],
+        "collision": {
+          "isColliding": true,
+          "collidedWithId": "Player"
+        }
+      },
+      {
+        "id": "Player",
+        "type": "",
+        "position": [0, 2, 0],
+        "velocity": [0, 0, 0],
+        "collision": {
+          "isColliding": true,
+          "collidedWithId": "Obstacle_0"
+        }
+      }
+    ]
+  },
+  {
+    "frame": 148,
+    "deltaTime": 0.0166667,
+    "objects": [
+    ]
+  },
+  {
+    "frame": 149,
+    "deltaTime": 0.0166667,
+    "objects": [
+    ]
+  },
+  {
+    "frame": 150,
+    "deltaTime": 0.0166667,
+    "objects": [
+    ]
+  },
+  {
+    "frame": 151,
+    "deltaTime": 0.0166667,
+    "objects": [
+    ]
+  },
+  {
+    "frame": 152,
+    "deltaTime": 0.0166667,
+    "objects": [
+    ]
+  },
+  {
+    "frame": 153,
+    "deltaTime": 0.0166667,
+    "objects": [
+    ]
+  },
+  {
+    "frame": 154,
+    "deltaTime": 0.0166667,
+    "objects": [
+    ]
+  },
+  {
+    "frame": 155,
+    "deltaTime": 0.0166667,
+    "objects": [
+    ]
+  }
+]

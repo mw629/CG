@@ -22,6 +22,11 @@ namespace HapiColi
         // Serialize multiple frames
         static std::string SerializeFrames(const std::vector<FrameData>& frames);
 
+        // Serialize unhappy results + their corresponding frames
+        static std::string SerializeUnhappyReport(
+            const std::vector<TestResult>& results,
+            const std::vector<FrameData>& frames);
+
     private:
         static std::string EscapeString(const std::string& str);
     };
