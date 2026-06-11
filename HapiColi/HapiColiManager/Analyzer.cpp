@@ -77,4 +77,9 @@ namespace HapiColi
     {
         return m_summary;
     }
+
+    const std::vector<std::shared_ptr<TestRule>>& Analyzer::GetRules() const
+    {
+        return m_rules;
+    }
 }

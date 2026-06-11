@@ -184,6 +184,52 @@ namespace HapiColi
                 m_manager->GetAnalyzer()->ClearRules();
             }
 
+            // --- 現在のルール一覧（開閉可能） ---
+            const auto& rules = m_manager->GetAnalyzer()->GetRules();
+            char ruleHeader[64];
+            snprintf(ruleHeader, sizeof(ruleHeader),
+                GetText("Current Rules (%d)###RuleList", u8"現在のルール (%d)###RuleList"),
+                (int)rules.size());
+
+            if (ImGui::CollapsingHeader(ruleHeader))
+            {
+                if (rules.empty())
+                {
+                    ImGui::TextDisabled(GetText("  No rules set.", u8"  ルールが設定されていません。"));
+                }
+                else
+                {
+                    ImGui::Indent(8.0f);
+                    if (ImGui::BeginTable("RuleTable", 3, ImGuiTableFlags_Borders | ImGuiTableFlags_RowBg | ImGuiTableFlags_SizingStretchProp))
+                    {
+                        ImGui::TableSetupColumn(GetText("Type",    u8"種別"),    ImGuiTableColumnFlags_WidthFixed, 90.0f);
+                        ImGui::TableSetupColumn(GetText("Subject", u8"主語ID"),  ImGuiTableColumnFlags_WidthStretch);
+                        ImGui::TableSetupColumn(GetText("Target",  u8"対象ID"),  ImGuiTableColumnFlags_WidthStretch);
+                        ImGui::TableHeadersRow();
+
+                        for (int i = 0; i < (int)rules.size(); ++i)
+                        {
+                            ImGui::TableNextRow();
+                            ImGui::TableSetColumnIndex(0);
+
+                            bool isHit = (rules[i]->GetName() == "ExpectedHitRule");
+                            if (isHit)
+                                ImGui::TextColored(ImVec4(0.4f, 1.0f, 0.4f, 1.0f), GetText("Hit",   u8"当たるべき"));
+                            else
+                                ImGui::TextColored(ImVec4(1.0f, 0.5f, 0.5f, 1.0f), GetText("NoHit", u8"当たらないべき"));
+
+                            ImGui::TableSetColumnIndex(1);
+                            ImGui::TextUnformatted(rules[i]->GetSubjectId().c_str());
+
+                            ImGui::TableSetColumnIndex(2);
+                            ImGui::TextUnformatted(rules[i]->GetTargetId().c_str());
+                        }
+                        ImGui::EndTable();
+                    }
+                    ImGui::Unindent(8.0f);
+                }
+            }
+
             if (ImGui::Button(GetText("Run Analysis", u8"解析実行")))
             {
                 m_manager->GetAnalyzer()->AnalyzeAppend(m_manager->GetRecorder()->GetRecordedFrames());

@@ -16,6 +16,8 @@ namespace HapiColi
         virtual bool Evaluate(const FrameData& frame, TestResult& outResult) = 0;
         
         virtual std::string GetName() const = 0;
+        virtual std::string GetSubjectId() const = 0;
+        virtual std::string GetTargetId() const = 0;
     };
 
     // Example Rule: Expected an object to hit another object
@@ -27,6 +29,8 @@ namespace HapiColi
 
         bool Evaluate(const FrameData& frame, TestResult& outResult) override;
         std::string GetName() const override { return "ExpectedHitRule"; }
+        std::string GetSubjectId() const override { return m_subjectId; }
+        std::string GetTargetId() const override { return m_targetId; }
 
     private:
         std::string m_subjectId;
@@ -42,6 +46,8 @@ namespace HapiColi
 
         bool Evaluate(const FrameData& frame, TestResult& outResult) override;
         std::string GetName() const override { return "ExpectedNoHitRule"; }
+        std::string GetSubjectId() const override { return m_subjectId; }
+        std::string GetTargetId() const override { return m_targetId; }
 
     private:
         std::string m_subjectId;

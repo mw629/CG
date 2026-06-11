@@ -20,6 +20,7 @@ namespace HapiColi
 
         const std::vector<TestResult>& GetResults() const;
         const TestSummary& GetSummary() const;
+        const std::vector<std::shared_ptr<TestRule>>& GetRules() const;
 
     private:
         std::vector<std::shared_ptr<TestRule>> m_rules;
