@@ -23,7 +23,6 @@ namespace HapiColi
         void EndFrame();
         
         // デバッグ描画用 (ビュープロジェクション行列を渡す)
-        void DrawDebug3D(const float* viewProjMatrix);
         
         const char* GetActiveSubjectId() const;
         const char* GetActiveTargetId() const;

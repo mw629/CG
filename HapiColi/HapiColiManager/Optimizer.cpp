@@ -30,7 +30,7 @@ namespace HapiColi
         {
             std::ostringstream oss;
             if (lang == Language::Japanese)
-                oss << unintendedCollisions << "回の意図しない衝突が検知されました。提案: コライダーサイズを縮小してください。";
+                oss << unintendedCollisions << (const char*)u8"回の意図しない衝突が検知されました。提案: コライダーサイズを縮小してください。";
             else
                 oss << "Detected " << unintendedCollisions << " unintended collisions. Suggestion: Shrink the Collider size.";
             suggestions.push_back(oss.str());
@@ -41,10 +41,10 @@ namespace HapiColi
             std::ostringstream oss;
             if (lang == Language::Japanese)
             {
-                oss << missedCollisions << "回の判定抜けが検知されました。提案:\n";
-                oss << "- コライダーサイズを拡大してください。\n";
-                oss << "- 連続衝突検知(CCD)を有効にしてください。\n";
-                oss << "- 高速な物体にはレイキャストを使用してください。";
+                oss << missedCollisions << (const char*)u8"回の判定抜けが検知されました。提案:\n";
+                oss << (const char*)u8"- コライダーサイズを拡大してください。\n";
+                oss << (const char*)u8"- 連続衝突検知(CCD)を有効にしてください。\n";
+                oss << (const char*)u8"- 高速な物体にはレイキャストを使用してください。";
             }
             else
             {
@@ -59,7 +59,7 @@ namespace HapiColi
         if (suggestions.empty() && !results.empty())
         {
             if (lang == Language::Japanese)
-                suggestions.push_back("特に改善案は見つかりませんでした。ルールに基づくと現在の挙動は最適です。");
+                suggestions.push_back((const char*)u8"特に改善案は見つかりませんでした。ルールに基づくと現在の挙動は最適です。");
             else
                 suggestions.push_back("No specific optimizations found. Current behavior seems optimal based on rules.");
         }

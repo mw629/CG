@@ -76,10 +76,6 @@ void GameScene::ImGui()
 
 	HapiColi::HapiColi::GetInstance().Update();
 
-	Matrix4x4 projectionMatrix = MakePerspectiveFovMatrix(0.45f, float(1280) / float(720), 0.1f, 10000.0f);
-	Matrix4x4 viewProj = MultiplyMatrix4x4(camera_->GetViewMatrix(), projectionMatrix);
-	HapiColi::HapiColi::GetInstance().DrawDebug3D(&viewProj.m[0][0]);
-
 #endif // _USE_IMGUI
 }
 
@@ -162,7 +158,8 @@ void GameScene::Draw() {
 		pauseSystem_->Draw();
 	}
 
-
+#ifdef _USE_IMGUI
+#endif
 }
 
 void GameScene::PlayingUpdate()

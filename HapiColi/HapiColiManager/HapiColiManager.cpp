@@ -31,13 +31,6 @@ namespace HapiColi
     {
         m_uiManager->Draw();
     }
-
-    void HapiColiManager::DrawDebug3D(const float* viewProjMatrix)
-    {
-        if (!viewProjMatrix) return;
-        m_uiManager->DrawDebug3D(viewProjMatrix, m_recorder->GetRecordedFrames());
-    }
-
     const char* HapiColiManager::GetActiveSubjectId() const
     {
         return m_uiManager->GetActiveSubjectId();

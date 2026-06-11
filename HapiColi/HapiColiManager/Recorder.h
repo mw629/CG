@@ -20,6 +20,7 @@ namespace HapiColi
         void EndFrame();
 
         const std::vector<FrameData>& GetRecordedFrames() const;
+        const std::vector<ObjectData>& GetRealtimeObjects() const;
         void Clear();
 
         const std::vector<std::string>& GetKnownObjectIds() const;
@@ -35,6 +36,7 @@ namespace HapiColi
         uint32_t m_currentFrameIndex;
         FrameData m_currentFrameData;
         std::vector<FrameData> m_recordedFrames;
+        std::vector<ObjectData> m_realtimeObjects;
         std::vector<std::string> m_targetIds;
         std::vector<std::string> m_knownObjectIds;
     };

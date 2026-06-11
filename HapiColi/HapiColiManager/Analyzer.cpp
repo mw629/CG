@@ -38,6 +38,12 @@ namespace HapiColi
         m_summary.Calculate();
     }
 
+    void Analyzer::ClearResults()
+    {
+        m_results.clear();
+        m_summary = TestSummary();
+    }
+
     const std::vector<TestResult>& Analyzer::GetResults() const
     {
         return m_results;

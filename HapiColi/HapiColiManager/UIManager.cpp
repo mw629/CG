@@ -6,6 +6,7 @@
 #include "Optimizer.h"
 #include "TestRule.h"
 #include <imgui.h>
+#include <imgui_internal.h>
 #include <string>
 #include <cstring>
 #include <thread>
@@ -46,7 +47,13 @@ namespace HapiColi
         int langInt = static_cast<int>(m_language);
         ImGui::RadioButton("English", &langInt, 0); ImGui::SameLine();
         ImGui::RadioButton((const char*)u8"日本語", &langInt, 1);
+        Language oldLanguage = m_language;
         m_language = static_cast<Language>(langInt);
+        if (m_language != oldLanguage)
+        {
+            const auto& results = m_manager->GetAnalyzer()->GetResults();
+            m_cachedSuggestions = m_manager->GetOptimizer()->GenerateSuggestions(results, m_language);
+        }
 
         ImGui::Separator();
 
@@ -183,6 +190,13 @@ namespace HapiColi
                 m_cachedSuggestions.clear();
             }
 
+            ImGui::SameLine();
+            if (ImGui::Button(GetText("Clear Results", u8"結果クリア")))
+            {
+                m_manager->GetAnalyzer()->ClearResults();
+                m_cachedSuggestions.clear();
+            }
+
             const auto& summary = m_manager->GetAnalyzer()->GetSummary();
             ImGui::Text(GetText("Total Tests: %d", u8"総テスト数: %d"), summary.totalTests);
             ImGui::TextColored(ImVec4(0, 1, 0, 1), GetText("Happy: %d", u8"成功(Happy): %d"), summary.happyCount);
@@ -245,86 +259,5 @@ namespace HapiColi
         
         // Pop all pushed colors
         ImGui::PopStyleColor(14);
-    }
-
-    void UIManager::DrawDebug3D(const float* viewProjMatrix, const std::vector<FrameData>& frames)
-    {
-        if (frames.empty() || !viewProjMatrix) return;
-        const auto& currentFrame = frames.back();
-
-        std::string subjectId = m_subjectBuffer;
-        std::string targetId = m_targetBuffer;
-
-        if (subjectId.empty() && targetId.empty()) return;
-
-        ImDrawList* drawList = ImGui::GetBackgroundDrawList();
-
-        float screenW = 1280.0f;
-        float screenH = 720.0f;
-
-        auto ProjectToScreen = [&](const Vector3& pos, ImVec2& outPos) -> bool {
-            float x = pos.x * viewProjMatrix[0] + pos.y * viewProjMatrix[4] + pos.z * viewProjMatrix[8] + viewProjMatrix[12];
-            float y = pos.x * viewProjMatrix[1] + pos.y * viewProjMatrix[5] + pos.z * viewProjMatrix[9] + viewProjMatrix[13];
-            float z = pos.x * viewProjMatrix[2] + pos.y * viewProjMatrix[6] + pos.z * viewProjMatrix[10] + viewProjMatrix[14];
-            float w = pos.x * viewProjMatrix[3] + pos.y * viewProjMatrix[7] + pos.z * viewProjMatrix[11] + viewProjMatrix[15];
-
-            if (w < 0.1f) return false;
-
-            float ndcX = x / w;
-            float ndcY = y / w;
-
-            outPos.x = (ndcX + 1.0f) * 0.5f * screenW;
-            outPos.y = (1.0f - ndcY) * 0.5f * screenH;
-            return true;
-        };
-
-        for (const auto& obj : currentFrame.objects) {
-            bool isSubject = (obj.id == subjectId && !subjectId.empty());
-            bool isTarget = (obj.id == targetId && !targetId.empty());
-
-            if (!isSubject && !isTarget) continue;
-
-            ImU32 color = isSubject ? IM_COL32(255, 50, 50, 255) : IM_COL32(50, 200, 255, 255);
-
-            Vector3 halfSize = obj.collider.size;
-            if (obj.collider.type == ColliderInfo::Type::Sphere) {
-                halfSize = {obj.collider.size.x, obj.collider.size.x, obj.collider.size.x};
-            }
-
-            Vector3 corners[8] = {
-                {obj.position.x - halfSize.x, obj.position.y - halfSize.y, obj.position.z - halfSize.z},
-                {obj.position.x + halfSize.x, obj.position.y - halfSize.y, obj.position.z - halfSize.z},
-                {obj.position.x + halfSize.x, obj.position.y + halfSize.y, obj.position.z - halfSize.z},
-                {obj.position.x - halfSize.x, obj.position.y + halfSize.y, obj.position.z - halfSize.z},
-                {obj.position.x - halfSize.x, obj.position.y - halfSize.y, obj.position.z + halfSize.z},
-                {obj.position.x + halfSize.x, obj.position.y - halfSize.y, obj.position.z + halfSize.z},
-                {obj.position.x + halfSize.x, obj.position.y + halfSize.y, obj.position.z + halfSize.z},
-                {obj.position.x - halfSize.x, obj.position.y + halfSize.y, obj.position.z + halfSize.z},
-            };
-
-            ImVec2 screenPoints[8];
-            bool valid[8];
-            for (int i = 0; i < 8; ++i) {
-                valid[i] = ProjectToScreen(corners[i], screenPoints[i]);
-            }
-
-            auto DrawLine = [&](int i, int j) {
-                if (valid[i] && valid[j]) {
-                    drawList->AddLine(screenPoints[i], screenPoints[j], color, 2.0f);
-                }
-            };
-
-            DrawLine(0, 1); DrawLine(1, 2); DrawLine(2, 3); DrawLine(3, 0);
-            DrawLine(4, 5); DrawLine(5, 6); DrawLine(6, 7); DrawLine(7, 4);
-            DrawLine(0, 4); DrawLine(1, 5); DrawLine(2, 6); DrawLine(3, 7);
-            
-            ImVec2 center;
-            if (ProjectToScreen(obj.position, center)) {
-                const char* label = isSubject ? "Subject" : "Target";
-                // 枠付き文字
-                drawList->AddText(ImVec2(center.x - 1, center.y - 1), IM_COL32(0, 0, 0, 255), label);
-                drawList->AddText(center, color, label);
-            }
-        }
     }
 }

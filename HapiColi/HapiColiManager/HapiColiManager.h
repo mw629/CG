@@ -19,7 +19,6 @@ namespace HapiColi
 
         void Initialize();
         void Update(); // Called every frame to render UI and manage state
-        void DrawDebug3D(const float* viewProjMatrix); // Called every frame to draw debug wireframes
 
         const char* GetActiveSubjectId() const;
         const char* GetActiveTargetId() const;

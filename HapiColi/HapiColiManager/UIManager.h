@@ -15,7 +15,6 @@ namespace HapiColi
     public:
         void Initialize(HapiColiManager* manager);
         void Draw();
-        void DrawDebug3D(const float* viewProjMatrix, const std::vector<FrameData>& frames);
 
         const char* GetActiveSubjectId() const { return m_subjectBuffer; }
         const char* GetActiveTargetId() const { return m_targetBuffer; }

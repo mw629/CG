@@ -28,6 +28,8 @@ namespace HapiColi
 
     void Recorder::BeginFrame(float deltaTime)
     {
+        m_realtimeObjects.clear();
+        
         if (!m_isRecording) return;
 
         m_currentFrameData = FrameData();
@@ -43,6 +45,8 @@ namespace HapiColi
         {
             m_knownObjectIds.push_back(objData.id);
         }
+
+        m_realtimeObjects.push_back(objData);
 
         if (!m_isRecording) return;
 
@@ -65,6 +69,11 @@ namespace HapiColi
     const std::vector<FrameData>& Recorder::GetRecordedFrames() const
     {
         return m_recordedFrames;
+    }
+
+    const std::vector<ObjectData>& Recorder::GetRealtimeObjects() const
+    {
+        return m_realtimeObjects;
     }
 
     const std::vector<std::string>& Recorder::GetKnownObjectIds() const
