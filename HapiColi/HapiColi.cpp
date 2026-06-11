@@ -1,31 +1,39 @@
 #include "HapiColi.h"
-#include "HapiColi_Collision.h"
-#include "HapiColi_Tester.h"
-#include <imgui.h>
-
+#include "HapiColiManager/Recorder.h"
 
 namespace HapiColi
 {
-	void HapiColi::ImGui()
-	{
-		ImGui::Begin("HapiColi");
-		ImGui::Text("Hello, HapiColi!");
-		ImGui::End();
-	}
+    HapiColi::HapiColi()
+    {
+        m_manager = std::make_unique<HapiColiManager>();
+    }
 
-	void HapiColi::Initialize()
-	{
-		// 初期化の実装
-	}
+    HapiColi::~HapiColi()
+    {
+    }
 
-	void HapiColi::StartFrame()
-	{
-		// フレーム開始の実装
-	}
+    void HapiColi::Initialize()
+    {
+        m_manager->Initialize();
+    }
 
-	void HapiColi::EndFrame()
-	{
-		// フレーム終了の実装
-	}
+    void HapiColi::Update()
+    {
+        m_manager->Update();
+    }
 
-}
+    void HapiColi::BeginFrame(float deltaTime)
+    {
+        m_manager->GetRecorder()->BeginFrame(deltaTime);
+    }
+
+    void HapiColi::RecordObject(const ObjectData& objData)
+    {
+        m_manager->GetRecorder()->RecordObject(objData);
+    }
+
+    void HapiColi::EndFrame()
+    {
+        m_manager->GetRecorder()->EndFrame();
+    }
+}
