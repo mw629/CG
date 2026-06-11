@@ -186,7 +186,7 @@ namespace HapiColi
 
             if (ImGui::Button(GetText("Run Analysis", u8"解析実行")))
             {
-                m_manager->GetAnalyzer()->Analyze(m_manager->GetRecorder()->GetRecordedFrames());
+                m_manager->GetAnalyzer()->AnalyzeAppend(m_manager->GetRecorder()->GetRecordedFrames());
                 m_cachedSuggestions.clear();
             }
 

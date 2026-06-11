@@ -17,4 +17,10 @@ namespace HapiColi
             m_testStepCallback();
         }
     }
+
+    void TestRunner::ResetTest()
+    {
+        // コールバックはそのままにして、必要に応じてエンジン側でリセット処理を行う
+        // 呼び出し元(UIManager)でRecorder/Analyzerのクリアも行う
+    }
 }

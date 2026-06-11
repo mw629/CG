@@ -15,6 +15,7 @@ namespace HapiColi
         void ClearRules();
 
         void Analyze(const std::vector<FrameData>& frames);
+        void AnalyzeAppend(const std::vector<FrameData>& frames); // 既存結果に追記
         void ClearResults();
 
         const std::vector<TestResult>& GetResults() const;

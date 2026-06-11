@@ -11,7 +11,7 @@ namespace HapiColi
     public:
         Recorder();
 
-        void Start();
+        void Start(bool clearData = true);
         void Stop();
         bool IsRecording() const;
 

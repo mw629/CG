@@ -12,6 +12,7 @@ namespace HapiColi
         void SetTestStepCallback(std::function<void()> callback);
 
         void RunTests(int iterations);
+        void ResetTest();
 
     private:
         std::function<void()> m_testStepCallback;

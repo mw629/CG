@@ -38,6 +38,30 @@ namespace HapiColi
         m_summary.Calculate();
     }
 
+    void Analyzer::AnalyzeAppend(const std::vector<FrameData>& frames)
+    {
+        // 既存の results/summary はクリアせず、追記する
+        for (const auto& frame : frames)
+        {
+            for (const auto& rule : m_rules)
+            {
+                TestResult result;
+                if (rule->Evaluate(frame, result))
+                {
+                    m_results.push_back(result);
+
+                    m_summary.totalTests++;
+                    if (result.happy)
+                        m_summary.happyCount++;
+                    else
+                        m_summary.unhappyCount++;
+                }
+            }
+        }
+
+        m_summary.Calculate();
+    }
+
     void Analyzer::ClearResults()
     {
         m_results.clear();

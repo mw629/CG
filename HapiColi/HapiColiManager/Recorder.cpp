@@ -9,11 +9,14 @@ namespace HapiColi
     {
     }
 
-    void Recorder::Start()
+    void Recorder::Start(bool clearData)
     {
         m_isRecording = true;
-        m_currentFrameIndex = 0;
-        Clear();
+        if (clearData)
+        {
+            m_currentFrameIndex = 0;
+            Clear();
+        }
     }
 
     void Recorder::Stop()

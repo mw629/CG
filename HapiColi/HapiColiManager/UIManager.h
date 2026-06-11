@@ -27,6 +27,7 @@ namespace HapiColi
         char m_ruleTargetBuffer[128] = {0};
         int m_ruleType = 0; // 0: Hit, 1: NoHit
         int m_activeInputTarget = 0; // 0: Subject, 1: Target
+        int m_testIterations = 100;
 
         Language m_language = Language::English;
         const char* GetText(const char* en, const void* jp) const {
