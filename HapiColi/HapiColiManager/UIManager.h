@@ -1,5 +1,11 @@
 #pragma once
 
+#include <vector>
+#include <string>
+#include <atomic>
+#include "HapiColiTypes.h"
+#include "FrameData.h"
+
 namespace HapiColi
 {
     class HapiColiManager;
@@ -9,6 +15,10 @@ namespace HapiColi
     public:
         void Initialize(HapiColiManager* manager);
         void Draw();
+        void DrawDebug3D(const float* viewProjMatrix, const std::vector<FrameData>& frames);
+
+        const char* GetActiveSubjectId() const { return m_subjectBuffer; }
+        const char* GetActiveTargetId() const { return m_targetBuffer; }
 
     private:
         HapiColiManager* m_manager = nullptr;
@@ -17,5 +27,14 @@ namespace HapiColi
         char m_subjectBuffer[128] = {0};
         char m_ruleTargetBuffer[128] = {0};
         int m_ruleType = 0; // 0: Hit, 1: NoHit
+        int m_activeInputTarget = 0; // 0: Subject, 1: Target
+
+        Language m_language = Language::English;
+        const char* GetText(const char* en, const void* jp) const {
+            return m_language == Language::Japanese ? static_cast<const char*>(jp) : en;
+        }
+
+        std::vector<std::string> m_cachedSuggestions;
+        std::atomic<bool> m_isSaving{false};
     };
 }

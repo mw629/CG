@@ -22,6 +22,8 @@ namespace HapiColi
         const std::vector<FrameData>& GetRecordedFrames() const;
         void Clear();
 
+        const std::vector<std::string>& GetKnownObjectIds() const;
+
         // Target filtering
         void AddTargetId(const std::string& id);
         void RemoveTargetId(const std::string& id);
@@ -34,5 +36,6 @@ namespace HapiColi
         FrameData m_currentFrameData;
         std::vector<FrameData> m_recordedFrames;
         std::vector<std::string> m_targetIds;
+        std::vector<std::string> m_knownObjectIds;
     };
 }

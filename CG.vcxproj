@@ -147,13 +147,15 @@ copy "$(WindowsSdkDir)bin\$(TargetPlatformVersion)\x64\dxil.dll" "$(TargetDir)dx
     <ClCompile Include="Game\GameScene\Entity\Obstacle.cpp" />
     <ClCompile Include="Game\GameScene\Stage\StageSettings.cpp" />
     <ClCompile Include="HapiColi\HapiColi.cpp" />
-    <ClCompile Include="HapiColi\HapiColiManager\HapiColi_Recorder.cpp" />
-    <ClCompile Include="HapiColi\HapiColiManager\HapiColi_JsonSerializer.cpp" />
-    <ClCompile Include="HapiColi\HapiColiManager\HapiColi_LogManager.cpp" />
-    <ClCompile Include="HapiColi\HapiColiManager\HapiColi_Optimizer.cpp" />
-    <ClCompile Include="HapiColi\HapiColiManager\HapiColi_TestRule.cpp" />
-    <ClCompile Include="HapiColi\HapiColiManager\HapiColi_TestRunner.cpp" />
-    <ClCompile Include="HapiColi\HapiColiManager\HapiColi_UIManager.cpp" />
+    <ClCompile Include="HapiColi\HapiColiManager\Analyzer.cpp" />
+    <ClCompile Include="HapiColi\HapiColiManager\HapiColiManager.cpp" />
+    <ClCompile Include="HapiColi\HapiColiManager\JsonSerializer.cpp" />
+    <ClCompile Include="HapiColi\HapiColiManager\LogManager.cpp" />
+    <ClCompile Include="HapiColi\HapiColiManager\Optimizer.cpp" />
+    <ClCompile Include="HapiColi\HapiColiManager\Recorder.cpp" />
+    <ClCompile Include="HapiColi\HapiColiManager\TestRule.cpp" />
+    <ClCompile Include="HapiColi\HapiColiManager\TestRunner.cpp" />
+    <ClCompile Include="HapiColi\HapiColiManager\UIManager.cpp" />
     <ClCompile Include="MatchaEngine\GameObjects\Object\3d\Cylinder.cpp" />
     <ClCompile Include="Game\GameApplication.cpp" />
     <ClCompile Include="MatchaEngine\GameObjects\Object\3d\Cube.cpp" />
@@ -237,7 +239,6 @@ copy "$(WindowsSdkDir)bin\$(TargetPlatformVersion)\x64\dxil.dll" "$(TargetDir)dx
     <ClCompile Include="MatchaEngine\GameObjects\Object\Animation\TransformAnimation.cpp" />
     <ClCompile Include="Game\TestScene\TestScene.cpp" />
     <ClCompile Include="Game\GameScene\System\PauseSystem.cpp" />
-    <ClCompile Include="HapiColi\HapiColiManager\Recorder_Analyzer.cpp" />
   </ItemGroup>
   <ItemGroup>
     <FxCompile Include="resources\Shader\Particle.PS.hlsl">
@@ -322,15 +323,18 @@ copy "$(WindowsSdkDir)bin\$(TargetPlatformVersion)\x64\dxil.dll" "$(TargetDir)dx
     <ClInclude Include="Game\GameScene\Entity\Obstacle.h" />
     <ClInclude Include="Game\GameScene\Stage\StageSettings.h" />
     <ClInclude Include="HapiColi\HapiColi.h" />
-    <ClInclude Include="HapiColi\HapiColiManager\HapiColi_Recorder.h" />
-    <ClInclude Include="HapiColi\HapiColiManager\HapiColi_TestResult.h" />
-    <ClInclude Include="HapiColi\HapiColiManager\HapiColi_FrameData.h" />
-    <ClInclude Include="HapiColi\HapiColiManager\HapiColi_JsonSerializer.h" />
-    <ClInclude Include="HapiColi\HapiColiManager\HapiColi_LogManager.h" />
-    <ClInclude Include="HapiColi\HapiColiManager\HapiColi_Optimizer.h" />
-    <ClInclude Include="HapiColi\HapiColiManager\HapiColi_TestRule.h" />
-    <ClInclude Include="HapiColi\HapiColiManager\HapiColi_TestRunner.h" />
-    <ClInclude Include="HapiColi\HapiColiManager\HapiColi_UIManager.h" />
+    <ClInclude Include="HapiColi\HapiColiManager\Analyzer.h" />
+    <ClInclude Include="HapiColi\HapiColiManager\FrameData.h" />
+    <ClInclude Include="HapiColi\HapiColiManager\HapiColiManager.h" />
+    <ClInclude Include="HapiColi\HapiColiManager\HapiColiTypes.h" />
+    <ClInclude Include="HapiColi\HapiColiManager\JsonSerializer.h" />
+    <ClInclude Include="HapiColi\HapiColiManager\LogManager.h" />
+    <ClInclude Include="HapiColi\HapiColiManager\Optimizer.h" />
+    <ClInclude Include="HapiColi\HapiColiManager\Recorder.h" />
+    <ClInclude Include="HapiColi\HapiColiManager\TestResult.h" />
+    <ClInclude Include="HapiColi\HapiColiManager\TestRule.h" />
+    <ClInclude Include="HapiColi\HapiColiManager\TestRunner.h" />
+    <ClInclude Include="HapiColi\HapiColiManager\UIManager.h" />
     <ClInclude Include="MatchaEngine\GameObjects\Object\3d\Cylinder.h" />
     <ClInclude Include="Game\GameApplication.h" />
     <ClInclude Include="MatchaEngine\GameObjects\Object\3d\Cube.h" />
@@ -404,7 +408,6 @@ copy "$(WindowsSdkDir)bin\$(TargetPlatformVersion)\x64\dxil.dll" "$(TargetDir)dx
     <ClInclude Include="MatchaEngine\GameObjects\Object\Animation\TransformAnimation.h" />
     <ClInclude Include="Game\TestScene\TestScene.h" />
     <ClInclude Include="Game\GameScene\System\PauseSystem.h" />
-    <ClInclude Include="HapiColi\HapiColiManager\Recorder_Analyzer.h" />
   </ItemGroup>
   <ItemGroup>
     <Text Include="externals\imgui\LICENSE.txt" />

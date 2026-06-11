@@ -21,7 +21,12 @@ namespace HapiColi
         void BeginFrame(float deltaTime);
         void RecordObject(const ObjectData& objData);
         void EndFrame();
-
+        
+        // デバッグ描画用 (ビュープロジェクション行列を渡す)
+        void DrawDebug3D(const float* viewProjMatrix);
+        
+        const char* GetActiveSubjectId() const;
+        const char* GetActiveTargetId() const;
         HapiColiManager* GetManager() { return m_manager.get(); }
 
     private:

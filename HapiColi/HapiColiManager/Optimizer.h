@@ -1,6 +1,7 @@
 #pragma once
 
 #include "TestResult.h"
+#include "HapiColiTypes.h"
 #include <vector>
 #include <string>
 
@@ -10,6 +11,6 @@ namespace HapiColi
     {
     public:
         // Analyze test results and generate suggestions
-        std::vector<std::string> GenerateSuggestions(const std::vector<TestResult>& results);
+        std::vector<std::string> GenerateSuggestions(const std::vector<TestResult>& results, Language lang = Language::English);
     };
 }

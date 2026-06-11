@@ -4,7 +4,7 @@
 
 namespace HapiColi
 {
-    std::vector<std::string> Optimizer::GenerateSuggestions(const std::vector<TestResult>& results)
+    std::vector<std::string> Optimizer::GenerateSuggestions(const std::vector<TestResult>& results, Language lang)
     {
         std::vector<std::string> suggestions;
         
@@ -29,23 +29,39 @@ namespace HapiColi
         if (unintendedCollisions > 0)
         {
             std::ostringstream oss;
-            oss << "Detected " << unintendedCollisions << " unintended collisions. Suggestion: Shrink the Collider size.";
+            if (lang == Language::Japanese)
+                oss << unintendedCollisions << "回の意図しない衝突が検知されました。提案: コライダーサイズを縮小してください。";
+            else
+                oss << "Detected " << unintendedCollisions << " unintended collisions. Suggestion: Shrink the Collider size.";
             suggestions.push_back(oss.str());
         }
 
         if (missedCollisions > 0)
         {
             std::ostringstream oss;
-            oss << "Detected " << missedCollisions << " missed collisions. Suggestions:";
-            oss << "\n- Enlarge the Collider size.";
-            oss << "\n- Enable Continuous Collision Detection (CCD).";
-            oss << "\n- Use Raycast for high-speed objects.";
+            if (lang == Language::Japanese)
+            {
+                oss << missedCollisions << "回の判定抜けが検知されました。提案:\n";
+                oss << "- コライダーサイズを拡大してください。\n";
+                oss << "- 連続衝突検知(CCD)を有効にしてください。\n";
+                oss << "- 高速な物体にはレイキャストを使用してください。";
+            }
+            else
+            {
+                oss << "Detected " << missedCollisions << " missed collisions. Suggestions:\n";
+                oss << "- Enlarge the Collider size.\n";
+                oss << "- Enable Continuous Collision Detection (CCD).\n";
+                oss << "- Use Raycast for high-speed objects.";
+            }
             suggestions.push_back(oss.str());
         }
 
         if (suggestions.empty() && !results.empty())
         {
-            suggestions.push_back("No specific optimizations found. Current behavior seems optimal based on rules.");
+            if (lang == Language::Japanese)
+                suggestions.push_back("特に改善案は見つかりませんでした。ルールに基づくと現在の挙動は最適です。");
+            else
+                suggestions.push_back("No specific optimizations found. Current behavior seems optimal based on rules.");
         }
 
         return suggestions;

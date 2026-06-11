@@ -270,28 +270,31 @@
     <ClCompile Include="HapiColi\HapiColi.cpp">
       <Filter>ソース ファイル</Filter>
     </ClCompile>
-    <ClCompile Include="HapiColi\HapiColiManager\HapiColi_Recorder.cpp">
+    <ClCompile Include="HapiColi\HapiColiManager\Analyzer.cpp">
       <Filter>ソース ファイル</Filter>
     </ClCompile>
-    <ClCompile Include="HapiColi\HapiColiManager\Recorder_Analyzer.cpp">
+    <ClCompile Include="HapiColi\HapiColiManager\HapiColiManager.cpp">
       <Filter>ソース ファイル</Filter>
     </ClCompile>
-    <ClCompile Include="HapiColi\HapiColiManager\HapiColi_Optimizer.cpp">
+    <ClCompile Include="HapiColi\HapiColiManager\JsonSerializer.cpp">
       <Filter>ソース ファイル</Filter>
     </ClCompile>
-    <ClCompile Include="HapiColi\HapiColiManager\HapiColi_LogManager.cpp">
+    <ClCompile Include="HapiColi\HapiColiManager\LogManager.cpp">
       <Filter>ソース ファイル</Filter>
     </ClCompile>
-    <ClCompile Include="HapiColi\HapiColiManager\HapiColi_UIManager.cpp">
+    <ClCompile Include="HapiColi\HapiColiManager\Optimizer.cpp">
       <Filter>ソース ファイル</Filter>
     </ClCompile>
-    <ClCompile Include="HapiColi\HapiColiManager\HapiColi_TestRunner.cpp">
+    <ClCompile Include="HapiColi\HapiColiManager\Recorder.cpp">
       <Filter>ソース ファイル</Filter>
     </ClCompile>
-    <ClCompile Include="HapiColi\HapiColiManager\HapiColi_TestRule.cpp">
+    <ClCompile Include="HapiColi\HapiColiManager\TestRule.cpp">
       <Filter>ソース ファイル</Filter>
     </ClCompile>
-    <ClCompile Include="HapiColi\HapiColiManager\HapiColi_JsonSerializer.cpp">
+    <ClCompile Include="HapiColi\HapiColiManager\TestRunner.cpp">
+      <Filter>ソース ファイル</Filter>
+    </ClCompile>
+    <ClCompile Include="HapiColi\HapiColiManager\UIManager.cpp">
       <Filter>ソース ファイル</Filter>
     </ClCompile>
   </ItemGroup>
@@ -550,34 +553,40 @@
     <ClInclude Include="HapiColi\HapiColi.h">
       <Filter>ヘッダー ファイル</Filter>
     </ClInclude>
-    <ClInclude Include="HapiColi\HapiColiManager\HapiColi_Recorder.h">
+    <ClInclude Include="HapiColi\HapiColiManager\Analyzer.h">
       <Filter>ヘッダー ファイル</Filter>
     </ClInclude>
-    <ClInclude Include="HapiColi\HapiColiManager\Recorder_Analyzer.h">
+    <ClInclude Include="HapiColi\HapiColiManager\FrameData.h">
       <Filter>ヘッダー ファイル</Filter>
     </ClInclude>
-    <ClInclude Include="HapiColi\HapiColiManager\HapiColi_Optimizer.h">
+    <ClInclude Include="HapiColi\HapiColiManager\HapiColiManager.h">
       <Filter>ヘッダー ファイル</Filter>
     </ClInclude>
-    <ClInclude Include="HapiColi\HapiColiManager\HapiColi_LogManager.h">
+    <ClInclude Include="HapiColi\HapiColiManager\HapiColiTypes.h">
       <Filter>ヘッダー ファイル</Filter>
     </ClInclude>
-    <ClInclude Include="HapiColi\HapiColiManager\HapiColi_UIManager.h">
+    <ClInclude Include="HapiColi\HapiColiManager\JsonSerializer.h">
       <Filter>ヘッダー ファイル</Filter>
     </ClInclude>
-    <ClInclude Include="HapiColi\HapiColiManager\HapiColi_TestRunner.h">
+    <ClInclude Include="HapiColi\HapiColiManager\LogManager.h">
       <Filter>ヘッダー ファイル</Filter>
     </ClInclude>
-    <ClInclude Include="HapiColi\HapiColiManager\HapiColi_TestRule.h">
+    <ClInclude Include="HapiColi\HapiColiManager\Optimizer.h">
       <Filter>ヘッダー ファイル</Filter>
     </ClInclude>
-    <ClInclude Include="HapiColi\HapiColiManager\HapiColi_FrameData.h">
+    <ClInclude Include="HapiColi\HapiColiManager\Recorder.h">
       <Filter>ヘッダー ファイル</Filter>
     </ClInclude>
-    <ClInclude Include="HapiColi\HapiColiManager\HapiColi_TestResult.h">
+    <ClInclude Include="HapiColi\HapiColiManager\TestResult.h">
       <Filter>ヘッダー ファイル</Filter>
     </ClInclude>
-    <ClInclude Include="HapiColi\HapiColiManager\HapiColi_JsonSerializer.h">
+    <ClInclude Include="HapiColi\HapiColiManager\TestRule.h">
+      <Filter>ヘッダー ファイル</Filter>
+    </ClInclude>
+    <ClInclude Include="HapiColi\HapiColiManager\TestRunner.h">
+      <Filter>ヘッダー ファイル</Filter>
+    </ClInclude>
+    <ClInclude Include="HapiColi\HapiColiManager\UIManager.h">
       <Filter>ヘッダー ファイル</Filter>
     </ClInclude>
   </ItemGroup>

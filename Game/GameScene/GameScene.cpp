@@ -1,6 +1,9 @@
 #include "GameScene.h"
 #include <imgui.h>
 #include <memory>
+#include <string>
+#include "../../HapiColi/HapiColi.h"
+#include "../../MatchaEngine/Math/Calculation.h"
 
 GameScene::~GameScene()
 {
@@ -71,6 +74,12 @@ void GameScene::ImGui()
 
 	ImGui::End();
 
+	HapiColi::HapiColi::GetInstance().Update();
+
+	Matrix4x4 projectionMatrix = MakePerspectiveFovMatrix(0.45f, float(1280) / float(720), 0.1f, 10000.0f);
+	Matrix4x4 viewProj = MultiplyMatrix4x4(camera_->GetViewMatrix(), projectionMatrix);
+	HapiColi::HapiColi::GetInstance().DrawDebug3D(&viewProj.m[0][0]);
+
 #endif // _USE_IMGUI
 }
 
@@ -94,9 +103,12 @@ void GameScene::Initialize() {
 	ModelData roadModelData = AssimpLoadObjFile("resources/Plane", "Plane.gltf");
 	ModelData obstacleModelData = AssimpLoadObjFile("resources/Block", "Block.obj");
 	stageSettings_->Initialize(roadModelData, obstacleModelData);
+
+	HapiColi::HapiColi::GetInstance().Initialize();
 }
 
 void GameScene::Update() {
+	HapiColi::HapiColi::GetInstance().BeginFrame(1.0f / 60.0f);
 
 	PostEffect::SetActivePostEffect(PostEffect::Type::GaussianFilter);
 
@@ -130,6 +142,7 @@ void GameScene::Update() {
 			sceneChangeRequest_ = true;
 		}
 	}
+	HapiColi::HapiColi::GetInstance().EndFrame();
 }
 
 void GameScene::Draw() {
@@ -173,6 +186,13 @@ void GameScene::CheckCollisions()
 	float playerHeight = player_->GetIsRolling() ? 0.5f : 1.5f; // 転がり中は低くなる
 	AABB playerAABB = Collision::MakeAABB(playerTransform, 0.8f, playerHeight, 0.8f);
 
+	HapiColi::ObjectData playerData;
+	playerData.id = "Player";
+	playerData.position = HapiColi::Vector3(playerTransform.translate.x, playerTransform.translate.y, playerTransform.translate.z);
+	playerData.collider.type = HapiColi::ColliderInfo::Type::Box;
+	playerData.collider.size = HapiColi::Vector3(0.8f, playerHeight, 0.8f);
+	playerData.collision.isColliding = false;
+
 	// 全障害物との当たり判定
 	for (int i = 0; i < stageSettings_->GetMaxObstacles(); i++) {
 		Obstacle* obstacle = stageSettings_->GetObstacle(i);
@@ -185,12 +205,29 @@ void GameScene::CheckCollisions()
 			obstacle->GetCollisionDepth()
 		);
 
+		HapiColi::ObjectData obstacleData;
+		obstacleData.id = "Obstacle_" + std::to_string(i);
+		obstacleData.position = HapiColi::Vector3(obstacle->GetTransform().translate.x, obstacle->GetTransform().translate.y, obstacle->GetTransform().translate.z);
+		obstacleData.collider.type = HapiColi::ColliderInfo::Type::Box;
+		obstacleData.collider.size = HapiColi::Vector3(obstacle->GetCollisionWidth(), obstacle->GetCollisionHeight(), obstacle->GetCollisionDepth());
+		obstacleData.collision.isColliding = false;
+
 		if (Collision::CheckAABB(playerAABB, obstacleAABB)) {
 			// 衝突！ゲームオーバー
 			gameState_ = GameState::GameOver;
 			stageSettings_->SetGameOver(true);
 			PostEffect::SetActivePostEffect(PostEffect::Type::GrayScale);
+			
+			playerData.collision.isColliding = true;
+			playerData.collision.collidedWithId = obstacleData.id;
+			obstacleData.collision.isColliding = true;
+			obstacleData.collision.collidedWithId = playerData.id;
+			
+			HapiColi::HapiColi::GetInstance().RecordObject(obstacleData);
 			break;
+		} else {
+			HapiColi::HapiColi::GetInstance().RecordObject(obstacleData);
 		}
 	}
+	HapiColi::HapiColi::GetInstance().RecordObject(playerData);
 }

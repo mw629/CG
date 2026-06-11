@@ -37,6 +37,13 @@ namespace HapiColi
 
     void Recorder::RecordObject(const ObjectData& objData)
     {
+        // Keep track of known IDs for UI regardless of recording state
+        // so the user can see available objects before starting to record
+        if (std::find(m_knownObjectIds.begin(), m_knownObjectIds.end(), objData.id) == m_knownObjectIds.end())
+        {
+            m_knownObjectIds.push_back(objData.id);
+        }
+
         if (!m_isRecording) return;
 
         // If targets are specified and this object is not in the targets, ignore it.
@@ -60,9 +67,15 @@ namespace HapiColi
         return m_recordedFrames;
     }
 
+    const std::vector<std::string>& Recorder::GetKnownObjectIds() const
+    {
+        return m_knownObjectIds;
+    }
+
     void Recorder::Clear()
     {
         m_recordedFrames.clear();
+        m_knownObjectIds.clear();
     }
 
     void Recorder::AddTargetId(const std::string& id)

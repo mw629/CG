@@ -63,6 +63,14 @@ for (auto& obj : gameObjects) {
 HapiColi::HapiColi::GetInstance().EndFrame();
 ```
 
+### 3. デバッグ描画（対象オブジェクトのハイライト）
+ゲームの描画ループ（ImGui描画中または前）でビュープロジェクション行列を渡すことで、現在UIで選択されているSubjectやTargetのワイヤーフレームと名前を画面上にハイライト表示できます。この機能はHapiColi内部のImGuiを用いて完結しています。
+
+```cpp
+// 行列の先頭ポインタ（float[16]）を渡す
+HapiColi::HapiColi::GetInstance().DrawDebug3D(&viewProjMatrix.m[0][0]);
+```
+
 ---
 
 ## ツール画面（ImGui）の使い方

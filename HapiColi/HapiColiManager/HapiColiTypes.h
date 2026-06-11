@@ -5,6 +5,12 @@
 
 namespace HapiColi
 {
+    enum class Language
+    {
+        English,
+        Japanese
+    };
+
     struct Vector3
     {
         float x, y, z;
