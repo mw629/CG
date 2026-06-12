@@ -16,7 +16,7 @@ void StageSettings::Initialize(ModelData roadModelData, ModelData obstacleModelD
 		// Z軸方向に並べて配置（手前から奥へ）
 		roadTransforms_[i].scale = { 5.0f, 5.0f, 5.0f };
 		roadTransforms_[i].rotate = { 0.0f, 0.0f, 0.0f };
-		roadTransforms_[i].translate = { 0.0f, 0.0f, static_cast<float>(i) * chunkLength_ };
+		roadTransforms_[i].translate = { 0.0f, 2.0f, static_cast<float>(i) * chunkLength_ };
 
 		roadChunks_[i]->SetTransform(roadTransforms_[i]);
 	}
@@ -53,24 +53,32 @@ void StageSettings::Update(Matrix4x4 view)
 	for (int i = 0; i < kChunkCount_; i++) {
 		roadTransforms_[i].translate.z -= scrollSpeed_;
 
+		// 最も奥にあるチャンクのZ座標を探す
+		float maxZ = roadTransforms_[0].translate.z;
+		for (int j = 1; j < kChunkCount_; j++) {
+			if (roadTransforms_[j].translate.z > maxZ) {
+				maxZ = roadTransforms_[j].translate.z;
+			}
+		}
+
 		// チャンクがカメラの後ろ（手前）を通り過ぎたら、一番奥に再配置
 		if (roadTransforms_[i].translate.z < -chunkLength_) {
-			// 最も奥にあるチャンクのZ座標を探す
-			float maxZ = roadTransforms_[0].translate.z;
-			for (int j = 1; j < kChunkCount_; j++) {
-				if (roadTransforms_[j].translate.z > maxZ) {
-					maxZ = roadTransforms_[j].translate.z;
-				}
-			}
-			// 最も奥のチャンクの更に奥に配置
-			roadTransforms_[i].translate.z = maxZ + chunkLength_;
+			float newChunkZ = maxZ + chunkLength_;
+			roadTransforms_[i].translate.z = newChunkZ;
 
-			// 再配置したチャンクに障害物を配置
-			SpawnObstaclesOnChunk(roadTransforms_[i].translate.z);
+			maxZ = newChunkZ; // 次のチャンク計算のために更新
 		}
 
 		roadChunks_[i]->SetTransform(roadTransforms_[i]);
 		roadChunks_[i]->SettingWvp(view);
+	}
+
+	// 障害物の定期生成
+	distanceSinceLastSpawn_ += scrollSpeed_;
+	while (distanceSinceLastSpawn_ >= obstacleInterval_) {
+		// 奥の固定位置(チャンクの向こう側)に生成
+		SpawnObstacles(45.0f);
+		distanceSinceLastSpawn_ -= obstacleInterval_;
 	}
 
 	// 障害物の更新
@@ -92,29 +100,59 @@ void StageSettings::Draw()
 	}
 }
 
-void StageSettings::SpawnObstaclesOnChunk(float chunkZ)
+void StageSettings::SpawnObstacles(float z)
 {
-	// チャンクに障害物を1～2個配置
-	int obstacleCount = 1 + (std::rand() % 2);
+	// 3レーンの状態を決定 (0: None, 1: Low, 2: High, 3: Wall)
+	int laneSpawns[3];
+	int wallCount = 0;
+	int noneCount = 0;
 
-	for (int i = 0; i < obstacleCount; i++) {
-		// ランダムなレーンを選択
-		int lane = minLaneIndex_ + (std::rand() % (maxLaneIndex_ - minLaneIndex_ + 1));
+	for (int i = 0; i < 3; i++) {
+		laneSpawns[i] = std::rand() % 4; // 0~3
+		if (laneSpawns[i] == 3) {
+			wallCount++;
+		} else if (laneSpawns[i] == 0) {
+			noneCount++;
+		}
+	}
+
+	// すべて「何もない(None)」の場合は、最低1つの障害物を配置する
+	if (noneCount == 3) {
+		int changeIndex = std::rand() % 3;
+		laneSpawns[changeIndex] = 1 + (std::rand() % 3); // 1, 2, 3 のどれか
+	}
+
+	// 全てWallの場合は1つをNoneにする
+	if (wallCount == 3) {
+		int changeIndex = std::rand() % 3;
+		laneSpawns[changeIndex] = 0; // Noneに変更
+	}
+
+	// 決定した内容で各レーンに生成
+	for (int i = 0; i < 3; i++) {
+		if (laneSpawns[i] == 0) continue; // None
+
+		int lane = minLaneIndex_ + i; // -1, 0, 1
 		float x = static_cast<float>(lane) * laneWidth_;
-		float z = chunkZ + static_cast<float>(std::rand() % static_cast<int>(chunkLength_));
 
-		// Y座標はタイプに応じて変える
-		float y = 1.5f; // Lowの場合（地面の高さ1.0f + 障害物半分の高さ0.5f）
-		Obstacle::Type type = obstacles_[nextObstacleIndex_]->GetType();
-		if (type == Obstacle::Type::High) {
-			y = 2.5f; // 高い障害物
-		}
-		else if (type == Obstacle::Type::Wall) {
-			y = 2.5f; // 壁は高さ3.0なので中心は2.5f
+		Obstacle::Type type;
+		float y = 2.5f;
+
+		if (laneSpawns[i] == 1) {
+			type = Obstacle::Type::Low;
+			y = 2.5f;
+		} else if (laneSpawns[i] == 2) {
+			type = Obstacle::Type::High;
+			y = 4.6f;
+		} else { // 3
+			type = Obstacle::Type::Wall;
+			y = 3.5f;
 		}
 
+		// 障害物のタイプを変更して配置
+		obstacles_[nextObstacleIndex_]->SetType(type);
 		obstacles_[nextObstacleIndex_]->Spawn(x, y, z);
-
+		
 		// 次のインデックスへ（リングバッファ的に使う）
 		nextObstacleIndex_ = (nextObstacleIndex_ + 1) % kMaxObstacles_;
 	}
@@ -129,7 +167,7 @@ void StageSettings::Reset()
 
 	// 道路チャンクの位置をリセット
 	for (int i = 0; i < kChunkCount_; i++) {
-		roadTransforms_[i].translate = { 0.0f, 0.0f, static_cast<float>(i) * chunkLength_ };
+		roadTransforms_[i].translate = { 0.0f, 2.0f, static_cast<float>(i) * chunkLength_ };
 		roadChunks_[i]->SetTransform(roadTransforms_[i]);
 	}
 
@@ -138,4 +176,7 @@ void StageSettings::Reset()
 		obstacles_[i]->Deactivate();
 	}
 	nextObstacleIndex_ = 0;
+	
+	// リセット時は最初は少し進んでから障害物が出るようにする
+	distanceSinceLastSpawn_ = obstacleInterval_ - 10.0f;
 }

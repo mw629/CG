@@ -31,19 +31,20 @@ void Player::Reset()
 	velocityY_ = 0.0f;
 	isRolling_ = false;
 	rollTimer_ = 0.0f;
+	keepRolling_ = false;
 
 	model_.get()->SetTransform(transform_);
 }
 
-void Player::Update(Matrix4x4 view)
+void Player::Update(Matrix4x4 view, float speedMultiplier)
 {
-	PlayerMove();
+	PlayerMove(speedMultiplier);
 
 
 	model_.get()->SettingWvp(view);
 }
 
-void Player::PlayerMove()
+void Player::PlayerMove(float speedMultiplier)
 {
 	const float kLaneWidth = 2.0f; // レーンの横幅
 	const int kMinLane = -1;       // 一番左のレーン
@@ -52,10 +53,10 @@ void Player::PlayerMove()
 	// レーンの移動中ではなかったら
 	if (laneIndex_ == targetLaneIndex_) {
 		// キー入力で目標レーンを設定
-		if (Input::PushKey(DIK_A)) {
+		if (Input::PushKey(DIK_A)||Input::PushKey(DIK_LEFT)) {
 			targetLaneIndex_ = laneIndex_ - 1;
 		}
-		if (Input::PushKey(DIK_D)) {
+		if (Input::PushKey(DIK_D)||Input::PushKey(DIK_RIGHT)) {
 			targetLaneIndex_ = laneIndex_ + 1;
 		}
 
@@ -67,12 +68,19 @@ void Player::PlayerMove()
 		if (targetLaneIndex_ != laneIndex_) {
 			startX_ = transform_.translate.x;
 			lerpTime_ = 0.0f;
+
+			// 横移動時にしゃがみ（転がり）をキャンセルして硬直をなくす
+			if (isRolling_ && !keepRolling_) {
+				isRolling_ = false;
+				transform_.scale.y = 1.0f;
+				transform_.translate.y = baseHeight_;
+			}
 		}
 	}
 	// レーンの移動中だったら
 	else {
 		// 線形補間で移動
-		lerpTime_ += laneChangeSpeed_;
+		lerpTime_ += laneChangeSpeed_ * speedMultiplier;
 		if (lerpTime_ > 1.0f) {
 			lerpTime_ = 1.0f;
 		}
@@ -87,13 +95,22 @@ void Player::PlayerMove()
 	}
 
 	// === アクション（ジャンプと転がり） ===
-	// 地上にいて何もしていない時のみアクション可能
-	if (!isJumping_ && !isRolling_) {
-		if (Input::PushKey(DIK_W) || Input::PushKey(DIK_SPACE)) {
-			isJumping_ = true;
-			velocityY_ = jumpPower_;
+	// 地上にいてジャンプ中でなければアクション可能（転がり中でもジャンプでキャンセル可能）
+	if (!isJumping_) {
+		if (Input::PushKey(DIK_W) || Input::PushKey(DIK_SPACE)||Input::PushKey(DIK_UP)) {
+			if (!(isRolling_ && keepRolling_)) {
+				isJumping_ = true;
+				velocityY_ = jumpPower_ * speedMultiplier;
+
+				// ジャンプ時にしゃがみをキャンセル
+				if (isRolling_) {
+					isRolling_ = false;
+					transform_.scale.y = 1.0f;
+					transform_.translate.y = baseHeight_;
+				}
+			}
 		}
-		else if (Input::PushKey(DIK_S)) {
+		else if (!isRolling_ && (Input::PushKey(DIK_S) || Input::PushKey(DIK_DOWN))) {
 			isRolling_ = true;
 			rollTimer_ = rollDuration_;
 			// 転がり中はスケールYを半分にして伏せるようにする
@@ -106,7 +123,7 @@ void Player::PlayerMove()
 	// ジャンプ処理
 	if (isJumping_) {
 		transform_.translate.y += velocityY_;
-		velocityY_ -= gravity_;
+		velocityY_ -= gravity_ * (speedMultiplier * speedMultiplier);
 
 		// 地面に着地
 		if (transform_.translate.y <= baseHeight_) {
@@ -118,8 +135,8 @@ void Player::PlayerMove()
 
 	// 転がり処理
 	if (isRolling_) {
-		rollTimer_ -= 1.0f;
-		if (rollTimer_ <= 0.0f) {
+		rollTimer_ -= speedMultiplier;
+		if (rollTimer_ <= 0.0f && !keepRolling_) {
 			isRolling_ = false;
 			// 姿勢を元に戻す
 			transform_.scale.y = 1.0f;

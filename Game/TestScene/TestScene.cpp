@@ -47,26 +47,30 @@ void TestScene::Initialize() {
 
 	ModelData modelData = AssimpLoadObjFile("resources/Model/obj", "sphere.obj");
 
+	//Modelの初期化
 	model_.get()->Initialize(modelData);
 	model_.get()->SetTransform(modelTransform_);
 	model_.get()->name_ = "Sphere Model";
 
 
+	//Animationの初期化
 	ModelData animModel = AssimpLoadObjFile("resources/Model/human", "sneakWalk.gltf");
 	animation_.get()->Initialize(animModel, "resources/Model/human", "sneakWalk.gltf");
 	animation_.get()->name_ = "Animation Model";
 
+	//NoodeAnimationの初期化
 	ModelData cubeModel = AssimpLoadObjFile("resources/AnimatedCube", "AnimatedCube.gltf");
 	nodeAnimation_.get()->Initialize(cubeModel, "resources/AnimatedCube", "AnimatedCube.gltf");
 	nodeAnimation_.get()->name_ = "Node Animation Cube";
 
 	
-
+	//Sphereの初期化
 	int texture1 = texture_.get()->CreateTexture("resources/Texture/monsterBall.png");
 	sphere_.get()->Initialize(texture1);
 	sphere_.get()->SetTransform(modelTransform_);
 	sphere_.get()->name_ = "MonsterBall Sphere";
 
+	//SkyBoxの初期化
 	skyBoxTexture_ = texture_.get()->CreateTexture("resources/DDS/rostock_laage_airport_4k.dds");
 	skyBox_.get()->Initialize(skyBoxTexture_);
 	skyBox_.get()->SetShader("SkyBoxShader");

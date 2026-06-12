@@ -38,11 +38,14 @@ private:
 	std::unique_ptr<Obstacle> obstacles_[kMaxObstacles_];
 	int nextObstacleIndex_ = 0;
 
+	float obstacleInterval_ = 30.0f; // 障害物の生成間隔
+	float distanceSinceLastSpawn_ = 0.0f; // 前回生成からの移動距離
+
 	// ゲームオーバーフラグ
 	bool isGameOver_ = false;
 
 	// 障害物をスポーンする
-	void SpawnObstaclesOnChunk(float chunkZ);
+	void SpawnObstacles(float spawnZ);
 
 public:
 
@@ -57,6 +60,10 @@ public:
 	float GetScrollSpeed() const { return scrollSpeed_; }
 	float GetBaseScrollSpeed() const { return baseScrollSpeed_; }
 	float GetMaxScrollSpeed() const { return maxScrollSpeed_; }
+	float GetObstacleInterval() const { return obstacleInterval_; }
+
+	// 設定
+	void SetObstacleInterval(float interval) { obstacleInterval_ = interval; }
 
 	// スクロール速度の設定
 	void SetBaseScrollSpeed(float speed) { baseScrollSpeed_ = speed; scrollSpeed_ = speed; }

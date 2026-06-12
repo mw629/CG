@@ -33,13 +33,14 @@ private:
 	// アクション用の変数
 	bool isJumping_ = false;
 	float velocityY_ = 0.0f;
-	float gravity_ = 0.015f;
-	float jumpPower_ = 0.25f;
-	float baseHeight_ = 2.0f; // 地面の高さ（Y座標）
+	float gravity_ = 0.007f;
+	float jumpPower_ = 0.17f;
+	float baseHeight_ = 3.0f; // 地面の高さ（Y座標）
 
 	bool isRolling_ = false;
 	float rollTimer_ = 0.0f;
-	float rollDuration_ = 30.0f; // 転がりの継続フレーム数
+	float rollDuration_ = 45.0f; // 転がりの継続フレーム数
+	bool keepRolling_ = false; // 強制的にしゃがみを維持するフラグ
 
 public:
 
@@ -49,13 +50,14 @@ public:
 	void Initialize(ModelData modelData);
 	void Reset();
 
-	void Update(Matrix4x4 view);
+	void Update(Matrix4x4 view, float speedMultiplier = 1.0f);
 
-	void PlayerMove();
+	void PlayerMove(float speedMultiplier);
 
 	void Draw();
 
 	const Transform& GetTransform() const { return transform_; }
 	bool GetIsRolling() const { return isRolling_; }
+	void SetKeepRolling(bool keep) { keepRolling_ = keep; }
 };
 
