@@ -158,6 +158,14 @@ void GameScene::Initialize() {
 	camera_->SetTransform(cameraTransform_);
 	camera_->Update();
 
+	// スカイボックスの初期化
+	skyBoxTexture_ = texture_.get()->CreateTexture("resources/DDS/SnowWorld.dds");
+	skyBox_.get()->Initialize(skyBoxTexture_);
+	skyBox_.get()->SetShader("SkyBoxShader");
+	skyBox_.get()->SetLighting(false);
+	skyBox_.get()->SetTransform(skyBoxTransform_);
+	skyBox_.get()->name_ = "SkyBox";
+
 	// プレイヤーの初期化
 	ModelData modelData = AssimpLoadObjFile("resources/Model/Player", "player.obj");
 	player_->Initialize(modelData);
@@ -176,6 +184,8 @@ void GameScene::Update() {
 
 	camera_->Update();
 	view = camera_->GetViewMatrix();
+
+	skyBox_.get()->SettingWvp(view);
 
 	if (gameState_ == GameState::Playing) {
 		PlayingUpdate();
@@ -211,7 +221,8 @@ void GameScene::Draw() {
 	//カメラの設定
 	Draw::SetCamera(camera_.get());
 	//背景の設定
-	Draw::SetEnvironmentTexture(texture_.get()->CreateTexture("resources/DDS/rostock_laage_airport_4k.dds"));
+	Draw::SetEnvironmentTexture(skyBoxTexture_);
+	Draw::DrawObj(skyBox_.get());
 
 	// ステージ描画（道路 + 障害物）
 	stageSettings_->Draw();

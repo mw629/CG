@@ -31,14 +31,23 @@ private:
 	// ゲーム状態
 	GameState gameState_ = GameState::Playing;
 
+	//<<Common>>
+	
+	//スカイボックス
+	std::unique_ptr<Cube> skyBox_ = std::make_unique<Cube>();
+	int skyBoxTexture_;
+	Transform skyBoxTransform_{ {500.0f,500.0f,500.0f},{0.0f,0.0f,0.0f},{0.0f,0.0f,0.0f} };
+
 	//<< Playing >>//
 	// プレイヤー管理
 	std::unique_ptr<Player>player_ = std::make_unique<Player>();
 	// ステージ管理
 	std::unique_ptr<StageSettings> stageSettings_ = std::make_unique<StageSettings>();
 
+
 	//<< Paused >>//
 	std::unique_ptr<PauseSystem> pauseSystem_ = std::make_unique<PauseSystem>();
+
 
 	// 当たり判定処理
 	void CheckCollisions();
