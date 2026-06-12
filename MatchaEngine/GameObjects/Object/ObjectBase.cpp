@@ -41,7 +41,20 @@ void ObjectBase::ImGui() {
 			ImGui::TreePop();
 		}
 
-		material_.get()->ImGui();
+		// Blend mode UI
+	if (ImGui::TreeNode("Blend")) {
+		static const BlendMode blendModes[] = { kBlendModeNone, kBlendModeNormal, kBlendModeAdd, kBlendModeSubtract, kBlendModeMultiply, kBlendModeScreen };
+		static const char* blendNames[] = { "None", "Normal", "Add", "Subtract", "Multiply", "Screen" };
+		int current_blend = 0;
+		for (int i = 0; i < IM_ARRAYSIZE(blendModes); ++i) {
+			if (blend_ == blendModes[i]) { current_blend = i; break; }
+		}
+		if (ImGui::Combo("Blend Selection", &current_blend, blendNames, IM_ARRAYSIZE(blendNames))) {
+			blend_ = blendModes[current_blend];
+		}
+		ImGui::TreePop();
+	}
+	material_.get()->ImGui();
 	}
 	ImGui::PopID();
 #endif // _USE_IMGUI

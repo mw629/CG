@@ -5,9 +5,25 @@ TextureCube<float32_t4> gEnvironmentTexture : register(t1);
 SamplerState gSampler : register(s0);
 ConstantBuffer<Material> gMaterial : register(b0);
 ConstantBuffer<Camera> gCamera : register(b1);
-struct DirectionalLightGroup { int32_t numLights; float32_t3 padding; DirectionalLight lights[64]; };
-struct PointLightGroup { int32_t numLights; float32_t3 padding; PointLight lights[64]; };
-struct SpotLightGroup { int32_t numLights; float32_t3 padding; SpotLight lights[64]; };
+
+struct DirectionalLightGroup
+{
+    int32_t numLights;
+    float32_t3 padding;
+    DirectionalLight lights[64];
+};
+struct PointLightGroup
+{
+    int32_t numLights;
+    float32_t3 padding;
+    PointLight lights[64];
+};
+struct SpotLightGroup
+{
+    int32_t numLights;
+    float32_t3 padding;
+    SpotLight lights[64];
+};
 
 ConstantBuffer<DirectionalLightGroup> gDirectionalLightGroup : register(b2);
 ConstantBuffer<PointLightGroup> gPointLightGroup : register(b3);
@@ -21,40 +37,39 @@ struct PixelShaderOutput
 PixelShaderOutput main(VertexShaderOutput input)
 {
     PixelShaderOutput output;
-    float4 transformedUV = mul(float32_t4(input.texcoord, 0.0f, 1.0f), gMaterial.uvTransform);
-    float32_t4 textureColor = gTexture.Sample(gSampler, transformedUV.xy);
-   
-    float32_t3 toEye = normalize(gCamera.worldPosition - input.worldPosition);
+    
+    // 視線ベクトルと法線の正規化
     float32_t3 normal = normalize(input.normal);
+    float32_t3 toEye = normalize(gCamera.worldPosition - input.worldPosition);
     
-    // --- 氷の環境マッピングと屈折表現 ---
-    float32_t3 cameraToPosition = -toEye;
+    // ---------------------------------------------------------------
+    // 1. フレネル効果（外枠を水色、中心を半透明にする）
+    // ---------------------------------------------------------------
+    // 視線と法線が垂直（外枠）に近づくほど 0 になり、正面（中心）ほど 1 になる
+    float32_t NdotV = saturate(dot(normal, toEye));
     
-    // フレネル反射 (Schlickの近似)
-    float f0 = 0.04f; // 氷や水などの基本的な反射率
-    float cosTheta = saturate(dot(toEye, normal));
-    float fresnel = f0 + (1.0f - f0) * pow(1.0f - cosTheta, 5.0f);
+    // 氷の色の定義（必要に応じてマテリアル側から渡せるようにしても良いです）
+    float32_t3 iceCenterColor = float32_t3(1.0f, 1.0f, 1.0f); // 中心：白
+    float32_t3 iceEdgeColor = float32_t3(0.5f, 0.8f, 1.0f); // 外枠：水色
+    
+    // フレネルの強さ。powの指数を大きくすると、水色がより外枠だけに集中します
+    float32_t fresnel = pow(1.0f - NdotV, 3.0f);
+    
+    // 外枠ほど水色、中心ほど白にする
+    float32_t3 baseIceColor = lerp(iceCenterColor, iceEdgeColor, fresnel);
+    
+    // 中心にかけて半透明（外枠は不透明に近づく）
+    // マテリアルのアルファ値を基準に、フレネルで外枠の不透明度を上げます
+    float32_t baseAlpha = lerp(gMaterial.color.a * 0.3f, 1.0f, fresnel);
 
-    // 反射
-    float32_t3 reflectedVector = reflect(cameraToPosition, normal);
-    float32_t4 reflectColor = gEnvironmentTexture.Sample(gSampler, reflectedVector);
-    
-    // 屈折 (空気 1.0 / 氷 1.31 ≈ 0.763)
-    float32_t3 refractedVector = refract(cameraToPosition, normal, 0.763f);
-    // 全反射して屈折ベクトルが0になる場合を考慮してブレンド
-    float32_t4 refractColor = length(refractedVector) > 0.01f ? gEnvironmentTexture.Sample(gSampler, refractedVector) : reflectColor;
-
-    // フレネル値を使って反射と屈折をブレンド
-    float32_t4 environmentColor = lerp(refractColor, reflectColor, fresnel);
-    
-    // 氷特有のベースカラー（少し青みを持たせる）
-    float32_t3 iceBaseColor = float32_t3(0.85f, 0.95f, 1.0f);
+    // ---------------------------------------------------------------
+    // 2. ライティング計算（テクスチャは無視して白ベースで計算）
+    // ---------------------------------------------------------------
+    float32_t3 diffuse = float32_t3(0.0f, 0.0f, 0.0f);
+    float32_t3 specular = float32_t3(0.0f, 0.0f, 0.0f);
     
     if (gMaterial.enableLighting != 0)
     {
-        float32_t3 diffuse = float32_t3(0.0f, 0.0f, 0.0f);
-        float32_t3 specular = float32_t3(0.0f, 0.0f, 0.0f);
-        
         // Directional Lights
         for (int i = 0; i < gDirectionalLightGroup.numLights; ++i)
         {
@@ -63,14 +78,13 @@ PixelShaderOutput main(VertexShaderOutput input)
                 DirectionalLight dirLight = gDirectionalLightGroup.lights[i];
                 float32_t3 halfVector = normalize(-dirLight.direction + toEye);
                 float32_t NDotH = dot(normal, halfVector);
-                // 氷の鋭いハイライト表現のためにshininessを少し強める
-                float32_t specularPow = pow(saturate(NDotH), gMaterial.shininess * 1.5f); 
+                float32_t specularPow = pow(saturate(NDotH), gMaterial.shininess);
                 
-                // ハーフランバートによる柔らかな光の回り込み (氷の内部散乱のフェイク)
                 float32_t NdirL = dot(normal, -dirLight.direction);
                 float32_t cos = pow(NdirL * 0.5f + 0.5f, 2.0f);
                 
-                diffuse += gMaterial.color.rgb * textureColor.rgb * dirLight.color.rgb * cos * dirLight.intensity;
+                // テクスチャカラーを外し、baseIceColorを基準にする
+                diffuse += baseIceColor * dirLight.color.rgb * cos * dirLight.intensity;
                 specular += dirLight.color.rgb * dirLight.intensity * specularPow * float32_t3(1.0f, 1.0f, 1.0f);
             }
         }
@@ -84,13 +98,15 @@ PixelShaderOutput main(VertexShaderOutput input)
                 float32_t3 pointLightDirection = normalize(input.worldPosition - ptLight.position);
                 float32_t3 pointHalfVector = normalize(-pointLightDirection + toEye);
                 float32_t pointDotH = dot(normal, pointHalfVector);
-                float32_t pointSpecularPow = pow(saturate(pointDotH), gMaterial.shininess * 1.5f);
+                float32_t pointSpecularPow = pow(saturate(pointDotH), gMaterial.shininess);
+                
                 float32_t pointNdirL = dot(normal, -pointLightDirection);
                 float32_t pointCos = pow(pointNdirL * 0.5f + 0.5f, 2.0f);
+                
                 float32_t distance = length(ptLight.position - input.worldPosition);
                 float32_t factor = pow(saturate(-distance / ptLight.radius + 1.0f), ptLight.decay);
                 
-                diffuse += gMaterial.color.rgb * textureColor.rgb * ptLight.color.rgb * pointCos * ptLight.intensity * factor;
+                diffuse += baseIceColor * ptLight.color.rgb * pointCos * ptLight.intensity * factor;
                 specular += ptLight.color.rgb * ptLight.intensity * pointSpecularPow * float32_t3(1.0f, 1.0f, 1.0f) * factor;
             }
         }
@@ -104,44 +120,50 @@ PixelShaderOutput main(VertexShaderOutput input)
                 float32_t3 spotLightDirectionOnSurface = normalize(input.worldPosition - spLight.position);
                 float32_t3 spotHalfVector = normalize(-spotLightDirectionOnSurface + toEye);
                 float32_t spotDotH = dot(normal, spotHalfVector);
-                float32_t spotSpecularPow = pow(saturate(spotDotH), gMaterial.shininess * 1.5f);
+                float32_t spotSpecularPow = pow(saturate(spotDotH), gMaterial.shininess);
+                
                 float32_t spotNdirL = dot(normal, -spotLightDirectionOnSurface);
                 float32_t spotCos = pow(spotNdirL * 0.5f + 0.5f, 2.0f);
+                
                 float32_t conAngle = dot(spotLightDirectionOnSurface, spLight.direction);
                 float32_t fallffFactor = saturate((conAngle - spLight.cosAngle) / (spLight.cosFalloffStart));
+                
                 float32_t spotDistance = length(spLight.position - input.worldPosition);
                 float32_t attenuationFactor = pow(saturate(-spotDistance / spLight.distance + 1.0f), spLight.decay);
                 
-                diffuse += gMaterial.color.rgb * textureColor.rgb * spLight.color.rgb * conAngle * spLight.intensity * fallffFactor * attenuationFactor;
+                diffuse += baseIceColor * spLight.color.rgb * conAngle * spLight.intensity * fallffFactor * attenuationFactor;
                 specular += spLight.color.rgb * spLight.intensity * spotSpecularPow * float32_t3(1.0f, 1.0f, 1.0f) * fallffFactor * attenuationFactor;
             }
         }
         
-        // リムライト (エッジを明るくして氷の透け感・反射を強調)
-        float rim = 1.0f - saturate(dot(toEye, normal));
-        rim = smoothstep(0.4f, 1.0f, rim);
-        float32_t3 rimColor = float32_t3(0.6f, 0.8f, 1.0f) * rim * 0.5f;
-
-        // 最終的な色の合成 (氷の青みを全体に乗せる)
-        output.color.rgb = (diffuse + specular + rimColor) * iceBaseColor;
-       
-        // α値
-        output.color.a = gMaterial.color.a * textureColor.a;
+        output.color.rgb = diffuse + specular;
+        output.color.a = baseAlpha;
     }
     else
     {
-        output.color = gMaterial.color * textureColor;
-        output.color.rgb *= iceBaseColor;
+        // ライトが無効な場合も氷のベース色を適用
+        output.color.rgb = baseIceColor;
+        output.color.a = baseAlpha;
     }
     
-    //環境マッピングの色を加算 (氷らしく少し強めに影響させる)
-    // 屈折成分も入っているので少し透明感が出る
-    output.color.rgb += environmentColor.rgb * gMaterial.environmentCoefficient * 1.2f;
+    // ---------------------------------------------------------------
+    // 3. 環境マッピングの適用
+    // ---------------------------------------------------------------
+    float32_t3 cameraToPosition = normalize(input.worldPosition - gCamera.worldPosition);
+    float32_t3 reflectedVector = reflect(cameraToPosition, normal);
+    float32_t4 environmentColor = gEnvironmentTexture.Sample(gSampler, reflectedVector);
     
+    // 環境マップの色を加算（氷の周囲の映り込みを表現）
+    output.color.rgb += environmentColor.rgb * gMaterial.environmentCoefficient;
+    
+    // 透過処理を行うため、元のコードにあった「0.5以下でdiscard」はコメントアウト、または削除します
+    // (discardしてしまうと、中心の半透明部分が消えて穴が空いてしまうため)
+    /*
     if (output.color.a <= 0.5f)
     {
         discard;
     }
+    */
     
     return output;
 }
