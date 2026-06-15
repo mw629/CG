@@ -20,7 +20,8 @@ private:
 		Playing,
 		Paused,
 		GameClear,
-		GameOver
+		GameOver,
+		Editor
 	};
 
 
@@ -79,7 +80,7 @@ public:
 	void PlayingUpdate();
 	
 	void PausedUpdate();
-
-
+	
+	void EditorUpdate();
 
 };

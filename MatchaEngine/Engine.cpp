@@ -14,6 +14,7 @@
 #pragma comment(lib,"winmm.lib")
 
 bool Engine::isEnd_ = false;
+Engine::SceneOverlayCallback Engine::s_sceneOverlayCallback_ = nullptr;
 
 Engine::~Engine()
 {
@@ -365,6 +366,10 @@ void Engine::Debug()
 	ImGui::Begin("Scene");
 	ImVec2 sceneWindowSize = ImGui::GetContentRegionAvail();
 	ImGui::Image((ImTextureID)renderTexture->GetSrvHandleGPU().ptr, sceneWindowSize);
+	// ギズモ等のオーバーレイ描画コールバックをSceneウィンドウのBegin/Endの間に呼び出す
+	if (s_sceneOverlayCallback_) {
+		s_sceneOverlayCallback_();
+	}
 	ImGui::End();
 
 #endif

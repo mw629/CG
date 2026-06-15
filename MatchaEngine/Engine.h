@@ -1,6 +1,7 @@
 #pragma once
 #include <fstream>
 #include <chrono>
+#include <functional>
 
 ///自作エンジン///
 
@@ -78,6 +79,10 @@
 
 class Engine
 {
+public:
+	// Sceneウィンドウ内のオーバーレイ描画用コールバック型
+	using SceneOverlayCallback = std::function<void()>;
+
 private:
 
 	Vector2 finalPos = { 100.0f, 100.0f }; 
@@ -122,6 +127,7 @@ private:
 	ID3D12DescriptorHeap* descriptorHeaps[1];
 
 	static bool isEnd_;
+	static SceneOverlayCallback s_sceneOverlayCallback_;
 
 public:
 
@@ -149,6 +155,9 @@ public:
 
 	static void SetEnd(bool isEnd) { isEnd_ = isEnd; }
 	static bool IsEnd() { return isEnd_; }
+
+	static void SetSceneOverlayCallback(SceneOverlayCallback cb) { s_sceneOverlayCallback_ = cb; }
+	static void ClearSceneOverlayCallback() { s_sceneOverlayCallback_ = nullptr; }
 };
 
 

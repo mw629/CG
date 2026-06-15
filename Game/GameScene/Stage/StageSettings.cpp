@@ -93,6 +93,14 @@ void StageSettings::Update(Matrix4x4 view)
 	}
 }
 
+void StageSettings::EditorUpdate(Matrix4x4 view)
+{
+	// Editor中はスクロールさせないため、スピードを0として更新（WVPのみ更新させる）
+	for (int i = 0; i < kMaxObstacles_; i++) {
+		obstacles_[i]->StageUpdate(view, 0.0f);
+	}
+}
+
 void StageSettings::Draw()
 {
 	// 描画はGameObjectManagerが一括で行うため、ここでは何もしない

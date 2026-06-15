@@ -15,7 +15,7 @@ void GameScene::ImGui()
 	camera_.get()->ImGui();
 
 	if (ImGui::CollapsingHeader("Game State", ImGuiTreeNodeFlags_DefaultOpen)) {
-		const char* stateNames[] = { "Playing", "Paused", "GameClear", "GameOver" };
+		const char* stateNames[] = { "Playing", "Paused", "GameClear", "GameOver", "Editor" };
 		ImGui::Text("Game State: %s", stateNames[gameState_]);
 		ImGui::Separator();
 
@@ -60,8 +60,21 @@ void GameScene::ImGui()
 		ImGui::Separator();
 
 		// ゲーム制御
+		if (gameState_ == GameState::Editor) {
+			if (ImGui::Button("Play", ImVec2(120, 0))) {
+				gameState_ = GameState::Playing;
+				camera_->SetDebugCamera(false);
+			}
+		} else {
+			if (ImGui::Button("Stop (Editor)", ImVec2(120, 0))) {
+				gameState_ = GameState::Editor;
+				camera_->SetDebugCamera(true);
+			}
+		}
+
 		if (ImGui::Button("Reset Game", ImVec2(120, 0))) {
 			gameState_ = GameState::Playing;
+			camera_->SetDebugCamera(false);
 			stageSettings_->Reset();
 			player_->Reset();
 			currentDistance_ = 0.0f;
@@ -94,14 +107,27 @@ void GameScene::ImGui()
 	if (ImGui::Button("Save Scene")) {
 		gameObjectManager_->SaveScene("Resources/Scene/scene.json");
 	}
-	ImGui::SameLine();
+
 	if (ImGui::Button("Load Scene")) {
 		gameObjectManager_->LoadScene("Resources/Scene/scene.json");
 	}
 
-	editorUI_->Draw(gameObjectManager_.get());
-
 	ImGui::End();
+
+	Matrix4x4 projection = MakePerspectiveFovMatrix(0.45f, float(1280.0f) / float(720.0f), 0.1f, 100.0f);
+	editorUI_->Draw(gameObjectManager_.get(), view, projection);
+
+	// Stopモードの時だけギズモ描画コールバックをSceneウィンドウに登録する
+#ifdef _USE_IMGUI
+	if (gameState_ == GameState::Editor) {
+		Engine::SetSceneOverlayCallback([this]() {
+			Matrix4x4 proj = MakePerspectiveFovMatrix(0.45f, float(1280.0f) / float(720.0f), 0.1f, 100.0f);
+			editorUI_->DrawGizmoInScene(view, proj);
+		});
+	} else {
+		Engine::ClearSceneOverlayCallback();
+	}
+#endif
 
 	// ポーズメニュー
 	if (gameState_ == GameState::Paused) {
@@ -234,6 +260,9 @@ void GameScene::Update() {
 			sceneChangeRequest_ = true;
 		}
 	}
+	else if (gameState_ == GameState::Editor) {
+		EditorUpdate();
+	}
 }
 
 void GameScene::Draw() {
@@ -279,6 +308,14 @@ void GameScene::PlayingUpdate()
 void GameScene::PausedUpdate()
 {
 	pauseSystem_->Update();
+}
+
+void GameScene::EditorUpdate()
+{
+	// Editor mode doesn't progress the game scroll or obstacle positions.
+	// But we still want to update objects (like their transforms).
+	gameObjectManager_->UpdateAll(view, 0.0f);
+	stageSettings_->EditorUpdate(view);
 }
 
 void GameScene::CheckCollisions()

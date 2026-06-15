@@ -50,6 +50,11 @@ void Player::PlayerMove(float speedMultiplier)
 	const int kMinLane = -1;       // 一番左のレーン
 	const int kMaxLane = 1;        // 一番右のレーン
 
+	if (speedMultiplier <= 0.0f) {
+		model_.get()->SetTransform(transform_);
+		return;
+	}
+
 	// レーンの移動中ではなかったら
 	if (laneIndex_ == targetLaneIndex_) {
 		// キー入力で目標レーンを設定

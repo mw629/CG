@@ -559,3 +559,47 @@ AABB GetAABB(Transform transform_,float kWidth,float kHeight) {
 
 	return aabb;
 }
+
+#include <algorithm>
+
+bool CheckRayAABB(const Ray& ray, const AABB& aabb, float& outDistance) {
+	float tMin = -FLT_MAX;
+	float tMax = FLT_MAX;
+
+	// X軸
+	if (abs(ray.direction.x) > 0.0001f) {
+		float t1 = (aabb.min.x - ray.origin.x) / ray.direction.x;
+		float t2 = (aabb.max.x - ray.origin.x) / ray.direction.x;
+		tMin = max(tMin, min(t1, t2));
+		tMax = min(tMax, max(t1, t2));
+	} else if (ray.origin.x < aabb.min.x || ray.origin.x > aabb.max.x) {
+		return false;
+	}
+
+	// Y軸
+	if (abs(ray.direction.y) > 0.0001f) {
+		float t1 = (aabb.min.y - ray.origin.y) / ray.direction.y;
+		float t2 = (aabb.max.y - ray.origin.y) / ray.direction.y;
+		tMin = max(tMin, min(t1, t2));
+		tMax = min(tMax, max(t1, t2));
+	} else if (ray.origin.y < aabb.min.y || ray.origin.y > aabb.max.y) {
+		return false;
+	}
+
+	// Z軸
+	if (abs(ray.direction.z) > 0.0001f) {
+		float t1 = (aabb.min.z - ray.origin.z) / ray.direction.z;
+		float t2 = (aabb.max.z - ray.origin.z) / ray.direction.z;
+		tMin = max(tMin, min(t1, t2));
+		tMax = min(tMax, max(t1, t2));
+	} else if (ray.origin.z < aabb.min.z || ray.origin.z > aabb.max.z) {
+		return false;
+	}
+
+	if (tMin > tMax || tMax < 0.0f) {
+		return false;
+	}
+
+	outDistance = tMin > 0.0f ? tMin : tMax;
+	return true;
+}
