@@ -2,11 +2,13 @@
 #include <memory>
 #include <Engine.h>
 
+#include "GameObject.h"
+
 /// <summary>
 /// 障害物を表すクラス
 /// ステージ上に配置され、手前に向かってスクロールする
 /// </summary>
-class Obstacle
+class Obstacle : public GameObject
 {
 public:
 	enum class Type
@@ -18,9 +20,7 @@ public:
 
 private:
 	std::unique_ptr<Model> model_ = std::make_unique<Model>();
-	Transform transform_;
 	Type type_ = Type::Wall;
-	bool isActive_ = false;
 
 	// 当たり判定のサイズ
 	float collisionWidth_ = 1.0f;
@@ -42,9 +42,12 @@ public:
 	/// <summary>
 	/// 毎フレームの更新（手前にスクロール）
 	/// </summary>
-	void Update(Matrix4x4 view, float scrollSpeed);
-
-	void Draw();
+	void StageUpdate(Matrix4x4 view, float scrollSpeed);
+	
+	// Override standard Update and Draw to avoid GameObjectManager from automatically updating scroll/drawing without context
+	void Update(Matrix4x4 view, float speedMultiplier = 1.0f) override {}
+	void Draw() override;
+	void ImGui() override;
 
 	/// <summary>
 	/// 画面の手前を過ぎたら非アクティブにする
@@ -52,8 +55,6 @@ public:
 	void Deactivate() { isActive_ = false; }
 
 	// ゲッター
-	bool GetIsActive() const { return isActive_; }
-	const Transform& GetTransform() const { return transform_; }
 	Type GetType() const { return type_; }
 	float GetCollisionWidth() const { return collisionWidth_; }
 	float GetCollisionHeight() const { return collisionHeight_; }

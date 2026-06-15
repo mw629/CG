@@ -152,3 +152,11 @@ void Player::Draw()
 {
 	Draw::DrawObj(model_.get());
 }
+
+void Player::ImGui()
+{
+	GameObject::ImGui();
+	if (model_) {
+		model_->ImGui();
+	}
+}

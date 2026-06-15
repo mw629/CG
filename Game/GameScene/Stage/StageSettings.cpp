@@ -2,16 +2,19 @@
 #include <cstdlib>
 #include <ctime>
 
-void StageSettings::Initialize(ModelData roadModelData, ModelData obstacleModelData)
+void StageSettings::Initialize(ModelData roadModelData, ModelData obstacleModelData, class GameObjectManager* manager)
 {
 	// 乱数の初期化
 	std::srand(static_cast<unsigned int>(std::time(nullptr)));
 
 	// 道路チャンクの初期化
 	for (int i = 0; i < kChunkCount_; i++) {
-		roadChunks_[i] = std::make_unique<Model>();
-		roadChunks_[i]->Initialize(roadModelData);
-		roadChunks_[i]->SetTexture(texture_->TextureData("resources/Model/Ground/road.png"));
+        auto roadModel = std::make_shared<Model>();
+		roadModel->Initialize(roadModelData);
+		roadModel->SetTexture(texture_->TextureData("resources/Model/Ground/road.png"));
+
+		roadChunks_[i] = std::make_shared<RenderObject>(roadModel);
+        roadChunks_[i]->SetName("RoadChunk " + std::to_string(i));
 
 		// Z軸方向に並べて配置（手前から奥へ）
 		roadTransforms_[i].scale = { 5.0f, 5.0f, 5.0f };
@@ -19,15 +22,19 @@ void StageSettings::Initialize(ModelData roadModelData, ModelData obstacleModelD
 		roadTransforms_[i].translate = { 0.0f, 2.0f, static_cast<float>(i) * chunkLength_ };
 
 		roadChunks_[i]->SetTransform(roadTransforms_[i]);
+        if (manager) manager->AddObject(roadChunks_[i]);
 	}
 
 	// 障害物の初期化
 	for (int i = 0; i < kMaxObstacles_; i++) {
-		obstacles_[i] = std::make_unique<Obstacle>();
+		obstacles_[i] = std::make_shared<Obstacle>();
+        obstacles_[i]->SetName("Obstacle " + std::to_string(i));
 
 		// ランダムなタイプで初期化
 		Obstacle::Type type = static_cast<Obstacle::Type>(std::rand() % 3);
 		obstacles_[i]->Initialize(obstacleModelData, type);
+        
+        if (manager) manager->AddObject(obstacles_[i]);
 	}
 }
 
@@ -70,7 +77,6 @@ void StageSettings::Update(Matrix4x4 view)
 		}
 
 		roadChunks_[i]->SetTransform(roadTransforms_[i]);
-		roadChunks_[i]->SettingWvp(view);
 	}
 
 	// 障害物の定期生成
@@ -83,21 +89,13 @@ void StageSettings::Update(Matrix4x4 view)
 
 	// 障害物の更新
 	for (int i = 0; i < kMaxObstacles_; i++) {
-		obstacles_[i]->Update(view, scrollSpeed_);
+		obstacles_[i]->StageUpdate(view, scrollSpeed_);
 	}
 }
 
 void StageSettings::Draw()
 {
-	// 道路チャンクの描画
-	for (int i = 0; i < kChunkCount_; i++) {
-		Draw::DrawObj(roadChunks_[i].get());
-	}
-
-	// 障害物の描画
-	for (int i = 0; i < kMaxObstacles_; i++) {
-		obstacles_[i]->Draw();
-	}
+	// 描画はGameObjectManagerが一括で行うため、ここでは何もしない
 }
 
 void StageSettings::SpawnObstacles(float z)

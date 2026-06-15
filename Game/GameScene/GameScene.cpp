@@ -1,6 +1,7 @@
 #include "GameScene.h"
 #include <imgui.h>
 #include <memory>
+#include "AssetManager.h"
 
 GameScene::~GameScene()
 {
@@ -90,6 +91,16 @@ void GameScene::ImGui()
 		}
 	}
 
+	if (ImGui::Button("Save Scene")) {
+		gameObjectManager_->SaveScene("Resources/Scene/scene.json");
+	}
+	ImGui::SameLine();
+	if (ImGui::Button("Load Scene")) {
+		gameObjectManager_->LoadScene("Resources/Scene/scene.json");
+	}
+
+	editorUI_->Draw(gameObjectManager_.get());
+
 	ImGui::End();
 
 	// ポーズメニュー
@@ -170,10 +181,18 @@ void GameScene::Initialize() {
 	ModelData modelData = AssimpLoadObjFile("resources/Model/Player", "player.obj");
 	player_->Initialize(modelData);
 
+	// オブジェクトマネージャーへの登録
+	gameObjectManager_->Clear();
+	auto skyboxRenderObj = std::make_shared<RenderObject>(skyBox_);
+	skyboxRenderObj->SetName("SkyBox");
+	gameObjectManager_->AddObject(skyboxRenderObj);
+	player_->SetName("Player");
+	gameObjectManager_->AddObject(player_);
+
 	// ステージの初期化
-	ModelData roadModelData = AssimpLoadObjFile("resources/Plane", "Plane.gltf");
-	ModelData obstacleModelData = AssimpLoadObjFile("resources/Block", "Block.obj");
-	stageSettings_->Initialize(roadModelData, obstacleModelData);
+	ModelData roadModelData = AssetManager::LoadModel("resources/Plane", "Plane.gltf");
+	ModelData obstacleModelData = AssetManager::LoadModel("resources/Block", "Block.obj");
+	stageSettings_->Initialize(roadModelData, obstacleModelData, gameObjectManager_.get());
 
 	currentDistance_ = 0.0f;
 }
@@ -185,7 +204,7 @@ void GameScene::Update() {
 	camera_->Update();
 	view = camera_->GetViewMatrix();
 
-	skyBox_.get()->SettingWvp(view);
+	// skyBox_ is now updated in gameObjectManager_
 
 	if (gameState_ == GameState::Playing) {
 		PlayingUpdate();
@@ -222,13 +241,12 @@ void GameScene::Draw() {
 	Draw::SetCamera(camera_.get());
 	//背景の設定
 	Draw::SetEnvironmentTexture(skyBoxTexture_);
-	Draw::DrawObj(skyBox_.get());
+
+	// オブジェクトの一括描画（SkyBox, Player など）
+	gameObjectManager_->DrawAll();
 
 	// ステージ描画（道路 + 障害物）
 	stageSettings_->Draw();
-
-	// プレイヤー描画
-	player_->Draw();
 
 	// ポーズ中の描画
 	if (gameState_ == GameState::Paused) {
@@ -248,7 +266,10 @@ void GameScene::PlayingUpdate()
 	currentDistance_ += stageSettings_->GetScrollSpeed();
 
 	CheckKeepRolling();
-	player_->Update(view, speedMultiplier);
+	
+	// オブジェクトの一括更新
+	gameObjectManager_->UpdateAll(view, speedMultiplier);
+	
 	stageSettings_->Update(view);
 
 	// 当たり判定チェック

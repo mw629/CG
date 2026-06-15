@@ -2,6 +2,8 @@
 
 Obstacle::Obstacle()
 {
+	name_ = "Obstacle";
+	isActive_ = false;
 }
 
 Obstacle::~Obstacle()
@@ -59,24 +61,32 @@ void Obstacle::Spawn(float x, float y, float z)
 	model_->SetTransform(transform_);
 }
 
-void Obstacle::Update(Matrix4x4 view, float scrollSpeed)
+void Obstacle::StageUpdate(Matrix4x4 view, float scrollSpeed)
 {
 	if (!isActive_) return;
 
-	// 手前に向かってスクロール
+	// 手前にスクロール
 	transform_.translate.z -= scrollSpeed;
 
-	// 画面の後ろ（手前）を過ぎたら非アクティブ
+	// カメラの後ろ（手前）を過ぎたら非アクティブにする
 	if (transform_.translate.z < -10.0f) {
 		isActive_ = false;
 	}
 
-	model_->SetTransform(transform_);
-	model_->SettingWvp(view);
+	model_.get()->SetTransform(transform_);
+	model_.get()->SettingWvp(view);
 }
 
 void Obstacle::Draw()
 {
 	if (!isActive_) return;
 	Draw::DrawObj(model_.get());
+}
+
+void Obstacle::ImGui()
+{
+	GameObject::ImGui();
+	if (model_) {
+		model_->ImGui();
+	}
 }

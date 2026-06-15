@@ -3,9 +3,9 @@
 #include <memory>
 #include <Engine.h>
 
+#include "GameObject.h"
 
-
-class Player
+class Player : public GameObject
 {
 private:
 
@@ -19,7 +19,7 @@ private:
 
 
 	std::unique_ptr<Model> model_ = std::make_unique<Model>();
-	Transform transform_;
+	// transform_ is inherited from GameObject
 
 	//レーン移動のための変数
 	int laneIndex_ = 0;// 現在のレーン位置
@@ -50,13 +50,14 @@ public:
 	void Initialize(ModelData modelData);
 	void Reset();
 
-	void Update(Matrix4x4 view, float speedMultiplier = 1.0f);
+	void Update(Matrix4x4 view, float speedMultiplier = 1.0f) override;
 
 	void PlayerMove(float speedMultiplier);
 
-	void Draw();
+	void Draw() override;
+	void ImGui() override;
 
-	const Transform& GetTransform() const { return transform_; }
+	// GetTransform() is inherited from GameObject
 	bool GetIsRolling() const { return isRolling_; }
 	void SetKeepRolling(bool keep) { keepRolling_ = keep; }
 };

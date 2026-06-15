@@ -7,7 +7,9 @@
 #include <Entity/Collision.h>
 #include <Stage/StageSettings.h>
 #include <System/PauseSystem.h>
-
+#include "GameObjectManager.h"
+#include "RenderObject.h"
+#include "EditorUI.h"
 
 class GameScene :public IScene
 {
@@ -34,13 +36,17 @@ private:
 	//<<Common>>
 	
 	//スカイボックス
-	std::unique_ptr<Cube> skyBox_ = std::make_unique<Cube>();
+	std::shared_ptr<Cube> skyBox_ = std::make_shared<Cube>();
 	int skyBoxTexture_;
 	Transform skyBoxTransform_{ {500.0f,500.0f,500.0f},{0.0f,0.0f,0.0f},{0.0f,0.0f,0.0f} };
 
 	//<< Playing >>//
 	// プレイヤー管理
-	std::unique_ptr<Player>player_ = std::make_unique<Player>();
+	std::shared_ptr<Player> player_ = std::make_shared<Player>();
+	// オブジェクト管理
+	std::unique_ptr<GameObjectManager> gameObjectManager_ = std::make_unique<GameObjectManager>();
+	// エディターUI
+	std::unique_ptr<EditorUI> editorUI_ = std::make_unique<EditorUI>();
 	// ステージ管理
 	std::unique_ptr<StageSettings> stageSettings_ = std::make_unique<StageSettings>();
 
