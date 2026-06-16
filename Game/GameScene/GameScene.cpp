@@ -59,19 +59,6 @@ void GameScene::ImGui()
 
 		ImGui::Separator();
 
-		// ゲーム制御
-		if (gameState_ == GameState::Editor) {
-			if (ImGui::Button("Play", ImVec2(120, 0))) {
-				gameState_ = GameState::Playing;
-				camera_->SetDebugCamera(false);
-			}
-		} else {
-			if (ImGui::Button("Stop (Editor)", ImVec2(120, 0))) {
-				gameState_ = GameState::Editor;
-				camera_->SetDebugCamera(true);
-			}
-		}
-
 		if (ImGui::Button("Reset Game", ImVec2(120, 0))) {
 			gameState_ = GameState::Playing;
 			camera_->SetDebugCamera(false);
@@ -119,7 +106,7 @@ void GameScene::ImGui()
 
 	// Stopモードの時だけギズモ描画コールバックをSceneウィンドウに登録する
 #ifdef _USE_IMGUI
-	if (gameState_ == GameState::Editor) {
+	if (!Engine::IsPlaying()) {
 		Engine::SetSceneOverlayCallback([this]() {
 			Matrix4x4 proj = MakePerspectiveFovMatrix(0.45f, float(1280.0f) / float(720.0f), 0.1f, 100.0f);
 			editorUI_->DrawGizmoInScene(view, proj);
@@ -186,12 +173,19 @@ void GameScene::ImGui()
 void GameScene::Initialize() {
 
 	sceneID_ = SceneID::Game;
-	gameState_ = GameState::Playing;
+	
+	if (!Engine::IsPlaying()) {
+		gameState_ = GameState::Editor;
+		camera_->SetDebugCamera(true);
+	} else {
+		gameState_ = GameState::Playing;
+		camera_->SetDebugCamera(false);
+	}
 	sceneChangeRequest_ = false;
 
 
 
-	camera_->SetDebugCamera(false); // ゲーム用カメラを使う
+	// camera_->SetDebugCamera() は上記で設定済み
 	camera_->SetTransform(cameraTransform_);
 	camera_->Update();
 
@@ -226,6 +220,16 @@ void GameScene::Initialize() {
 void GameScene::Update() {
 
 	PostEffect::SetActivePostEffect(PostEffect::Type::GaussianFilter);
+
+	// Engine側のPlay/Stop状態に同期してゲームステートを切り替え
+	bool isEnginePlaying = Engine::IsPlaying();
+	if (isEnginePlaying && gameState_ == GameState::Editor) {
+		gameState_ = GameState::Playing;
+		camera_->SetDebugCamera(false);
+	} else if (!isEnginePlaying && gameState_ == GameState::Playing) {
+		gameState_ = GameState::Editor;
+		camera_->SetDebugCamera(true);
+	}
 
 	camera_->Update();
 	view = camera_->GetViewMatrix();

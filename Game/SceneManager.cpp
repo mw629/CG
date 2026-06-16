@@ -28,17 +28,7 @@ void SceneManager::Update() {
 		scene_->Initialize();
 	}
 
-#ifdef _USE_IMGUI
-	// Play状態のときのみゲームロジックを更新
-	// ただし初回1フレームはUpdateを通す（初期化後の行列計算等のため）
-	static bool firstFrame = true;
-	if (Engine::IsPlaying() || firstFrame) {
-		scene_->Update();
-		firstFrame = false;
-	}
-#else
 	scene_->Update();
-#endif
 }
 
 void SceneManager::Draw() {
