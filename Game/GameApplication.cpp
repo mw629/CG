@@ -22,7 +22,14 @@ void GameApplication::Run() {
 
 		engine.get()->Debug();
 
+#ifdef _USE_IMGUI
+		// エディタモード: Play/Stop問わずInitialize・Drawは常に通す
+		// Play状態でのみUpdate（ゲームロジック）を実行
 		sceneManager.get()->Run();
+#else
+		// Release/Developmentでは常に実行
+		sceneManager.get()->Run();
+#endif
 
 		engine.get()->EndFrame();
 	}

@@ -82,11 +82,16 @@ class Engine
 public:
 	// Sceneウィンドウ内のオーバーレイ描画用コールバック型
 	using SceneOverlayCallback = std::function<void()>;
+	// Save/Loadコールバック型
+	using EditorCallback = std::function<void()>;
 
 private:
 
 	Vector2 finalPos = { 100.0f, 100.0f }; 
 	bool showFinalWindow = true;
+
+	// Sceneウィンドウのアスペクト比設定
+	int sceneAspectRatioIndex_ = 2; // 0: Free, 1: 16:9, 2: 4:3, 3: 1:1, 4: 21:9
 
 	HRESULT hr_;
 	std::chrono::steady_clock::time_point reference_;
@@ -127,7 +132,10 @@ private:
 	ID3D12DescriptorHeap* descriptorHeaps[1];
 
 	static bool isEnd_;
+	static bool isPlaying_;
 	static SceneOverlayCallback s_sceneOverlayCallback_;
+	static EditorCallback s_saveCallback_;
+	static EditorCallback s_loadCallback_;
 
 public:
 
@@ -156,8 +164,14 @@ public:
 	static void SetEnd(bool isEnd) { isEnd_ = isEnd; }
 	static bool IsEnd() { return isEnd_; }
 
+	static void SetPlaying(bool playing) { isPlaying_ = playing; }
+	static bool IsPlaying() { return isPlaying_; }
+
 	static void SetSceneOverlayCallback(SceneOverlayCallback cb) { s_sceneOverlayCallback_ = cb; }
 	static void ClearSceneOverlayCallback() { s_sceneOverlayCallback_ = nullptr; }
+
+	static void SetSaveCallback(EditorCallback cb) { s_saveCallback_ = cb; }
+	static void SetLoadCallback(EditorCallback cb) { s_loadCallback_ = cb; }
 };
 
 

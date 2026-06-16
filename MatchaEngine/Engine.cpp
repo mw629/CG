@@ -14,7 +14,10 @@
 #pragma comment(lib,"winmm.lib")
 
 bool Engine::isEnd_ = false;
+bool Engine::isPlaying_ = false;
 Engine::SceneOverlayCallback Engine::s_sceneOverlayCallback_ = nullptr;
+Engine::EditorCallback Engine::s_saveCallback_ = nullptr;
+Engine::EditorCallback Engine::s_loadCallback_ = nullptr;
 
 Engine::~Engine()
 {
@@ -189,7 +192,12 @@ void Engine::PostDraw()
 	command->GetCommandList()->RSSetViewports(1, viewportScissor->GetViewport());
 	command->GetCommandList()->RSSetScissorRects(1, viewportScissor->GetScissorRect());
 
-	Draw::DrawPostEffect(renderTexture.get()->GetSrvHandleGPU(), PostEffect::GetActiveShaderName(), postEffect_.get());
+#ifdef _USE_IMGUI
+	// _USE_IMGUI有効時はSceneウィンドウ内のImGui::Imageで描画するため
+	// Swapchainへの全画面PostEffect描画はスキップ
+#else
+	Draw::DrawPostEffect(renderTexture->GetSrvHandleGPU(), PostEffect::GetActiveShaderName(), postEffect_.get());
+#endif
 
 #ifdef _USE_IMGUI
 	imGuiManager->Render(command->GetCommandList());
@@ -312,6 +320,65 @@ void Engine::Debug()
 {
 #ifdef _USE_IMGUI
 
+	// ===== Unity風メインメニューバー =====
+	if (ImGui::BeginMainMenuBar()) {
+		if (ImGui::BeginMenu("File")) {
+			if (ImGui::MenuItem("Save", "Ctrl+S")) {
+				if (s_saveCallback_) s_saveCallback_();
+			}
+			if (ImGui::MenuItem("Load", "Ctrl+L")) {
+				if (s_loadCallback_) s_loadCallback_();
+			}
+			ImGui::Separator();
+			if (ImGui::MenuItem("Exit")) {
+				SetEnd(true);
+			}
+			ImGui::EndMenu();
+		}
+		if (ImGui::BeginMenu("Window")) {
+			ImGui::MenuItem("Debug Info", nullptr, &showFinalWindow);
+			ImGui::EndMenu();
+		}
+
+		// --- メニューバー中央にPlay/Stopボタン ---
+		float menuBarWidth = ImGui::GetWindowWidth();
+		float buttonAreaWidth = 140.0f;
+		ImGui::SetCursorPosX((menuBarWidth - buttonAreaWidth) * 0.5f);
+
+		if (isPlaying_) {
+			// Stopボタン（赤）
+			ImGui::PushStyleColor(ImGuiCol_Button, ImVec4(0.8f, 0.15f, 0.15f, 1.0f));
+			ImGui::PushStyleColor(ImGuiCol_ButtonHovered, ImVec4(0.9f, 0.25f, 0.25f, 1.0f));
+			ImGui::PushStyleColor(ImGuiCol_ButtonActive, ImVec4(0.7f, 0.1f, 0.1f, 1.0f));
+			if (ImGui::Button("  Stop  ")) {
+				isPlaying_ = false;
+			}
+			ImGui::PopStyleColor(3);
+		} else {
+			// Playボタン（緑）
+			ImGui::PushStyleColor(ImGuiCol_Button, ImVec4(0.15f, 0.65f, 0.15f, 1.0f));
+			ImGui::PushStyleColor(ImGuiCol_ButtonHovered, ImVec4(0.2f, 0.75f, 0.2f, 1.0f));
+			ImGui::PushStyleColor(ImGuiCol_ButtonActive, ImVec4(0.1f, 0.55f, 0.1f, 1.0f));
+			if (ImGui::Button("  Play  ")) {
+				isPlaying_ = true;
+			}
+			ImGui::PopStyleColor(3);
+		}
+
+		ImGui::EndMainMenuBar();
+	}
+
+	// Ctrl+S / Ctrl+L ショートカット
+	if (ImGui::GetIO().KeyCtrl && ImGui::IsKeyPressed(ImGuiKey_S)) {
+		if (s_saveCallback_) s_saveCallback_();
+	}
+	if (ImGui::GetIO().KeyCtrl && ImGui::IsKeyPressed(ImGuiKey_L)) {
+		if (s_loadCallback_) s_loadCallback_();
+	}
+
+	// ウィンドウ全体をDockSpaceとして設定（各ImGuiウィンドウをドッキング固定可能にする）
+	ImGui::DockSpaceOverViewport(0, ImGui::GetMainViewport(), ImGuiDockNodeFlags_PassthruCentralNode);
+
 	ImGui::SetNextWindowSize(ImVec2(500, 400), ImGuiCond_FirstUseEver);
 	ImGui::Begin("Debug Info");
 
@@ -364,8 +431,38 @@ void Engine::Debug()
 	ImGui::End();
 
 	ImGui::Begin("Scene");
-	ImVec2 sceneWindowSize = ImGui::GetContentRegionAvail();
-	ImGui::Image((ImTextureID)renderTexture->GetSrvHandleGPU().ptr, sceneWindowSize);
+
+	// --- アスペクト比設定 ---
+	const char* aspectLabels[] = { "Free", "16:9", "4:3", "1:1", "21:9" };
+	const float aspectRatios[] = { 0.0f, 16.0f / 9.0f, 4.0f / 3.0f, 1.0f, 21.0f / 9.0f };
+	ImGui::Combo("Aspect Ratio", &sceneAspectRatioIndex_, aspectLabels, IM_ARRAYSIZE(aspectLabels));
+	ImGui::Separator();
+
+	ImVec2 availSize = ImGui::GetContentRegionAvail();
+	ImVec2 imageSize = availSize;
+	ImVec2 cursorStart = ImGui::GetCursorPos();
+
+	if (sceneAspectRatioIndex_ > 0 && availSize.x > 0.0f && availSize.y > 0.0f) {
+		float targetAspect = aspectRatios[sceneAspectRatioIndex_];
+		float availAspect = availSize.x / availSize.y;
+
+		if (availAspect > targetAspect) {
+			// ウィンドウが横に広い → 高さに合わせ、左右に余白
+			imageSize.y = availSize.y;
+			imageSize.x = availSize.y * targetAspect;
+		} else {
+			// ウィンドウが縦に長い → 幅に合わせ、上下に余白
+			imageSize.x = availSize.x;
+			imageSize.y = availSize.x / targetAspect;
+		}
+
+		// 余白を計算して中央配置
+		float offsetX = (availSize.x - imageSize.x) * 0.5f;
+		float offsetY = (availSize.y - imageSize.y) * 0.5f;
+		ImGui::SetCursorPos(ImVec2(cursorStart.x + offsetX, cursorStart.y + offsetY));
+	}
+
+	ImGui::Image((ImTextureID)renderTexture->GetSrvHandleGPU().ptr, imageSize);
 	// ギズモ等のオーバーレイ描画コールバックをSceneウィンドウのBegin/Endの間に呼び出す
 	if (s_sceneOverlayCallback_) {
 		s_sceneOverlayCallback_();
