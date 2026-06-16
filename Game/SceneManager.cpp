@@ -3,6 +3,7 @@
 #include "TitleScene.h"
 #include "TestScene.h"
 #include <Engine.h>
+#include "../Editer/EditorManager.h"
 
 SceneManager::SceneManager()
 {

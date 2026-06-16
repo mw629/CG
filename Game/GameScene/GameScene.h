@@ -9,7 +9,7 @@
 #include <System/PauseSystem.h>
 #include "GameObjectManager.h"
 #include "RenderObject.h"
-#include "EditorUI.h"
+#include "../../Editer/EditorUI.h"
 
 class GameScene :public IScene
 {

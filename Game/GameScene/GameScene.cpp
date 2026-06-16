@@ -1,6 +1,8 @@
 #include "GameScene.h"
 #include <imgui.h>
 #include <memory>
+#include <Engine.h>
+#include "../../Editer/EditorManager.h"
 #include "AssetManager.h"
 
 GameScene::~GameScene()
@@ -91,13 +93,7 @@ void GameScene::ImGui()
 		}
 	}
 
-	if (ImGui::Button("Save Scene")) {
-		gameObjectManager_->SaveScene("Resources/Scene/scene.json");
-	}
-
-	if (ImGui::Button("Load Scene")) {
-		gameObjectManager_->LoadScene("Resources/Scene/scene.json");
-	}
+	
 
 	ImGui::End();
 
@@ -106,13 +102,13 @@ void GameScene::ImGui()
 
 	// Stopモードの時だけギズモ描画コールバックをSceneウィンドウに登録する
 #ifdef _USE_IMGUI
-	if (!Engine::IsPlaying()) {
-		Engine::SetSceneOverlayCallback([this]() {
+	if (!EditorManager::IsPlaying()) {
+		EditorManager::SetSceneOverlayCallback([this]() {
 			Matrix4x4 proj = MakePerspectiveFovMatrix(0.45f, float(1280.0f) / float(720.0f), 0.1f, 100.0f);
 			editorUI_->DrawGizmoInScene(view, proj);
 		});
 	} else {
-		Engine::ClearSceneOverlayCallback();
+		EditorManager::ClearSceneOverlayCallback();
 	}
 #endif
 
@@ -174,7 +170,7 @@ void GameScene::Initialize() {
 
 	sceneID_ = SceneID::Game;
 	
-	if (!Engine::IsPlaying()) {
+	if (!EditorManager::IsPlaying()) {
 		gameState_ = GameState::Editor;
 		camera_->SetDebugCamera(true);
 	} else {
@@ -222,7 +218,7 @@ void GameScene::Update() {
 	PostEffect::SetActivePostEffect(PostEffect::Type::GaussianFilter);
 
 	// Engine側のPlay/Stop状態に同期してゲームステートを切り替え
-	bool isEnginePlaying = Engine::IsPlaying();
+	bool isEnginePlaying = EditorManager::IsPlaying();
 	if (isEnginePlaying && gameState_ == GameState::Editor) {
 		gameState_ = GameState::Playing;
 		camera_->SetDebugCamera(false);
