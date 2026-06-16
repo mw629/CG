@@ -180,7 +180,7 @@ void GameScene::Initialize() {
 
 void GameScene::Update() {
 
-	PostEffect::SetActivePostEffect(PostEffect::Type::GaussianFilter);
+	PostEffect::SetActivePostEffect(PostEffect::Type::OutLine);
 
 	camera_->Update();
 	view = camera_->GetViewMatrix();
