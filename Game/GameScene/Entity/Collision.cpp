@@ -25,3 +25,31 @@ AABB Collision::MakeAABB(const Transform& transform, float width, float height, 
 	};
 	return aabb;
 }
+
+bool Collision::CheckAABBSphere(const AABB& aabb, const CollisionSphere& sphere)
+{
+	float sqDist = 0.0f;
+	
+	if (sphere.center.x < aabb.min.x) sqDist += (aabb.min.x - sphere.center.x) * (aabb.min.x - sphere.center.x);
+	else if (sphere.center.x > aabb.max.x) sqDist += (sphere.center.x - aabb.max.x) * (sphere.center.x - aabb.max.x);
+	
+	if (sphere.center.y < aabb.min.y) sqDist += (aabb.min.y - sphere.center.y) * (aabb.min.y - sphere.center.y);
+	else if (sphere.center.y > aabb.max.y) sqDist += (sphere.center.y - aabb.max.y) * (sphere.center.y - aabb.max.y);
+	
+	if (sphere.center.z < aabb.min.z) sqDist += (aabb.min.z - sphere.center.z) * (aabb.min.z - sphere.center.z);
+	else if (sphere.center.z > aabb.max.z) sqDist += (sphere.center.z - aabb.max.z) * (sphere.center.z - aabb.max.z);
+	
+	return sqDist <= sphere.radius * sphere.radius;
+}
+
+CollisionSphere Collision::MakeSphere(const Transform& transform, float radius)
+{
+	CollisionSphere sphere;
+	sphere.center = {
+		transform.translate.x,
+		transform.translate.y + radius,
+		transform.translate.z
+	};
+	sphere.radius = radius;
+	return sphere;
+}

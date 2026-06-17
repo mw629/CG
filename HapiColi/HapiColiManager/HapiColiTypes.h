@@ -72,6 +72,18 @@ namespace HapiColi
             return data;
         }
 
+        // 簡単な初期化用ヘルパー（Sphere）
+        static ObjectData CreateSphere(const std::string& id, const Vector3& position, float radius)
+        {
+            ObjectData data;
+            data.id = id;
+            data.position = position;
+            data.collider.type = ColliderInfo::Type::Sphere;
+            data.collider.size = { radius, radius, radius };
+            data.collision.isColliding = false;
+            return data;
+        }
+
         // 衝突状態をセットするヘルパー
         void SetCollision(const std::string& collidedWithId)
         {

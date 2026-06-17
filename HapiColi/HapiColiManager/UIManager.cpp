@@ -67,6 +67,7 @@ namespace HapiColi
                 if (ImGui::Button(GetText("Stop Recording", u8"記録停止")))
                 {
                     recorder->Stop();
+                    AddLog("Recording stopped.");
                 }
                 ImGui::Text(GetText("Recording...", u8"記録中..."));
                 ImGui::Text(GetText("Frames recorded: %d", u8"記録フレーム数: %d"), (int)recorder->GetRecordedFrames().size());
@@ -76,6 +77,7 @@ namespace HapiColi
                 if (ImGui::Button(GetText("Start Recording", u8"記録開始")))
                 {
                     recorder->Start();
+                    AddLog("Recording started.");
                 }
                 ImGui::SameLine();
                 if (ImGui::Button(GetText("Clear Data", u8"データ消去")))
@@ -152,7 +154,12 @@ namespace HapiColi
             }
         }
 
-        if (ImGui::CollapsingHeader(GetText("Playback & Time Control", u8"再生・時間操作"), ImGuiTreeNodeFlags_DefaultOpen))
+        ImGui::End(); // End Debugger window temporarily
+
+        ImGui::SetNextWindowPos(ImVec2(50, 50), ImGuiCond_FirstUseEver);
+        ImGui::SetNextWindowSize(ImVec2(400, 250), ImGuiCond_FirstUseEver);
+        ImGui::Begin(GetText("HapiColi Playback", u8"HapiColi 再生 (Playback)"));
+        if (true) // Just an always-true block to keep the scope clean, replacing CollapsingHeader
         {
             auto playback = m_manager->GetPlaybackManager();
             if (playback)
@@ -207,6 +214,9 @@ namespace HapiColi
                 }
             }
         }
+        ImGui::End(); // End Playback window
+
+        ImGui::Begin("HapiColi Debugger"); // Resume Debugger window
 
         if (ImGui::CollapsingHeader(GetText("Analyzer", u8"解析 (Analyzer)")))
         {
@@ -302,10 +312,10 @@ namespace HapiColi
             }
 
             const auto& summary = m_manager->GetAnalyzer()->GetSummary();
-            ImGui::Text(GetText("Total Tests: %d", u8"総テスト数: %d"), summary.totalTests);
-            ImGui::TextColored(ImVec4(0, 1, 0, 1), GetText("Happy: %d", u8"成功(Happy): %d"), summary.happyCount);
-            ImGui::TextColored(ImVec4(1, 0, 0, 1), GetText("Unhappy: %d", u8"失敗(Unhappy): %d"), summary.unhappyCount);
-            ImGui::Text(GetText("Success Rate: %.1f%%", u8"成功率: %.1f%%"), summary.successRate * 100.0f);
+            ImGui::Text(GetText("Total Frames: %d", u8"総記録フレーム数: %d"), summary.totalTests);
+            ImGui::TextColored(ImVec4(0, 1, 0, 1), GetText("Happy Frames: %d", u8"成功フレーム(Happy): %d"), summary.happyCount);
+            ImGui::TextColored(ImVec4(1, 0, 0, 1), GetText("Unhappy Frames: %d", u8"失敗フレーム(Unhappy): %d"), summary.unhappyCount);
+            ImGui::Text(GetText("Success Rate: %.1f%%", u8"成功率(フレーム割合): %.1f%%"), summary.successRate * 100.0f);
         }
 
         if (ImGui::CollapsingHeader(GetText("Optimizer", u8"改善提案 (Optimizer)")))
@@ -348,10 +358,12 @@ namespace HapiColi
                              timeinfo.tm_mday,
                              timeinfo.tm_hour,
                              timeinfo.tm_min);
-                    
-                    std::string logDir  = "c:\\TechnicalSchool\\MyEngine\\HapiColi\\Log";
+
+                    // 実行環境の相対パスで保存するように変更
+                    std::string logDir  = "HapiColi\\Log";
                     std::string logPath = logDir + "\\" + timeBuf + ".json";
                     std::string unhappyPath = logDir + "\\" + timeBuf + "_Unhappy.json";
+                    std::string summaryPath = logDir + "\\" + timeBuf + "_CollisionSummary.json";
                     
                     system(("mkdir \"" + logDir + "\" 2> nul").c_str());
 
@@ -360,7 +372,11 @@ namespace HapiColi
 
                     // Unhappy な結果 + 対応フレームを別ファイルに保存
                     logManager->SaveUnhappyReport(unhappyPath, resultsToSave, framesToSave);
+
+                    // 何フレーム目から何フレーム目まで当たっていたかのサマリーを保存
+                    logManager->SaveCollisionSummary(summaryPath, framesToSave);
                     
+                    AddLog("Saved JSON log files successfully.");
                     m_isSaving = false;
                 }).detach();
             }
@@ -370,8 +386,15 @@ namespace HapiColi
         if (ImGui::CollapsingHeader(GetText("Fuzzer (Auto Test)", u8"ファザー (自動テスト)")))
         {
             Fuzzer* fuzzer = m_manager->GetFuzzer();
+            
+            auto& config = fuzzer->GetConfig();
+            ImGui::Checkbox(GetText("Enable Micro-offset Test", u8"微小ゆらぎテストを有効化"), &config.enableMicroOffsetTest);
+            ImGui::SliderFloat(GetText("Offset Range", u8"ゆらぎの範囲 (レベル)"), &config.microOffsetRange, 0.001f, 0.5f, "%.3f");
+            ImGui::SliderInt(GetText("Trials", u8"試行回数"), &config.microOffsetTrials, 1, 500);
+
             if (ImGui::Button(GetText("Run Fuzzing", u8"ファジング実行"))) {
                 fuzzer->RunAll();
+                AddLog("Fuzzing run completed.");
             }
             ImGui::SameLine();
             if (ImGui::Button(GetText("Clear Fuzz Results", u8"結果クリア"))) {
@@ -401,6 +424,7 @@ namespace HapiColi
             Analyzer* analyzer = m_manager->GetAnalyzer();
             if (ImGui::Button(GetText("Analyze Recorded Frames", u8"記録フレームを分析"))) {
                 analyzer->AnalyzeWarnings(m_manager->GetRecorder()->GetRecordedFrames());
+                AddLog("Analyzer run completed.");
             }
 
             const auto& warnings = analyzer->GetWarnings();
@@ -419,7 +443,30 @@ namespace HapiColi
 
         ImGui::End();
         
+        // --- HapiColi Log Window ---
+        ImGui::SetNextWindowPos(ImVec2(50, 350), ImGuiCond_FirstUseEver);
+        ImGui::SetNextWindowSize(ImVec2(400, 300), ImGuiCond_FirstUseEver);
+        ImGui::Begin(GetText("HapiColi Log", u8"HapiColi ログ (Log)"));
+        if (ImGui::Button(GetText("Clear Log", u8"ログクリア"))) {
+            m_logLines.clear();
+        }
+        ImGui::Separator();
+        ImGui::BeginChild("LogRegion", ImVec2(0, 0), true);
+        for (const auto& line : m_logLines) {
+            ImGui::TextWrapped("%s", line.c_str());
+        }
+        ImGui::EndChild();
+        ImGui::End();
+
         // Pop all pushed colors
         ImGui::PopStyleColor(14);
+    }
+
+    void UIManager::AddLog(const std::string& msg)
+    {
+        m_logLines.push_back(msg);
+        if (m_logLines.size() > 500) {
+            m_logLines.erase(m_logLines.begin());
+        }
     }
 }

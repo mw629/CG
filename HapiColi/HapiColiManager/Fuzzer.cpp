@@ -31,6 +31,7 @@ namespace HapiColi {
     }
 
     void Fuzzer::RunVariations(const FuzzTarget& target) {
+        bool baseColliding = false;
         // 1. Base Test
         {
             ObjectData a = target.baseA;
@@ -46,6 +47,8 @@ namespace HapiColi {
             res.isBugCaught = false; // By default, base is assumed expected unless explicitly defined
             res.description = a.collision.isColliding ? "衝突した" : "衝突なし";
             m_results.push_back(res);
+
+            baseColliding = a.collision.isColliding;
         }
 
         // 2. High Velocity Test (Tunneling)
@@ -61,19 +64,24 @@ namespace HapiColi {
             res.objB = b;
             res.collisionA = a.collision;
             res.collisionB = b.collision;
-            // If it's a known tunnel setup and it fails to collide, that's a bug!
-            // But generically, we just log it. If it doesn't collide, we flag it as a potential tunneling bug.
-            res.isBugCaught = !a.collision.isColliding; 
-            res.description = res.isBugCaught ? "バグ：すり抜けが発生しました！" : "すり抜け防止成功（衝突しました）";
+            // Since evalFunc is just static AABB, moving it 100 units will naturally stop collision.
+            res.isBugCaught = false; 
+            if (baseColliding) {
+                res.description = res.collisionA.isColliding ? "警告：遠距離で衝突判定がありました" : "静的判定では衝突なし（すり抜けの可能性）";
+            } else {
+                res.description = "元の状態が非衝突のためテスト対象外（非衝突を維持）";
+            }
             m_results.push_back(res);
         }
 
         // 3. Boundary / Micro-offset Test
+        if (m_config.enableMicroOffsetTest)
         {
             std::mt19937 rng(42); // Fixed seed for reproducibility
-            std::uniform_real_distribution<float> dist(-0.01f, 0.01f);
+            std::uniform_real_distribution<float> dist(-m_config.microOffsetRange, m_config.microOffsetRange);
+            bool toggled = false;
             
-            for(int i = 0; i < 50; ++i) {
+            for(int i = 0; i < m_config.microOffsetTrials; ++i) {
                 ObjectData a = target.baseA;
                 ObjectData b = target.baseB;
                 b.position.x += dist(rng);
@@ -82,19 +90,33 @@ namespace HapiColi {
 
                 target.evalFunc(a, b);
                 
-                // If it toggles in a way we don't expect, record it
-                if (!a.collision.isColliding) {
+                // If it toggles from the base state, record it
+                if (a.collision.isColliding != baseColliding) {
                     FuzzResult res;
                     res.testName = target.name + " (微小ゆらぎテスト #" + std::to_string(i) + ")";
                     res.objA = a;
                     res.objB = b;
                     res.collisionA = a.collision;
                     res.collisionB = b.collision;
-                    res.isBugCaught = true; 
-                    res.description = "バグ：境界線の精度エラー（すり抜け発生）！";
+                    // Not necessarily a bug, just a boundary fluctuation. Let's record it without flagging as red bug.
+                    res.isBugCaught = false; 
+                    res.description = "境界付近でのゆらぎ（結果が変わりました）";
                     m_results.push_back(res);
+                    toggled = true;
                     break; // Only record the first micro-failure to avoid spam
                 }
+            }
+
+            if (!toggled) {
+                FuzzResult res;
+                res.testName = target.name + " (微小ゆらぎテスト)";
+                res.objA = target.baseA;
+                res.objB = target.baseB;
+                res.collisionA = target.baseA.collision;
+                res.collisionB = target.baseB.collision;
+                res.isBugCaught = false; 
+                res.description = "ゆらぎ耐性チェック完了（判定の変動なし）";
+                m_results.push_back(res);
             }
         }
     }

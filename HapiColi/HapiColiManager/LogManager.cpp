@@ -33,6 +33,18 @@ namespace HapiColi
         return true;
     }
 
+    bool LogManager::SaveCollisionSummary(const std::string& filepath, const std::vector<FrameData>& frames)
+    {
+        std::ofstream file(filepath);
+        if (!file.is_open())
+            return false;
+
+        std::string jsonStr = JsonSerializer::SerializeCollisionSummary(frames);
+        file << jsonStr;
+        file.close();
+        return true;
+    }
+
     bool LogManager::LoadFrames(const std::string& filepath, std::vector<FrameData>& outFrames)
     {
         std::ifstream file(filepath);

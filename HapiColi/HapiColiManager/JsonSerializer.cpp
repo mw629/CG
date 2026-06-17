@@ -144,6 +144,84 @@ namespace HapiColi
         return oss.str();
     }
 
+    std::string JsonSerializer::SerializeCollisionSummary(const std::vector<FrameData>& frames)
+    {
+        struct CollisionPeriod {
+            std::string idA;
+            std::string idB;
+            uint32_t start_frame;
+            uint32_t end_frame;
+        };
+        std::vector<CollisionPeriod> periods;
+        struct ActiveCol { std::string idA; std::string idB; uint32_t start; };
+        std::vector<ActiveCol> activeList;
+
+        for (const auto& frame : frames) {
+            std::vector<std::pair<std::string, std::string>> currentCols;
+            for (const auto& obj : frame.objects) {
+                if (obj.collision.isColliding && !obj.collision.collidedWithId.empty()) {
+                    std::string a = obj.id;
+                    std::string b = obj.collision.collidedWithId;
+                    if (a > b) std::swap(a, b);
+                    bool found = false;
+                    for (const auto& p : currentCols) {
+                        if (p.first == a && p.second == b) { found = true; break; }
+                    }
+                    if (!found) currentCols.push_back({a, b});
+                }
+            }
+
+            for (auto it = activeList.begin(); it != activeList.end(); ) {
+                bool stillColliding = false;
+                for (const auto& cc : currentCols) {
+                    if (cc.first == it->idA && cc.second == it->idB) {
+                        stillColliding = true; break;
+                    }
+                }
+                if (!stillColliding) {
+                    periods.push_back({it->idA, it->idB, it->start, frame.frame - 1});
+                    it = activeList.erase(it);
+                } else {
+                    ++it;
+                }
+            }
+
+            for (const auto& cc : currentCols) {
+                bool isNew = true;
+                for (const auto& ac : activeList) {
+                    if (ac.idA == cc.first && ac.idB == cc.second) {
+                        isNew = false; break;
+                    }
+                }
+                if (isNew) {
+                    activeList.push_back({cc.first, cc.second, frame.frame});
+                }
+            }
+        }
+
+        if (!frames.empty()) {
+            uint32_t lastFrame = frames.back().frame;
+            for (const auto& ac : activeList) {
+                periods.push_back({ac.idA, ac.idB, ac.start, lastFrame});
+            }
+        }
+
+        std::ostringstream oss;
+        oss << "{\n  \"collision_periods\": [\n";
+        for (size_t i = 0; i < periods.size(); ++i) {
+            oss << "    {\n";
+            oss << "      \"idA\": \"" << EscapeStr(periods[i].idA) << "\",\n";
+            oss << "      \"idB\": \"" << EscapeStr(periods[i].idB) << "\",\n";
+            oss << "      \"start_frame\": " << periods[i].start_frame << ",\n";
+            oss << "      \"end_frame\": " << periods[i].end_frame << "\n";
+            oss << "    }";
+            if (i < periods.size() - 1) oss << ",";
+            oss << "\n";
+        }
+        oss << "  ]\n}\n";
+        return oss.str();
+    }
+
     std::string JsonSerializer::SerializeUnhappyReport(
         const std::vector<TestResult>& results,
         const std::vector<FrameData>& frames)

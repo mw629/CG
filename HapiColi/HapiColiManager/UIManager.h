@@ -19,6 +19,8 @@ namespace HapiColi
         const char* GetActiveSubjectId() const { return m_subjectBuffer; }
         const char* GetActiveTargetId() const { return m_targetBuffer; }
 
+        void AddLog(const std::string& message);
+
     private:
         HapiColiManager* m_manager = nullptr;
         
@@ -36,5 +38,7 @@ namespace HapiColi
 
         std::vector<std::string> m_cachedSuggestions;
         std::atomic<bool> m_isSaving{false};
+
+        std::vector<std::string> m_logLines;
     };
 }

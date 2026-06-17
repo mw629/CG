@@ -22,6 +22,9 @@ namespace HapiColi
         // Serialize multiple frames
         static std::string SerializeFrames(const std::vector<FrameData>& frames);
 
+        // Serialize collision summary (start/end frames)
+        static std::string SerializeCollisionSummary(const std::vector<FrameData>& frames);
+
         // Serialize unhappy results + their corresponding frames
         static std::string SerializeUnhappyReport(
             const std::vector<TestResult>& results,

@@ -16,6 +16,12 @@ namespace HapiColi {
         std::string description;
     };
 
+    struct FuzzerConfig {
+        bool enableMicroOffsetTest = true;
+        float microOffsetRange = 0.01f;
+        int microOffsetTrials = 50;
+    };
+
     class Fuzzer {
     public:
         // The callback used to run collision detection logic from the game engine
@@ -35,7 +41,10 @@ namespace HapiColi {
         const std::vector<FuzzResult>& GetResults() const { return m_results; }
         void ClearResults() { m_results.clear(); }
 
+        FuzzerConfig& GetConfig() { return m_config; }
+
     private:
+        FuzzerConfig m_config;
         std::vector<FuzzTarget> m_targets;
         std::vector<FuzzResult> m_results;
 

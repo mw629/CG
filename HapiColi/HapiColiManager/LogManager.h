@@ -19,6 +19,9 @@ namespace HapiColi
             const std::vector<TestResult>& results,
             const std::vector<FrameData>& frames);
 
+        // Save collision summary (start and end frames of collisions)
+        bool SaveCollisionSummary(const std::string& filepath, const std::vector<FrameData>& frames);
+
         // Load frames from a JSON file
         bool LoadFrames(const std::string& filepath, std::vector<FrameData>& outFrames);
     };

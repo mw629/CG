@@ -172,17 +172,16 @@ void TestScene::Initialize() {
 	Vector3 initialModelCenter = { (initialModelAABB.min.x + initialModelAABB.max.x)*0.5f, (initialModelAABB.min.y + initialModelAABB.max.y)*0.5f, (initialModelAABB.min.z + initialModelAABB.max.z)*0.5f };
 	HapiColi::ObjectData baseA = HapiColi::ObjectData::CreateBox("Model", {initialModelCenter.x, initialModelCenter.y, initialModelCenter.z}, {1.0f, 1.0f, 1.0f});
 
-	AABB initialSphereAABB = Collision::MakeAABB(Transform_, 1.0f, 1.0f, 1.0f);
-	Vector3 initialSphereCenter = { (initialSphereAABB.min.x + initialSphereAABB.max.x)*0.5f, (initialSphereAABB.min.y + initialSphereAABB.max.y)*0.5f, (initialSphereAABB.min.z + initialSphereAABB.max.z)*0.5f };
-	HapiColi::ObjectData baseB = HapiColi::ObjectData::CreateBox("Sphere", {initialSphereCenter.x, initialSphereCenter.y, initialSphereCenter.z}, {1.0f, 1.0f, 1.0f});
+	CollisionSphere initialColSphere = Collision::MakeSphere(Transform_, 0.5f);
+	HapiColi::ObjectData baseB = HapiColi::ObjectData::CreateSphere("Sphere", {initialColSphere.center.x, initialColSphere.center.y, initialColSphere.center.z}, initialColSphere.radius);
 	HapiColi::HapiColi::GetInstance().RegisterFuzzTarget("Model vs Sphere Fuzzing", baseA, baseB, [](HapiColi::ObjectData& a, HapiColi::ObjectData& b) {
 		AABB aabbA; 
-		aabbA.min = {a.position.x-0.5f, a.position.y-0.5f, a.position.z-0.5f}; 
-		aabbA.max = {a.position.x+0.5f, a.position.y+0.5f, a.position.z+0.5f};
-		AABB aabbB; 
-		aabbB.min = {b.position.x-0.5f, b.position.y-0.5f, b.position.z-0.5f}; 
-		aabbB.max = {b.position.x+0.5f, b.position.y+0.5f, b.position.z+0.5f};
-		bool hit = Collision::CheckAABB(aabbA, aabbB);
+		aabbA.min = {a.position.x - a.collider.size.x * 0.5f, a.position.y - a.collider.size.y * 0.5f, a.position.z - a.collider.size.z * 0.5f}; 
+		aabbA.max = {a.position.x + a.collider.size.x * 0.5f, a.position.y + a.collider.size.y * 0.5f, a.position.z + a.collider.size.z * 0.5f};
+		CollisionSphere sphereB;
+		sphereB.center = {b.position.x, b.position.y, b.position.z};
+		sphereB.radius = b.collider.size.x;
+		bool hit = Collision::CheckAABBSphere(aabbA, sphereB);
 		a.collision.isColliding = hit;
 		b.collision.isColliding = hit;
 	});
@@ -278,16 +277,14 @@ void TestScene::Update() {
 		{modelSize.x, modelSize.y, modelSize.z}
 	);
 
-	AABB sphereAABB = Collision::MakeAABB(Transform_, 1.0f, 1.0f, 1.0f); // Transform_ is for sphere_
-	Vector3 sphereCenter = { (sphereAABB.min.x + sphereAABB.max.x)*0.5f, (sphereAABB.min.y + sphereAABB.max.y)*0.5f, (sphereAABB.min.z + sphereAABB.max.z)*0.5f };
-	Vector3 sphereSize = { sphereAABB.max.x - sphereAABB.min.x, sphereAABB.max.y - sphereAABB.min.y, sphereAABB.max.z - sphereAABB.min.z };
-	HapiColi::ObjectData sphereData = HapiColi::ObjectData::CreateBox(
+	CollisionSphere colSphere = Collision::MakeSphere(Transform_, 0.5f);
+	HapiColi::ObjectData sphereData = HapiColi::ObjectData::CreateSphere(
 		"Sphere",
-		{sphereCenter.x, sphereCenter.y, sphereCenter.z},
-		{sphereSize.x, sphereSize.y, sphereSize.z}
+		{colSphere.center.x, colSphere.center.y, colSphere.center.z},
+		colSphere.radius
 	);
 
-	isCollision_ = Collision::CheckAABB(modelAABB, sphereAABB);
+	isCollision_ = Collision::CheckAABBSphere(modelAABB, colSphere);
 	
 	HapiColi::HapiColi::GetInstance().UpdateFuzzTarget("Model vs Sphere Fuzzing", modelData, sphereData);
 
@@ -295,28 +292,22 @@ void TestScene::Update() {
 		modelData.SetCollision(sphereData.id);
 		sphereData.SetCollision(modelData.id);
 
-		// 衝突点と法線の計算
-		float overlapX1 = modelAABB.max.x - sphereAABB.min.x;
-		float overlapX2 = sphereAABB.max.x - modelAABB.min.x;
-		float overlapY1 = modelAABB.max.y - sphereAABB.min.y;
-		float overlapY2 = sphereAABB.max.y - modelAABB.min.y;
-		float overlapZ1 = modelAABB.max.z - sphereAABB.min.z;
-		float overlapZ2 = sphereAABB.max.z - modelAABB.min.z;
-		
-		float minOverlap = (std::min)({overlapX1, overlapX2, overlapY1, overlapY2, overlapZ1, overlapZ2});
-		
+		// 衝突点と法線の計算 (AABB vs Sphere)
 		Vector3 contactPoint;
-		contactPoint.x = (std::max)(modelAABB.min.x, sphereAABB.min.x) + ((std::min)(modelAABB.max.x, sphereAABB.max.x) - (std::max)(modelAABB.min.x, sphereAABB.min.x)) * 0.5f;
-		contactPoint.y = (std::max)(modelAABB.min.y, sphereAABB.min.y) + ((std::min)(modelAABB.max.y, sphereAABB.max.y) - (std::max)(modelAABB.min.y, sphereAABB.min.y)) * 0.5f;
-		contactPoint.z = (std::max)(modelAABB.min.z, sphereAABB.min.z) + ((std::min)(modelAABB.max.z, sphereAABB.max.z) - (std::max)(modelAABB.min.z, sphereAABB.min.z)) * 0.5f;
+		contactPoint.x = (std::max)(modelAABB.min.x, (std::min)(colSphere.center.x, modelAABB.max.x));
+		contactPoint.y = (std::max)(modelAABB.min.y, (std::min)(colSphere.center.y, modelAABB.max.y));
+		contactPoint.z = (std::max)(modelAABB.min.z, (std::min)(colSphere.center.z, modelAABB.max.z));
 
-		Vector3 contactNormal = {0,0,0};
-		if (minOverlap == overlapX1) contactNormal = {1, 0, 0};
-		else if (minOverlap == overlapX2) contactNormal = {-1, 0, 0};
-		else if (minOverlap == overlapY1) contactNormal = {0, 1, 0};
-		else if (minOverlap == overlapY2) contactNormal = {0, -1, 0};
-		else if (minOverlap == overlapZ1) contactNormal = {0, 0, 1};
-		else if (minOverlap == overlapZ2) contactNormal = {0, 0, -1};
+		Vector3 contactNormal = { colSphere.center.x - contactPoint.x, colSphere.center.y - contactPoint.y, colSphere.center.z - contactPoint.z };
+		float distSq = contactNormal.x*contactNormal.x + contactNormal.y*contactNormal.y + contactNormal.z*contactNormal.z;
+		if (distSq > 0.0001f) {
+			float invDist = 1.0f / std::sqrt(distSq);
+			contactNormal.x *= invDist;
+			contactNormal.y *= invDist;
+			contactNormal.z *= invDist;
+		} else {
+			contactNormal = { 0, 1, 0 };
+		}
 
 		modelData.SetContactInfo({contactPoint.x, contactPoint.y, contactPoint.z}, {contactNormal.x, contactNormal.y, contactNormal.z});
 		sphereData.SetContactInfo({contactPoint.x, contactPoint.y, contactPoint.z}, {-contactNormal.x, -contactNormal.y, -contactNormal.z});
@@ -339,9 +330,9 @@ void TestScene::Draw() {
 
 	Draw::DrawObj(skyBox_.get());
 	Draw::DrawObj(model_.get());
-	Draw::DrawObj(floor.get());
-	Draw::DrawObj(nodeAnimation_.get());
-	Draw::DrawAnimation(animation_.get());
+	//Draw::DrawObj(floor.get());
+	//Draw::DrawObj(nodeAnimation_.get());
+	//Draw::DrawAnimation(animation_.get());
 
 	Draw::DrawObj(sphere_.get());
 	for (int i = 0, n = static_cast<int>(particle_.size()); i < n; ++i) {
