@@ -79,6 +79,13 @@ namespace HapiColi
             collision.collidedWithId = collidedWithId;
         }
 
+        void SetContactInfo(const Vector3& contactPoint, const Vector3& contactNormal)
+        {
+            collision.contactPoint = contactPoint;
+            collision.contactNormal = contactNormal;
+            collision.hasContactInfo = true;
+        }
+
         // 衝突判定はないが、最後の衝突点情報を残すためのヘルパー
         void SetContactInfoOnly(const Vector3& contactPoint, const Vector3& contactNormal)
         {

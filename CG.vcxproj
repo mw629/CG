@@ -149,6 +149,7 @@ copy "$(WindowsSdkDir)bin\$(TargetPlatformVersion)\x64\dxil.dll" "$(TargetDir)dx
     <ClCompile Include="HapiColi\HapiColi.cpp" />
     <ClCompile Include="HapiColi\HapiColiRenderer.cpp" />
     <ClCompile Include="HapiColi\HapiColiManager\Analyzer.cpp" />
+    <ClCompile Include="HapiColi\HapiColiManager\Fuzzer.cpp" />
     <ClCompile Include="HapiColi\HapiColiManager\HapiColiManager.cpp" />
     <ClCompile Include="HapiColi\HapiColiManager\PlaybackManager.cpp" />
     <ClCompile Include="HapiColi\HapiColiManager\JsonSerializer.cpp" />
@@ -337,6 +338,7 @@ copy "$(WindowsSdkDir)bin\$(TargetPlatformVersion)\x64\dxil.dll" "$(TargetDir)dx
     <ClInclude Include="HapiColi\HapiColi.h" />
     <ClInclude Include="HapiColi\HapiColiRenderer.h" />
     <ClInclude Include="HapiColi\HapiColiManager\Analyzer.h" />
+    <ClInclude Include="HapiColi\HapiColiManager\Fuzzer.h" />
     <ClInclude Include="HapiColi\HapiColiManager\FrameData.h" />
     <ClInclude Include="HapiColi\HapiColiManager\HapiColiManager.h" />
     <ClInclude Include="HapiColi\HapiColiManager\PlaybackManager.h" />

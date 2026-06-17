@@ -167,6 +167,25 @@ void TestScene::Initialize() {
 	cylinder_.get()->SetTransform(cylinderTransform_);
 
 	HapiColi::HapiColi::GetInstance().Initialize();
+
+	AABB initialModelAABB = Collision::MakeAABB(modelTransform_, 1.0f, 1.0f, 1.0f);
+	Vector3 initialModelCenter = { (initialModelAABB.min.x + initialModelAABB.max.x)*0.5f, (initialModelAABB.min.y + initialModelAABB.max.y)*0.5f, (initialModelAABB.min.z + initialModelAABB.max.z)*0.5f };
+	HapiColi::ObjectData baseA = HapiColi::ObjectData::CreateBox("Model", {initialModelCenter.x, initialModelCenter.y, initialModelCenter.z}, {1.0f, 1.0f, 1.0f});
+
+	AABB initialSphereAABB = Collision::MakeAABB(Transform_, 1.0f, 1.0f, 1.0f);
+	Vector3 initialSphereCenter = { (initialSphereAABB.min.x + initialSphereAABB.max.x)*0.5f, (initialSphereAABB.min.y + initialSphereAABB.max.y)*0.5f, (initialSphereAABB.min.z + initialSphereAABB.max.z)*0.5f };
+	HapiColi::ObjectData baseB = HapiColi::ObjectData::CreateBox("Sphere", {initialSphereCenter.x, initialSphereCenter.y, initialSphereCenter.z}, {1.0f, 1.0f, 1.0f});
+	HapiColi::HapiColi::GetInstance().RegisterFuzzTarget("Model vs Sphere Fuzzing", baseA, baseB, [](HapiColi::ObjectData& a, HapiColi::ObjectData& b) {
+		AABB aabbA; 
+		aabbA.min = {a.position.x-0.5f, a.position.y-0.5f, a.position.z-0.5f}; 
+		aabbA.max = {a.position.x+0.5f, a.position.y+0.5f, a.position.z+0.5f};
+		AABB aabbB; 
+		aabbB.min = {b.position.x-0.5f, b.position.y-0.5f, b.position.z-0.5f}; 
+		aabbB.max = {b.position.x+0.5f, b.position.y+0.5f, b.position.z+0.5f};
+		bool hit = Collision::CheckAABB(aabbA, aabbB);
+		a.collision.isColliding = hit;
+		b.collision.isColliding = hit;
+	});
 }
 
 #include "../../HapiColi/HapiColiManager/PlaybackManager.h"
@@ -251,23 +270,56 @@ void TestScene::Update() {
 
 	// 当たり判定
 	AABB modelAABB = Collision::MakeAABB(modelTransform_, 1.0f, 1.0f, 1.0f);
+	Vector3 modelCenter = { (modelAABB.min.x + modelAABB.max.x)*0.5f, (modelAABB.min.y + modelAABB.max.y)*0.5f, (modelAABB.min.z + modelAABB.max.z)*0.5f };
+	Vector3 modelSize = { modelAABB.max.x - modelAABB.min.x, modelAABB.max.y - modelAABB.min.y, modelAABB.max.z - modelAABB.min.z };
 	HapiColi::ObjectData modelData = HapiColi::ObjectData::CreateBox(
 		"Model",
-		{modelTransform_.translate.x, modelTransform_.translate.y, modelTransform_.translate.z},
-		{1.0f, 1.0f, 1.0f}
+		{modelCenter.x, modelCenter.y, modelCenter.z},
+		{modelSize.x, modelSize.y, modelSize.z}
 	);
 
 	AABB sphereAABB = Collision::MakeAABB(Transform_, 1.0f, 1.0f, 1.0f); // Transform_ is for sphere_
+	Vector3 sphereCenter = { (sphereAABB.min.x + sphereAABB.max.x)*0.5f, (sphereAABB.min.y + sphereAABB.max.y)*0.5f, (sphereAABB.min.z + sphereAABB.max.z)*0.5f };
+	Vector3 sphereSize = { sphereAABB.max.x - sphereAABB.min.x, sphereAABB.max.y - sphereAABB.min.y, sphereAABB.max.z - sphereAABB.min.z };
 	HapiColi::ObjectData sphereData = HapiColi::ObjectData::CreateBox(
 		"Sphere",
-		{Transform_.translate.x, Transform_.translate.y, Transform_.translate.z},
-		{1.0f, 1.0f, 1.0f}
+		{sphereCenter.x, sphereCenter.y, sphereCenter.z},
+		{sphereSize.x, sphereSize.y, sphereSize.z}
 	);
 
 	isCollision_ = Collision::CheckAABB(modelAABB, sphereAABB);
+	
+	HapiColi::HapiColi::GetInstance().UpdateFuzzTarget("Model vs Sphere Fuzzing", modelData, sphereData);
+
 	if (isCollision_) {
 		modelData.SetCollision(sphereData.id);
 		sphereData.SetCollision(modelData.id);
+
+		// 衝突点と法線の計算
+		float overlapX1 = modelAABB.max.x - sphereAABB.min.x;
+		float overlapX2 = sphereAABB.max.x - modelAABB.min.x;
+		float overlapY1 = modelAABB.max.y - sphereAABB.min.y;
+		float overlapY2 = sphereAABB.max.y - modelAABB.min.y;
+		float overlapZ1 = modelAABB.max.z - sphereAABB.min.z;
+		float overlapZ2 = sphereAABB.max.z - modelAABB.min.z;
+		
+		float minOverlap = (std::min)({overlapX1, overlapX2, overlapY1, overlapY2, overlapZ1, overlapZ2});
+		
+		Vector3 contactPoint;
+		contactPoint.x = (std::max)(modelAABB.min.x, sphereAABB.min.x) + ((std::min)(modelAABB.max.x, sphereAABB.max.x) - (std::max)(modelAABB.min.x, sphereAABB.min.x)) * 0.5f;
+		contactPoint.y = (std::max)(modelAABB.min.y, sphereAABB.min.y) + ((std::min)(modelAABB.max.y, sphereAABB.max.y) - (std::max)(modelAABB.min.y, sphereAABB.min.y)) * 0.5f;
+		contactPoint.z = (std::max)(modelAABB.min.z, sphereAABB.min.z) + ((std::min)(modelAABB.max.z, sphereAABB.max.z) - (std::max)(modelAABB.min.z, sphereAABB.min.z)) * 0.5f;
+
+		Vector3 contactNormal = {0,0,0};
+		if (minOverlap == overlapX1) contactNormal = {1, 0, 0};
+		else if (minOverlap == overlapX2) contactNormal = {-1, 0, 0};
+		else if (minOverlap == overlapY1) contactNormal = {0, 1, 0};
+		else if (minOverlap == overlapY2) contactNormal = {0, -1, 0};
+		else if (minOverlap == overlapZ1) contactNormal = {0, 0, 1};
+		else if (minOverlap == overlapZ2) contactNormal = {0, 0, -1};
+
+		modelData.SetContactInfo({contactPoint.x, contactPoint.y, contactPoint.z}, {contactNormal.x, contactNormal.y, contactNormal.z});
+		sphereData.SetContactInfo({contactPoint.x, contactPoint.y, contactPoint.z}, {-contactNormal.x, -contactNormal.y, -contactNormal.z});
 	}
 
 	HapiColi::HapiColi::GetInstance().RecordObject(modelData);

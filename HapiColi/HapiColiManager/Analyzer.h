@@ -8,6 +8,12 @@
 
 namespace HapiColi
 {
+    struct AnalyzerWarning {
+        uint32_t frame;
+        std::string message;
+        std::string severity;
+    };
+
     class Analyzer
     {
     public:
@@ -22,9 +28,13 @@ namespace HapiColi
         const TestSummary& GetSummary() const;
         const std::vector<std::shared_ptr<TestRule>>& GetRules() const;
 
+        void AnalyzeWarnings(const std::vector<FrameData>& frames);
+        const std::vector<AnalyzerWarning>& GetWarnings() const { return m_warnings; }
+
     private:
         std::vector<std::shared_ptr<TestRule>> m_rules;
         std::vector<TestResult> m_results;
         TestSummary m_summary;
+        std::vector<AnalyzerWarning> m_warnings;
     };
 }

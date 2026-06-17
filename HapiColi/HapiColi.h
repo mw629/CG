@@ -4,6 +4,7 @@
 #include "HapiColiManager/FrameData.h"
 #include <memory>
 #include <vector>
+#include <functional>
 #include "HapiColiRenderer.h"
 namespace HapiColi
 {
@@ -25,6 +26,9 @@ namespace HapiColi
         void BeginFrame(float deltaTime);
         void RecordObject(const ObjectData& objData);
         void EndFrame();
+        
+        void RegisterFuzzTarget(const std::string& name, const ObjectData& baseA, const ObjectData& baseB, std::function<void(ObjectData&, ObjectData&)> func);
+        void UpdateFuzzTarget(const std::string& name, const ObjectData& baseA, const ObjectData& baseB);
         
         // 描画コマンド取得（DirectX非依存）
         void BuildRenderCommands();

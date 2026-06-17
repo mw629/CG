@@ -4,6 +4,7 @@
 #include "Analyzer.h"
 #include "LogManager.h"
 #include "Optimizer.h"
+#include "Fuzzer.h"
 #include "TestRule.h"
 #include "PlaybackManager.h"
 #include <imgui.h>
@@ -362,6 +363,57 @@ namespace HapiColi
                     
                     m_isSaving = false;
                 }).detach();
+            }
+        }
+
+        ImGui::Separator();
+        if (ImGui::CollapsingHeader(GetText("Fuzzer (Auto Test)", u8"ファザー (自動テスト)")))
+        {
+            Fuzzer* fuzzer = m_manager->GetFuzzer();
+            if (ImGui::Button(GetText("Run Fuzzing", u8"ファジング実行"))) {
+                fuzzer->RunAll();
+            }
+            ImGui::SameLine();
+            if (ImGui::Button(GetText("Clear Fuzz Results", u8"結果クリア"))) {
+                fuzzer->ClearResults();
+            }
+
+            const auto& fuzzResults = fuzzer->GetResults();
+            if (!fuzzResults.empty()) {
+                ImGui::Text(GetText("Fuzz Results: %d", u8"ファジング結果: %d件"), (int)fuzzResults.size());
+                ImGui::BeginChild("FuzzRes", ImVec2(0, 150), true);
+                for (const auto& res : fuzzResults) {
+                    if (res.isBugCaught) {
+                        ImGui::PushStyleColor(ImGuiCol_Text, ImVec4(1, 0, 0, 1)); // Red for bugs
+                    } else {
+                        ImGui::PushStyleColor(ImGuiCol_Text, ImVec4(0, 1, 0, 1)); // Green for passed
+                    }
+                    ImGui::Text("[%s] %s", res.testName.c_str(), res.description.c_str());
+                    ImGui::PopStyleColor();
+                }
+                ImGui::EndChild();
+            }
+        }
+
+        ImGui::Separator();
+        if (ImGui::CollapsingHeader(GetText("Analyzer Warnings", u8"アナライザー警告")))
+        {
+            Analyzer* analyzer = m_manager->GetAnalyzer();
+            if (ImGui::Button(GetText("Analyze Recorded Frames", u8"記録フレームを分析"))) {
+                analyzer->AnalyzeWarnings(m_manager->GetRecorder()->GetRecordedFrames());
+            }
+
+            const auto& warnings = analyzer->GetWarnings();
+            if (warnings.empty()) {
+                ImGui::Text(GetText("No warnings.", u8"警告はありません。"));
+            } else {
+                ImGui::BeginChild("WarnRes", ImVec2(0, 150), true);
+                for (const auto& w : warnings) {
+                    ImGui::PushStyleColor(ImGuiCol_Text, ImVec4(1, 1, 0, 1)); // Yellow
+                    ImGui::Text("Frame %d: %s", w.frame, w.message.c_str());
+                    ImGui::PopStyleColor();
+                }
+                ImGui::EndChild();
             }
         }
 

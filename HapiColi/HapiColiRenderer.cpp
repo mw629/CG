@@ -75,10 +75,10 @@ void HapiColiRenderer::AddBoxLines(const ::Vector3& pos, const ::Vector3& scale,
     Matrix4x4 world = MakeAffineMatrix(pos, scale, rot);
     
     ::Vector3 corners[8] = {
-        {-1.0f, -1.0f, -1.0f}, { 1.0f, -1.0f, -1.0f},
-        { 1.0f,  1.0f, -1.0f}, {-1.0f,  1.0f, -1.0f},
-        {-1.0f, -1.0f,  1.0f}, { 1.0f, -1.0f,  1.0f},
-        { 1.0f,  1.0f,  1.0f}, {-1.0f,  1.0f,  1.0f}
+        {-0.5f, -0.5f, -0.5f}, { 0.5f, -0.5f, -0.5f},
+        { 0.5f,  0.5f, -0.5f}, {-0.5f,  0.5f, -0.5f},
+        {-0.5f, -0.5f,  0.5f}, { 0.5f, -0.5f,  0.5f},
+        { 0.5f,  0.5f,  0.5f}, {-0.5f,  0.5f,  0.5f}
     };
 
     for (int i = 0; i < 8; ++i) {

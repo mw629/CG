@@ -6,6 +6,7 @@
 #include "UIManager.h"
 #include "TestRunner.h"
 #include "PlaybackManager.h"
+#include "Fuzzer.h"
 
 namespace HapiColi
 {
@@ -18,6 +19,7 @@ namespace HapiColi
         m_uiManager = std::make_unique<UIManager>();
         m_testRunner = std::make_unique<TestRunner>();
         m_playbackManager = std::make_unique<PlaybackManager>();
+        m_fuzzer = std::make_unique<Fuzzer>();
     }
 
     HapiColiManager::~HapiColiManager()

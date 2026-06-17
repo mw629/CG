@@ -1,5 +1,6 @@
 #include "HapiColi.h"
 #include "HapiColiManager/Recorder.h"
+#include "HapiColiManager/Fuzzer.h"
 #include "HapiColiManager/PlaybackManager.h"
 #include "HapiColiRenderer.h"
 
@@ -47,7 +48,27 @@ namespace HapiColi
     {
         auto playback = m_manager->GetPlaybackManager();
         if (playback && playback->IsReplayMode()) return;
-        m_manager->GetRecorder()->EndFrame();
+
+        if (m_manager && m_manager->GetRecorder())
+        {
+            m_manager->GetRecorder()->EndFrame();
+        }
+    }
+
+    void HapiColi::RegisterFuzzTarget(const std::string& name, const ObjectData& baseA, const ObjectData& baseB, std::function<void(ObjectData&, ObjectData&)> func)
+    {
+        if (m_manager && m_manager->GetFuzzer())
+        {
+            m_manager->GetFuzzer()->RegisterTarget(name, baseA, baseB, func);
+        }
+    }
+
+    void HapiColi::UpdateFuzzTarget(const std::string& name, const ObjectData& baseA, const ObjectData& baseB)
+    {
+        if (m_manager && m_manager->GetFuzzer())
+        {
+            m_manager->GetFuzzer()->UpdateTarget(name, baseA, baseB);
+        }
     }
 
     void HapiColi::BuildRenderCommands()
