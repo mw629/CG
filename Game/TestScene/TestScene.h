@@ -4,6 +4,9 @@
 #include "../IScene.h"
 #include "Emitter.h"
 #include <memory>
+#include <vector>
+#include "../GameScene/Entity/Collision.h"
+#include "../../HapiColi/HapiColi.h"
 
 class TestScene :public IScene
 {
@@ -45,6 +48,16 @@ private:
 	std::unique_ptr<TransformAnimation> nodeAnimation_ = std::make_unique<TransformAnimation>();
 
 	bool bill = true;
+
+	// デバッグ用ラインのプール
+	std::vector<std::unique_ptr<Line>> debugLines_;
+
+	// 当たり判定の表示フラグ
+	bool isDrawColi_ = true;
+	bool isCollision_ = false;
+
+	std::unique_ptr<Sphere> contactSphere_ = std::make_unique<Sphere>();
+	std::unique_ptr<Cube> normalBox_ = std::make_unique<Cube>();
 
 public:
 	~TestScene()override;

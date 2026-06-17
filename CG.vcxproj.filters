@@ -279,6 +279,9 @@
     <ClCompile Include="HapiColi\HapiColiManager\HapiColiManager.cpp">
       <Filter>ソース ファイル</Filter>
     </ClCompile>
+    <ClCompile Include="HapiColi\HapiColiManager\PlaybackManager.cpp">
+      <Filter>ソース ファイル</Filter>
+    </ClCompile>
     <ClCompile Include="HapiColi\HapiColiManager\JsonSerializer.cpp">
       <Filter>ソース ファイル</Filter>
     </ClCompile>
@@ -568,6 +571,9 @@
       <Filter>ヘッダー ファイル</Filter>
     </ClInclude>
     <ClInclude Include="HapiColi\HapiColiManager\HapiColiManager.h">
+      <Filter>ヘッダー ファイル</Filter>
+    </ClInclude>
+    <ClInclude Include="HapiColi\HapiColiManager\PlaybackManager.h">
       <Filter>ヘッダー ファイル</Filter>
     </ClInclude>
     <ClInclude Include="HapiColi\HapiColiManager\HapiColiTypes.h">

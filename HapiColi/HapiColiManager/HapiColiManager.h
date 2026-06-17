@@ -10,6 +10,7 @@ namespace HapiColi
     class Optimizer;
     class UIManager;
     class TestRunner;
+    class PlaybackManager;
 
     class HapiColiManager
     {
@@ -29,6 +30,7 @@ namespace HapiColi
         Optimizer* GetOptimizer() const { return m_optimizer.get(); }
         UIManager* GetUIManager() const { return m_uiManager.get(); }
         TestRunner* GetTestRunner() const { return m_testRunner.get(); }
+        PlaybackManager* GetPlaybackManager() const { return m_playbackManager.get(); }
 
     private:
         std::unique_ptr<Recorder> m_recorder;
@@ -37,5 +39,6 @@ namespace HapiColi
         std::unique_ptr<Optimizer> m_optimizer;
         std::unique_ptr<UIManager> m_uiManager;
         std::unique_ptr<TestRunner> m_testRunner;
+        std::unique_ptr<PlaybackManager> m_playbackManager;
     };
 }

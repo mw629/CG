@@ -5,6 +5,7 @@
 #include "Optimizer.h"
 #include "UIManager.h"
 #include "TestRunner.h"
+#include "PlaybackManager.h"
 
 namespace HapiColi
 {
@@ -16,6 +17,7 @@ namespace HapiColi
         m_optimizer = std::make_unique<Optimizer>();
         m_uiManager = std::make_unique<UIManager>();
         m_testRunner = std::make_unique<TestRunner>();
+        m_playbackManager = std::make_unique<PlaybackManager>();
     }
 
     HapiColiManager::~HapiColiManager()

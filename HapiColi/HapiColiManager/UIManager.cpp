@@ -5,6 +5,7 @@
 #include "LogManager.h"
 #include "Optimizer.h"
 #include "TestRule.h"
+#include "PlaybackManager.h"
 #include <imgui.h>
 #include <imgui_internal.h>
 #include <string>
@@ -145,6 +146,62 @@ namespace HapiColi
                             strncpy(m_subjectBuffer, id.c_str(), sizeof(m_subjectBuffer) - 1);
 #endif
                         }
+                    }
+                }
+            }
+        }
+
+        if (ImGui::CollapsingHeader(GetText("Playback & Time Control", u8"再生・時間操作"), ImGuiTreeNodeFlags_DefaultOpen))
+        {
+            auto playback = m_manager->GetPlaybackManager();
+            if (playback)
+            {
+                bool isReplay = playback->IsReplayMode();
+                if (ImGui::Checkbox(GetText("Enable Replay Mode", u8"リプレイモードを有効化"), &isReplay))
+                {
+                    playback->SetReplayMode(isReplay);
+                    if (isReplay) {
+                        playback->SetSimulationPaused(true);
+                    } else {
+                        playback->SetSimulationPaused(false); // リプレイ終了時は一時停止を解除
+                    }
+                }
+
+                if (isReplay)
+                {
+                    int totalFrames = (int)m_manager->GetRecorder()->GetRecordedFrames().size();
+                    if (totalFrames > 0)
+                    {
+                        int maxFrame = totalFrames - 1;
+                        int currentFrame = playback->GetReplayFrameIndex();
+                        if (currentFrame > maxFrame) currentFrame = maxFrame;
+                        
+                        bool isReplayPlaying = playback->IsReplayPlaying();
+                        if (ImGui::Button(isReplayPlaying ? GetText("Pause Replay", u8"リプレイ一時停止") : GetText("Play Replay", u8"リプレイ再生")))
+                        {
+                            if (!isReplayPlaying && currentFrame >= maxFrame) {
+                                playback->SetReplayFrameIndex(0);
+                            }
+                            playback->SetReplayPlaying(!isReplayPlaying);
+                        }
+                        
+                        ImGui::SameLine();
+                        float timeScale = playback->GetTimeScale();
+                        ImGui::SetNextItemWidth(100.0f);
+                        if (ImGui::SliderFloat(GetText("Speed", u8"速度"), &timeScale, 0.1f, 3.0f, "%.2fx"))
+                        {
+                            playback->SetTimeScale(timeScale);
+                        }
+
+                        if (ImGui::SliderInt(GetText("Timeline", u8"タイムライン"), &currentFrame, 0, maxFrame))
+                        {
+                            playback->SetReplayFrameIndex(currentFrame);
+                            playback->SetReplayPlaying(false);
+                        }
+                    }
+                    else
+                    {
+                        ImGui::Text(GetText("No recorded frames available.", u8"記録されたフレームがありません。"));
                     }
                 }
             }

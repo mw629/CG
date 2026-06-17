@@ -8,6 +8,7 @@
 namespace HapiColi
 {
     class HapiColiRenderer;
+    class PlaybackManager;
 
     class HapiColi
     {
@@ -28,10 +29,12 @@ namespace HapiColi
         // 描画コマンド取得（DirectX非依存）
         void BuildRenderCommands();
         const std::vector<RenderCommand>& GetRenderCommands() const;
+        const std::vector<SolidRenderCommand>& GetSolidRenderCommands() const;
         
         const char* GetActiveSubjectId() const;
         const char* GetActiveTargetId() const;
         HapiColiManager* GetManager() { return m_manager.get(); }
+        PlaybackManager* GetPlaybackManager() const;
 
     private:
         HapiColi();

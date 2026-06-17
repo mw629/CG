@@ -33,7 +33,14 @@ void TestScene::ImGui()
 		particle_[i].get()->ImGui();
 	}
 
+	if (ImGui::Button("Toggle Collision Draw")) {
+		isDrawColi_ = !isDrawColi_;
+	}
+	ImGui::Text("Collision: %s", isCollision_ ? "TRUE" : "FALSE");
+
 	ImGui::End();
+
+	HapiColi::HapiColi::GetInstance().Update();
 
 #endif // _USE_IMGUI
 }
@@ -73,6 +80,9 @@ void TestScene::Initialize() {
 	skyBox_.get()->SetLighting(false);
 	skyBox_.get()->SetTransform(skyBoxTransform_);
 	skyBox_.get()->name_ = "SkyBox";
+
+	contactSphere_->Initialize(skyBoxTexture_);
+	normalBox_->Initialize(skyBoxTexture_);
 
 	modelData = AssimpLoadObjFile("resources/Model/Ground", "Ground.obj");
 	floor.get()->Initialize(modelData);
@@ -155,9 +165,58 @@ void TestScene::Initialize() {
 	ring_.get()->Initialize(texture);
    cylinder_.get()->Initialize(texture);
 	cylinder_.get()->SetTransform(cylinderTransform_);
+
+	HapiColi::HapiColi::GetInstance().Initialize();
 }
 
+#include "../../HapiColi/HapiColiManager/PlaybackManager.h"
+#include "../../HapiColi/HapiColiManager/Recorder.h"
+
 void TestScene::Update() {
+	HapiColi::HapiColi::GetInstance().BeginFrame(1.0f / 60.0f);
+
+	auto playback = HapiColi::HapiColi::GetInstance().GetPlaybackManager();
+	bool shouldUpdateScene = true;
+	float timeScale = 1.0f;
+
+	if (playback) {
+		if (playback->IsReplayMode()) {
+			shouldUpdateScene = false;
+			
+			// リプレイ中は記録されたデータを元にモデルの座標を上書きして、実際に動いているように見せる
+			auto recorder = HapiColi::HapiColi::GetInstance().GetManager()->GetRecorder();
+			if (recorder) {
+				const auto& frames = recorder->GetRecordedFrames();
+				int idx = playback->GetReplayFrameIndex();
+				if (!frames.empty() && idx >= 0 && idx < frames.size()) {
+					for (const auto& obj : frames[idx].objects) {
+						if (obj.id == "Model") {
+							modelTransform_.translate = { obj.position.x, obj.position.y, obj.position.z };
+							model_.get()->SetTransform(modelTransform_);
+						} else if (obj.id == "Sphere") {
+							Transform_.translate = { obj.position.x, obj.position.y, obj.position.z };
+							sphere_.get()->SetTransform(Transform_);
+						}
+					}
+				}
+			}
+		} else {
+			if (playback->IsSimulationPaused()) {
+				shouldUpdateScene = playback->ConsumeStepRequest();
+			}
+			timeScale = playback->GetTimeScale();
+		}
+	}
+
+	if (shouldUpdateScene) {
+		// 移動処理 (model_ を操作)
+		float moveSpeed = 0.1f * timeScale;
+		if (Input::PressKey(DIK_UP) || Input::PressKey(DIK_W)) { modelTransform_.translate.z += moveSpeed; }
+		if (Input::PressKey(DIK_DOWN) || Input::PressKey(DIK_S)) { modelTransform_.translate.z -= moveSpeed; }
+		if (Input::PressKey(DIK_LEFT) || Input::PressKey(DIK_A)) { modelTransform_.translate.x -= moveSpeed; }
+		if (Input::PressKey(DIK_RIGHT) || Input::PressKey(DIK_D)) { modelTransform_.translate.x += moveSpeed; }
+		model_.get()->SetTransform(modelTransform_);
+	}
 
 	camera_.get()->Update();
 	Matrix4x4 view = camera_.get()->GetViewMatrix();
@@ -189,6 +248,32 @@ void TestScene::Update() {
 
 	animation_.get()->Update(view);
 	nodeAnimation_.get()->Update(view);
+
+	// 当たり判定
+	AABB modelAABB = Collision::MakeAABB(modelTransform_, 1.0f, 1.0f, 1.0f);
+	HapiColi::ObjectData modelData = HapiColi::ObjectData::CreateBox(
+		"Model",
+		{modelTransform_.translate.x, modelTransform_.translate.y, modelTransform_.translate.z},
+		{1.0f, 1.0f, 1.0f}
+	);
+
+	AABB sphereAABB = Collision::MakeAABB(Transform_, 1.0f, 1.0f, 1.0f); // Transform_ is for sphere_
+	HapiColi::ObjectData sphereData = HapiColi::ObjectData::CreateBox(
+		"Sphere",
+		{Transform_.translate.x, Transform_.translate.y, Transform_.translate.z},
+		{1.0f, 1.0f, 1.0f}
+	);
+
+	isCollision_ = Collision::CheckAABB(modelAABB, sphereAABB);
+	if (isCollision_) {
+		modelData.SetCollision(sphereData.id);
+		sphereData.SetCollision(modelData.id);
+	}
+
+	HapiColi::HapiColi::GetInstance().RecordObject(modelData);
+	HapiColi::HapiColi::GetInstance().RecordObject(sphereData);
+
+	HapiColi::HapiColi::GetInstance().EndFrame();
 }
 
 void TestScene::Draw() {
@@ -206,9 +291,78 @@ void TestScene::Draw() {
 	Draw::DrawObj(nodeAnimation_.get());
 	Draw::DrawAnimation(animation_.get());
 
-	//Draw::DrawObj(sphere_.get());
+	Draw::DrawObj(sphere_.get());
 	for (int i = 0, n = static_cast<int>(particle_.size()); i < n; ++i) {
 		//particle_[i].get()->Draw();
 	}
 	//Draw::DrawSprite(sprite_.get());
+
+
+
+	if (isDrawColi_) {
+		HapiColi::HapiColi::GetInstance().BuildRenderCommands();
+		const auto& renderCommands = HapiColi::HapiColi::GetInstance().GetRenderCommands();
+		
+		if (!renderCommands.empty()) {
+			Draw::preDraw(LineShader, kBlendModeNormal);
+
+			int lineIndex = 0;
+			for (const auto& cmd : renderCommands) {
+				if (lineIndex >= debugLines_.size()) {
+					auto line = std::make_unique<Line>();
+					line->CreateLine();
+					debugLines_.push_back(std::move(line));
+				}
+
+				LineVertexData vertices[2] = {
+					{ cmd.start, {cmd.color[0], cmd.color[1], cmd.color[2], cmd.color[3]} },
+					{ cmd.end, {cmd.color[0], cmd.color[1], cmd.color[2], cmd.color[3]} }
+				};
+				debugLines_[lineIndex]->SetVertex(vertices);
+				debugLines_[lineIndex]->SettingWvp(camera_->GetViewMatrix());
+				Draw::DrawLine(debugLines_[lineIndex].get());
+				lineIndex++;
+			}
+
+			// Clear the rest
+			for (int i = lineIndex; i < debugLines_.size(); ++i) {
+				LineVertexData vertices[2] = {
+					{ {0,0,0}, {1,1,1,1} },
+					{ {0,0,0}, {1,1,1,1} }
+				};
+				debugLines_[i]->SetVertex(vertices);
+			}
+		}
+
+		const auto& solidCommands = HapiColi::HapiColi::GetInstance().GetSolidRenderCommands();
+		for (const auto& scmd : solidCommands) {
+			if (scmd.type == HapiColi::SolidRenderCommand::Sphere) {
+				Transform t;
+				t.scale = {scmd.scale.x, scmd.scale.y, scmd.scale.z};
+				t.rotate = {scmd.rotation.x, scmd.rotation.y, scmd.rotation.z};
+				t.translate = {scmd.position.x, scmd.position.y, scmd.position.z};
+				contactSphere_->SetTransform(t);
+				contactSphere_->GetMartial()->SetColor( { scmd.color[0], scmd.color[1], scmd.color[2], scmd.color[3] } );
+				contactSphere_->SettingWvp(camera_->GetViewMatrix());
+				Draw::DrawSphere(contactSphere_.get());
+			} else if (scmd.type == HapiColi::SolidRenderCommand::Box) {
+				Transform t;
+				t.scale = {scmd.scale.x, scmd.scale.y, scmd.scale.z};
+				t.rotate = {scmd.rotation.x, scmd.rotation.y, scmd.rotation.z};
+				t.translate = {scmd.position.x, scmd.position.y, scmd.position.z};
+				normalBox_->SetTransform(t);
+				normalBox_->GetMartial()->SetColor( { scmd.color[0], scmd.color[1], scmd.color[2], scmd.color[3] } );
+				normalBox_->SettingWvp(camera_->GetViewMatrix());
+				Draw::DrawObj(normalBox_.get());
+			}
+		}
+	} else {
+		for (auto& lineObj : debugLines_) {
+			LineVertexData vertices[2] = {
+				{ {0,0,0}, {1,1,1,1} },
+				{ {0,0,0}, {1,1,1,1} }
+			};
+			lineObj->SetVertex(vertices);
+		}
+	}
 }

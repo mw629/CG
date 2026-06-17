@@ -45,6 +45,9 @@ namespace HapiColi
     {
         bool isColliding = false;
         std::string collidedWithId;
+        Vector3 contactPoint;
+        Vector3 contactNormal;
+        bool hasContactInfo = false;
     };
 
     struct ObjectData
@@ -74,6 +77,14 @@ namespace HapiColi
         {
             collision.isColliding = true;
             collision.collidedWithId = collidedWithId;
+        }
+
+        // 衝突判定はないが、最後の衝突点情報を残すためのヘルパー
+        void SetContactInfoOnly(const Vector3& contactPoint, const Vector3& contactNormal)
+        {
+            collision.contactPoint = contactPoint;
+            collision.contactNormal = contactNormal;
+            collision.hasContactInfo = true;
         }
     };
 }
