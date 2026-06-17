@@ -206,12 +206,11 @@ void GameScene::CheckCollisions()
 	float playerHeight = player_->GetIsRolling() ? 0.5f : 1.5f; // 転がり中は低くなる
 	AABB playerAABB = Collision::MakeAABB(playerTransform, 0.8f, playerHeight, 0.8f);
 
-	HapiColi::ObjectData playerData;
-	playerData.id = "Player";
-	playerData.position = HapiColi::Vector3(playerTransform.translate.x, playerTransform.translate.y, playerTransform.translate.z);
-	playerData.collider.type = HapiColi::ColliderInfo::Type::Box;
-	playerData.collider.size = HapiColi::Vector3(0.8f, playerHeight, 0.8f);
-	playerData.collision.isColliding = false;
+	HapiColi::ObjectData playerData = HapiColi::ObjectData::CreateBox(
+		"Player",
+		{playerTransform.translate.x, playerTransform.translate.y, playerTransform.translate.z},
+		{0.8f, playerHeight, 0.8f}
+	);
 
 	// 全障害物との当たり判定
 	for (int i = 0; i < stageSettings_->GetMaxObstacles(); i++) {
@@ -225,12 +224,11 @@ void GameScene::CheckCollisions()
 			obstacle->GetCollisionDepth()
 		);
 
-		HapiColi::ObjectData obstacleData;
-		obstacleData.id = "Obstacle_" + std::to_string(i);
-		obstacleData.position = HapiColi::Vector3(obstacle->GetTransform().translate.x, obstacle->GetTransform().translate.y, obstacle->GetTransform().translate.z);
-		obstacleData.collider.type = HapiColi::ColliderInfo::Type::Box;
-		obstacleData.collider.size = HapiColi::Vector3(obstacle->GetCollisionWidth(), obstacle->GetCollisionHeight(), obstacle->GetCollisionDepth());
-		obstacleData.collision.isColliding = false;
+		HapiColi::ObjectData obstacleData = HapiColi::ObjectData::CreateBox(
+			"Obstacle_" + std::to_string(i),
+			{obstacle->GetTransform().translate.x, obstacle->GetTransform().translate.y, obstacle->GetTransform().translate.z},
+			{obstacle->GetCollisionWidth(), obstacle->GetCollisionHeight(), obstacle->GetCollisionDepth()}
+		);
 
 		if (Collision::CheckAABB(playerAABB, obstacleAABB)) {
 			// 衝突！ゲームオーバー
@@ -238,10 +236,8 @@ void GameScene::CheckCollisions()
 			stageSettings_->SetGameOver(true);
 			PostEffect::SetActivePostEffect(PostEffect::Type::GrayScale);
 			
-			playerData.collision.isColliding = true;
-			playerData.collision.collidedWithId = obstacleData.id;
-			obstacleData.collision.isColliding = true;
-			obstacleData.collision.collidedWithId = playerData.id;
+			playerData.SetCollision(obstacleData.id);
+			obstacleData.SetCollision(playerData.id);
 			
 			HapiColi::HapiColi::GetInstance().RecordObject(obstacleData);
 			break;

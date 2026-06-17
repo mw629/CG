@@ -56,5 +56,24 @@ namespace HapiColi
         Vector3 velocity;
         ColliderInfo collider;
         CollisionResult collision;
+
+        // 簡単な初期化用ヘルパー（Box）
+        static ObjectData CreateBox(const std::string& id, const Vector3& position, const Vector3& size)
+        {
+            ObjectData data;
+            data.id = id;
+            data.position = position;
+            data.collider.type = ColliderInfo::Type::Box;
+            data.collider.size = size;
+            data.collision.isColliding = false;
+            return data;
+        }
+
+        // 衝突状態をセットするヘルパー
+        void SetCollision(const std::string& collidedWithId)
+        {
+            collision.isColliding = true;
+            collision.collidedWithId = collidedWithId;
+        }
     };
 }
