@@ -41,13 +41,36 @@ namespace HapiColi
             << obj.position.x << ", "
             << obj.position.y << ", "
             << obj.position.z << "],\n";
+        oss << i1 << "\"rotation\": ["
+            << obj.rotation.x << ", "
+            << obj.rotation.y << ", "
+            << obj.rotation.z << ", "
+            << obj.rotation.w << "],\n";
         oss << i1 << "\"velocity\": ["
             << obj.velocity.x << ", "
             << obj.velocity.y << ", "
             << obj.velocity.z << "],\n";
+            
+        oss << i1 << "\"collider\": {\n";
+        oss << i2 << "\"type\": " << (int)obj.collider.type << ",\n";
+        oss << i2 << "\"size\": ["
+            << obj.collider.size.x << ", "
+            << obj.collider.size.y << ", "
+            << obj.collider.size.z << "]\n";
+        oss << i1 << "},\n";
+        
         oss << i1 << "\"collision\": {\n";
         oss << i2 << "\"isColliding\": "      << (obj.collision.isColliding ? "true" : "false") << ",\n";
-        oss << i2 << "\"collidedWithId\": \"" << EscapeStr(obj.collision.collidedWithId) << "\"\n";
+        oss << i2 << "\"collidedWithId\": \"" << EscapeStr(obj.collision.collidedWithId) << "\",\n";
+        oss << i2 << "\"hasContactInfo\": "   << (obj.collision.hasContactInfo ? "true" : "false") << ",\n";
+        oss << i2 << "\"contactPoint\": ["
+            << obj.collision.contactPoint.x << ", "
+            << obj.collision.contactPoint.y << ", "
+            << obj.collision.contactPoint.z << "],\n";
+        oss << i2 << "\"contactNormal\": ["
+            << obj.collision.contactNormal.x << ", "
+            << obj.collision.contactNormal.y << ", "
+            << obj.collision.contactNormal.z << "]\n";
         oss << i1 << "}\n";
         oss << i0 << "}";
         return oss.str();
