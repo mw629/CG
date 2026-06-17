@@ -43,6 +43,9 @@ private:
 	// デバッグ用ラインのプール
 	std::vector<std::unique_ptr<Line>> debugLines_;
 
+	// 当たり判定の表示フラグ
+	bool isDrawColi_ = true;
+
 	// 当たり判定処理
 	void CheckCollisions();
 

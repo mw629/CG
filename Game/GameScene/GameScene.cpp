@@ -100,11 +100,7 @@ void GameScene::Initialize() {
 	ModelData obstacleModelData = AssimpLoadObjFile("resources/Block", "Block.obj");
 	stageSettings_->Initialize(roadModelData, obstacleModelData);
 
-	for (int i = 0; i < 200; ++i) {
-		auto line = std::make_unique<Line>();
-		line->CreateLine();
-		debugLines_.push_back(std::move(line));
-	}
+	// デバッグ用ラインはDraw時に必要に応じて動的に確保します
 
 	HapiColi::HapiColi::GetInstance().Initialize();
 }
@@ -112,7 +108,6 @@ void GameScene::Initialize() {
 void GameScene::Update() {
 	HapiColi::HapiColi::GetInstance().BeginFrame(1.0f / 60.0f);
 
-	PostEffect::SetActivePostEffect(PostEffect::Type::GaussianFilter);
 
 	camera_->Update();
 	view = camera_->GetViewMatrix();
@@ -144,6 +139,15 @@ void GameScene::Update() {
 			sceneChangeRequest_ = true;
 		}
 	}
+
+	// デバッグ表示の切り替え (Cキー)
+	if (Input::PushKey(DIK_C)) {
+		isDrawColi_ = !isDrawColi_;
+	}
+
+	// 当たり判定のチェックと記録 (ポーズ中などどんな状態でも描画するために毎フレーム実行)
+	CheckCollisions();
+
 	HapiColi::HapiColi::GetInstance().EndFrame();
 }
 
@@ -164,21 +168,32 @@ void GameScene::Draw() {
 		pauseSystem_->Draw();
 	}
 
-	HapiColi::HapiColi::GetInstance().BuildRenderCommands();
-	const auto& renderCommands = HapiColi::HapiColi::GetInstance().GetRenderCommands();
-	Draw::preDraw(LineShader, kBlendModeNormal);
+	if (isDrawColi_) {
+		HapiColi::HapiColi::GetInstance().BuildRenderCommands();
+		const auto& renderCommands = HapiColi::HapiColi::GetInstance().GetRenderCommands();
+		
+		if (!renderCommands.empty()) {
+			Draw::preDraw(LineShader, kBlendModeNormal);
 
-	int lineIndex = 0;
-	for (const auto& cmd : renderCommands) {
-		if (lineIndex >= debugLines_.size()) break;
-		LineVertexData vertices[2] = {
-			{ cmd.start, {cmd.color[0], cmd.color[1], cmd.color[2], cmd.color[3]} },
-			{ cmd.end, {cmd.color[0], cmd.color[1], cmd.color[2], cmd.color[3]} }
-		};
-		debugLines_[lineIndex]->SetVertex(vertices);
-		debugLines_[lineIndex]->SettingWvp(camera_->GetViewMatrix());
-		Draw::DrawLine(debugLines_[lineIndex].get());
-		lineIndex++;
+			int lineIndex = 0;
+			for (const auto& cmd : renderCommands) {
+				// 足りなければLineを追加生成（サイズが変わった際やオブジェクトが増えた際に対応）
+				if (lineIndex >= debugLines_.size()) {
+					auto line = std::make_unique<Line>();
+					line->CreateLine();
+					debugLines_.push_back(std::move(line));
+				}
+
+				LineVertexData vertices[2] = {
+					{ cmd.start, {cmd.color[0], cmd.color[1], cmd.color[2], cmd.color[3]} },
+					{ cmd.end, {cmd.color[0], cmd.color[1], cmd.color[2], cmd.color[3]} }
+				};
+				debugLines_[lineIndex]->SetVertex(vertices);
+				debugLines_[lineIndex]->SettingWvp(camera_->GetViewMatrix());
+				Draw::DrawLine(debugLines_[lineIndex].get());
+				lineIndex++;
+			}
+		}
 	}
 
 #ifdef _USE_IMGUI
@@ -189,9 +204,6 @@ void GameScene::PlayingUpdate()
 {
 	player_->Update(view);
 	stageSettings_->Update(view);
-
-	// 当たり判定チェック
-	CheckCollisions();
 }
 
 void GameScene::PausedUpdate()
@@ -231,19 +243,19 @@ void GameScene::CheckCollisions()
 		);
 
 		if (Collision::CheckAABB(playerAABB, obstacleAABB)) {
-			// 衝突！ゲームオーバー
-			gameState_ = GameState::GameOver;
-			stageSettings_->SetGameOver(true);
-			PostEffect::SetActivePostEffect(PostEffect::Type::GrayScale);
+			if (gameState_ == GameState::Playing) {
+				// 衝突！ゲームオーバー
+				gameState_ = GameState::GameOver;
+				stageSettings_->SetGameOver(true);
+				PostEffect::SetActivePostEffect(PostEffect::Type::GrayScale);
+			}
 			
+			// 衝突状態をセット（赤くする。ポーズ中やゲームオーバー時も表示を維持）
 			playerData.SetCollision(obstacleData.id);
 			obstacleData.SetCollision(playerData.id);
-			
-			HapiColi::HapiColi::GetInstance().RecordObject(obstacleData);
-			break;
-		} else {
-			HapiColi::HapiColi::GetInstance().RecordObject(obstacleData);
 		}
+		
+		HapiColi::HapiColi::GetInstance().RecordObject(obstacleData);
 	}
 	HapiColi::HapiColi::GetInstance().RecordObject(playerData);
 }
