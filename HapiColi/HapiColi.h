@@ -3,9 +3,12 @@
 #include "HapiColiManager/HapiColiManager.h"
 #include "HapiColiManager/FrameData.h"
 #include <memory>
-
+#include <vector>
+#include "HapiColiRenderer.h"
 namespace HapiColi
 {
+    class HapiColiRenderer;
+
     class HapiColi
     {
     public:
@@ -22,7 +25,9 @@ namespace HapiColi
         void RecordObject(const ObjectData& objData);
         void EndFrame();
         
-        // デバッグ描画用 (ビュープロジェクション行列を渡す)
+        // 描画コマンド取得（DirectX非依存）
+        void BuildRenderCommands();
+        const std::vector<RenderCommand>& GetRenderCommands() const;
         
         const char* GetActiveSubjectId() const;
         const char* GetActiveTargetId() const;
@@ -33,5 +38,6 @@ namespace HapiColi
         ~HapiColi();
         
         std::unique_ptr<HapiColiManager> m_manager;
+        std::unique_ptr<HapiColiRenderer> renderer_;
     };
 }

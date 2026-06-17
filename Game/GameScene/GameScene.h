@@ -40,6 +40,9 @@ private:
 	//<< Paused >>//
 	std::unique_ptr<PauseSystem> pauseSystem_ = std::make_unique<PauseSystem>();
 
+	// デバッグ用ラインのプール
+	std::vector<std::unique_ptr<Line>> debugLines_;
+
 	// 当たり判定処理
 	void CheckCollisions();
 

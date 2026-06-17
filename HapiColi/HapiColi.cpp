@@ -1,11 +1,13 @@
 #include "HapiColi.h"
 #include "HapiColiManager/Recorder.h"
+#include "HapiColiRenderer.h"
 
 namespace HapiColi
 {
     HapiColi::HapiColi()
     {
         m_manager = std::make_unique<HapiColiManager>();
+        renderer_ = std::make_unique<HapiColiRenderer>();
     }
 
     HapiColi::~HapiColi()
@@ -35,6 +37,16 @@ namespace HapiColi
     void HapiColi::EndFrame()
     {
         m_manager->GetRecorder()->EndFrame();
+    }
+
+    void HapiColi::BuildRenderCommands()
+    {
+        renderer_->BuildCommands(m_manager->GetRecorder()->GetRealtimeObjects());
+    }
+
+    const std::vector<RenderCommand>& HapiColi::GetRenderCommands() const
+    {
+        return renderer_->GetCommands();
     }
 
     const char* HapiColi::GetActiveSubjectId() const

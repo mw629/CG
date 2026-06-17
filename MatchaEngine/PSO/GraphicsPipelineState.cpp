@@ -128,9 +128,12 @@ void GraphicsPipelineState::CreateGraphicsPSO(const ShaderName& shaderName, cons
 	//書き込むRTVの情報
 	graphicsPipelineStateDesc_[shaderName][blendMode].NumRenderTargets = 1;
 	graphicsPipelineStateDesc_[shaderName][blendMode].RTVFormats[0] = DXGI_FORMAT_R8G8B8A8_UNORM_SRGB;
-	//利用するトポロジ（形状）のタイプ。三角形
-	graphicsPipelineStateDesc_[shaderName][blendMode].PrimitiveTopologyType =
-		D3D12_PRIMITIVE_TOPOLOGY_TYPE_TRIANGLE;
+	//利用するトポロジ（形状）のタイプ
+	if (shaderName == LineShader) {
+		graphicsPipelineStateDesc_[shaderName][blendMode].PrimitiveTopologyType = D3D12_PRIMITIVE_TOPOLOGY_TYPE_LINE;
+	} else {
+		graphicsPipelineStateDesc_[shaderName][blendMode].PrimitiveTopologyType = D3D12_PRIMITIVE_TOPOLOGY_TYPE_TRIANGLE;
+	}
 	//どのように画面に色を打ち込むのかの設定(気にしなくていい)
 	graphicsPipelineStateDesc_[shaderName][blendMode].SampleDesc.Count = 1;
 	graphicsPipelineStateDesc_[shaderName][blendMode].SampleMask = D3D12_DEFAULT_SAMPLE_MASK;

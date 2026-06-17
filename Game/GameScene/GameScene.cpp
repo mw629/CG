@@ -100,6 +100,12 @@ void GameScene::Initialize() {
 	ModelData obstacleModelData = AssimpLoadObjFile("resources/Block", "Block.obj");
 	stageSettings_->Initialize(roadModelData, obstacleModelData);
 
+	for (int i = 0; i < 200; ++i) {
+		auto line = std::make_unique<Line>();
+		line->CreateLine();
+		debugLines_.push_back(std::move(line));
+	}
+
 	HapiColi::HapiColi::GetInstance().Initialize();
 }
 
@@ -156,6 +162,23 @@ void GameScene::Draw() {
 	// ポーズ中の描画
 	if (gameState_ == GameState::Paused) {
 		pauseSystem_->Draw();
+	}
+
+	HapiColi::HapiColi::GetInstance().BuildRenderCommands();
+	const auto& renderCommands = HapiColi::HapiColi::GetInstance().GetRenderCommands();
+	Draw::preDraw(LineShader, kBlendModeNormal);
+
+	int lineIndex = 0;
+	for (const auto& cmd : renderCommands) {
+		if (lineIndex >= debugLines_.size()) break;
+		LineVertexData vertices[2] = {
+			{ cmd.start, {cmd.color[0], cmd.color[1], cmd.color[2], cmd.color[3]} },
+			{ cmd.end, {cmd.color[0], cmd.color[1], cmd.color[2], cmd.color[3]} }
+		};
+		debugLines_[lineIndex]->SetVertex(vertices);
+		debugLines_[lineIndex]->SettingWvp(camera_->GetViewMatrix());
+		Draw::DrawLine(debugLines_[lineIndex].get());
+		lineIndex++;
 	}
 
 #ifdef _USE_IMGUI
