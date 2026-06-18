@@ -205,6 +205,14 @@ void GameScene::Initialize() {
 	player_->SetName("Player");
 	gameObjectManager_->AddObject(player_);
 
+	// エディターでの保存・読み込み先をJsonSceneに設定
+	EditorManager::SetSaveCallback([this](const std::string& filePath) {
+		gameObjectManager_->SaveScene(filePath);
+	});
+	EditorManager::SetLoadCallback([this](const std::string& filePath) {
+		gameObjectManager_->LoadScene(filePath);
+	});
+
 	// ステージの初期化
 	ModelData roadModelData = AssetManager::LoadModel("resources/Plane", "Plane.gltf");
 	ModelData obstacleModelData = AssetManager::LoadModel("resources/Block", "Block.obj");

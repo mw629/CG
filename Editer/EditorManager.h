@@ -1,6 +1,7 @@
 #pragma once
 #include <functional>
 #include <memory>
+#include <string>
 
 class Engine;
 
@@ -9,13 +10,14 @@ public:
 	// Sceneウィンドウ内のオーバーレイ描画用コールバック型
 	using SceneOverlayCallback = std::function<void()>;
 	// Save/Loadコールバック型
-	using EditorCallback = std::function<void()>;
+	using EditorCallback = std::function<void(const std::string&)>;
 
 private:
 	static bool isPlaying_;
 	static SceneOverlayCallback s_sceneOverlayCallback_;
 	static EditorCallback s_saveCallback_;
 	static EditorCallback s_loadCallback_;
+	static std::string s_currentFileName_;
 
 	bool showFinalWindow_ = true;
 	int sceneAspectRatioIndex_ = 0; // 0: Free, 1: 16:9, 2: 4:3, 3: 1:1, 4: 21:9

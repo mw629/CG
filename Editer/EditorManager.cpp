@@ -1,5 +1,7 @@
 #include "EditorManager.h"
 #include <Engine.h>
+#include <filesystem>
+#include <vector>
 
 #ifdef _USE_IMGUI
 #include "../externals/imgui/imgui.h"
@@ -9,19 +11,46 @@ bool EditorManager::isPlaying_ = false;
 EditorManager::SceneOverlayCallback EditorManager::s_sceneOverlayCallback_ = nullptr;
 EditorManager::EditorCallback EditorManager::s_saveCallback_ = nullptr;
 EditorManager::EditorCallback EditorManager::s_loadCallback_ = nullptr;
+std::string EditorManager::s_currentFileName_ = "scene";
 
 void EditorManager::Update(Engine* engine)
 {
 #ifdef _USE_IMGUI
 
+	static bool showSaveAsPopup = false;
+	static bool showLoadPopup = false;
+	static char fileNameBuffer[256] = "";
+
+	auto getFullPath = [](const std::string& name) {
+		std::string fname = name;
+		if (fname.length() < 5 || fname.substr(fname.length() - 5) != ".json") {
+			fname += ".json";
+		}
+		return "resources/Json/Scene/" + fname;
+	};
+
 	// ===== Unity風メインメニューバー =====
 	if (ImGui::BeginMainMenuBar()) {
 		if (ImGui::BeginMenu("File")) {
+			std::string displayFileName = s_currentFileName_.empty() ? "None" : s_currentFileName_ + ".json";
+			ImGui::TextDisabled("Current File: %s", displayFileName.c_str());
+			ImGui::Separator();
+
 			if (ImGui::MenuItem("Save", "Ctrl+S")) {
-				if (s_saveCallback_) s_saveCallback_();
+				if (s_currentFileName_.empty()) {
+					showSaveAsPopup = true;
+					snprintf(fileNameBuffer, sizeof(fileNameBuffer), "%s", "scene");
+				} else {
+					if (s_saveCallback_) s_saveCallback_(getFullPath(s_currentFileName_));
+				}
 			}
-			if (ImGui::MenuItem("Load", "Ctrl+L")) {
-				if (s_loadCallback_) s_loadCallback_();
+			if (ImGui::MenuItem("Save As...")) {
+				showSaveAsPopup = true;
+				snprintf(fileNameBuffer, sizeof(fileNameBuffer), "%s", s_currentFileName_.empty() ? "scene" : s_currentFileName_.c_str());
+			}
+			if (ImGui::MenuItem("Load...", "Ctrl+L")) {
+				showLoadPopup = true;
+				snprintf(fileNameBuffer, sizeof(fileNameBuffer), "%s", s_currentFileName_.empty() ? "scene" : s_currentFileName_.c_str());
 			}
 			ImGui::Separator();
 			if (ImGui::MenuItem("Exit")) {
@@ -64,10 +93,86 @@ void EditorManager::Update(Engine* engine)
 
 	// Ctrl+S / Ctrl+L ショートカット
 	if (ImGui::GetIO().KeyCtrl && ImGui::IsKeyPressed(ImGuiKey_S)) {
-		if (s_saveCallback_) s_saveCallback_();
+		if (s_currentFileName_.empty()) {
+			showSaveAsPopup = true;
+			snprintf(fileNameBuffer, sizeof(fileNameBuffer), "%s", "scene");
+		} else {
+			if (s_saveCallback_) s_saveCallback_(getFullPath(s_currentFileName_));
+		}
 	}
 	if (ImGui::GetIO().KeyCtrl && ImGui::IsKeyPressed(ImGuiKey_L)) {
-		if (s_loadCallback_) s_loadCallback_();
+		showLoadPopup = true;
+		snprintf(fileNameBuffer, sizeof(fileNameBuffer), "%s", s_currentFileName_.empty() ? "scene" : s_currentFileName_.c_str());
+	}
+
+	// Save As... ポップアップ
+	if (showSaveAsPopup) {
+		ImGui::OpenPopup("Save As...");
+		showSaveAsPopup = false;
+	}
+	if (ImGui::BeginPopupModal("Save As...", NULL, ImGuiWindowFlags_AlwaysAutoResize)) {
+		std::string displayFileName = s_currentFileName_.empty() ? "None" : s_currentFileName_ + ".json";
+		ImGui::TextDisabled("Current File: %s", displayFileName.c_str());
+		ImGui::Text("File name (saved in resources/Json/Scene/):");
+		ImGui::InputText("##savepath", fileNameBuffer, sizeof(fileNameBuffer));
+		if (ImGui::Button("Save", ImVec2(120, 0))) {
+			s_currentFileName_ = fileNameBuffer;
+			if (s_saveCallback_) s_saveCallback_(getFullPath(s_currentFileName_));
+			ImGui::CloseCurrentPopup();
+		}
+		ImGui::SameLine();
+		if (ImGui::Button("Cancel", ImVec2(120, 0))) {
+			ImGui::CloseCurrentPopup();
+		}
+		ImGui::EndPopup();
+	}
+
+	// Load Scene... ポップアップ
+	if (showLoadPopup) {
+		ImGui::OpenPopup("Load Scene...");
+		showLoadPopup = false;
+	}
+	if (ImGui::BeginPopupModal("Load Scene...", NULL, ImGuiWindowFlags_AlwaysAutoResize)) {
+		std::string displayFileName = s_currentFileName_.empty() ? "None" : s_currentFileName_ + ".json";
+		ImGui::TextDisabled("Current File: %s", displayFileName.c_str());
+		ImGui::Text("Select file to load from resources/Json/Scene/:");
+
+		// List files
+		std::vector<std::string> jsonFiles;
+		try {
+			for (const auto& entry : std::filesystem::directory_iterator("resources/Json/Scene")) {
+				if (entry.is_regular_file() && entry.path().extension() == ".json") {
+					jsonFiles.push_back(entry.path().stem().string());
+				}
+			}
+		} catch (...) {}
+
+		if (ImGui::BeginCombo("Target File", s_currentFileName_.c_str())) {
+			for (const auto& file : jsonFiles) {
+				bool is_selected = (s_currentFileName_ == file);
+				if (ImGui::Selectable(file.c_str(), is_selected)) {
+					s_currentFileName_ = file;
+					snprintf(fileNameBuffer, sizeof(fileNameBuffer), "%s", file.c_str());
+				}
+				if (is_selected) {
+					ImGui::SetItemDefaultFocus();
+				}
+			}
+			ImGui::EndCombo();
+		}
+
+		ImGui::InputText("##loadpath", fileNameBuffer, sizeof(fileNameBuffer));
+
+		if (ImGui::Button("Load", ImVec2(120, 0))) {
+			s_currentFileName_ = fileNameBuffer;
+			if (s_loadCallback_) s_loadCallback_(getFullPath(s_currentFileName_));
+			ImGui::CloseCurrentPopup();
+		}
+		ImGui::SameLine();
+		if (ImGui::Button("Cancel", ImVec2(120, 0))) {
+			ImGui::CloseCurrentPopup();
+		}
+		ImGui::EndPopup();
 	}
 
 	// ウィンドウ全体をDockSpaceとして設定（各ImGuiウィンドウをドッキング固定可能にする）
