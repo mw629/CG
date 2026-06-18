@@ -11,7 +11,7 @@ void StageSettings::Initialize(ModelData roadModelData, ModelData obstacleModelD
 	for (int i = 0; i < kChunkCount_; i++) {
         auto roadModel = std::make_shared<Model>();
 		roadModel->Initialize(roadModelData);
-		roadModel->SetTexture(texture_->TextureData("resources/Model/Ground/road.png"));
+		roadModel->SetTexture(texture_->TextureData("Resources/Model/Ground/road.png"));
 
 		roadChunks_[i] = std::make_shared<RenderObject>(roadModel);
         roadChunks_[i]->SetName("RoadChunk " + std::to_string(i));

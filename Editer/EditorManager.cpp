@@ -7,6 +7,23 @@
 #include "../externals/imgui/imgui.h"
 #endif // _USE_IMGUI
 
+#include "../MatchaEngine/Core/LogHandler.h"
+
+void DrawResourceDirectory(const std::filesystem::path& dirPath) {
+	try {
+		for (const auto& entry : std::filesystem::directory_iterator(dirPath)) {
+			if (entry.is_directory()) {
+				if (ImGui::TreeNodeEx(entry.path().filename().string().c_str(), ImGuiTreeNodeFlags_OpenOnArrow)) {
+					DrawResourceDirectory(entry.path());
+					ImGui::TreePop();
+				}
+			} else if (entry.is_regular_file()) {
+				ImGui::TreeNodeEx(entry.path().filename().string().c_str(), ImGuiTreeNodeFlags_Leaf | ImGuiTreeNodeFlags_NoTreePushOnOpen);
+			}
+		}
+	} catch (...) {}
+}
+
 bool EditorManager::isPlaying_ = false;
 EditorManager::SceneOverlayCallback EditorManager::s_sceneOverlayCallback_ = nullptr;
 EditorManager::EditorCallback EditorManager::s_saveCallback_ = nullptr;
@@ -26,7 +43,7 @@ void EditorManager::Update(Engine* engine)
 		if (fname.length() < 5 || fname.substr(fname.length() - 5) != ".json") {
 			fname += ".json";
 		}
-		return "resources/Json/Scene/" + fname;
+		return "Resources/Json/Scene/" + fname;
 	};
 
 	// ===== Unity風メインメニューバー =====
@@ -60,6 +77,8 @@ void EditorManager::Update(Engine* engine)
 		}
 		if (ImGui::BeginMenu("Window")) {
 			ImGui::MenuItem("Debug Info", nullptr, &showFinalWindow_);
+			ImGui::MenuItem("Resources", nullptr, &showResourcesWindow_);
+			ImGui::MenuItem("Logs", nullptr, &showLogsWindow_);
 			ImGui::EndMenu();
 		}
 
@@ -113,7 +132,7 @@ void EditorManager::Update(Engine* engine)
 	if (ImGui::BeginPopupModal("Save As...", NULL, ImGuiWindowFlags_AlwaysAutoResize)) {
 		std::string displayFileName = s_currentFileName_.empty() ? "None" : s_currentFileName_ + ".json";
 		ImGui::TextDisabled("Current File: %s", displayFileName.c_str());
-		ImGui::Text("File name (saved in resources/Json/Scene/):");
+		ImGui::Text("File name (saved in Resources/Json/Scene/):");
 		ImGui::InputText("##savepath", fileNameBuffer, sizeof(fileNameBuffer));
 		if (ImGui::Button("Save", ImVec2(120, 0))) {
 			s_currentFileName_ = fileNameBuffer;
@@ -135,12 +154,12 @@ void EditorManager::Update(Engine* engine)
 	if (ImGui::BeginPopupModal("Load Scene...", NULL, ImGuiWindowFlags_AlwaysAutoResize)) {
 		std::string displayFileName = s_currentFileName_.empty() ? "None" : s_currentFileName_ + ".json";
 		ImGui::TextDisabled("Current File: %s", displayFileName.c_str());
-		ImGui::Text("Select file to load from resources/Json/Scene/:");
+		ImGui::Text("Select file to load from Resources/Json/Scene/:");
 
 		// List files
 		std::vector<std::string> jsonFiles;
 		try {
-			for (const auto& entry : std::filesystem::directory_iterator("resources/Json/Scene")) {
+			for (const auto& entry : std::filesystem::directory_iterator("Resources/Json/Scene")) {
 				if (entry.is_regular_file() && entry.path().extension() == ".json") {
 					jsonFiles.push_back(entry.path().stem().string());
 				}
@@ -278,6 +297,43 @@ void EditorManager::Update(Engine* engine)
 		s_sceneOverlayCallback_();
 	}
 	ImGui::End();
+
+	// Resources Window
+	if (showResourcesWindow_) {
+		ImGui::SetNextWindowSize(ImVec2(300, 400), ImGuiCond_FirstUseEver);
+		if (ImGui::Begin("Resources", &showResourcesWindow_)) {
+			if (std::filesystem::exists("resources")) {
+				if (ImGui::CollapsingHeader("resources", ImGuiTreeNodeFlags_DefaultOpen)) {
+					DrawResourceDirectory("resources");
+				}
+			} else {
+				ImGui::Text("resources directory not found.");
+			}
+		}
+		ImGui::End();
+	}
+
+	// Logs Window
+	if (showLogsWindow_) {
+		ImGui::SetNextWindowSize(ImVec2(500, 300), ImGuiCond_FirstUseEver);
+		if (ImGui::Begin("Logs", &showLogsWindow_)) {
+			if (ImGui::Button("Clear Logs")) {
+				ClearLogs();
+			}
+			ImGui::Separator();
+			ImGui::BeginChild("ScrollingRegion", ImVec2(0, 0), false, ImGuiWindowFlags_HorizontalScrollbar);
+			const auto& logs = GetLogs();
+			for (const auto& log : logs) {
+				ImGui::TextUnformatted(log.c_str());
+			}
+			// 自動スクロール
+			if (ImGui::GetScrollY() >= ImGui::GetScrollMaxY()) {
+				ImGui::SetScrollHereY(1.0f);
+			}
+			ImGui::EndChild();
+		}
+		ImGui::End();
+	}
 
 #endif
 }

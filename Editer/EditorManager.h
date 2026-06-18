@@ -18,8 +18,10 @@ private:
 	static EditorCallback s_saveCallback_;
 	static EditorCallback s_loadCallback_;
 	static std::string s_currentFileName_;
-
+	
 	bool showFinalWindow_ = true;
+	bool showResourcesWindow_ = true;
+	bool showLogsWindow_ = true;
 	int sceneAspectRatioIndex_ = 0; // 0: Free, 1: 16:9, 2: 4:3, 3: 1:1, 4: 21:9
 
 public:

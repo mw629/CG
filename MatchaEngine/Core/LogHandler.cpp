@@ -33,9 +33,20 @@ std::wstring ConvertString(const std::string& str) {
 }
 
 
+static std::vector<std::string> g_logs;
+
 void Log(std::ostream& os, const std::string& message) {
 	os << message << std::endl;
 	OutputDebugStringA(message.c_str());
+	g_logs.push_back(message);
+}
+
+const std::vector<std::string>& GetLogs() {
+	return g_logs;
+}
+
+void ClearLogs() {
+	g_logs.clear();
 }
 
 std::ofstream CurrentTimestamp()

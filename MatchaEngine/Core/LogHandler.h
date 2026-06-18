@@ -18,8 +18,14 @@ std::string ConvertString(const std::wstring& str);
 
 std::wstring ConvertString(const std::string& str);
 
+#include <vector>
+
 //ログを出す
 void Log(std::ostream& os, const std::string& message);
+
+// ログの取得とクリア用
+const std::vector<std::string>& GetLogs();
+void ClearLogs();
 
 //CrashHandlerの登録//
 LONG WINAPI ExportDump(EXCEPTION_POINTERS* exception);

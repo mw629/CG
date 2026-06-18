@@ -45,7 +45,7 @@ void TestScene::Initialize() {
 	camera_.get()->SetTransform(cameraTransform_);
 	camera_.get()->Update();
 
-	ModelData modelData = AssimpLoadObjFile("resources/Model/obj", "sphere.obj");
+	ModelData modelData = AssimpLoadObjFile("Resources/Model/obj", "sphere.obj");
 
 	//Modelの初期化
 	model_.get()->Initialize(modelData);
@@ -54,31 +54,31 @@ void TestScene::Initialize() {
 
 
 	//Animationの初期化
-	ModelData animModel = AssimpLoadObjFile("resources/Model/human", "sneakWalk.gltf");
-	animation_.get()->Initialize(animModel, "resources/Model/human", "sneakWalk.gltf");
+	ModelData animModel = AssimpLoadObjFile("Resources/Model/human", "sneakWalk.gltf");
+	animation_.get()->Initialize(animModel, "Resources/Model/human", "sneakWalk.gltf");
 	animation_.get()->name_ = "Animation Model";
 
 	//NoodeAnimationの初期化
-	ModelData cubeModel = AssimpLoadObjFile("resources/AnimatedCube", "AnimatedCube.gltf");
-	nodeAnimation_.get()->Initialize(cubeModel, "resources/AnimatedCube", "AnimatedCube.gltf");
+	ModelData cubeModel = AssimpLoadObjFile("Resources/AnimatedCube", "AnimatedCube.gltf");
+	nodeAnimation_.get()->Initialize(cubeModel, "Resources/AnimatedCube", "AnimatedCube.gltf");
 	nodeAnimation_.get()->name_ = "Node Animation Cube";
 
 	
 	//Sphereの初期化
-	int texture1 = texture_.get()->CreateTexture("resources/Texture/monsterBall.png");
+	int texture1 = texture_.get()->CreateTexture("Resources/Texture/monsterBall.png");
 	sphere_.get()->Initialize(texture1);
 	sphere_.get()->SetTransform(modelTransform_);
 	sphere_.get()->name_ = "MonsterBall Sphere";
 
 	//SkyBoxの初期化
-	skyBoxTexture_ = texture_.get()->CreateTexture("resources/DDS/rostock_laage_airport_4k.dds");
+	skyBoxTexture_ = texture_.get()->CreateTexture("Resources/DDS/rostock_laage_airport_4k.dds");
 	skyBox_.get()->Initialize(skyBoxTexture_);
 	skyBox_.get()->SetShader("SkyBoxShader");
 	skyBox_.get()->SetLighting(false);
 	skyBox_.get()->SetTransform(skyBoxTransform_);
 	skyBox_.get()->name_ = "SkyBox";
 
-	modelData = AssimpLoadObjFile("resources/Model/Ground", "Ground.obj");
+	modelData = AssimpLoadObjFile("Resources/Model/Ground", "Ground.obj");
 	floor.get()->Initialize(modelData);
 	floor.get()->SetTransform(floorT);
 	floor.get()->name_ = "Floor";
@@ -153,7 +153,7 @@ void TestScene::Initialize() {
 	particle_.push_back(std::move(particleRing));
 
 
-	int texture = texture_.get()->CreateTexture("resources/Texture/uvChecker.png");
+	int texture = texture_.get()->CreateTexture("Resources/Texture/uvChecker.png");
 	sprite_.get()->Initialize(spriteData_, texture);
 
 	ring_.get()->Initialize(texture);

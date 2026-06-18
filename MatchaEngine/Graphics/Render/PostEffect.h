@@ -64,7 +64,7 @@ private:
 	bool isTimerRunning_ = true;
 
 	std::unordered_map<std::string, std::string> texturePaths_;
-	std::string maskTexturePath_ = "resources/Texture/noise0.png";
+	std::string maskTexturePath_ = "Resources/Texture/noise0.png";
 
 	Type currentType_ = Type::Normal;
 	static Type activeType_;
