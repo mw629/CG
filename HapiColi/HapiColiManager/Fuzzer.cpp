@@ -1,6 +1,8 @@
 #include "Fuzzer.h"
+#include "LogManager.h"
 #include <cmath>
 #include <random>
+#include <string>
 
 namespace HapiColi {
 
@@ -24,16 +26,20 @@ namespace HapiColi {
     }
 
     void Fuzzer::RunAll() {
+        LogManager::PrintOutput("Fuzzer::RunAll() started. Number of targets: " + std::to_string(m_targets.size()));
         m_results.clear();
         for (const auto& target : m_targets) {
             RunVariations(target);
         }
+        LogManager::PrintOutput("Fuzzer::RunAll() completed. Total results: " + std::to_string(m_results.size()));
     }
 
     void Fuzzer::RunVariations(const FuzzTarget& target) {
+        LogManager::PrintOutput("Fuzzer::RunVariations() starting for target: " + target.name);
         bool baseColliding = false;
         // 1. Base Test
         {
+            LogManager::PrintOutput("  -> [Test 1] Base Test started.");
             ObjectData a = target.baseA;
             ObjectData b = target.baseB;
             target.evalFunc(a, b);
@@ -49,10 +55,12 @@ namespace HapiColi {
             m_results.push_back(res);
 
             baseColliding = a.collision.isColliding;
+            LogManager::PrintOutput("  -> [Test 1] Result: " + res.description);
         }
 
         // 2. High Velocity Test (Tunneling)
         {
+            LogManager::PrintOutput("  -> [Test 2] High Velocity Test (Tunneling) started.");
             ObjectData a = target.baseA;
             ObjectData b = target.baseB;
             b.position.x += 100.0f; // Simulate very fast movement over one frame
@@ -72,11 +80,13 @@ namespace HapiColi {
                 res.description = "元の状態が非衝突のためテスト対象外（非衝突を維持）";
             }
             m_results.push_back(res);
+            LogManager::PrintOutput("  -> [Test 2] Result: " + res.description);
         }
 
         // 3. Boundary / Micro-offset Test
         if (m_config.enableMicroOffsetTest)
         {
+            LogManager::PrintOutput("  -> [Test 3] Boundary / Micro-offset Test started. Trials: " + std::to_string(m_config.microOffsetTrials));
             std::mt19937 rng(42); // Fixed seed for reproducibility
             std::uniform_real_distribution<float> dist(-m_config.microOffsetRange, m_config.microOffsetRange);
             bool toggled = false;
@@ -103,6 +113,7 @@ namespace HapiColi {
                     res.description = "境界付近でのゆらぎ（結果が変わりました）";
                     m_results.push_back(res);
                     toggled = true;
+                    LogManager::PrintOutput("  -> [Test 3] Toggled on trial " + std::to_string(i) + ". Result changed.");
                     break; // Only record the first micro-failure to avoid spam
                 }
             }
@@ -117,6 +128,7 @@ namespace HapiColi {
                 res.isBugCaught = false; 
                 res.description = "ゆらぎ耐性チェック完了（判定の変動なし）";
                 m_results.push_back(res);
+                LogManager::PrintOutput("  -> [Test 3] Completed with no toggles.");
             }
         }
     }

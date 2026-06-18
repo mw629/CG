@@ -3,6 +3,7 @@
 #include <fstream>
 #include <sstream>
 #include <filesystem>
+#include <windows.h>
 
 namespace HapiColi
 {
@@ -59,5 +60,25 @@ namespace HapiColi
         // Normally we would parse the JSON array here.
         // Since we are using a minimal placeholder, this won't populate outFrames yet.
         return true;
+    }
+
+    std::function<void(const std::string&)> LogManager::s_logCallback = nullptr;
+
+    void LogManager::SetLogCallback(std::function<void(const std::string&)> callback)
+    {
+        s_logCallback = callback;
+    }
+
+    void LogManager::PrintOutput(const std::string& message)
+    {
+        if (s_logCallback)
+        {
+            s_logCallback(message);
+        }
+        else
+        {
+            std::string logMsg = "[HapiColi] " + message + "\n";
+            OutputDebugStringA(logMsg.c_str());
+        }
     }
 }

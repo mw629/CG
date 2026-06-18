@@ -3,6 +3,7 @@
 #include <vector>
 #include <string>
 #include <atomic>
+#include <mutex>
 #include "HapiColiTypes.h"
 #include "FrameData.h"
 
@@ -39,6 +40,7 @@ namespace HapiColi
         std::vector<std::string> m_cachedSuggestions;
         std::atomic<bool> m_isSaving{false};
 
+        std::mutex m_logMutex;
         std::vector<std::string> m_logLines;
     };
 }

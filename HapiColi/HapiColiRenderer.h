@@ -32,6 +32,7 @@ private:
     std::vector<SolidRenderCommand> solidCommands_;
     
     void AddBoxLines(const ::Vector3& pos, const ::Vector3& scale, const ::Quaternion& rot, float color[4]);
+    void AddSphereLines(const ::Vector3& center, float radius, float color[4]);
     void AddSolidSphere(const ::Vector3& center, float radius, float color[4]);
     void AddSolidBox(const ::Vector3& center, const ::Vector3& scale, const ::Vector3& rotation, float color[4]);
 };

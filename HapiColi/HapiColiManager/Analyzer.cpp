@@ -1,4 +1,6 @@
 #include "Analyzer.h"
+#include "LogManager.h"
+#include <string>
 
 namespace HapiColi
 {
@@ -14,6 +16,7 @@ namespace HapiColi
 
     void Analyzer::Analyze(const std::vector<FrameData>& frames)
     {
+        LogManager::PrintOutput("Analyzer::Analyze() started. Frame count: " + std::to_string(frames.size()));
         m_results.clear();
         m_summary = TestSummary();
 
@@ -36,6 +39,7 @@ namespace HapiColi
         }
 
         m_summary.Calculate();
+        LogManager::PrintOutput("Analyzer::Analyze() completed. Happy: " + std::to_string(m_summary.happyCount) + " Unhappy: " + std::to_string(m_summary.unhappyCount));
     }
 
     void Analyzer::AnalyzeAppend(const std::vector<FrameData>& frames)
@@ -116,9 +120,12 @@ namespace HapiColi
                                     prevObj->velocity.z * prevObj->velocity.z;
                     if (speedSq > 100.0f) { // Arbitrary high speed threshold
                         m_warnings.push_back({ currFrame.frame, "高速衝突（すり抜けリスクあり）： " + currObj.id, "警告" });
+                        LogManager::PrintOutput("Analyzer::AnalyzeWarnings() Detected High Speed Collision: " + currObj.id);
                     }
                 }
             }
         }
+        
+        LogManager::PrintOutput("Analyzer::AnalyzeWarnings() completed. Warnings found: " + std::to_string(m_warnings.size()));
     }
 }

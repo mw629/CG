@@ -4,6 +4,7 @@
 #include "TestResult.h"
 #include <string>
 #include <vector>
+#include <functional>
 
 namespace HapiColi
 {
@@ -24,5 +25,12 @@ namespace HapiColi
 
         // Load frames from a JSON file
         bool LoadFrames(const std::string& filepath, std::vector<FrameData>& outFrames);
+
+        // Debug output
+        static void PrintOutput(const std::string& message);
+        static void SetLogCallback(std::function<void(const std::string&)> callback);
+
+    private:
+        static std::function<void(const std::string&)> s_logCallback;
     };
 }
