@@ -12,6 +12,7 @@
 #include <unordered_map>
 #include <algorithm>
 
+#ifdef _USE_IMGUI
 static std::filesystem::path s_selectedResourceDir = "resources";
 static std::unordered_map<std::string, D3D12_GPU_DESCRIPTOR_HANDLE> s_iconCache;
 static std::unique_ptr<Texture> s_editorTexture;
@@ -154,8 +155,13 @@ void DrawDirectoryContents(const std::filesystem::path& dirPath) {
 		ImGui::Columns(1);
 	} catch (...) {}
 }
+#endif // _USE_IMGUI
 
+#ifdef _USE_IMGUI
 bool EditorManager::isPlaying_ = false;
+#else
+bool EditorManager::isPlaying_ = true;
+#endif
 EditorManager::SceneOverlayCallback EditorManager::s_sceneOverlayCallback_ = nullptr;
 EditorManager::EditorCallback EditorManager::s_saveCallback_ = nullptr;
 EditorManager::EditorCallback EditorManager::s_loadCallback_ = nullptr;

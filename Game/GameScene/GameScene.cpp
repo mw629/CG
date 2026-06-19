@@ -218,6 +218,9 @@ void GameScene::Initialize() {
 	ModelData obstacleModelData = AssetManager::LoadModel("Resources/Block", "Block.obj");
 	stageSettings_->Initialize(roadModelData, obstacleModelData, gameObjectManager_.get());
 
+	// 指定したJsonファイルを初期シーンとして読み込む
+	gameObjectManager_->LoadScene(initialSceneJson_);
+
 	currentDistance_ = 0.0f;
 }
 
