@@ -207,6 +207,38 @@ void Engine::PostDraw()
 
 void Engine::NewFrame() {
 
+	RECT clientRect;
+	GetClientRect(window.GetHwnd(), &clientRect);
+	int width = clientRect.right - clientRect.left;
+	int height = clientRect.bottom - clientRect.top;
+
+	if (width > 0 && height > 0 && (width != kClientWidth_ || height != kClientHeight_)) {
+		kClientWidth_ = width;
+		kClientHeight_ = height;
+
+		gpuSyncManager.WaitForGpu();
+
+		swapChain->ChangeScreen(width, height, !window.IsFullscreen());
+
+		renderTargetView->RecreateRenderTargetViews(graphics->GetDevice(), swapChain->GetSwapChainResources(), descriptorHeap->GetRtvDescriptorHeap());
+
+		depthStencil->CreateDepthStencil(graphics->GetDevice(), width, height);
+
+		renderTexture->Initialize(graphics->GetDevice(), width, height, descriptorHeap->GetSrvDescriptorHeap(), descriptorHeap->GetDescriptorSizeSRV());
+
+		viewportScissor = std::make_unique<ViewportScissor>(width, height);
+		viewportScissor->CreateViewPort();
+		viewportScissor->CreateSxissor();
+
+		Vector2 Client = { (float)kClientWidth_, (float)kClientHeight_ };
+		ObjectBase::SetObjectResource(Client);
+		Line::SetScreenSize(Client);
+		Grid::SetScreenSize(Client);
+		EffectDefinition::SetScreenSize(Client);
+		Triangle::SetScreenSize(Client);
+		Sprite::SetScreenSize(Client);
+	}
+
 #ifdef _USE_IMGUI
 	imGuiManager->NewFrame();
 #endif // _USE_IMGUI

@@ -8,19 +8,150 @@
 #endif // _USE_IMGUI
 
 #include "../MatchaEngine/Core/LogHandler.h"
+#include "../MatchaEngine/Resource/Texture.h"
+#include <unordered_map>
+#include <algorithm>
 
-void DrawResourceDirectory(const std::filesystem::path& dirPath) {
+static std::filesystem::path s_selectedResourceDir = "resources";
+static std::unordered_map<std::string, D3D12_GPU_DESCRIPTOR_HANDLE> s_iconCache;
+static std::unique_ptr<Texture> s_editorTexture;
+
+void DrawDirectoryTree(const std::filesystem::path& dirPath) {
 	try {
 		for (const auto& entry : std::filesystem::directory_iterator(dirPath)) {
 			if (entry.is_directory()) {
-				if (ImGui::TreeNodeEx(entry.path().filename().string().c_str(), ImGuiTreeNodeFlags_OpenOnArrow)) {
-					DrawResourceDirectory(entry.path());
+				ImGuiTreeNodeFlags flags = ImGuiTreeNodeFlags_OpenOnArrow | ImGuiTreeNodeFlags_OpenOnDoubleClick;
+				if (s_selectedResourceDir == entry.path()) {
+					flags |= ImGuiTreeNodeFlags_Selected;
+				}
+				
+				auto u8name = entry.path().filename().u8string();
+				bool isOpen = ImGui::TreeNodeEx(reinterpret_cast<const char*>(u8name.c_str()), flags);
+				if (ImGui::IsItemClicked()) {
+					s_selectedResourceDir = entry.path();
+				}
+				if (isOpen) {
+					DrawDirectoryTree(entry.path());
 					ImGui::TreePop();
 				}
-			} else if (entry.is_regular_file()) {
-				ImGui::TreeNodeEx(entry.path().filename().string().c_str(), ImGuiTreeNodeFlags_Leaf | ImGuiTreeNodeFlags_NoTreePushOnOpen);
 			}
 		}
+	} catch (...) {}
+}
+
+void DrawDirectoryContents(const std::filesystem::path& dirPath) {
+	try {
+		float padding = 16.0f;
+		float thumbnailSize = 64.0f;
+		float cellSize = thumbnailSize + padding;
+		float panelWidth = ImGui::GetContentRegionAvail().x;
+		int columnCount = (int)(panelWidth / cellSize);
+		if (columnCount < 1) columnCount = 1;
+
+		ImGui::Columns(columnCount, 0, false);
+
+		for (const auto& entry : std::filesystem::directory_iterator(dirPath)) {
+			std::string name;
+			auto u8name = entry.path().filename().u8string();
+			name = std::string(reinterpret_cast<const char*>(u8name.c_str()));
+			
+			bool isDirectory = entry.is_directory();
+			std::string ext = entry.path().extension().string();
+			std::transform(ext.begin(), ext.end(), ext.begin(), ::tolower);
+			
+			ImGui::PushID(name.c_str());
+			
+			ImTextureID texID = 0;
+			bool isImage = false;
+			
+			if (!isDirectory && (ext == ".png" || ext == ".jpg" || ext == ".jpeg")) {
+				isImage = true;
+				auto u8str = entry.path().u8string();
+				std::string pathStr(reinterpret_cast<const char*>(u8str.c_str()));
+				std::replace(pathStr.begin(), pathStr.end(), '\\', '/');
+
+				if (s_iconCache.find(pathStr) == s_iconCache.end()) {
+					if (!s_editorTexture) s_editorTexture = std::make_unique<Texture>();
+					int id = s_editorTexture->CreateTexture(pathStr);
+					s_iconCache[pathStr] = s_editorTexture->TextureData(id);
+				}
+				D3D12_GPU_DESCRIPTOR_HANDLE handle = s_iconCache[pathStr];
+				texID = (ImTextureID)handle.ptr;
+			}
+			
+			ImGui::PushStyleColor(ImGuiCol_Button, ImVec4(0, 0, 0, 0));
+			if (isImage) {
+				ImGui::ImageButton(name.c_str(), texID, ImVec2(thumbnailSize, thumbnailSize));
+			} else {
+				ImGui::Button("##Icon", ImVec2(thumbnailSize, thumbnailSize));
+				
+				ImDrawList* drawList = ImGui::GetWindowDrawList();
+				ImVec2 rectMin = ImGui::GetItemRectMin();
+				ImVec2 rectMax = ImGui::GetItemRectMax();
+				float itemW = rectMax.x - rectMin.x;
+				float itemH = rectMax.y - rectMin.y;
+				
+				ImU32 outlineColor = IM_COL32(150, 150, 150, 255);
+				if (ImGui::IsItemHovered()) outlineColor = IM_COL32(220, 220, 220, 255);
+				
+				if (isDirectory) {
+					ImU32 folderColor = IM_COL32(234, 194, 82, 255);
+					if (ImGui::IsItemHovered()) folderColor = IM_COL32(255, 214, 102, 255);
+					ImU32 folderDark = IM_COL32(204, 164, 52, 255);
+					float tabW = itemW * 0.45f;
+					float tabH = itemH * 0.15f;
+					drawList->AddRectFilled(rectMin, ImVec2(rectMin.x + tabW, rectMin.y + tabH), folderDark, 2.0f);
+					drawList->AddRectFilled(ImVec2(rectMin.x, rectMin.y + tabH * 0.8f), ImVec2(rectMin.x + itemW, rectMin.y + itemH), folderColor, 4.0f);
+				} else {
+					ImU32 docColor = IM_COL32(230, 230, 230, 255);
+					if (ImGui::IsItemHovered()) docColor = IM_COL32(250, 250, 250, 255);
+					
+					ImU32 labelBgColor = IM_COL32(100, 100, 100, 255);
+					if (ext == ".json") labelBgColor = IM_COL32(180, 180, 50, 255);
+					else if (ext == ".dds") labelBgColor = IM_COL32(150, 50, 50, 255);
+					else if (ext == ".obj" || ext == ".gltf") labelBgColor = IM_COL32(50, 150, 200, 255);
+					else if (ext == ".hlsl" || ext == ".hlsli") labelBgColor = IM_COL32(50, 200, 150, 255);
+					
+					float foldSize = itemW * 0.25f;
+					
+					drawList->AddRectFilled(rectMin, ImVec2(rectMin.x + itemW, rectMin.y + itemH), docColor, 2.0f);
+					drawList->AddRect(rectMin, ImVec2(rectMin.x + itemW, rectMin.y + itemH), outlineColor, 2.0f);
+					
+					ImVec2 foldPts[3] = {
+						ImVec2(rectMin.x + itemW - foldSize, rectMin.y),
+						ImVec2(rectMin.x + itemW - foldSize, rectMin.y + foldSize),
+						ImVec2(rectMin.x + itemW, rectMin.y + foldSize)
+					};
+					drawList->AddConvexPolyFilled(foldPts, 3, IM_COL32(180, 180, 180, 255));
+					
+					float labelH = itemH * 0.35f;
+					ImVec2 labelPos = ImVec2(rectMin.x, rectMin.y + itemH * 0.45f);
+					drawList->AddRectFilled(labelPos, ImVec2(rectMin.x + itemW, labelPos.y + labelH), labelBgColor);
+					
+					std::string text = ext.empty() ? "" : ext.substr(1);
+					std::transform(text.begin(), text.end(), text.begin(), ::toupper);
+					
+					if (text.length() > 4) text = text.substr(0, 4); // Keep text short
+					
+					ImVec2 textSize = ImGui::CalcTextSize(text.c_str());
+					ImVec2 textPos = ImVec2(rectMin.x + (itemW - textSize.x) * 0.5f, labelPos.y + (labelH - textSize.y) * 0.5f);
+					drawList->AddText(textPos, IM_COL32(255, 255, 255, 255), text.c_str());
+				}
+			}
+			ImGui::PopStyleColor();
+			
+			if (ImGui::IsItemHovered() && ImGui::IsMouseDoubleClicked(ImGuiMouseButton_Left)) {
+				if (isDirectory) {
+					s_selectedResourceDir = entry.path();
+				}
+			}
+			
+			ImGui::TextWrapped("%s", name.c_str());
+			
+			ImGui::NextColumn();
+			ImGui::PopID();
+		}
+		ImGui::Columns(1);
 	} catch (...) {}
 }
 
@@ -300,14 +431,37 @@ void EditorManager::Update(Engine* engine)
 
 	// Resources Window
 	if (showResourcesWindow_) {
-		ImGui::SetNextWindowSize(ImVec2(300, 400), ImGuiCond_FirstUseEver);
+		ImGui::SetNextWindowSize(ImVec2(600, 400), ImGuiCond_FirstUseEver);
 		if (ImGui::Begin("Resources", &showResourcesWindow_)) {
-			if (std::filesystem::exists("resources")) {
-				if (ImGui::CollapsingHeader("resources", ImGuiTreeNodeFlags_DefaultOpen)) {
-					DrawResourceDirectory("resources");
+			if (ImGui::BeginTable("ResourceBrowser", 2, ImGuiTableFlags_BordersInnerV | ImGuiTableFlags_Resizable)) {
+				ImGui::TableNextRow();
+				
+				// Left pane: Directory tree
+				ImGui::TableSetColumnIndex(0);
+				ImGui::BeginChild("DirTree", ImVec2(0, 0), false, ImGuiWindowFlags_HorizontalScrollbar);
+				ImGuiTreeNodeFlags rootFlags = ImGuiTreeNodeFlags_OpenOnArrow | ImGuiTreeNodeFlags_DefaultOpen;
+				if (s_selectedResourceDir == "resources") rootFlags |= ImGuiTreeNodeFlags_Selected;
+				bool rootOpen = ImGui::TreeNodeEx("resources", rootFlags);
+				if (ImGui::IsItemClicked()) s_selectedResourceDir = "resources";
+				if (rootOpen) {
+					DrawDirectoryTree("resources");
+					ImGui::TreePop();
 				}
-			} else {
-				ImGui::Text("resources directory not found.");
+				ImGui::EndChild();
+
+				// Right pane: Contents of selected directory
+				ImGui::TableSetColumnIndex(1);
+				ImGui::BeginChild("DirContents", ImVec2(0, 0), false, ImGuiWindowFlags_HorizontalScrollbar);
+				if (std::filesystem::exists(s_selectedResourceDir) && std::filesystem::is_directory(s_selectedResourceDir)) {
+					ImGui::TextUnformatted(s_selectedResourceDir.string().c_str());
+					ImGui::Separator();
+					DrawDirectoryContents(s_selectedResourceDir);
+				} else {
+					ImGui::Text("Directory not found.");
+				}
+				ImGui::EndChild();
+
+				ImGui::EndTable();
 			}
 		}
 		ImGui::End();
