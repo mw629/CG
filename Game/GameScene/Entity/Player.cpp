@@ -33,13 +33,22 @@ void Player::Reset()
 	rollTimer_ = 0.0f;
 	keepRolling_ = false;
 
+	isHit_ = false;
+	hitTimer_ = 0.0f;
+	knockbackVelocity_ = { 0.0f, 0.0f, 0.0f };
+
 	model_.get()->SetTransform(transform_);
 }
 
 void Player::Update(Matrix4x4 view, float speedMultiplier)
 {
-	PlayerMove(speedMultiplier);
-
+	if (isHit_) {
+		// SpeedMultiplier is ignored for hit update so animation plays consistently 
+		// even if the game scroll stops.
+		HitUpdate(1.0f);
+	} else {
+		PlayerMove(speedMultiplier);
+	}
 
 	model_.get()->SettingWvp(view);
 }
@@ -164,4 +173,50 @@ void Player::ImGui()
 	if (model_) {
 		model_->ImGui();
 	}
+}
+
+void Player::HitUpdate(float /*speedMultiplier*/)
+{
+	// ノックバック処理
+	if (isHit_) {
+		hitTimer_ += 1.0f;
+
+		transform_.translate.x += knockbackVelocity_.x;
+		transform_.translate.y += knockbackVelocity_.y;
+		transform_.translate.z += knockbackVelocity_.z;
+
+		// 重力と回転（後ろに飛ぶような動き）
+		knockbackVelocity_.y -= gravity_ * 2.0f; 
+		transform_.rotate.x -= 0.1f;
+
+		// 地面に着地したらバウンドなどを抑える
+		if (transform_.translate.y <= baseHeight_ && knockbackVelocity_.y < 0.0f) {
+			transform_.translate.y = baseHeight_;
+			knockbackVelocity_.y = 0.0f;
+			knockbackVelocity_.x *= 0.8f;
+			knockbackVelocity_.z *= 0.8f;
+		}
+		
+		model_.get()->SetTransform(transform_);
+	}
+}
+
+void Player::OnHit()
+{
+	isHit_ = true;
+	hitTimer_ = 0.0f;
+	
+	// 姿勢をリセット
+	isRolling_ = false;
+	isJumping_ = false;
+	transform_.scale = { 1.0f, 1.0f, 1.0f };
+
+	// 少し後ろと上に飛ぶノックバック
+	float randX = ((float)rand() / RAND_MAX - 0.5f) * 0.1f;
+	knockbackVelocity_ = { randX, 0.4f, -0.6f }; 
+}
+
+bool Player::IsHitAnimationFinished() const
+{
+	return isHit_ && hitTimer_ >= hitDuration_;
 }

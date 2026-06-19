@@ -10,6 +10,7 @@
 #include "GameObjectManager.h"
 #include "RenderObject.h"
 #include "../../Editer/EditorUI.h"
+#include <Emitter.h>
 
 class GameScene :public IScene
 {
@@ -19,6 +20,7 @@ private:
 	{
 		Playing,
 		Paused,
+		PlayerHit,
 		GameClear,
 		GameOver,
 		Editor
@@ -55,6 +57,9 @@ private:
 	//<< Paused >>//
 	std::unique_ptr<PauseSystem> pauseSystem_ = std::make_unique<PauseSystem>();
 
+	//<< Hit Effect >>//
+	std::unique_ptr<Emitter> hitEffect_ = std::make_unique<Emitter>();
+
 
 	// 当たり判定処理
 	void CheckCollisions();
@@ -84,6 +89,8 @@ public:
 	
 	void PausedUpdate();
 	
+	void PlayerHitUpdate();
+
 	void EditorUpdate();
 
 };

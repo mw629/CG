@@ -179,6 +179,24 @@ void GameScene::Initialize() {
 	}
 	sceneChangeRequest_ = false;
 
+	// ヒットエフェクトの初期化
+	EmitterData hitEmitter;
+	hitEmitter.count = 40;
+	hitEmitter.frequency = 0.05f;
+	EffectDefinitionData hitData;
+	hitData.color = { 1.0f, 0.5f, 0.0f, 1.0f }; // オレンジ/赤系の火花
+	hitData.lifeTime = 0.5f;
+	hitData.transform.scale = { 0.1f, 0.1f, 0.1f };
+	hitEffect_->Initialize(hitEmitter, hitData, EffectShape::Plane);
+	hitEffect_->name_ = "Hit Effect";
+	hitEffect_->generatorBehavior = [](EffectDefinitionData& p) {
+		float randX = ((float)rand() / RAND_MAX - 0.5f) * 4.0f;
+		float randY = ((float)rand() / RAND_MAX - 0.5f) * 4.0f;
+		float randZ = ((float)rand() / RAND_MAX - 0.5f) * 4.0f;
+		p.velocity = { randX * 0.1f, randY * 0.1f + 0.1f, randZ * 0.1f }; 
+		p.transform.rotate.z = ((float)rand() / RAND_MAX) * 3.14159f;
+	};
+
 
 
 	// camera_->SetDebugCamera() は上記で設定済み
@@ -256,6 +274,9 @@ void GameScene::Update() {
 			gameState_ = GameState::Playing;
 		}
 	}
+	else if (gameState_ == GameState::PlayerHit) {
+		PlayerHitUpdate();
+	}
 	else if(gameState_ == GameState::GameOver){
 		// 1でリスタート
 		if (Input::PushKey(DIK_1)) {
@@ -293,7 +314,24 @@ void GameScene::Draw() {
 		pauseSystem_->Draw();
 	}
 
+	// ヒットエフェクトの描画
+	if (gameState_ == GameState::PlayerHit || gameState_ == GameState::GameOver) {
+		hitEffect_->Draw();
+	}
+}
 
+void GameScene::PlayerHitUpdate()
+{
+	// カメラやビューの更新は GameScene::Update で行われている
+	hitEffect_->Update(view);
+
+	// プレイヤーのノックバックアニメーションを更新
+	// (GameScene側の全体更新は停止し、プレイヤーのみ更新)
+	player_->Update(view, 0.0f);
+
+	if (player_->IsHitAnimationFinished()) {
+		gameState_ = GameState::GameOver;
+	}
 }
 
 void GameScene::PlayingUpdate()
@@ -349,11 +387,22 @@ void GameScene::CheckCollisions()
 		);
 
 		if (Collision::CheckAABB(playerAABB, obstacleAABB)) {
-			// 衝突！ゲームオーバー
-			gameState_ = GameState::GameOver;
+			// 衝突！ヒット演出へ移行
+			gameState_ = GameState::PlayerHit;
 			stageSettings_->SetGameOver(true);
 			PostEffect::SetActivePostEffect(PostEffect::Type::GrayScale);
 			
+			// プレイヤーのヒットアニメーション開始
+			player_->OnHit();
+
+			// エフェクトの発生位置をプレイヤーに合わせる
+			EmitterData emData = hitEffect_->GetEmitterData();
+			emData.transform.translate = player_->GetTransform().translate;
+			emData.transform.translate.y += 0.5f; // 少し上から発生
+			emData.count = 40;
+			hitEffect_->SetEmitterData(emData);
+			hitEffect_->Emit();
+
 			// ランキング更新
 			UpdateRanking();
 			

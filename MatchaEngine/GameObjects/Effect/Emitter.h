@@ -42,6 +42,9 @@ public:
 	// 生成時の振る舞いを注入する関数
 	std::function<void(EffectDefinitionData&)> generatorBehavior = nullptr;
 
+	void SetEmitterData(const EmitterData& data) { emitter_ = data; }
+	EmitterData GetEmitterData() const { return emitter_; }
+
 	void ImGui();
 
 	void Initialize(EffectShape shape = EffectShape::Plane);

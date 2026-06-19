@@ -42,6 +42,12 @@ private:
 	float rollDuration_ = 45.0f; // 転がりの継続フレーム数
 	bool keepRolling_ = false; // 強制的にしゃがみを維持するフラグ
 
+	// ヒット時の演出用変数
+	bool isHit_ = false;
+	float hitTimer_ = 0.0f;
+	float hitDuration_ = 90.0f; // ノックバックにかかるフレーム数
+	Vector3 knockbackVelocity_{ 0.0f, 0.0f, 0.0f }; // ノックバック速度
+
 public:
 
 	Player();
@@ -53,6 +59,7 @@ public:
 	void Update(Matrix4x4 view, float speedMultiplier = 1.0f) override;
 
 	void PlayerMove(float speedMultiplier);
+	void HitUpdate(float speedMultiplier);
 
 	void Draw() override;
 	void ImGui() override;
@@ -60,5 +67,9 @@ public:
 	// GetTransform() is inherited from GameObject
 	bool GetIsRolling() const { return isRolling_; }
 	void SetKeepRolling(bool keep) { keepRolling_ = keep; }
+
+	// ヒット演出用
+	void OnHit();
+	bool IsHitAnimationFinished() const;
 };
 
