@@ -7,6 +7,13 @@ extern IMGUI_IMPL_API LRESULT ImGui_ImplWin32_WndProcHandler(HWND hWnd, UINT msg
 
 LRESULT WindowConfig::WindowProc(HWND hwnd, UINT msg, WPARAM wparam, LPARAM lparam)
 {
+	if (msg == WM_NCCREATE) {
+		CREATESTRUCT* create = reinterpret_cast<CREATESTRUCT*>(lparam);
+		SetWindowLongPtr(hwnd, GWLP_USERDATA, reinterpret_cast<LONG_PTR>(create->lpCreateParams));
+	}
+
+	WindowConfig* window = reinterpret_cast<WindowConfig*>(GetWindowLongPtr(hwnd, GWLP_USERDATA));
+
 #ifdef _USE_IMGUI
 	if (ImGui_ImplWin32_WndProcHandler(hwnd, msg, wparam, lparam)) { return true; }
 #endif // _USE_IMGUI
@@ -21,8 +28,9 @@ LRESULT WindowConfig::WindowProc(HWND hwnd, UINT msg, WPARAM wparam, LPARAM lpar
 	case WM_SYSKEYDOWN:
 		if (wparam == VK_RETURN && (lparam & (1 << 29))) {
 			// Alt+Enterが押された場合
-			// 注意: この実装では静的なインスタンスが必要
-			// 実際の使用時は適切なインスタンスアクセス方法を使用
+			if (window) {
+				window->ToggleFullscreen();
+			}
 			return 0;
 		}
 		break;
@@ -70,7 +78,7 @@ void WindowConfig::SetWindowData(const int32_t kClientWidth, const int32_t kClie
 		nullptr,//親ウィンドウハンドル
 		nullptr,//メニューハンドル
 		wc.hInstance,//インスタンスハンドル
-		nullptr);
+		this);
 
 
 }

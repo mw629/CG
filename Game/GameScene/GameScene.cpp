@@ -186,7 +186,7 @@ void GameScene::Initialize() {
 	camera_->Update();
 
 	// スカイボックスの初期化
-	skyBoxTexture_ = texture_.get()->CreateTexture("resources/DDS/SnowWorld.dds");
+	skyBoxTexture_ = texture_.get()->CreateTexture("Resources/DDS/SnowWorld.dds");
 	skyBox_.get()->Initialize(skyBoxTexture_);
 	skyBox_.get()->SetShader("SkyBoxShader");
 	skyBox_.get()->SetLighting(false);
@@ -194,7 +194,7 @@ void GameScene::Initialize() {
 	skyBox_.get()->name_ = "SkyBox";
 
 	// プレイヤーの初期化
-	ModelData modelData = AssimpLoadObjFile("resources/Model/Player", "player.obj");
+	ModelData modelData = AssimpLoadObjFile("Resources/Model/Player", "player.obj");
 	player_->Initialize(modelData);
 
 	// オブジェクトマネージャーへの登録
@@ -205,10 +205,21 @@ void GameScene::Initialize() {
 	player_->SetName("Player");
 	gameObjectManager_->AddObject(player_);
 
+	// エディターでの保存・読み込み先をJsonSceneに設定
+	EditorManager::SetSaveCallback([this](const std::string& filePath) {
+		gameObjectManager_->SaveScene(filePath);
+	});
+	EditorManager::SetLoadCallback([this](const std::string& filePath) {
+		gameObjectManager_->LoadScene(filePath);
+	});
+
 	// ステージの初期化
-	ModelData roadModelData = AssetManager::LoadModel("resources/Plane", "Plane.gltf");
-	ModelData obstacleModelData = AssetManager::LoadModel("resources/Block", "Block.obj");
+	ModelData roadModelData = AssetManager::LoadModel("Resources/Plane", "Plane.gltf");
+	ModelData obstacleModelData = AssetManager::LoadModel("Resources/Block", "Block.obj");
 	stageSettings_->Initialize(roadModelData, obstacleModelData, gameObjectManager_.get());
+
+	// 指定したJsonファイルを初期シーンとして読み込む
+	gameObjectManager_->LoadScene(initialSceneJson_);
 
 	currentDistance_ = 0.0f;
 }

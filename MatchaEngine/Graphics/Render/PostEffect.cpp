@@ -128,6 +128,7 @@ void PostEffect::SetMaskTexturePath(const std::string& filePath) {
 }
 
 void PostEffect::ImGuiWindow() {
+#ifdef _USE_IMGUI
 	if (ImGui::TreeNode("Post Effect Parameters")) {
 		ImGui::SliderFloat("Time##PostEffect", &time_, 0.0f, 100.0f);
 		
@@ -180,6 +181,7 @@ void PostEffect::ImGuiWindow() {
 
 		ImGui::TreePop();
 	}
+#endif
 }
 
 void PostEffect::SetActivePostEffect(Type type) {

@@ -65,6 +65,9 @@ private:
 	float topRankings_[3] = { 0.0f, 0.0f, 0.0f };
 	void UpdateRanking();
 
+	// 初期読み込みするSceneJsonのファイルパス (変更することで読み込むJsonを決定できる)
+	std::string initialSceneJson_ = "Resources/Json/Scene/scene.json";
+
 public:
 	~GameScene()override;
 
