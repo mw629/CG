@@ -186,20 +186,51 @@ void GameScene::Initialize() {
 	hitEmitter.frequency = 9999.0f; // 自動発生させず、手動のEmitのみにする
 	EffectDefinitionData hitData;
 	hitData.color = { 1.0f, 1.0f, 1.0f, 1.0f }; // 白色
-	hitData.lifeTime = 1.8f; // ライフを長くして余韻を残す
-	hitData.transform.scale = { 2.5f, 0.3f, 1.0f }; // 長さを少し短く(2.5)、横幅(太さ/短径)をもっと細く(0.3)
+	hitData.lifeTime = 1.0f; // ライフ（余韻の長さ）を少し短く調整
+	hitData.transform.scale = { 0.04f, 0.8f, 0.04f }; // エミッタ（パーティクル）のサイズをもう少し小さく
 	
-	int whiteTexture = texture_.get()->CreateTexture("Resources/Texture/white64x64.png");
-	hitEffect_->Initialize(hitEmitter, hitData, whiteTexture, EffectShape::Ring);
-	hitEffect_->SetBlend(BlendMode::kBlendModeNormal); // 加算だと背景と同化して見えなくなるため通常ブレンドにする
+	// テクスチャ指定なしなら自動的にcircle.pngが使われます
+	hitEffect_->Initialize(hitEmitter, hitData, EffectShape::Plane);
+	hitEffect_->SetBlend(BlendMode::kBlendModeAdd); // 黒い部分を透過させるために加算ブレンドに戻す
 	hitEffect_->name_ = "Hit Effect";
 	hitEffect_->generatorBehavior = [](EffectDefinitionData& p) {
-		// 広がらずにその場に出現するだけにするため、速度はゼロ
-		p.velocity = { 0.0f, 0.0f, 0.0f }; 
+		// 中心から円状に放射状に広がるためのランダムな方向
+		float randX = ((float)rand() / RAND_MAX - 0.5f) * 2.0f;
+		float randY = ((float)rand() / RAND_MAX - 0.5f) * 2.0f;
 		
-		// リングが様々な角度を向くようにランダムに回転させる
-		p.transform.rotate.x = ((float)rand() / RAND_MAX) * 3.14159f * 2.0f;
-		p.transform.rotate.y = ((float)rand() / RAND_MAX) * 3.14159f * 2.0f;
+		// 画面手前（-Z方向）へ向かって飛んでいくように速度を設定
+		p.velocity = { 0.0f, 0.0f, -0.15f - ((float)rand() / RAND_MAX) * 0.2f }; 
+		
+		// 長さに少しランダムなばらつきを持たせる
+		p.transform.scale.y = 0.6f + ((float)rand() / RAND_MAX) * 0.8f; 
+
+		// Y軸ベースの細長いPlaneを、放射状に向きを合わせる
+		p.transform.rotate.z = std::atan2(randY, randX) - 3.14159f / 2.0f;
+		
+		// X, Yの回転を消して純粋にカメラに対してフラットな星型にする
+		p.transform.rotate.x = 0.0f;
+		p.transform.rotate.y = 0.0f;
+	};
+
+	// 砂埃エフェクトの初期化
+	EmitterData dustEmitter;
+	dustEmitter.transform.scale = { 0.0f, 0.0f, 0.0f }; 
+	dustEmitter.count = 1; // 1回のEmitで発生する量
+	dustEmitter.frequency = 9999.0f; // 自動発生はさせない
+	EffectDefinitionData dustData;
+	dustData.color = { 0.4f, 0.4f, 0.4f, 0.8f }; // 通常の半透明グレー
+	dustData.lifeTime = 0.8f; // 少し余韻を残す
+	dustData.transform.scale = { 0.4f, 0.4f, 0.4f }; // サイズをもっと小さく修正
+	
+	dustEffect_->Initialize(dustEmitter, dustData, EffectShape::Plane); // circle.pngを使用
+	dustEffect_->SetBlend(BlendMode::kBlendModeNormal); // アルファブレンド（シェーダー側で黒を透過するように修正済み）
+	dustEffect_->name_ = "Dust Effect";
+	dustEffect_->generatorBehavior = [](EffectDefinitionData& p) {
+		// X, Y方向の移動（広がりや上昇）を大幅に抑えて小さくする
+		float randX = ((float)rand() / RAND_MAX - 0.5f) * 0.05f;
+		float randY = ((float)rand() / RAND_MAX) * 0.02f + 0.05f; // わずかに上へ
+		float randZ = ((float)rand() / RAND_MAX - 0.5f) * 0.50f; // Zの散らばりも控えめに
+		p.velocity = { randX, randY, randZ }; 
 		p.transform.rotate.z = ((float)rand() / RAND_MAX) * 3.14159f * 2.0f;
 	};
 
@@ -321,12 +352,16 @@ void GameScene::Draw() {
 
 	// ヒットエフェクトの描画
 	hitEffect_->Draw();
+	
+	// 砂埃エフェクトの描画
+	dustEffect_->Draw();
 }
 
 void GameScene::PlayerHitUpdate()
 {
 	// カメラやビューの更新は GameScene::Update で行われている
 	hitEffect_->Update(view);
+	dustEffect_->Update(view);
 
 	// プレイヤーのノックバックアニメーションを更新
 	// (GameScene側の全体更新は停止し、プレイヤーのみ更新)
@@ -357,6 +392,30 @@ void GameScene::PlayingUpdate()
 	CheckCollisions();
 
 	hitEffect_->Update(view);
+
+	// 走っている間（転がっていなくて地面にいる時）足元に砂埃を出す
+	if (!player_->GetIsRolling() && player_->GetTransform().translate.y <= 3.01f) {
+		EmitterData ed = dustEffect_->GetEmitterData();
+		ed.transform.translate = player_->GetTransform().translate;
+		ed.transform.translate.y -= 0.2f; // 足元から少しだけ上（前回より少し高くする）
+		ed.transform.translate.z -= 2.0f; // Playerの前ではなく後ろ(-Z側)に出るように調整
+		dustEffect_->SetEmitterData(ed);
+		dustEffect_->Emit();
+	}
+
+	// 砂埃は広がりながら消えるようにUpdate
+	float currentScrollSpeed = stageSettings_->GetScrollSpeed();
+	dustEffect_->Update(view, [currentScrollSpeed](const EffectDefinitionData& p) {
+		EffectDefinitionData next = p;
+		
+		// しっかりと後ろ（-Z方向）に流れるようにする（スクロール速度の8割）
+		next.transform.translate.z -= currentScrollSpeed * 0.8f;
+
+		// 寿命が尽きるにつれてモクモクと少し大きくなる
+		next.transform.scale.x *= 1.03f;
+		next.transform.scale.y *= 1.03f;
+		return next;
+	});
 }
 
 void GameScene::PausedUpdate()
@@ -397,14 +456,14 @@ void GameScene::CheckCollisions()
 				obstacle->OnHit();
 				currentDistance_ += 50.0f; // スコア（距離）ボーナス
 
-				// 軽くヒットエフェクトを出す
-				EmitterData emData = hitEffect_->GetEmitterData();
-				emData.transform.translate = obstacle->GetTransform().translate;
-				emData.transform.translate.y += 1.0f; 
-				emData.transform.translate.z -= 5.0f; // 少し-z側に表示
-				emData.count = 7; // 数を半分程度に減らす
-				hitEffect_->SetEmitterData(emData);
-				hitEffect_->Emit();
+				// 軽くヒットエフェクトを出す（要望により廃止）
+				// EmitterData emData = hitEffect_->GetEmitterData();
+				// emData.transform.translate = obstacle->GetTransform().translate;
+				// emData.transform.translate.y += 1.0f; 
+				// emData.transform.translate.z -= 5.0f; // 少し-z側に表示
+				// emData.count = 7; // 数を半分程度に減らす
+				// hitEffect_->SetEmitterData(emData);
+				// hitEffect_->Emit();
 
 				continue; // ゲームオーバーにはならず、次の判定へ
 			}
@@ -421,7 +480,7 @@ void GameScene::CheckCollisions()
 			// エフェクトの発生位置をプレイヤーから取得する
 			EmitterData emData = hitEffect_->GetEmitterData();
 			emData.transform.translate = player_->GetTransform().translate;
-			emData.transform.translate.y += 1.0f; // プレイヤーの体の中央付近から発生
+			emData.transform.translate.y += 2.0f; // プレイヤーの体より少し上（前回より少し下げる）
 			emData.transform.translate.z -= 5.0f; // さらに手前（カメラ側）にずらす
 			emData.count = 10; // 数を半分にする
 			hitEffect_->SetEmitterData(emData);

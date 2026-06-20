@@ -60,6 +60,9 @@ private:
 	//<< Hit Effect >>//
 	std::unique_ptr<Emitter> hitEffect_ = std::make_unique<Emitter>();
 
+	//<< Dust Effect >>//
+	std::unique_ptr<Emitter> dustEffect_ = std::make_unique<Emitter>();
+
 
 	// 当たり判定処理
 	void CheckCollisions();

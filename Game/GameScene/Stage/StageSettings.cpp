@@ -7,11 +7,14 @@ void StageSettings::Initialize(ModelData roadModelData, ModelData obstacleModelD
 	// 乱数の初期化
 	std::srand(static_cast<unsigned int>(std::time(nullptr)));
 
+	// グラウンドテクスチャをロード
+	texture_->CreateTexture("Resources/Model/Ground/Ground.png");
+
 	// 道路チャンクの初期化
 	for (int i = 0; i < kChunkCount_; i++) {
         auto roadModel = std::make_shared<Model>();
 		roadModel->Initialize(roadModelData);
-		roadModel->SetTexture(texture_->TextureData("Resources/Model/Ground/road.png"));
+		roadModel->SetTexture(texture_->TextureData("Resources/Model/Ground/Ground.png"));
 
 		roadChunks_[i] = std::make_shared<RenderObject>(roadModel);
         roadChunks_[i]->SetName("RoadChunk " + std::to_string(i));
