@@ -228,10 +228,27 @@ void GameScene::Initialize() {
 	dustEffect_->generatorBehavior = [](EffectDefinitionData& p) {
 		// X, Y方向の移動（広がりや上昇）を大幅に抑えて小さくする
 		float randX = ((float)rand() / RAND_MAX - 0.5f) * 0.05f;
-		float randY = ((float)rand() / RAND_MAX) * 0.02f + 0.05f; // わずかに上へ
-		float randZ = ((float)rand() / RAND_MAX - 0.5f) * 0.50f; // Zの散らばりも控えめに
+		float randY = ((float)rand() / RAND_MAX) * 0.02f + 0.01f; // わずかに上へ
+		float randZ = ((float)rand() / RAND_MAX - 0.5f) * 0.05f; // Zの散らばりも控えめに
 		p.velocity = { randX, randY, randZ }; 
 		p.transform.rotate.z = ((float)rand() / RAND_MAX) * 3.14159f * 2.0f;
+	};
+
+	// ボーナスヒット時のショックウェーブ（Ring）の初期化
+	EmitterData shockwaveEmitter;
+	shockwaveEmitter.transform.scale = { 0.1f, 0.1f, 0.1f };
+	shockwaveEmitter.count = 1;
+	shockwaveEmitter.frequency = 9999.0f; // 手動Emit
+	EffectDefinitionData shockwaveData;
+	shockwaveData.color = { 1.0f, 1.0f, 0.0f, 1.0f }; // 黄色（Yellow）
+	shockwaveData.lifeTime = 0.5f; // スパッと消えるように短め
+	shockwaveData.transform.scale = { 0.1f, 0.1f, 0.1f };
+	shockwaveEffect_->Initialize(shockwaveEmitter, shockwaveData, EffectShape::Ring);
+	shockwaveEffect_->SetBlend(BlendMode::kBlendModeNone); // 加算だと背景と同化して薄くなるため、通常ブレンドで濃く（クッキリ）表示させる
+	shockwaveEffect_->name_ = "Bonus Shockwave";
+	shockwaveEffect_->generatorBehavior = [](EffectDefinitionData& p) {
+		p.velocity = { 0.0f, 0.0f, 0.0f }; // 発生時は移動なし
+		p.transform.rotate.x = 3.14159265f / 2.0f; // 盾（縦）になっているリングを90度回転させて地面と平行（横）にする
 	};
 
 	// camera_->SetDebugCamera() は上記で設定済み
@@ -351,9 +368,9 @@ void GameScene::Draw() {
 	}
 
 	// ヒットエフェクトの描画
+	stageSettings_->Draw();
 	hitEffect_->Draw();
-	
-	// 砂埃エフェクトの描画
+	shockwaveEffect_->Draw();
 	dustEffect_->Draw();
 }
 
@@ -392,6 +409,19 @@ void GameScene::PlayingUpdate()
 	CheckCollisions();
 
 	hitEffect_->Update(view);
+	
+	float currentScrollSpeed = stageSettings_->GetScrollSpeed();
+
+	shockwaveEffect_->Update(view, [currentScrollSpeed](const EffectDefinitionData& p) {
+		EffectDefinitionData next = p;
+		// 衝撃波のように急速にスケールを拡大する
+		next.transform.scale.x += 0.06f;
+		next.transform.scale.y += 0.06f;
+		next.transform.scale.z += 0.06f;
+		// スクロールに合わせて手前（-Z方向）に流れるようにする
+		next.transform.translate.z -= currentScrollSpeed;
+		return next;
+	});
 
 	// 走っている間（転がっていなくて地面にいる時）足元に砂埃を出す
 	if (!player_->GetIsRolling() && player_->GetTransform().translate.y <= 3.01f) {
@@ -404,7 +434,6 @@ void GameScene::PlayingUpdate()
 	}
 
 	// 砂埃は広がりながら消えるようにUpdate
-	float currentScrollSpeed = stageSettings_->GetScrollSpeed();
 	dustEffect_->Update(view, [currentScrollSpeed](const EffectDefinitionData& p) {
 		EffectDefinitionData next = p;
 		
@@ -456,14 +485,12 @@ void GameScene::CheckCollisions()
 				obstacle->OnHit();
 				currentDistance_ += 50.0f; // スコア（距離）ボーナス
 
-				// 軽くヒットエフェクトを出す（要望により廃止）
-				// EmitterData emData = hitEffect_->GetEmitterData();
-				// emData.transform.translate = obstacle->GetTransform().translate;
-				// emData.transform.translate.y += 1.0f; 
-				// emData.transform.translate.z -= 5.0f; // 少し-z側に表示
-				// emData.count = 7; // 数を半分程度に減らす
-				// hitEffect_->SetEmitterData(emData);
-				// hitEffect_->Emit();
+				// プレイヤーの足元にRingエフェクトを出す
+				EmitterData ringData = shockwaveEffect_->GetEmitterData();
+				ringData.transform.translate = player_->GetTransform().translate;
+				ringData.transform.translate.y -= 0.4f; // 足元より少し上（腰から足の間くらい）に設定
+				shockwaveEffect_->SetEmitterData(ringData);
+				shockwaveEffect_->Emit();
 
 				continue; // ゲームオーバーにはならず、次の判定へ
 			}

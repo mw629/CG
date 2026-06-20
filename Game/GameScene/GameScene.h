@@ -63,6 +63,9 @@ private:
 	//<< Dust Effect >>//
 	std::unique_ptr<Emitter> dustEffect_ = std::make_unique<Emitter>();
 
+	//<< Shockwave Effect >>//
+	std::unique_ptr<Emitter> shockwaveEffect_ = std::make_unique<Emitter>();
+
 
 	// 当たり判定処理
 	void CheckCollisions();
