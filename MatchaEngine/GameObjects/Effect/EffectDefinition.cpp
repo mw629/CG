@@ -58,6 +58,19 @@ void EffectDefinition::Initialize(int TextureHandle, EffectShape shape)
 	CreateParticle();
 }
 
+void EffectDefinition::SetTexturePath(const std::string& path)
+{
+	Texture texture;
+	int handle = texture.CreateTexture(path);
+	textureSrvHandleGPU_ = texture.TextureData(handle);
+}
+
+void EffectDefinition::SetShape(EffectShape shape)
+{
+	shape_ = shape;
+	CreateVertexData();
+}
+
 void EffectDefinition::CreateVertexData()
 {
 	std::vector<VertexData> vertices;

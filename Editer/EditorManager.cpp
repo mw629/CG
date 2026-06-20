@@ -12,6 +12,16 @@
 #include <unordered_map>
 #include <algorithm>
 
+#include "../MatchaEngine/Graphics/RenderTexture.h"
+#include "../MatchaEngine/Graphics/DepthStencil.h"
+#include "../MatchaEngine/GameObjects/Effect/Emitter.h"
+#include "../MatchaEngine/GameObjects/Camera/Camera.h"
+#include "../MatchaEngine/GameObjects/Line/Grid.h"
+#include "../MatchaEngine/Graphics/DescriptorHeap.h"
+#include "../MatchaEngine/Graphics/GraphicsDevice.h"
+#include "../MatchaEngine/Common/CommandContext.h"
+#include "../MatchaEngine/Graphics/Render/Draw.h"
+
 #ifdef _USE_IMGUI
 static std::filesystem::path s_selectedResourceDir = "resources";
 static std::unordered_map<std::string, D3D12_GPU_DESCRIPTOR_HANDLE> s_iconCache;
@@ -140,6 +150,17 @@ void DrawDirectoryContents(const std::filesystem::path& dirPath) {
 				}
 			}
 			ImGui::PopStyleColor();
+
+			if (!isDirectory) {
+				if (ImGui::BeginDragDropSource(ImGuiDragDropFlags_SourceAllowNullID)) {
+					auto u8str = entry.path().u8string();
+					std::string pathStr(reinterpret_cast<const char*>(u8str.c_str()));
+					std::replace(pathStr.begin(), pathStr.end(), '\\', '/');
+					ImGui::SetDragDropPayload("RESOURCE_FILE", pathStr.c_str(), pathStr.size() + 1);
+					ImGui::Text("Drag %s", name.c_str());
+					ImGui::EndDragDropSource();
+				}
+			}
 			
 			if (ImGui::IsItemHovered() && ImGui::IsMouseDoubleClicked(ImGuiMouseButton_Left)) {
 				if (isDirectory) {
@@ -166,6 +187,8 @@ EditorManager::SceneOverlayCallback EditorManager::s_sceneOverlayCallback_ = nul
 EditorManager::EditorCallback EditorManager::s_saveCallback_ = nullptr;
 EditorManager::EditorCallback EditorManager::s_loadCallback_ = nullptr;
 std::string EditorManager::s_currentFileName_ = "scene";
+
+EditorManager::~EditorManager() = default;
 
 void EditorManager::Update(Engine* engine)
 {
@@ -216,6 +239,7 @@ void EditorManager::Update(Engine* engine)
 			ImGui::MenuItem("Debug Info", nullptr, &showFinalWindow_);
 			ImGui::MenuItem("Resources", nullptr, &showResourcesWindow_);
 			ImGui::MenuItem("Logs", nullptr, &showLogsWindow_);
+			ImGui::MenuItem("Particle Editor", nullptr, &showParticleViewer_);
 			ImGui::EndMenu();
 		}
 
@@ -493,6 +517,93 @@ void EditorManager::Update(Engine* engine)
 			ImGui::EndChild();
 		}
 		ImGui::End();
+	}
+
+	// Particle Viewer Window
+	if (showParticleViewer_) {
+		if (!isParticleViewerInitialized_) {
+			particleRenderTexture_ = std::make_unique<RenderTexture>();
+			particleDepthStencil_ = std::make_unique<DepthStencil>();
+			previewParticle_ = std::make_unique<Emitter>();
+			previewCamera_ = std::make_unique<Camera>();
+			previewGrid_ = std::make_unique<Grid>();
+
+			particleRenderTexture_->Initialize(engine->graphics->GetDevice(), 512, 512, engine->descriptorHeap->GetSrvDescriptorHeap(), engine->descriptorHeap->GetDescriptorSizeSRV());
+			particleDepthStencil_->CreateDepthStencil(engine->graphics->GetDevice(), 512, 512);
+			previewGrid_->CreateGrid();
+
+			EmitterData ed;
+			ed.frequency = 0.1f;
+			ed.count = 5;
+			EffectDefinitionData baseData;
+			baseData.color = { 1.0f,1.0f,1.0f,1.0f };
+			baseData.lifeTime = 2.0f;
+			previewParticle_->Initialize(ed, baseData, EffectShape::Plane);
+			previewParticle_->name_ = "Preview Particle";
+
+			Transform camT = { {1.0f,1.0f,1.0f}, {0.0f,0.0f,0.0f}, {0.0f, 2.0f, -10.0f} };
+			previewCamera_->SetTransform(camT);
+			previewCamera_->Update();
+
+			isParticleViewerInitialized_ = true;
+		}
+
+		// Draw the ImGui window FIRST so any resource recreations happen BEFORE recording draw calls
+		ImGui::SetNextWindowSize(ImVec2(800, 600), ImGuiCond_FirstUseEver);
+		if (ImGui::Begin("Particle Editor", &showParticleViewer_)) {
+			ImGui::Columns(2, "ParticleEditorColumns", true);
+			ImGui::SetColumnWidth(0, 532.0f); // Make sure image fits + padding
+
+			ImGui::Text("Preview:");
+			ImGui::Image((ImTextureID)particleRenderTexture_->GetSrvHandleGPU().ptr, ImVec2(512, 512));
+
+			ImGui::NextColumn();
+
+			ImGui::Text("Controls:");
+			ImGui::Checkbox("Show Grid", &showGridInViewer_);
+			// Optional: Camera controls for preview
+			Transform& camT = const_cast<Transform&>(previewCamera_->GetTransform());
+			if (ImGui::DragFloat3("Camera Pos", &camT.translate.x, 0.1f)) {
+				previewCamera_->SetTransform(camT);
+			}
+
+			ImGui::Separator();
+			previewParticle_->ImGui();
+
+			ImGui::Columns(1);
+		}
+		ImGui::End();
+
+		// Draw the particle into the render texture AFTER ImGui has processed (and potentially recreated resources)
+		previewCamera_->Update();
+		previewParticle_->Update(previewCamera_->GetViewMatrix());
+
+		auto cmdList = engine->command->GetCommandList();
+		particleRenderTexture_->TransitionToRenderTarget(cmdList);
+		particleRenderTexture_->Clear(cmdList);
+		D3D12_CPU_DESCRIPTOR_HANDLE rtvHandle = particleRenderTexture_->GetRtvHandle();
+		particleDepthStencil_->SetDSV(cmdList, &rtvHandle);
+
+		// Store old viewport/scissor and set new ones for 512x512
+		D3D12_VIEWPORT vp = { 0.0f, 0.0f, 512.0f, 512.0f, 0.0f, 1.0f };
+		D3D12_RECT scissor = { 0, 0, 512, 512 };
+		cmdList->RSSetViewports(1, &vp);
+		cmdList->RSSetScissorRects(1, &scissor);
+
+		Draw::SetCamera(previewCamera_.get());
+		if (showGridInViewer_) {
+			previewGrid_->SettingWvp(previewCamera_->GetViewMatrix());
+			Draw::DrawGrid(previewGrid_.get());
+		}
+		previewParticle_->Draw();
+
+		particleRenderTexture_->TransitionToShaderResource(cmdList);
+
+		// Restore engine's main render target
+		D3D12_CPU_DESCRIPTOR_HANDLE mainRtv = engine->GetRenderTexture()->GetRtvHandle();
+		engine->depthStencil->SetDSV(cmdList, &mainRtv);
+		cmdList->RSSetViewports(1, engine->viewportScissor->GetViewport());
+		cmdList->RSSetScissorRects(1, engine->viewportScissor->GetScissorRect());
 	}
 
 #endif

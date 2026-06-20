@@ -15,6 +15,13 @@ struct AccelerationFiled {
 	AABB area = { { -10.0f,-10.0f,-10.0f },{10.0f,10.0f,10.0f} };
 };
 
+struct ParticleMovementData {
+	Vector3 baseVelocity = { 0.0f, 0.0f, 0.0f };
+	Vector3 velocityVariance = { 1.0f / 60.0f, 1.0f / 60.0f, 1.0f / 60.0f };
+	Vector3 acceleration = { 0.0f, 0.0f, 0.0f };
+	float sizeDelta = 1.0f; // Multiplied each frame
+};
+
 class Emitter
 {
 private:
@@ -25,6 +32,10 @@ private:
 	AccelerationFiled accelerationFiled_;
 
 	EffectDefinitionData SetEffectDefinitionData_;
+	ParticleMovementData movementData_;
+
+	std::string texturePath_ = "Resources/Texture/circle.png";
+	EffectShape shape_ = EffectShape::Plane;
 
 	EmitterData emitter_;
 	std::mt19937 randomEngine;
@@ -38,6 +49,7 @@ private:
 
 public:
 	std::string name_ = "Particle";
+	char saveFileName_[256] = "particle";
 
 	// 生成時の振る舞いを注入する関数
 	std::function<void(EffectDefinitionData&)> generatorBehavior = nullptr;
@@ -48,6 +60,9 @@ public:
 	void ClearParticles() { effectDefinitionData_.clear(); }
 
 	void ImGui();
+
+	void SaveToJson(const std::string& name);
+	void LoadFromJson(const std::string& name);
 
 	void Initialize(EffectShape shape = EffectShape::Plane);
 
@@ -74,10 +89,15 @@ public:
 	void Emit();
 
 	void SetAccelerationFiled(AccelerationFiled accelerationFiled) { accelerationFiled_ = accelerationFiled; }
+	void DeleteParticle(int ParticleNum) { effectDefinition_.get()->DeleteParticle(ParticleNum); }
+
+	void SetTexturePath(const std::string& path);
+	void SetShape(EffectShape shape);
+	std::string GetTexturePath() const { return texturePath_; }
+	EffectShape GetShape() const { return shape_; }
 	void SetBlend(BlendMode blend) { effectDefinition_.get()->SetBlend(blend); }
 
 
 
 	std::list<EffectDefinitionData> GetEffectDefinitionData() { return effectDefinition_.get()->GetEffectDefinitionData(); }
 };
-

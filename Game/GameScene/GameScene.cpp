@@ -93,7 +93,11 @@ void GameScene::ImGui()
 		}
 	}
 
-	
+	if (ImGui::CollapsingHeader("Particles")) {
+		if (hitEffect_) hitEffect_->ImGui();
+		if (dustEffect_) dustEffect_->ImGui();
+		if (shockwaveEffect_) shockwaveEffect_->ImGui();
+	}
 
 	ImGui::End();
 

@@ -62,6 +62,9 @@ public:
 	void Initialize(EffectShape shape = EffectShape::Plane);
 	void Initialize(int TextureHandle, EffectShape shape = EffectShape::Plane);
 
+	void SetTexturePath(const std::string& path);
+	void SetShape(EffectShape shape);
+
 	void CreateVertexData();
 	void CreateWVP();
 	void CreateSRV();

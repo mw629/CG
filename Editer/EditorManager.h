@@ -4,6 +4,11 @@
 #include <string>
 
 class Engine;
+class RenderTexture;
+class DepthStencil;
+class Emitter;
+class Camera;
+class Grid;
 
 class EditorManager {
 public:
@@ -22,9 +27,20 @@ private:
 	bool showFinalWindow_ = true;
 	bool showResourcesWindow_ = true;
 	bool showLogsWindow_ = true;
+	bool showParticleViewer_ = false;
 	int sceneAspectRatioIndex_ = 0; // 0: Free, 1: 16:9, 2: 4:3, 3: 1:1, 4: 21:9
 
+	std::unique_ptr<RenderTexture> particleRenderTexture_;
+	std::unique_ptr<DepthStencil> particleDepthStencil_;
+	std::unique_ptr<Emitter> previewParticle_;
+	std::unique_ptr<Camera> previewCamera_;
+	std::unique_ptr<Grid> previewGrid_;
+	bool isParticleViewerInitialized_ = false;
+	bool showGridInViewer_ = true;
+
 public:
+	~EditorManager();
+
 	static void SetPlaying(bool playing) { isPlaying_ = playing; }
 	static bool IsPlaying() { return isPlaying_; }
 
