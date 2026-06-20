@@ -44,6 +44,7 @@ private:
 
 	// ヒット時の演出用変数
 	bool isHit_ = false;
+	bool isTrip_ = false;
 	float hitTimer_ = 0.0f;
 	float hitDuration_ = 90.0f; // ノックバックにかかるフレーム数
 	Vector3 knockbackVelocity_{ 0.0f, 0.0f, 0.0f }; // ノックバック速度
@@ -69,7 +70,7 @@ public:
 	void SetKeepRolling(bool keep) { keepRolling_ = keep; }
 
 	// ヒット演出用
-	void OnHit();
+	void OnHit(bool isTrip = false);
 	bool IsHitAnimationFinished() const;
 };
 

@@ -2,7 +2,7 @@
 #include <cstdlib>
 #include <ctime>
 
-void StageSettings::Initialize(ModelData roadModelData, ModelData obstacleModelData, class GameObjectManager* manager)
+void StageSettings::Initialize(ModelData roadModelData, ModelData obstacleModelData, ModelData bonusModelData, class GameObjectManager* manager)
 {
 	// 乱数の初期化
 	std::srand(static_cast<unsigned int>(std::time(nullptr)));
@@ -32,7 +32,7 @@ void StageSettings::Initialize(ModelData roadModelData, ModelData obstacleModelD
 
 		// ランダムなタイプで初期化
 		Obstacle::Type type = static_cast<Obstacle::Type>(std::rand() % 3);
-		obstacles_[i]->Initialize(obstacleModelData, type);
+		obstacles_[i]->Initialize(obstacleModelData, bonusModelData, type);
         
         if (manager) manager->AddObject(obstacles_[i]);
 	}
@@ -108,7 +108,7 @@ void StageSettings::Draw()
 
 void StageSettings::SpawnObstacles(float z)
 {
-	// 3レーンの状態を決定 (0: None, 1: Low, 2: High, 3: Wall)
+	// 3レーンの状態を決定 (0: None, 1: Low, 2: High, 3: Wall, 4: Bonus)
 	int laneSpawns[3];
 	int wallCount = 0;
 	int noneCount = 0;
@@ -134,6 +134,12 @@ void StageSettings::SpawnObstacles(float z)
 		laneSpawns[changeIndex] = 0; // Noneに変更
 	}
 
+	// たまにボーナスエネミーを配置する (約10%の確率)
+	if (std::rand() % 10 == 0) {
+		int bonusIndex = std::rand() % 3;
+		laneSpawns[bonusIndex] = 4; // 4: Bonus
+	}
+
 	// 決定した内容で各レーンに生成
 	for (int i = 0; i < 3; i++) {
 		if (laneSpawns[i] == 0) continue; // None
@@ -150,9 +156,12 @@ void StageSettings::SpawnObstacles(float z)
 		} else if (laneSpawns[i] == 2) {
 			type = Obstacle::Type::High;
 			y = 4.6f;
-		} else { // 3
+		} else if (laneSpawns[i] == 3) {
 			type = Obstacle::Type::Wall;
 			y = 3.5f;
+		} else { // 4
+			type = Obstacle::Type::Bonus;
+			y = 2.5f; // 足元付近
 		}
 
 		// 障害物のタイプを変更して配置

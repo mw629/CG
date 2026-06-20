@@ -15,12 +15,19 @@ public:
 	{
 		Low,   // ジャンプで避ける（低い障害物）
 		High,  // 転がりで避ける（高い障害物・バー）
-		Wall   // レーン移動で避ける（壁）
+		Wall,  // レーン移動で避ける（壁）
+		Bonus  // 当たると吹き飛ぶボーナスエネミー
 	};
 
 private:
 	std::unique_ptr<Model> model_ = std::make_unique<Model>();
+	ModelData normalModelData_;
+	ModelData bonusModelData_;
 	Type type_ = Type::Wall;
+
+	bool isHit_ = false;
+	Vector3 velocity_{ 0.0f, 0.0f, 0.0f };
+	float gravity_ = 0.015f;
 
 	// 当たり判定のサイズ
 	float collisionWidth_ = 1.0f;
@@ -31,7 +38,7 @@ public:
 	Obstacle();
 	~Obstacle();
 
-	void Initialize(ModelData modelData, Type type);
+	void Initialize(ModelData normalData, ModelData bonusData, Type type);
 	void SetType(Type type);
 
 	/// <summary>
@@ -43,6 +50,11 @@ public:
 	/// 毎フレームの更新（手前にスクロール）
 	/// </summary>
 	void StageUpdate(Matrix4x4 view, float scrollSpeed);
+
+	/// <summary>
+	/// プレイヤーに当たった時の処理
+	/// </summary>
+	void OnHit();
 	
 	// Override standard Update and Draw to avoid GameObjectManager from automatically updating scroll/drawing without context
 	void Update(Matrix4x4 view, float speedMultiplier = 1.0f) override {}

@@ -179,38 +179,29 @@ void GameScene::Initialize() {
 	}
 	sceneChangeRequest_ = false;
 
-	// ヒットエフェクトの初期化（煙のような演出）
+	// ヒットエフェクトの初期化（ヒットスパーク演出）
 	EmitterData hitEmitter;
 	hitEmitter.transform.scale = { 0.0f, 0.0f, 0.0f }; // 中心の一点から発生させる
-	hitEmitter.count = 20; // 粒を少なくする
+	hitEmitter.count = 40; // 粒を増やして派手にする
 	hitEmitter.frequency = 9999.0f; // 自動発生させず、手動のEmitのみにする
 	EffectDefinitionData hitData;
-	hitData.color = { 1.0f, 1.0f, 1.0f, 0.9f }; // 真っ白
-	hitData.lifeTime = 1.2f; // 長く残る
-	hitData.transform.scale = { 1.2f, 1.2f, 1.2f }; // 粒をさらに大きくする
-	hitEffect_->Initialize(hitEmitter, hitData, EffectShape::Plane);
+	hitData.color = { 1.0f, 1.0f, 1.0f, 1.0f }; // 白色
+	hitData.lifeTime = 1.8f; // ライフを長くして余韻を残す
+	hitData.transform.scale = { 2.5f, 0.3f, 1.0f }; // 長さを少し短く(2.5)、横幅(太さ/短径)をもっと細く(0.3)
+	
+	int whiteTexture = texture_.get()->CreateTexture("Resources/Texture/white64x64.png");
+	hitEffect_->Initialize(hitEmitter, hitData, whiteTexture, EffectShape::Ring);
+	hitEffect_->SetBlend(BlendMode::kBlendModeNormal); // 加算だと背景と同化して見えなくなるため通常ブレンドにする
 	hitEffect_->name_ = "Hit Effect";
 	hitEffect_->generatorBehavior = [](EffectDefinitionData& p) {
-		// 中心から円状（球状）に広がるようにランダムな方向ベクトルを生成
-		float randX = ((float)rand() / RAND_MAX - 0.5f) * 2.0f;
-		float randY = ((float)rand() / RAND_MAX - 0.5f) * 2.0f;
-		float randZ = ((float)rand() / RAND_MAX - 0.5f) * 2.0f;
+		// 広がらずにその場に出現するだけにするため、速度はゼロ
+		p.velocity = { 0.0f, 0.0f, 0.0f }; 
 		
-		// 正規化して方向を揃える
-		float length = std::sqrt(randX * randX + randY * randY + randZ * randZ);
-		if (length > 0.0f) {
-			randX /= length;
-			randY /= length;
-			randZ /= length;
-		}
-
-		// 広がるスピードを大幅に抑えて、小さく広がるようにする
-		float speed = ((float)rand() / RAND_MAX) * 0.03f + 0.01f; 
-		p.velocity = { randX * speed, randY * speed, randZ * speed }; 
-		p.transform.rotate.z = ((float)rand() / RAND_MAX) * 3.14159f;
+		// リングが様々な角度を向くようにランダムに回転させる
+		p.transform.rotate.x = ((float)rand() / RAND_MAX) * 3.14159f * 2.0f;
+		p.transform.rotate.y = ((float)rand() / RAND_MAX) * 3.14159f * 2.0f;
+		p.transform.rotate.z = ((float)rand() / RAND_MAX) * 3.14159f * 2.0f;
 	};
-
-
 
 	// camera_->SetDebugCamera() は上記で設定済み
 	camera_->SetTransform(cameraTransform_);
@@ -247,7 +238,7 @@ void GameScene::Initialize() {
 	// ステージの初期化
 	ModelData roadModelData = AssetManager::LoadModel("Resources/Plane", "Plane.gltf");
 	ModelData obstacleModelData = AssetManager::LoadModel("Resources/Block", "Block.obj");
-	stageSettings_->Initialize(roadModelData, obstacleModelData, gameObjectManager_.get());
+	stageSettings_->Initialize(roadModelData, obstacleModelData, modelData, gameObjectManager_.get());
 
 	// 指定したJsonファイルを初期シーンとして読み込む
 	gameObjectManager_->LoadScene(initialSceneJson_);
@@ -329,9 +320,7 @@ void GameScene::Draw() {
 	}
 
 	// ヒットエフェクトの描画
-	if (gameState_ == GameState::PlayerHit || gameState_ == GameState::GameOver) {
-		hitEffect_->Draw();
-	}
+	hitEffect_->Draw();
 }
 
 void GameScene::PlayerHitUpdate()
@@ -366,6 +355,8 @@ void GameScene::PlayingUpdate()
 
 	// 当たり判定チェック
 	CheckCollisions();
+
+	hitEffect_->Update(view);
 }
 
 void GameScene::PausedUpdate()
@@ -401,20 +392,38 @@ void GameScene::CheckCollisions()
 		);
 
 		if (Collision::CheckAABB(playerAABB, obstacleAABB)) {
+			if (obstacle->GetType() == Obstacle::Type::Bonus) {
+				// ボーナスエネミーに当たった場合の処理（吹き飛ばす）
+				obstacle->OnHit();
+				currentDistance_ += 50.0f; // スコア（距離）ボーナス
+
+				// 軽くヒットエフェクトを出す
+				EmitterData emData = hitEffect_->GetEmitterData();
+				emData.transform.translate = obstacle->GetTransform().translate;
+				emData.transform.translate.y += 1.0f; 
+				emData.transform.translate.z -= 5.0f; // 少し-z側に表示
+				emData.count = 7; // 数を半分程度に減らす
+				hitEffect_->SetEmitterData(emData);
+				hitEffect_->Emit();
+
+				continue; // ゲームオーバーにはならず、次の判定へ
+			}
+
 			// 衝突！ヒット演出へ移行
 			gameState_ = GameState::PlayerHit;
 			stageSettings_->SetGameOver(true);
 			PostEffect::SetActivePostEffect(PostEffect::Type::GrayScale);
 			
-			// プレイヤーのヒットアニメーション開始
-			player_->OnHit();
+			// プレイヤーのヒットアニメーション開始（Low障害物なら前へ転がる）
+			bool isTrip = (obstacle->GetType() == Obstacle::Type::Low);
+			player_->OnHit(isTrip);
 
 			// エフェクトの発生位置をプレイヤーから取得する
 			EmitterData emData = hitEffect_->GetEmitterData();
 			emData.transform.translate = player_->GetTransform().translate;
 			emData.transform.translate.y += 1.0f; // プレイヤーの体の中央付近から発生
-			emData.transform.translate.z -= 3.0f; // プレイヤーより手前（カメラ側）にずらす
-			emData.count = 20;
+			emData.transform.translate.z -= 5.0f; // さらに手前（カメラ側）にずらす
+			emData.count = 10; // 数を半分にする
 			hitEffect_->SetEmitterData(emData);
 			hitEffect_->Emit();
 

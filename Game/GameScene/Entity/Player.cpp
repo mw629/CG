@@ -34,6 +34,7 @@ void Player::Reset()
 	keepRolling_ = false;
 
 	isHit_ = false;
+	isTrip_ = false;
 	hitTimer_ = 0.0f;
 	knockbackVelocity_ = { 0.0f, 0.0f, 0.0f };
 
@@ -185,9 +186,13 @@ void Player::HitUpdate(float /*speedMultiplier*/)
 		transform_.translate.y += knockbackVelocity_.y;
 		transform_.translate.z += knockbackVelocity_.z;
 
-		// 重力と回転（後ろに飛ぶような動き）
+		// 重力と回転（後ろに飛ぶか前に転がるか）
 		knockbackVelocity_.y -= gravity_ * 2.0f; 
-		transform_.rotate.x -= 0.1f;
+		if (isTrip_) {
+			transform_.rotate.x += 0.2f; // 前に転がる回転
+		} else {
+			transform_.rotate.x -= 0.1f; // 後ろに飛ぶ回転
+		}
 
 		// 地面に着地したらバウンドなどを抑える
 		if (transform_.translate.y <= baseHeight_ && knockbackVelocity_.y < 0.0f) {
@@ -201,9 +206,10 @@ void Player::HitUpdate(float /*speedMultiplier*/)
 	}
 }
 
-void Player::OnHit()
+void Player::OnHit(bool isTrip)
 {
 	isHit_ = true;
+	isTrip_ = isTrip;
 	hitTimer_ = 0.0f;
 	
 	// 姿勢をリセット
@@ -211,9 +217,15 @@ void Player::OnHit()
 	isJumping_ = false;
 	transform_.scale = { 1.0f, 1.0f, 1.0f };
 
-	// 少し後ろと上に飛ぶノックバック
 	float randX = ((float)rand() / RAND_MAX - 0.5f) * 0.1f;
-	knockbackVelocity_ = { randX, 0.4f, -0.6f }; 
+
+	if (isTrip_) {
+		// Lowに当たってつまずいた場合、少し前に転がるようなノックバック
+		knockbackVelocity_ = { randX, 0.3f, 0.8f }; 
+	} else {
+		// 少し後ろと上に飛ぶノックバック
+		knockbackVelocity_ = { randX, 0.4f, -0.6f }; 
+	}
 }
 
 bool Player::IsHitAnimationFinished() const

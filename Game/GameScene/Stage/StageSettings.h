@@ -51,7 +51,7 @@ private:
 
 public:
 
-	void Initialize(ModelData roadModelData, ModelData obstacleModelData, class GameObjectManager* manager);
+	void Initialize(ModelData roadModelData, ModelData obstacleModelData, ModelData bonusModelData, class GameObjectManager* manager);
 	void Update(Matrix4x4 view);
 	void EditorUpdate(Matrix4x4 view);
 	void Draw();
