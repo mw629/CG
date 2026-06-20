@@ -45,6 +45,8 @@ public:
 	void SetEmitterData(const EmitterData& data) { emitter_ = data; }
 	EmitterData GetEmitterData() const { return emitter_; }
 
+	void ClearParticles() { effectDefinitionData_.clear(); }
+
 	void ImGui();
 
 	void Initialize(EffectShape shape = EffectShape::Plane);

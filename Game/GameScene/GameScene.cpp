@@ -17,7 +17,7 @@ void GameScene::ImGui()
 	camera_.get()->ImGui();
 
 	if (ImGui::CollapsingHeader("Game State", ImGuiTreeNodeFlags_DefaultOpen)) {
-		const char* stateNames[] = { "Playing", "Paused", "GameClear", "GameOver", "Editor" };
+		const char* stateNames[] = { "Playing", "Paused", "PlayerHit", "GameClear", "GameOver", "Editor" };
 		ImGui::Text("Game State: %s", stateNames[gameState_]);
 		ImGui::Separator();
 
@@ -179,21 +179,34 @@ void GameScene::Initialize() {
 	}
 	sceneChangeRequest_ = false;
 
-	// ヒットエフェクトの初期化
+	// ヒットエフェクトの初期化（煙のような演出）
 	EmitterData hitEmitter;
-	hitEmitter.count = 40;
-	hitEmitter.frequency = 0.05f;
+	hitEmitter.transform.scale = { 0.0f, 0.0f, 0.0f }; // 中心の一点から発生させる
+	hitEmitter.count = 20; // 粒を少なくする
+	hitEmitter.frequency = 9999.0f; // 自動発生させず、手動のEmitのみにする
 	EffectDefinitionData hitData;
-	hitData.color = { 1.0f, 0.5f, 0.0f, 1.0f }; // オレンジ/赤系の火花
-	hitData.lifeTime = 0.5f;
-	hitData.transform.scale = { 0.1f, 0.1f, 0.1f };
+	hitData.color = { 1.0f, 1.0f, 1.0f, 0.9f }; // 真っ白
+	hitData.lifeTime = 1.2f; // 長く残る
+	hitData.transform.scale = { 1.2f, 1.2f, 1.2f }; // 粒をさらに大きくする
 	hitEffect_->Initialize(hitEmitter, hitData, EffectShape::Plane);
 	hitEffect_->name_ = "Hit Effect";
 	hitEffect_->generatorBehavior = [](EffectDefinitionData& p) {
-		float randX = ((float)rand() / RAND_MAX - 0.5f) * 4.0f;
-		float randY = ((float)rand() / RAND_MAX - 0.5f) * 4.0f;
-		float randZ = ((float)rand() / RAND_MAX - 0.5f) * 4.0f;
-		p.velocity = { randX * 0.1f, randY * 0.1f + 0.1f, randZ * 0.1f }; 
+		// 中心から円状（球状）に広がるようにランダムな方向ベクトルを生成
+		float randX = ((float)rand() / RAND_MAX - 0.5f) * 2.0f;
+		float randY = ((float)rand() / RAND_MAX - 0.5f) * 2.0f;
+		float randZ = ((float)rand() / RAND_MAX - 0.5f) * 2.0f;
+		
+		// 正規化して方向を揃える
+		float length = std::sqrt(randX * randX + randY * randY + randZ * randZ);
+		if (length > 0.0f) {
+			randX /= length;
+			randY /= length;
+			randZ /= length;
+		}
+
+		// 広がるスピードを大幅に抑えて、小さく広がるようにする
+		float speed = ((float)rand() / RAND_MAX) * 0.03f + 0.01f; 
+		p.velocity = { randX * speed, randY * speed, randZ * speed }; 
 		p.transform.rotate.z = ((float)rand() / RAND_MAX) * 3.14159f;
 	};
 
@@ -284,6 +297,7 @@ void GameScene::Update() {
 			stageSettings_->Reset();
 			PostEffect::SetActivePostEffect(PostEffect::Type::Normal);
 			player_->Reset();
+			hitEffect_->ClearParticles(); // 前回の煙をリセット
 			currentDistance_ = 0.0f;
 		}
 		// 2でタイトルへ
@@ -395,11 +409,12 @@ void GameScene::CheckCollisions()
 			// プレイヤーのヒットアニメーション開始
 			player_->OnHit();
 
-			// エフェクトの発生位置をプレイヤーに合わせる
+			// エフェクトの発生位置をプレイヤーから取得する
 			EmitterData emData = hitEffect_->GetEmitterData();
 			emData.transform.translate = player_->GetTransform().translate;
-			emData.transform.translate.y += 0.5f; // 少し上から発生
-			emData.count = 40;
+			emData.transform.translate.y += 1.0f; // プレイヤーの体の中央付近から発生
+			emData.transform.translate.z -= 3.0f; // プレイヤーより手前（カメラ側）にずらす
+			emData.count = 20;
 			hitEffect_->SetEmitterData(emData);
 			hitEffect_->Emit();
 
