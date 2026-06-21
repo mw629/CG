@@ -177,7 +177,7 @@ void GraphicsPipelineState::ALLPSOCreate(std::ostream& os, ID3D12Device* device)
 	std::vector<D3D12_INPUT_ELEMENT_DESC> particleInput = {
 		{ "POSITION", 0, DXGI_FORMAT_R32G32B32A32_FLOAT, 0, D3D12_APPEND_ALIGNED_ELEMENT, D3D12_INPUT_CLASSIFICATION_PER_VERTEX_DATA, 0 },
 		{ "TEXCOORD", 0, DXGI_FORMAT_R32G32_FLOAT, 0, D3D12_APPEND_ALIGNED_ELEMENT, D3D12_INPUT_CLASSIFICATION_PER_VERTEX_DATA, 0 },
-		{ "COLOR",    0, DXGI_FORMAT_R32G32B32A32_FLOAT, 0, D3D12_APPEND_ALIGNED_ELEMENT, D3D12_INPUT_CLASSIFICATION_PER_VERTEX_DATA, 0 }
+		{ "NORMAL",   0, DXGI_FORMAT_R32G32B32_FLOAT, 0, D3D12_APPEND_ALIGNED_ELEMENT, D3D12_INPUT_CLASSIFICATION_PER_VERTEX_DATA, 0 }
 	};
 	std::vector<D3D12_INPUT_ELEMENT_DESC> lineInput = {
 		{ "POSITION", 0, DXGI_FORMAT_R32G32B32_FLOAT, 0, D3D12_APPEND_ALIGNED_ELEMENT, D3D12_INPUT_CLASSIFICATION_PER_VERTEX_DATA, 0 },
@@ -194,6 +194,7 @@ void GraphicsPipelineState::ALLPSOCreate(std::ostream& os, ID3D12Device* device)
 		
 		//ParticleShaderはパーティクル用のシェーダー。描画モードはポイントリストで、頂点バッファの内容をそのままスクリーンに打ち込むようなイメージ。深度は書き込まない
 		{ ParticleShader, { L"Resources/Shader/ParticleShader/Particle.VS.hlsl", L"Resources/Shader/ParticleShader/Particle.PS.hlsl", particleInput, true, D3D12_DEPTH_WRITE_MASK_ZERO, D3D12_COMPARISON_FUNC_LESS_EQUAL, D3D12_CULL_MODE_NONE, D3D12_FILL_MODE_SOLID } },
+		{ SmokeShader, { L"Resources/Shader/ParticleShader/Particle.VS.hlsl", L"Resources/Shader/ParticleShader/Smoke.PS.hlsl", particleInput, true, D3D12_DEPTH_WRITE_MASK_ZERO, D3D12_COMPARISON_FUNC_LESS_EQUAL, D3D12_CULL_MODE_NONE, D3D12_FILL_MODE_SOLID } },
 		
 		//LineShaderはライン描画用のシェーダー。描画モードはラインリストで、頂点バッファの内容をそのままスクリーンに打ち込むようなイメージ。深度は書き込む
 		{ LineShader, { L"Resources/Shader/LineShader/Line.VS.hlsl", L"Resources/Shader/LineShader/Line.PS.hlsl", lineInput, true, D3D12_DEPTH_WRITE_MASK_ALL, D3D12_COMPARISON_FUNC_LESS_EQUAL, D3D12_CULL_MODE_NONE, D3D12_FILL_MODE_SOLID } },

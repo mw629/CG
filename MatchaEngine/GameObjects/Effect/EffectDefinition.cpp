@@ -65,9 +65,16 @@ void EffectDefinition::SetTexturePath(const std::string& path)
 	textureSrvHandleGPU_ = texture.TextureData(handle);
 }
 
-void EffectDefinition::SetShape(EffectShape shape)
+void EffectDefinition::SetShape(EffectShape shape, const EffectShapeData& data)
 {
 	shape_ = shape;
+	shapeData_ = data;
+	CreateVertexData();
+}
+
+void EffectDefinition::SetShapeData(const EffectShapeData& data)
+{
+	shapeData_ = data;
 	CreateVertexData();
 }
 
@@ -85,11 +92,11 @@ void EffectDefinition::CreateVertexData()
 		vertices.push_back({ .position = {  1.0f,  1.0f, 0.0f, 1.0f }, .texcoord = {1.0f,0.0f}, .normal = {0.0f,0.0f,1.0f} }); // 右上
 		vertices.push_back({ .position = {  1.0f, -1.0f, 0.0f, 1.0f }, .texcoord = {1.0f,1.0f}, .normal = {0.0f,0.0f,1.0f} }); // 右下
 	} else if (shape_ == EffectShape::Cylinder) {
-		int divide = 32;
+		int divide = shapeData_.cylinderDivide;
 		vertexSize_ = divide * 6;
-		float topRadius = 1.0f;
-		float bottomRadius = 1.0f;
-		float height = 3.0f;
+		float topRadius = shapeData_.cylinderTopRadius;
+		float bottomRadius = shapeData_.cylinderBottomRadius;
+		float height = shapeData_.cylinderHeight;
 		float radianPerDivide = 2.0f * 3.141592654f / float(divide);
 		for (int index = 0; index < divide; ++index) {
 			float sin = std::sin(radianPerDivide * index);
@@ -113,10 +120,10 @@ void EffectDefinition::CreateVertexData()
 			vertices.push_back(b);
 		}
 	} else if (shape_ == EffectShape::Ring) {
-		int kRingDivide = 32;
+		int kRingDivide = shapeData_.ringDivide;
 		vertexSize_ = kRingDivide * 6;
-		float outerRadius = 1.0f;
-		float innerRadius = 0.8f;
+		float outerRadius = shapeData_.ringOuterRadius;
+		float innerRadius = shapeData_.ringInnerRadius;
 		float radianPerDivide = 2.0f * 3.141592654f / float(kRingDivide);
 		for (int index = 0; index < kRingDivide; ++index) {
 			float sin = std::sin(radianPerDivide * index);

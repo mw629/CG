@@ -1,0 +1,79 @@
+{
+    "emitter": {
+        "count": 1,
+        "frequency": 0.25,
+        "transform": {
+            "rotate": [
+                0.0,
+                0.0,
+                0.0
+            ],
+            "scale": [
+                0.25,
+                0.10000000149011612,
+                0.5
+            ],
+            "translate": [
+                0.0,
+                0.0,
+                0.0
+            ]
+        }
+    },
+    "movement": {
+        "acceleration": [
+            0.0,
+            0.00019999999494757503,
+            -0.004000000189989805
+        ],
+        "baseVelocity": [
+            0.0,
+            0.0,
+            0.0
+        ],
+        "sizeDelta": [
+            1.0,
+            1.0,
+            1.0
+        ],
+        "sizeVariance": [
+            0.0,
+            0.0,
+            0.0
+        ],
+        "velocityVariance": [
+            0.0,
+            0.0,
+            0.0
+        ]
+    },
+    "particle": {
+        "color": [
+            1.0,
+            1.0,
+            1.0,
+            1.0
+        ],
+        "lifeTime": 1.5,
+        "transform": {
+            "scale": [
+                0.5,
+                0.20000000298023224,
+                0.20000000298023224
+            ]
+        }
+    },
+    "visual": {
+        "blendMode": 1,
+        "cylinderBottomRadius": 1.0,
+        "cylinderDivide": 32,
+        "cylinderHeight": 3.0,
+        "cylinderTopRadius": 1.0,
+        "ringDivide": 32,
+        "ringInnerRadius": 0.800000011920929,
+        "ringOuterRadius": 1.0,
+        "shader": "SmokeShader",
+        "shape": 0,
+        "texturePath": "resources/Texture/white64x64.png"
+    }
+}

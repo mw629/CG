@@ -8,7 +8,7 @@ void StageSettings::Initialize(ModelData roadModelData, ModelData obstacleModelD
 	std::srand(static_cast<unsigned int>(std::time(nullptr)));
 
 	// グラウンドテクスチャをロード
-	texture_->CreateTexture("Resources/Model/Ground/Ground.png");
+	texture_->CreateTexture("Resources/Model/Ground/white64x64.png");
 
 	// 道路チャンクの初期化
 	for (int i = 0; i < kChunkCount_; i++) {

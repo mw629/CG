@@ -20,9 +20,21 @@ enum class EffectShape {
 	Ring
 };
 
+struct EffectShapeData {
+	int cylinderDivide = 32;
+	float cylinderTopRadius = 1.0f;
+	float cylinderBottomRadius = 1.0f;
+	float cylinderHeight = 3.0f;
+
+	int ringDivide = 32;
+	float ringOuterRadius = 1.0f;
+	float ringInnerRadius = 0.8f;
+};
+
 class EffectDefinition
 {
 private:
+	EffectShapeData shapeData_;
 
 	ModelData modelData_{};
 	std::unique_ptr<MaterialFactory> material_;
@@ -63,7 +75,8 @@ public:
 	void Initialize(int TextureHandle, EffectShape shape = EffectShape::Plane);
 
 	void SetTexturePath(const std::string& path);
-	void SetShape(EffectShape shape);
+	void SetShape(EffectShape shape, const EffectShapeData& data);
+	void SetShapeData(const EffectShapeData& data);
 
 	void CreateVertexData();
 	void CreateWVP();
@@ -100,6 +113,7 @@ private:
 	BlendMode blend_ = BlendMode::kBlendModeAdd;
 public:
 	void SetBlend(BlendMode blend) { blend_ = blend; }
+	void SetShader(ShaderName shader) { shader_ = shader; }
 	ShaderName GetShader() { return shader_; }
 	BlendMode GetBlend() { return blend_; }
 

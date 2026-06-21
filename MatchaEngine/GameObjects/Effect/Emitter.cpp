@@ -23,7 +23,13 @@ void Emitter::SetTexturePath(const std::string& path)
 void Emitter::SetShape(EffectShape shape)
 {
 	shape_ = shape;
-	effectDefinition_->SetShape(shape);
+	effectDefinition_->SetShape(shape, shapeData_);
+}
+
+void Emitter::SetShapeData(const EffectShapeData& data)
+{
+	shapeData_ = data;
+	effectDefinition_->SetShapeData(data);
 }
 
 void Emitter::ImGui() {
@@ -35,7 +41,7 @@ void Emitter::ImGui() {
 			if (ImGui::TreeNode("Transform")) {
 				ImGui::DragFloat3("Position", &emitter_.transform.translate.x, 0.01f, -FLT_MAX, FLT_MAX, "%.2f");
 				ImGui::DragFloat3("Rotation", &emitter_.transform.rotate.x, 0.01f, -FLT_MAX, FLT_MAX, "%.2f");
-				ImGui::DragFloat3("Scale", &emitter_.transform.scale.x, 0.01f, -FLT_MAX, FLT_MAX, "%.2f");
+				ImGui::DragFloat3("Spawn Area Scale", &emitter_.transform.scale.x, 0.01f, -FLT_MAX, FLT_MAX, "%.2f");
 				ImGui::TreePop();
 			}
 			ImGui::DragInt("Count", reinterpret_cast<int*>(&emitter_.count), 1, 0, 10000);
@@ -45,7 +51,7 @@ void Emitter::ImGui() {
 		}
 
 		if (ImGui::TreeNode("Particle Initial Settings")) {
-			ImGui::DragFloat3("Scale", &SetEffectDefinitionData_.transform.scale.x, 0.01f, -FLT_MAX, FLT_MAX, "%.2f");
+			ImGui::DragFloat3("Base Size (Scale)", &SetEffectDefinitionData_.transform.scale.x, 0.01f, -FLT_MAX, FLT_MAX, "%.2f");
 			ImGui::ColorEdit4("Color", &SetEffectDefinitionData_.color.x);
 			ImGui::DragFloat("LifeTime", &SetEffectDefinitionData_.lifeTime, 0.01f, 0.0f, FLT_MAX, "%.2f");
 			ImGui::TreePop();
@@ -55,7 +61,8 @@ void Emitter::ImGui() {
 			ImGui::DragFloat3("Base Velocity", &movementData_.baseVelocity.x, 0.001f, -FLT_MAX, FLT_MAX, "%.3f");
 			ImGui::DragFloat3("Velocity Variance", &movementData_.velocityVariance.x, 0.001f, 0.0f, FLT_MAX, "%.3f");
 			ImGui::DragFloat3("Acceleration (Gravity)", &movementData_.acceleration.x, 0.0001f, -FLT_MAX, FLT_MAX, "%.4f");
-			ImGui::DragFloat("Size Multiplier", &movementData_.sizeDelta, 0.001f, 0.0f, FLT_MAX, "%.3f");
+			ImGui::DragFloat3("Size Variance", &movementData_.sizeVariance.x, 0.01f, 0.0f, FLT_MAX, "%.2f");
+			ImGui::DragFloat3("Size Multiplier", &movementData_.sizeDelta.x, 0.001f, 0.0f, FLT_MAX, "%.3f");
 			ImGui::TreePop();
 		}
 
@@ -64,6 +71,41 @@ void Emitter::ImGui() {
 			int currentShape = static_cast<int>(shape_);
 			if (ImGui::Combo("Shape", &currentShape, shapes, IM_ARRAYSIZE(shapes))) {
 				SetShape(static_cast<EffectShape>(currentShape));
+			}
+
+			const char* blendModes[] = { "None", "Normal", "Add", "Subtract", "Multiply", "Screen" };
+			int currentBlend = static_cast<int>(GetBlend());
+			if (ImGui::Combo("Blend Mode", &currentBlend, blendModes, IM_ARRAYSIZE(blendModes))) {
+				SetBlend(static_cast<BlendMode>(currentBlend));
+			}
+
+			const char* shaderNames[] = { "ParticleShader", "SmokeShader" };
+			if (ImGui::BeginCombo("Shader", shaderName_.c_str())) {
+				for (const auto& shader : shaderNames) {
+					bool is_selected = (shaderName_ == shader);
+					if (ImGui::Selectable(shader, is_selected)) {
+						SetShader(shader);
+					}
+					if (is_selected) {
+						ImGui::SetItemDefaultFocus();
+					}
+				}
+				ImGui::EndCombo();
+			}
+
+			bool shapeChanged = false;
+			if (shape_ == EffectShape::Cylinder) {
+				shapeChanged |= ImGui::DragInt("Cylinder Divide", &shapeData_.cylinderDivide, 1.0f, 3, 128);
+				shapeChanged |= ImGui::DragFloat("Cylinder Top Radius", &shapeData_.cylinderTopRadius, 0.05f, 0.0f, 100.0f);
+				shapeChanged |= ImGui::DragFloat("Cylinder Bottom Radius", &shapeData_.cylinderBottomRadius, 0.05f, 0.0f, 100.0f);
+				shapeChanged |= ImGui::DragFloat("Cylinder Height", &shapeData_.cylinderHeight, 0.05f, 0.0f, 100.0f);
+			} else if (shape_ == EffectShape::Ring) {
+				shapeChanged |= ImGui::DragInt("Ring Divide", &shapeData_.ringDivide, 1.0f, 3, 128);
+				shapeChanged |= ImGui::DragFloat("Ring Outer Radius", &shapeData_.ringOuterRadius, 0.05f, 0.0f, 100.0f);
+				shapeChanged |= ImGui::DragFloat("Ring Inner Radius", &shapeData_.ringInnerRadius, 0.05f, 0.0f, 100.0f);
+			}
+			if (shapeChanged) {
+				SetShapeData(shapeData_);
 			}
 			
 			ImGui::Text("Texture:");
@@ -164,10 +206,22 @@ void Emitter::SaveToJson(const std::string& name)
 	root["movement"]["baseVelocity"] = { movementData_.baseVelocity.x, movementData_.baseVelocity.y, movementData_.baseVelocity.z };
 	root["movement"]["velocityVariance"] = { movementData_.velocityVariance.x, movementData_.velocityVariance.y, movementData_.velocityVariance.z };
 	root["movement"]["acceleration"] = { movementData_.acceleration.x, movementData_.acceleration.y, movementData_.acceleration.z };
-	root["movement"]["sizeDelta"] = movementData_.sizeDelta;
+	root["movement"]["sizeVariance"] = { movementData_.sizeVariance.x, movementData_.sizeVariance.y, movementData_.sizeVariance.z };
+	root["movement"]["sizeDelta"] = { movementData_.sizeDelta.x, movementData_.sizeDelta.y, movementData_.sizeDelta.z };
 
 	root["visual"]["texturePath"] = texturePath_;
 	root["visual"]["shape"] = static_cast<int>(shape_);
+	root["visual"]["blendMode"] = static_cast<int>(GetBlend());
+	root["visual"]["shader"] = shaderName_;
+
+	root["visual"]["cylinderDivide"] = shapeData_.cylinderDivide;
+	root["visual"]["cylinderTopRadius"] = shapeData_.cylinderTopRadius;
+	root["visual"]["cylinderBottomRadius"] = shapeData_.cylinderBottomRadius;
+	root["visual"]["cylinderHeight"] = shapeData_.cylinderHeight;
+
+	root["visual"]["ringDivide"] = shapeData_.ringDivide;
+	root["visual"]["ringOuterRadius"] = shapeData_.ringOuterRadius;
+	root["visual"]["ringInnerRadius"] = shapeData_.ringInnerRadius;
 
 	std::ofstream file(filepath);
 	if (file.is_open()) {
@@ -237,8 +291,21 @@ void Emitter::LoadFromJson(const std::string& name)
 			movementData_.acceleration.y = root["movement"]["acceleration"][1];
 			movementData_.acceleration.z = root["movement"]["acceleration"][2];
 		}
+		if (root["movement"].contains("sizeVariance")) {
+			movementData_.sizeVariance.x = root["movement"]["sizeVariance"][0];
+			movementData_.sizeVariance.y = root["movement"]["sizeVariance"][1];
+			movementData_.sizeVariance.z = root["movement"]["sizeVariance"][2];
+		}
 		if (root["movement"].contains("sizeDelta")) {
-			movementData_.sizeDelta = root["movement"]["sizeDelta"];
+			if (root["movement"]["sizeDelta"].is_array()) {
+				movementData_.sizeDelta.x = root["movement"]["sizeDelta"][0];
+				movementData_.sizeDelta.y = root["movement"]["sizeDelta"][1];
+				movementData_.sizeDelta.z = root["movement"]["sizeDelta"][2];
+			} else {
+				// Fallback for old save format
+				float delta = root["movement"]["sizeDelta"];
+				movementData_.sizeDelta = { delta, delta, delta };
+			}
 		}
 	} else if (root.contains("particle") && root["particle"].contains("velocity")) {
 		// Fallback for old save format
@@ -251,8 +318,25 @@ void Emitter::LoadFromJson(const std::string& name)
 		if (root["visual"].contains("texturePath")) {
 			SetTexturePath(root["visual"]["texturePath"].get<std::string>());
 		}
+		
+		if (root["visual"].contains("cylinderDivide")) {
+			shapeData_.cylinderDivide = root["visual"]["cylinderDivide"];
+			shapeData_.cylinderTopRadius = root["visual"]["cylinderTopRadius"];
+			shapeData_.cylinderBottomRadius = root["visual"]["cylinderBottomRadius"];
+			shapeData_.cylinderHeight = root["visual"]["cylinderHeight"];
+			shapeData_.ringDivide = root["visual"]["ringDivide"];
+			shapeData_.ringOuterRadius = root["visual"]["ringOuterRadius"];
+			shapeData_.ringInnerRadius = root["visual"]["ringInnerRadius"];
+		}
+
 		if (root["visual"].contains("shape")) {
 			SetShape(static_cast<EffectShape>(root["visual"]["shape"].get<int>()));
+		}
+		if (root["visual"].contains("blendMode")) {
+			SetBlend(static_cast<BlendMode>(root["visual"]["blendMode"].get<int>()));
+		}
+		if (root["visual"].contains("shader")) {
+			SetShader(root["visual"]["shader"].get<std::string>());
 		}
 	}
 }
@@ -261,6 +345,7 @@ void Emitter::Initialize(EffectShape shape) {
 	shape_ = shape;
 	randomEngine.seed(seedGenerator_());
 	effectDefinition_.get()->Initialize(shape_);
+	effectDefinition_->SetShader(shaderName_);
 }
 
 void Emitter::Initialize(EmitterData emitter, EffectShape shape)
@@ -269,6 +354,7 @@ void Emitter::Initialize(EmitterData emitter, EffectShape shape)
 	emitter_ = emitter;
 	randomEngine.seed(seedGenerator_());
 	effectDefinition_.get()->Initialize(shape_);
+	effectDefinition_->SetShader(shaderName_);
 }
 
 void Emitter::Initialize(EmitterData emitter, EffectDefinitionData effectDefinitionData, EffectShape shape)
@@ -278,6 +364,7 @@ void Emitter::Initialize(EmitterData emitter, EffectDefinitionData effectDefinit
 	SetEffectDefinitionData_ = effectDefinitionData;
 	randomEngine.seed(seedGenerator_());
 	effectDefinition_.get()->Initialize(shape_);
+	effectDefinition_->SetShader(shaderName_);
 }
 
 void Emitter::Initialize(EmitterData emitter, EffectDefinitionData particleData, int TextureHandle, EffectShape shape)
@@ -286,6 +373,7 @@ void Emitter::Initialize(EmitterData emitter, EffectDefinitionData particleData,
 	SetEffectDefinitionData_ = particleData;
 	randomEngine.seed(seedGenerator_());
 	effectDefinition_.get()->Initialize(TextureHandle, shape);
+	effectDefinition_->SetShader(shaderName_);
 }
 
 void Emitter::Update(Matrix4x4 viewMatrix) {
@@ -301,9 +389,9 @@ void Emitter::Update(Matrix4x4 viewMatrix) {
 
 		// 位置とスケールを更新
 		particleIterator->velocity += movementData_.acceleration;
-		particleIterator->transform.scale.x *= movementData_.sizeDelta;
-		particleIterator->transform.scale.y *= movementData_.sizeDelta;
-		particleIterator->transform.scale.z *= movementData_.sizeDelta;
+		particleIterator->transform.scale.x *= movementData_.sizeDelta.x;
+		particleIterator->transform.scale.y *= movementData_.sizeDelta.y;
+		particleIterator->transform.scale.z *= movementData_.sizeDelta.z;
 		particleIterator->transform.translate += particleIterator->velocity;
 
 		particleIterator->color.w -= 1.0f / (particleIterator->lifeTime * 60.0f);
@@ -347,10 +435,10 @@ void Emitter::Update(Matrix4x4 viewMatrix, std::function<EffectDefinitionData(co
 			(*particleIterator).velocity += accelerationFiled_.acceleration / 60.0f;
 		}
 
-		particleIterator->transform.translate += particleIterator->velocity;
-		particleIterator->transform.scale.x = updated.transform.scale.x * movementData_.sizeDelta;
-		particleIterator->transform.scale.y = updated.transform.scale.y * movementData_.sizeDelta;
-		particleIterator->transform.scale.z = updated.transform.scale.z * movementData_.sizeDelta;
+		particleIterator->transform.translate = updated.transform.translate + particleIterator->velocity;
+		particleIterator->transform.scale.x = updated.transform.scale.x * movementData_.sizeDelta.x;
+		particleIterator->transform.scale.y = updated.transform.scale.y * movementData_.sizeDelta.y;
+		particleIterator->transform.scale.z = updated.transform.scale.z * movementData_.sizeDelta.z;
 		particleIterator->transform.rotate = updated.transform.rotate;
 
 		// 共通の寿命更新
@@ -395,10 +483,10 @@ void Emitter::Update(EmitterData emitter, Matrix4x4 viewMatrix, std::function<Ef
 		}
 		// 必要なフィールドを反映
 		particleIterator->velocity = updated.velocity + movementData_.acceleration;
-		particleIterator->transform.translate += particleIterator->velocity;
-		particleIterator->transform.scale.x = updated.transform.scale.x * movementData_.sizeDelta;
-		particleIterator->transform.scale.y = updated.transform.scale.y * movementData_.sizeDelta;
-		particleIterator->transform.scale.z = updated.transform.scale.z * movementData_.sizeDelta;
+		particleIterator->transform.translate = updated.transform.translate + particleIterator->velocity;
+		particleIterator->transform.scale.x = updated.transform.scale.x * movementData_.sizeDelta.x;
+		particleIterator->transform.scale.y = updated.transform.scale.y * movementData_.sizeDelta.y;
+		particleIterator->transform.scale.z = updated.transform.scale.z * movementData_.sizeDelta.z;
 		particleIterator->transform.rotate = updated.transform.rotate;
 
 		// 共通の寿命更新
@@ -431,9 +519,9 @@ void Emitter::Update(Matrix4x4 viewMatrix, Vector3 scale)
 		}
 		// 位置とスケールを更新
 		particleIterator->velocity += movementData_.acceleration;
-		particleIterator->transform.scale.x *= movementData_.sizeDelta;
-		particleIterator->transform.scale.y *= movementData_.sizeDelta;
-		particleIterator->transform.scale.z *= movementData_.sizeDelta;
+		particleIterator->transform.scale.x *= movementData_.sizeDelta.x;
+		particleIterator->transform.scale.y *= movementData_.sizeDelta.y;
+		particleIterator->transform.scale.z *= movementData_.sizeDelta.z;
 		particleIterator->transform.translate += particleIterator->velocity;
 
 		particleIterator->color.w -= 1.0f / (particleIterator->lifeTime * 60.0f);
@@ -463,6 +551,9 @@ EffectDefinitionData Emitter::MakeNewParticle()
 	data = SetEffectDefinitionData_;
 	Vector3 possion = { distribution(randomEngine),distribution(randomEngine) ,distribution(randomEngine) };
 	data.transform.translate = possion * emitter_.transform.scale + emitter_.transform.translate;
+	data.transform.scale.x += distribution(randomEngine) * movementData_.sizeVariance.x;
+	data.transform.scale.y += distribution(randomEngine) * movementData_.sizeVariance.y;
+	data.transform.scale.z += distribution(randomEngine) * movementData_.sizeVariance.z;
 	data.velocity = { 
 		movementData_.baseVelocity.x + distribution(randomEngine) * movementData_.velocityVariance.x,
 		movementData_.baseVelocity.y + distribution(randomEngine) * movementData_.velocityVariance.y,
@@ -484,6 +575,9 @@ EffectDefinitionData Emitter::MakeNewParticle(Vector3 scale)
 	Vector3 possion = { distribution(randomEngine),distribution(randomEngine) ,distribution(randomEngine) };
 	data.transform.translate = possion * emitter_.transform.scale + emitter_.transform.translate;
 	data.transform.scale = scale;
+	data.transform.scale.x += distribution(randomEngine) * movementData_.sizeVariance.x;
+	data.transform.scale.y += distribution(randomEngine) * movementData_.sizeVariance.y;
+	data.transform.scale.z += distribution(randomEngine) * movementData_.sizeVariance.z;
 	data.velocity = { 
 		movementData_.baseVelocity.x + distribution(randomEngine) * movementData_.velocityVariance.x,
 		movementData_.baseVelocity.y + distribution(randomEngine) * movementData_.velocityVariance.y,

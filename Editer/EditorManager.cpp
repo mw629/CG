@@ -5,6 +5,7 @@
 
 #ifdef _USE_IMGUI
 #include "../externals/imgui/imgui.h"
+#include "../externals/imgui/ImGuizmo.h"
 #endif // _USE_IMGUI
 
 #include "../MatchaEngine/Core/LogHandler.h"
@@ -555,12 +556,81 @@ void EditorManager::Update(Engine* engine)
 			ImGui::SetColumnWidth(0, 532.0f); // Make sure image fits + padding
 
 			ImGui::Text("Preview:");
+			ImVec2 vMin = ImGui::GetCursorScreenPos();
 			ImGui::Image((ImTextureID)particleRenderTexture_->GetSrvHandleGPU().ptr, ImVec2(512, 512));
+
+			ImGuizmo::SetOrthographic(false);
+			ImGuizmo::SetDrawlist(ImGui::GetWindowDrawList());
+			ImGuizmo::SetRect(vMin.x, vMin.y, 512.0f, 512.0f);
+
+			Matrix4x4 viewMat = previewCamera_->GetViewMatrix();
+			Matrix4x4 projMat = MakePerspectiveFovMatrix(0.45f, 1.0f, 0.1f, 100.0f);
+
+			EmitterData ed = previewParticle_->GetEmitterData();
+			Matrix4x4 worldMat = MakeAffineMatrix(ed.transform.translate, ed.transform.scale, ed.transform.rotate);
+
+			static ImGuizmo::OPERATION currentOp = ImGuizmo::TRANSLATE;
+
+			// Draw a wireframe cube at Emitter location if enabled
+			if (showEmitterCube_) {
+				auto drawList = ImGui::GetWindowDrawList();
+				Matrix4x4 viewProj = MultiplyMatrix4x4(viewMat, projMat);
+				Matrix4x4 wvp = MultiplyMatrix4x4(worldMat, viewProj);
+				Vector3 corners[8] = {
+					{-0.5f, -0.5f, -0.5f}, { 0.5f, -0.5f, -0.5f}, { 0.5f,  0.5f, -0.5f}, {-0.5f,  0.5f, -0.5f},
+					{-0.5f, -0.5f,  0.5f}, { 0.5f, -0.5f,  0.5f}, { 0.5f,  0.5f,  0.5f}, {-0.5f,  0.5f,  0.5f}
+				};
+				ImVec2 points[8];
+				bool allInFront = true;
+				for (int i = 0; i < 8; ++i) {
+					float w = corners[i].x * wvp.m[0][3] + corners[i].y * wvp.m[1][3] + corners[i].z * wvp.m[2][3] + wvp.m[3][3];
+					if (w < 0.1f) allInFront = false;
+					Vector3 projected = TransformMatrix(corners[i], wvp);
+					points[i].x = vMin.x + (projected.x + 1.0f) * 0.5f * 512.0f;
+					points[i].y = vMin.y + (1.0f - projected.y) * 0.5f * 512.0f;
+				}
+				
+				if (allInFront) {
+					ImU32 color = IM_COL32(255, 255, 255, 255);
+					int edges[12][2] = {
+						{0,1}, {1,2}, {2,3}, {3,0},
+						{4,5}, {5,6}, {6,7}, {7,4},
+						{0,4}, {1,5}, {2,6}, {3,7}
+					};
+					for (int i = 0; i < 12; ++i) {
+						drawList->AddLine(points[edges[i][0]], points[edges[i][1]], color, 2.0f);
+					}
+				}
+			}
+			ImGuizmo::Manipulate(&viewMat.m[0][0], &projMat.m[0][0], currentOp, ImGuizmo::LOCAL, &worldMat.m[0][0]);
+
+			if (ImGuizmo::IsUsing()) {
+				float t[3], r[3], s[3];
+				ImGuizmo::DecomposeMatrixToComponents(&worldMat.m[0][0], t, r, s);
+				float pi = 3.1415926535f;
+				ed.transform.translate = { t[0], t[1], t[2] };
+				ed.transform.rotate = { r[0] * pi / 180.0f, r[1] * pi / 180.0f, r[2] * pi / 180.0f };
+				ed.transform.scale = { s[0], s[1], s[2] };
+				previewParticle_->SetEmitterData(ed);
+			}
 
 			ImGui::NextColumn();
 
+			// 右側の設定項目をChildウィンドウにして、スクロール時に左側のプレビュー画像が一緒に移動（スクロールアウト）しないように位置を固定する
+			ImGui::BeginChild("ParticleControls", ImVec2(0, 0), false, ImGuiWindowFlags_HorizontalScrollbar);
+
 			ImGui::Text("Controls:");
 			ImGui::Checkbox("Show Grid", &showGridInViewer_);
+			ImGui::SameLine();
+			ImGui::Checkbox("Show Emitter Cube", &showEmitterCube_);
+			
+			ImGui::Separator();
+			ImGui::Text("Gizmo Operation:");
+			if (ImGui::RadioButton("Translate", currentOp == ImGuizmo::TRANSLATE)) currentOp = ImGuizmo::TRANSLATE;
+			ImGui::SameLine();
+			if (ImGui::RadioButton("Rotate", currentOp == ImGuizmo::ROTATE)) currentOp = ImGuizmo::ROTATE;
+			ImGui::SameLine();
+			if (ImGui::RadioButton("Scale", currentOp == ImGuizmo::SCALE)) currentOp = ImGuizmo::SCALE;
 			// Optional: Camera controls for preview
 			Transform& camT = const_cast<Transform&>(previewCamera_->GetTransform());
 			if (ImGui::DragFloat3("Camera Pos", &camT.translate.x, 0.1f)) {
@@ -569,6 +639,8 @@ void EditorManager::Update(Engine* engine)
 
 			ImGui::Separator();
 			previewParticle_->ImGui();
+
+			ImGui::EndChild();
 
 			ImGui::Columns(1);
 		}

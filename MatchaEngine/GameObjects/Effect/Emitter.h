@@ -19,7 +19,8 @@ struct ParticleMovementData {
 	Vector3 baseVelocity = { 0.0f, 0.0f, 0.0f };
 	Vector3 velocityVariance = { 1.0f / 60.0f, 1.0f / 60.0f, 1.0f / 60.0f };
 	Vector3 acceleration = { 0.0f, 0.0f, 0.0f };
-	float sizeDelta = 1.0f; // Multiplied each frame
+	Vector3 sizeVariance = { 0.0f, 0.0f, 0.0f };
+	Vector3 sizeDelta = { 1.0f, 1.0f, 1.0f }; // Multiplied each frame
 };
 
 class Emitter
@@ -36,9 +37,12 @@ private:
 
 	std::string texturePath_ = "Resources/Texture/circle.png";
 	EffectShape shape_ = EffectShape::Plane;
+	EffectShapeData shapeData_;
 
 	EmitterData emitter_;
 	std::mt19937 randomEngine;
+
+	ShaderName shaderName_ = "ParticleShader";
 
 	std::random_device seedGenerator_;
 
@@ -57,6 +61,7 @@ public:
 	void SetEmitterData(const EmitterData& data) { emitter_ = data; }
 	EmitterData GetEmitterData() const { return emitter_; }
 
+	void SetStop(bool isStop) { isStop_ = isStop; }
 	void ClearParticles() { effectDefinitionData_.clear(); }
 
 	void ImGui();
@@ -93,9 +98,15 @@ public:
 
 	void SetTexturePath(const std::string& path);
 	void SetShape(EffectShape shape);
+	void SetShapeData(const EffectShapeData& data);
 	std::string GetTexturePath() const { return texturePath_; }
 	EffectShape GetShape() const { return shape_; }
+	EffectShapeData GetShapeData() const { return shapeData_; }
 	void SetBlend(BlendMode blend) { effectDefinition_.get()->SetBlend(blend); }
+	BlendMode GetBlend() const { return effectDefinition_.get()->GetBlend(); }
+
+	void SetShader(ShaderName shader) { shaderName_ = shader; effectDefinition_->SetShader(shader); }
+	ShaderName GetShader() const { return shaderName_; }
 
 
 

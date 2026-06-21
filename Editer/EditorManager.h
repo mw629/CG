@@ -37,6 +37,7 @@ private:
 	std::unique_ptr<Grid> previewGrid_;
 	bool isParticleViewerInitialized_ = false;
 	bool showGridInViewer_ = true;
+	bool showEmitterCube_ = true;
 
 public:
 	~EditorManager();

@@ -22,6 +22,7 @@ const ShaderName ObjectShader = "ObjectShader";
 const ShaderName IceShader = "IceShader";
 const ShaderName AnimationObj = "AnimationObj";
 const ShaderName ParticleShader = "ParticleShader";
+const ShaderName SmokeShader = "SmokeShader";
 const ShaderName LineShader = "LineShader";
 const ShaderName SkyBoxShader = "SkyBoxShader";
 const ShaderName CopyImageShader = "CopyShader";

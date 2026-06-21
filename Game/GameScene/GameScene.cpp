@@ -191,7 +191,7 @@ void GameScene::Initialize() {
 	EffectDefinitionData hitData;
 	hitData.color = { 1.0f, 1.0f, 1.0f, 1.0f }; // 白色
 	hitData.lifeTime = 1.0f; // ライフ（余韻の長さ）を少し短く調整
-	hitData.transform.scale = { 0.04f, 0.8f, 0.04f }; // エミッタ（パーティクル）のサイズをもう少し小さく
+	hitData.transform.scale = { 0.1f, 0.8f, 0.1f }; // エミッタ（パーティクル）のサイズを調整して見やすくする
 	
 	// テクスチャ指定なしなら自動的にcircle.pngが使われます
 	hitEffect_->Initialize(hitEmitter, hitData, EffectShape::Plane);
@@ -202,8 +202,8 @@ void GameScene::Initialize() {
 		float randX = ((float)rand() / RAND_MAX - 0.5f) * 2.0f;
 		float randY = ((float)rand() / RAND_MAX - 0.5f) * 2.0f;
 		
-		// 画面手前（-Z方向）へ向かって飛んでいくように速度を設定
-		p.velocity = { 0.0f, 0.0f, -0.15f - ((float)rand() / RAND_MAX) * 0.2f }; 
+		// 位置を固定するために速度を0にする
+		p.velocity = { 0.0f, 0.0f, 0.0f }; 
 		
 		// 長さに少しランダムなばらつきを持たせる
 		p.transform.scale.y = 0.6f + ((float)rand() / RAND_MAX) * 0.8f; 
@@ -216,28 +216,12 @@ void GameScene::Initialize() {
 		p.transform.rotate.y = 0.0f;
 	};
 
-	// 砂埃エフェクトの初期化
-	EmitterData dustEmitter;
-	dustEmitter.transform.scale = { 0.0f, 0.0f, 0.0f }; 
-	dustEmitter.count = 1; // 1回のEmitで発生する量
-	dustEmitter.frequency = 9999.0f; // 自動発生はさせない
-	EffectDefinitionData dustData;
-	dustData.color = { 0.4f, 0.4f, 0.4f, 0.8f }; // 通常の半透明グレー
-	dustData.lifeTime = 0.8f; // 少し余韻を残す
-	dustData.transform.scale = { 0.4f, 0.4f, 0.4f }; // サイズをもっと小さく修正
-	
-	dustEffect_->Initialize(dustEmitter, dustData, EffectShape::Plane); // circle.pngを使用
-	dustEffect_->SetBlend(BlendMode::kBlendModeNormal); // アルファブレンド（シェーダー側で黒を透過するように修正済み）
+	dustEffect_->Initialize();
+	dustEffect_->LoadFromJson("Dustparticle");
+	dustEffect_->SetBlend(BlendMode::kBlendModeNormal); // アルファブレンドを強制
 	dustEffect_->name_ = "Dust Effect";
-	dustEffect_->generatorBehavior = [](EffectDefinitionData& p) {
-		// X, Y方向の移動（広がりや上昇）を大幅に抑えて小さくする
-		float randX = ((float)rand() / RAND_MAX - 0.5f) * 0.05f;
-		float randY = ((float)rand() / RAND_MAX) * 0.02f + 0.01f; // わずかに上へ
-		float randZ = ((float)rand() / RAND_MAX - 0.5f) * 0.05f; // Zの散らばりも控えめに
-		p.velocity = { randX, randY, randZ }; 
-		p.transform.rotate.z = ((float)rand() / RAND_MAX) * 3.14159f * 2.0f;
-	};
-
+	dustEffect_->generatorBehavior = nullptr; // JSONの設定に完全に従う
+	dustEffect_->SetStop(true); // 自動発生を停止（スクリプトから手動でのみEmitする）
 	// ボーナスヒット時のショックウェーブ（Ring）の初期化
 	EmitterData shockwaveEmitter;
 	shockwaveEmitter.transform.scale = { 0.1f, 0.1f, 0.1f };
@@ -414,16 +398,12 @@ void GameScene::PlayingUpdate()
 
 	hitEffect_->Update(view);
 	
-	float currentScrollSpeed = stageSettings_->GetScrollSpeed();
-
-	shockwaveEffect_->Update(view, [currentScrollSpeed](const EffectDefinitionData& p) {
+	shockwaveEffect_->Update(view, [](const EffectDefinitionData& p) {
 		EffectDefinitionData next = p;
 		// 衝撃波のように急速にスケールを拡大する
 		next.transform.scale.x += 0.06f;
 		next.transform.scale.y += 0.06f;
 		next.transform.scale.z += 0.06f;
-		// スクロールに合わせて手前（-Z方向）に流れるようにする
-		next.transform.translate.z -= currentScrollSpeed;
 		return next;
 	});
 
@@ -431,24 +411,14 @@ void GameScene::PlayingUpdate()
 	if (!player_->GetIsRolling() && player_->GetTransform().translate.y <= 3.01f) {
 		EmitterData ed = dustEffect_->GetEmitterData();
 		ed.transform.translate = player_->GetTransform().translate;
-		ed.transform.translate.y -= 0.2f; // 足元から少しだけ上（前回より少し高くする）
-		ed.transform.translate.z -= 2.0f; // Playerの前ではなく後ろ(-Z側)に出るように調整
+		ed.transform.translate.y += 0.5f; // さらに高く調整
+		ed.transform.translate.z -= 4.0f; // Playerの前ではなく後ろ(-Z側)に出るように調整
 		dustEffect_->SetEmitterData(ed);
 		dustEffect_->Emit();
 	}
 
-	// 砂埃は広がりながら消えるようにUpdate
-	dustEffect_->Update(view, [currentScrollSpeed](const EffectDefinitionData& p) {
-		EffectDefinitionData next = p;
-		
-		// しっかりと後ろ（-Z方向）に流れるようにする（スクロール速度の8割）
-		next.transform.translate.z -= currentScrollSpeed * 0.8f;
-
-		// 寿命が尽きるにつれてモクモクと少し大きくなる
-		next.transform.scale.x *= 1.03f;
-		next.transform.scale.y *= 1.03f;
-		return next;
-	});
+	// 砂埃のUpdate (スケールや速度はJSONの設定に依存)
+	dustEffect_->Update(view);
 }
 
 void GameScene::PausedUpdate()
