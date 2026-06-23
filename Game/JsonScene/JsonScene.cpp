@@ -47,6 +47,7 @@ void JsonScene::ImGui()
 			
 			if (ImGui::Button("Load & Start", ImVec2(120, 0))) {
 				initialSceneJson_ = "Resources/Json/Scene/" + selectedJsonFile_ + ".json";
+				EditorManager::SetCurrentFileName(selectedJsonFile_);
 				gameObjectManager_->LoadScene(initialSceneJson_);
 				showInitJsonSelectPopup_ = false;
 				ImGui::CloseCurrentPopup();

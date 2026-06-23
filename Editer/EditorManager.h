@@ -55,6 +55,9 @@ public:
 	static void SetLoadCallback(EditorCallback cb) { s_loadCallback_ = cb; }
 	static void SetFileDropCallback(FileDropCallback cb) { s_fileDropCallback_ = cb; }
 
+	static void SetCurrentFileName(const std::string& name) { s_currentFileName_ = name; }
+	static std::string GetCurrentFileName() { return s_currentFileName_; }
+
 	// 毎フレーム呼ばれるエディタUIの更新処理
 	void Update(Engine* engine);
 };
