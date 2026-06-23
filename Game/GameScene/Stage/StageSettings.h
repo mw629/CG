@@ -3,6 +3,8 @@
 #include <vector>
 #include <Engine.h>
 #include <Entity/Obstacle.h>
+#include "RenderObject.h"
+#include "GameObjectManager.h"
 
 /// <summary>
 /// ステージの無限スクロールと障害物の管理を行うクラス
@@ -27,7 +29,7 @@ private:
 	static const int kChunkCount_ = 5;      // チャンクの数
 	float chunkLength_ = 10.0f;              // 1チャンクの奥行き（Z軸方向のサイズ）
 
-	std::unique_ptr<Model> roadChunks_[kChunkCount_];
+	std::shared_ptr<RenderObject> roadChunks_[kChunkCount_];
 	Transform roadTransforms_[kChunkCount_];
 
 	// テクスチャ
@@ -35,7 +37,7 @@ private:
 
 	// 障害物管理
 	static const int kMaxObstacles_ = 20;
-	std::unique_ptr<Obstacle> obstacles_[kMaxObstacles_];
+	std::shared_ptr<Obstacle> obstacles_[kMaxObstacles_];
 	int nextObstacleIndex_ = 0;
 
 	float obstacleInterval_ = 30.0f; // 障害物の生成間隔
@@ -49,8 +51,9 @@ private:
 
 public:
 
-	void Initialize(ModelData roadModelData, ModelData obstacleModelData);
+	void Initialize(ModelData roadModelData, ModelData obstacleModelData, ModelData bonusModelData, class GameObjectManager* manager);
 	void Update(Matrix4x4 view);
+	void EditorUpdate(Matrix4x4 view);
 	void Draw();
 
 	// ゲッター

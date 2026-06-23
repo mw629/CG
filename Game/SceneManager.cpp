@@ -2,6 +2,8 @@
 #include "GameScene.h"
 #include "TitleScene.h"
 #include "TestScene.h"
+#include <Engine.h>
+#include "../Editer/EditorManager.h"
 
 SceneManager::SceneManager()
 {
@@ -20,12 +22,13 @@ void SceneManager::Initialize() {
 
 void SceneManager::Update() {
 	
+	// シーン遷移チェック・Initializeは常に実行
 	if (scene_->GetSceneChangeRequest()) {
 		int NextScene = scene_->GetNextSceneID();
 		scene_ = CreateScene(NextScene);
 		scene_->Initialize();
 	}
-	
+
 	scene_->Update();
 }
 

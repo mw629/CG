@@ -3,6 +3,7 @@
 #include <d3d12.h>
 #include <string>
 #include <unordered_map>
+#include "../../Core/VariableTypes.h"
 
 struct PaddedFloat {
 	float v;
@@ -26,6 +27,7 @@ struct PostEffectShaderData {
 	PaddedFloat kernel5x5[5][5];
 	PaddedFloat2 index3x3[3][3];
 	PaddedFloat2 index5x5[5][5];
+	Matrix4x4 ProjectionInverse;
 };
 
 class PostEffect {
@@ -64,11 +66,10 @@ private:
 	bool isTimerRunning_ = true;
 
 	std::unordered_map<std::string, std::string> texturePaths_;
-	std::string maskTexturePath_ = "resources/Texture/noise0.png";
+	std::string maskTexturePath_ = "Resources/Texture/noise0.png";
 
-	Type currentType_ = Type::Normal;
-	static Type activeType_;
-	static std::string activeShaderName_;
+	Type activeType_ = Type::Normal;
+	std::string activeShaderName_ = "CopyShader";
 
 public:
 	PostEffect();
@@ -126,17 +127,22 @@ public:
 
 	void ImGuiWindow();
 
-	// Static methods for managing active post effect
+	// Methods for managing active post effect
+	static std::vector<PostEffect*> s_instances;
 	static void SetActivePostEffect(Type type);
-	static void SetActivePostEffectByName(const std::string& name) { activeShaderName_ = name; }
-	static Type GetActivePostEffect() { return activeType_; }
-	static std::string GetActiveShaderName() { return activeShaderName_; }
+	void SetActivePostEffectByName(const std::string& name) { activeShaderName_ = name; }
+	Type GetActivePostEffect() const { return activeType_; }
+	std::string GetActiveShaderName() const { return activeShaderName_; }
 
 	void SetBlurStrength(float strength) {
 		blurStrength_ = strength;
 		if (cbData_) cbData_->blurStrength = blurStrength_;
 	}
 	float GetBlurStrength() const { return blurStrength_; }
+
+	void SetProjectionInverse(const Matrix4x4& projectionInverse) {
+		if (cbData_) cbData_->ProjectionInverse = projectionInverse;
+	}
 
 	// Convenience method to set all parameters at once
 	void SetPostEffectParameters(float time, float ratio, float value1, float value2, float blurStrength = 1.0f) {

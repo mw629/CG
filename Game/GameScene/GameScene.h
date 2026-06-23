@@ -7,7 +7,10 @@
 #include <Entity/Collision.h>
 #include <Stage/StageSettings.h>
 #include <System/PauseSystem.h>
-
+#include "GameObjectManager.h"
+#include "RenderObject.h"
+#include "../../Editer/EditorUI.h"
+#include <Emitter.h>
 
 class GameScene :public IScene
 {
@@ -17,8 +20,10 @@ private:
 	{
 		Playing,
 		Paused,
+		PlayerHit,
 		GameClear,
-		GameOver
+		GameOver,
+		Editor
 	};
 
 
@@ -34,19 +39,32 @@ private:
 	//<<Common>>
 	
 	//スカイボックス
-	std::unique_ptr<Cube> skyBox_ = std::make_unique<Cube>();
+	std::shared_ptr<Cube> skyBox_ = std::make_shared<Cube>();
 	int skyBoxTexture_;
 	Transform skyBoxTransform_{ {500.0f,500.0f,500.0f},{0.0f,0.0f,0.0f},{0.0f,0.0f,0.0f} };
 
 	//<< Playing >>//
 	// プレイヤー管理
-	std::unique_ptr<Player>player_ = std::make_unique<Player>();
+	std::shared_ptr<Player> player_ = std::make_shared<Player>();
+	// オブジェクト管理
+	std::unique_ptr<GameObjectManager> gameObjectManager_ = std::make_unique<GameObjectManager>();
+	// エディターUI
+	std::unique_ptr<EditorUI> editorUI_ = std::make_unique<EditorUI>();
 	// ステージ管理
 	std::unique_ptr<StageSettings> stageSettings_ = std::make_unique<StageSettings>();
 
 
 	//<< Paused >>//
 	std::unique_ptr<PauseSystem> pauseSystem_ = std::make_unique<PauseSystem>();
+
+	//<< Hit Effect >>//
+	std::unique_ptr<Emitter> hitEffect_ = std::make_unique<Emitter>();
+
+	//<< Dust Effect >>//
+	std::unique_ptr<Emitter> dustEffect_ = std::make_unique<Emitter>();
+
+	//<< Shockwave Effect >>//
+	std::unique_ptr<Emitter> shockwaveEffect_ = std::make_unique<Emitter>();
 
 
 	// 当たり判定処理
@@ -57,6 +75,9 @@ private:
 	float currentDistance_ = 0.0f;
 	float topRankings_[3] = { 0.0f, 0.0f, 0.0f };
 	void UpdateRanking();
+
+	// 初期読み込みするSceneJsonのファイルパス (変更することで読み込むJsonを決定できる)
+	std::string initialSceneJson_ = "Resources/Json/Scene/scene.json";
 
 public:
 	~GameScene()override;
@@ -73,7 +94,9 @@ public:
 	void PlayingUpdate();
 	
 	void PausedUpdate();
+	
+	void PlayerHitUpdate();
 
-
+	void EditorUpdate();
 
 };

@@ -13,7 +13,7 @@ void TitleScene::Initialize()
 	sceneID_ = SceneID::Title;
 
 	std::unique_ptr<Texture> texture = std::make_unique<Texture>();
-	int backImageHandle = texture.get()->CreateTexture("resources/nightSky.png");
+	int backImageHandle = texture.get()->CreateTexture("Resources/nightSky.png");
 
 	spritePos[0] = { 0.0f,0.0f };
 	spritePos[1] = { 1280.0f, 720.0f };

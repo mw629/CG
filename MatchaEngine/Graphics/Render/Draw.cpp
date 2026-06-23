@@ -222,19 +222,23 @@ void Draw::DrawTriangle(Triangle* triangle)
 
 void Draw::DrawLine(Line* line)
 {
+	preDraw("LineShader", kBlendModeNormal);
+	commandList_->IASetPrimitiveTopology(D3D_PRIMITIVE_TOPOLOGY_LINELIST);
 	commandList_->IASetVertexBuffers(0, 1, line->GetVertexBufferView());//VBVを設定
-	SetCBV(LineShader, kBlendModeNormal, "gTransform", line->GetVertexResource()->GetGPUVirtualAddress());
+	SetCBV("LineShader", kBlendModeNormal, "gTransform", line->GetVertexResource()->GetGPUVirtualAddress());
 	commandList_->DrawInstanced(2, 1, 0, 0);
 }
 
 void Draw::DrawGrid(Grid* grid)
 {
+	preDraw("LineShader", kBlendModeNormal);
+	commandList_->IASetPrimitiveTopology(D3D_PRIMITIVE_TOPOLOGY_LINELIST);
 	commandList_->IASetVertexBuffers(0, 1, grid->GetVertexBufferView());//VBVを設定
-	SetCBV(LineShader, kBlendModeNormal, "gTransform", grid->GetVertexResource()->GetGPUVirtualAddress());
+	SetCBV("LineShader", kBlendModeNormal, "gTransform", grid->GetVertexResource()->GetGPUVirtualAddress());
 	commandList_->DrawInstanced(grid->GetSubdivision() * 4, 1, 0, 0);
 }
 
-void Draw::DrawPostEffect(D3D12_GPU_DESCRIPTOR_HANDLE textureHandle, ShaderName shader, PostEffect* postEffect)
+void Draw::DrawPostEffect(D3D12_GPU_DESCRIPTOR_HANDLE textureHandle, ShaderName shader, PostEffect* postEffect, D3D12_GPU_DESCRIPTOR_HANDLE depthTextureHandle)
 {
 	preDraw(shader, BlendMode::kBlendModeNone);
 	
@@ -242,6 +246,13 @@ void Draw::DrawPostEffect(D3D12_GPU_DESCRIPTOR_HANDLE textureHandle, ShaderName 
 	UINT gTexIndex = graphicsPipelineState_->GetRootParameterIndex(shader, BlendMode::kBlendModeNone, "gTexture");
 	if (gTexIndex != static_cast<UINT>(-1)) {
 		commandList_->SetGraphicsRootDescriptorTable(gTexIndex, textureHandle);
+	}
+
+	if (depthTextureHandle.ptr != 0) {
+		UINT gDepthTexIndex = graphicsPipelineState_->GetRootParameterIndex(shader, BlendMode::kBlendModeNone, "gDepthTexture");
+		if (gDepthTexIndex != static_cast<UINT>(-1)) {
+			commandList_->SetGraphicsRootDescriptorTable(gDepthTexIndex, depthTextureHandle);
+		}
 	}
 
 	if (postEffect) {

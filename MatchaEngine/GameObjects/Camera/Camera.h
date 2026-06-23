@@ -30,6 +30,7 @@ public:
 	void Update();
 	Matrix4x4 GetViewMatrix()const { return viewMatrix_; }
 
+	const Transform& GetTransform() const { return transform_; }
 	void SetTransform(Transform transform) { transform_ = transform; }
 	void SetDebugCamera(bool isDebug) { isDebugCamera_ = isDebug; }
 	

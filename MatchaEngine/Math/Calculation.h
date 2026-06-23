@@ -1,3 +1,4 @@
+#pragma once
 #include "../Core/VariableTypes.h"
 
 
@@ -239,3 +240,18 @@ Matrix4x4 MakeViewPortMatrix(float width, float height, float left, float top, f
 Matrix4x4 MakeLookAtLH(const Vector3& eye, const Vector3& target, const Vector3& up);
 
 AABB GetAABB(Transform transform_, float kWidth, float kHeight);
+
+// レイ(光線)構造体
+struct Ray {
+	Vector3 origin;
+	Vector3 direction;
+};
+
+/// <summary>
+/// レイとAABBの交差判定を計算します
+/// </summary>
+/// <param name="ray">レイ</param>
+/// <param name="aabb">AABB</param>
+/// <param name="outDistance">交差点までの距離(当たった場合のみ有効)</param>
+/// <returns>交差していればtrue</returns>
+bool CheckRayAABB(const Ray& ray, const AABB& aabb, float& outDistance);

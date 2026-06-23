@@ -2,16 +2,22 @@
 #include <cstdlib>
 #include <ctime>
 
-void StageSettings::Initialize(ModelData roadModelData, ModelData obstacleModelData)
+void StageSettings::Initialize(ModelData roadModelData, ModelData obstacleModelData, ModelData bonusModelData, class GameObjectManager* manager)
 {
 	// 乱数の初期化
 	std::srand(static_cast<unsigned int>(std::time(nullptr)));
 
+	// グラウンドテクスチャをロード
+	texture_->CreateTexture("Resources/Model/Ground/white64x64.png");
+
 	// 道路チャンクの初期化
 	for (int i = 0; i < kChunkCount_; i++) {
-		roadChunks_[i] = std::make_unique<Model>();
-		roadChunks_[i]->Initialize(roadModelData);
-		roadChunks_[i]->SetTexture(texture_->TextureData("resources/Model/Ground/road.png"));
+        auto roadModel = std::make_shared<Model>();
+		roadModel->Initialize(roadModelData);
+		roadModel->SetTexture(texture_->TextureData("Resources/Model/Ground/Ground.png"));
+
+		roadChunks_[i] = std::make_shared<RenderObject>(roadModel);
+        roadChunks_[i]->SetName("RoadChunk " + std::to_string(i));
 
 		// Z軸方向に並べて配置（手前から奥へ）
 		roadTransforms_[i].scale = { 5.0f, 5.0f, 5.0f };
@@ -19,15 +25,19 @@ void StageSettings::Initialize(ModelData roadModelData, ModelData obstacleModelD
 		roadTransforms_[i].translate = { 0.0f, 2.0f, static_cast<float>(i) * chunkLength_ };
 
 		roadChunks_[i]->SetTransform(roadTransforms_[i]);
+        if (manager) manager->AddObject(roadChunks_[i]);
 	}
 
 	// 障害物の初期化
 	for (int i = 0; i < kMaxObstacles_; i++) {
-		obstacles_[i] = std::make_unique<Obstacle>();
+		obstacles_[i] = std::make_shared<Obstacle>();
+        obstacles_[i]->SetName("Obstacle " + std::to_string(i));
 
 		// ランダムなタイプで初期化
 		Obstacle::Type type = static_cast<Obstacle::Type>(std::rand() % 3);
-		obstacles_[i]->Initialize(obstacleModelData, type);
+		obstacles_[i]->Initialize(obstacleModelData, bonusModelData, type);
+        
+        if (manager) manager->AddObject(obstacles_[i]);
 	}
 }
 
@@ -43,10 +53,10 @@ void StageSettings::Update(Matrix4x4 view)
 		}
 	}
 	if (scrollSpeed_ > maxScrollSpeed_ / 2) {
-		PostEffect::SetActivePostEffect(PostEffect::Type::Vignetting);
+		// PostEffect::SetActivePostEffect(PostEffect::Type::Vignetting);
 	}
 	else {
-		PostEffect::SetActivePostEffect(PostEffect::Type::Normal);
+		// PostEffect::SetActivePostEffect(PostEffect::Type::Normal);
 	}
 
 	// 道路チャンクのスクロール
@@ -70,7 +80,6 @@ void StageSettings::Update(Matrix4x4 view)
 		}
 
 		roadChunks_[i]->SetTransform(roadTransforms_[i]);
-		roadChunks_[i]->SettingWvp(view);
 	}
 
 	// 障害物の定期生成
@@ -83,26 +92,26 @@ void StageSettings::Update(Matrix4x4 view)
 
 	// 障害物の更新
 	for (int i = 0; i < kMaxObstacles_; i++) {
-		obstacles_[i]->Update(view, scrollSpeed_);
+		obstacles_[i]->StageUpdate(view, scrollSpeed_);
+	}
+}
+
+void StageSettings::EditorUpdate(Matrix4x4 view)
+{
+	// Editor中はスクロールさせないため、スピードを0として更新（WVPのみ更新させる）
+	for (int i = 0; i < kMaxObstacles_; i++) {
+		obstacles_[i]->StageUpdate(view, 0.0f);
 	}
 }
 
 void StageSettings::Draw()
 {
-	// 道路チャンクの描画
-	for (int i = 0; i < kChunkCount_; i++) {
-		Draw::DrawObj(roadChunks_[i].get());
-	}
-
-	// 障害物の描画
-	for (int i = 0; i < kMaxObstacles_; i++) {
-		obstacles_[i]->Draw();
-	}
+	// 描画はGameObjectManagerが一括で行うため、ここでは何もしない
 }
 
 void StageSettings::SpawnObstacles(float z)
 {
-	// 3レーンの状態を決定 (0: None, 1: Low, 2: High, 3: Wall)
+	// 3レーンの状態を決定 (0: None, 1: Low, 2: High, 3: Wall, 4: Bonus)
 	int laneSpawns[3];
 	int wallCount = 0;
 	int noneCount = 0;
@@ -128,6 +137,12 @@ void StageSettings::SpawnObstacles(float z)
 		laneSpawns[changeIndex] = 0; // Noneに変更
 	}
 
+	// たまにボーナスエネミーを配置する (約10%の確率)
+	if (std::rand() % 10 == 0) {
+		int bonusIndex = std::rand() % 3;
+		laneSpawns[bonusIndex] = 4; // 4: Bonus
+	}
+
 	// 決定した内容で各レーンに生成
 	for (int i = 0; i < 3; i++) {
 		if (laneSpawns[i] == 0) continue; // None
@@ -144,9 +159,12 @@ void StageSettings::SpawnObstacles(float z)
 		} else if (laneSpawns[i] == 2) {
 			type = Obstacle::Type::High;
 			y = 4.6f;
-		} else { // 3
+		} else if (laneSpawns[i] == 3) {
 			type = Obstacle::Type::Wall;
 			y = 3.5f;
+		} else { // 4
+			type = Obstacle::Type::Bonus;
+			y = 2.5f; // 足元付近
 		}
 
 		// 障害物のタイプを変更して配置

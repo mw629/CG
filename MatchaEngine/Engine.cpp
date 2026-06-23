@@ -54,7 +54,8 @@ Engine::Engine(int32_t kClientWidth, int32_t kClientHeight)
 	//描画
 	debugCamera = std::make_unique<DebugCamera>();
 	depthStencil = std::make_unique<DepthStencil>();
-	renderTexture = std::make_unique<RenderTexture>();
+	renderTextures[0] = std::make_unique<RenderTexture>();
+	renderTextures[1] = std::make_unique<RenderTexture>();
 	draw = std::make_unique<Draw>();
 	textureLoader = std::make_unique<TextureLoader>();
 	//バリア
@@ -110,9 +111,10 @@ void Engine::Setting()
 
 	gpuSyncManager.Initialize(graphics.get()->GetDevice());
 
-	depthStencil->CreateDepthStencil(graphics->GetDevice(), kClientWidth_, kClientHeight_);
+	depthStencil->CreateDepthStencil(graphics->GetDevice(), kClientWidth_, kClientHeight_, descriptorHeap->GetSrvDescriptorHeap(), descriptorHeap->GetDescriptorSizeSRV());
 
-	renderTexture->Initialize(graphics->GetDevice(), kClientWidth_, kClientHeight_, descriptorHeap->GetSrvDescriptorHeap(), descriptorHeap->GetDescriptorSizeSRV());
+	renderTextures[0]->Initialize(graphics->GetDevice(), kClientWidth_, kClientHeight_, descriptorHeap->GetSrvDescriptorHeap(), descriptorHeap->GetDescriptorSizeSRV());
+	renderTextures[1]->Initialize(graphics->GetDevice(), kClientWidth_, kClientHeight_, descriptorHeap->GetSrvDescriptorHeap(), descriptorHeap->GetDescriptorSizeSRV());
 
 	graphicsPipelineState.get()->ALLPSOCreate(logStream, graphics.get()->GetDevice());
 
@@ -141,7 +143,7 @@ void Engine::Setting()
 
 
 	// 初回表示位置・サイズを厳密に指定（ImGuiCond_Once または ImGuiCond_Always に変更可能）
-	ImGui::SetNextWindowPos(ImVec2(finalPos.x, finalPos.y), ImGuiCond_Once);
+	ImGui::SetNextWindowPos(ImVec2(0.0f, 0.0f), ImGuiCond_Once);
 	ImGui::SetNextWindowSize(ImVec2(500.0f, 100.0f), ImGuiCond_Once);
 
 
@@ -170,15 +172,38 @@ void Engine::Setting()
   EffectDefinition::SetDescriptorHeap(descriptorHeap.get());
   EffectDefinition::SetDevice(graphics.get()->GetDevice());
 
-  postEffect_ = std::make_unique<PostEffect>();
-  postEffect_->Initialize();
+  postEffects_.push_back(std::make_unique<PostEffect>());
+  postEffects_[0]->Initialize();
 }
 
 
 void Engine::PostDraw()
 {
 	//Scene描画が終わったRenderTextureをShaderResourceへ
-	renderTexture->TransitionToShaderResource(command->GetCommandList());
+	renderTextures[0]->TransitionToShaderResource(command->GetCommandList());
+	depthStencil->TransitionToShaderResource(command->GetCommandList());
+
+	int currentRT = 0;
+	int nextRT = 1;
+
+	for (auto& effect : postEffects_) {
+		if (effect->GetActivePostEffect() == PostEffect::Type::Normal) continue; // Skip Normal (CopyShader) if we want, or keep it. Let's process it so we don't break ping-pong if user adds Normal on purpose.
+
+		renderTextures[nextRT]->TransitionToRenderTarget(command->GetCommandList());
+		// renderTextures[nextRT]->Clear(command->GetCommandList()); // No need to clear since we render full screen
+
+		D3D12_CPU_DESCRIPTOR_HANDLE rtvHandle = renderTextures[nextRT]->GetRtvHandle();
+		command->GetCommandList()->OMSetRenderTargets(1, &rtvHandle, false, nullptr);
+
+		command->GetCommandList()->RSSetViewports(1, viewportScissor->GetViewport());
+		command->GetCommandList()->RSSetScissorRects(1, viewportScissor->GetScissorRect());
+
+		Draw::DrawPostEffect(renderTextures[currentRT]->GetSrvHandleGPU(), effect->GetActiveShaderName(), effect.get(), depthStencil->GetSrvHandleGPU());
+
+		renderTextures[nextRT]->TransitionToShaderResource(command->GetCommandList());
+
+		std::swap(currentRT, nextRT);
+	}
 
 	//SwapchainをRenderTargetへ
 	resourceBarrierHelper->Transition(command->GetCommandList(), swapChain.get());
@@ -188,7 +213,12 @@ void Engine::PostDraw()
 	command->GetCommandList()->RSSetViewports(1, viewportScissor->GetViewport());
 	command->GetCommandList()->RSSetScissorRects(1, viewportScissor->GetScissorRect());
 
-	Draw::DrawPostEffect(renderTexture.get()->GetSrvHandleGPU(), PostEffect::GetActiveShaderName(), postEffect_.get());
+#ifdef _USE_IMGUI
+	// _USE_IMGUI有効時はSceneウィンドウ内のImGui::Imageで描画するため
+	// Swapchainへの全画面PostEffect描画はスキップ
+#else
+	Draw::DrawPostEffect(renderTextures[currentRT]->GetSrvHandleGPU(), "CopyShader", nullptr, depthStencil->GetSrvHandleGPU());
+#endif
 
 #ifdef _USE_IMGUI
 	imGuiManager->Render(command->GetCommandList());
@@ -199,19 +229,63 @@ void Engine::PostDraw()
 	resourceBarrierHelper->TransitionToPresent(command->GetCommandList());
 }
 
+RenderTexture* Engine::GetFinalRenderTexture() {
+	int finalIndex = 0;
+	for (auto& effect : postEffects_) {
+		if (effect->GetActivePostEffect() != PostEffect::Type::Normal) {
+			finalIndex = 1 - finalIndex;
+		}
+	}
+	return renderTextures[finalIndex].get();
+}
+
 
 void Engine::NewFrame() {
+
+	RECT clientRect;
+	GetClientRect(window.GetHwnd(), &clientRect);
+	int width = clientRect.right - clientRect.left;
+	int height = clientRect.bottom - clientRect.top;
+
+	if (width > 0 && height > 0 && (width != kClientWidth_ || height != kClientHeight_)) {
+		kClientWidth_ = width;
+		kClientHeight_ = height;
+
+		gpuSyncManager.WaitForGpu();
+
+		swapChain->ChangeScreen(width, height, !window.IsFullscreen());
+
+		renderTargetView->RecreateRenderTargetViews(graphics->GetDevice(), swapChain->GetSwapChainResources(), descriptorHeap->GetRtvDescriptorHeap());
+
+		depthStencil->CreateDepthStencil(graphics->GetDevice(), width, height, descriptorHeap->GetSrvDescriptorHeap(), descriptorHeap->GetDescriptorSizeSRV());
+
+		renderTextures[0]->Initialize(graphics->GetDevice(), width, height, descriptorHeap->GetSrvDescriptorHeap(), descriptorHeap->GetDescriptorSizeSRV());
+		renderTextures[1]->Initialize(graphics->GetDevice(), width, height, descriptorHeap->GetSrvDescriptorHeap(), descriptorHeap->GetDescriptorSizeSRV());
+
+		viewportScissor = std::make_unique<ViewportScissor>(width, height);
+		viewportScissor->CreateViewPort();
+		viewportScissor->CreateSxissor();
+
+		Vector2 Client = { (float)kClientWidth_, (float)kClientHeight_ };
+		ObjectBase::SetObjectResource(Client);
+		Line::SetScreenSize(Client);
+		Grid::SetScreenSize(Client);
+		EffectDefinition::SetScreenSize(Client);
+		Triangle::SetScreenSize(Client);
+		Sprite::SetScreenSize(Client);
+	}
 
 #ifdef _USE_IMGUI
 	imGuiManager->NewFrame();
 #endif // _USE_IMGUI
 
 	//コマンドを積み込んで確定させる//
-	renderTexture->TransitionToRenderTarget(command->GetCommandList());
-	renderTexture->Clear(command->GetCommandList());
+	renderTextures[0]->TransitionToRenderTarget(command->GetCommandList());
+	renderTextures[0]->Clear(command->GetCommandList());
 
-	D3D12_CPU_DESCRIPTOR_HANDLE rtvHandle = renderTexture->GetRtvHandle();
+	D3D12_CPU_DESCRIPTOR_HANDLE rtvHandle = renderTextures[0]->GetRtvHandle();
 	//DSVを設定する
+	depthStencil->TransitionToDepthWrite(command->GetCommandList());
 	depthStencil->SetDSV(command->GetCommandList(), &rtvHandle);
 	//コマンドを積む//
 
@@ -227,8 +301,11 @@ void Engine::NewFrame() {
 
 	gamePadInput.get()->Update();
 
-	if (postEffect_) {
-		postEffect_->Update(1.0f / 60.0f);
+	Matrix4x4 projectionMatri = MakePerspectiveFovMatrix(0.45f, float(kClientWidth_) / float(kClientHeight_), 0.1f, 100.0f);
+	Matrix4x4 projInverse = Inverse(projectionMatri);
+	for (auto& effect : postEffects_) {
+		effect->SetProjectionInverse(projInverse);
+		effect->Update(1.0f / 60.0f);
 	}
 }
 
@@ -305,67 +382,4 @@ size_t Engine::GetProcessMemoryUsage() {
 		return pmc.WorkingSetSize; // 現在の物理メモリ使用量(バイト)
 	}
 	return 0;
-}
-
-void Engine::Debug()
-{
-#ifdef _USE_IMGUI
-
-	ImGui::SetNextWindowSize(ImVec2(500, 400), ImGuiCond_FirstUseEver);
-	ImGui::Begin("Debug Info");
-
-	if (ImGui::BeginTabBar("DebugTabs")) {
-		if (ImGui::BeginTabItem("System Data")) {
-			ImGui::Text("--- Performance ---");
-			ImGui::Text("FPS: %.1f (%.3f ms/frame)", ImGui::GetIO().Framerate, 1000.0f / ImGui::GetIO().Framerate);
-
-			static int frameCount = 0;
-			frameCount++;
-			ImGui::Text("Frame Count: %d", frameCount);
-
-			size_t mem = GetProcessMemoryUsage();
-			ImGui::Text("Memory Usage: %.2f MB", mem / (1024.0f * 1024.0f));
-			ImGui::Spacing();
-
-			ImGui::Text("--- Application ---");
-			ImGui::Text("Resolution: %d x %d", kClientWidth_, kClientHeight_);
-			ImGui::Spacing();
-
-			ImGui::Text("--- Light Settings ---");
-			static bool showLight = false;
-			ImGui::Checkbox("Enable Light Settings (Shortcut: F1)", &showLight);
-			if (ImGui::IsKeyPressed(ImGuiKey_F1))
-			{
-				showLight = !showLight;
-			}
-			
-			if (showLight)
-			{
-				lightManager->ImGui();
-			}
-
-			ImGui::EndTabItem();
-		}
-
-		if (ImGui::BeginTabItem("Post Effect")) {
-			postEffect_->ImGuiWindow();
-			ImGui::EndTabItem();
-		}
-
-		if (ImGui::BeginTabItem("Resource List")) {
-			textureLoader.get()->Draw();
-			ImGui::EndTabItem();
-		}
-
-		ImGui::EndTabBar();
-	}
-
-	ImGui::End();
-
-	ImGui::Begin("Scene");
-	ImVec2 sceneWindowSize = ImGui::GetContentRegionAvail();
-	ImGui::Image((ImTextureID)renderTexture->GetSrvHandleGPU().ptr, sceneWindowSize);
-	ImGui::End();
-
-#endif
 }

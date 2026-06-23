@@ -23,4 +23,5 @@ struct PostEffectData
     float32_t kernel5x5[5][5];
     float32_t2 index3x3[3][3];
     float32_t2 index5x5[5][5];
+    float32_t4x4 ProjectionInverse;
 };

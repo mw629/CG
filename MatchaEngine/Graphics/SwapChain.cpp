@@ -39,7 +39,7 @@ void SwapChain::ChangeScreen(int kClientWidth, int kClientHeight, bool windowMod
 	}
 
 	if (windowMode) {
-		HRESULT hr = swapChain_.Get()->ResizeBuffers(2, kClientWidth, kClientHeight, DXGI_FORMAT_R8G8B8A8_UNORM, DXGI_SWAP_CHAIN_FLAG_ALLOW_TEARING);
+		HRESULT hr = swapChain_.Get()->ResizeBuffers(2, kClientWidth, kClientHeight, DXGI_FORMAT_R8G8B8A8_UNORM, 0);
 		assert(SUCCEEDED(hr));
 	}
 	else {

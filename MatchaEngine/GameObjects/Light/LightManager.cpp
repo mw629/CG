@@ -32,6 +32,7 @@ void LightManager::Initialize()
 
 void LightManager::ImGui()
 {
+#ifdef _USE_IMGUI
     ImGui::Begin("Light Settings");
 
     // Directional Lights
@@ -116,6 +117,7 @@ void LightManager::ImGui()
     ImGui::End();
 
     TransferData();
+#endif
 }
 
 void LightManager::TransferData()

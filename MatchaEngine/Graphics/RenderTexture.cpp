@@ -51,8 +51,10 @@ void RenderTexture::Initialize(ID3D12Device* device, int width, int height, ID3D
 	rtvDesc.ViewDimension = D3D12_RTV_DIMENSION_TEXTURE2D;
 	device->CreateRenderTargetView(resource_.Get(), &rtvDesc, rtvHandleCPU_);
 
-	srvHandleCPU_ = GetCPUDescriptorHandle(srvDescriptorHeap, srvDescriptorSize);
-	srvHandleGPU_ = GetGPUDescriptorHandle(srvDescriptorHeap, srvDescriptorSize);
+	if (srvHandleCPU_.ptr == 0) {
+		srvHandleCPU_ = GetCPUDescriptorHandle(srvDescriptorHeap, srvDescriptorSize);
+		srvHandleGPU_ = GetGPUDescriptorHandle(srvDescriptorHeap, srvDescriptorSize);
+	}
 
 	D3D12_SHADER_RESOURCE_VIEW_DESC srvDesc{};
 	srvDesc.Format = DXGI_FORMAT_R8G8B8A8_UNORM_SRGB;
