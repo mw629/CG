@@ -2,10 +2,13 @@
 #include "GameObject.h"
 #include <memory>
 #include "Graphics/Render/Draw.h"
+#include "Model.h"
 
 class RenderObject : public GameObject {
 private:
     std::shared_ptr<ObjectBase> objectBase_;
+public:
+    std::string modelFilePath_ = "";
 
 public:
     RenderObject() {}
@@ -27,7 +30,11 @@ public:
 
     void Draw() override {
         if (objectBase_) {
-            Draw::DrawObj(objectBase_.get());
+            if (auto model = dynamic_cast<Model*>(objectBase_.get())) {
+                Draw::DrawModel(model);
+            } else {
+                Draw::DrawObj(objectBase_.get());
+            }
         }
     }
 

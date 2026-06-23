@@ -156,6 +156,14 @@ void Engine::Setting()
 		lightManager.get());
 	Texture::Initialize(graphics->GetDevice(), command->GetCommandList(), descriptorHeap.get(), textureLoader.get());
 
+	// ダミーテクスチャ（0番目）としてロードしておくことで、テクスチャ無しのオブジェクトが描画されたときのクラッシュを防ぐ
+	std::unique_ptr<Texture> dummyTex = std::make_unique<Texture>();
+	try {
+		dummyTex->CreateTexture("Resources/DDS/SnowWorld.dds");
+	} catch (...) {
+		// もし無ければ無視する（フォールバックが機能しなくなるが、少なくとも起動はする）
+	}
+
 	CharacterAnimator::SetData(graphics.get()->GetDevice(), descriptorHeap.get());
 	//TransformAnimation::SetData(graphics.get()->GetDevice(), descriptorHeap.get());
 

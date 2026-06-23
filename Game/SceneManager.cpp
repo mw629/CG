@@ -2,13 +2,14 @@
 #include "GameScene.h"
 #include "TitleScene.h"
 #include "TestScene.h"
+#include "JsonScene/JsonScene.h"
 #include <Engine.h>
 #include "../Editer/EditorManager.h"
 
 SceneManager::SceneManager()
 {
-	// 最初のシーンをGameSceneに設定
-	scene_ = std::make_unique<GameScene>();
+	// 最初のシーンをJsonSceneに設定
+	scene_ = std::make_unique<JsonScene>();
 	Initialize();
 }
 
@@ -49,6 +50,7 @@ std::unique_ptr<IScene> SceneManager::CreateScene(int sceneID)
 	case SceneID::Test:  return std::make_unique<TestScene>();
 	case SceneID::Title: return std::make_unique<TitleScene>();
 	case SceneID::Game:  return std::make_unique<GameScene>(); 
+	case SceneID::Json:  return std::make_unique<JsonScene>();
 	default: return nullptr;
 	}
 }
