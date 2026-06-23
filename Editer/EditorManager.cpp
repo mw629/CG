@@ -399,8 +399,22 @@ void EditorManager::Update(Engine* engine)
 			}
 
 			if (ImGui::BeginTabItem("Post Effect")) {
-				if (engine->GetPostEffect()) {
-					engine->GetPostEffect()->ImGuiWindow();
+				auto& postEffects = const_cast<std::vector<std::unique_ptr<PostEffect>>&>(engine->GetPostEffects());
+				if (ImGui::Button("Add Post Effect Layer")) {
+					auto newEffect = std::make_unique<PostEffect>();
+					newEffect->Initialize();
+					postEffects.push_back(std::move(newEffect));
+				}
+				for (size_t i = 0; i < postEffects.size(); ++i) {
+					ImGui::PushID(static_cast<int>(i));
+					postEffects[i]->ImGuiWindow();
+					if (ImGui::Button("Remove Layer")) {
+						postEffects.erase(postEffects.begin() + i);
+						ImGui::PopID();
+						break; // Break and skip the rest of the loop for this frame to avoid invalid iterators
+					}
+					ImGui::Separator();
+					ImGui::PopID();
 				}
 				ImGui::EndTabItem();
 			}
@@ -450,8 +464,8 @@ void EditorManager::Update(Engine* engine)
 		ImGui::SetCursorPos(ImVec2(cursorStart.x + offsetX, cursorStart.y + offsetY));
 	}
 
-	if (engine->GetRenderTexture()) {
-		ImGui::Image((ImTextureID)engine->GetRenderTexture()->GetSrvHandleGPU().ptr, imageSize);
+	if (engine->GetFinalRenderTexture()) {
+		ImGui::Image((ImTextureID)engine->GetFinalRenderTexture()->GetSrvHandleGPU().ptr, imageSize);
 	}
 
 	// ギズモ等のオーバーレイ描画コールバックをSceneウィンドウのBegin/Endの間に呼び出す

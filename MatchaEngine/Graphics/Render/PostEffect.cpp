@@ -3,11 +3,11 @@
 #include "../../Resource/Texture.h"
 #include <imgui.h>
 
-// Static member initialization
-PostEffect::Type PostEffect::activeType_ = PostEffect::Type::Normal;
-std::string PostEffect::activeShaderName_ = "CopyShader";
+
+std::vector<PostEffect*> PostEffect::s_instances;
 
 PostEffect::PostEffect() {
+	s_instances.push_back(this);
 	for (int y = 0; y < 3; ++y) {
 		for (int x = 0; x < 3; ++x) {
 			kernel3x3_[y][x] = 1.0f / 9.0f;
@@ -33,6 +33,10 @@ PostEffect::PostEffect() {
 }
 
 PostEffect::~PostEffect() {
+	auto it = std::find(s_instances.begin(), s_instances.end(), this);
+	if (it != s_instances.end()) {
+		s_instances.erase(it);
+	}
 	if (constantBufferResource_) {
 		constantBufferResource_->Unmap(0, nullptr);
 	}
@@ -129,7 +133,7 @@ void PostEffect::SetMaskTexturePath(const std::string& filePath) {
 
 void PostEffect::ImGuiWindow() {
 #ifdef _USE_IMGUI
-	if (ImGui::TreeNode("Post Effect Parameters")) {
+	if (ImGui::TreeNode(("Post Effect Parameters##" + std::to_string((size_t)this)).c_str())) {
 		ImGui::SliderFloat("Time##PostEffect", &time_, 0.0f, 100.0f);
 		
 		ImGui::Checkbox("Timer Running", &isTimerRunning_);
@@ -171,12 +175,25 @@ void PostEffect::ImGuiWindow() {
 	}
 
 	// Post Effect type selection
-	if (ImGui::TreeNode("Post Effect Selection")) {
-		static int currentEffectIndex = static_cast<int>(activeType_);
+	if (ImGui::TreeNode(("Post Effect Selection##" + std::to_string((size_t)this)).c_str())) {
+		int currentEffectIndex = static_cast<int>(activeType_);
 		const char* effectNames[] = { "Normal", "GrayScale", "Sepia", "OutLine", "Smoothing", "Vignetting", "RadialBlur", "Dissolve", "GaussianFilter","Random"};
 
-		if (ImGui::Combo("Post Effect", &currentEffectIndex, effectNames, IM_ARRAYSIZE(effectNames))) {
-			SetActivePostEffect(static_cast<Type>(currentEffectIndex));
+		if (ImGui::Combo("Post Effect Type", &currentEffectIndex, effectNames, IM_ARRAYSIZE(effectNames))) {
+			activeType_ = static_cast<Type>(currentEffectIndex);
+			switch (activeType_) {
+			case Type::Normal:         activeShaderName_ = "CopyShader"; break;
+			case Type::GrayScale:      activeShaderName_ = "GrayScaleShader"; break;
+			case Type::Sepia:          activeShaderName_ = "GrayScaleSepiaToneShader"; break;
+			case Type::OutLine:        activeShaderName_ = "OutLineShader"; break;
+			case Type::Smoothing:      activeShaderName_ = "SmoothingShader"; break;
+			case Type::Vignetting:     activeShaderName_ = "VignettingShader"; break;
+			case Type::RadialBlur:     activeShaderName_ = "RadialBlurShader"; break;
+			case Type::Dissolve:       activeShaderName_ = "DissolveShader"; break;
+			case Type::GaussianFilter: activeShaderName_ = "GaussianFilterShader"; break;
+			case Type::Random:         activeShaderName_ = "RandomShader"; break;
+			default:                   activeShaderName_ = "CopyShader"; break;
+			}
 		}
 
 		ImGui::TreePop();
@@ -185,18 +202,20 @@ void PostEffect::ImGuiWindow() {
 }
 
 void PostEffect::SetActivePostEffect(Type type) {
-	activeType_ = type;
-	switch (type) {
-	case Type::Normal: activeShaderName_ = "CopyShader"; break;
-	case Type::GrayScale: activeShaderName_ = "GrayScaleShader"; break;
-	case Type::Sepia: activeShaderName_ = "GrayScaleSepiaToneShader"; break;
-	case Type::OutLine: activeShaderName_ = "OutLineShader"; break;
-	case Type::Smoothing: activeShaderName_ = "SmoothingShader"; break;
-	case Type::Vignetting: activeShaderName_ = "VignettingShader"; break;
-	case Type::RadialBlur: activeShaderName_ = "RadialBlurShader"; break;
-	case Type::Dissolve: activeShaderName_ = "DissolveShader"; break;
-	case Type::GaussianFilter: activeShaderName_ = "GaussianFilterShader"; break;
-	case Type::Random: activeShaderName_ = "RandomShader"; break;
+	if (!s_instances.empty()) {
+		s_instances[0]->activeType_ = type;
+		switch (type) {
+		case Type::Normal:         s_instances[0]->activeShaderName_ = "CopyShader"; break;
+		case Type::GrayScale:      s_instances[0]->activeShaderName_ = "GrayScaleShader"; break;
+		case Type::Sepia:          s_instances[0]->activeShaderName_ = "GrayScaleSepiaToneShader"; break;
+		case Type::OutLine:        s_instances[0]->activeShaderName_ = "OutLineShader"; break;
+		case Type::Smoothing:      s_instances[0]->activeShaderName_ = "SmoothingShader"; break;
+		case Type::Vignetting:     s_instances[0]->activeShaderName_ = "VignettingShader"; break;
+		case Type::RadialBlur:     s_instances[0]->activeShaderName_ = "RadialBlurShader"; break;
+		case Type::Dissolve:       s_instances[0]->activeShaderName_ = "DissolveShader"; break;
+		case Type::GaussianFilter: s_instances[0]->activeShaderName_ = "GaussianFilterShader"; break;
+		case Type::Random:         s_instances[0]->activeShaderName_ = "RandomShader"; break;
+		default:                   s_instances[0]->activeShaderName_ = "CopyShader"; break;
+		}
 	}
 }
-

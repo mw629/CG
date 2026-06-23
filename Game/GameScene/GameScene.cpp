@@ -156,7 +156,7 @@ void GameScene::ImGui()
 		if (ImGui::Button("Restart (1)", ImVec2(200, 40))) {
 			gameState_ = GameState::Playing;
 			stageSettings_->Reset();
-			PostEffect::SetActivePostEffect(PostEffect::Type::Normal);
+			// PostEffect::SetActivePostEffect(PostEffect::Type::Normal);
 			player_->Reset();
 			currentDistance_ = 0.0f;
 		}
@@ -284,7 +284,7 @@ void GameScene::Initialize() {
 
 void GameScene::Update() {
 
-	PostEffect::SetActivePostEffect(PostEffect::Type::GaussianFilter);
+	// PostEffect::SetActivePostEffect(PostEffect::Type::GaussianFilter);
 
 	// Engine側のPlay/Stop状態に同期してゲームステートを切り替え
 	bool isEnginePlaying = EditorManager::IsPlaying();
@@ -322,7 +322,7 @@ void GameScene::Update() {
 		if (Input::PushKey(DIK_1)) {
 			gameState_ = GameState::Playing;
 			stageSettings_->Reset();
-			PostEffect::SetActivePostEffect(PostEffect::Type::Normal);
+			// PostEffect::SetActivePostEffect(PostEffect::Type::Normal);
 			player_->Reset();
 			hitEffect_->ClearParticles(); // 前回の煙をリセット
 			currentDistance_ = 0.0f;
@@ -472,7 +472,7 @@ void GameScene::CheckCollisions()
 			// 衝突！ヒット演出へ移行
 			gameState_ = GameState::PlayerHit;
 			stageSettings_->SetGameOver(true);
-			PostEffect::SetActivePostEffect(PostEffect::Type::GrayScale);
+			// PostEffect::SetActivePostEffect(PostEffect::Type::GrayScale);
 			
 			// プレイヤーのヒットアニメーション開始（Low障害物なら前へ転がる）
 			bool isTrip = (obstacle->GetType() == Obstacle::Type::Low);

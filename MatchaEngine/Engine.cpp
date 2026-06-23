@@ -54,7 +54,8 @@ Engine::Engine(int32_t kClientWidth, int32_t kClientHeight)
 	//描画
 	debugCamera = std::make_unique<DebugCamera>();
 	depthStencil = std::make_unique<DepthStencil>();
-	renderTexture = std::make_unique<RenderTexture>();
+	renderTextures[0] = std::make_unique<RenderTexture>();
+	renderTextures[1] = std::make_unique<RenderTexture>();
 	draw = std::make_unique<Draw>();
 	textureLoader = std::make_unique<TextureLoader>();
 	//バリア
@@ -110,9 +111,10 @@ void Engine::Setting()
 
 	gpuSyncManager.Initialize(graphics.get()->GetDevice());
 
-	depthStencil->CreateDepthStencil(graphics->GetDevice(), kClientWidth_, kClientHeight_);
+	depthStencil->CreateDepthStencil(graphics->GetDevice(), kClientWidth_, kClientHeight_, descriptorHeap->GetSrvDescriptorHeap(), descriptorHeap->GetDescriptorSizeSRV());
 
-	renderTexture->Initialize(graphics->GetDevice(), kClientWidth_, kClientHeight_, descriptorHeap->GetSrvDescriptorHeap(), descriptorHeap->GetDescriptorSizeSRV());
+	renderTextures[0]->Initialize(graphics->GetDevice(), kClientWidth_, kClientHeight_, descriptorHeap->GetSrvDescriptorHeap(), descriptorHeap->GetDescriptorSizeSRV());
+	renderTextures[1]->Initialize(graphics->GetDevice(), kClientWidth_, kClientHeight_, descriptorHeap->GetSrvDescriptorHeap(), descriptorHeap->GetDescriptorSizeSRV());
 
 	graphicsPipelineState.get()->ALLPSOCreate(logStream, graphics.get()->GetDevice());
 
@@ -170,15 +172,38 @@ void Engine::Setting()
   EffectDefinition::SetDescriptorHeap(descriptorHeap.get());
   EffectDefinition::SetDevice(graphics.get()->GetDevice());
 
-  postEffect_ = std::make_unique<PostEffect>();
-  postEffect_->Initialize();
+  postEffects_.push_back(std::make_unique<PostEffect>());
+  postEffects_[0]->Initialize();
 }
 
 
 void Engine::PostDraw()
 {
 	//Scene描画が終わったRenderTextureをShaderResourceへ
-	renderTexture->TransitionToShaderResource(command->GetCommandList());
+	renderTextures[0]->TransitionToShaderResource(command->GetCommandList());
+	depthStencil->TransitionToShaderResource(command->GetCommandList());
+
+	int currentRT = 0;
+	int nextRT = 1;
+
+	for (auto& effect : postEffects_) {
+		if (effect->GetActivePostEffect() == PostEffect::Type::Normal) continue; // Skip Normal (CopyShader) if we want, or keep it. Let's process it so we don't break ping-pong if user adds Normal on purpose.
+
+		renderTextures[nextRT]->TransitionToRenderTarget(command->GetCommandList());
+		// renderTextures[nextRT]->Clear(command->GetCommandList()); // No need to clear since we render full screen
+
+		D3D12_CPU_DESCRIPTOR_HANDLE rtvHandle = renderTextures[nextRT]->GetRtvHandle();
+		command->GetCommandList()->OMSetRenderTargets(1, &rtvHandle, false, nullptr);
+
+		command->GetCommandList()->RSSetViewports(1, viewportScissor->GetViewport());
+		command->GetCommandList()->RSSetScissorRects(1, viewportScissor->GetScissorRect());
+
+		Draw::DrawPostEffect(renderTextures[currentRT]->GetSrvHandleGPU(), effect->GetActiveShaderName(), effect.get(), depthStencil->GetSrvHandleGPU());
+
+		renderTextures[nextRT]->TransitionToShaderResource(command->GetCommandList());
+
+		std::swap(currentRT, nextRT);
+	}
 
 	//SwapchainをRenderTargetへ
 	resourceBarrierHelper->Transition(command->GetCommandList(), swapChain.get());
@@ -192,7 +217,7 @@ void Engine::PostDraw()
 	// _USE_IMGUI有効時はSceneウィンドウ内のImGui::Imageで描画するため
 	// Swapchainへの全画面PostEffect描画はスキップ
 #else
-	Draw::DrawPostEffect(renderTexture->GetSrvHandleGPU(), PostEffect::GetActiveShaderName(), postEffect_.get());
+	Draw::DrawPostEffect(renderTextures[currentRT]->GetSrvHandleGPU(), "CopyShader", nullptr, depthStencil->GetSrvHandleGPU());
 #endif
 
 #ifdef _USE_IMGUI
@@ -202,6 +227,16 @@ void Engine::PostDraw()
 	//画面に描く処理はすべて終わり、画面に映すので、状態を遷移
 	//今回RenderTargetからPresentにする
 	resourceBarrierHelper->TransitionToPresent(command->GetCommandList());
+}
+
+RenderTexture* Engine::GetFinalRenderTexture() {
+	int finalIndex = 0;
+	for (auto& effect : postEffects_) {
+		if (effect->GetActivePostEffect() != PostEffect::Type::Normal) {
+			finalIndex = 1 - finalIndex;
+		}
+	}
+	return renderTextures[finalIndex].get();
 }
 
 
@@ -222,9 +257,10 @@ void Engine::NewFrame() {
 
 		renderTargetView->RecreateRenderTargetViews(graphics->GetDevice(), swapChain->GetSwapChainResources(), descriptorHeap->GetRtvDescriptorHeap());
 
-		depthStencil->CreateDepthStencil(graphics->GetDevice(), width, height);
+		depthStencil->CreateDepthStencil(graphics->GetDevice(), width, height, descriptorHeap->GetSrvDescriptorHeap(), descriptorHeap->GetDescriptorSizeSRV());
 
-		renderTexture->Initialize(graphics->GetDevice(), width, height, descriptorHeap->GetSrvDescriptorHeap(), descriptorHeap->GetDescriptorSizeSRV());
+		renderTextures[0]->Initialize(graphics->GetDevice(), width, height, descriptorHeap->GetSrvDescriptorHeap(), descriptorHeap->GetDescriptorSizeSRV());
+		renderTextures[1]->Initialize(graphics->GetDevice(), width, height, descriptorHeap->GetSrvDescriptorHeap(), descriptorHeap->GetDescriptorSizeSRV());
 
 		viewportScissor = std::make_unique<ViewportScissor>(width, height);
 		viewportScissor->CreateViewPort();
@@ -244,11 +280,12 @@ void Engine::NewFrame() {
 #endif // _USE_IMGUI
 
 	//コマンドを積み込んで確定させる//
-	renderTexture->TransitionToRenderTarget(command->GetCommandList());
-	renderTexture->Clear(command->GetCommandList());
+	renderTextures[0]->TransitionToRenderTarget(command->GetCommandList());
+	renderTextures[0]->Clear(command->GetCommandList());
 
-	D3D12_CPU_DESCRIPTOR_HANDLE rtvHandle = renderTexture->GetRtvHandle();
+	D3D12_CPU_DESCRIPTOR_HANDLE rtvHandle = renderTextures[0]->GetRtvHandle();
 	//DSVを設定する
+	depthStencil->TransitionToDepthWrite(command->GetCommandList());
 	depthStencil->SetDSV(command->GetCommandList(), &rtvHandle);
 	//コマンドを積む//
 
@@ -264,8 +301,11 @@ void Engine::NewFrame() {
 
 	gamePadInput.get()->Update();
 
-	if (postEffect_) {
-		postEffect_->Update(1.0f / 60.0f);
+	Matrix4x4 projectionMatri = MakePerspectiveFovMatrix(0.45f, float(kClientWidth_) / float(kClientHeight_), 0.1f, 100.0f);
+	Matrix4x4 projInverse = Inverse(projectionMatri);
+	for (auto& effect : postEffects_) {
+		effect->SetProjectionInverse(projInverse);
+		effect->Update(1.0f / 60.0f);
 	}
 }
 

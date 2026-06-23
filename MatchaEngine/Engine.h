@@ -102,11 +102,11 @@ public:
 
 	std::unique_ptr<DebugCamera> debugCamera;
 	std::unique_ptr<DepthStencil> depthStencil;
-	std::unique_ptr<RenderTexture> renderTexture;
+	std::unique_ptr<RenderTexture> renderTextures[2];
 
 	std::unique_ptr<Draw> draw;
 	std::unique_ptr<TextureLoader> textureLoader;
-	std::unique_ptr<PostEffect> postEffect_;
+	std::vector<std::unique_ptr<PostEffect>> postEffects_;
 	std::unique_ptr<ImGuiManager> imGuiManager;
 
 	GpuSyncManager gpuSyncManager;
@@ -142,10 +142,11 @@ public:
 	void Debug(); // Editor分離後は非推奨・不要になりますが一旦空で残すか削除します
 
 	Input* GetInput() { return input.get(); }
-	PostEffect* GetPostEffect() { return postEffect_.get(); }
+	const std::vector<std::unique_ptr<PostEffect>>& GetPostEffects() { return postEffects_; }
 	LightManager* GetLightManager() { return lightManager.get(); }
 	TextureLoader* GetTextureLoader() { return textureLoader.get(); }
-	RenderTexture* GetRenderTexture() { return renderTexture.get(); }
+	RenderTexture* GetRenderTexture() { return renderTextures[0].get(); } // The main scene is always rendered to renderTextures[0]
+	RenderTexture* GetFinalRenderTexture(); // Return the final texture after all post effects
 	int32_t GetClientWidth() const { return kClientWidth_; }
 	int32_t GetClientHeight() const { return kClientHeight_; }
 

@@ -53,10 +53,10 @@ void StageSettings::Update(Matrix4x4 view)
 		}
 	}
 	if (scrollSpeed_ > maxScrollSpeed_ / 2) {
-		PostEffect::SetActivePostEffect(PostEffect::Type::Vignetting);
+		// PostEffect::SetActivePostEffect(PostEffect::Type::Vignetting);
 	}
 	else {
-		PostEffect::SetActivePostEffect(PostEffect::Type::Normal);
+		// PostEffect::SetActivePostEffect(PostEffect::Type::Normal);
 	}
 
 	// 道路チャンクのスクロール

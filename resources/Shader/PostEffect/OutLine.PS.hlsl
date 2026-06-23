@@ -1,7 +1,10 @@
 #include "PostEffect.hlsli"
 
 Texture2D<float32_t4> gTexture : register(t0);
+Texture2D<float32_t> gDepthTexture : register(t1);
 sampler gSampler : register(s0);
+
+ConstantBuffer<PostEffectData> gPostEffect : register(b0);
 
 static const float32_t2 kIndex3x3[3][3] =
 {
@@ -46,15 +49,16 @@ PixelShaderOutput main(VertexShaderOutput input)
         for (int32_t y = 0; y < 3; ++y)
         {
             float32_t2 texcoord = input.texcoord + kIndex3x3[x][y] * uvStepSize;
-            float32_t3 fetchColor = gTexture.Sample(gSampler, texcoord).rgb;
-            float32_t luminance = Luminance(fetchColor);
-            difference.x += luminance * kPrewittHorizontalKernel[x][y];
-            difference.y += luminance * kPrewittVerticalKernel[x][y];
+            float32_t ndcDepth = gDepthTexture.Sample(gSampler, texcoord);
+            float32_t4 viewSpacePos = mul(float32_t4(0.0f, 0.0f, ndcDepth, 1.0f), gPostEffect.ProjectionInverse);
+            float32_t viewZ = viewSpacePos.z / viewSpacePos.w;
+            difference.x += viewZ * kPrewittHorizontalKernel[x][y];
+            difference.y += viewZ * kPrewittVerticalKernel[x][y];
         }
     }
     //変化の長さをウェイトとして合成；ウェイトの決定方法もいろいろと考えれる。
     float32_t weight = length(difference);
-    weight = saturate(weight * 6.0f); //0.0f～1.0fにしておく
+    weight = saturate(weight * 10.0f); // Adjust weight for depth difference (View space distance)
     output.color.rgb = (1.0f - weight) * gTexture.Sample(gSampler, input.texcoord).rgb;
     output.color.a = 1.0f;
     

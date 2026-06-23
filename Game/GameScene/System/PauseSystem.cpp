@@ -7,5 +7,5 @@ void PauseSystem::Update()
 
 void PauseSystem::Draw()
 {
-	PostEffect::SetActivePostEffect(PostEffect::Type::Smoothing);
+	// PostEffect::SetActivePostEffect(PostEffect::Type::Smoothing);
 }
