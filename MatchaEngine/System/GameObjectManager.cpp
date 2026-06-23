@@ -102,6 +102,8 @@ void GameObjectManager::LoadScene(const std::string& filepath)
     file >> root;
 
     if (root.contains("objects")) {
+        std::vector<std::shared_ptr<GameObject>> usedObjects;
+
         for (const auto& objJson : root["objects"]) {
             std::string name = objJson["name"];
             std::string type = objJson.contains("type") ? objJson["type"].get<std::string>() : "";
@@ -109,8 +111,11 @@ void GameObjectManager::LoadScene(const std::string& filepath)
 
             for (auto& obj : objects_) {
                 if (obj && obj->GetName() == name) {
-                    targetObj = obj;
-                    break;
+                    if (std::find(usedObjects.begin(), usedObjects.end(), obj) == usedObjects.end()) {
+                        targetObj = obj;
+                        usedObjects.push_back(obj);
+                        break;
+                    }
                 }
             }
 
@@ -131,6 +136,7 @@ void GameObjectManager::LoadScene(const std::string& filepath)
                         renderObj->modelFilePath_ = filePath;
                         targetObj = renderObj;
                         objects_.push_back(targetObj);
+                        usedObjects.push_back(targetObj);
                     } catch (...) {}
                 }
             }
