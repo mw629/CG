@@ -3,6 +3,8 @@
 #include <imgui.h>
 #include <fstream>
 #include <nlohmann/json.hpp>
+#include "../GameObjects/Object/RenderObject.h"
+#include "Resource/AssetManager.h"
 
 void GameObjectManager::AddObject(std::shared_ptr<GameObject> obj)
 {
@@ -75,6 +77,11 @@ void GameObjectManager::SaveScene(const std::string& filepath)
         objJson["transform"]["rotate"] = { t.rotate.x, t.rotate.y, t.rotate.z };
         objJson["transform"]["scale"] = { t.scale.x, t.scale.y, t.scale.z };
         
+        if (auto renderObj = std::dynamic_pointer_cast<RenderObject>(obj)) {
+            objJson["type"] = "RenderObject";
+            objJson["modelFilePath"] = renderObj->modelFilePath_;
+        }
+        
         objectsArray.push_back(objJson);
     }
     
@@ -97,27 +104,55 @@ void GameObjectManager::LoadScene(const std::string& filepath)
     if (root.contains("objects")) {
         for (const auto& objJson : root["objects"]) {
             std::string name = objJson["name"];
+            std::string type = objJson.contains("type") ? objJson["type"].get<std::string>() : "";
+            std::shared_ptr<GameObject> targetObj = nullptr;
+
             for (auto& obj : objects_) {
                 if (obj && obj->GetName() == name) {
-                    obj->SetIsActive(objJson["isActive"]);
-                    
-                    if (objJson.contains("transform")) {
-                        Transform t;
-                        t.translate.x = objJson["transform"]["translate"][0];
-                        t.translate.y = objJson["transform"]["translate"][1];
-                        t.translate.z = objJson["transform"]["translate"][2];
-                        
-                        t.rotate.x = objJson["transform"]["rotate"][0];
-                        t.rotate.y = objJson["transform"]["rotate"][1];
-                        t.rotate.z = objJson["transform"]["rotate"][2];
-                        
-                        t.scale.x = objJson["transform"]["scale"][0];
-                        t.scale.y = objJson["transform"]["scale"][1];
-                        t.scale.z = objJson["transform"]["scale"][2];
-                        
-                        obj->SetTransform(t);
-                    }
+                    targetObj = obj;
                     break;
+                }
+            }
+
+            if (!targetObj && type == "RenderObject") {
+                std::string filePath = objJson.value("modelFilePath", "");
+                size_t lastSlash = filePath.find_last_of("/\\");
+                if (lastSlash != std::string::npos) {
+                    std::string dirPath = filePath.substr(0, lastSlash);
+                    std::string fileName = filePath.substr(lastSlash + 1);
+                    try {
+                        ModelData modelData = AssetManager::LoadModel(dirPath, fileName);
+                        auto model = std::make_shared<Model>();
+                        model->Initialize(modelData);
+                        model->name_ = fileName;
+                        
+                        auto renderObj = std::make_shared<RenderObject>(model);
+                        renderObj->SetName(name);
+                        renderObj->modelFilePath_ = filePath;
+                        targetObj = renderObj;
+                        objects_.push_back(targetObj);
+                    } catch (...) {}
+                }
+            }
+
+            if (targetObj) {
+                targetObj->SetIsActive(objJson["isActive"]);
+                
+                if (objJson.contains("transform")) {
+                    Transform t;
+                    t.translate.x = objJson["transform"]["translate"][0];
+                    t.translate.y = objJson["transform"]["translate"][1];
+                    t.translate.z = objJson["transform"]["translate"][2];
+                    
+                    t.rotate.x = objJson["transform"]["rotate"][0];
+                    t.rotate.y = objJson["transform"]["rotate"][1];
+                    t.rotate.z = objJson["transform"]["rotate"][2];
+                    
+                    t.scale.x = objJson["transform"]["scale"][0];
+                    t.scale.y = objJson["transform"]["scale"][1];
+                    t.scale.z = objJson["transform"]["scale"][2];
+                    
+                    targetObj->SetTransform(t);
                 }
             }
         }

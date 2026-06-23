@@ -18,8 +18,14 @@ namespace {
 	}
 
 	void SetTable(ShaderName shader, BlendMode blend, const std::string& name, D3D12_GPU_DESCRIPTOR_HANDLE handle) {
+		D3D12_GPU_DESCRIPTOR_HANDLE useHandle = handle;
+		if (useHandle.ptr == 0) {
+			Texture tex;
+			useHandle = tex.TextureData(0);
+		}
+		if (useHandle.ptr == 0) return;
 		UINT index = graphicsPipelineState_->GetRootParameterIndex(shader, blend, name);
-		if (index != static_cast<UINT>(-1)) commandList_->SetGraphicsRootDescriptorTable(index, handle);
+		if (index != static_cast<UINT>(-1)) commandList_->SetGraphicsRootDescriptorTable(index, useHandle);
 	}
 }
 
@@ -245,7 +251,14 @@ void Draw::DrawPostEffect(D3D12_GPU_DESCRIPTOR_HANDLE textureHandle, ShaderName 
 	// Bind main screen texture using reflection name "gTexture" if present, otherwise fallback to slot 0
 	UINT gTexIndex = graphicsPipelineState_->GetRootParameterIndex(shader, BlendMode::kBlendModeNone, "gTexture");
 	if (gTexIndex != static_cast<UINT>(-1)) {
-		commandList_->SetGraphicsRootDescriptorTable(gTexIndex, textureHandle);
+		D3D12_GPU_DESCRIPTOR_HANDLE useHandle = textureHandle;
+		if (useHandle.ptr == 0) {
+			Texture tex;
+			useHandle = tex.TextureData(0);
+		}
+		if (useHandle.ptr != 0) {
+			commandList_->SetGraphicsRootDescriptorTable(gTexIndex, useHandle);
+		}
 	}
 
 	if (depthTextureHandle.ptr != 0) {
@@ -268,7 +281,12 @@ void Draw::DrawPostEffect(D3D12_GPU_DESCRIPTOR_HANDLE textureHandle, ShaderName 
 			if (texIndex != static_cast<UINT>(-1)) {
 				Texture texture;
 				D3D12_GPU_DESCRIPTOR_HANDLE handle = texture.TextureData(path);
-				commandList_->SetGraphicsRootDescriptorTable(texIndex, handle);
+				if (handle.ptr == 0) {
+					handle = texture.TextureData(0);
+				}
+				if (handle.ptr != 0) {
+					commandList_->SetGraphicsRootDescriptorTable(texIndex, handle);
+				}
 			}
 		}
 	}

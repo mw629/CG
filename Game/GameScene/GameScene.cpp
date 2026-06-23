@@ -4,6 +4,8 @@
 #include <Engine.h>
 #include "../../Editer/EditorManager.h"
 #include "AssetManager.h"
+#include <GameObjects/Object/3d/Model.h>
+#include <algorithm>
 
 GameScene::~GameScene()
 {
@@ -269,6 +271,33 @@ void GameScene::Initialize() {
 	});
 	EditorManager::SetLoadCallback([this](const std::string& filePath) {
 		gameObjectManager_->LoadScene(filePath);
+	});
+	EditorManager::SetFileDropCallback([this](const std::string& dropPath) {
+		size_t lastSlash = dropPath.find_last_of("/\\");
+		if (lastSlash != std::string::npos) {
+			std::string dirPath = dropPath.substr(0, lastSlash);
+			std::string fileName = dropPath.substr(lastSlash + 1);
+			
+			size_t extPos = fileName.find_last_of(".");
+			if (extPos != std::string::npos) {
+				std::string ext = fileName.substr(extPos);
+				std::transform(ext.begin(), ext.end(), ext.begin(), ::tolower);
+				if (ext == ".obj" || ext == ".gltf") {
+					try {
+						ModelData modelData = AssetManager::LoadModel(dirPath, fileName);
+						auto model = std::make_shared<Model>();
+						model->Initialize(modelData);
+						model->name_ = fileName;
+						
+						auto renderObj = std::make_shared<RenderObject>(model);
+						renderObj->SetName(fileName);
+						gameObjectManager_->AddObject(renderObj);
+					} catch (const std::exception& e) {
+						// Error handling if loading fails
+					}
+				}
+			}
+		}
 	});
 
 	// ステージの初期化

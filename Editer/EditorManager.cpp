@@ -187,6 +187,7 @@ bool EditorManager::isPlaying_ = true;
 EditorManager::SceneOverlayCallback EditorManager::s_sceneOverlayCallback_ = nullptr;
 EditorManager::EditorCallback EditorManager::s_saveCallback_ = nullptr;
 EditorManager::EditorCallback EditorManager::s_loadCallback_ = nullptr;
+EditorManager::FileDropCallback EditorManager::s_fileDropCallback_ = nullptr;
 std::string EditorManager::s_currentFileName_ = "scene";
 
 EditorManager::~EditorManager() = default;
@@ -466,12 +467,23 @@ void EditorManager::Update(Engine* engine)
 
 	if (engine->GetFinalRenderTexture()) {
 		ImGui::Image((ImTextureID)engine->GetFinalRenderTexture()->GetSrvHandleGPU().ptr, imageSize);
+		
+		if (ImGui::BeginDragDropTarget()) {
+			if (const ImGuiPayload* payload = ImGui::AcceptDragDropPayload("RESOURCE_FILE")) {
+				const char* dropPath = (const char*)payload->Data;
+				if (s_fileDropCallback_) {
+					s_fileDropCallback_(dropPath);
+				}
+			}
+			ImGui::EndDragDropTarget();
+		}
 	}
 
 	// ギズモ等のオーバーレイ描画コールバックをSceneウィンドウのBegin/Endの間に呼び出す
 	if (s_sceneOverlayCallback_) {
 		s_sceneOverlayCallback_();
 	}
+
 	ImGui::End();
 
 	// Resources Window

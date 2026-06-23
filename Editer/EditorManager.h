@@ -16,12 +16,15 @@ public:
 	using SceneOverlayCallback = std::function<void()>;
 	// Save/Loadコールバック型
 	using EditorCallback = std::function<void(const std::string&)>;
+	// FileDropコールバック型
+	using FileDropCallback = std::function<void(const std::string&)>;
 
 private:
 	static bool isPlaying_;
 	static SceneOverlayCallback s_sceneOverlayCallback_;
 	static EditorCallback s_saveCallback_;
 	static EditorCallback s_loadCallback_;
+	static FileDropCallback s_fileDropCallback_;
 	static std::string s_currentFileName_;
 	
 	bool showFinalWindow_ = true;
@@ -50,6 +53,7 @@ public:
 
 	static void SetSaveCallback(EditorCallback cb) { s_saveCallback_ = cb; }
 	static void SetLoadCallback(EditorCallback cb) { s_loadCallback_ = cb; }
+	static void SetFileDropCallback(FileDropCallback cb) { s_fileDropCallback_ = cb; }
 
 	// 毎フレーム呼ばれるエディタUIの更新処理
 	void Update(Engine* engine);
