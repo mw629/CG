@@ -400,11 +400,6 @@ void EditorManager::Update(Engine* engine)
 
 			if (ImGui::BeginTabItem("Post Effect")) {
 				auto& postEffects = const_cast<std::vector<std::unique_ptr<PostEffect>>&>(engine->GetPostEffects());
-				if (ImGui::Button("Add Post Effect Layer")) {
-					auto newEffect = std::make_unique<PostEffect>();
-					newEffect->Initialize();
-					postEffects.push_back(std::move(newEffect));
-				}
 				for (size_t i = 0; i < postEffects.size(); ++i) {
 					ImGui::PushID(static_cast<int>(i));
 					postEffects[i]->ImGuiWindow();
@@ -415,6 +410,11 @@ void EditorManager::Update(Engine* engine)
 					}
 					ImGui::Separator();
 					ImGui::PopID();
+				}
+				if (ImGui::Button("Add Post Effect Layer")) {
+					auto newEffect = std::make_unique<PostEffect>();
+					newEffect->Initialize();
+					postEffects.push_back(std::move(newEffect));
 				}
 				ImGui::EndTabItem();
 			}
