@@ -29,6 +29,13 @@ namespace HapiColi
     void HapiColiManager::Initialize()
     {
         m_uiManager->Initialize(this);
+
+        // Register the UI log callback
+        LogManager::SetLogCallback([this](const std::string& msg) {
+            if (this->m_uiManager) {
+                this->m_uiManager->AddLog(msg);
+            }
+        });
     }
 
     void HapiColiManager::Update()

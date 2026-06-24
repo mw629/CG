@@ -14,7 +14,7 @@ void HapiColiRenderer::BuildCommands(const std::vector<ObjectData>& objects) {
     if (objects.empty()) return;
 
     for (const auto& obj : objects) {
-        if (obj.collider.type == ColliderInfo::Type::None || obj.collider.type == ColliderInfo::Type::Mesh) continue;
+        if (obj.collider.type != ColliderInfo::Type::Box) continue;
 
         ::Vector3 pos = { obj.position.x, obj.position.y, obj.position.z };
         ::Vector3 scale = { obj.collider.size.x, obj.collider.size.y, obj.collider.size.z };
@@ -31,7 +31,11 @@ void HapiColiRenderer::BuildCommands(const std::vector<ObjectData>& objects) {
             color[0] = 1.0f; color[1] = 0.0f; color[2] = 0.0f; // Red if colliding
         }
 
-        AddBoxLines(pos, scale, rot, color);
+        if (obj.collider.type == ColliderInfo::Type::Box) {
+            AddBoxLines(pos, scale, rot, color);
+        } else if (obj.collider.type == ColliderInfo::Type::Sphere) {
+            AddSphereLines(pos, obj.collider.size.x, color);
+        }
 
         bool shouldDrawContact = false;
         const char* activeTargetId = HapiColi::GetInstance().GetActiveTargetId();
@@ -108,6 +112,38 @@ void HapiColiRenderer::AddBoxLines(const ::Vector3& pos, const ::Vector3& scale,
     commands_.push_back({ corners[1], corners[2], {color[0], color[1], color[2], color[3]} });
     commands_.push_back({ corners[4], corners[7], {color[0], color[1], color[2], color[3]} });
     commands_.push_back({ corners[5], corners[6], {color[0], color[1], color[2], color[3]} });
+}
+
+void HapiColiRenderer::AddSphereLines(const ::Vector3& center, float radius, float color[4]) {
+    const int segments = 16;
+    const float PI = 3.14159265f;
+    
+    // Draw 3 orthogonal circles
+    for (int i = 0; i < segments; ++i) {
+        float t1 = (float)i / segments * 2.0f * PI;
+        float t2 = (float)(i + 1) / segments * 2.0f * PI;
+        
+        // XY plane
+        commands_.push_back({
+            {center.x + radius * cosf(t1), center.y + radius * sinf(t1), center.z},
+            {center.x + radius * cosf(t2), center.y + radius * sinf(t2), center.z},
+            {color[0], color[1], color[2], color[3]}
+        });
+        
+        // YZ plane
+        commands_.push_back({
+            {center.x, center.y + radius * cosf(t1), center.z + radius * sinf(t1)},
+            {center.x, center.y + radius * cosf(t2), center.z + radius * sinf(t2)},
+            {color[0], color[1], color[2], color[3]}
+        });
+        
+        // ZX plane
+        commands_.push_back({
+            {center.x + radius * sinf(t1), center.y, center.z + radius * cosf(t1)},
+            {center.x + radius * sinf(t2), center.y, center.z + radius * cosf(t2)},
+            {color[0], color[1], color[2], color[3]}
+        });
+    }
 }
 
 const std::vector<SolidRenderCommand>& HapiColiRenderer::GetSolidRenderCommands() const {

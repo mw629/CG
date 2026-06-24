@@ -1,5 +1,7 @@
 #include "Recorder.h"
+#include "LogManager.h"
 #include <algorithm>
+#include <string>
 
 namespace HapiColi
 {
@@ -11,6 +13,7 @@ namespace HapiColi
 
     void Recorder::Start(bool clearData)
     {
+        LogManager::PrintOutput("Recorder::Start() invoked. clearData=" + std::string(clearData ? "true" : "false"));
         m_isRecording = true;
         if (clearData)
         {
@@ -21,6 +24,7 @@ namespace HapiColi
 
     void Recorder::Stop()
     {
+        LogManager::PrintOutput("Recorder::Stop() invoked. Recorded frames: " + std::to_string(m_recordedFrames.size()));
         m_isRecording = false;
     }
 
@@ -86,6 +90,7 @@ namespace HapiColi
 
     void Recorder::Clear()
     {
+        LogManager::PrintOutput("Recorder::Clear() invoked. Cleared " + std::to_string(m_recordedFrames.size()) + " frames.");
         m_recordedFrames.clear();
         m_knownObjectIds.clear();
     }
@@ -94,12 +99,14 @@ namespace HapiColi
     {
         if (!IsTarget(id))
         {
+            LogManager::PrintOutput("Recorder::AddTargetId() added target: " + id);
             m_targetIds.push_back(id);
         }
     }
 
     void Recorder::RemoveTargetId(const std::string& id)
     {
+        LogManager::PrintOutput("Recorder::RemoveTargetId() removed target: " + id);
         m_targetIds.erase(std::remove(m_targetIds.begin(), m_targetIds.end(), id), m_targetIds.end());
     }
 
@@ -110,6 +117,7 @@ namespace HapiColi
 
     void Recorder::ClearTargets()
     {
+        LogManager::PrintOutput("Recorder::ClearTargets() invoked.");
         m_targetIds.clear();
     }
 }

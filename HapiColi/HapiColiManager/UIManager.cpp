@@ -446,12 +446,16 @@ namespace HapiColi
         ImGui::SetNextWindowSize(ImVec2(400, 300), ImGuiCond_FirstUseEver);
         ImGui::Begin(GetText("HapiColi Log", u8"HapiColi ログ (Log)"));
         if (ImGui::Button(GetText("Clear Log", u8"ログクリア"))) {
+            std::lock_guard<std::mutex> lock(m_logMutex);
             m_logLines.clear();
         }
         ImGui::Separator();
         ImGui::BeginChild("LogRegion", ImVec2(0, 0), true);
-        for (const auto& line : m_logLines) {
-            ImGui::TextWrapped("%s", line.c_str());
+        {
+            std::lock_guard<std::mutex> lock(m_logMutex);
+            for (const auto& line : m_logLines) {
+                ImGui::TextWrapped("%s", line.c_str());
+            }
         }
         ImGui::EndChild();
         ImGui::End();
@@ -462,6 +466,7 @@ namespace HapiColi
 
     void UIManager::AddLog(const std::string& msg)
     {
+        std::lock_guard<std::mutex> lock(m_logMutex);
         m_logLines.push_back(msg);
         if (m_logLines.size() > 500) {
             m_logLines.erase(m_logLines.begin());

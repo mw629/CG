@@ -1,4 +1,6 @@
 #include "TestRunner.h"
+#include "LogManager.h"
+#include <string>
 
 namespace HapiColi
 {
@@ -11,11 +13,15 @@ namespace HapiColi
     {
         if (!m_testStepCallback) return;
 
+        LogManager::PrintOutput("TestRunner::RunTests() started. Iterations: " + std::to_string(iterations));
+
         for (int i = 0; i < iterations; ++i)
         {
             // Execute the engine test simulation step
             m_testStepCallback();
         }
+
+        LogManager::PrintOutput("TestRunner::RunTests() completed.");
     }
 
     void TestRunner::ResetTest()

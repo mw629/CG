@@ -168,12 +168,15 @@ void TestScene::Initialize() {
 
 	HapiColi::HapiColi::GetInstance().Initialize();
 
-	AABB initialModelAABB = Collision::MakeAABB(modelTransform_, 1.0f, 1.0f, 1.0f);
+	AABB initialModelAABB = Collision::MakeAABB(modelTransform_, 2.0f, 2.0f, 2.0f);
+	initialModelAABB.min.y -= 1.0f;
+	initialModelAABB.max.y -= 1.0f;
 	Vector3 initialModelCenter = { (initialModelAABB.min.x + initialModelAABB.max.x)*0.5f, (initialModelAABB.min.y + initialModelAABB.max.y)*0.5f, (initialModelAABB.min.z + initialModelAABB.max.z)*0.5f };
-	HapiColi::ObjectData baseA = HapiColi::ObjectData::CreateBox("Model", {initialModelCenter.x, initialModelCenter.y, initialModelCenter.z}, {1.0f, 1.0f, 1.0f});
+	HapiColi::ObjectData baseA = HapiColi::ObjectData::CreateBox("Model_Box", {initialModelCenter.x, initialModelCenter.y, initialModelCenter.z}, {2.0f, 2.0f, 2.0f});
 
-	CollisionSphere initialColSphere = Collision::MakeSphere(Transform_, 0.5f);
-	HapiColi::ObjectData baseB = HapiColi::ObjectData::CreateSphere("Sphere", {initialColSphere.center.x, initialColSphere.center.y, initialColSphere.center.z}, initialColSphere.radius);
+	CollisionSphere initialColSphere = Collision::MakeSphere(Transform_, 1.0f);
+	initialColSphere.center.y -= 1.0f;
+	HapiColi::ObjectData baseB = HapiColi::ObjectData::CreateSphere("Target_Sphere", {initialColSphere.center.x, initialColSphere.center.y, initialColSphere.center.z}, initialColSphere.radius);
 	HapiColi::HapiColi::GetInstance().RegisterFuzzTarget("Model vs Sphere Fuzzing", baseA, baseB, [](HapiColi::ObjectData& a, HapiColi::ObjectData& b) {
 		AABB aabbA; 
 		aabbA.min = {a.position.x - a.collider.size.x * 0.5f, a.position.y - a.collider.size.y * 0.5f, a.position.z - a.collider.size.z * 0.5f}; 
@@ -208,10 +211,10 @@ void TestScene::Update() {
 				int idx = playback->GetReplayFrameIndex();
 				if (!frames.empty() && idx >= 0 && idx < frames.size()) {
 					for (const auto& obj : frames[idx].objects) {
-						if (obj.id == "Model") {
+						if (obj.id == "Model_Box" || obj.id == "Model_Sphere") {
 							modelTransform_.translate = { obj.position.x, obj.position.y, obj.position.z };
 							model_.get()->SetTransform(modelTransform_);
-						} else if (obj.id == "Sphere") {
+						} else if (obj.id == "Target_Sphere") {
 							Transform_.translate = { obj.position.x, obj.position.y, obj.position.z };
 							sphere_.get()->SetTransform(Transform_);
 						}
@@ -267,30 +270,52 @@ void TestScene::Update() {
 	animation_.get()->Update(view);
 	nodeAnimation_.get()->Update(view);
 
-	// 当たり判定
-	AABB modelAABB = Collision::MakeAABB(modelTransform_, 1.0f, 1.0f, 1.0f);
+	// 当たり判定 (Model_Box)
+	AABB modelAABB = Collision::MakeAABB(modelTransform_, 2.0f, 2.0f, 2.0f);
+	modelAABB.min.y -= 1.0f;
+	modelAABB.max.y -= 1.0f;
 	Vector3 modelCenter = { (modelAABB.min.x + modelAABB.max.x)*0.5f, (modelAABB.min.y + modelAABB.max.y)*0.5f, (modelAABB.min.z + modelAABB.max.z)*0.5f };
 	Vector3 modelSize = { modelAABB.max.x - modelAABB.min.x, modelAABB.max.y - modelAABB.min.y, modelAABB.max.z - modelAABB.min.z };
-	HapiColi::ObjectData modelData = HapiColi::ObjectData::CreateBox(
-		"Model",
+	HapiColi::ObjectData modelBoxData = HapiColi::ObjectData::CreateBox(
+		"Model_Box",
 		{modelCenter.x, modelCenter.y, modelCenter.z},
 		{modelSize.x, modelSize.y, modelSize.z}
 	);
 
-	CollisionSphere colSphere = Collision::MakeSphere(Transform_, 0.5f);
-	HapiColi::ObjectData sphereData = HapiColi::ObjectData::CreateSphere(
-		"Sphere",
+	// 当たり判定 (Model_Sphere)
+	CollisionSphere modelSphere = Collision::MakeSphere(modelTransform_, 1.0f);
+	modelSphere.center.y -= 1.0f;
+	HapiColi::ObjectData modelSphereData = HapiColi::ObjectData::CreateSphere(
+		"Model_Sphere",
+		{modelSphere.center.x, modelSphere.center.y, modelSphere.center.z},
+		modelSphere.radius
+	);
+
+	// 相手 (Sphere)
+	CollisionSphere colSphere = Collision::MakeSphere(Transform_, 1.0f);
+	colSphere.center.y -= 1.0f;
+	HapiColi::ObjectData targetSphereData = HapiColi::ObjectData::CreateSphere(
+		"Target_Sphere",
 		{colSphere.center.x, colSphere.center.y, colSphere.center.z},
 		colSphere.radius
 	);
 
-	isCollision_ = Collision::CheckAABBSphere(modelAABB, colSphere);
-	
-	HapiColi::HapiColi::GetInstance().UpdateFuzzTarget("Model vs Sphere Fuzzing", modelData, sphereData);
+	bool hitBox = Collision::CheckAABBSphere(modelAABB, colSphere);
+	// Sphere同士の当たり判定 (半径の和の2乗と距離の2乗を比較)
+	float distSqSphere = 
+		(modelSphere.center.x - colSphere.center.x) * (modelSphere.center.x - colSphere.center.x) +
+		(modelSphere.center.y - colSphere.center.y) * (modelSphere.center.y - colSphere.center.y) +
+		(modelSphere.center.z - colSphere.center.z) * (modelSphere.center.z - colSphere.center.z);
+	float rSum = modelSphere.radius + colSphere.radius;
+	bool hitSphere = distSqSphere <= (rSum * rSum);
 
-	if (isCollision_) {
-		modelData.SetCollision(sphereData.id);
-		sphereData.SetCollision(modelData.id);
+	isCollision_ = hitBox || hitSphere;
+	
+	HapiColi::HapiColi::GetInstance().UpdateFuzzTarget("Model vs Sphere Fuzzing", modelBoxData, targetSphereData);
+
+	if (hitBox) {
+		modelBoxData.SetCollision(targetSphereData.id);
+		targetSphereData.SetCollision(modelBoxData.id);
 
 		// 衝突点と法線の計算 (AABB vs Sphere)
 		Vector3 contactPoint;
@@ -309,12 +334,18 @@ void TestScene::Update() {
 			contactNormal = { 0, 1, 0 };
 		}
 
-		modelData.SetContactInfo({contactPoint.x, contactPoint.y, contactPoint.z}, {contactNormal.x, contactNormal.y, contactNormal.z});
-		sphereData.SetContactInfo({contactPoint.x, contactPoint.y, contactPoint.z}, {-contactNormal.x, -contactNormal.y, -contactNormal.z});
+		modelBoxData.SetContactInfo({contactPoint.x, contactPoint.y, contactPoint.z}, {contactNormal.x, contactNormal.y, contactNormal.z});
+		targetSphereData.SetContactInfo({contactPoint.x, contactPoint.y, contactPoint.z}, {-contactNormal.x, -contactNormal.y, -contactNormal.z});
 	}
 
-	HapiColi::HapiColi::GetInstance().RecordObject(modelData);
-	HapiColi::HapiColi::GetInstance().RecordObject(sphereData);
+	if (hitSphere) {
+		modelSphereData.SetCollision(targetSphereData.id);
+		targetSphereData.SetCollision(modelSphereData.id);
+	}
+
+	HapiColi::HapiColi::GetInstance().RecordObject(modelBoxData);
+	HapiColi::HapiColi::GetInstance().RecordObject(modelSphereData);
+	HapiColi::HapiColi::GetInstance().RecordObject(targetSphereData);
 
 	HapiColi::HapiColi::GetInstance().EndFrame();
 }
@@ -333,8 +364,7 @@ void TestScene::Draw() {
 	//Draw::DrawObj(floor.get());
 	//Draw::DrawObj(nodeAnimation_.get());
 	//Draw::DrawAnimation(animation_.get());
-
-	Draw::DrawObj(sphere_.get());
+	Draw::DrawSphere(sphere_.get());
 	for (int i = 0, n = static_cast<int>(particle_.size()); i < n; ++i) {
 		//particle_[i].get()->Draw();
 	}
