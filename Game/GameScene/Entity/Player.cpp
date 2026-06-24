@@ -43,6 +43,7 @@ void Player::Reset()
 
 void Player::Update(Matrix4x4 view, float speedMultiplier)
 {
+	GameObject::Update(view, speedMultiplier);
 	if (isHit_) {
 		// SpeedMultiplier is ignored for hit update so animation plays consistently 
 		// even if the game scroll stops.
@@ -166,6 +167,7 @@ void Player::PlayerMove(float speedMultiplier)
 void Player::Draw()
 {
 	Draw::DrawObj(model_.get());
+	GameObject::Draw();
 }
 
 void Player::ImGuiInnerComponents()

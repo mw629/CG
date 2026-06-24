@@ -22,6 +22,7 @@ public:
     }
 
     void Update(Matrix4x4 view, float speedMultiplier = 1.0f) override {
+        GameObject::Update(view, speedMultiplier);
         if (objectBase_) {
             objectBase_->SetTransform(transform_);
             objectBase_->SettingWvp(view);
@@ -29,6 +30,7 @@ public:
     }
 
     void Draw() override {
+        GameObject::Draw();
         if (objectBase_) {
             if (auto model = dynamic_cast<Model*>(objectBase_.get())) {
                 Draw::DrawModel(model);

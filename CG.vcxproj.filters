@@ -93,6 +93,15 @@
     <ClCompile Include="MatchaEngine\Core\WindowConfig.cpp">
       <Filter>MatchaEngine\Core</Filter>
     </ClCompile>
+    <ClCompile Include="MatchaEngine\System\GameObjectManager.cpp">
+      <Filter>MatchaEngine\System</Filter>
+    </ClCompile>
+    <ClCompile Include="MatchaEngine\System\CollisionManager.cpp">
+      <Filter>MatchaEngine\System</Filter>
+    </ClCompile>
+    <ClCompile Include="MatchaEngine\GameObjects\Component\ColliderComponent.cpp">
+      <Filter>MatchaEngine\GameObjects\Component</Filter>
+    </ClCompile>
     <ClCompile Include="MatchaEngine\Core\ImGuiManager.cpp">
       <Filter>MatchaEngine\Core</Filter>
     </ClCompile>
@@ -366,6 +375,15 @@
     </ClInclude>
     <ClInclude Include="MatchaEngine\Core\WindowConfig.h">
       <Filter>MatchaEngine\Core</Filter>
+    </ClInclude>
+    <ClInclude Include="MatchaEngine\System\GameObjectManager.h">
+      <Filter>MatchaEngine\System</Filter>
+    </ClInclude>
+    <ClInclude Include="MatchaEngine\System\CollisionManager.h">
+      <Filter>MatchaEngine\System</Filter>
+    </ClInclude>
+    <ClInclude Include="MatchaEngine\GameObjects\Component\ColliderComponent.h">
+      <Filter>MatchaEngine\GameObjects\Component</Filter>
     </ClInclude>
     <ClInclude Include="MatchaEngine\Core\ImGuiManager.h">
       <Filter>MatchaEngine\Core</Filter>

@@ -41,7 +41,16 @@ void Cube::CreateVertexData()
     // 便宜上のデータを埋めておく
     for (int i = 0; i < 8; ++i) {
         vertexData_[i].texcoord = { 0.0f, 0.0f };
-        vertexData_[i].normal = { 0.0f, 0.0f, 0.0f };
+        
+        // 0,0,0だとShaderでNaNが発生してCubemapのSampleでGPUがクラッシュするので、
+        // positionを元に正規化した法線を設定する
+        Vector3 pos = { vertexData_[i].position.x, vertexData_[i].position.y, vertexData_[i].position.z };
+        float length = std::sqrt(pos.x * pos.x + pos.y * pos.y + pos.z * pos.z);
+        if (length > 0.0f) {
+            vertexData_[i].normal = { pos.x / length, pos.y / length, pos.z / length };
+        } else {
+            vertexData_[i].normal = { 0.0f, 1.0f, 0.0f };
+        }
     }
 }
 

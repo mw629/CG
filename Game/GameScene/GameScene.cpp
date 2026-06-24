@@ -1,6 +1,7 @@
 #include "GameScene.h"
 #include <imgui.h>
 #include <memory>
+#include <System/CollisionManager.h>
 #include <Engine.h>
 #include "../../Editer/EditorManager.h"
 #include "AssetManager.h"
@@ -9,6 +10,7 @@
 
 GameScene::~GameScene()
 {
+	CollisionManager::GetInstance()->Clear();
 }
 
 void GameScene::ImGui()
@@ -171,6 +173,8 @@ void GameScene::ImGui()
 
 #endif // _USE_IMGUI
 }
+
+
 
 void GameScene::Initialize() {
 
@@ -422,8 +426,11 @@ void GameScene::PlayingUpdate()
 	
 	stageSettings_->Update(view);
 
-	// 当たり判定チェック
+	// 以前の当たり判定チェック
 	CheckCollisions();
+
+	// Componentベースの当たり判定チェック
+	CollisionManager::GetInstance()->UpdateCollisions();
 
 	hitEffect_->Update(view);
 	

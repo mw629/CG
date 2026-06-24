@@ -187,6 +187,7 @@ void GraphicsPipelineState::ALLPSOCreate(std::ostream& os, ID3D12Device* device)
 	std::vector<std::pair<ShaderName, PipelineConfig>> configs = {
 		//ObjectShaderは通常の3Dオブジェクト用のシェーダー。アニメーションなし
 		{ ObjectShader, { L"Resources/Shader/ObjectShader/Object3D.VS.hlsl", L"Resources/Shader/ObjectShader/Object3D.PS.hlsl", objInput, true, D3D12_DEPTH_WRITE_MASK_ALL, D3D12_COMPARISON_FUNC_LESS_EQUAL, D3D12_CULL_MODE_NONE, D3D12_FILL_MODE_SOLID } },
+		{ WireFrameShader, { L"Resources/Shader/ObjectShader/Object3D.VS.hlsl", L"Resources/Shader/ObjectShader/Object3D.PS.hlsl", objInput, true, D3D12_DEPTH_WRITE_MASK_ALL, D3D12_COMPARISON_FUNC_LESS_EQUAL, D3D12_CULL_MODE_NONE, D3D12_FILL_MODE_WIREFRAME } },
 		{IceShader, { L"Resources/Shader/ObjectShader/Object3D.VS.hlsl", L"Resources/Shader/ObjectShader/IceShader.PS.hlsl", objInput, true, D3D12_DEPTH_WRITE_MASK_ALL, D3D12_COMPARISON_FUNC_LESS_EQUAL, D3D12_CULL_MODE_NONE, D3D12_FILL_MODE_SOLID } },
 
 		//AnimationObjはスキニングアニメーション用のシェーダー。アニメーションあり

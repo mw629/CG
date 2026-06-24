@@ -25,4 +25,20 @@ public:
 	/// <param name="depth">奥行き</param>
 	/// <returns>生成されたAABB</returns>
 	static AABB MakeAABB(const Transform& transform, float width, float height, float depth);
+
+	/// <summary>
+	/// 球体同士の交差判定
+	/// </summary>
+	/// <param name="a">BoundingSphere A</param>
+	/// <param name="b">BoundingSphere B</param>
+	/// <returns>交差していたらtrue</returns>
+	static bool CheckSphere(const BoundingSphere& a, const BoundingSphere& b);
+
+	/// <summary>
+	/// AABBと球体の交差判定
+	/// </summary>
+	/// <param name="aabb">AABB</param>
+	/// <param name="sphere">BoundingSphere</param>
+	/// <returns>交差していたらtrue</returns>
+	static bool CheckAABBSphere(const AABB& aabb, const BoundingSphere& sphere);
 };

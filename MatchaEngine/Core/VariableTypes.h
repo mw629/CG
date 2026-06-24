@@ -64,6 +64,11 @@ struct AABB {
 	Vector3 max;
 };
 
+struct BoundingSphere {
+	Vector3 center;
+	float radius;
+};
+
 struct TransformationMatrix
 {
 	Matrix4x4 WVP;

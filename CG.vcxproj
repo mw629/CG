@@ -154,7 +154,9 @@ copy "$(WindowsSdkDir)bin\$(TargetPlatformVersion)\x64\dxil.dll" "$(TargetDir)dx
     <ClCompile Include="Editer\EditorManager.cpp" />
     <ClCompile Include="Game\JsonScene\JsonScene.cpp" />
     <ClCompile Include="MatchaEngine\System\GameObjectManager.cpp" />
+    <ClCompile Include="MatchaEngine\System\CollisionManager.cpp" />
     <ClCompile Include="MatchaEngine\GameObjects\Component\MaterialComponent.cpp" />
+    <ClCompile Include="MatchaEngine\GameObjects\Component\ColliderComponent.cpp" />
     <ClCompile Include="MatchaEngine\Resource\AssetManager.cpp" />
     <ClCompile Include="Game\GameScene\Entity\Player.cpp" />
     <ClCompile Include="Game\GameScene\Entity\Collision.cpp" />
@@ -331,10 +333,12 @@ copy "$(WindowsSdkDir)bin\$(TargetPlatformVersion)\x64\dxil.dll" "$(TargetDir)dx
     <ClInclude Include="Editer\EditorManager.h" />
     <ClInclude Include="Game\JsonScene\JsonScene.h" />
     <ClInclude Include="MatchaEngine\System\GameObjectManager.h" />
+    <ClInclude Include="MatchaEngine\System\CollisionManager.h" />
     <ClInclude Include="MatchaEngine\Resource\AssetManager.h" />
     <ClInclude Include="MatchaEngine\GameObjects\Object\GameObject.h" />
     <ClInclude Include="MatchaEngine\GameObjects\Component\Component.h" />
     <ClInclude Include="MatchaEngine\GameObjects\Component\MaterialComponent.h" />
+    <ClInclude Include="MatchaEngine\GameObjects\Component\ColliderComponent.h" />
     <ClInclude Include="MatchaEngine\GameObjects\Object\RenderObject.h" />
     <ClInclude Include="Game\GameScene\Entity\Player.h" />
     <ClInclude Include="Game\GameScene\Entity\Collision.h" />
@@ -462,4 +466,4 @@ copy "$(WindowsSdkDir)bin\$(TargetPlatformVersion)\x64\dxil.dll" "$(TargetDir)dx
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
   <ImportGroup Label="ExtensionTargets">
   </ImportGroup>
-</Project>
+</Project> 
