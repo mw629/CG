@@ -38,8 +38,7 @@ void Triangle::Initialize(D3D12_GPU_DESCRIPTOR_HANDLE textureSrvHandleGPU) {
 	vertex_[1] = { 0.0f,0.1f,0.0f,1.0f };
 	vertex_[2] = { 0.1f,-0.1f,0.0f,1.0f };
 
-	material_ = std::make_unique<MaterialFactory>();
-	material_.get()->CreateMartial();
+	AddComponent<MaterialComponent>();
 
 }
 
@@ -113,12 +112,6 @@ void Triangle::SetShape()
 }
 
 
-void Triangle::SetTransform(Transform transform)
-{
-	transform_.translate = transform.translate;
-	transform_.scale = transform.scale;
-	transform_.rotate = transform.rotate;
-}
 
 void Triangle::SetVertex(Vector4 vertex[3])
 {

@@ -127,9 +127,8 @@ void Obstacle::Draw() {
   Draw::DrawObj(model_.get());
 }
 
-void Obstacle::ImGui() {
-  GameObject::ImGui();
+void Obstacle::ImGuiInnerComponents() {
   if (model_) {
-    model_->ImGui();
+    model_->ImGui(false);
   }
 }

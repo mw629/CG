@@ -5,6 +5,8 @@
 #include "Texture.h"
 #include "MaterialFactory.h"
 #include "PipelineState.h"
+#include "../Object/GameObject.h"
+#include "../Component/MaterialComponent.h"
 
 struct EffectDefinitionData {
 	Transform transform = { {1.0f,1.0f,1.0f},{0.0f,0.0f,0.0f}, {0.0f,0.0f,0.0f} };
@@ -31,13 +33,12 @@ struct EffectShapeData {
 	float ringInnerRadius = 0.8f;
 };
 
-class EffectDefinition
+class EffectDefinition : public GameObject
 {
 private:
 	EffectShapeData shapeData_;
 
 	ModelData modelData_{};
-	std::unique_ptr<MaterialFactory> material_;
 	D3D12_GPU_DESCRIPTOR_HANDLE textureSrvHandleGPU_{};
 
 
@@ -94,7 +95,10 @@ public:
 	void SetBillboard(bool flag) { isBillboard_ = flag; }
 
 	ModelData GetModelData() { return modelData_; }
-	MaterialFactory* GetMartial() { return material_.get(); }
+	MaterialFactory* GetMartial() { 
+		auto matComp = GetComponent<MaterialComponent>();
+		return matComp ? matComp->GetMaterialFactory() : nullptr;
+	}
 	D3D12_GPU_DESCRIPTOR_HANDLE GetTextureSrvHandleGPU()const { return textureSrvHandleGPU_; }
 
 	D3D12_VERTEX_BUFFER_VIEW* GetVertexBufferView() { return &vertexBufferView_; }

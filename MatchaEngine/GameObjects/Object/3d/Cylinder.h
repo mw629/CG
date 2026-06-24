@@ -11,7 +11,7 @@ private:
 	float radianPerDivide_;
 
 public:
-	void ImGui()override;
+
 	~Cylinder()override;
 	void Initialize(int textureSrvHandle);
 	void CreateVertexData()override;

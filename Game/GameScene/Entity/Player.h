@@ -63,7 +63,11 @@ public:
 	void HitUpdate(float speedMultiplier);
 
 	void Draw() override;
-	void ImGui() override;
+	void ImGuiInnerComponents() override;
+
+	bool HasMaterial() const override {
+		return model_ && model_->GetComponent<MaterialComponent>() != nullptr || GameObject::HasMaterial();
+	}
 
 	// GetTransform() is inherited from GameObject
 	bool GetIsRolling() const { return isRolling_; }
