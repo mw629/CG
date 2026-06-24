@@ -24,8 +24,12 @@ void Model::Initialize(ModelData modelData)
 	//アニメーション
 	rootNode_ = modelData.rootNode;
 
-	material_ = std::make_unique<MaterialFactory>();
-	material_->CreateMartial();
+	AddComponent<MaterialComponent>();
+	auto matComp = GetComponent<MaterialComponent>();
+	if (matComp && !modelData.material.textureDilePath.empty()) {
+		matComp->SetTexturePath(modelData.material.textureDilePath);
+	}
+
 	CreateObject();
 }
 

@@ -5,22 +5,20 @@
 #include "Texture.h"
 #include "MaterialFactory.h"
 #include "PipelineState.h"
+#include "GameObject.h"
+#include "../Component/MaterialComponent.h"
 
-class ObjectBase
+class ObjectBase : public GameObject
 {
 protected:
 	// 派生クラスからアクセス可能な静的メンバー
 	static float kClientWidth_;
 	static float kClientHeight_;
 
-	Transform transform_;
-
 	//objectResource
-
 
 	//マテリアルデータ
 	std::unique_ptr<Texture> texture = std::make_unique<Texture>();
-	std::unique_ptr<MaterialFactory> material_{};
 	D3D12_GPU_DESCRIPTOR_HANDLE textureSrvHandleGPU_{};
 
 	//頂点データ
@@ -37,11 +35,8 @@ protected:
 	int indexSize_;
 
 public:
-	std::string name_ = "Object";
-
 	virtual ~ObjectBase();
 
-	virtual void ImGui();
 
 	static void SetObjectResource(Vector2 ClientSize);
 
@@ -55,13 +50,25 @@ public:
 
 
 	void SetTransform(Transform transform) { transform_ = transform; }  // バグ修正: transform_ = transform_ → transform_ = transform
-	void SetLighting(bool isActive) { material_.get()->SetMaterialLighting(isActive); }
+	void SetLighting(bool isActive) { 
+		auto matComp = GetComponent<MaterialComponent>();
+		if(matComp) matComp->GetMaterialFactory()->SetMaterialLighting(isActive);
+	}
 	void SetTexture(D3D12_GPU_DESCRIPTOR_HANDLE textureSrvHandleGPU) { textureSrvHandleGPU_ = textureSrvHandleGPU; }
 
 	//getter
 	Transform GetTransform() const { return transform_; }
-	MaterialFactory* GetMartial() { return material_.get(); }
-	D3D12_GPU_DESCRIPTOR_HANDLE GetTextureSrvHandleGPU()const { return textureSrvHandleGPU_; }
+	MaterialFactory* GetMartial() { 
+		auto matComp = GetComponent<MaterialComponent>();
+		return matComp ? matComp->GetMaterialFactory() : nullptr;
+	}
+	D3D12_GPU_DESCRIPTOR_HANDLE GetTextureSrvHandleGPU()const { 
+		auto matComp = GetComponent<MaterialComponent>();
+		if (matComp && matComp->GetTextureSrvHandleGPU().ptr != 0) {
+			return matComp->GetTextureSrvHandleGPU();
+		}
+		return textureSrvHandleGPU_; 
+	}
 
 	virtual Mesh GetMesh();
 
@@ -75,17 +82,21 @@ public:
 
 	virtual int GetIndexSize() { return indexSize_; }
 
-private:
-	ShaderName shader_ = "ObjectShader";
-	BlendMode blend_ = BlendMode::kBlendModeNone;
-public:
+	void SetShader(ShaderName shader) { 
+		if (auto mat = GetComponent<MaterialComponent>()) mat->SetShader(shader); 
+	}
+	void SetBlend(BlendMode blend) { 
+		if (auto mat = GetComponent<MaterialComponent>()) mat->SetBlend(blend); 
+	}
 
-	void SetShader(ShaderName shader) { shader_ = shader; }
-	void SetBlend(BlendMode blend) { blend_ = blend; }
-
-	ShaderName GetShader() { return shader_; }
-	BlendMode GetBlend() { return blend_; }
-
+	ShaderName GetShader() { 
+		if (auto mat = GetComponent<MaterialComponent>()) return mat->GetShader();
+		return "ObjectShader"; 
+	}
+	BlendMode GetBlend() { 
+		if (auto mat = GetComponent<MaterialComponent>()) return mat->GetBlend();
+		return BlendMode::kBlendModeNone; 
+	}
 
 };
 

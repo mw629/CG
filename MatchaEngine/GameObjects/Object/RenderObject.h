@@ -45,11 +45,14 @@ public:
         }
     }
 
-    void ImGui() override {
-        GameObject::ImGui();
+    void ImGuiInnerComponents() override {
         if (objectBase_) {
-            objectBase_->ImGui();
+            objectBase_->ImGui(false);
         }
+    }
+
+    bool HasMaterial() const override {
+        return objectBase_ && objectBase_->GetComponent<MaterialComponent>() != nullptr || GameObject::HasMaterial();
     }
 
     std::shared_ptr<ObjectBase> GetObjectBase() const { return objectBase_; }

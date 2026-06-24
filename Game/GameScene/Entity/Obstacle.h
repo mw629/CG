@@ -59,7 +59,11 @@ public:
 	// Override standard Update and Draw to avoid GameObjectManager from automatically updating scroll/drawing without context
 	void Update(Matrix4x4 view, float speedMultiplier = 1.0f) override {}
 	void Draw() override;
-	void ImGui() override;
+	void ImGuiInnerComponents() override;
+
+	bool HasMaterial() const override {
+		return model_ && model_->GetComponent<MaterialComponent>() != nullptr || GameObject::HasMaterial();
+	}
 
 	/// <summary>
 	/// 画面の手前を過ぎたら非アクティブにする

@@ -3,14 +3,14 @@
 #include "MaterialFactory.h"
 #include "PipelineState.h"
 #include <memory>
+#include "../Object/GameObject.h"
+#include "../Component/MaterialComponent.h"
 
-class Triangle
+class Triangle : public GameObject
 {
 private:
 
-	Transform transform_{};
 	Vector4 vertex_[3];
-	std::unique_ptr<MaterialFactory> material_{};
 	D3D12_GPU_DESCRIPTOR_HANDLE textureSrvHandleGPU_{};
 
 	Microsoft::WRL::ComPtr<ID3D12Resource> vertexResource_{};
@@ -40,13 +40,19 @@ public:
 
 
 	void SetShape();
-	void SetTransform(Transform transform);
+	void SetTransform(Transform transform) { transform_ = transform; }
 	void SetVertex(Vector4 vertex[3]);
-	void SetMaterialLighting(bool isActive) { material_.get()->SetMaterialLighting(isActive); }
+	void SetMaterialLighting(bool isActive) { 
+		auto matComp = GetComponent<MaterialComponent>();
+		if(matComp) matComp->GetMaterialFactory()->SetMaterialLighting(isActive);
+	}
 
 	D3D12_VERTEX_BUFFER_VIEW* GetVertexBufferView() { return &vertexBufferView_; }
 	ID3D12Resource* GetVertexResource()const { return wvpResource_.Get(); }
-	MaterialFactory* GetMartial()const { return material_.get(); }
+	MaterialFactory* GetMartial()const { 
+		auto matComp = GetComponent<MaterialComponent>();
+		return matComp ? matComp->GetMaterialFactory() : nullptr;
+	}
 	D3D12_GPU_DESCRIPTOR_HANDLE GetTextureSrvHandleGPU()const { return textureSrvHandleGPU_; }
 
 private:

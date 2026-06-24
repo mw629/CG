@@ -15,51 +15,6 @@ ObjectBase::~ObjectBase()
 
 }
 
-void ObjectBase::ImGui() {
-#ifdef _USE_IMGUI
-	ImGui::PushID(this);
-	if (ImGui::CollapsingHeader(name_.c_str())) {
-		if (ImGui::TreeNode("Transform")) {
-			ImGui::DragFloat3("Position", reinterpret_cast<float*>(&transform_.translate), 0.01f, -FLT_MAX, FLT_MAX, "%.2f");
-			ImGui::DragFloat3("Rotation", reinterpret_cast<float*>(&transform_.rotate), 0.01f, -FLT_MAX, FLT_MAX, "%.2f");
-			ImGui::DragFloat3("Scale", reinterpret_cast<float*>(&transform_.scale), 0.01f, -FLT_MAX, FLT_MAX, "%.2f");
-			ImGui::TreePop();
-		}
-		
-		if (ImGui::TreeNode("Shader")) {
-			const char* shaders[] = { "ObjectShader", "IceShader", "AnimationObj", "SkyBoxShader" };
-			int current_item = 0;
-			for (int i = 0; i < IM_ARRAYSIZE(shaders); ++i) {
-				if (shader_ == shaders[i]) {
-					current_item = i;
-					break;
-				}
-			}
-			if (ImGui::Combo("Shader Selection", &current_item, shaders, IM_ARRAYSIZE(shaders))) {
-				shader_ = shaders[current_item];
-			}
-			ImGui::TreePop();
-		}
-
-		// Blend mode UI
-	if (ImGui::TreeNode("Blend")) {
-		static const BlendMode blendModes[] = { kBlendModeNone, kBlendModeNormal, kBlendModeAdd, kBlendModeSubtract, kBlendModeMultiply, kBlendModeScreen };
-		static const char* blendNames[] = { "None", "Normal", "Add", "Subtract", "Multiply", "Screen" };
-		int current_blend = 0;
-		for (int i = 0; i < IM_ARRAYSIZE(blendModes); ++i) {
-			if (blend_ == blendModes[i]) { current_blend = i; break; }
-		}
-		if (ImGui::Combo("Blend Selection", &current_blend, blendNames, IM_ARRAYSIZE(blendNames))) {
-			blend_ = blendModes[current_blend];
-		}
-		ImGui::TreePop();
-	}
-	material_.get()->ImGui();
-	}
-	ImGui::PopID();
-#endif // _USE_IMGUI
-}
-
 
 void ObjectBase::SetObjectResource(Vector2 ClientSize)
 {

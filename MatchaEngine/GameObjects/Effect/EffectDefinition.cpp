@@ -42,8 +42,7 @@ void EffectDefinition::Initialize(EffectShape shape)
 	std::unique_ptr<Texture> texture = std::make_unique<Texture>();
 	textureSrvHandleGPU_ = texture.get()->TextureData(texture.get()->CreateTexture("Resources/Texture/circle.png"));
 
-	material_ = std::make_unique<MaterialFactory>();
-	material_->CreateMartial(false);
+	AddComponent<MaterialComponent>(false);
 	CreateParticle();
 }
 
@@ -53,8 +52,7 @@ void EffectDefinition::Initialize(int TextureHandle, EffectShape shape)
 	std::unique_ptr<Texture> texture = std::make_unique<Texture>();
 	textureSrvHandleGPU_ = texture.get()->TextureData(TextureHandle);
 
-	material_ = std::make_unique<MaterialFactory>();
-	material_->CreateMartial();
+	AddComponent<MaterialComponent>();
 	CreateParticle();
 }
 

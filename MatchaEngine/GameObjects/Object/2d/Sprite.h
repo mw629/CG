@@ -5,6 +5,8 @@
 #include "Core/VariableTypes.h"
 #include "MaterialFactory.h"
 #include "PipelineState.h"
+#include "../Object/GameObject.h"
+#include "../Component/MaterialComponent.h"
 
 struct SpriteData{
 	Transform transform;
@@ -12,12 +14,10 @@ struct SpriteData{
 	Vector2 textureArea[2];
 };
 
-class Sprite
+class Sprite : public GameObject
 {
 private:
 
-	Transform transform_;
-	std::unique_ptr<MaterialFactory> material_;
 	D3D12_GPU_DESCRIPTOR_HANDLE textureSrvHandleGPU_;
 
 	Microsoft::WRL::ComPtr<ID3D12Resource> vertexResource_;
@@ -69,7 +69,10 @@ public:
 
 	void Update(SpriteData spriteData);
 
-	void SetMaterialLighting(bool isActiv) { material_->SetMaterialLighting(isActiv); }
+	void SetMaterialLighting(bool isActiv) { 
+		auto matComp = GetComponent<MaterialComponent>();
+		if(matComp) matComp->GetMaterialFactory()->SetMaterialLighting(isActiv);
+	}
 
 	void SetTexture(D3D12_GPU_DESCRIPTOR_HANDLE textureSrvHandleGPU) { textureSrvHandleGPU_ = textureSrvHandleGPU; }
 
@@ -79,7 +82,10 @@ public:
 
 	Transform& GetTransform() { return transform_; }
 	
-	MaterialFactory* GetMartial() { return material_.get(); }
+	MaterialFactory* GetMartial() { 
+		auto matComp = GetComponent<MaterialComponent>();
+		return matComp ? matComp->GetMaterialFactory() : nullptr;
+	}
 	D3D12_GPU_DESCRIPTOR_HANDLE GetTextureSrvHandleGPU() { return textureSrvHandleGPU_; }
 
 private:

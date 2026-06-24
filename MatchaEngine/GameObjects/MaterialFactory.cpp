@@ -14,18 +14,15 @@ MaterialFactory::~MaterialFactory(){
 }
 
 void MaterialFactory::ImGui() {
-   #ifdef _USE_IMGUI
-	if (ImGui::TreeNode("MaterialFactory")) {
-		ImGui::ColorEdit4("Color", &materialData_->color.x);
-		bool enableLighting = materialData_->enableLighting != 0;
-		if (ImGui::Checkbox("Enable Lighting", &enableLighting)) {
-			materialData_->enableLighting = enableLighting ? 1 : 0;
-		}
-		ImGui::SliderFloat("Shininess", &materialData_->shininess, 0.0f, 100.0f);
-		ImGui::SliderFloat("Environment Coefficient", &materialData_->environmentCoefficient, 0.0f, 1.0f);
-		ImGui::TreePop();
+#ifdef _USE_IMGUI
+	ImGui::ColorEdit4("Color", &materialData_->color.x);
+	bool enableLighting = materialData_->enableLighting != 0;
+	if (ImGui::Checkbox("Enable Lighting", &enableLighting)) {
+		materialData_->enableLighting = enableLighting ? 1 : 0;
 	}
-   #endif
+	ImGui::SliderFloat("Shininess", &materialData_->shininess, 0.0f, 100.0f);
+	ImGui::SliderFloat("Environment Coefficient", &materialData_->environmentCoefficient, 0.0f, 1.0f);
+#endif // _USE_IMGUI
 }
 
 void MaterialFactory::CreateMartial(bool Lighting, float environmentCoefficient)

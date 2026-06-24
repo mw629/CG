@@ -168,11 +168,10 @@ void Player::Draw()
 	Draw::DrawObj(model_.get());
 }
 
-void Player::ImGui()
+void Player::ImGuiInnerComponents()
 {
-	GameObject::ImGui();
 	if (model_) {
-		model_->ImGui();
+		model_->ImGui(false);
 	}
 }
 

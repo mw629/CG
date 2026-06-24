@@ -32,8 +32,11 @@ void CharacterAnimator::Initialize(ModelData modelData, const std::string& direc
 	skeleton_ = CreateSkeleton(modelData_.rootNode);
 	CreateSkinCluster();
 
-	material_ = std::make_unique<MaterialFactory>();
-	material_->CreateMartial();
+	AddComponent<MaterialComponent>();
+	auto matComp = GetComponent<MaterialComponent>();
+	if (matComp && !modelData_.material.textureDilePath.empty()) {
+		matComp->SetTexturePath(modelData_.material.textureDilePath);
+	}
 	CreateObject();
 
 	SetShader(AnimationObj);

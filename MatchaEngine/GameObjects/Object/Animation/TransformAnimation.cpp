@@ -22,8 +22,7 @@ void TransformAnimation::Initialize(ModelData modelData, const std::string& dire
 
 	skeleton_ = CreateSkeleton(modelData_.rootNode);
 
-	material_ = std::make_unique<MaterialFactory>();
-	material_->CreateMartial();
+	AddComponent<MaterialComponent>();
 	CreateObject();
 }
 

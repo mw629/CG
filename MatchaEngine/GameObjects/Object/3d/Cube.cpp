@@ -11,8 +11,7 @@ void Cube::Initialize(int textureSrvHandle)
 {
     textureSrvHandleGPU_ = texture.get()->TextureData(textureSrvHandle);
 
-    material_ = std::make_unique<MaterialFactory>();
-    material_->CreateMartial();
+    AddComponent<MaterialComponent>();
 
     CreateObject();
 }

@@ -1,0 +1,23 @@
+#pragma once
+#include <string>
+#include "../../Core/VariableTypes.h"
+
+class GameObject;
+
+class Component
+{
+protected:
+    GameObject* gameObject_ = nullptr;
+
+public:
+    Component() = default;
+    virtual ~Component() = default;
+
+    virtual void Initialize() {}
+    virtual void Update(Matrix4x4 view, float speedMultiplier = 1.0f) {}
+    virtual void Draw() {}
+    virtual void ImGui() {}
+
+    void SetGameObject(GameObject* gameObject) { gameObject_ = gameObject; }
+    GameObject* GetGameObject() const { return gameObject_; }
+};
