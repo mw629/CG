@@ -14,10 +14,16 @@ void HapiColiRenderer::BuildCommands(const std::vector<ObjectData>& objects) {
     if (objects.empty()) return;
 
     for (const auto& obj : objects) {
-        if (obj.collider.type != ColliderInfo::Type::Box) continue;
+        if (obj.collider.type == ColliderInfo::Type::None || obj.collider.type == ColliderInfo::Type::Mesh) continue;
 
         ::Vector3 pos = { obj.position.x, obj.position.y, obj.position.z };
         ::Vector3 scale = { obj.collider.size.x, obj.collider.size.y, obj.collider.size.z };
+        
+        // 球の場合は、半径(x)の2倍を各辺とするBox（球を覆う四角）を描画する
+        if (obj.collider.type == ColliderInfo::Type::Sphere) {
+            scale = { obj.collider.size.x * 2.0f, obj.collider.size.x * 2.0f, obj.collider.size.x * 2.0f };
+        }
+
         ::Quaternion rot = { obj.rotation.x, obj.rotation.y, obj.rotation.z, obj.rotation.w };
 
         float color[4] = { 0.0f, 1.0f, 0.0f, 1.0f }; // Green by default

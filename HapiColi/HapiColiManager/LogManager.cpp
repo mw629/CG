@@ -6,41 +6,19 @@
 
 namespace HapiColi
 {
-    bool LogManager::SaveFrames(const std::string& filepath, const std::vector<FrameData>& frames)
-    {
-        std::ofstream file(filepath);
-        if (!file.is_open())
-            return false;
-
-        std::string jsonStr = JsonSerializer::SerializeFrames(frames);
-        file << jsonStr;
-        file.close();
-        return true;
-    }
-
-    bool LogManager::SaveUnhappyReport(
+    bool LogManager::SaveCombinedReport(
         const std::string& filepath,
         const std::vector<TestResult>& results,
-        const std::vector<FrameData>& frames)
+        const std::vector<FrameData>& frames,
+        const std::vector<FuzzResult>& fuzzResults,
+        Language language)
     {
         std::ofstream file(filepath);
         if (!file.is_open())
             return false;
 
-        std::string jsonStr = JsonSerializer::SerializeUnhappyReport(results, frames);
-        file << jsonStr;
-        file.close();
-        return true;
-    }
-
-    bool LogManager::SaveCollisionSummary(const std::string& filepath, const std::vector<FrameData>& frames)
-    {
-        std::ofstream file(filepath);
-        if (!file.is_open())
-            return false;
-
-        std::string jsonStr = JsonSerializer::SerializeCollisionSummary(frames);
-        file << jsonStr;
+        std::string reportStr = JsonSerializer::SerializeMarkdownReport(results, frames, fuzzResults, language);
+        file << reportStr;
         file.close();
         return true;
     }

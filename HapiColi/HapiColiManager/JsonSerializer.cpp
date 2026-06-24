@@ -1,11 +1,13 @@
 #include "JsonSerializer.h"
 #include <sstream>
 #include <unordered_map>
+#include <cmath>
+#include <utility>
 
 namespace HapiColi
 {
     // ---------------------------------------------------------------
-    //  ファイルスコープ ヘルパー
+    //  File scope helper
     // ---------------------------------------------------------------
     static std::string EscapeStr(const std::string& str)
     {
@@ -25,7 +27,7 @@ namespace HapiColi
     }
 
     // ---------------------------------------------------------------
-    //  ObjectData（インデント付き）
+    //  ObjectData (With indent)
     // ---------------------------------------------------------------
     static std::string SerializeObject(const ObjectData& obj, int depth)
     {
@@ -77,7 +79,7 @@ namespace HapiColi
     }
 
     // ---------------------------------------------------------------
-    //  FrameData（インデント深さ指定）
+    //  FrameData (Indent depth)
     // ---------------------------------------------------------------
     static std::string SerializeFrameDataAt(const FrameData& data, int depth)
     {
@@ -103,10 +105,10 @@ namespace HapiColi
     }
 
     // ---------------------------------------------------------------
-    //  公開 API
+    //  Public API
     // ---------------------------------------------------------------
 
-    // private helper – keep signature for header
+    // private helper - keep signature for header
     std::string JsonSerializer::EscapeString(const std::string& str)
     {
         return EscapeStr(str);
@@ -130,22 +132,17 @@ namespace HapiColi
         return oss.str();
     }
 
-    std::string JsonSerializer::SerializeFrames(const std::vector<FrameData>& frames)
+    std::string JsonSerializer::SerializeMarkdownReport(
+        const std::vector<TestResult>& results,
+        const std::vector<FrameData>& frames,
+        const std::vector<FuzzResult>& fuzzResults,
+        Language language)
     {
-        std::ostringstream oss;
-        oss << "[\n";
-        for (size_t i = 0; i < frames.size(); ++i)
-        {
-            oss << SerializeFrameDataAt(frames[i], 1);
-            if (i < frames.size() - 1) oss << ",";
-            oss << "\n";
-        }
-        oss << "]\n";
-        return oss.str();
-    }
+        auto GetText = [language](const char* en, auto jp) {
+            return language == Language::Japanese ? (const char*)jp : en;
+        };
 
-    std::string JsonSerializer::SerializeCollisionSummary(const std::vector<FrameData>& frames)
-    {
+        // 1. Collision Summary Calculation
         struct CollisionPeriod {
             std::string idA;
             std::string idB;
@@ -206,26 +203,7 @@ namespace HapiColi
             }
         }
 
-        std::ostringstream oss;
-        oss << "{\n  \"collision_periods\": [\n";
-        for (size_t i = 0; i < periods.size(); ++i) {
-            oss << "    {\n";
-            oss << "      \"idA\": \"" << EscapeStr(periods[i].idA) << "\",\n";
-            oss << "      \"idB\": \"" << EscapeStr(periods[i].idB) << "\",\n";
-            oss << "      \"start_frame\": " << periods[i].start_frame << ",\n";
-            oss << "      \"end_frame\": " << periods[i].end_frame << "\n";
-            oss << "    }";
-            if (i < periods.size() - 1) oss << ",";
-            oss << "\n";
-        }
-        oss << "  ]\n}\n";
-        return oss.str();
-    }
-
-    std::string JsonSerializer::SerializeUnhappyReport(
-        const std::vector<TestResult>& results,
-        const std::vector<FrameData>& frames)
-    {
+        // 2. Unhappy Report Calculation
         std::unordered_map<uint32_t, const FrameData*> frameMap;
         for (const auto& f : frames)
         {
@@ -233,7 +211,6 @@ namespace HapiColi
                 frameMap[f.frame] = &f;
         }
 
-        // 集計
         int totalTests  = (int)results.size();
         int unhappyCount = 0;
         for (const auto& r : results)
@@ -241,50 +218,142 @@ namespace HapiColi
         int happyCount = totalTests - unhappyCount;
         float successRate = (totalTests > 0) ? (float)happyCount / totalTests * 100.0f : 0.0f;
 
+        // 3. Serialize to Markdown
         std::ostringstream oss;
-        oss << "{\n";
+        oss << GetText("# HapiColi Test Report\n\n", u8"# HapiColi テストレポート\n\n");
 
-        // ── 結論（サマリー）を先頭に ──────────────────────
-        oss << "  \"summary\": {\n";
-        oss << "    \"total_tests\": "   << totalTests   << ",\n";
-        oss << "    \"happy\": "         << happyCount   << ",\n";
-        oss << "    \"unhappy\": "       << unhappyCount << ",\n";
-
-        // 小数点1桁で出力
+        // Summary
+        oss << GetText("## 1. Summary\n", u8"## 1. サマリー\n");
+        oss << GetText("- **Total Tests:** ", u8"- **総テスト数:** ") << totalTests << "\n";
+        oss << GetText("- **Happy (Success):** ", u8"- **成功 (Happy):** ") << happyCount << "\n";
+        oss << GetText("- **Unhappy (Failed):** ", u8"- **失敗 (Unhappy):** ") << unhappyCount << "\n";
         char rateBuf[32];
         snprintf(rateBuf, sizeof(rateBuf), "%.1f", successRate);
-        oss << "    \"success_rate\": \"" << rateBuf << "%\"\n";
-        oss << "  },\n";
+        oss << GetText("- **Success Rate:** ", u8"- **成功率:** ") << rateBuf << "%\n\n";
 
-        // ── 失敗詳細 ──────────────────────────────────────
-        oss << "  \"unhappy_report\": [\n";
-
-        bool first = true;
-        for (const auto& result : results)
-        {
-            if (result.happy) continue;
-
-            if (!first) oss << ",\n";
-            first = false;
-
-            oss << "  {\n";
-            oss << "    \"result\": " << SerializeTestResult(result) << ",\n";
-
-            auto it = frameMap.find(result.frame);
-            if (it != frameMap.end())
-            {
-                oss << "    \"frame_data\":\n";
-                oss << SerializeFrameDataAt(*it->second, 2) << "\n";
+        // Collision Periods
+        oss << GetText("## 2. Collision Periods\n", u8"## 2. 衝突期間 (Collision Periods)\n");
+        if (periods.empty()) {
+            oss << GetText("No collisions detected.\n\n", u8"衝突は検知されませんでした。\n\n");
+        } else {
+            oss << GetText("| Object A | Object B | Start Frame | End Frame |\n", u8"| オブジェクト A | オブジェクト B | 開始フレーム | 終了フレーム |\n");
+            oss << "|---|---|---|---|\n";
+            for (const auto& p : periods) {
+                oss << "| " << p.idA << " | " << p.idB << " | " << p.start_frame << " | " << p.end_frame << " |\n";
             }
-            else
-            {
-                oss << "    \"frame_data\": null\n";
-            }
-
-            oss << "  }";
+            oss << "\n";
         }
 
-        oss << "\n  ]\n}\n";
+        // Test details (Both Happy and Unhappy)
+        oss << GetText("## 3. Test Details\n", u8"## 3. テストの詳細\n");
+        if (results.empty()) {
+            oss << GetText("No tests recorded.\n\n", u8"記録されたテストはありません。\n\n");
+        } else {
+            oss << GetText("| Frame | Status | Expected | Actual | Subject Pos | Target Pos | Distance | Reason |\n", 
+                           u8"| フレーム | 状態 | 期待値 | 実際 | 主語座標 | 対象座標 | 距離 | 理由 |\n");
+            oss << "|---|---|---|---|---|---|---|---|\n";
+            for (const auto& result : results)
+            {
+                std::string statusStr = result.happy ? GetText("Happy", u8"成功") : GetText("Unhappy", u8"失敗");
+                std::string reasonStr = result.reason;
+                if (language == Language::Japanese) {
+                    if (reasonStr == "Success") reasonStr = (const char*)u8"成功";
+                    else if (reasonStr == "Failed to hit target") reasonStr = (const char*)u8"ターゲットへの衝突失敗";
+                    else if (reasonStr == "Unintended collision") reasonStr = (const char*)u8"意図しない衝突";
+                }
+
+                std::string targetName = result.expected;
+                if (targetName.find("Hit ") == 0) targetName = targetName.substr(4);
+                else if (targetName.find("No Hit ") == 0) targetName = targetName.substr(7);
+
+                std::string expectedStr = result.expected;
+                std::string actualStr = result.actual;
+                if (language == Language::Japanese) {
+                    if (expectedStr.find("Hit ") == 0) expectedStr = std::string((const char*)u8"衝突: ") + expectedStr.substr(4);
+                    else if (expectedStr.find("No Hit ") == 0) expectedStr = std::string((const char*)u8"非衝突: ") + expectedStr.substr(7);
+
+                    if (actualStr.find("Hit ") == 0) actualStr = std::string((const char*)u8"衝突: ") + actualStr.substr(4);
+                    else if (actualStr == "No Hit") actualStr = (const char*)u8"非衝突";
+                    else if (actualStr.find("Did not hit ") == 0) actualStr = std::string((const char*)u8"非衝突: ") + actualStr.substr(12);
+                }
+
+                std::string subPosStr = "N/A";
+                std::string tarPosStr = "N/A";
+                std::string distStr = "N/A";
+
+                auto it = frameMap.find(result.frame);
+                if (it != frameMap.end())
+                {
+                    const FrameData* f = it->second;
+                    const ObjectData* subObj = f->GetObjectById(result.targetId); // result.targetId is subject
+                    const ObjectData* tarObj = f->GetObjectById(targetName);
+
+                    if (subObj) {
+                        char buf[64];
+                        snprintf(buf, sizeof(buf), "(%.2f, %.2f, %.2f)", subObj->position.x, subObj->position.y, subObj->position.z);
+                        subPosStr = result.targetId + " " + buf;
+                    }
+                    if (tarObj) {
+                        char buf[64];
+                        snprintf(buf, sizeof(buf), "(%.2f, %.2f, %.2f)", tarObj->position.x, tarObj->position.y, tarObj->position.z);
+                        tarPosStr = targetName + " " + buf;
+                    }
+                    if (subObj && tarObj) {
+                        float dx = subObj->position.x - tarObj->position.x;
+                        float dy = subObj->position.y - tarObj->position.y;
+                        float dz = subObj->position.z - tarObj->position.z;
+                        float dist = std::sqrt(dx*dx + dy*dy + dz*dz);
+                        char buf[32];
+                        snprintf(buf, sizeof(buf), "%.2f", dist);
+                        distStr = buf;
+                    }
+                }
+
+                oss << "| " << result.frame 
+                    << " | " << statusStr 
+                    << " | " << expectedStr 
+                    << " | " << actualStr 
+                    << " | " << subPosStr 
+                    << " | " << tarPosStr 
+                    << " | " << distStr 
+                    << " | " << reasonStr << " |\n";
+            }
+            oss << "\n";
+        }
+
+        // Fuzzing Results
+        oss << GetText("## 4. Fuzzing Results\n", u8"## 4. ファジング結果 (Fuzzing Results)\n");
+        if (fuzzResults.empty()) {
+            oss << GetText("No fuzzing tests recorded.\n\n", u8"記録されたファジングテストはありません。\n\n");
+        } else {
+            oss << GetText("| Test Name | Status | Object A Pos | Object B Pos | Description |\n", 
+                           u8"| テスト名 | 状態 | オブジェクトA 座標 | オブジェクトB 座標 | 説明 |\n");
+            oss << "|---|---|---|---|---|\n";
+            for (const auto& f : fuzzResults) {
+                std::string statusStr = f.isBugCaught ? GetText("Bug Caught", u8"バグ検知") : GetText("Passed", u8"パス");
+                
+                char bufA[64];
+                snprintf(bufA, sizeof(bufA), "(%.2f, %.2f, %.2f)", f.objA.position.x, f.objA.position.y, f.objA.position.z);
+                
+                char bufB[64];
+                snprintf(bufB, sizeof(bufB), "(%.2f, %.2f, %.2f)", f.objB.position.x, f.objB.position.y, f.objB.position.z);
+
+                std::string descStr = f.description;
+                if (language == Language::Japanese) {
+                    if (descStr == "Unexpected collision detected!") descStr = (const char*)u8"予期せぬ衝突を検知！";
+                    else if (descStr == "Missed expected collision!") descStr = (const char*)u8"想定された衝突をミス！";
+                    else if (descStr == "OK") descStr = (const char*)u8"正常";
+                }
+
+                oss << "| " << f.testName
+                    << " | " << statusStr
+                    << " | " << f.objA.id << " " << bufA
+                    << " | " << f.objB.id << " " << bufB
+                    << " | " << descStr << " |\n";
+            }
+            oss << "\n";
+        }
+
         return oss.str();
     }
 

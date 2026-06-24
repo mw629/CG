@@ -54,7 +54,9 @@ namespace HapiColi
         if (m_language != oldLanguage)
         {
             const auto& results = m_manager->GetAnalyzer()->GetResults();
-            m_cachedSuggestions = m_manager->GetOptimizer()->GenerateSuggestions(results, m_language);
+            const auto& warnings = m_manager->GetAnalyzer()->GetWarnings();
+            const auto& fuzzResults = m_manager->GetFuzzer()->GetResults();
+            m_cachedSuggestions = m_manager->GetOptimizer()->GenerateSuggestions(results, warnings, fuzzResults, m_language);
         }
 
         ImGui::Separator();
@@ -323,7 +325,9 @@ namespace HapiColi
             if (ImGui::Button(GetText("Generate Suggestions", u8"改善案を生成")))
             {
                 const auto& results = m_manager->GetAnalyzer()->GetResults();
-                m_cachedSuggestions = m_manager->GetOptimizer()->GenerateSuggestions(results, m_language);
+                const auto& warnings = m_manager->GetAnalyzer()->GetWarnings();
+                const auto& fuzzResults = m_manager->GetFuzzer()->GetResults();
+                m_cachedSuggestions = m_manager->GetOptimizer()->GenerateSuggestions(results, warnings, fuzzResults, m_language);
             }
             
             for (const auto& sug : m_cachedSuggestions)
@@ -334,15 +338,17 @@ namespace HapiColi
 
         if (ImGui::CollapsingHeader(GetText("File I/O", u8"ファイル入出力")))
         {
-            if (ImGui::Button(GetText("Save JSON", u8"JSON保存")))
+            if (ImGui::Button(GetText("Save Log (Markdown)", u8"レポート保存(Markdown)")))
             {
                 m_isSaving = true;
                 
                 auto framesToSave  = m_manager->GetRecorder()->GetRecordedFrames();
                 auto resultsToSave = m_manager->GetAnalyzer()->GetResults(); // Unhappy抽出用
+                auto fuzzResultsToSave = m_manager->GetFuzzer()->GetResults();
                 LogManager* logManager = m_manager->GetLogManager();
                 
-                std::thread([logManager, framesToSave, resultsToSave, this]() {
+                Language currentLang = m_language;
+                std::thread([logManager, framesToSave, resultsToSave, fuzzResultsToSave, currentLang, this]() {
                     auto now = std::chrono::system_clock::now();
                     auto time = std::chrono::system_clock::to_time_t(now);
                     struct tm timeinfo;
@@ -361,22 +367,14 @@ namespace HapiColi
 
                     // 実行環境の相対パスで保存するように変更
                     std::string logDir  = "HapiColi\\Log";
-                    std::string logPath = logDir + "\\" + timeBuf + ".json";
-                    std::string unhappyPath = logDir + "\\" + timeBuf + "_Unhappy.json";
-                    std::string summaryPath = logDir + "\\" + timeBuf + "_CollisionSummary.json";
+                    std::string logPath = logDir + "\\" + timeBuf + "_Report.md";
                     
                     system(("mkdir \"" + logDir + "\" 2> nul").c_str());
 
-                    // 全フレームを保存
-                    logManager->SaveFrames(logPath, framesToSave);
-
-                    // Unhappy な結果 + 対応フレームを別ファイルに保存
-                    logManager->SaveUnhappyReport(unhappyPath, resultsToSave, framesToSave);
-
-                    // 何フレーム目から何フレーム目まで当たっていたかのサマリーを保存
-                    logManager->SaveCollisionSummary(summaryPath, framesToSave);
+                    // 必要な情報のみ（テスト結果サマリー、衝突期間、失敗フレーム詳細、Fuzz結果）をMarkdownで保存
+                    logManager->SaveCombinedReport(logPath, resultsToSave, framesToSave, fuzzResultsToSave, currentLang);
                     
-                    AddLog("Saved JSON log files successfully.");
+                    AddLog("Saved Markdown report successfully.");
                     m_isSaving = false;
                 }).detach();
             }
