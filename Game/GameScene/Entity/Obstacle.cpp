@@ -110,6 +110,9 @@ void Obstacle::StageUpdate(Matrix4x4 view, float scrollSpeed) {
 
   model_.get()->SetTransform(transform_);
   model_.get()->SettingWvp(view);
+
+  // コンポーネント（ColliderComponentなど）のUpdateを呼ぶ
+  GameObject::Update(view, 1.0f);
 }
 
 void Obstacle::OnHit() {
@@ -122,9 +125,9 @@ void Obstacle::OnHit() {
 }
 
 void Obstacle::Draw() {
-  if (!isActive_)
-    return;
+  if (!isActive_) return;
   Draw::DrawObj(model_.get());
+  GameObject::Draw();
 }
 
 void Obstacle::ImGuiInnerComponents() {

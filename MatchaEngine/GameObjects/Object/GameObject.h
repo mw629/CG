@@ -6,6 +6,7 @@
 #include "VariableTypes.h"
 #include "../Component/Component.h"
 #include "../Component/MaterialComponent.h"
+#include "../Component/ColliderComponent.h"
 
 #ifdef _USE_IMGUI
 #include <imgui.h>
@@ -64,6 +65,8 @@ public:
             component->Update(view, speedMultiplier);
         }
     }
+    virtual void OnCollision(GameObject* other) {}
+
     virtual void Draw() {
         for (auto& component : components_) {
             component->Draw();
@@ -111,6 +114,13 @@ public:
                         }
                     } else {
                         ImGui::TextDisabled("MaterialComponent (Added)");
+                    }
+                    if (!GetComponent<ColliderComponent>()) {
+                        if (ImGui::Selectable("ColliderComponent")) {
+                            AddComponent<ColliderComponent>();
+                        }
+                    } else {
+                        ImGui::TextDisabled("ColliderComponent (Added)");
                     }
                     ImGui::EndPopup();
                 }

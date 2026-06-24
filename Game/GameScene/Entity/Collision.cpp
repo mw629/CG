@@ -25,3 +25,29 @@ AABB Collision::MakeAABB(const Transform& transform, float width, float height, 
 	};
 	return aabb;
 }
+
+bool Collision::CheckSphere(const BoundingSphere& a, const BoundingSphere& b)
+{
+	float dx = a.center.x - b.center.x;
+	float dy = a.center.y - b.center.y;
+	float dz = a.center.z - b.center.z;
+	float distSquared = dx * dx + dy * dy + dz * dz;
+	float radiusSum = a.radius + b.radius;
+	return distSquared <= (radiusSum * radiusSum);
+}
+
+bool Collision::CheckAABBSphere(const AABB& aabb, const BoundingSphere& sphere)
+{
+	// AABB上の球の中心に最も近い点を見つける
+	float closestX = (std::max)(aabb.min.x, (std::min)(sphere.center.x, aabb.max.x));
+	float closestY = (std::max)(aabb.min.y, (std::min)(sphere.center.y, aabb.max.y));
+	float closestZ = (std::max)(aabb.min.z, (std::min)(sphere.center.z, aabb.max.z));
+
+	// その点と球の中心との距離を計算
+	float dx = closestX - sphere.center.x;
+	float dy = closestY - sphere.center.y;
+	float dz = closestZ - sphere.center.z;
+
+	float distSquared = dx * dx + dy * dy + dz * dz;
+	return distSquared <= (sphere.radius * sphere.radius);
+}
