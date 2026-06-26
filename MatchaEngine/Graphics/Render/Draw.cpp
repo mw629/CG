@@ -126,6 +126,7 @@ void Draw::DrawModel(Model* model)
 
 
 	//objectの描画
+	commandList_->IASetIndexBuffer(&mesh.indexBufferView_);
 	commandList_->IASetVertexBuffers(0, 1, &mesh.vertexBufferView);  // アドレスを渡す
 	ShaderName shader = model->GetShader();
 	BlendMode blend = model->GetBlend();
@@ -138,7 +139,7 @@ void Draw::DrawModel(Model* model)
 	SetCBV(shader, blend, "gSpotLightGroup", lightManager_->GetSpotLightResource()->GetGPUVirtualAddress());
 	SetTable(shader, blend, "gEnvironmentTexture", environmentTextureSrvHandleGPU_);
 
-	commandList_->DrawInstanced(UINT(mesh.vertexSize), 1, 0, 0);
+	commandList_->DrawIndexedInstanced(UINT(mesh.indexBufferView_.SizeInBytes / sizeof(uint32_t)), 1, 0, 0, 0);
 }
 
 void Draw::DrawParticle(EffectDefinition* particle)

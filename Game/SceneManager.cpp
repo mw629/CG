@@ -9,7 +9,7 @@
 SceneManager::SceneManager()
 {
 	// 最初のシーンをJsonSceneに設定
-	scene_ = std::make_unique<JsonScene>();
+	scene_ = std::make_unique<GameScene>();
 	Initialize();
 }
 
