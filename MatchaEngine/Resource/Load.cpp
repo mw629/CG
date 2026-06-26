@@ -136,7 +136,7 @@ ModelData LoadObjFile(const std::string& directoryPath, const std::string& filen
 	Assimp::Importer impoter;
 	std::string filePath = directoryPath + "/" + filename;
 	const aiScene* scene = impoter.ReadFile(filePath.c_str(),
-		aiProcess_FlipWindingOrder | aiProcess_FlipUVs);
+		aiProcess_FlipWindingOrder | aiProcess_FlipUVs | aiProcess_Triangulate);
 	assert(scene->HasMeshes());
 
 	std::vector<VertexData> vertices;
@@ -226,7 +226,7 @@ ModelData AssimpLoadObjFile(const std::string& directoryPath, const std::string&
 	Assimp::Importer impoter;
 	std::string filePath = directoryPath + "/" + filename;
 	const aiScene* scene = impoter.ReadFile(filePath.c_str(),
-		aiProcess_FlipWindingOrder | aiProcess_FlipUVs);
+		aiProcess_FlipWindingOrder | aiProcess_FlipUVs | aiProcess_Triangulate);
 	assert(scene->HasMeshes());
 
 	for (uint32_t meshIndex = 0; meshIndex < scene->mNumMeshes; ++meshIndex) {
