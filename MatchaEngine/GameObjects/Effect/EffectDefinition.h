@@ -93,6 +93,7 @@ public:
 	void DeleteParticle(int ParticleNum);
 
 	void SetBillboard(bool flag) { isBillboard_ = flag; }
+	bool GetBillboard() const { return isBillboard_; }
 
 	ModelData GetModelData() { return modelData_; }
 	MaterialFactory* GetMartial() { 

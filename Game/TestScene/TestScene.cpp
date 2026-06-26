@@ -212,7 +212,7 @@ void TestScene::Draw() {
 
 	//Draw::DrawObj(sphere_.get());
 	for (int i = 0, n = static_cast<int>(particle_.size()); i < n; ++i) {
-		//particle_[i].get()->Draw();
+		particle_[i].get()->Draw();
 	}
 	//Draw::DrawSprite(sprite_.get());
 }

@@ -51,7 +51,9 @@ void Emitter::ImGui() {
 		}
 
 		if (ImGui::TreeNode("Particle Initial Settings")) {
+			ImGui::DragFloat3("Base Position", &SetEffectDefinitionData_.transform.translate.x, 0.01f, -FLT_MAX, FLT_MAX, "%.2f");
 			ImGui::DragFloat3("Base Size (Scale)", &SetEffectDefinitionData_.transform.scale.x, 0.01f, -FLT_MAX, FLT_MAX, "%.2f");
+			ImGui::DragFloat3("Base Rotation", &SetEffectDefinitionData_.transform.rotate.x, 0.01f, -FLT_MAX, FLT_MAX, "%.2f");
 			ImGui::ColorEdit4("Color", &SetEffectDefinitionData_.color.x);
 			ImGui::DragFloat("LifeTime", &SetEffectDefinitionData_.lifeTime, 0.01f, 0.0f, FLT_MAX, "%.2f");
 			ImGui::TreePop();
@@ -67,6 +69,11 @@ void Emitter::ImGui() {
 		}
 
 		if (ImGui::TreeNode("Visual Settings")) {
+			bool isBillboard = GetBillboard();
+			if (ImGui::Checkbox("Billboard", &isBillboard)) {
+				SetBillboard(isBillboard);
+			}
+
 			const char* shapes[] = { "Plane", "Cylinder", "Ring" };
 			int currentShape = static_cast<int>(shape_);
 			if (ImGui::Combo("Shape", &currentShape, shapes, IM_ARRAYSIZE(shapes))) {
@@ -199,7 +206,9 @@ void Emitter::SaveToJson(const std::string& name)
 	root["emitter"]["count"] = emitter_.count;
 	root["emitter"]["frequency"] = emitter_.frequency;
 
+	root["particle"]["transform"]["translate"] = { SetEffectDefinitionData_.transform.translate.x, SetEffectDefinitionData_.transform.translate.y, SetEffectDefinitionData_.transform.translate.z };
 	root["particle"]["transform"]["scale"] = { SetEffectDefinitionData_.transform.scale.x, SetEffectDefinitionData_.transform.scale.y, SetEffectDefinitionData_.transform.scale.z };
+	root["particle"]["transform"]["rotate"] = { SetEffectDefinitionData_.transform.rotate.x, SetEffectDefinitionData_.transform.rotate.y, SetEffectDefinitionData_.transform.rotate.z };
 	root["particle"]["color"] = { SetEffectDefinitionData_.color.x, SetEffectDefinitionData_.color.y, SetEffectDefinitionData_.color.z, SetEffectDefinitionData_.color.w };
 	root["particle"]["lifeTime"] = SetEffectDefinitionData_.lifeTime;
 
@@ -212,6 +221,7 @@ void Emitter::SaveToJson(const std::string& name)
 	root["visual"]["texturePath"] = texturePath_;
 	root["visual"]["shape"] = static_cast<int>(shape_);
 	root["visual"]["blendMode"] = static_cast<int>(GetBlend());
+	root["visual"]["isBillboard"] = GetBillboard();
 	root["visual"]["shader"] = shaderName_;
 
 	root["visual"]["cylinderDivide"] = shapeData_.cylinderDivide;
@@ -262,9 +272,21 @@ void Emitter::LoadFromJson(const std::string& name)
 
 	if (root.contains("particle")) {
 		if (root["particle"].contains("transform")) {
-			SetEffectDefinitionData_.transform.scale.x = root["particle"]["transform"]["scale"][0];
-			SetEffectDefinitionData_.transform.scale.y = root["particle"]["transform"]["scale"][1];
-			SetEffectDefinitionData_.transform.scale.z = root["particle"]["transform"]["scale"][2];
+			if (root["particle"]["transform"].contains("translate")) {
+				SetEffectDefinitionData_.transform.translate.x = root["particle"]["transform"]["translate"][0];
+				SetEffectDefinitionData_.transform.translate.y = root["particle"]["transform"]["translate"][1];
+				SetEffectDefinitionData_.transform.translate.z = root["particle"]["transform"]["translate"][2];
+			}
+			if (root["particle"]["transform"].contains("scale")) {
+				SetEffectDefinitionData_.transform.scale.x = root["particle"]["transform"]["scale"][0];
+				SetEffectDefinitionData_.transform.scale.y = root["particle"]["transform"]["scale"][1];
+				SetEffectDefinitionData_.transform.scale.z = root["particle"]["transform"]["scale"][2];
+			}
+			if (root["particle"]["transform"].contains("rotate")) {
+				SetEffectDefinitionData_.transform.rotate.x = root["particle"]["transform"]["rotate"][0];
+				SetEffectDefinitionData_.transform.rotate.y = root["particle"]["transform"]["rotate"][1];
+				SetEffectDefinitionData_.transform.rotate.z = root["particle"]["transform"]["rotate"][2];
+			}
 		}
 		if (root["particle"].contains("color")) {
 			SetEffectDefinitionData_.color.x = root["particle"]["color"][0];
@@ -334,6 +356,9 @@ void Emitter::LoadFromJson(const std::string& name)
 		}
 		if (root["visual"].contains("blendMode")) {
 			SetBlend(static_cast<BlendMode>(root["visual"]["blendMode"].get<int>()));
+		}
+		if (root["visual"].contains("isBillboard")) {
+			SetBillboard(root["visual"]["isBillboard"].get<bool>());
 		}
 		if (root["visual"].contains("shader")) {
 			SetShader(root["visual"]["shader"].get<std::string>());
@@ -550,7 +575,7 @@ EffectDefinitionData Emitter::MakeNewParticle()
 	EffectDefinitionData data;
 	data = SetEffectDefinitionData_;
 	Vector3 possion = { distribution(randomEngine),distribution(randomEngine) ,distribution(randomEngine) };
-	data.transform.translate = possion * emitter_.transform.scale + emitter_.transform.translate;
+	data.transform.translate = SetEffectDefinitionData_.transform.translate + possion * emitter_.transform.scale + emitter_.transform.translate;
 	data.transform.scale.x += distribution(randomEngine) * movementData_.sizeVariance.x;
 	data.transform.scale.y += distribution(randomEngine) * movementData_.sizeVariance.y;
 	data.transform.scale.z += distribution(randomEngine) * movementData_.sizeVariance.z;
@@ -571,9 +596,10 @@ EffectDefinitionData Emitter::MakeNewParticle(Vector3 scale)
 {
 	std::uniform_real_distribution<float> distribution(-1.0f, 1.0f);
 	EffectDefinitionData data;
-	data.transform = { {1.0f,1.0f,1.0f},{0.0f,0.0f,0.0f},{0.0f,0.0f,0.0f} };
+	data.transform = SetEffectDefinitionData_.transform;
+	data.transform.scale = scale;
 	Vector3 possion = { distribution(randomEngine),distribution(randomEngine) ,distribution(randomEngine) };
-	data.transform.translate = possion * emitter_.transform.scale + emitter_.transform.translate;
+	data.transform.translate = SetEffectDefinitionData_.transform.translate + possion * emitter_.transform.scale + emitter_.transform.translate;
 	data.transform.scale = scale;
 	data.transform.scale.x += distribution(randomEngine) * movementData_.sizeVariance.x;
 	data.transform.scale.y += distribution(randomEngine) * movementData_.sizeVariance.y;

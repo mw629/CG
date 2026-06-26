@@ -101,6 +101,7 @@ void GameScene::ImGui()
 		if (hitEffect_) hitEffect_->ImGui();
 		if (dustEffect_) dustEffect_->ImGui();
 		if (shockwaveEffect_) shockwaveEffect_->ImGui();
+		if (bonusCylinderEffect_) bonusCylinderEffect_->ImGui();
 	}
 
 	ImGui::End();
@@ -243,6 +244,16 @@ void GameScene::Initialize() {
 	shockwaveEffect_->generatorBehavior = [](EffectDefinitionData& p) {
 		p.velocity = { 0.0f, 0.0f, 0.0f }; // 発生時は移動なし
 		p.transform.rotate.x = 3.14159265f / 2.0f; // 盾（縦）になっているリングを90度回転させて地面と平行（横）にする
+	};
+
+	// ボーナスヒット時のシリンダーエフェクトの初期化
+	bonusCylinderEffect_->Initialize();
+	bonusCylinderEffect_->LoadFromJson("BonusCylinder1");
+	bonusCylinderEffect_->name_ = "Bonus Cylinder";
+	bonusCylinderEffect_->SetStop(true);
+	bonusCylinderEffect_->generatorBehavior = [](EffectDefinitionData& p) {
+		p.velocity = { 0.0f, 0.0f, 0.0f }; // 発生時は移動なし
+		p.transform.rotate.x = 0.0f; 
 	};
 
 	// camera_->SetDebugCamera() は上記で設定済み
@@ -392,6 +403,7 @@ void GameScene::Draw() {
 	stageSettings_->Draw();
 	hitEffect_->Draw();
 	shockwaveEffect_->Draw();
+	bonusCylinderEffect_->Draw();
 	dustEffect_->Draw();
 }
 
@@ -440,6 +452,15 @@ void GameScene::PlayingUpdate()
 		next.transform.scale.x += 0.06f;
 		next.transform.scale.y += 0.06f;
 		next.transform.scale.z += 0.06f;
+		return next;
+	});
+
+	bonusCylinderEffect_->Update(view, [](const EffectDefinitionData& p) {
+		EffectDefinitionData next = p;
+		// シリンダーは半径と高さを広げる
+		next.transform.scale.x += 0.08f;
+		next.transform.scale.y += 0.2f; // Y（高さ）を強めに広げる
+		next.transform.scale.z += 0.08f;
 		return next;
 	});
 
@@ -501,6 +522,13 @@ void GameScene::CheckCollisions()
 				ringData.transform.translate.y -= 0.4f; // 足元より少し上（腰から足の間くらい）に設定
 				shockwaveEffect_->SetEmitterData(ringData);
 				shockwaveEffect_->Emit();
+
+				// プレイヤーの足元にCylinderエフェクトを出す
+				EmitterData cylinderData = bonusCylinderEffect_->GetEmitterData();
+				cylinderData.transform.translate = player_->GetTransform().translate;
+				cylinderData.transform.translate.y -= 0.6f; // 足元に設定
+				bonusCylinderEffect_->SetEmitterData(cylinderData);
+				bonusCylinderEffect_->Emit();
 
 				continue; // ゲームオーバーにはならず、次の判定へ
 			}

@@ -66,6 +66,9 @@ private:
 	//<< Shockwave Effect >>//
 	std::unique_ptr<Emitter> shockwaveEffect_ = std::make_unique<Emitter>();
 
+	//<< Bonus Cylinder Effect >>//
+	std::unique_ptr<Emitter> bonusCylinderEffect_ = std::make_unique<Emitter>();
+
 
 	// 当たり判定処理
 	void CheckCollisions();

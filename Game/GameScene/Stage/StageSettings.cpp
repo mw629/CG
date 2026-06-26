@@ -8,12 +8,15 @@ void StageSettings::Initialize(ModelData roadModelData, ModelData obstacleModelD
 	std::srand(static_cast<unsigned int>(std::time(nullptr)));
 
 	// グラウンドテクスチャをロード
-	texture_->CreateTexture("Resources/Model/Ground/white64x64.png");
+	texture_->CreateTexture("Resources/Model/Ground/Ground.png");
 
 	// 道路チャンクの初期化
 	for (int i = 0; i < kChunkCount_; i++) {
         auto roadModel = std::make_shared<Model>();
 		roadModel->Initialize(roadModelData);
+		if (auto matComp = roadModel->GetComponent<MaterialComponent>()) {
+			matComp->SetTexturePath("Resources/Model/Ground/Ground.png");
+		}
 		roadModel->SetTexture(texture_->TextureData("Resources/Model/Ground/Ground.png"));
 
 		roadChunks_[i] = std::make_shared<RenderObject>(roadModel);
@@ -185,8 +188,8 @@ void StageSettings::Reset()
 
 	// 道路チャンクの位置をリセット
 	for (int i = 0; i < kChunkCount_; i++) {
-		roadTransforms_[i].translate = { 0.0f, 2.0f, static_cast<float>(i) * chunkLength_ };
-		roadChunks_[i]->SetTransform(roadTransforms_[i]);
+		//roadTransforms_[i].translate = { 0.0f, 2.0f, static_cast<float>(i) * chunkLength_ };
+		//roadChunks_[i]->SetTransform(roadTransforms_[i]);
 	}
 
 	// 障害物を全て非アクティブに
