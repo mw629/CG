@@ -108,6 +108,9 @@ public:
 	void SetShader(ShaderName shader) { shaderName_ = shader; effectDefinition_->SetShader(shader); }
 	ShaderName GetShader() const { return shaderName_; }
 
+	void SetBillboard(bool flag) { effectDefinition_->SetBillboard(flag); }
+	bool GetBillboard() const { return effectDefinition_->GetBillboard(); }
+
 
 
 	std::list<EffectDefinitionData> GetEffectDefinitionData() { return effectDefinition_.get()->GetEffectDefinitionData(); }
