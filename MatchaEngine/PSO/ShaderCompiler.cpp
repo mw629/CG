@@ -138,3 +138,19 @@ void ShaderCompile::CreateShaderCompile(const PipelineConfig& config, std::ostre
 
 	Log(os, "====== CreateShaderCompile End ======\n");
 }
+
+void ShaderCompile::CreateComputeShaderCompile(const std::wstring& csPath, std::ostream& os, Microsoft::WRL::ComPtr<IDxcUtils> dxcUtils, Microsoft::WRL::ComPtr<IDxcCompiler3> dxcCompiler, Microsoft::WRL::ComPtr<IDxcIncludeHandler> includeHandler)
+{
+	Log(os, "====== CreateComputeShaderCompile Start ======\n");
+	Log(os, "Compiling Compute Shader...\n");
+	computeShaderBlob_ = CompileShader(os, csPath, L"cs_6_0", dxcUtils, dxcCompiler, includeHandler);
+	if (computeShaderBlob_ != nullptr) {
+		Log(os, "Compute Shader compiled successfully\n");
+	} else {
+		Log(os, "Compute Shader compilation failed\n");
+	}
+	assert(computeShaderBlob_ != nullptr);
+	Log(os, "====== CreateComputeShaderCompile End ======\n");
+}
+
+IDxcBlob* ShaderCompile::GetComputeShaderBlob() { return computeShaderBlob_.Get(); }
