@@ -51,7 +51,8 @@ namespace HapiColi {
             res.collisionA = a.collision;
             res.collisionB = b.collision;
             res.isBugCaught = false; // By default, base is assumed expected unless explicitly defined
-            res.description = a.collision.isColliding ? "衝突した" : "衝突なし";
+            std::string resultStr = a.collision.isColliding ? "衝突した" : "衝突なし";
+            res.description = "行ったこと: 現在の座標でそのまま判定を行った。 結果: " + resultStr;
             m_results.push_back(res);
 
             baseColliding = a.collision.isColliding;
@@ -74,11 +75,13 @@ namespace HapiColi {
             res.collisionB = b.collision;
             // Since evalFunc is just static AABB, moving it 100 units will naturally stop collision.
             res.isBugCaught = false; 
+            std::string resultStr;
             if (baseColliding) {
-                res.description = res.collisionA.isColliding ? "警告：遠距離で衝突判定がありました" : "静的判定では衝突なし（すり抜けの可能性）";
+                resultStr = res.collisionA.isColliding ? "警告：遠距離で衝突判定がありました" : "静的判定では衝突なし（すり抜けの可能性）";
             } else {
-                res.description = "元の状態が非衝突のためテスト対象外（非衝突を維持）";
+                resultStr = "元の状態が非衝突のためテスト対象外（非衝突を維持）";
             }
+            res.description = "行ったこと: 相手(Object B)をX軸方向に+100.0f移動させて高速移動をシミュレートした。 結果: " + resultStr;
             m_results.push_back(res);
             LogManager::PrintOutput("  -> [Test 2] Result: " + res.description);
         }
@@ -110,7 +113,7 @@ namespace HapiColi {
                     res.collisionB = b.collision;
                     // Not necessarily a bug, just a boundary fluctuation. Let's record it without flagging as red bug.
                     res.isBugCaught = false; 
-                    res.description = "境界付近でのゆらぎ（結果が変わりました）";
+                    res.description = "行ったこと: 相手(Object B)の座標をランダムに微小移動させて判定を行った。 結果: 境界付近でのゆらぎ（結果が変わりました）";
                     m_results.push_back(res);
                     toggled = true;
                     LogManager::PrintOutput("  -> [Test 3] Toggled on trial " + std::to_string(i) + ". Result changed.");
@@ -126,7 +129,7 @@ namespace HapiColi {
                 res.collisionA = target.baseA.collision;
                 res.collisionB = target.baseB.collision;
                 res.isBugCaught = false; 
-                res.description = "ゆらぎ耐性チェック完了（判定の変動なし）";
+                res.description = "行ったこと: 相手(Object B)の座標をランダムに微小移動させて判定を行った。 結果: ゆらぎ耐性チェック完了（判定の変動なし）";
                 m_results.push_back(res);
                 LogManager::PrintOutput("  -> [Test 3] Completed with no toggles.");
             }

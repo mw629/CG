@@ -174,17 +174,20 @@ void TestScene::Initialize() {
 	Vector3 initialModelCenter = { (initialModelAABB.min.x + initialModelAABB.max.x)*0.5f, (initialModelAABB.min.y + initialModelAABB.max.y)*0.5f, (initialModelAABB.min.z + initialModelAABB.max.z)*0.5f };
 	HapiColi::ObjectData baseA = HapiColi::ObjectData::CreateBox("Model_Box", {initialModelCenter.x, initialModelCenter.y, initialModelCenter.z}, {2.0f, 2.0f, 2.0f});
 
-	CollisionSphere initialColSphere = Collision::MakeSphere(Transform_, 1.0f);
-	initialColSphere.center.y -= 1.0f;
-	HapiColi::ObjectData baseB = HapiColi::ObjectData::CreateSphere("Target_Sphere", {initialColSphere.center.x, initialColSphere.center.y, initialColSphere.center.z}, initialColSphere.radius);
-	HapiColi::HapiColi::GetInstance().RegisterFuzzTarget("Model vs Sphere Fuzzing", baseA, baseB, [](HapiColi::ObjectData& a, HapiColi::ObjectData& b) {
+	AABB targetInitialAABB = Collision::MakeAABB(Transform_, 2.0f, 2.0f, 2.0f);
+	targetInitialAABB.min.y -= 1.0f;
+	targetInitialAABB.max.y -= 1.0f;
+	Vector3 targetInitialCenter = { (targetInitialAABB.min.x + targetInitialAABB.max.x)*0.5f, (targetInitialAABB.min.y + targetInitialAABB.max.y)*0.5f, (targetInitialAABB.min.z + targetInitialAABB.max.z)*0.5f };
+	HapiColi::ObjectData baseB = HapiColi::ObjectData::CreateBox("Target_Box", {targetInitialCenter.x, targetInitialCenter.y, targetInitialCenter.z}, {2.0f, 2.0f, 2.0f});
+	
+	HapiColi::HapiColi::GetInstance().RegisterFuzzTarget("Model vs Box Fuzzing", baseA, baseB, [](HapiColi::ObjectData& a, HapiColi::ObjectData& b) {
 		AABB aabbA; 
 		aabbA.min = {a.position.x - a.collider.size.x * 0.5f, a.position.y - a.collider.size.y * 0.5f, a.position.z - a.collider.size.z * 0.5f}; 
 		aabbA.max = {a.position.x + a.collider.size.x * 0.5f, a.position.y + a.collider.size.y * 0.5f, a.position.z + a.collider.size.z * 0.5f};
-		CollisionSphere sphereB;
-		sphereB.center = {b.position.x, b.position.y, b.position.z};
-		sphereB.radius = b.collider.size.x;
-		bool hit = Collision::CheckAABBSphere(aabbA, sphereB);
+		AABB aabbB;
+		aabbB.min = {b.position.x - b.collider.size.x * 0.5f, b.position.y - b.collider.size.y * 0.5f, b.position.z - b.collider.size.z * 0.5f};
+		aabbB.max = {b.position.x + b.collider.size.x * 0.5f, b.position.y + b.collider.size.y * 0.5f, b.position.z + b.collider.size.z * 0.5f};
+		bool hit = Collision::CheckAABB(aabbA, aabbB);
 		a.collision.isColliding = hit;
 		b.collision.isColliding = hit;
 	});
@@ -214,7 +217,7 @@ void TestScene::Update() {
 						if (obj.id == "Model_Box" || obj.id == "Model_Sphere") {
 							modelTransform_.translate = { obj.position.x, obj.position.y, obj.position.z };
 							model_.get()->SetTransform(modelTransform_);
-						} else if (obj.id == "Target_Sphere") {
+						} else if (obj.id == "Target_Box") {
 							Transform_.translate = { obj.position.x, obj.position.y, obj.position.z };
 							sphere_.get()->SetTransform(Transform_);
 						}
@@ -291,39 +294,36 @@ void TestScene::Update() {
 		modelSphere.radius
 	);
 
-	// 相手 (Sphere)
-	CollisionSphere colSphere = Collision::MakeSphere(Transform_, 1.0f);
-	colSphere.center.y -= 1.0f;
-	HapiColi::ObjectData targetSphereData = HapiColi::ObjectData::CreateSphere(
-		"Target_Sphere",
-		{colSphere.center.x, colSphere.center.y, colSphere.center.z},
-		colSphere.radius
+	// 相手 (Box)
+	AABB targetAABB = Collision::MakeAABB(Transform_, 2.0f, 2.0f, 2.0f);
+	targetAABB.min.y -= 1.0f;
+	targetAABB.max.y -= 1.0f;
+	Vector3 targetCenter = { (targetAABB.min.x + targetAABB.max.x)*0.5f, (targetAABB.min.y + targetAABB.max.y)*0.5f, (targetAABB.min.z + targetAABB.max.z)*0.5f };
+	Vector3 targetSize = { targetAABB.max.x - targetAABB.min.x, targetAABB.max.y - targetAABB.min.y, targetAABB.max.z - targetAABB.min.z };
+	HapiColi::ObjectData targetBoxData = HapiColi::ObjectData::CreateBox(
+		"Target_Box",
+		{targetCenter.x, targetCenter.y, targetCenter.z},
+		{targetSize.x, targetSize.y, targetSize.z}
 	);
 
-	bool hitBox = Collision::CheckAABBSphere(modelAABB, colSphere);
-	// Sphere同士の当たり判定 (半径の和の2乗と距離の2乗を比較)
-	float distSqSphere = 
-		(modelSphere.center.x - colSphere.center.x) * (modelSphere.center.x - colSphere.center.x) +
-		(modelSphere.center.y - colSphere.center.y) * (modelSphere.center.y - colSphere.center.y) +
-		(modelSphere.center.z - colSphere.center.z) * (modelSphere.center.z - colSphere.center.z);
-	float rSum = modelSphere.radius + colSphere.radius;
-	bool hitSphere = distSqSphere <= (rSum * rSum);
+	bool hitBox = Collision::CheckAABB(modelAABB, targetAABB);
+	bool hitSphere = Collision::CheckAABBSphere(targetAABB, modelSphere);
 
 	isCollision_ = hitBox || hitSphere;
 	
-	HapiColi::HapiColi::GetInstance().UpdateFuzzTarget("Model vs Sphere Fuzzing", modelBoxData, targetSphereData);
+	HapiColi::HapiColi::GetInstance().UpdateFuzzTarget("Model vs Box Fuzzing", modelBoxData, targetBoxData);
 
 	if (hitBox) {
-		modelBoxData.SetCollision(targetSphereData.id);
-		targetSphereData.SetCollision(modelBoxData.id);
+		modelBoxData.SetCollision(targetBoxData.id);
+		targetBoxData.SetCollision(modelBoxData.id);
 
-		// 衝突点と法線の計算 (AABB vs Sphere)
-		Vector3 contactPoint;
-		contactPoint.x = (std::max)(modelAABB.min.x, (std::min)(colSphere.center.x, modelAABB.max.x));
-		contactPoint.y = (std::max)(modelAABB.min.y, (std::min)(colSphere.center.y, modelAABB.max.y));
-		contactPoint.z = (std::max)(modelAABB.min.z, (std::min)(colSphere.center.z, modelAABB.max.z));
-
-		Vector3 contactNormal = { colSphere.center.x - contactPoint.x, colSphere.center.y - contactPoint.y, colSphere.center.z - contactPoint.z };
+		// 衝突点と法線の計算 (AABB vs AABB)
+		Vector3 contactPoint = {
+			(std::max)(modelAABB.min.x, (std::min)(targetAABB.max.x, modelAABB.max.x)),
+			(std::max)(modelAABB.min.y, (std::min)(targetAABB.max.y, modelAABB.max.y)),
+			(std::max)(modelAABB.min.z, (std::min)(targetAABB.max.z, modelAABB.max.z))
+		};
+		Vector3 contactNormal = { targetCenter.x - modelCenter.x, targetCenter.y - modelCenter.y, targetCenter.z - modelCenter.z };
 		float distSq = contactNormal.x*contactNormal.x + contactNormal.y*contactNormal.y + contactNormal.z*contactNormal.z;
 		if (distSq > 0.0001f) {
 			float invDist = 1.0f / std::sqrt(distSq);
@@ -335,17 +335,17 @@ void TestScene::Update() {
 		}
 
 		modelBoxData.SetContactInfo({contactPoint.x, contactPoint.y, contactPoint.z}, {contactNormal.x, contactNormal.y, contactNormal.z});
-		targetSphereData.SetContactInfo({contactPoint.x, contactPoint.y, contactPoint.z}, {-contactNormal.x, -contactNormal.y, -contactNormal.z});
+		targetBoxData.SetContactInfo({contactPoint.x, contactPoint.y, contactPoint.z}, {-contactNormal.x, -contactNormal.y, -contactNormal.z});
 	}
 
 	if (hitSphere) {
-		modelSphereData.SetCollision(targetSphereData.id);
-		targetSphereData.SetCollision(modelSphereData.id);
+		modelSphereData.SetCollision(targetBoxData.id);
+		targetBoxData.SetCollision(modelSphereData.id);
 	}
 
 	HapiColi::HapiColi::GetInstance().RecordObject(modelBoxData);
 	HapiColi::HapiColi::GetInstance().RecordObject(modelSphereData);
-	HapiColi::HapiColi::GetInstance().RecordObject(targetSphereData);
+	HapiColi::HapiColi::GetInstance().RecordObject(targetBoxData);
 
 	HapiColi::HapiColi::GetInstance().EndFrame();
 }
