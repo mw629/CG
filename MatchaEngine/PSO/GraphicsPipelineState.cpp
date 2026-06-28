@@ -3,6 +3,7 @@
 #include <cassert>
 #include <d3d12shader.h>
 #include <vector>
+#include <filesystem>
 
 
 
@@ -193,10 +194,6 @@ void GraphicsPipelineState::ALLPSOCreate(std::ostream& os, ID3D12Device* device)
 		//AnimationObjはスキニングアニメーション用のシェーダー。アニメーションあり
 		{ AnimationObj, { L"Resources/Shader/SkinningShader/SkinningObject3d.VS.hlsl", L"Resources/Shader/SkinningShader/SkinningObject3d.PS.hlsl", animInput, true, D3D12_DEPTH_WRITE_MASK_ALL, D3D12_COMPARISON_FUNC_LESS_EQUAL, D3D12_CULL_MODE_NONE, D3D12_FILL_MODE_SOLID } },
 		
-		//ParticleShaderはパーティクル用のシェーダー。描画モードはポイントリストで、頂点バッファの内容をそのままスクリーンに打ち込むようなイメージ。深度は書き込まない
-		{ ParticleShader, { L"Resources/Shader/ParticleShader/Particle.VS.hlsl", L"Resources/Shader/ParticleShader/Particle.PS.hlsl", particleInput, true, D3D12_DEPTH_WRITE_MASK_ZERO, D3D12_COMPARISON_FUNC_LESS_EQUAL, D3D12_CULL_MODE_NONE, D3D12_FILL_MODE_SOLID } },
-		{ SmokeShader, { L"Resources/Shader/ParticleShader/Particle.VS.hlsl", L"Resources/Shader/ParticleShader/Smoke.PS.hlsl", particleInput, true, D3D12_DEPTH_WRITE_MASK_ZERO, D3D12_COMPARISON_FUNC_LESS_EQUAL, D3D12_CULL_MODE_NONE, D3D12_FILL_MODE_SOLID } },
-		
 		//LineShaderはライン描画用のシェーダー。描画モードはラインリストで、頂点バッファの内容をそのままスクリーンに打ち込むようなイメージ。深度は書き込む
 		{ LineShader, { L"Resources/Shader/LineShader/Line.VS.hlsl", L"Resources/Shader/LineShader/Line.PS.hlsl", lineInput, true, D3D12_DEPTH_WRITE_MASK_ALL, D3D12_COMPARISON_FUNC_LESS_EQUAL, D3D12_CULL_MODE_NONE, D3D12_FILL_MODE_SOLID } },
 		
@@ -215,6 +212,18 @@ void GraphicsPipelineState::ALLPSOCreate(std::ostream& os, ID3D12Device* device)
 		{ DissolveShader, { L"Resources/Shader/PostEffect/PostEffect.VS.hlsl", L"Resources/Shader/PostEffect/Dissolve.PS.hlsl", lineInput, false, D3D12_DEPTH_WRITE_MASK_ZERO, D3D12_COMPARISON_FUNC_ALWAYS, D3D12_CULL_MODE_NONE, D3D12_FILL_MODE_SOLID } },
 		{ RandomShader, { L"Resources/Shader/PostEffect/PostEffect.VS.hlsl", L"Resources/Shader/PostEffect/Random.PS.hlsl", lineInput, false, D3D12_DEPTH_WRITE_MASK_ZERO, D3D12_COMPARISON_FUNC_ALWAYS, D3D12_CULL_MODE_NONE, D3D12_FILL_MODE_SOLID } }
 	};
+
+	std::filesystem::path particleShaderDir = "Resources/Shader/ParticleShader";
+	if (std::filesystem::exists(particleShaderDir)) {
+		for (const auto& entry : std::filesystem::directory_iterator(particleShaderDir)) {
+			std::string filename = entry.path().filename().string();
+			if (filename.find(".PS.hlsl") != std::string::npos) {
+				std::string shaderNameStr = filename.substr(0, filename.find(".PS.hlsl")) + "Shader";
+				std::wstring psPath = entry.path().wstring();
+				configs.push_back({ shaderNameStr, { L"Resources/Shader/ParticleShader/Particle.VS.hlsl", psPath, particleInput, true, D3D12_DEPTH_WRITE_MASK_ZERO, D3D12_COMPARISON_FUNC_LESS_EQUAL, D3D12_CULL_MODE_NONE, D3D12_FILL_MODE_SOLID } });
+			}
+		}
+	}
 
 	for (const auto& pair : configs) {
 		for (int j = 0; j < kBlendNum; j++) {

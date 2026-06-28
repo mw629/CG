@@ -86,11 +86,22 @@ void Emitter::ImGui() {
 				SetBlend(static_cast<BlendMode>(currentBlend));
 			}
 
-			const char* shaderNames[] = { "ParticleShader", "SmokeShader" };
+			std::vector<std::string> shaderNames;
+			std::filesystem::path shaderDir = "Resources/Shader/ParticleShader";
+			if (std::filesystem::exists(shaderDir)) {
+				for (const auto& entry : std::filesystem::directory_iterator(shaderDir)) {
+					std::string filename = entry.path().filename().string();
+					if (filename.find(".PS.hlsl") != std::string::npos) {
+						std::string sName = filename.substr(0, filename.find(".PS.hlsl")) + "Shader";
+						shaderNames.push_back(sName);
+					}
+				}
+			}
+
 			if (ImGui::BeginCombo("Shader", shaderName_.c_str())) {
 				for (const auto& shader : shaderNames) {
 					bool is_selected = (shaderName_ == shader);
-					if (ImGui::Selectable(shader, is_selected)) {
+					if (ImGui::Selectable(shader.c_str(), is_selected)) {
 						SetShader(shader);
 					}
 					if (is_selected) {

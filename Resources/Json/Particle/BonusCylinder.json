@@ -83,7 +83,7 @@
         "ringDivide": 32,
         "ringInnerRadius": 0.800000011920929,
         "ringOuterRadius": 1.0,
-        "shader": "ParticleShader",
+        "shader": "ToonParticleShader",
         "shape": 1,
         "texturePath": "Resources/Texture/gradationLine.png"
     }

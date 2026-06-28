@@ -93,15 +93,6 @@
     <ClCompile Include="MatchaEngine\Core\WindowConfig.cpp">
       <Filter>MatchaEngine\Core</Filter>
     </ClCompile>
-    <ClCompile Include="MatchaEngine\System\GameObjectManager.cpp">
-      <Filter>MatchaEngine\System</Filter>
-    </ClCompile>
-    <ClCompile Include="MatchaEngine\System\CollisionManager.cpp">
-      <Filter>MatchaEngine\System</Filter>
-    </ClCompile>
-    <ClCompile Include="MatchaEngine\GameObjects\Component\ColliderComponent.cpp">
-      <Filter>MatchaEngine\GameObjects\Component</Filter>
-    </ClCompile>
     <ClCompile Include="MatchaEngine\Core\ImGuiManager.cpp">
       <Filter>MatchaEngine\Core</Filter>
     </ClCompile>
@@ -297,6 +288,15 @@
     <ClCompile Include="Game\JsonScene\JsonScene.cpp">
       <Filter>ソース ファイル</Filter>
     </ClCompile>
+    <ClCompile Include="MatchaEngine\System\GameObjectManager.cpp">
+      <Filter>ソース ファイル</Filter>
+    </ClCompile>
+    <ClCompile Include="MatchaEngine\System\CollisionManager.cpp">
+      <Filter>ソース ファイル</Filter>
+    </ClCompile>
+    <ClCompile Include="MatchaEngine\GameObjects\Component\ColliderComponent.cpp">
+      <Filter>ソース ファイル</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <FxCompile Include="resources\Shader\Object3d.VS.hlsl">
@@ -317,6 +317,7 @@
     <FxCompile Include="resources\Shader\SkinningObject3d.VS.hlsl" />
     <FxCompile Include="resources\Shader\SkyBox.VS.hlsl" />
     <FxCompile Include="resources\Shader\SkinningObject3d.CS.hlsl" />
+    <FxCompile Include="Resources\Shader\ParticleShader\ToonParticle.PS.hlsl" />
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="externals\imgui\imconfig.h">
@@ -375,15 +376,6 @@
     </ClInclude>
     <ClInclude Include="MatchaEngine\Core\WindowConfig.h">
       <Filter>MatchaEngine\Core</Filter>
-    </ClInclude>
-    <ClInclude Include="MatchaEngine\System\GameObjectManager.h">
-      <Filter>MatchaEngine\System</Filter>
-    </ClInclude>
-    <ClInclude Include="MatchaEngine\System\CollisionManager.h">
-      <Filter>MatchaEngine\System</Filter>
-    </ClInclude>
-    <ClInclude Include="MatchaEngine\GameObjects\Component\ColliderComponent.h">
-      <Filter>MatchaEngine\GameObjects\Component</Filter>
     </ClInclude>
     <ClInclude Include="MatchaEngine\Core\ImGuiManager.h">
       <Filter>MatchaEngine\Core</Filter>
@@ -587,6 +579,15 @@
       <Filter>ヘッダー ファイル</Filter>
     </ClInclude>
     <ClInclude Include="Game\JsonScene\JsonScene.h">
+      <Filter>ヘッダー ファイル</Filter>
+    </ClInclude>
+    <ClInclude Include="MatchaEngine\System\GameObjectManager.h">
+      <Filter>ヘッダー ファイル</Filter>
+    </ClInclude>
+    <ClInclude Include="MatchaEngine\System\CollisionManager.h">
+      <Filter>ヘッダー ファイル</Filter>
+    </ClInclude>
+    <ClInclude Include="MatchaEngine\GameObjects\Component\ColliderComponent.h">
       <Filter>ヘッダー ファイル</Filter>
     </ClInclude>
   </ItemGroup>

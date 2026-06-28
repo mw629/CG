@@ -248,7 +248,7 @@ void GameScene::Initialize() {
 
 	// ボーナスヒット時のシリンダーエフェクトの初期化
 	bonusCylinderEffect_->Initialize();
-	bonusCylinderEffect_->LoadFromJson("BonusCylinder1");
+	bonusCylinderEffect_->LoadFromJson("BonusCylinder");
 	bonusCylinderEffect_->name_ = "Bonus Cylinder";
 	bonusCylinderEffect_->SetStop(true);
 	bonusCylinderEffect_->generatorBehavior = [](EffectDefinitionData& p) {
