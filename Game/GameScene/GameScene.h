@@ -41,7 +41,7 @@ private:
 	//スカイボックス
 	std::shared_ptr<Cube> skyBox_ = std::make_shared<Cube>();
 	int skyBoxTexture_;
-	Transform skyBoxTransform_{ {500.0f,500.0f,500.0f},{0.0f,0.0f,0.0f},{0.0f,0.0f,0.0f} };
+	Transform skyBoxTransform_{ {100.0f,100.0f,100.0f},{0.0f,0.0f,0.0f},{0.0f,0.0f,0.0f} };
 
 	//<< Playing >>//
 	// プレイヤー管理

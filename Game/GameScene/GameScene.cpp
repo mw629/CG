@@ -343,6 +343,11 @@ void GameScene::Update() {
 	camera_->Update();
 	view = camera_->GetViewMatrix();
 
+	// SkyBoxをカメラの位置に追従させる（無限遠の背景として機能させるため）
+	Transform skyboxTransform = skyBox_->GetTransform();
+	skyboxTransform.translate = camera_->GetTransform().translate;
+	skyBox_->SetTransform(skyboxTransform);
+	
 	// skyBox_ is now updated in gameObjectManager_
 
 	if (gameState_ == GameState::Playing) {
@@ -424,19 +429,20 @@ void GameScene::PlayerHitUpdate()
 
 void GameScene::PlayingUpdate()
 {
+	float timeScale = EditorManager::GetPlaySpeed();
 	float speedMultiplier = 1.0f;
 	if (stageSettings_->GetBaseScrollSpeed() > 0.0f) {
 		speedMultiplier = stageSettings_->GetScrollSpeed() / stageSettings_->GetBaseScrollSpeed();
 	}
 
-	currentDistance_ += stageSettings_->GetScrollSpeed();
+	currentDistance_ += stageSettings_->GetScrollSpeed() * timeScale;
 
 	CheckKeepRolling();
 	
 	// オブジェクトの一括更新
-	gameObjectManager_->UpdateAll(view, speedMultiplier);
+	gameObjectManager_->UpdateAll(view, speedMultiplier * timeScale);
 	
-	stageSettings_->Update(view);
+	stageSettings_->Update(view, timeScale);
 
 	// 以前の当たり判定チェック
 	CheckCollisions();

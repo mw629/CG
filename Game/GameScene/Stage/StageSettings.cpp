@@ -44,13 +44,13 @@ void StageSettings::Initialize(ModelData roadModelData, ModelData obstacleModelD
 	}
 }
 
-void StageSettings::Update(Matrix4x4 view)
+void StageSettings::Update(Matrix4x4 view, float timeScale)
 {
 	if (isGameOver_) return;
 
 	// スクロール速度の加速（最大速度まで徐々に上がる）
 	if (scrollSpeed_ < maxScrollSpeed_) {
-		scrollSpeed_ += scrollAcceleration_;
+		scrollSpeed_ += scrollAcceleration_ * timeScale;
 		if (scrollSpeed_ > maxScrollSpeed_) {
 			scrollSpeed_ = maxScrollSpeed_;
 		}
@@ -62,9 +62,11 @@ void StageSettings::Update(Matrix4x4 view)
 		// PostEffect::SetActivePostEffect(PostEffect::Type::Normal);
 	}
 
+	float currentScroll = scrollSpeed_ * timeScale;
+
 	// 道路チャンクのスクロール
 	for (int i = 0; i < kChunkCount_; i++) {
-		roadTransforms_[i].translate.z -= scrollSpeed_;
+		roadTransforms_[i].translate.z -= currentScroll;
 
 		// 最も奥にあるチャンクのZ座標を探す
 		float maxZ = roadTransforms_[0].translate.z;
@@ -86,7 +88,7 @@ void StageSettings::Update(Matrix4x4 view)
 	}
 
 	// 障害物の定期生成
-	distanceSinceLastSpawn_ += scrollSpeed_;
+	distanceSinceLastSpawn_ += currentScroll;
 	while (distanceSinceLastSpawn_ >= obstacleInterval_) {
 		// 奥の固定位置(チャンクの向こう側)に生成
 		SpawnObstacles(45.0f);
@@ -95,7 +97,7 @@ void StageSettings::Update(Matrix4x4 view)
 
 	// 障害物の更新
 	for (int i = 0; i < kMaxObstacles_; i++) {
-		obstacles_[i]->StageUpdate(view, scrollSpeed_);
+		obstacles_[i]->StageUpdate(view, currentScroll);
 	}
 }
 

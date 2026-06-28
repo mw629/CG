@@ -52,7 +52,7 @@ private:
 public:
 
 	void Initialize(ModelData roadModelData, ModelData obstacleModelData, ModelData bonusModelData, class GameObjectManager* manager);
-	void Update(Matrix4x4 view);
+	void Update(Matrix4x4 view, float timeScale = 1.0f);
 	void EditorUpdate(Matrix4x4 view);
 	void Draw();
 

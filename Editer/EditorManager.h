@@ -21,6 +21,7 @@ public:
 
 private:
 	static bool isPlaying_;
+	static float playSpeed_;
 	static SceneOverlayCallback s_sceneOverlayCallback_;
 	static EditorCallback s_saveCallback_;
 	static EditorCallback s_loadCallback_;
@@ -47,6 +48,9 @@ public:
 
 	static void SetPlaying(bool playing) { isPlaying_ = playing; }
 	static bool IsPlaying() { return isPlaying_; }
+
+	static void SetPlaySpeed(float speed) { playSpeed_ = speed; }
+	static float GetPlaySpeed() { return playSpeed_; }
 
 	static void SetSceneOverlayCallback(SceneOverlayCallback cb) { s_sceneOverlayCallback_ = cb; }
 	static void ClearSceneOverlayCallback() { s_sceneOverlayCallback_ = nullptr; }

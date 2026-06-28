@@ -13,12 +13,18 @@ public:
 public:
     RenderObject() {}
     RenderObject(std::shared_ptr<ObjectBase> obj) : objectBase_(obj) {
-        if (objectBase_) name_ = objectBase_->name_;
+        if (objectBase_) {
+            name_ = objectBase_->name_;
+            transform_ = objectBase_->GetTransform();
+        }
     }
 
     void SetObjectBase(std::shared_ptr<ObjectBase> obj) {
         objectBase_ = obj;
-        if (objectBase_) name_ = objectBase_->name_;
+        if (objectBase_) {
+            name_ = objectBase_->name_;
+            transform_ = objectBase_->GetTransform();
+        }
     }
 
     void Update(Matrix4x4 view, float speedMultiplier = 1.0f) override {

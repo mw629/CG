@@ -181,8 +181,10 @@ void DrawDirectoryContents(const std::filesystem::path& dirPath) {
 
 #ifdef _USE_IMGUI
 bool EditorManager::isPlaying_ = false;
+float EditorManager::playSpeed_ = 1.0f;
 #else
 bool EditorManager::isPlaying_ = true;
+float EditorManager::playSpeed_ = 1.0f;
 #endif
 EditorManager::SceneOverlayCallback EditorManager::s_sceneOverlayCallback_ = nullptr;
 EditorManager::EditorCallback EditorManager::s_saveCallback_ = nullptr;
@@ -247,7 +249,7 @@ void EditorManager::Update(Engine* engine)
 
 		// --- メニューバー中央にPlay/Stopボタン ---
 		float menuBarWidth = ImGui::GetWindowWidth();
-		float buttonAreaWidth = 140.0f;
+		float buttonAreaWidth = 240.0f;
 		ImGui::SetCursorPosX((menuBarWidth - buttonAreaWidth) * 0.5f);
 
 		if (isPlaying_) {
@@ -268,6 +270,15 @@ void EditorManager::Update(Engine* engine)
 				isPlaying_ = true;
 			}
 			ImGui::PopStyleColor(3);
+		}
+
+		ImGui::SameLine();
+		ImGui::SetNextItemWidth(80.0f);
+		const char* speedLabels[] = { "x4", "x2", "x1", "x-2", "x-4" };
+		const float speedValues[] = { 4.0f, 2.0f, 1.0f, 0.5f, 0.25f };
+		static int speedIndex = 2; // Default to x1
+		if (ImGui::Combo("##PlaySpeed", &speedIndex, speedLabels, IM_ARRAYSIZE(speedLabels))) {
+			playSpeed_ = speedValues[speedIndex];
 		}
 
 		ImGui::EndMainMenuBar();
