@@ -80,6 +80,8 @@ public:
 	void Update(EmitterData emitter, Matrix4x4 viewMatrix, std::function<EffectDefinitionData(const EffectDefinitionData&)> moveBehavior);//動きに変化をつけたい場合
 	void Update(Matrix4x4 viewMatrix, Vector3 scale);
 
+	void EditorUpdate(Matrix4x4 viewMatrix);
+
 	void Draw();
 	
 	EffectDefinitionData MakeNewParticle();

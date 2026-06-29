@@ -69,6 +69,10 @@ private:
 	//<< Bonus Cylinder Effect >>//
 	std::unique_ptr<Emitter> bonusCylinderEffect_ = std::make_unique<Emitter>();
 
+	// ボーナスシリンダーエフェクトの連続発生用
+	bool isBonusEffectActive_ = false;
+	float bonusEffectTimer_ = 0.0f;
+
 
 	// 当たり判定処理
 	void CheckCollisions();

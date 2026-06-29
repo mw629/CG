@@ -576,6 +576,13 @@ void Emitter::Update(Matrix4x4 viewMatrix, Vector3 scale)
 	effectDefinition_.get()->Updata(viewMatrix, effectDefinitionData_);
 }
 
+void Emitter::EditorUpdate(Matrix4x4 viewMatrix)
+{
+	// Editor mode doesn't progress the particle time or physics
+	// It just updates the transform matrices for the camera.
+	effectDefinition_.get()->Updata(viewMatrix, effectDefinitionData_);
+}
+
 void Emitter::Draw() {
 	Draw::DrawParticle(effectDefinition_.get());
 }

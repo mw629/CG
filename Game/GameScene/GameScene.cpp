@@ -461,21 +461,40 @@ void GameScene::PlayingUpdate()
 		return next;
 	});
 
-	bonusCylinderEffect_->Update(view, [](const EffectDefinitionData& p) {
+	// ボーナスシリンダーの更新
+	bonusCylinderEffect_->Update(view, [this](const EffectDefinitionData& p) {
 		EffectDefinitionData next = p;
-		// シリンダーは半径と高さを広げる
-		next.transform.scale.x += 0.08f;
-		next.transform.scale.y += 0.2f; // Y（高さ）を強めに広げる
-		next.transform.scale.z += 0.08f;
+		// プレイヤーの位置に追従させつつ、Y軸は元の発生高さを基準に徐々に上に広がるようにする
+		next.transform.translate.x = player_->GetTransform().translate.x;
+		next.transform.translate.z = player_->GetTransform().translate.z;
+		// Y軸のスケールを時間経過で伸ばす（上に伸びる柱）
+		next.transform.scale.y += 0.1f;
+		// 両側に伸びてしまうのを防ぐため、伸びた分だけ上に持ち上げる (スケール0.1の増加 = 高さ0.3の増加 = 中心を0.15上へ)
+		next.transform.translate.y += 0.15f;
 		return next;
 	});
 
-	// 走っている間（転がっていなくて地面にいる時）足元に砂埃を出す
+	// ボーナスシリンダーの連続発生処理
+	if (isBonusEffectActive_) {
+		bonusEffectTimer_ -= 1.0f * timeScale;
+		if (bonusEffectTimer_ > 0.0f) {
+			// 毎フレーム（または数フレームに1回）連続で発生させることで重なりを作る
+			// 重すぎる場合は `static int frameCount` 等で間引き処理を追加可能
+			EmitterData cylinderData = bonusCylinderEffect_->GetEmitterData();
+			cylinderData.transform.translate = player_->GetTransform().translate;
+			cylinderData.transform.translate.y -= 1.0f; 
+			bonusCylinderEffect_->SetEmitterData(cylinderData);
+			bonusCylinderEffect_->Emit();
+		} else {
+			isBonusEffectActive_ = false;
+		}
+	}
+
+	// 走っている間（転がっていなくて地面にいる時）	// プレイヤーの足元に砂埃エフェクトを生成
 	if (!player_->GetIsRolling() && player_->GetTransform().translate.y <= 3.01f) {
 		EmitterData ed = dustEffect_->GetEmitterData();
 		ed.transform.translate = player_->GetTransform().translate;
 		ed.transform.translate.y += 0.5f; // さらに高く調整
-		ed.transform.translate.z -= 4.0f; // Playerの前ではなく後ろ(-Z側)に出るように調整
 		dustEffect_->SetEmitterData(ed);
 		dustEffect_->Emit();
 	}
@@ -495,6 +514,12 @@ void GameScene::EditorUpdate()
 	// But we still want to update objects (like their transforms).
 	gameObjectManager_->UpdateAll(view, 0.0f);
 	stageSettings_->EditorUpdate(view);
+
+	// パーティクルがデバッグカメラに対応するように、EditorUpdate() を呼び出す
+	hitEffect_->EditorUpdate(view);
+	dustEffect_->EditorUpdate(view);
+	shockwaveEffect_->EditorUpdate(view);
+	bonusCylinderEffect_->EditorUpdate(view);
 }
 
 void GameScene::CheckCollisions()
@@ -530,9 +555,13 @@ void GameScene::CheckCollisions()
 				shockwaveEffect_->Emit();
 
 				// プレイヤーの足元にCylinderエフェクトを出す
+				isBonusEffectActive_ = true;
+				bonusEffectTimer_ = 120.0f; // 60FPS環境で2秒間
+
 				EmitterData cylinderData = bonusCylinderEffect_->GetEmitterData();
 				cylinderData.transform.translate = player_->GetTransform().translate;
-				cylinderData.transform.translate.y -= 0.6f; // 足元に設定
+				// 足元（Y=2.0付近）を基準にするため少し下げる
+				cylinderData.transform.translate.y -= 1.0f; 
 				bonusCylinderEffect_->SetEmitterData(cylinderData);
 				bonusCylinderEffect_->Emit();
 
@@ -551,8 +580,7 @@ void GameScene::CheckCollisions()
 			// エフェクトの発生位置をプレイヤーから取得する
 			EmitterData emData = hitEffect_->GetEmitterData();
 			emData.transform.translate = player_->GetTransform().translate;
-			emData.transform.translate.y += 2.0f; // プレイヤーの体より少し上（前回より少し下げる）
-			emData.transform.translate.z -= 5.0f; // さらに手前（カメラ側）にずらす
+			emData.transform.translate.y += 4.0f; // プレイヤーの体より上に発生させる
 			emData.count = 10; // 数を半分にする
 			hitEffect_->SetEmitterData(emData);
 			hitEffect_->Emit();
