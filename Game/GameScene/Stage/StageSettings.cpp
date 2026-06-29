@@ -28,7 +28,7 @@ void StageSettings::Initialize(ModelData roadModelData, ModelData obstacleModelD
 		roadTransforms_[i].translate = { 0.0f, 2.0f, static_cast<float>(i) * chunkLength_ };
 
 		roadChunks_[i]->SetTransform(roadTransforms_[i]);
-        if (manager) manager->AddObject(roadChunks_[i]);
+        //if (manager) manager->AddObject(roadChunks_[i]);
 	}
 
 	// 障害物の初期化
