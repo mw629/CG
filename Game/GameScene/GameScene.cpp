@@ -97,12 +97,7 @@ void GameScene::ImGui()
 		}
 	}
 
-	if (ImGui::CollapsingHeader("Particles")) {
-		if (hitEffect_) hitEffect_->ImGui();
-		if (dustEffect_) dustEffect_->ImGui();
-		if (shockwaveEffect_) shockwaveEffect_->ImGui();
-		if (bonusCylinderEffect_) bonusCylinderEffect_->ImGui();
-	}
+	particleManager_->ImGui();
 
 	ImGui::End();
 
@@ -190,71 +185,8 @@ void GameScene::Initialize() {
 	}
 	sceneChangeRequest_ = false;
 
-	// ヒットエフェクトの初期化（ヒットスパーク演出）
-	EmitterData hitEmitter;
-	hitEmitter.transform.scale = { 0.0f, 0.0f, 0.0f }; // 中心の一点から発生させる
-	hitEmitter.count = 40; // 粒を増やして派手にする
-	hitEmitter.frequency = 9999.0f; // 自動発生させず、手動のEmitのみにする
-	EffectDefinitionData hitData;
-	hitData.color = { 1.0f, 1.0f, 1.0f, 1.0f }; // 白色
-	hitData.lifeTime = 1.0f; // ライフ（余韻の長さ）を少し短く調整
-	hitData.transform.scale = { 0.1f, 0.8f, 0.1f }; // エミッタ（パーティクル）のサイズを調整して見やすくする
-	
-	// テクスチャ指定なしなら自動的にcircle.pngが使われます
-	hitEffect_->Initialize(hitEmitter, hitData, EffectShape::Plane);
-	hitEffect_->SetBlend(BlendMode::kBlendModeAdd); // 黒い部分を透過させるために加算ブレンドに戻す
-	hitEffect_->name_ = "Hit Effect";
-	hitEffect_->generatorBehavior = [](EffectDefinitionData& p) {
-		// 中心から円状に放射状に広がるためのランダムな方向
-		float randX = ((float)rand() / RAND_MAX - 0.5f) * 2.0f;
-		float randY = ((float)rand() / RAND_MAX - 0.5f) * 2.0f;
-		
-		// 位置を固定するために速度を0にする
-		p.velocity = { 0.0f, 0.0f, 0.0f }; 
-		
-		// 長さに少しランダムなばらつきを持たせる
-		p.transform.scale.y = 0.6f + ((float)rand() / RAND_MAX) * 0.8f; 
-
-		// Y軸ベースの細長いPlaneを、放射状に向きを合わせる
-		p.transform.rotate.z = std::atan2(randY, randX) - 3.14159f / 2.0f;
-		
-		// X, Yの回転を消して純粋にカメラに対してフラットな星型にする
-		p.transform.rotate.x = 0.0f;
-		p.transform.rotate.y = 0.0f;
-	};
-
-	dustEffect_->Initialize();
-	dustEffect_->LoadFromJson("Dustparticle");
-	dustEffect_->SetBlend(BlendMode::kBlendModeNormal); // アルファブレンドを強制
-	dustEffect_->name_ = "Dust Effect";
-	dustEffect_->generatorBehavior = nullptr; // JSONの設定に完全に従う
-	dustEffect_->SetStop(true); // 自動発生を停止（スクリプトから手動でのみEmitする）
-	// ボーナスヒット時のショックウェーブ（Ring）の初期化
-	EmitterData shockwaveEmitter;
-	shockwaveEmitter.transform.scale = { 0.1f, 0.1f, 0.1f };
-	shockwaveEmitter.count = 1;
-	shockwaveEmitter.frequency = 9999.0f; // 手動Emit
-	EffectDefinitionData shockwaveData;
-	shockwaveData.color = { 1.0f, 1.0f, 0.0f, 1.0f }; // 黄色（Yellow）
-	shockwaveData.lifeTime = 0.5f; // スパッと消えるように短め
-	shockwaveData.transform.scale = { 0.1f, 0.1f, 0.1f };
-	shockwaveEffect_->Initialize(shockwaveEmitter, shockwaveData, EffectShape::Ring);
-	shockwaveEffect_->SetBlend(BlendMode::kBlendModeNone); // 加算だと背景と同化して薄くなるため、通常ブレンドで濃く（クッキリ）表示させる
-	shockwaveEffect_->name_ = "Bonus Shockwave";
-	shockwaveEffect_->generatorBehavior = [](EffectDefinitionData& p) {
-		p.velocity = { 0.0f, 0.0f, 0.0f }; // 発生時は移動なし
-		p.transform.rotate.x = 3.14159265f / 2.0f; // 盾（縦）になっているリングを90度回転させて地面と平行（横）にする
-	};
-
-	// ボーナスヒット時のシリンダーエフェクトの初期化
-	bonusCylinderEffect_->Initialize();
-	bonusCylinderEffect_->LoadFromJson("BonusCylinder");
-	bonusCylinderEffect_->name_ = "Bonus Cylinder";
-	bonusCylinderEffect_->SetStop(true);
-	bonusCylinderEffect_->generatorBehavior = [](EffectDefinitionData& p) {
-		p.velocity = { 0.0f, 0.0f, 0.0f }; // 発生時は移動なし
-		p.transform.rotate.x = 0.0f; 
-	};
+	// パーティクルマネージャーの初期化
+	particleManager_->Initialize();
 
 	// camera_->SetDebugCamera() は上記で設定済み
 	camera_->SetTransform(cameraTransform_);
@@ -373,7 +305,7 @@ void GameScene::Update() {
 			stageSettings_->Reset();
 			// PostEffect::SetActivePostEffect(PostEffect::Type::Normal);
 			player_->Reset();
-			hitEffect_->ClearParticles(); // 前回の煙をリセット
+			particleManager_->ClearHitParticles(); // 前回の煙をリセット
 			currentDistance_ = 0.0f;
 		}
 		// 2でタイトルへ
@@ -406,17 +338,13 @@ void GameScene::Draw() {
 
 	// ヒットエフェクトの描画
 	stageSettings_->Draw();
-	hitEffect_->Draw();
-	shockwaveEffect_->Draw();
-	bonusCylinderEffect_->Draw();
-	dustEffect_->Draw();
+	particleManager_->Draw();
 }
 
 void GameScene::PlayerHitUpdate()
 {
 	// カメラやビューの更新は GameScene::Update で行われている
-	hitEffect_->Update(view);
-	dustEffect_->Update(view);
+	particleManager_->PlayerHitUpdate(view);
 
 	// プレイヤーのノックバックアニメーションを更新
 	// (GameScene側の全体更新は停止し、プレイヤーのみ更新)
@@ -450,57 +378,13 @@ void GameScene::PlayingUpdate()
 	// Componentベースの当たり判定チェック
 	CollisionManager::GetInstance()->UpdateCollisions();
 
-	hitEffect_->Update(view);
-	
-	shockwaveEffect_->Update(view, [](const EffectDefinitionData& p) {
-		EffectDefinitionData next = p;
-		// 衝撃波のように急速にスケールを拡大する
-		next.transform.scale.x += 0.06f;
-		next.transform.scale.y += 0.06f;
-		next.transform.scale.z += 0.06f;
-		return next;
-	});
-
-	// ボーナスシリンダーの更新
-	bonusCylinderEffect_->Update(view, [this](const EffectDefinitionData& p) {
-		EffectDefinitionData next = p;
-		// プレイヤーの位置に追従させつつ、Y軸は元の発生高さを基準に徐々に上に広がるようにする
-		next.transform.translate.x = player_->GetTransform().translate.x;
-		next.transform.translate.z = player_->GetTransform().translate.z;
-		// Y軸のスケールを時間経過で伸ばす（上に伸びる柱）
-		next.transform.scale.y += 0.1f;
-		// 両側に伸びてしまうのを防ぐため、伸びた分だけ上に持ち上げる (スケール0.1の増加 = 高さ0.3の増加 = 中心を0.15上へ)
-		next.transform.translate.y += 0.15f;
-		return next;
-	});
-
-	// ボーナスシリンダーの連続発生処理
-	if (isBonusEffectActive_) {
-		bonusEffectTimer_ -= 1.0f * timeScale;
-		if (bonusEffectTimer_ > 0.0f) {
-			// 毎フレーム（または数フレームに1回）連続で発生させることで重なりを作る
-			// 重すぎる場合は `static int frameCount` 等で間引き処理を追加可能
-			EmitterData cylinderData = bonusCylinderEffect_->GetEmitterData();
-			cylinderData.transform.translate = player_->GetTransform().translate;
-			cylinderData.transform.translate.y -= 1.0f; 
-			bonusCylinderEffect_->SetEmitterData(cylinderData);
-			bonusCylinderEffect_->Emit();
-		} else {
-			isBonusEffectActive_ = false;
-		}
-	}
+	particleManager_->PlayingUpdate(view, player_->GetTransform().translate);
+	particleManager_->UpdateBonusEffectEmit(timeScale, player_->GetTransform().translate);
 
 	// 走っている間（転がっていなくて地面にいる時）	// プレイヤーの足元に砂埃エフェクトを生成
 	if (!player_->GetIsRolling() && player_->GetTransform().translate.y <= 3.01f) {
-		EmitterData ed = dustEffect_->GetEmitterData();
-		ed.transform.translate = player_->GetTransform().translate;
-		ed.transform.translate.y += 0.5f; // さらに高く調整
-		dustEffect_->SetEmitterData(ed);
-		dustEffect_->Emit();
+		particleManager_->EmitDust(player_->GetTransform().translate);
 	}
-
-	// 砂埃のUpdate (スケールや速度はJSONの設定に依存)
-	dustEffect_->Update(view);
 }
 
 void GameScene::PausedUpdate()
@@ -516,10 +400,7 @@ void GameScene::EditorUpdate()
 	stageSettings_->EditorUpdate(view);
 
 	// パーティクルがデバッグカメラに対応するように、EditorUpdate() を呼び出す
-	hitEffect_->EditorUpdate(view);
-	dustEffect_->EditorUpdate(view);
-	shockwaveEffect_->EditorUpdate(view);
-	bonusCylinderEffect_->EditorUpdate(view);
+	particleManager_->EditorUpdate(view);
 }
 
 void GameScene::CheckCollisions()
@@ -548,22 +429,11 @@ void GameScene::CheckCollisions()
 				currentDistance_ += 50.0f; // スコア（距離）ボーナス
 
 				// プレイヤーの足元にRingエフェクトを出す
-				EmitterData ringData = shockwaveEffect_->GetEmitterData();
-				ringData.transform.translate = player_->GetTransform().translate;
-				ringData.transform.translate.y -= 0.4f; // 足元より少し上（腰から足の間くらい）に設定
-				shockwaveEffect_->SetEmitterData(ringData);
-				shockwaveEffect_->Emit();
+				particleManager_->EmitShockwave(player_->GetTransform().translate);
 
 				// プレイヤーの足元にCylinderエフェクトを出す
-				isBonusEffectActive_ = true;
-				bonusEffectTimer_ = 120.0f; // 60FPS環境で2秒間
-
-				EmitterData cylinderData = bonusCylinderEffect_->GetEmitterData();
-				cylinderData.transform.translate = player_->GetTransform().translate;
-				// 足元（Y=2.0付近）を基準にするため少し下げる
-				cylinderData.transform.translate.y -= 1.0f; 
-				bonusCylinderEffect_->SetEmitterData(cylinderData);
-				bonusCylinderEffect_->Emit();
+				particleManager_->StartBonusEffect(120.0f); // 60FPS環境で2秒間
+				particleManager_->EmitBonusCylinder(player_->GetTransform().translate);
 
 				continue; // ゲームオーバーにはならず、次の判定へ
 			}
@@ -578,12 +448,7 @@ void GameScene::CheckCollisions()
 			player_->OnHit(isTrip);
 
 			// エフェクトの発生位置をプレイヤーから取得する
-			EmitterData emData = hitEffect_->GetEmitterData();
-			emData.transform.translate = player_->GetTransform().translate;
-			emData.transform.translate.y += 4.0f; // プレイヤーの体より上に発生させる
-			emData.count = 10; // 数を半分にする
-			hitEffect_->SetEmitterData(emData);
-			hitEffect_->Emit();
+			particleManager_->EmitHitEffect(player_->GetTransform().translate);
 
 			// ランキング更新
 			UpdateRanking();

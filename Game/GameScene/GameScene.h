@@ -10,7 +10,7 @@
 #include "GameObjectManager.h"
 #include "RenderObject.h"
 #include "../../Editer/EditorUI.h"
-#include <Emitter.h>
+#include "GameSceneParticle.h"
 
 class GameScene :public IScene
 {
@@ -57,22 +57,8 @@ private:
 	//<< Paused >>//
 	std::unique_ptr<PauseSystem> pauseSystem_ = std::make_unique<PauseSystem>();
 
-	//<< Hit Effect >>//
-	std::unique_ptr<Emitter> hitEffect_ = std::make_unique<Emitter>();
-
-	//<< Dust Effect >>//
-	std::unique_ptr<Emitter> dustEffect_ = std::make_unique<Emitter>();
-
-	//<< Shockwave Effect >>//
-	std::unique_ptr<Emitter> shockwaveEffect_ = std::make_unique<Emitter>();
-
-	//<< Bonus Cylinder Effect >>//
-	std::unique_ptr<Emitter> bonusCylinderEffect_ = std::make_unique<Emitter>();
-
-	// ボーナスシリンダーエフェクトの連続発生用
-	bool isBonusEffectActive_ = false;
-	float bonusEffectTimer_ = 0.0f;
-
+	//<< Particles >>//
+	std::unique_ptr<GameSceneParticle> particleManager_ = std::make_unique<GameSceneParticle>();
 
 	// 当たり判定処理
 	void CheckCollisions();

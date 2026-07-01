@@ -177,6 +177,7 @@ copy "$(WindowsSdkDir)bin\$(TargetPlatformVersion)\x64\dxil.dll" "$(TargetDir)dx
     <ClCompile Include="Game\Direction\Fade.cpp" />
     <ClCompile Include="MatchaEngine\GameObjects\Camera\Camera.cpp" />
     <ClCompile Include="Game\GameScene\GameScene.cpp" />
+    <ClCompile Include="Game\GameScene\GameSceneParticle.cpp" />
     <ClCompile Include="MatchaEngine\Graphics\Render\PostEffect.cpp" />
     <ClCompile Include="MatchaEngine\Input\GamePadInput.cpp" />
     <ClCompile Include="MatchaEngine\GameObjects\Line\Line.cpp" />
@@ -368,6 +369,7 @@ copy "$(WindowsSdkDir)bin\$(TargetPlatformVersion)\x64\dxil.dll" "$(TargetDir)dx
     <ClInclude Include="Game\IScene.h" />
     <ClInclude Include="MatchaEngine\GameObjects\Camera\Camera.h" />
     <ClInclude Include="Game\GameScene\GameScene.h" />
+    <ClInclude Include="Game\GameScene\GameSceneParticle.h" />
     <ClInclude Include="MatchaEngine\Core\VariableTypes\Matrix4x4.h" />
     <ClInclude Include="MatchaEngine\Core\VariableTypes\Vector3.h" />
     <ClInclude Include="MatchaEngine\Core\VariableTypes\Vector2Int.h" />
