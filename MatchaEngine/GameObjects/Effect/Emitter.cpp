@@ -12,6 +12,7 @@
 #include <fstream>
 #include <nlohmann/json.hpp>
 #include <filesystem>
+#include "../../../Editer/LanguageManager.h"
 
 
 void Emitter::SetTexturePath(const std::string& path)
@@ -37,52 +38,52 @@ void Emitter::ImGui() {
 
 	ImGui::PushID(this);
 	if (ImGui::CollapsingHeader(name_.c_str())) {
-		if (ImGui::TreeNode("Emitter Settings")) {
-			if (ImGui::TreeNode("Transform")) {
-				ImGui::DragFloat3("Position", &emitter_.transform.translate.x, 0.01f, -FLT_MAX, FLT_MAX, "%.2f");
-				ImGui::DragFloat3("Rotation", &emitter_.transform.rotate.x, 0.01f, -FLT_MAX, FLT_MAX, "%.2f");
-				ImGui::DragFloat3("Spawn Area Scale", &emitter_.transform.scale.x, 0.01f, -FLT_MAX, FLT_MAX, "%.2f");
+		if (ImGui::TreeNode(LanguageManager::Tr("Emitter Settings"))) {
+			if (ImGui::TreeNode(LanguageManager::Tr("Transform"))) {
+				ImGui::DragFloat3(LanguageManager::Tr("Position"), &emitter_.transform.translate.x, 0.01f, -FLT_MAX, FLT_MAX, "%.2f");
+				ImGui::DragFloat3(LanguageManager::Tr("Rotation"), &emitter_.transform.rotate.x, 0.01f, -FLT_MAX, FLT_MAX, "%.2f");
+				ImGui::DragFloat3(LanguageManager::Tr("Spawn Area Scale"), &emitter_.transform.scale.x, 0.01f, -FLT_MAX, FLT_MAX, "%.2f");
 				ImGui::TreePop();
 			}
-			ImGui::DragInt("Count", reinterpret_cast<int*>(&emitter_.count), 1, 0, 10000);
-			ImGui::DragFloat("Frequency", &emitter_.frequency, 0.01f, 0.0f, 10.0f, "%.2f");
-			ImGui::DragFloat("Frequency Time", &emitter_.frequencyTime, 0.01f, 0.0f, 9999.0f, "%.2f");
+			ImGui::DragInt(LanguageManager::Tr("Count"), reinterpret_cast<int*>(&emitter_.count), 1, 0, 10000);
+			ImGui::DragFloat(LanguageManager::Tr("Frequency"), &emitter_.frequency, 0.01f, 0.0f, 10.0f, "%.2f");
+			ImGui::DragFloat(LanguageManager::Tr("Frequency Time"), &emitter_.frequencyTime, 0.01f, 0.0f, 9999.0f, "%.2f");
 			ImGui::TreePop();
 		}
 
-		if (ImGui::TreeNode("Particle Initial Settings")) {
-			ImGui::DragFloat3("Base Position", &SetEffectDefinitionData_.transform.translate.x, 0.01f, -FLT_MAX, FLT_MAX, "%.2f");
-			ImGui::DragFloat3("Base Size (Scale)", &SetEffectDefinitionData_.transform.scale.x, 0.01f, -FLT_MAX, FLT_MAX, "%.2f");
-			ImGui::DragFloat3("Base Rotation", &SetEffectDefinitionData_.transform.rotate.x, 0.01f, -FLT_MAX, FLT_MAX, "%.2f");
-			ImGui::ColorEdit4("Color", &SetEffectDefinitionData_.color.x);
-			ImGui::DragFloat("LifeTime", &SetEffectDefinitionData_.lifeTime, 0.01f, 0.0f, FLT_MAX, "%.2f");
+		if (ImGui::TreeNode(LanguageManager::Tr("Particle Initial Settings"))) {
+			ImGui::DragFloat3(LanguageManager::Tr("Base Position"), &SetEffectDefinitionData_.transform.translate.x, 0.01f, -FLT_MAX, FLT_MAX, "%.2f");
+			ImGui::DragFloat3(LanguageManager::Tr("Base Size (Scale)"), &SetEffectDefinitionData_.transform.scale.x, 0.01f, -FLT_MAX, FLT_MAX, "%.2f");
+			ImGui::DragFloat3(LanguageManager::Tr("Base Rotation"), &SetEffectDefinitionData_.transform.rotate.x, 0.01f, -FLT_MAX, FLT_MAX, "%.2f");
+			ImGui::ColorEdit4(LanguageManager::Tr("Color"), &SetEffectDefinitionData_.color.x);
+			ImGui::DragFloat(LanguageManager::Tr("LifeTime"), &SetEffectDefinitionData_.lifeTime, 0.01f, 0.0f, FLT_MAX, "%.2f");
 			ImGui::TreePop();
 		}
 
-		if (ImGui::TreeNode("Particle Movement Settings")) {
-			ImGui::DragFloat3("Base Velocity", &movementData_.baseVelocity.x, 0.001f, -FLT_MAX, FLT_MAX, "%.3f");
-			ImGui::DragFloat3("Velocity Variance", &movementData_.velocityVariance.x, 0.001f, 0.0f, FLT_MAX, "%.3f");
-			ImGui::DragFloat3("Acceleration (Gravity)", &movementData_.acceleration.x, 0.0001f, -FLT_MAX, FLT_MAX, "%.4f");
-			ImGui::DragFloat3("Size Variance", &movementData_.sizeVariance.x, 0.01f, 0.0f, FLT_MAX, "%.2f");
-			ImGui::DragFloat3("Size Multiplier", &movementData_.sizeDelta.x, 0.001f, 0.0f, FLT_MAX, "%.3f");
+		if (ImGui::TreeNode(LanguageManager::Tr("Particle Movement Settings"))) {
+			ImGui::DragFloat3(LanguageManager::Tr("Base Velocity"), &movementData_.baseVelocity.x, 0.001f, -FLT_MAX, FLT_MAX, "%.3f");
+			ImGui::DragFloat3(LanguageManager::Tr("Velocity Variance"), &movementData_.velocityVariance.x, 0.001f, 0.0f, FLT_MAX, "%.3f");
+			ImGui::DragFloat3(LanguageManager::Tr("Acceleration (Gravity)"), &movementData_.acceleration.x, 0.0001f, -FLT_MAX, FLT_MAX, "%.4f");
+			ImGui::DragFloat3(LanguageManager::Tr("Size Variance"), &movementData_.sizeVariance.x, 0.01f, 0.0f, FLT_MAX, "%.2f");
+			ImGui::DragFloat3(LanguageManager::Tr("Size Multiplier"), &movementData_.sizeDelta.x, 0.001f, 0.0f, FLT_MAX, "%.3f");
 			ImGui::TreePop();
 		}
 
-		if (ImGui::TreeNode("Visual Settings")) {
+		if (ImGui::TreeNode(LanguageManager::Tr("Visual Settings"))) {
 			bool isBillboard = GetBillboard();
-			if (ImGui::Checkbox("Billboard", &isBillboard)) {
+			if (ImGui::Checkbox(LanguageManager::Tr("Billboard"), &isBillboard)) {
 				SetBillboard(isBillboard);
 			}
 
 			const char* shapes[] = { "Plane", "Cylinder", "Ring" };
 			int currentShape = static_cast<int>(shape_);
-			if (ImGui::Combo("Shape", &currentShape, shapes, IM_ARRAYSIZE(shapes))) {
+			if (ImGui::Combo(LanguageManager::Tr("Shape"), &currentShape, shapes, IM_ARRAYSIZE(shapes))) {
 				SetShape(static_cast<EffectShape>(currentShape));
 			}
 
 			const char* blendModes[] = { "None", "Normal", "Add", "Subtract", "Multiply", "Screen" };
 			int currentBlend = static_cast<int>(GetBlend());
-			if (ImGui::Combo("Blend Mode", &currentBlend, blendModes, IM_ARRAYSIZE(blendModes))) {
+			if (ImGui::Combo(LanguageManager::Tr("Blend Mode"), &currentBlend, blendModes, IM_ARRAYSIZE(blendModes))) {
 				SetBlend(static_cast<BlendMode>(currentBlend));
 			}
 
@@ -98,7 +99,7 @@ void Emitter::ImGui() {
 				}
 			}
 
-			if (ImGui::BeginCombo("Shader", shaderName_.c_str())) {
+			if (ImGui::BeginCombo(LanguageManager::Tr("Shader"), shaderName_.c_str())) {
 				for (const auto& shader : shaderNames) {
 					bool is_selected = (shaderName_ == shader);
 					if (ImGui::Selectable(shader.c_str(), is_selected)) {
@@ -113,20 +114,20 @@ void Emitter::ImGui() {
 
 			bool shapeChanged = false;
 			if (shape_ == EffectShape::Cylinder) {
-				shapeChanged |= ImGui::DragInt("Cylinder Divide", &shapeData_.cylinderDivide, 1.0f, 3, 128);
-				shapeChanged |= ImGui::DragFloat("Cylinder Top Radius", &shapeData_.cylinderTopRadius, 0.05f, 0.0f, 100.0f);
-				shapeChanged |= ImGui::DragFloat("Cylinder Bottom Radius", &shapeData_.cylinderBottomRadius, 0.05f, 0.0f, 100.0f);
-				shapeChanged |= ImGui::DragFloat("Cylinder Height", &shapeData_.cylinderHeight, 0.05f, 0.0f, 100.0f);
+				shapeChanged |= ImGui::DragInt(LanguageManager::Tr("Cylinder Divide"), &shapeData_.cylinderDivide, 1.0f, 3, 128);
+				shapeChanged |= ImGui::DragFloat(LanguageManager::Tr("Cylinder Top Radius"), &shapeData_.cylinderTopRadius, 0.05f, 0.0f, 100.0f);
+				shapeChanged |= ImGui::DragFloat(LanguageManager::Tr("Cylinder Bottom Radius"), &shapeData_.cylinderBottomRadius, 0.05f, 0.0f, 100.0f);
+				shapeChanged |= ImGui::DragFloat(LanguageManager::Tr("Cylinder Height"), &shapeData_.cylinderHeight, 0.05f, 0.0f, 100.0f);
 			} else if (shape_ == EffectShape::Ring) {
-				shapeChanged |= ImGui::DragInt("Ring Divide", &shapeData_.ringDivide, 1.0f, 3, 128);
-				shapeChanged |= ImGui::DragFloat("Ring Outer Radius", &shapeData_.ringOuterRadius, 0.05f, 0.0f, 100.0f);
-				shapeChanged |= ImGui::DragFloat("Ring Inner Radius", &shapeData_.ringInnerRadius, 0.05f, 0.0f, 100.0f);
+				shapeChanged |= ImGui::DragInt(LanguageManager::Tr("Ring Divide"), &shapeData_.ringDivide, 1.0f, 3, 128);
+				shapeChanged |= ImGui::DragFloat(LanguageManager::Tr("Ring Outer Radius"), &shapeData_.ringOuterRadius, 0.05f, 0.0f, 100.0f);
+				shapeChanged |= ImGui::DragFloat(LanguageManager::Tr("Ring Inner Radius"), &shapeData_.ringInnerRadius, 0.05f, 0.0f, 100.0f);
 			}
 			if (shapeChanged) {
 				SetShapeData(shapeData_);
 			}
 			
-			ImGui::Text("Texture:");
+			ImGui::Text(LanguageManager::Tr("Texture:"));
 			std::string btnLabel = texturePath_ + "##TexDrop";
 			ImGui::Button(btnLabel.c_str(), ImVec2(-FLT_MIN, 0)); // Button taking full width
 
@@ -139,21 +140,21 @@ void Emitter::ImGui() {
 				}
 				ImGui::EndDragDropTarget();
 			}
-			ImGui::TextDisabled("(Drag and drop an image from the Resources window)");
+			ImGui::TextDisabled(LanguageManager::Tr("(Drag and drop an image from the Resources window)"));
 			
 			ImGui::TreePop();
 		}
 
-		if (ImGui::Button("Add Particle")) {
+		if (ImGui::Button(LanguageManager::Tr("Add Particle"))) {
 			Emit();
 		}
-		ImGui::Checkbox("stop", &isStop_);
-		ImGui::Checkbox("IsHit", &isHit_);
+		ImGui::Checkbox(LanguageManager::Tr("stop"), &isStop_);
+		ImGui::Checkbox(LanguageManager::Tr("IsHit"), &isHit_);
 		ImGui::Separator();
-		ImGui::Text("Active Particles: %d", effectDefinition_.get()->GetEffectDefinitionNum());
+		ImGui::Text(LanguageManager::Tr("Active Particles: %d"), effectDefinition_.get()->GetEffectDefinitionNum());
 
 		ImGui::Separator();
-		ImGui::InputText("File Name", saveFileName_, sizeof(saveFileName_));
+		ImGui::InputText(LanguageManager::Tr("File Name"), saveFileName_, sizeof(saveFileName_));
 
 		std::filesystem::path dir = "Resources/Json/Particle";
 		std::vector<std::string> jsonFiles;
@@ -165,7 +166,7 @@ void Emitter::ImGui() {
 			}
 		}
 
-		if (ImGui::BeginCombo("Saved Particles", saveFileName_)) {
+		if (ImGui::BeginCombo(LanguageManager::Tr("Saved Particles"), saveFileName_)) {
 			for (const auto& file : jsonFiles) {
 				std::string nameWithoutExt = file;
 				size_t extPos = nameWithoutExt.find(".json");
@@ -184,11 +185,11 @@ void Emitter::ImGui() {
 			ImGui::EndCombo();
 		}
 
-		if (ImGui::Button("Save JSON")) {
+		if (ImGui::Button(LanguageManager::Tr("Save JSON"))) {
 			SaveToJson(saveFileName_);
 		}
 		ImGui::SameLine();
-		if (ImGui::Button("Load JSON")) {
+		if (ImGui::Button(LanguageManager::Tr("Load JSON"))) {
 			LoadFromJson(saveFileName_);
 		}
 	}
