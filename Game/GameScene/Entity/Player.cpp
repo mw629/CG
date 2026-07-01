@@ -57,10 +57,6 @@ void Player::Update(Matrix4x4 view, float speedMultiplier)
 
 void Player::PlayerMove(float speedMultiplier)
 {
-	const float kLaneWidth = 2.0f; // レーンの横幅
-	const int kMinLane = -1;       // 一番左のレーン
-	const int kMaxLane = 1;        // 一番右のレーン
-
 	if (speedMultiplier <= 0.0f) {
 		model_.get()->SetTransform(transform_);
 		return;
@@ -77,8 +73,8 @@ void Player::PlayerMove(float speedMultiplier)
 		}
 
 		// レーンの範囲制限
-		if (targetLaneIndex_ < kMinLane) targetLaneIndex_ = kMinLane;
-		if (targetLaneIndex_ > kMaxLane) targetLaneIndex_ = kMaxLane;
+		if (targetLaneIndex_ < minLane_) targetLaneIndex_ = minLane_;
+		if (targetLaneIndex_ > maxLane_) targetLaneIndex_ = maxLane_;
 
 		// 移動が開始される場合、初期値を保存
 		if (targetLaneIndex_ != laneIndex_) {
@@ -101,7 +97,7 @@ void Player::PlayerMove(float speedMultiplier)
 			lerpTime_ = 1.0f;
 		}
 
-		float targetX = static_cast<float>(targetLaneIndex_) * kLaneWidth;
+		float targetX = static_cast<float>(targetLaneIndex_) * laneWidth_;
 		transform_.translate.x = Lerp(startX_, targetX, lerpTime_);
 
 		// 移動が完了したら現在のレーンを更新

@@ -23,12 +23,16 @@ void StageSettings::Initialize(ModelData roadModelData, ModelData obstacleModelD
         roadChunks_[i]->SetName("RoadChunk " + std::to_string(i));
 
 		// Z軸方向に並べて配置（手前から奥へ）
-		roadTransforms_[i].scale = { 5.0f, 5.0f, 5.0f };
+		// 隙間を完全に埋めるため、Zスケールを少し大きくして(10.1f)オーバーラップさせる
+		// Yサイズを大きく(50.0f)し、横幅は元のサイズと同じ(10.0f)
+		roadTransforms_[i].scale = { 10.0f, 50.0f, 10.1f };
 		roadTransforms_[i].rotate = { 0.0f, 0.0f, 0.0f };
-		roadTransforms_[i].translate = { 0.0f, 2.0f, static_cast<float>(i) * chunkLength_ };
+		// BoxのYスケールが50.0なので、上面は translate.y + 25.0 になる。
+		// 上面を 2.0 に合わせるため、 translate.y は 2.0 - 25.0 = -23.0 にする。
+		roadTransforms_[i].translate = { 0.0f, -23.0f, static_cast<float>(i) * chunkLength_ };
 
 		roadChunks_[i]->SetTransform(roadTransforms_[i]);
-        //if (manager) manager->AddObject(roadChunks_[i]);
+        if (manager) manager->AddObject(roadChunks_[i]);
 	}
 
 	// 障害物の初期化
@@ -116,12 +120,12 @@ void StageSettings::Draw()
 
 void StageSettings::SpawnObstacles(float z)
 {
-	// 3レーンの状態を決定 (0: None, 1: Low, 2: High, 3: Wall, 4: Bonus)
-	int laneSpawns[3];
+	// レーンの状態を決定 (0: None, 1: Low, 2: High, 3: Wall, 4: Bonus)
+	std::vector<int> laneSpawns(laneCount_);
 	int wallCount = 0;
 	int noneCount = 0;
 
-	for (int i = 0; i < 3; i++) {
+	for (int i = 0; i < laneCount_; i++) {
 		laneSpawns[i] = std::rand() % 4; // 0~3
 		if (laneSpawns[i] == 3) {
 			wallCount++;
@@ -131,25 +135,43 @@ void StageSettings::SpawnObstacles(float z)
 	}
 
 	// すべて「何もない(None)」の場合は、最低1つの障害物を配置する
-	if (noneCount == 3) {
-		int changeIndex = std::rand() % 3;
-		laneSpawns[changeIndex] = 1 + (std::rand() % 3); // 1, 2, 3 のどれか
+	if (noneCount == laneCount_) {
+		int changeIndex = std::rand() % laneCount_;
+		if (laneCount_ == 1) {
+			// レーンが1つの場合はWall(3)を生成しないようにする(1:Low, 2:High)
+			laneSpawns[changeIndex] = 1 + (std::rand() % 2);
+		} else {
+			laneSpawns[changeIndex] = 1 + (std::rand() % 3); // 1, 2, 3 のどれか
+		}
 	}
 
-	// 全てWallの場合は1つをNoneにする
-	if (wallCount == 3) {
-		int changeIndex = std::rand() % 3;
-		laneSpawns[changeIndex] = 0; // Noneに変更
+	// noneCountの処理でWallが増えた可能性があるのでwallCountを再計算
+	wallCount = 0;
+	for (int i = 0; i < laneCount_; i++) {
+		if (laneSpawns[i] == 3) {
+			wallCount++;
+		}
+	}
+
+	// 全てWallの場合は1つを確実に通れるようにする
+	if (wallCount == laneCount_) {
+		int changeIndex = std::rand() % laneCount_;
+		if (laneCount_ == 1) {
+			// 1レーンしかなく全てWallの場合は、必ず通れる障害物にする
+			laneSpawns[changeIndex] = 1 + (std::rand() % 2); // 1:Low または 2:High
+		} else {
+			laneSpawns[changeIndex] = 0; // Noneに変更
+		}
 	}
 
 	// たまにボーナスエネミーを配置する (約10%の確率)
 	if (std::rand() % 10 == 0) {
-		int bonusIndex = std::rand() % 3;
+		int bonusIndex = std::rand() % laneCount_;
 		laneSpawns[bonusIndex] = 4; // 4: Bonus
 	}
 
 	// 決定した内容で各レーンに生成
-	for (int i = 0; i < 3; i++) {
+	for (int i = 0; i < laneCount_; i++) {
 		if (laneSpawns[i] == 0) continue; // None
 
 		int lane = minLaneIndex_ + i; // -1, 0, 1
@@ -190,7 +212,7 @@ void StageSettings::Reset()
 
 	// 道路チャンクの位置をリセット
 	for (int i = 0; i < kChunkCount_; i++) {
-		//roadTransforms_[i].translate = { 0.0f, 2.0f, static_cast<float>(i) * chunkLength_ };
+		//roadTransforms_[i].translate = { 0.0f, -23.0f, static_cast<float>(i) * chunkLength_ };
 		//roadChunks_[i]->SetTransform(roadTransforms_[i]);
 	}
 

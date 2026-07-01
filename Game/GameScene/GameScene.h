@@ -30,7 +30,7 @@ private:
 	std::unique_ptr<Texture> texture_ = std::make_unique<Texture>();
 
 	std::unique_ptr<Camera>camera_ = std::make_unique<Camera>();
-	Transform cameraTransform_{ {0.5f,0.5f,0.5f},{0.3f,0.0f,0.0f,},{0.0f,8.0f,-15.0f} };
+	Transform cameraTransform_{ {1.0f,1.0f,1.0f},{0.3f,0.0f,0.0f,},{0.0f,8.0f,-15.0f} };
 	Matrix4x4 view;
 
 	// ゲーム状態
@@ -68,6 +68,11 @@ private:
 	float currentDistance_ = 0.0f;
 	float topRankings_[3] = { 0.0f, 0.0f, 0.0f };
 	void UpdateRanking();
+
+	float currentScore_ = 0.0f;
+	float topScoreRankings_[3] = { 0.0f, 0.0f, 0.0f };
+	int bonusEnemyHitCount_ = 0;
+	void UpdateScoreRanking();
 
 	// 初期読み込みするSceneJsonのファイルパス (変更することで読み込むJsonを決定できる)
 	std::string initialSceneJson_ = "Resources/Json/Scene/scene.json";

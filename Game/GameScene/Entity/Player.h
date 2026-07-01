@@ -30,6 +30,11 @@ private:
 	float startX_ = 0.0f;   // 移動開始時のX座標
 	MoveDirection moveDirection_ = MoveDirection::None; // 移動方向
 
+	// レーン設定
+	int minLane_ = -1;
+	int maxLane_ = 1;
+	float laneWidth_ = 2.0f;
+
 	// アクション用の変数
 	bool isJumping_ = false;
 	float velocityY_ = 0.0f;
@@ -61,6 +66,12 @@ public:
 
 	void PlayerMove(float speedMultiplier);
 	void HitUpdate(float speedMultiplier);
+
+	void SetLaneLimits(int minLane, int maxLane, float laneWidth) {
+		minLane_ = minLane;
+		maxLane_ = maxLane;
+		laneWidth_ = laneWidth;
+	}
 
 	void Draw() override;
 	void ImGuiInnerComponents() override;

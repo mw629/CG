@@ -20,6 +20,32 @@ void GameScene::ImGui()
 
 	camera_.get()->ImGui();
 
+	if (ImGui::CollapsingHeader("Camera Presets", ImGuiTreeNodeFlags_DefaultOpen)) {
+		if (ImGui::Button("Behind View")) {
+			Transform t;
+			t.scale = { 1.0f, 1.0f, 1.0f };
+			t.rotate = { 0.3f, 0.0f, 0.0f };
+			t.translate = { 0.0f, 8.0f, -15.0f };
+			camera_->SetTransform(t);
+		}
+		ImGui::SameLine();
+		if (ImGui::Button("Left Side View")) {
+			Transform t;
+			t.scale = { 1.0f, 1.0f, 1.0f };
+			t.rotate = { 0.3f, 1.0472f, 0.0f }; // 60 degrees (90 - 30)
+			t.translate = { -20.0f, 8.0f, -5.0f }; 
+			camera_->SetTransform(t);
+		}
+		ImGui::SameLine();
+		if (ImGui::Button("Right Side View")) {
+			Transform t;
+			t.scale = { 1.0f, 1.0f, 1.0f };
+			t.rotate = { 0.3f, -1.0472f, 0.0f }; // -60 degrees (-90 + 30)
+			t.translate = { 20.0f, 8.0f, -5.0f }; 
+			camera_->SetTransform(t);
+		}
+	}
+
 	if (ImGui::CollapsingHeader("Game State", ImGuiTreeNodeFlags_DefaultOpen)) {
 		const char* stateNames[] = { "Playing", "Paused", "PlayerHit", "GameClear", "GameOver", "Editor" };
 		ImGui::Text("Game State: %s", stateNames[gameState_]);
@@ -52,10 +78,22 @@ void GameScene::ImGui()
 
 		// スコアとランキング
 		ImGui::Text("Current Distance: %.2f m", currentDistance_);
-		if (ImGui::TreeNode("Top 3 Ranking")) {
+		if (ImGui::TreeNode("Distance Top 3 Ranking")) {
 			for (int i = 0; i < 3; i++) {
 				if (topRankings_[i] > 0.0f) {
 					ImGui::Text("Rank %d: %.2f m", i + 1, topRankings_[i]);
+				} else {
+					ImGui::Text("Rank %d: ---", i + 1);
+				}
+			}
+			ImGui::TreePop();
+		}
+
+		ImGui::Text("Current Score: %.0f", currentScore_);
+		if (ImGui::TreeNode("Score Top 3 Ranking")) {
+			for (int i = 0; i < 3; i++) {
+				if (topScoreRankings_[i] > 0.0f) {
+					ImGui::Text("Rank %d: %.0f", i + 1, topScoreRankings_[i]);
 				} else {
 					ImGui::Text("Rank %d: ---", i + 1);
 				}
@@ -71,11 +109,24 @@ void GameScene::ImGui()
 			stageSettings_->Reset();
 			player_->Reset();
 			currentDistance_ = 0.0f;
+			currentScore_ = 0.0f;
+			bonusEnemyHitCount_ = 0;
 		}
 	}
 
 	// ステージ設定のデバッグパネル
 	if (ImGui::CollapsingHeader("Stage Settings Debug")) {
+		int laneCount = stageSettings_->GetLaneCount();
+		if (ImGui::SliderInt("Lane Count", &laneCount, 1, 11)) {
+			// Ensure it's preferably an odd number, or just pass it to the setter
+			stageSettings_->SetLaneCount(laneCount);
+		}
+
+		float laneWidth = stageSettings_->GetLaneWidth();
+		if (ImGui::SliderFloat("Lane Width", &laneWidth, 1.0f, 10.0f)) {
+			stageSettings_->SetLaneWidth(laneWidth);
+		}
+
 		float baseSpeed = stageSettings_->GetBaseScrollSpeed();
 		if (ImGui::SliderFloat("Base Scroll Speed", &baseSpeed, 0.0f, 1.0f)) {
 			stageSettings_->SetBaseScrollSpeed(baseSpeed);
@@ -141,12 +192,22 @@ void GameScene::ImGui()
 		ImGui::Text("GAME OVER");
 		ImGui::Separator();
 
-		ImGui::Text("Your Score: %.2f m", currentDistance_);
+		ImGui::Text("Your Distance: %.2f m", currentDistance_);
+		ImGui::Text("Your Score: %.0f", currentScore_);
 		ImGui::Separator();
-		ImGui::Text("--- TOP 3 RANKING ---");
+		ImGui::Text("--- DISTANCE TOP 3 RANKING ---");
 		for (int i = 0; i < 3; i++) {
 			if (topRankings_[i] > 0.0f) {
 				ImGui::Text("  %d. %.2f m", i + 1, topRankings_[i]);
+			} else {
+				ImGui::Text("  %d. ---", i + 1);
+			}
+		}
+		ImGui::Separator();
+		ImGui::Text("--- SCORE TOP 3 RANKING ---");
+		for (int i = 0; i < 3; i++) {
+			if (topScoreRankings_[i] > 0.0f) {
+				ImGui::Text("  %d. %.0f", i + 1, topScoreRankings_[i]);
 			} else {
 				ImGui::Text("  %d. ---", i + 1);
 			}
@@ -159,6 +220,8 @@ void GameScene::ImGui()
 			// PostEffect::SetActivePostEffect(PostEffect::Type::Normal);
 			player_->Reset();
 			currentDistance_ = 0.0f;
+			currentScore_ = 0.0f;
+			bonusEnemyHitCount_ = 0;
 		}
 		if (ImGui::Button("Return to Title (2)", ImVec2(200, 40))) {
 			nextSceneID_ = SceneID::Title;
@@ -248,7 +311,7 @@ void GameScene::Initialize() {
 	});
 
 	// ステージの初期化
-	ModelData roadModelData = AssetManager::LoadModel("Resources/Plane", "Plane.gltf");
+	ModelData roadModelData = AssetManager::LoadModel("Resources/Block", "Block.obj");
 	ModelData obstacleModelData = AssetManager::LoadModel("Resources/Block", "Block.obj");
 	stageSettings_->Initialize(roadModelData, obstacleModelData, modelData, gameObjectManager_.get());
 
@@ -256,6 +319,8 @@ void GameScene::Initialize() {
 	gameObjectManager_->LoadScene(initialSceneJson_);
 
 	currentDistance_ = 0.0f;
+	currentScore_ = 0.0f;
+	bonusEnemyHitCount_ = 0;
 }
 
 void GameScene::Update() {
@@ -307,6 +372,8 @@ void GameScene::Update() {
 			player_->Reset();
 			particleManager_->ClearHitParticles(); // 前回の煙をリセット
 			currentDistance_ = 0.0f;
+			currentScore_ = 0.0f;
+			bonusEnemyHitCount_ = 0;
 		}
 		// 2でタイトルへ
 		if (Input::PushKey(DIK_2)) {
@@ -337,7 +404,6 @@ void GameScene::Draw() {
 	}
 
 	// ヒットエフェクトの描画
-	stageSettings_->Draw();
 	particleManager_->Draw();
 }
 
@@ -364,9 +430,13 @@ void GameScene::PlayingUpdate()
 	}
 
 	currentDistance_ += stageSettings_->GetScrollSpeed() * timeScale;
+	currentScore_ = currentDistance_ + (bonusEnemyHitCount_ * 200.0f * stageSettings_->GetScrollSpeed());
 
 	CheckKeepRolling();
 	
+	// Update Player lane constraints
+	player_->SetLaneLimits(stageSettings_->GetMinLaneIndex(), stageSettings_->GetMaxLaneIndex(), stageSettings_->GetLaneWidth());
+
 	// オブジェクトの一括更新
 	gameObjectManager_->UpdateAll(view, speedMultiplier * timeScale);
 	
@@ -426,7 +496,7 @@ void GameScene::CheckCollisions()
 			if (obstacle->GetType() == Obstacle::Type::Bonus) {
 				// ボーナスエネミーに当たった場合の処理（吹き飛ばす）
 				obstacle->OnHit();
-				currentDistance_ += 50.0f; // スコア（距離）ボーナス
+				bonusEnemyHitCount_++; // スコア（距離）ボーナス
 
 				// プレイヤーの足元にRingエフェクトを出す
 				particleManager_->EmitShockwave(player_->GetTransform().translate);
@@ -452,6 +522,7 @@ void GameScene::CheckCollisions()
 
 			// ランキング更新
 			UpdateRanking();
+			UpdateScoreRanking();
 			
 			break;
 		}
@@ -468,6 +539,21 @@ void GameScene::UpdateRanking()
 				topRankings_[j] = topRankings_[j - 1];
 			}
 			topRankings_[i] = currentDistance_;
+			break;
+		}
+	}
+}
+
+void GameScene::UpdateScoreRanking()
+{
+	// 降順ソートでトップ3を保持
+	for (int i = 0; i < 3; i++) {
+		if (currentScore_ > topScoreRankings_[i]) {
+			// シフト
+			for (int j = 2; j > i; j--) {
+				topScoreRankings_[j] = topScoreRankings_[j - 1];
+			}
+			topScoreRankings_[i] = currentScore_;
 			break;
 		}
 	}

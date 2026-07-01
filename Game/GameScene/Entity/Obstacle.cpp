@@ -33,7 +33,7 @@ void Obstacle::SetType(Type type) {
     collisionHeight_ = 1.0f;
     collisionDepth_ = 1.0f;
     transform_.scale = {1.5f, 1.0f, 1.0f};
-    model_->GetMartial()->SetColor({0.0f, 1.0f, 0.0f, 1.0f}); // 緑色
+    model_->GetMartial()->SetColor({0.0f, 0.0f, 1.0f, 1.0f}); // 緑色
     break;
   case Type::High:
     // 転がりで避ける高い障害物（上に浮いている）

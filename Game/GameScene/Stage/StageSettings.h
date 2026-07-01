@@ -15,6 +15,7 @@ class StageSettings
 private:
 
 	// レーンの管理
+	int laneCount_ = 3;
 	int minLaneIndex_ = -1;
 	int maxLaneIndex_ = 1;
 	float laneWidth_ = 2.0f;
@@ -57,9 +58,19 @@ public:
 	void Draw();
 
 	// ゲッター
+	int GetLaneCount() const { return laneCount_; }
 	int GetMinLaneIndex() const { return minLaneIndex_; }
 	int GetMaxLaneIndex() const { return maxLaneIndex_; }
 	float GetLaneWidth() const { return laneWidth_; }
+
+	// セッター
+	void SetLaneCount(int count) {
+		if (count < 1) count = 1;
+		laneCount_ = count;
+		minLaneIndex_ = -(laneCount_ / 2);
+		maxLaneIndex_ = (laneCount_ - 1) / 2;
+	}
+	void SetLaneWidth(float width) { laneWidth_ = width; }
 	float GetScrollSpeed() const { return scrollSpeed_; }
 	float GetBaseScrollSpeed() const { return baseScrollSpeed_; }
 	float GetMaxScrollSpeed() const { return maxScrollSpeed_; }
