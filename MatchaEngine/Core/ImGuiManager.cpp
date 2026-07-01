@@ -4,7 +4,6 @@
 #include "../../externals/imgui/imgui.h"
 #include "../../externals/imgui/imgui_impl_dx12.h"
 #include "../../externals/imgui/imgui_impl_win32.h"
-#include "../../externals/imgui/ImGuizmo.h"
 #include <vector>
 #include <mutex>
 #include <cassert>
@@ -55,10 +54,19 @@ void ImGuiManager::Initialize(HWND hwnd, ID3D12Device* device, int bufferCount, 
 	IMGUI_CHECKVERSION();
 	ImGui::CreateContext();
 	ImGui::StyleColorsDark();
-	
+
 	ImGuiIO& io = ImGui::GetIO();
 	io.ConfigFlags |= ImGuiConfigFlags_DockingEnable;           // ドッキング有効化
 	io.ConfigFlags |= ImGuiConfigFlags_ViewportsEnable;         // マルチビューポート有効化
+
+	// === ここにフォント読み込み処理を追加 ===
+	// 例: Windows標準の「ＭＳ ゴシック」を読み込む場合 (サイズ16px)
+	io.Fonts->AddFontFromFileTTF(
+		"C:\\Windows\\Fonts\\msgothic.ttc",
+		16.0f,
+		NULL,
+		io.Fonts->GetGlyphRangesJapanese() // これを渡すことで日本語の文字データがテクスチャに書き込まれます
+	);
 
 	ImGuiStyle& style = ImGui::GetStyle();
 	if (io.ConfigFlags & ImGuiConfigFlags_ViewportsEnable) {
@@ -89,7 +97,6 @@ void ImGuiManager::NewFrame() {
 	ImGui_ImplDX12_NewFrame();
 	ImGui_ImplWin32_NewFrame();
 	ImGui::NewFrame();
-	ImGuizmo::BeginFrame();
 #endif
 }
 

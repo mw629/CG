@@ -10,6 +10,7 @@
 
 #include "../MatchaEngine/Core/LogHandler.h"
 #include "../MatchaEngine/Resource/Texture.h"
+#include "LanguageManager.h"
 #include <unordered_map>
 #include <algorithm>
 
@@ -212,12 +213,12 @@ void EditorManager::Update(Engine* engine)
 
 	// ===== Unity風メインメニューバー =====
 	if (ImGui::BeginMainMenuBar()) {
-		if (ImGui::BeginMenu("File")) {
-			std::string displayFileName = s_currentFileName_.empty() ? "None" : s_currentFileName_ + ".json";
-			ImGui::TextDisabled("Current File: %s", displayFileName.c_str());
+		if (ImGui::BeginMenu(LanguageManager::Tr("File"))) {
+			std::string displayFileName = s_currentFileName_.empty() ? LanguageManager::Tr("None") : s_currentFileName_ + ".json";
+			ImGui::TextDisabled(LanguageManager::Tr("Current File: %s"), displayFileName.c_str());
 			ImGui::Separator();
 
-			if (ImGui::MenuItem("Save", "Ctrl+S")) {
+			if (ImGui::MenuItem(LanguageManager::Tr("Save"), "Ctrl+S")) {
 				if (s_currentFileName_.empty()) {
 					showSaveAsPopup = true;
 					snprintf(fileNameBuffer, sizeof(fileNameBuffer), "%s", "scene");
@@ -225,25 +226,37 @@ void EditorManager::Update(Engine* engine)
 					if (s_saveCallback_) s_saveCallback_(getFullPath(s_currentFileName_));
 				}
 			}
-			if (ImGui::MenuItem("Save As...")) {
+			if (ImGui::MenuItem(LanguageManager::Tr("Save As..."))) {
 				showSaveAsPopup = true;
 				snprintf(fileNameBuffer, sizeof(fileNameBuffer), "%s", s_currentFileName_.empty() ? "scene" : s_currentFileName_.c_str());
 			}
-			if (ImGui::MenuItem("Load...", "Ctrl+L")) {
+			if (ImGui::MenuItem(LanguageManager::Tr("Load..."), "Ctrl+L")) {
 				showLoadPopup = true;
 				snprintf(fileNameBuffer, sizeof(fileNameBuffer), "%s", s_currentFileName_.empty() ? "scene" : s_currentFileName_.c_str());
 			}
 			ImGui::Separator();
-			if (ImGui::MenuItem("Exit")) {
+			if (ImGui::MenuItem(LanguageManager::Tr("Exit"))) {
 				Engine::SetEnd(true);
 			}
 			ImGui::EndMenu();
 		}
-		if (ImGui::BeginMenu("Window")) {
-			ImGui::MenuItem("Debug Info", nullptr, &showFinalWindow_);
-			ImGui::MenuItem("Resources", nullptr, &showResourcesWindow_);
-			ImGui::MenuItem("Logs", nullptr, &showLogsWindow_);
-			ImGui::MenuItem("Particle Editor", nullptr, &showParticleViewer_);
+		if (ImGui::BeginMenu(LanguageManager::Tr("Window"))) {
+			ImGui::MenuItem(LanguageManager::Tr("Debug Info"), nullptr, &showFinalWindow_);
+			ImGui::MenuItem(LanguageManager::Tr("Resources"), nullptr, &showResourcesWindow_);
+			ImGui::MenuItem(LanguageManager::Tr("Logs"), nullptr, &showLogsWindow_);
+			ImGui::MenuItem(LanguageManager::Tr("Particle Editor"), nullptr, &showParticleViewer_);
+			ImGui::EndMenu();
+		}
+		if (ImGui::BeginMenu(LanguageManager::Tr("Settings"))) {
+			if (ImGui::BeginMenu(LanguageManager::Tr("Language"))) {
+				if (ImGui::MenuItem("English", nullptr, LanguageManager::GetLanguage() == EditorLanguage::English)) {
+					LanguageManager::SetLanguage(EditorLanguage::English);
+				}
+				if (ImGui::MenuItem("日本語", nullptr, LanguageManager::GetLanguage() == EditorLanguage::Japanese)) {
+					LanguageManager::SetLanguage(EditorLanguage::Japanese);
+				}
+				ImGui::EndMenu();
+			}
 			ImGui::EndMenu();
 		}
 
@@ -257,7 +270,7 @@ void EditorManager::Update(Engine* engine)
 			ImGui::PushStyleColor(ImGuiCol_Button, ImVec4(0.8f, 0.15f, 0.15f, 1.0f));
 			ImGui::PushStyleColor(ImGuiCol_ButtonHovered, ImVec4(0.9f, 0.25f, 0.25f, 1.0f));
 			ImGui::PushStyleColor(ImGuiCol_ButtonActive, ImVec4(0.7f, 0.1f, 0.1f, 1.0f));
-			if (ImGui::Button("  Stop  ")) {
+			if (ImGui::Button(LanguageManager::Tr("  Stop  "))) {
 				isPlaying_ = false;
 			}
 			ImGui::PopStyleColor(3);
@@ -266,7 +279,7 @@ void EditorManager::Update(Engine* engine)
 			ImGui::PushStyleColor(ImGuiCol_Button, ImVec4(0.15f, 0.65f, 0.15f, 1.0f));
 			ImGui::PushStyleColor(ImGuiCol_ButtonHovered, ImVec4(0.2f, 0.75f, 0.2f, 1.0f));
 			ImGui::PushStyleColor(ImGuiCol_ButtonActive, ImVec4(0.1f, 0.55f, 0.1f, 1.0f));
-			if (ImGui::Button("  Play  ")) {
+			if (ImGui::Button(LanguageManager::Tr("  Play  "))) {
 				isPlaying_ = true;
 			}
 			ImGui::PopStyleColor(3);
@@ -300,21 +313,21 @@ void EditorManager::Update(Engine* engine)
 
 	// Save As... ポップアップ
 	if (showSaveAsPopup) {
-		ImGui::OpenPopup("Save As...");
+		ImGui::OpenPopup(LanguageManager::Tr("Save As..."));
 		showSaveAsPopup = false;
 	}
-	if (ImGui::BeginPopupModal("Save As...", NULL, ImGuiWindowFlags_AlwaysAutoResize)) {
-		std::string displayFileName = s_currentFileName_.empty() ? "None" : s_currentFileName_ + ".json";
-		ImGui::TextDisabled("Current File: %s", displayFileName.c_str());
-		ImGui::Text("File name (saved in Resources/Json/Scene/):");
+	if (ImGui::BeginPopupModal(LanguageManager::Tr("Save As..."), NULL, ImGuiWindowFlags_AlwaysAutoResize)) {
+		std::string displayFileName = s_currentFileName_.empty() ? LanguageManager::Tr("None") : s_currentFileName_ + ".json";
+		ImGui::TextDisabled(LanguageManager::Tr("Current File: %s"), displayFileName.c_str());
+		ImGui::Text(LanguageManager::Tr("File name (saved in Resources/Json/Scene/):"));
 		ImGui::InputText("##savepath", fileNameBuffer, sizeof(fileNameBuffer));
-		if (ImGui::Button("Save", ImVec2(120, 0))) {
+		if (ImGui::Button(LanguageManager::Tr("Save"), ImVec2(120, 0))) {
 			s_currentFileName_ = fileNameBuffer;
 			if (s_saveCallback_) s_saveCallback_(getFullPath(s_currentFileName_));
 			ImGui::CloseCurrentPopup();
 		}
 		ImGui::SameLine();
-		if (ImGui::Button("Cancel", ImVec2(120, 0))) {
+		if (ImGui::Button(LanguageManager::Tr("Cancel"), ImVec2(120, 0))) {
 			ImGui::CloseCurrentPopup();
 		}
 		ImGui::EndPopup();
@@ -322,13 +335,13 @@ void EditorManager::Update(Engine* engine)
 
 	// Load Scene... ポップアップ
 	if (showLoadPopup) {
-		ImGui::OpenPopup("Load Scene...");
+		ImGui::OpenPopup(LanguageManager::Tr("Load..."));
 		showLoadPopup = false;
 	}
-	if (ImGui::BeginPopupModal("Load Scene...", NULL, ImGuiWindowFlags_AlwaysAutoResize)) {
-		std::string displayFileName = s_currentFileName_.empty() ? "None" : s_currentFileName_ + ".json";
-		ImGui::TextDisabled("Current File: %s", displayFileName.c_str());
-		ImGui::Text("Select file to load from Resources/Json/Scene/:");
+	if (ImGui::BeginPopupModal(LanguageManager::Tr("Load..."), NULL, ImGuiWindowFlags_AlwaysAutoResize)) {
+		std::string displayFileName = s_currentFileName_.empty() ? LanguageManager::Tr("None") : s_currentFileName_ + ".json";
+		ImGui::TextDisabled(LanguageManager::Tr("Current File: %s"), displayFileName.c_str());
+		ImGui::Text(LanguageManager::Tr("Select file to load from Resources/Json/Scene/:"));
 
 		// List files
 		std::vector<std::string> jsonFiles;
@@ -340,7 +353,7 @@ void EditorManager::Update(Engine* engine)
 			}
 		} catch (...) {}
 
-		if (ImGui::BeginCombo("Target File", s_currentFileName_.c_str())) {
+		if (ImGui::BeginCombo(LanguageManager::Tr("Target File"), s_currentFileName_.c_str())) {
 			for (const auto& file : jsonFiles) {
 				bool is_selected = (s_currentFileName_ == file);
 				if (ImGui::Selectable(file.c_str(), is_selected)) {
@@ -356,13 +369,13 @@ void EditorManager::Update(Engine* engine)
 
 		ImGui::InputText("##loadpath", fileNameBuffer, sizeof(fileNameBuffer));
 
-		if (ImGui::Button("Load", ImVec2(120, 0))) {
+		if (ImGui::Button(LanguageManager::Tr("Load"), ImVec2(120, 0))) {
 			s_currentFileName_ = fileNameBuffer;
 			if (s_loadCallback_) s_loadCallback_(getFullPath(s_currentFileName_));
 			ImGui::CloseCurrentPopup();
 		}
 		ImGui::SameLine();
-		if (ImGui::Button("Cancel", ImVec2(120, 0))) {
+		if (ImGui::Button(LanguageManager::Tr("Cancel"), ImVec2(120, 0))) {
 			ImGui::CloseCurrentPopup();
 		}
 		ImGui::EndPopup();
@@ -373,28 +386,28 @@ void EditorManager::Update(Engine* engine)
 
 	if (showFinalWindow_) {
 		ImGui::SetNextWindowSize(ImVec2(500, 400), ImGuiCond_FirstUseEver);
-		ImGui::Begin("Debug Info", &showFinalWindow_);
+		ImGui::Begin(LanguageManager::Tr("Debug Info"), &showFinalWindow_);
 
 		if (ImGui::BeginTabBar("DebugTabs")) {
-			if (ImGui::BeginTabItem("System Data")) {
-				ImGui::Text("--- Performance ---");
+			if (ImGui::BeginTabItem(LanguageManager::Tr("System Data"))) {
+				ImGui::Text(LanguageManager::Tr("--- Performance ---"));
 				ImGui::Text("FPS: %.1f (%.3f ms/frame)", ImGui::GetIO().Framerate, 1000.0f / ImGui::GetIO().Framerate);
 
 				static int frameCount = 0;
 				frameCount++;
-				ImGui::Text("Frame Count: %d", frameCount);
+				ImGui::Text(LanguageManager::Tr("Frame Count: %d"), frameCount);
 
 				size_t mem = engine->GetProcessMemoryUsage();
-				ImGui::Text("Memory Usage: %.2f MB", mem / (1024.0f * 1024.0f));
+				ImGui::Text(LanguageManager::Tr("Memory Usage: %.2f MB"), mem / (1024.0f * 1024.0f));
 				ImGui::Spacing();
 
-				ImGui::Text("--- Application ---");
-				ImGui::Text("Resolution: %d x %d", engine->GetClientWidth(), engine->GetClientHeight());
+				ImGui::Text(LanguageManager::Tr("--- Application ---"));
+				ImGui::Text(LanguageManager::Tr("Resolution: %d x %d"), engine->GetClientWidth(), engine->GetClientHeight());
 				ImGui::Spacing();
 
-				ImGui::Text("--- Light Settings ---");
+				ImGui::Text(LanguageManager::Tr("--- Light Settings ---"));
 				static bool showLight = false;
-				ImGui::Checkbox("Enable Light Settings (Shortcut: F1)", &showLight);
+				ImGui::Checkbox(LanguageManager::Tr("Enable Light Settings (Shortcut: F1)"), &showLight);
 				if (ImGui::IsKeyPressed(ImGuiKey_F1))
 				{
 					showLight = !showLight;
@@ -410,12 +423,12 @@ void EditorManager::Update(Engine* engine)
 				ImGui::EndTabItem();
 			}
 
-			if (ImGui::BeginTabItem("Post Effect")) {
+			if (ImGui::BeginTabItem(LanguageManager::Tr("Post Effect"))) {
 				auto& postEffects = const_cast<std::vector<std::unique_ptr<PostEffect>>&>(engine->GetPostEffects());
 				for (size_t i = 0; i < postEffects.size(); ++i) {
 					ImGui::PushID(static_cast<int>(i));
 					postEffects[i]->ImGuiWindow();
-					if (ImGui::Button("Remove Layer")) {
+					if (ImGui::Button(LanguageManager::Tr("Remove Layer"))) {
 						postEffects.erase(postEffects.begin() + i);
 						ImGui::PopID();
 						break; // Break and skip the rest of the loop for this frame to avoid invalid iterators
@@ -423,7 +436,7 @@ void EditorManager::Update(Engine* engine)
 					ImGui::Separator();
 					ImGui::PopID();
 				}
-				if (ImGui::Button("Add Post Effect Layer")) {
+				if (ImGui::Button(LanguageManager::Tr("Add Post Effect Layer"))) {
 					auto newEffect = std::make_unique<PostEffect>();
 					newEffect->Initialize();
 					postEffects.push_back(std::move(newEffect));
@@ -431,7 +444,7 @@ void EditorManager::Update(Engine* engine)
 				ImGui::EndTabItem();
 			}
 
-			if (ImGui::BeginTabItem("Resource List")) {
+			if (ImGui::BeginTabItem(LanguageManager::Tr("Resource List"))) {
 				if (engine->GetTextureLoader()) {
 					engine->GetTextureLoader()->Draw();
 				}
@@ -444,12 +457,12 @@ void EditorManager::Update(Engine* engine)
 		ImGui::End();
 	}
 
-	ImGui::Begin("Scene");
+	ImGui::Begin(LanguageManager::Tr("Scene"));
 
 	// --- アスペクト比設定 ---
 	const char* aspectLabels[] = { "Free", "16:9", "4:3", "1:1", "21:9" };
 	const float aspectRatios[] = { 0.0f, 16.0f / 9.0f, 4.0f / 3.0f, 1.0f, 21.0f / 9.0f };
-	ImGui::Combo("Aspect Ratio", &sceneAspectRatioIndex_, aspectLabels, IM_ARRAYSIZE(aspectLabels));
+	ImGui::Combo(LanguageManager::Tr("Aspect Ratio"), &sceneAspectRatioIndex_, aspectLabels, IM_ARRAYSIZE(aspectLabels));
 	ImGui::Separator();
 
 	ImVec2 availSize = ImGui::GetContentRegionAvail();
@@ -500,7 +513,7 @@ void EditorManager::Update(Engine* engine)
 	// Resources Window
 	if (showResourcesWindow_) {
 		ImGui::SetNextWindowSize(ImVec2(600, 400), ImGuiCond_FirstUseEver);
-		if (ImGui::Begin("Resources", &showResourcesWindow_)) {
+		if (ImGui::Begin(LanguageManager::Tr("Resources"), &showResourcesWindow_)) {
 			if (ImGui::BeginTable("ResourceBrowser", 2, ImGuiTableFlags_BordersInnerV | ImGuiTableFlags_Resizable)) {
 				ImGui::TableNextRow();
 				
@@ -525,7 +538,7 @@ void EditorManager::Update(Engine* engine)
 					ImGui::Separator();
 					DrawDirectoryContents(s_selectedResourceDir);
 				} else {
-					ImGui::Text("Directory not found.");
+					ImGui::Text(LanguageManager::Tr("Directory not found."));
 				}
 				ImGui::EndChild();
 
@@ -538,8 +551,8 @@ void EditorManager::Update(Engine* engine)
 	// Logs Window
 	if (showLogsWindow_) {
 		ImGui::SetNextWindowSize(ImVec2(500, 300), ImGuiCond_FirstUseEver);
-		if (ImGui::Begin("Logs", &showLogsWindow_)) {
-			if (ImGui::Button("Clear Logs")) {
+		if (ImGui::Begin(LanguageManager::Tr("Logs"), &showLogsWindow_)) {
+			if (ImGui::Button(LanguageManager::Tr("Clear Logs"))) {
 				ClearLogs();
 			}
 			ImGui::Separator();
@@ -588,11 +601,11 @@ void EditorManager::Update(Engine* engine)
 
 		// Draw the ImGui window FIRST so any resource recreations happen BEFORE recording draw calls
 		ImGui::SetNextWindowSize(ImVec2(800, 600), ImGuiCond_FirstUseEver);
-		if (ImGui::Begin("Particle Editor", &showParticleViewer_)) {
+		if (ImGui::Begin(LanguageManager::Tr("Particle Editor"), &showParticleViewer_)) {
 			ImGui::Columns(2, "ParticleEditorColumns", true);
 			ImGui::SetColumnWidth(0, 532.0f); // Make sure image fits + padding
 
-			ImGui::Text("Preview:");
+			ImGui::Text(LanguageManager::Tr("Preview:"));
 			ImVec2 vMin = ImGui::GetCursorScreenPos();
 			ImGui::Image((ImTextureID)particleRenderTexture_->GetSrvHandleGPU().ptr, ImVec2(512, 512));
 
@@ -656,21 +669,21 @@ void EditorManager::Update(Engine* engine)
 			// 右側の設定項目をChildウィンドウにして、スクロール時に左側のプレビュー画像が一緒に移動（スクロールアウト）しないように位置を固定する
 			ImGui::BeginChild("ParticleControls", ImVec2(0, 0), false, ImGuiWindowFlags_HorizontalScrollbar);
 
-			ImGui::Text("Controls:");
-			ImGui::Checkbox("Show Grid", &showGridInViewer_);
+			ImGui::Text(LanguageManager::Tr("Controls:"));
+			ImGui::Checkbox(LanguageManager::Tr("Show Grid"), &showGridInViewer_);
 			ImGui::SameLine();
-			ImGui::Checkbox("Show Emitter Cube", &showEmitterCube_);
+			ImGui::Checkbox(LanguageManager::Tr("Show Emitter Cube"), &showEmitterCube_);
 			
 			ImGui::Separator();
-			ImGui::Text("Gizmo Operation:");
-			if (ImGui::RadioButton("Translate", currentOp == ImGuizmo::TRANSLATE)) currentOp = ImGuizmo::TRANSLATE;
+			ImGui::Text(LanguageManager::Tr("Gizmo Operation:"));
+			if (ImGui::RadioButton(LanguageManager::Tr("Translate"), currentOp == ImGuizmo::TRANSLATE)) currentOp = ImGuizmo::TRANSLATE;
 			ImGui::SameLine();
-			if (ImGui::RadioButton("Rotate", currentOp == ImGuizmo::ROTATE)) currentOp = ImGuizmo::ROTATE;
+			if (ImGui::RadioButton(LanguageManager::Tr("Rotate"), currentOp == ImGuizmo::ROTATE)) currentOp = ImGuizmo::ROTATE;
 			ImGui::SameLine();
-			if (ImGui::RadioButton("Scale", currentOp == ImGuizmo::SCALE)) currentOp = ImGuizmo::SCALE;
+			if (ImGui::RadioButton(LanguageManager::Tr("Scale"), currentOp == ImGuizmo::SCALE)) currentOp = ImGuizmo::SCALE;
 			// Optional: Camera controls for preview
 			Transform& camT = const_cast<Transform&>(previewCamera_->GetTransform());
-			if (ImGui::DragFloat3("Camera Pos", &camT.translate.x, 0.1f)) {
+			if (ImGui::DragFloat3(LanguageManager::Tr("Camera Pos"), &camT.translate.x, 0.1f)) {
 				previewCamera_->SetTransform(camT);
 			}
 

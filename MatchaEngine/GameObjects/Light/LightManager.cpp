@@ -3,6 +3,7 @@
 #include <imgui.h>
 #include <string>
 #include "Math/Calculation.h"
+#include "../../Editer/LanguageManager.h"
 
 LightManager::LightManager()
 {
@@ -33,22 +34,22 @@ void LightManager::Initialize()
 void LightManager::ImGui()
 {
 #ifdef _USE_IMGUI
-    ImGui::Begin("Light Settings");
+    ImGui::Begin(LanguageManager::Tr("Light Settings"));
 
     // Directional Lights
-    if (ImGui::TreeNode("Directional Lights")) {
-        if (ImGui::Button("Add Directional Light") && dirLights_.size() < kMaxLights) {
+    if (ImGui::TreeNode(LanguageManager::Tr("Directional Lights"))) {
+        if (ImGui::Button(LanguageManager::Tr("Add Directional Light")) && dirLights_.size() < kMaxLights) {
             dirLights_.push_back(DirLightParams());
         }
         for (size_t i = 0; i < dirLights_.size(); ++i) {
-            std::string label = "Directional Light " + std::to_string(i);
+            std::string label = std::string(LanguageManager::Tr("Directional Light")) + " " + std::to_string(i);
             if (ImGui::TreeNode(label.c_str())) {
-                ImGui::Checkbox("Active", &dirLights_[i].active);
-                ImGui::ColorEdit4("Color", &dirLights_[i].color.x);
-                ImGui::DragFloat3("Direction", &dirLights_[i].direction.x, 0.01f, -1.0f, 1.0f);
-                ImGui::DragFloat("Intensity", &dirLights_[i].intensity, 0.01f, 0.0f, 10.0f);
+                ImGui::Checkbox(LanguageManager::Tr("Active"), &dirLights_[i].active);
+                ImGui::ColorEdit4(LanguageManager::Tr("Color"), &dirLights_[i].color.x);
+                ImGui::DragFloat3(LanguageManager::Tr("Direction"), &dirLights_[i].direction.x, 0.01f, -1.0f, 1.0f);
+                ImGui::DragFloat(LanguageManager::Tr("Intensity"), &dirLights_[i].intensity, 0.01f, 0.0f, 10.0f);
                 
-                if (ImGui::Button("Remove") && !dirLights_.empty()) {
+                if (ImGui::Button(LanguageManager::Tr("Remove")) && !dirLights_.empty()) {
                     dirLights_.erase(dirLights_.begin() + i);
                     ImGui::TreePop();
                     break;
@@ -60,21 +61,21 @@ void LightManager::ImGui()
     }
 
     // Point Lights
-    if (ImGui::TreeNode("Point Lights")) {
-        if (ImGui::Button("Add Point Light") && pointLights_.size() < kMaxLights) {
+    if (ImGui::TreeNode(LanguageManager::Tr("Point Lights"))) {
+        if (ImGui::Button(LanguageManager::Tr("Add Point Light")) && pointLights_.size() < kMaxLights) {
             pointLights_.push_back(PointLightParams());
         }
         for (size_t i = 0; i < pointLights_.size(); ++i) {
-            std::string label = "Point Light " + std::to_string(i);
+            std::string label = std::string(LanguageManager::Tr("Point Light")) + " " + std::to_string(i);
             if (ImGui::TreeNode(label.c_str())) {
-                ImGui::Checkbox("Active", &pointLights_[i].active);
-                ImGui::ColorEdit4("Color", &pointLights_[i].color.x);
-                ImGui::DragFloat3("Position", &pointLights_[i].position.x, 0.1f);
-                ImGui::DragFloat("Intensity", &pointLights_[i].intensity, 0.01f, 0.0f, 10.0f);
-                ImGui::DragFloat("Radius", &pointLights_[i].radius, 0.1f, 0.0f, 100.0f);
-                ImGui::DragFloat("Decay", &pointLights_[i].decay, 0.1f, 0.0f, 10.0f);
+                ImGui::Checkbox(LanguageManager::Tr("Active"), &pointLights_[i].active);
+                ImGui::ColorEdit4(LanguageManager::Tr("Color"), &pointLights_[i].color.x);
+                ImGui::DragFloat3(LanguageManager::Tr("Position"), &pointLights_[i].position.x, 0.1f);
+                ImGui::DragFloat(LanguageManager::Tr("Intensity"), &pointLights_[i].intensity, 0.01f, 0.0f, 10.0f);
+                ImGui::DragFloat(LanguageManager::Tr("Radius"), &pointLights_[i].radius, 0.1f, 0.0f, 100.0f);
+                ImGui::DragFloat(LanguageManager::Tr("Decay"), &pointLights_[i].decay, 0.1f, 0.0f, 10.0f);
                 
-                if (ImGui::Button("Remove") && !pointLights_.empty()) {
+                if (ImGui::Button(LanguageManager::Tr("Remove")) && !pointLights_.empty()) {
                     pointLights_.erase(pointLights_.begin() + i);
                     ImGui::TreePop();
                     break;
@@ -86,24 +87,24 @@ void LightManager::ImGui()
     }
 
     // Spot Lights
-    if (ImGui::TreeNode("Spot Lights")) {
-        if (ImGui::Button("Add Spot Light") && spotLights_.size() < kMaxLights) {
+    if (ImGui::TreeNode(LanguageManager::Tr("Spot Lights"))) {
+        if (ImGui::Button(LanguageManager::Tr("Add Spot Light")) && spotLights_.size() < kMaxLights) {
             spotLights_.push_back(SpotLightParams());
         }
         for (size_t i = 0; i < spotLights_.size(); ++i) {
-            std::string label = "Spot Light " + std::to_string(i);
+            std::string label = std::string(LanguageManager::Tr("Spot Light")) + " " + std::to_string(i);
             if (ImGui::TreeNode(label.c_str())) {
-                ImGui::Checkbox("Active", &spotLights_[i].active);
-                ImGui::ColorEdit4("Color", &spotLights_[i].color.x);
-                ImGui::DragFloat3("Position", &spotLights_[i].position.x, 0.1f);
-                ImGui::DragFloat3("Direction", &spotLights_[i].direction.x, 0.01f, -1.0f, 1.0f);
-                ImGui::DragFloat("Intensity", &spotLights_[i].intensity, 0.01f, 0.0f, 10.0f);
-                ImGui::DragFloat("Distance", &spotLights_[i].distance, 0.1f, 0.0f, 100.0f);
-                ImGui::DragFloat("Decay", &spotLights_[i].decay, 0.1f, 0.0f, 10.0f);
-                ImGui::DragFloat("CosAngle", &spotLights_[i].cosAngle, 0.01f, 0.0f, 1.0f);
-                ImGui::DragFloat("CosFalloffStart", &spotLights_[i].cosFalloffStart, 0.01f, 0.0f, 1.0f);
+                ImGui::Checkbox(LanguageManager::Tr("Active"), &spotLights_[i].active);
+                ImGui::ColorEdit4(LanguageManager::Tr("Color"), &spotLights_[i].color.x);
+                ImGui::DragFloat3(LanguageManager::Tr("Position"), &spotLights_[i].position.x, 0.1f);
+                ImGui::DragFloat3(LanguageManager::Tr("Direction"), &spotLights_[i].direction.x, 0.01f, -1.0f, 1.0f);
+                ImGui::DragFloat(LanguageManager::Tr("Intensity"), &spotLights_[i].intensity, 0.01f, 0.0f, 10.0f);
+                ImGui::DragFloat(LanguageManager::Tr("Distance"), &spotLights_[i].distance, 0.1f, 0.0f, 100.0f);
+                ImGui::DragFloat(LanguageManager::Tr("Decay"), &spotLights_[i].decay, 0.1f, 0.0f, 10.0f);
+                ImGui::DragFloat(LanguageManager::Tr("Angle"), &spotLights_[i].cosAngle, 0.01f, 0.0f, 1.0f);
+                ImGui::DragFloat(LanguageManager::Tr("Falloff"), &spotLights_[i].cosFalloffStart, 0.01f, 0.0f, 1.0f);
                 
-                if (ImGui::Button("Remove") && !spotLights_.empty()) {
+                if (ImGui::Button(LanguageManager::Tr("Remove")) && !spotLights_.empty()) {
                     spotLights_.erase(spotLights_.begin() + i);
                     ImGui::TreePop();
                     break;

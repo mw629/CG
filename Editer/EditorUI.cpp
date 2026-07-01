@@ -6,6 +6,8 @@
 #include "ImGuizmo.h"
 #endif
 
+#include "LanguageManager.h"
+
 void EditorUI::ProcessMousePicking(GameObjectManager* gameObjectManager, const Matrix4x4& view, const Matrix4x4& projection) {
 #ifdef _USE_IMGUI
     if (!gameObjectManager) return;
@@ -13,7 +15,7 @@ void EditorUI::ProcessMousePicking(GameObjectManager* gameObjectManager, const M
     // Sceneウィンドウの矩形とホバー状態を取得
     ImVec2 vMin, vMax, windowPos;
     bool isSceneHovered = false;
-    ImGui::Begin("Scene");
+    ImGui::Begin(LanguageManager::Tr("Scene"));
     vMin = ImGui::GetWindowContentRegionMin();
     vMax = ImGui::GetWindowContentRegionMax();
     windowPos = ImGui::GetWindowPos();
@@ -134,7 +136,7 @@ void EditorUI::Draw(GameObjectManager* gameObjectManager, const Matrix4x4& view,
     // (ギズモはEngineのSceneウィンドウコールバックから描画される)
 
     // Hierarchy Window
-    ImGui::Begin("Hierarchy");
+    ImGui::Begin(LanguageManager::Tr("Hierarchy"));
     for (auto& obj : gameObjectManager->GetObjects()) {
         if (!obj) continue;
         
@@ -164,20 +166,20 @@ void EditorUI::Draw(GameObjectManager* gameObjectManager, const Matrix4x4& view,
     ImGui::End();
 
     // Inspector Window
-    ImGui::Begin("Inspector");
+    ImGui::Begin(LanguageManager::Tr("Inspector"));
     if (selectedObject_) {
-        ImGui::Text("Name: %s", selectedObject_->GetName().c_str());
+        ImGui::Text(LanguageManager::Tr("Name: %s"), selectedObject_->GetName().c_str());
         ImGui::Separator();
 
         bool isActive = selectedObject_->GetIsActive();
-        if (ImGui::Checkbox("Active", &isActive)) {
+        if (ImGui::Checkbox(LanguageManager::Tr("Active"), &isActive)) {
             selectedObject_->SetIsActive(isActive);
         }
         ImGui::Separator();
 
         selectedObject_->ImGui();
     } else {
-        ImGui::Text("No object selected.");
+        ImGui::Text(LanguageManager::Tr("No object selected."));
     }
     ImGui::End();
 #endif

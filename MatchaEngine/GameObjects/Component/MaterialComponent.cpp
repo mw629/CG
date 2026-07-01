@@ -2,6 +2,7 @@
 #ifdef _USE_IMGUI
 #include <imgui.h>
 #endif
+#include "../../../Editer/LanguageManager.h"
 MaterialComponent::MaterialComponent(bool lighting, float environmentCoefficient)
     : initialLighting_(lighting), initialEnvCoeff_(environmentCoefficient)
 {
@@ -18,7 +19,7 @@ void MaterialComponent::Initialize()
 void MaterialComponent::ImGui()
 {
 #ifdef _USE_IMGUI
-    if (ImGui::TreeNodeEx("Material", ImGuiTreeNodeFlags_DefaultOpen)) {
+    if (ImGui::TreeNodeEx(LanguageManager::Tr("Material"), ImGuiTreeNodeFlags_DefaultOpen)) {
         if (materialFactory_) {
             materialFactory_->ImGui();
         }
@@ -32,7 +33,7 @@ void MaterialComponent::ImGui()
                 break;
             }
         }
-        if (ImGui::Combo("Shader Selection", &current_shader, shaders, IM_ARRAYSIZE(shaders))) {
+        if (ImGui::Combo(LanguageManager::Tr("Shader Selection"), &current_shader, shaders, IM_ARRAYSIZE(shaders))) {
             shader_ = shaders[current_shader];
         }
 
@@ -43,13 +44,13 @@ void MaterialComponent::ImGui()
         for (int i = 0; i < IM_ARRAYSIZE(blendModes); ++i) {
             if (blend_ == blendModes[i]) { current_blend = i; break; }
         }
-        if (ImGui::Combo("Blend Selection", &current_blend, blendNames, IM_ARRAYSIZE(blendNames))) {
+        if (ImGui::Combo(LanguageManager::Tr("Blend Selection"), &current_blend, blendNames, IM_ARRAYSIZE(blendNames))) {
             blend_ = blendModes[current_blend];
         }
         
         ImGui::Separator();
-        ImGui::Text("Texture:");
-        std::string btnLabel = (texturePath_.empty() ? "None" : texturePath_) + "##TexDrop";
+        ImGui::Text(LanguageManager::Tr("Texture:"));
+        std::string btnLabel = (texturePath_.empty() ? LanguageManager::Tr("None") : texturePath_) + "##TexDrop";
         ImGui::Button(btnLabel.c_str(), ImVec2(-FLT_MIN, 0)); // Button taking full width
 
         if (ImGui::BeginDragDropTarget()) {
