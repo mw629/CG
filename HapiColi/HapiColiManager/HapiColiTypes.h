@@ -39,6 +39,9 @@ namespace HapiColi
         Type type = Type::None;
         Vector3 size; // Sphere: x=radius, Capsule: x=radius, y=height, Box: half-extents
         Vector3 offset;
+        bool isTrigger = false;
+        float friction = 0.5f;
+        float bounciness = 0.0f;
     };
 
     struct CollisionResult
@@ -48,6 +51,8 @@ namespace HapiColi
         Vector3 contactPoint;
         Vector3 contactNormal;
         bool hasContactInfo = false;
+        float penetrationDepth = 0.0f;
+        Vector3 appliedImpulse;
     };
 
     struct ObjectData
@@ -56,7 +61,13 @@ namespace HapiColi
         std::string type;
         Vector3 position;
         Quaternion rotation;
+        Vector3 scale = { 1.0f, 1.0f, 1.0f };
         Vector3 velocity;
+        Vector3 angularVelocity;
+        float mass = 1.0f;
+        bool isSleeping = false;
+        uint32_t collisionLayer = 0;
+        uint32_t collisionMask = 0xFFFFFFFF;
         ColliderInfo collider;
         CollisionResult collision;
 
@@ -91,18 +102,22 @@ namespace HapiColi
             collision.collidedWithId = collidedWithId;
         }
 
-        void SetContactInfo(const Vector3& contactPoint, const Vector3& contactNormal)
+        void SetContactInfo(const Vector3& contactPoint, const Vector3& contactNormal, float penetrationDepth = 0.0f, const Vector3& appliedImpulse = Vector3())
         {
             collision.contactPoint = contactPoint;
             collision.contactNormal = contactNormal;
+            collision.penetrationDepth = penetrationDepth;
+            collision.appliedImpulse = appliedImpulse;
             collision.hasContactInfo = true;
         }
 
         // 衝突判定はないが、最後の衝突点情報を残すためのヘルパー
-        void SetContactInfoOnly(const Vector3& contactPoint, const Vector3& contactNormal)
+        void SetContactInfoOnly(const Vector3& contactPoint, const Vector3& contactNormal, float penetrationDepth = 0.0f, const Vector3& appliedImpulse = Vector3())
         {
             collision.contactPoint = contactPoint;
             collision.contactNormal = contactNormal;
+            collision.penetrationDepth = penetrationDepth;
+            collision.appliedImpulse = appliedImpulse;
             collision.hasContactInfo = true;
         }
     };

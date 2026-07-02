@@ -213,49 +213,34 @@ void GameScene::PausedUpdate()
 
 void GameScene::CheckCollisions()
 {
-	// プレイヤーのAABBを生成
+	// プレイヤーのサイズと位置情報
 	const Transform& playerTransform = player_->GetTransform();
 	float playerHeight = player_->GetIsRolling() ? 0.5f : 1.5f; // 転がり中は低くなる
-	AABB playerAABB = Collision::MakeAABB(playerTransform, 0.8f, playerHeight, 0.8f);
-
-	HapiColi::ObjectData playerData = HapiColi::ObjectData::CreateBox(
-		"Player",
-		{playerTransform.translate.x, playerTransform.translate.y, playerTransform.translate.z},
-		{0.8f, playerHeight, 0.8f}
-	);
+	HapiColi::Vector3 playerPos = {playerTransform.translate.x, playerTransform.translate.y, playerTransform.translate.z};
+	HapiColi::Vector3 playerSize = {0.8f, playerHeight, 0.8f};
 
 	// 全障害物との当たり判定
 	for (int i = 0; i < stageSettings_->GetMaxObstacles(); i++) {
 		Obstacle* obstacle = stageSettings_->GetObstacle(i);
 		if (!obstacle->GetIsActive()) continue;
 
-		AABB obstacleAABB = Collision::MakeAABB(
-			obstacle->GetTransform(),
-			obstacle->GetCollisionWidth(),
-			obstacle->GetCollisionHeight(),
-			obstacle->GetCollisionDepth()
+		HapiColi::Vector3 obsPos = {obstacle->GetTransform().translate.x, obstacle->GetTransform().translate.y, obstacle->GetTransform().translate.z};
+		HapiColi::Vector3 obsSize = {obstacle->GetCollisionWidth(), obstacle->GetCollisionHeight(), obstacle->GetCollisionDepth()};
+
+		// HapiColiのヘルパー関数を呼ぶだけで、AABB判定・ObjectData生成・ログ記録が全て自動で行われます
+		bool isHit = HapiColi::HapiColi::GetInstance().CheckAABBAndRecord(
+			"Player", playerPos, playerSize,
+			"Obstacle_" + std::to_string(i), obsPos, obsSize,
+			"Player", "Obstacle"
 		);
 
-		HapiColi::ObjectData obstacleData = HapiColi::ObjectData::CreateBox(
-			"Obstacle_" + std::to_string(i),
-			{obstacle->GetTransform().translate.x, obstacle->GetTransform().translate.y, obstacle->GetTransform().translate.z},
-			{obstacle->GetCollisionWidth(), obstacle->GetCollisionHeight(), obstacle->GetCollisionDepth()}
-		);
-
-		if (Collision::CheckAABB(playerAABB, obstacleAABB)) {
+		if (isHit) {
 			if (gameState_ == GameState::Playing) {
 				// 衝突！ゲームオーバー
 				gameState_ = GameState::GameOver;
 				stageSettings_->SetGameOver(true);
 				PostEffect::SetActivePostEffect(PostEffect::Type::GrayScale);
 			}
-			
-			// 衝突状態をセット（赤くする。ポーズ中やゲームオーバー時も表示を維持）
-			playerData.SetCollision(obstacleData.id);
-			obstacleData.SetCollision(playerData.id);
 		}
-		
-		HapiColi::HapiColi::GetInstance().RecordObject(obstacleData);
 	}
-	HapiColi::HapiColi::GetInstance().RecordObject(playerData);
 }

@@ -27,6 +27,13 @@ namespace HapiColi
         void RecordObject(const ObjectData& objData);
         void EndFrame();
         
+        // ヘルパー関数: AABB同士の当たり判定を行い、結果を自動で記録する
+        bool CheckAABBAndRecord(
+            const std::string& idA, const Vector3& posA, const Vector3& sizeA,
+            const std::string& idB, const Vector3& posB, const Vector3& sizeB,
+            const std::string& typeA = "Object", const std::string& typeB = "Object"
+        );
+        
         void RegisterFuzzTarget(const std::string& name, const ObjectData& baseA, const ObjectData& baseB, std::function<void(ObjectData&, ObjectData&)> func);
         void UpdateFuzzTarget(const std::string& name, const ObjectData& baseA, const ObjectData& baseB);
         

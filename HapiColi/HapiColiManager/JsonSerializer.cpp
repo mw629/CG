@@ -48,17 +48,32 @@ namespace HapiColi
             << obj.rotation.y << ", "
             << obj.rotation.z << ", "
             << obj.rotation.w << "],\n";
+        oss << i1 << "\"scale\": ["
+            << obj.scale.x << ", "
+            << obj.scale.y << ", "
+            << obj.scale.z << "],\n";
         oss << i1 << "\"velocity\": ["
             << obj.velocity.x << ", "
             << obj.velocity.y << ", "
             << obj.velocity.z << "],\n";
+        oss << i1 << "\"angularVelocity\": ["
+            << obj.angularVelocity.x << ", "
+            << obj.angularVelocity.y << ", "
+            << obj.angularVelocity.z << "],\n";
+        oss << i1 << "\"mass\": " << obj.mass << ",\n";
+        oss << i1 << "\"isSleeping\": " << (obj.isSleeping ? "true" : "false") << ",\n";
+        oss << i1 << "\"collisionLayer\": " << obj.collisionLayer << ",\n";
+        oss << i1 << "\"collisionMask\": " << obj.collisionMask << ",\n";
             
         oss << i1 << "\"collider\": {\n";
         oss << i2 << "\"type\": " << (int)obj.collider.type << ",\n";
         oss << i2 << "\"size\": ["
             << obj.collider.size.x << ", "
             << obj.collider.size.y << ", "
-            << obj.collider.size.z << "]\n";
+            << obj.collider.size.z << "],\n";
+        oss << i2 << "\"isTrigger\": " << (obj.collider.isTrigger ? "true" : "false") << ",\n";
+        oss << i2 << "\"friction\": " << obj.collider.friction << ",\n";
+        oss << i2 << "\"bounciness\": " << obj.collider.bounciness << "\n";
         oss << i1 << "},\n";
         
         oss << i1 << "\"collision\": {\n";
@@ -72,7 +87,12 @@ namespace HapiColi
         oss << i2 << "\"contactNormal\": ["
             << obj.collision.contactNormal.x << ", "
             << obj.collision.contactNormal.y << ", "
-            << obj.collision.contactNormal.z << "]\n";
+            << obj.collision.contactNormal.z << "],\n";
+        oss << i2 << "\"penetrationDepth\": " << obj.collision.penetrationDepth << ",\n";
+        oss << i2 << "\"appliedImpulse\": ["
+            << obj.collision.appliedImpulse.x << ", "
+            << obj.collision.appliedImpulse.y << ", "
+            << obj.collision.appliedImpulse.z << "]\n";
         oss << i1 << "}\n";
         oss << i0 << "}";
         return oss.str();
@@ -350,6 +370,41 @@ namespace HapiColi
                     << " | " << f.objA.id << " " << bufA
                     << " | " << f.objB.id << " " << bufB
                     << " | " << descStr << " |\n";
+            }
+            oss << "\n";
+        }
+
+        // 5. Unhappy Advanced Details
+        oss << GetText("## 5. Unhappy Advanced Details\n", u8"## 5. 失敗時詳細データ (Unhappy Advanced Details)\n");
+        if (unhappyCount == 0) {
+            oss << GetText("No unhappy frames recorded.\n\n", u8"失敗したフレームはありません。\n\n");
+        } else {
+            oss << GetText("| Frame | Object | Scale | Mass | Velocity | AngVel | Friction | Bounce | Depth |\n", 
+                           u8"| フレーム | オブジェクト | スケール | 質量 | 速度 | 角速度 | 摩擦 | 反発 | 深度 |\n");
+            oss << "|---|---|---|---|---|---|---|---|---|\n";
+            for (const auto& result : results) {
+                if (result.happy) continue;
+                auto it = frameMap.find(result.frame);
+                if (it != frameMap.end()) {
+                    const FrameData* f = it->second;
+                    const ObjectData* subObj = f->GetObjectById(result.targetId); // Subject is targetId in result
+                    if (subObj) {
+                        char sBuf[64], vBuf[64], avBuf[64];
+                        snprintf(sBuf, sizeof(sBuf), "(%.1f,%.1f,%.1f)", subObj->scale.x, subObj->scale.y, subObj->scale.z);
+                        snprintf(vBuf, sizeof(vBuf), "(%.1f,%.1f,%.1f)", subObj->velocity.x, subObj->velocity.y, subObj->velocity.z);
+                        snprintf(avBuf, sizeof(avBuf), "(%.1f,%.1f,%.1f)", subObj->angularVelocity.x, subObj->angularVelocity.y, subObj->angularVelocity.z);
+                        
+                        oss << "| " << result.frame
+                            << " | " << subObj->id
+                            << " | " << sBuf
+                            << " | " << subObj->mass
+                            << " | " << vBuf
+                            << " | " << avBuf
+                            << " | " << subObj->collider.friction
+                            << " | " << subObj->collider.bounciness
+                            << " | " << subObj->collision.penetrationDepth << " |\n";
+                    }
+                }
             }
             oss << "\n";
         }

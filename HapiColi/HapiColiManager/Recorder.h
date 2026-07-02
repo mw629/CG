@@ -17,6 +17,7 @@ namespace HapiColi
 
         void BeginFrame(float deltaTime);
         void RecordObject(const ObjectData& objData);
+        void RecordObjectMerge(const ObjectData& objData); // Duplicate ID overwrite
         void EndFrame();
 
         const std::vector<FrameData>& GetRecordedFrames() const;

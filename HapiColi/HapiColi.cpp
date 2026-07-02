@@ -55,6 +55,56 @@ namespace HapiColi
         }
     }
 
+    bool HapiColi::CheckAABBAndRecord(
+        const std::string& idA, const Vector3& posA, const Vector3& sizeA,
+        const std::string& idB, const Vector3& posB, const Vector3& sizeB,
+        const std::string& typeA, const std::string& typeB)
+    {
+        // 1. AABB交差判定 (底面中央を基準として計算)
+        float minX_A = posA.x - sizeA.x / 2.0f;
+        float maxX_A = posA.x + sizeA.x / 2.0f;
+        float minY_A = posA.y;
+        float maxY_A = posA.y + sizeA.y;
+        float minZ_A = posA.z - sizeA.z / 2.0f;
+        float maxZ_A = posA.z + sizeA.z / 2.0f;
+
+        float minX_B = posB.x - sizeB.x / 2.0f;
+        float maxX_B = posB.x + sizeB.x / 2.0f;
+        float minY_B = posB.y;
+        float maxY_B = posB.y + sizeB.y;
+        float minZ_B = posB.z - sizeB.z / 2.0f;
+        float maxZ_B = posB.z + sizeB.z / 2.0f;
+
+        bool hit = true;
+        if (maxX_A < minX_B || minX_A > maxX_B) hit = false;
+        if (maxY_A < minY_B || minY_A > maxY_B) hit = false;
+        if (maxZ_A < minZ_B || minZ_A > maxZ_B) hit = false;
+
+        // 2. 描画用に中心座標を計算 (HapiColiRendererは中心座標を基準に描画するため)
+        Vector3 centerA = { posA.x, posA.y + sizeA.y / 2.0f, posA.z };
+        Vector3 centerB = { posB.x, posB.y + sizeB.y / 2.0f, posB.z };
+
+        // 3. データ生成
+        ObjectData objA = ObjectData::CreateBox(idA, centerA, sizeA);
+        objA.type = typeA;
+        ObjectData objB = ObjectData::CreateBox(idB, centerB, sizeB);
+        objB.type = typeB;
+
+        if (hit) {
+            objA.SetCollision(idB);
+            objB.SetCollision(idA);
+        }
+
+        // 4. 重複をマージしながら記録
+        auto playback = m_manager->GetPlaybackManager();
+        if (!playback || !playback->IsReplayMode()) {
+            m_manager->GetRecorder()->RecordObjectMerge(objA);
+            m_manager->GetRecorder()->RecordObjectMerge(objB);
+        }
+
+        return hit;
+    }
+
     void HapiColi::RegisterFuzzTarget(const std::string& name, const ObjectData& baseA, const ObjectData& baseB, std::function<void(ObjectData&, ObjectData&)> func)
     {
         if (m_manager && m_manager->GetFuzzer())

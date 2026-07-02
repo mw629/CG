@@ -67,6 +67,35 @@ namespace HapiColi
         m_currentFrameData.objects.push_back(objData);
     }
 
+    void Recorder::RecordObjectMerge(const ObjectData& objData)
+    {
+        if (std::find(m_knownObjectIds.begin(), m_knownObjectIds.end(), objData.id) == m_knownObjectIds.end())
+        {
+            m_knownObjectIds.push_back(objData.id);
+        }
+
+        auto itRt = std::find_if(m_realtimeObjects.begin(), m_realtimeObjects.end(), [&](const ObjectData& o) { return o.id == objData.id; });
+        if (itRt != m_realtimeObjects.end()) {
+            if (objData.collision.isColliding) {
+                itRt->collision = objData.collision;
+            }
+        } else {
+            m_realtimeObjects.push_back(objData);
+        }
+
+        if (!m_isRecording) return;
+        if (!m_targetIds.empty() && !IsTarget(objData.id)) return;
+
+        auto itF = std::find_if(m_currentFrameData.objects.begin(), m_currentFrameData.objects.end(), [&](const ObjectData& o) { return o.id == objData.id; });
+        if (itF != m_currentFrameData.objects.end()) {
+            if (objData.collision.isColliding) {
+                itF->collision = objData.collision;
+            }
+        } else {
+            m_currentFrameData.objects.push_back(objData);
+        }
+    }
+
     void Recorder::EndFrame()
     {
         if (!m_isRecording) return;
