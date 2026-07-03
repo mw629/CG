@@ -34,9 +34,9 @@ void TransformAnimation::SettingWvp(Matrix4x4 viewMatrix) {
 	Matrix4x4 worldInverseTranspose = TransposeMatrix4x4(Inverse(worldViewProjectionMatrix));
 
 
-	wvpData_->WVP = localMatrix_ * worldMatrix * worldViewProjectionMatrix;
-	wvpData_->World = localMatrix_ * worldMatrix;
-	wvpData_->WorldInverseTranspose = worldInverseTranspose;
+	GetWvpData()->WVP = localMatrix_ * worldMatrix * worldViewProjectionMatrix;
+	GetWvpData()->World = localMatrix_ * worldMatrix;
+	GetWvpData()->WorldInverseTranspose = worldInverseTranspose;
 }
 
 Skeleton TransformAnimation::CreateSkeleton(const Node& rootNode)

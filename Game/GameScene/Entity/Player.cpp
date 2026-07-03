@@ -47,7 +47,11 @@ void Player::Update(Matrix4x4 view, float speedMultiplier)
 	if (isHit_) {
 		// SpeedMultiplier is ignored for hit update so animation plays consistently 
 		// even if the game scroll stops.
-		HitUpdate(1.0f);
+		if (speedMultiplier > 0.0f) {
+			HitUpdate(1.0f);
+		} else {
+			HitUpdate(0.0f);
+		}
 	} else {
 		PlayerMove(speedMultiplier);
 	}
@@ -173,10 +177,15 @@ void Player::ImGuiInnerComponents()
 	}
 }
 
-void Player::HitUpdate(float /*speedMultiplier*/)
+void Player::HitUpdate(float speedMultiplier)
 {
 	// ノックバック処理
 	if (isHit_) {
+		if (speedMultiplier == 0.0f) {
+			model_.get()->SetTransform(transform_);
+			return;
+		}
+
 		hitTimer_ += 1.0f;
 
 		transform_.translate.x += knockbackVelocity_.x;

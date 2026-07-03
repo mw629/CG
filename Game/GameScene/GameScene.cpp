@@ -20,29 +20,41 @@ void GameScene::ImGui()
 
 	camera_.get()->ImGui();
 
-	if (ImGui::CollapsingHeader("Camera Presets", ImGuiTreeNodeFlags_DefaultOpen)) {
+	if (ImGui::CollapsingHeader("GameScene Camera Settings", ImGuiTreeNodeFlags_DefaultOpen)) {
+		bool cameraChanged = false;
+		if (ImGui::DragFloat3("Translate", &cameraTransform_.translate.x, 0.1f)) cameraChanged = true;
+		if (ImGui::DragFloat3("Rotate", &cameraTransform_.rotate.x, 0.01f)) cameraChanged = true;
+		if (ImGui::DragFloat3("Scale", &cameraTransform_.scale.x, 0.01f)) cameraChanged = true;
+
+		if (cameraChanged) {
+			camera_->SetTransform(cameraTransform_);
+			gameCamera_->SetTransform(cameraTransform_);
+		}
+
+		ImGui::Separator();
+		ImGui::Text("Presets:");
 		if (ImGui::Button("Behind View")) {
-			Transform t;
-			t.scale = { 1.0f, 1.0f, 1.0f };
-			t.rotate = { 0.3f, 0.0f, 0.0f };
-			t.translate = { 0.0f, 8.0f, -15.0f };
-			camera_->SetTransform(t);
+			cameraTransform_.scale = { 1.0f, 1.0f, 1.0f };
+			cameraTransform_.rotate = { 0.3f, 0.0f, 0.0f };
+			cameraTransform_.translate = { 0.0f, 8.0f, -15.0f };
+			camera_->SetTransform(cameraTransform_);
+			gameCamera_->SetTransform(cameraTransform_);
 		}
 		ImGui::SameLine();
 		if (ImGui::Button("Left Side View")) {
-			Transform t;
-			t.scale = { 1.0f, 1.0f, 1.0f };
-			t.rotate = { 0.3f, 1.0472f, 0.0f }; // 60 degrees (90 - 30)
-			t.translate = { -20.0f, 8.0f, -5.0f }; 
-			camera_->SetTransform(t);
+			cameraTransform_.scale = { 1.0f, 1.0f, 1.0f };
+			cameraTransform_.rotate = { 0.3f, 1.0472f, 0.0f }; // 60 degrees (90 - 30)
+			cameraTransform_.translate = { -20.0f, 8.0f, -5.0f }; 
+			camera_->SetTransform(cameraTransform_);
+			gameCamera_->SetTransform(cameraTransform_);
 		}
 		ImGui::SameLine();
 		if (ImGui::Button("Right Side View")) {
-			Transform t;
-			t.scale = { 1.0f, 1.0f, 1.0f };
-			t.rotate = { 0.3f, -1.0472f, 0.0f }; // -60 degrees (-90 + 30)
-			t.translate = { 20.0f, 8.0f, -5.0f }; 
-			camera_->SetTransform(t);
+			cameraTransform_.scale = { 1.0f, 1.0f, 1.0f };
+			cameraTransform_.rotate = { 0.3f, -1.0472f, 0.0f }; // -60 degrees (-90 + 30)
+			cameraTransform_.translate = { 30.0f, 15.0f, -5.0f }; 
+			camera_->SetTransform(cameraTransform_);
+			gameCamera_->SetTransform(cameraTransform_);
 		}
 	}
 
@@ -255,6 +267,41 @@ void GameScene::Initialize() {
 	camera_->SetTransform(cameraTransform_);
 	camera_->Update();
 
+	gameCamera_->SetDebugCamera(false); // Game Cameraは常にDebug操作を受け付けない
+	gameCamera_->SetTransform(cameraTransform_);
+	gameCamera_->Update();
+
+	// Game View描画コールバックの登録
+	EditorManager::SetGameViewDrawCallback([this]() {
+		Matrix4x4 gameViewMat = gameCamera_->GetViewMatrix();
+
+		// 一時的にSkyBoxをGameCameraの位置へ移動
+		Transform originalSkyBoxT = skyBox_->GetTransform();
+		Transform gameSkyBoxT = originalSkyBoxT;
+		gameSkyBoxT.translate = gameCamera_->GetTransform().translate;
+		skyBox_->SetTransform(gameSkyBoxT);
+
+		// ゲームカメラのView行列でオブジェクトのWVPを更新 (speedMultiplier=0.0f でアニメーションは進めない)
+		ObjectBase::SetWvpIndex(1);
+		EffectDefinition::SetWvpIndex(1);
+
+		gameObjectManager_->UpdateAll(gameViewMat, 0.0f);
+		stageSettings_->EditorUpdate(gameViewMat);
+		particleManager_->EditorUpdate(gameViewMat);
+
+		Draw::SetCamera(gameCamera_.get());
+		Draw::SetEnvironmentTexture(skyBoxTexture_);
+		gameObjectManager_->DrawAll();
+		stageSettings_->Draw();
+		particleManager_->Draw();
+
+		// SkyBoxの位置を元に戻す
+		skyBox_->SetTransform(originalSkyBoxT);
+
+		ObjectBase::SetWvpIndex(0);
+		EffectDefinition::SetWvpIndex(0);
+	});
+
 	// スカイボックスの初期化
 	skyBoxTexture_ = texture_.get()->CreateTexture("Resources/DDS/SnowWorld.dds");
 	skyBox_.get()->Initialize(skyBoxTexture_);
@@ -324,6 +371,8 @@ void GameScene::Initialize() {
 }
 
 void GameScene::Update() {
+	ObjectBase::SetWvpIndex(0);
+	EffectDefinition::SetWvpIndex(0);
 
 	// PostEffect::SetActivePostEffect(PostEffect::Type::GaussianFilter);
 
@@ -339,6 +388,8 @@ void GameScene::Update() {
 
 	camera_->Update();
 	view = camera_->GetViewMatrix();
+
+	gameCamera_->Update();
 
 	// SkyBoxをカメラの位置に追従させる（無限遠の背景として機能させるため）
 	Transform skyboxTransform = skyBox_->GetTransform();

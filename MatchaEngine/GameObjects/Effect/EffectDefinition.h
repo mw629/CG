@@ -45,12 +45,14 @@ private:
 	Microsoft::WRL::ComPtr<ID3D12Resource> vertexResource_;
 	D3D12_VERTEX_BUFFER_VIEW vertexBufferView_{};
 	VertexData* vertexData_ = nullptr;
-	Microsoft::WRL::ComPtr<ID3D12Resource> instancingResource_;
-	ParticleForGPU* instancingData_ = nullptr;
+	Microsoft::WRL::ComPtr<ID3D12Resource> instancingResource_[2];
+	ParticleForGPU* instancingData_[2] = { nullptr, nullptr };
 	D3D12_SHADER_RESOURCE_VIEW_DESC instancingSrvDesc_{};
 
-	D3D12_CPU_DESCRIPTOR_HANDLE instancingSrvHandleCPU_;
-	D3D12_GPU_DESCRIPTOR_HANDLE instancingSrvHandleGPU_;
+	D3D12_CPU_DESCRIPTOR_HANDLE instancingSrvHandleCPU_[2];
+	D3D12_GPU_DESCRIPTOR_HANDLE instancingSrvHandleGPU_[2];
+
+	static int s_wvpIndex;
 
 
 
@@ -71,6 +73,7 @@ public:
 	static void SetDevice(ID3D12Device* device);
 	static void SetScreenSize(Vector2 screenSize);
 	static void SetDescriptorHeap(DescriptorHeap* descriptorHeap);
+	static void SetWvpIndex(int index) { s_wvpIndex = index; }
 
 	void Initialize(EffectShape shape = EffectShape::Plane);
 	void Initialize(int TextureHandle, EffectShape shape = EffectShape::Plane);
@@ -103,10 +106,10 @@ public:
 	D3D12_GPU_DESCRIPTOR_HANDLE GetTextureSrvHandleGPU()const { return textureSrvHandleGPU_; }
 
 	D3D12_VERTEX_BUFFER_VIEW* GetVertexBufferView() { return &vertexBufferView_; }
-	ID3D12Resource* GetInstancingResource() { return instancingResource_.Get(); }
+	ID3D12Resource* GetInstancingResource() { return instancingResource_[s_wvpIndex].Get(); }
 
-	D3D12_CPU_DESCRIPTOR_HANDLE GetInstancingSrvHandleCPU() { return instancingSrvHandleCPU_; }
-	D3D12_GPU_DESCRIPTOR_HANDLE GetInstancingSrvHandleGPU() { return instancingSrvHandleGPU_; }
+	D3D12_CPU_DESCRIPTOR_HANDLE GetInstancingSrvHandleCPU() { return instancingSrvHandleCPU_[s_wvpIndex]; }
+	D3D12_GPU_DESCRIPTOR_HANDLE GetInstancingSrvHandleGPU() { return instancingSrvHandleGPU_[s_wvpIndex]; }
 
 	int GetEffectDefinitionNum() { return effectDefinitionNum_; }
 	uint32_t GetVertexSize() const { return vertexSize_; }

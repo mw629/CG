@@ -25,9 +25,11 @@ protected:
 	Microsoft::WRL::ComPtr<ID3D12Resource> vertexResource_;
 	D3D12_VERTEX_BUFFER_VIEW vertexBufferView_{};
 	VertexData* vertexData_ = nullptr;
-	Microsoft::WRL::ComPtr<ID3D12Resource> wvpDataResource_;
-	TransformationMatrix* wvpData_ = nullptr;
+	Microsoft::WRL::ComPtr<ID3D12Resource> wvpDataResource_[2];
+	TransformationMatrix* wvpData_[2] = { nullptr, nullptr };
 	int vertexSize_ = 0;
+
+	static int s_wvpIndex;
 
 	Microsoft::WRL::ComPtr<ID3D12Resource> indexResource_;
 	D3D12_INDEX_BUFFER_VIEW indexBufferView_{};
@@ -37,8 +39,8 @@ protected:
 public:
 	virtual ~ObjectBase();
 
-
 	static void SetObjectResource(Vector2 ClientSize);
+	static void SetWvpIndex(int index) { s_wvpIndex = index; }
 
 	virtual void CreateVertexData();
 	virtual void CreateWVP();
@@ -73,9 +75,9 @@ public:
 	virtual Mesh GetMesh();
 
 	D3D12_VERTEX_BUFFER_VIEW* GetVertexBufferView();
-	ID3D12Resource* GetWvpDataResource() { return wvpDataResource_.Get(); }
+	ID3D12Resource* GetWvpDataResource() { return wvpDataResource_[s_wvpIndex].Get(); }
 	int GetVertexSize() { return vertexSize_; }
-	TransformationMatrix* GetWvpData() { return wvpData_; }
+	TransformationMatrix* GetWvpData() { return wvpData_[s_wvpIndex]; }
 
 	ID3D12Resource* GetIndexResource() { return indexResource_.Get(); }
 	D3D12_INDEX_BUFFER_VIEW* GetIndexBufferView() { return &indexBufferView_; }

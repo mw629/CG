@@ -30,6 +30,7 @@ private:
 	std::unique_ptr<Texture> texture_ = std::make_unique<Texture>();
 
 	std::unique_ptr<Camera>camera_ = std::make_unique<Camera>();
+	std::unique_ptr<Camera>gameCamera_ = std::make_unique<Camera>();
 	Transform cameraTransform_{ {1.0f,1.0f,1.0f},{0.3f,0.0f,0.0f,},{0.0f,8.0f,-15.0f} };
 	Matrix4x4 view;
 

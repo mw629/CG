@@ -19,6 +19,7 @@ namespace {
 }
 
 int EffectDefinition::DescriptorNum = 5;
+int EffectDefinition::s_wvpIndex = 0;
 
 void EffectDefinition::SetDevice(ID3D12Device* device)
 {
@@ -163,32 +164,36 @@ void EffectDefinition::CreateVertexData()
 void EffectDefinition::CreateWVP()
 {
 
-	//Sprite用ののTransformationMatrix用のリソースを作る。Matrix4x41つ分のサイズを用意する
-	instancingResource_ = GraphicsDevice::CreateBufferResource(sizeof(ParticleForGPU) * effectDefinitionMaxNum_);
-	//データを書き込む
-	//書き込むためのアドレスを取得
-	instancingResource_->Map(0, nullptr, reinterpret_cast<void**>(&instancingData_));
-	//単位行列をかきこんでおく
-	for (int i = 0; i < effectDefinitionMaxNum_; i++) {
-		instancingData_[i].WVP = IdentityMatrix();
-		instancingData_[i].World = IdentityMatrix();
-		instancingData_[i].color = Vector4(1.0f, 1.0f, 1.0f, 1.0f);
+	for (int j = 0; j < 2; j++) {
+		//Sprite用ののTransformationMatrix用のリソースを作る。Matrix4x41つ分のサイズを用意する
+		instancingResource_[j] = GraphicsDevice::CreateBufferResource(sizeof(ParticleForGPU) * effectDefinitionMaxNum_);
+		//データを書き込む
+		//書き込むためのアドレスを取得
+		instancingResource_[j]->Map(0, nullptr, reinterpret_cast<void**>(&instancingData_[j]));
+		//単位行列をかきこんでおく
+		for (int i = 0; i < effectDefinitionMaxNum_; i++) {
+			instancingData_[j][i].WVP = IdentityMatrix();
+			instancingData_[j][i].World = IdentityMatrix();
+			instancingData_[j][i].color = Vector4(1.0f, 1.0f, 1.0f, 1.0f);
+		}
 	}
 }
 
 void EffectDefinition::CreateSRV()
 {
-	instancingSrvDesc_.Format = DXGI_FORMAT_UNKNOWN;
-	instancingSrvDesc_.Shader4ComponentMapping = D3D12_DEFAULT_SHADER_4_COMPONENT_MAPPING;
-	instancingSrvDesc_.ViewDimension = D3D12_SRV_DIMENSION_BUFFER;
-	instancingSrvDesc_.Buffer.FirstElement = 0;
-	instancingSrvDesc_.Buffer.Flags = D3D12_BUFFER_SRV_FLAG_NONE;
-	instancingSrvDesc_.Buffer.NumElements = effectDefinitionMaxNum_;
-	instancingSrvDesc_.Buffer.StructureByteStride = sizeof(ParticleForGPU);
-	instancingSrvHandleCPU_ = GetCPUDescriptorHandle(descriptorHeap_->GetSrvDescriptorHeap(), descriptorHeap_->GetDescriptorSizeSRV());
-	instancingSrvHandleGPU_ = GetGPUDescriptorHandle(descriptorHeap_->GetSrvDescriptorHeap(), descriptorHeap_->GetDescriptorSizeSRV());
+	for (int j = 0; j < 2; j++) {
+		instancingSrvDesc_.Format = DXGI_FORMAT_UNKNOWN;
+		instancingSrvDesc_.Shader4ComponentMapping = D3D12_DEFAULT_SHADER_4_COMPONENT_MAPPING;
+		instancingSrvDesc_.ViewDimension = D3D12_SRV_DIMENSION_BUFFER;
+		instancingSrvDesc_.Buffer.FirstElement = 0;
+		instancingSrvDesc_.Buffer.Flags = D3D12_BUFFER_SRV_FLAG_NONE;
+		instancingSrvDesc_.Buffer.NumElements = effectDefinitionMaxNum_;
+		instancingSrvDesc_.Buffer.StructureByteStride = sizeof(ParticleForGPU);
+		instancingSrvHandleCPU_[j] = GetCPUDescriptorHandle(descriptorHeap_->GetSrvDescriptorHeap(), descriptorHeap_->GetDescriptorSizeSRV());
+		instancingSrvHandleGPU_[j] = GetGPUDescriptorHandle(descriptorHeap_->GetSrvDescriptorHeap(), descriptorHeap_->GetDescriptorSizeSRV());
 
-	device_->CreateShaderResourceView(instancingResource_.Get(), &instancingSrvDesc_, instancingSrvHandleCPU_);
+		device_->CreateShaderResourceView(instancingResource_[j].Get(), &instancingSrvDesc_, instancingSrvHandleCPU_[j]);
+	}
 }
 
 
@@ -224,7 +229,7 @@ void EffectDefinition::SettingWvp(Matrix4x4 viewMatrix)
     Matrix4x4 projectionMatri = MakePerspectiveFovMatrix(0.45f, float(kClientWidth) / float(kClientHeight), 0.1f, 100.0f);
 
     auto particleIter = effectDefinitionData_.begin();
-    auto instancingIter = instancingData_;
+    auto instancingIter = instancingData_[s_wvpIndex];
 
     int i = 0;
     while (particleIter != effectDefinitionData_.end() && i < effectDefinitionMaxNum_) {

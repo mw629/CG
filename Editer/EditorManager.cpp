@@ -191,6 +191,7 @@ EditorManager::SceneOverlayCallback EditorManager::s_sceneOverlayCallback_ = nul
 EditorManager::EditorCallback EditorManager::s_saveCallback_ = nullptr;
 EditorManager::EditorCallback EditorManager::s_loadCallback_ = nullptr;
 EditorManager::FileDropCallback EditorManager::s_fileDropCallback_ = nullptr;
+EditorManager::GameViewDrawCallback EditorManager::s_gameViewDrawCallback_ = nullptr;
 std::string EditorManager::s_currentFileName_ = "scene";
 
 EditorManager::~EditorManager() = default;
@@ -245,6 +246,7 @@ void EditorManager::Update(Engine* engine)
 			ImGui::MenuItem(LanguageManager::Tr("Resources"), nullptr, &showResourcesWindow_);
 			ImGui::MenuItem(LanguageManager::Tr("Logs"), nullptr, &showLogsWindow_);
 			ImGui::MenuItem(LanguageManager::Tr("Particle Editor"), nullptr, &showParticleViewer_);
+			ImGui::MenuItem(LanguageManager::Tr("Game View"), nullptr, &showGameViewWindow_);
 			ImGui::EndMenu();
 		}
 		if (ImGui::BeginMenu(LanguageManager::Tr("Settings"))) {
@@ -720,6 +722,66 @@ void EditorManager::Update(Engine* engine)
 		previewParticle_->Draw();
 
 		particleRenderTexture_->TransitionToShaderResource(cmdList);
+
+		// Restore engine's main render target
+		D3D12_CPU_DESCRIPTOR_HANDLE mainRtv = engine->GetRenderTexture()->GetRtvHandle();
+		engine->depthStencil->SetDSV(cmdList, &mainRtv);
+		cmdList->RSSetViewports(1, engine->viewportScissor->GetViewport());
+		cmdList->RSSetScissorRects(1, engine->viewportScissor->GetScissorRect());
+	}
+
+	// Game View Window
+	if (showGameViewWindow_) {
+		if (!isGameViewInitialized_) {
+			gameViewRenderTexture_ = std::make_unique<RenderTexture>();
+			gameViewDepthStencil_ = std::make_unique<DepthStencil>();
+			gameViewRenderTexture_->Initialize(engine->graphics->GetDevice(), 1280, 720, engine->descriptorHeap->GetSrvDescriptorHeap(), engine->descriptorHeap->GetDescriptorSizeSRV());
+			gameViewDepthStencil_->CreateDepthStencil(engine->graphics->GetDevice(), 1280, 720);
+			isGameViewInitialized_ = true;
+		}
+
+		ImGui::SetNextWindowSize(ImVec2(800, 450), ImGuiCond_FirstUseEver);
+		if (ImGui::Begin(LanguageManager::Tr("Game View"), &showGameViewWindow_)) {
+			ImVec2 availSize = ImGui::GetContentRegionAvail();
+			ImVec2 imageSize = availSize;
+			ImVec2 cursorStart = ImGui::GetCursorPos();
+
+			float targetAspect = 1280.0f / 720.0f;
+			float availAspect = availSize.x / availSize.y;
+
+			if (availAspect > targetAspect) {
+				imageSize.y = availSize.y;
+				imageSize.x = availSize.y * targetAspect;
+			} else {
+				imageSize.x = availSize.x;
+				imageSize.y = availSize.x / targetAspect;
+			}
+
+			float offsetX = (availSize.x - imageSize.x) * 0.5f;
+			float offsetY = (availSize.y - imageSize.y) * 0.5f;
+			ImGui::SetCursorPos(ImVec2(cursorStart.x + offsetX, cursorStart.y + offsetY));
+
+			ImGui::Image((ImTextureID)gameViewRenderTexture_->GetSrvHandleGPU().ptr, imageSize);
+		}
+		ImGui::End();
+
+		// Draw into Game View Render Texture
+		auto cmdList = engine->command->GetCommandList();
+		gameViewRenderTexture_->TransitionToRenderTarget(cmdList);
+		gameViewRenderTexture_->Clear(cmdList);
+		D3D12_CPU_DESCRIPTOR_HANDLE rtvHandle = gameViewRenderTexture_->GetRtvHandle();
+		gameViewDepthStencil_->SetDSV(cmdList, &rtvHandle);
+
+		D3D12_VIEWPORT vp = { 0.0f, 0.0f, 1280.0f, 720.0f, 0.0f, 1.0f };
+		D3D12_RECT scissor = { 0, 0, 1280, 720 };
+		cmdList->RSSetViewports(1, &vp);
+		cmdList->RSSetScissorRects(1, &scissor);
+
+		if (s_gameViewDrawCallback_) {
+			s_gameViewDrawCallback_();
+		}
+
+		gameViewRenderTexture_->TransitionToShaderResource(cmdList);
 
 		// Restore engine's main render target
 		D3D12_CPU_DESCRIPTOR_HANDLE mainRtv = engine->GetRenderTexture()->GetRtvHandle();
