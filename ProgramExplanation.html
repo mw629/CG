@@ -1,0 +1,173 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>プログラム説明資料 - ゲームシステムの解説</title>
+    <style>
+        :root {
+            --primary-color: #2c3e50;
+            --accent-color: #e67e22; /* ゲーム向けに少しアクティブな色に変更 */
+            --bg-color: #f8f9fa;
+            --text-color: #333;
+            --border-color: #e9ecef;
+        }
+        body {
+            font-family: 'Segoe UI', Meiryo, system-ui, -apple-system, sans-serif;
+            line-height: 1.6;
+            color: var(--text-color);
+            background-color: var(--bg-color);
+            margin: 0;
+            padding: 0;
+        }
+        .container {
+            max-width: 900px;
+            margin: 40px auto;
+            background: #fff;
+            padding: 40px;
+            border-radius: 8px;
+            box-shadow: 0 4px 6px rgba(0,0,0,0.05);
+        }
+        h1 {
+            color: var(--primary-color);
+            border-bottom: 3px solid var(--accent-color);
+            padding-bottom: 10px;
+            text-align: center;
+        }
+        h2 {
+            color: var(--primary-color);
+            margin-top: 35px;
+            border-left: 5px solid var(--accent-color);
+            padding-left: 15px;
+        }
+        h3 {
+            color: #495057;
+            margin-top: 25px;
+        }
+        p {
+            margin-bottom: 1rem;
+        }
+        .highlight {
+            background-color: #fff3cd;
+            border-left: 4px solid #ffc107;
+            padding: 15px;
+            margin: 20px 0;
+            border-radius: 0 4px 4px 0;
+        }
+        code {
+            background: #f4f4f4;
+            padding: 2px 5px;
+            border-radius: 4px;
+            font-family: Consolas, Monaco, monospace;
+            font-size: 0.9em;
+            color: #d35400;
+        }
+        pre {
+            background: #282c34;
+            color: #abb2bf;
+            padding: 15px;
+            border-radius: 6px;
+            overflow-x: auto;
+            font-family: Consolas, Monaco, monospace;
+            font-size: 0.9em;
+            line-height: 1.4;
+        }
+        ul {
+            padding-left: 20px;
+        }
+        li {
+            margin-bottom: 8px;
+        }
+        .feature-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+            gap: 20px;
+            margin-top: 20px;
+        }
+        .feature-card {
+            background: #fdfdfd;
+            border: 1px solid #ddd;
+            padding: 20px;
+            border-radius: 6px;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.02);
+        }
+        .feature-card h4 {
+            margin-top: 0;
+            color: var(--primary-color);
+            border-bottom: 1px dashed #ccc;
+            padding-bottom: 5px;
+        }
+    </style>
+</head>
+<body>
+
+<div class="container">
+    <h1>ゲームプログラム 仕様・設計説明資料</h1>
+    <p>本資料では、本ゲームにおけるメインロジック（主に <code>GameScene</code> 周辺）のプログラム設計、各種システムの実装手法について解説します。</p>
+
+    <h2>1. ゲームループと状態管理 (ステートマシン)</h2>
+    <p>ゲームのメイン処理を担う <code>GameScene</code> クラスでは、現在のゲーム状況を <code>GameState</code> という列挙型(enum)を用いて管理しています。</p>
+<pre><code>enum GameState {
+    Playing,     // プレイ中
+    Paused,      // 一時停止中
+    PlayerHit,   // 被弾演出中
+    GameClear,   // クリア
+    GameOver,    // ゲームオーバー
+    Editor       // ステージ編集モード
+};</code></pre>
+    <p>毎フレーム実行される <code>Update()</code> メソッド内でこの <code>GameState</code> を判定し、<code>PlayingUpdate()</code> や <code>PausedUpdate()</code> などの専用関数に処理を振り分けています。これにより、「ポーズ画面中に裏でプレイヤーが動いてしまう」といったバグを防ぎ、処理の見通しを良くしています。</p>
+
+    <h2>2. 主なゲームシステム群</h2>
+    
+    <div class="feature-grid">
+        <div class="feature-card">
+            <h4>🏃‍♂️ プレイヤーとオブジェクト管理</h4>
+            <p>
+                操作キャラクターの処理は <code>Player</code> クラスにカプセル化されています。敵や障害物などの配置物は <code>GameObjectManager</code> が一括で保持・更新・描画の指示を出しています。<br>
+                これにより、画面上に無数のオブジェクトが存在しても管理ループは常にクリーンに保たれます。
+            </p>
+        </div>
+        <div class="feature-card">
+            <h4>💥 当たり判定処理 (Collision)</h4>
+            <p>
+                <code>CheckCollisions()</code> メソッドによって、プレイヤーと敵・障害物・アイテム等との衝突を毎フレーム計算しています。<br>
+                被弾時には状態が直ちに <code>PlayerHit</code> へ遷移し、ゲームオーバーへの演出が開始されます。
+            </p>
+        </div>
+        <div class="feature-card">
+            <h4>✨ 演出・パーティクル (Particles)</h4>
+            <p>
+                視覚的なフィードバックを強化するため、<code>GameSceneParticle</code> マネージャーを導入しています。オブジェクトの破壊時やアイテム取得時など、特定のアクションに合わせてパーティクルを生成し、画面を彩ります。
+            </p>
+        </div>
+        <div class="feature-card">
+            <h4>🗺️ ステージとエディター連携</h4>
+            <p>
+                ステージの構造や難易度設定は <code>StageSettings</code> クラスが担います。また、内部に <code>EditorUI</code> を組み込んでおり、<code>scene.json</code> を直接読み書きして開発中（あるいはゲーム内のEditor状態）にリアルタイムでステージを調整できる仕組みを持っています。
+            </p>
+        </div>
+    </div>
+
+    <h2>3. スコア・ランキングシステムの実装</h2>
+    <p>プレイヤーの進行度や成果を評価するため、スコアと走行距離の2軸でランキングを管理しています。</p>
+    <ul>
+        <li><strong>走行距離 (Distance):</strong> <code>currentDistance_</code> 変数で進行した距離を追跡し、上位3位を <code>topRankings_[3]</code> の配列に記録します。</li>
+        <li><strong>スコア (Score):</strong> 敵を倒した数やアイテム取得による点数を <code>currentScore_</code> として計算。連続で敵を倒した際の <code>bonusEnemyHitCount_</code> (コンボボーナス) もスコアリングに影響を与え、上位3位を <code>topScoreRankings_[3]</code> に保持します。</li>
+    </ul>
+    <p>ゲームオーバーやクリア時に <code>UpdateRanking()</code> や <code>UpdateScoreRanking()</code> が呼ばれ、配列内の数値をソート・更新するシンプルな構造でランキングを実現しています。</p>
+
+    <h2>4. ポーズ（一時停止）システムの独立</h2>
+    <p>
+        ゲームを中断する処理は、ゲームの進行状況とは切り離す必要があるため <code>PauseSystem</code> クラスとして完全に独立させています。
+        状態が <code>Paused</code> のときは <code>PauseSystem</code> のUIや入力を受け付け、オブジェクト群のUpdateをスキップすることで「ゲームの時間が止まっている」状態を作ります。
+    </p>
+    
+    <div class="highlight">
+        <strong>設計のポイント:</strong>
+        単一の巨大なクラス (神クラス) を作るのではなく、<code>Player</code>、<code>GameObjectManager</code>、<code>GameSceneParticle</code>、<code>StageSettings</code> など役割ごとにクラスを小さく切り分けています。これにより、今後の機能追加やバグ修正が非常に容易になっています。
+    </div>
+
+</div>
+
+</body>
+</html>

@@ -43,7 +43,7 @@ void GameScene::ImGui()
 		ImGui::SameLine();
 		if (ImGui::Button("Left Side View")) {
 			cameraTransform_.scale = { 1.0f, 1.0f, 1.0f };
-			cameraTransform_.rotate = { 0.3f, 1.0472f, 0.0f }; // 60 degrees (90 - 30)
+			cameraTransform_.rotate = { 0.3f, 1.0472f, 0.0f };
 			cameraTransform_.translate = { -20.0f, 8.0f, -5.0f }; 
 			camera_->SetTransform(cameraTransform_);
 			gameCamera_->SetTransform(cameraTransform_);
@@ -465,7 +465,7 @@ void GameScene::PlayerHitUpdate()
 
 	// プレイヤーのノックバックアニメーションを更新
 	// (GameScene側の全体更新は停止し、プレイヤーのみ更新)
-	player_->Update(view, 0.0f);
+	player_->Update(view, 1.0f);
 
 	if (player_->IsHitAnimationFinished()) {
 		gameState_ = GameState::GameOver;

@@ -4,7 +4,7 @@
 
 void StageSettings::Initialize(ModelData roadModelData, ModelData obstacleModelData, ModelData bonusModelData, class GameObjectManager* manager)
 {
-	// 乱数の初期化
+	// 乱数の初化
 	std::srand(static_cast<unsigned int>(std::time(nullptr)));
 
 	// グラウンドテクスチャをロード
