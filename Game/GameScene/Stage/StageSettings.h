@@ -50,6 +50,10 @@ private:
 	// 生成の一時停止フラグ
 	bool isSpawningPaused_ = false;
 
+	// 狭まる区間（レーン減少）の管理
+	bool isNarrowingSection_ = false;
+	float narrowingTimer_ = 0.0f;
+
 	// 障害物をスポーンする
 	void SpawnObstacles(float spawnZ);
 
@@ -94,6 +98,9 @@ public:
 
 	// 生成の一時停止設定
 	void SetSpawningPaused(bool paused) { isSpawningPaused_ = paused; }
+
+	// 狭まる区間の設定
+	void SetNarrowingSection(bool isNarrowing) { isNarrowingSection_ = isNarrowing; }
 
 	// 障害物リストへのアクセス（当たり判定用）
 	Obstacle* GetObstacle(int index) { return obstacles_[index].get(); }

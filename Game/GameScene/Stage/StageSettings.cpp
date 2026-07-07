@@ -122,6 +122,22 @@ void StageSettings::Draw()
 
 void StageSettings::SpawnObstacles(float z)
 {
+	// === 狭まる区間の専用処理 ===
+	if (isNarrowingSection_ && laneCount_ == 3) {
+		// 左右レーンに GuideFloor を配置する
+		obstacles_[nextObstacleIndex_]->SetType(Obstacle::Type::GuideFloor);
+		obstacles_[nextObstacleIndex_]->Spawn(-laneWidth_, 2.0f, z);
+		nextObstacleIndex_ = (nextObstacleIndex_ + 1) % kMaxObstacles_;
+
+		obstacles_[nextObstacleIndex_]->SetType(Obstacle::Type::GuideFloor);
+		obstacles_[nextObstacleIndex_]->Spawn(laneWidth_, 2.0f, z);
+		nextObstacleIndex_ = (nextObstacleIndex_ + 1) % kMaxObstacles_;
+		
+		// 中央レーンは安全にするか、ボーナスを置く
+		return; 
+	}
+	// =============================
+
 	// レーンの状態を決定 (0: None, 1: Low, 2: High, 3: Wall, 4: Bonus)
 	std::vector<int> laneSpawns(laneCount_);
 	int wallCount = 0;
@@ -228,6 +244,7 @@ void StageSettings::SpawnObstacles(float z)
 void StageSettings::Reset()
 {
 	isGameOver_ = false;
+	isNarrowingSection_ = false;
 
 	// スクロール速度を初期値にリセット
 	scrollSpeed_ = baseScrollSpeed_;

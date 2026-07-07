@@ -540,6 +540,21 @@ void GameScene::CheckCollisions()
 		);
 
 		if (Collision::CheckAABB(playerAABB, obstacleAABB)) {
+			// 誘導床（GuideFloor）の判定
+			if (obstacle->GetType() == Obstacle::Type::GuideFloor) {
+				// プレイヤーを滑らかに中央へ誘導 (30フレーム)
+				player_->StartForceToCenter(30.0f);
+				
+				// 【演出ポイント: パーティクル】
+				// 加速や誘導を示すスピード線のエフェクトや、足元の衝撃波を出す
+				// particleManager_->EmitGuideEffect(player_->GetTransform().translate);
+				
+				// 【演出ポイント: サウンド】
+				// SoundManager::Play("GuideDash_SE"); // シューッというSE等
+				
+				continue; // ゲームオーバーにはならない
+			}
+
 			if (obstacle->GetType() == Obstacle::Type::Bonus) {
 				// ボーナスエネミーに当たった場合の処理（吹き飛ばす）
 				obstacle->OnHit();
@@ -714,4 +729,4 @@ void GameScene::UpdateCameraTransition() {
 
 	camera_->SetTransform(cameraTransform_);
 	gameCamera_->SetTransform(cameraTransform_);
-}
+}

@@ -60,6 +60,12 @@ private:
 	float hitDuration_ = 90.0f; // ノックバックにかかるフレーム数
 	Vector3 knockbackVelocity_{ 0.0f, 0.0f, 0.0f }; // ノックバック速度
 
+	// 強制中央移動用の変数
+	bool isForcedCentering_ = false;
+	float forcedCenterTimer_ = 0.0f;
+	float forcedCenterDuration_ = 30.0f; // 中央に到達するまでのフレーム数
+	float forcedCenterStartX_ = 0.0f;
+
 public:
 
 	Player();
@@ -93,5 +99,8 @@ public:
 	// ヒット演出用
 	void OnHit(bool isTrip = false);
 	bool IsHitAnimationFinished() const;
+
+	// 狭まる区間で強制的に中央へ寄せる
+	void StartForceToCenter(float duration);
 };
 

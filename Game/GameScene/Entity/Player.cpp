@@ -39,6 +39,11 @@ void Player::Reset()
 	hitTimer_ = 0.0f;
 	knockbackVelocity_ = { 0.0f, 0.0f, 0.0f };
 
+	isForcedCentering_ = false;
+	forcedCenterTimer_ = 0.0f;
+	forcedCenterDuration_ = 30.0f;
+	forcedCenterStartX_ = 0.0f;
+
 	model_.get()->SetTransform(transform_);
 }
 
@@ -77,8 +82,26 @@ void Player::PlayerMove(float speedMultiplier)
 
 	bool canAct = (currentRecoveryTimer_ <= 0.0f);
 
-	// レーンの移動中ではなかったら
-	if (laneIndex_ == targetLaneIndex_) {
+	// 強制中央移動の処理
+	if (isForcedCentering_) {
+		forcedCenterTimer_ += speedMultiplier;
+		float t = forcedCenterTimer_ / forcedCenterDuration_;
+		if (t > 1.0f) {
+			t = 1.0f;
+		}
+
+		// スムーズな補間（EaseInOut）
+		float easeT = t * t * (3.0f - 2.0f * t);
+		transform_.translate.x = Lerp(forcedCenterStartX_, 0.0f, easeT);
+
+		if (t >= 1.0f) {
+			isForcedCentering_ = false;
+			laneIndex_ = 0; // 中央レーンに確定
+			targetLaneIndex_ = 0;
+		}
+	}
+	// レーンの移動中ではなかったら（強制移動中でない時のみ入力受付）
+	else if (laneIndex_ == targetLaneIndex_) {
 		// キー入力で目標レーンを設定
 		if (canAct) {
 			if (Input::PushKey(DIK_A)||Input::PushKey(DIK_LEFT)) {
@@ -254,4 +277,22 @@ void Player::OnHit(bool isTrip)
 bool Player::IsHitAnimationFinished() const
 {
 	return isHit_ && hitTimer_ >= hitDuration_;
+}
+
+void Player::StartForceToCenter(float duration)
+{
+	if (isForcedCentering_ || targetLaneIndex_ == 0) {
+		return; // 既に移動中、または既に中央目標の場合は何もしない
+	}
+	isForcedCentering_ = true;
+	forcedCenterTimer_ = 0.0f;
+	forcedCenterDuration_ = duration;
+	forcedCenterStartX_ = transform_.translate.x;
+
+	// 転がり中なら解除する（安全のため）
+	if (isRolling_ && !keepRolling_) {
+		isRolling_ = false;
+		transform_.scale.y = 1.0f;
+		transform_.translate.y = baseHeight_;
+	}
 }

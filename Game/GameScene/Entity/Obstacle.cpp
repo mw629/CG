@@ -61,6 +61,15 @@ void Obstacle::SetType(Type type) {
     model_->GetMartial()->SetColor({1.0f, 0.84f, 0.0f, 1.0f}); // 金色
     model_->SetShader("ObjectShader"); // IceShaderから戻す可能性があるため明示
     break;
+  case Type::GuideFloor:
+    // 中央へ誘導するトリガー床（床に埋め込むか薄くする）
+    collisionWidth_ = 2.0f;
+    collisionHeight_ = 0.5f;
+    collisionDepth_ = 2.0f;
+    transform_.scale = {2.0f, 0.1f, 10.0f}; // 縦長にして光るレールのように見せる
+    model_->GetMartial()->SetColor({0.0f, 1.0f, 1.0f, 0.5f}); // シアン・半透明
+    model_->SetShader("ObjectShader");
+    break;
   }
 
   model_->SetTransform(transform_);
