@@ -32,6 +32,7 @@ void Player::Reset()
 	isRolling_ = false;
 	rollTimer_ = 0.0f;
 	keepRolling_ = false;
+	currentRecoveryTimer_ = 0.0f;
 
 	isHit_ = false;
 	isTrip_ = false;
@@ -66,14 +67,26 @@ void Player::PlayerMove(float speedMultiplier)
 		return;
 	}
 
+	// 硬直タイマーの更新
+	if (currentRecoveryTimer_ > 0.0f) {
+		currentRecoveryTimer_ -= speedMultiplier;
+		if (currentRecoveryTimer_ < 0.0f) {
+			currentRecoveryTimer_ = 0.0f;
+		}
+	}
+
+	bool canAct = (currentRecoveryTimer_ <= 0.0f);
+
 	// レーンの移動中ではなかったら
 	if (laneIndex_ == targetLaneIndex_) {
 		// キー入力で目標レーンを設定
-		if (Input::PushKey(DIK_A)||Input::PushKey(DIK_LEFT)) {
-			targetLaneIndex_ = laneIndex_ - 1;
-		}
-		if (Input::PushKey(DIK_D)||Input::PushKey(DIK_RIGHT)) {
-			targetLaneIndex_ = laneIndex_ + 1;
+		if (canAct) {
+			if (Input::PushKey(DIK_A)||Input::PushKey(DIK_LEFT)) {
+				targetLaneIndex_ = laneIndex_ - 1;
+			}
+			if (Input::PushKey(DIK_D)||Input::PushKey(DIK_RIGHT)) {
+				targetLaneIndex_ = laneIndex_ + 1;
+			}
 		}
 
 		// レーンの範囲制限
@@ -107,12 +120,13 @@ void Player::PlayerMove(float speedMultiplier)
 		// 移動が完了したら現在のレーンを更新
 		if (lerpTime_ >= 1.0f) {
 			laneIndex_ = targetLaneIndex_;
+			currentRecoveryTimer_ = laneChangeRecovery_;
 		}
 	}
 
 	// === アクション（ジャンプと転がり） ===
 	// 地上にいてジャンプ中でなければアクション可能（転がり中でもジャンプでキャンセル可能）
-	if (!isJumping_) {
+	if (!isJumping_ && canAct) {
 		if (Input::PushKey(DIK_W) || Input::PushKey(DIK_SPACE)||Input::PushKey(DIK_UP)) {
 			if (!(isRolling_ && keepRolling_)) {
 				isJumping_ = true;
@@ -146,6 +160,7 @@ void Player::PlayerMove(float speedMultiplier)
 			transform_.translate.y = baseHeight_;
 			isJumping_ = false;
 			velocityY_ = 0.0f;
+			currentRecoveryTimer_ = jumpRecovery_;
 		}
 	}
 
@@ -157,6 +172,7 @@ void Player::PlayerMove(float speedMultiplier)
 			// 姿勢を元に戻す
 			transform_.scale.y = 1.0f;
 			transform_.translate.y = baseHeight_;
+			currentRecoveryTimer_ = rollRecovery_;
 		}
 	}
 
@@ -222,6 +238,7 @@ void Player::OnHit(bool isTrip)
 	isRolling_ = false;
 	isJumping_ = false;
 	transform_.scale = { 1.0f, 1.0f, 1.0f };
+	currentRecoveryTimer_ = 0.0f;
 
 	float randX = ((float)rand() / RAND_MAX - 0.5f) * 0.1f;
 

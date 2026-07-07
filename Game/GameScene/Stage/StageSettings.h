@@ -47,6 +47,9 @@ private:
 	// ゲームオーバーフラグ
 	bool isGameOver_ = false;
 
+	// 生成の一時停止フラグ
+	bool isSpawningPaused_ = false;
+
 	// 障害物をスポーンする
 	void SpawnObstacles(float spawnZ);
 
@@ -88,6 +91,9 @@ public:
 
 	// ゲームオーバー設定
 	void SetGameOver(bool isGameOver) { isGameOver_ = isGameOver; }
+
+	// 生成の一時停止設定
+	void SetSpawningPaused(bool paused) { isSpawningPaused_ = paused; }
 
 	// 障害物リストへのアクセス（当たり判定用）
 	Obstacle* GetObstacle(int index) { return obstacles_[index].get(); }

@@ -95,7 +95,9 @@ void StageSettings::Update(Matrix4x4 view, float timeScale)
 	distanceSinceLastSpawn_ += currentScroll;
 	while (distanceSinceLastSpawn_ >= obstacleInterval_) {
 		// 奥の固定位置(チャンクの向こう側)に生成
-		SpawnObstacles(45.0f);
+		if (!isSpawningPaused_) {
+			SpawnObstacles(45.0f);
+		}
 		distanceSinceLastSpawn_ -= obstacleInterval_;
 	}
 
@@ -165,41 +167,61 @@ void StageSettings::SpawnObstacles(float z)
 	}
 
 	// たまにボーナスエネミーを配置する (約10%の確率)
-	if (std::rand() % 10 == 0) {
-		int bonusIndex = std::rand() % laneCount_;
-		laneSpawns[bonusIndex] = 4; // 4: Bonus
+	// ただし1レーンの場合はボーナスエネミーを出さない
+	int bonusLane = -1;
+	if (laneCount_ > 1 && std::rand() % 10 == 0) {
+		// 障害物があるレーンを優先して選ぶ
+		std::vector<int> obstacleLanes;
+		for (int i = 0; i < laneCount_; i++) {
+			if (laneSpawns[i] != 0) {
+				obstacleLanes.push_back(i);
+			}
+		}
+
+		if (!obstacleLanes.empty()) {
+			bonusLane = obstacleLanes[std::rand() % obstacleLanes.size()];
+		} else {
+			bonusLane = std::rand() % laneCount_;
+		}
 	}
 
 	// 決定した内容で各レーンに生成
 	for (int i = 0; i < laneCount_; i++) {
-		if (laneSpawns[i] == 0) continue; // None
+		if (laneSpawns[i] == 0 && i != bonusLane) continue; // None 且つ ボーナスも無いならスキップ
 
 		int lane = minLaneIndex_ + i; // -1, 0, 1
 		float x = static_cast<float>(lane) * laneWidth_;
 
-		Obstacle::Type type;
-		float y = 2.5f;
-
-		if (laneSpawns[i] == 1) {
-			type = Obstacle::Type::Low;
-			y = 2.5f;
-		} else if (laneSpawns[i] == 2) {
-			type = Obstacle::Type::High;
-			y = 4.6f;
-		} else if (laneSpawns[i] == 3) {
-			type = Obstacle::Type::Wall;
-			y = 3.5f;
-		} else { // 4
-			type = Obstacle::Type::Bonus;
-			y = 2.5f; // 足元付近
+		// ボーナスエネミーの生成（障害物の手前に配置）
+		if (i == bonusLane) {
+			obstacles_[nextObstacleIndex_]->SetType(Obstacle::Type::Bonus);
+			obstacles_[nextObstacleIndex_]->Spawn(x, 2.5f, z - 5.0f);
+			nextObstacleIndex_ = (nextObstacleIndex_ + 1) % kMaxObstacles_;
 		}
 
-		// 障害物のタイプを変更して配置
-		obstacles_[nextObstacleIndex_]->SetType(type);
-		obstacles_[nextObstacleIndex_]->Spawn(x, y, z);
-		
-		// 次のインデックスへ（リングバッファ的に使う）
-		nextObstacleIndex_ = (nextObstacleIndex_ + 1) % kMaxObstacles_;
+		// 障害物の生成
+		if (laneSpawns[i] != 0) {
+			Obstacle::Type type;
+			float y = 2.5f;
+
+			if (laneSpawns[i] == 1) {
+				type = Obstacle::Type::Low;
+				y = 2.5f;
+			} else if (laneSpawns[i] == 2) {
+				type = Obstacle::Type::High;
+				y = 4.6f;
+			} else if (laneSpawns[i] == 3) {
+				type = Obstacle::Type::Wall;
+				y = 3.5f;
+			}
+
+			// 障害物のタイプを変更して配置
+			obstacles_[nextObstacleIndex_]->SetType(type);
+			obstacles_[nextObstacleIndex_]->Spawn(x, y, z);
+			
+			// 次のインデックスへ（リングバッファ的に使う）
+			nextObstacleIndex_ = (nextObstacleIndex_ + 1) % kMaxObstacles_;
+		}
 	}
 }
 

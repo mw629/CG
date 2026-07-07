@@ -7,6 +7,8 @@
 #include "AssetManager.h"
 #include <GameObjects/Object/3d/Model.h>
 #include <algorithm>
+#include <cmath>
+#include <Math/Calculation.h>
 
 GameScene::~GameScene()
 {
@@ -34,11 +36,7 @@ void GameScene::ImGui()
 		ImGui::Separator();
 		ImGui::Text("Presets:");
 		if (ImGui::Button("Behind View")) {
-			cameraTransform_.scale = { 1.0f, 1.0f, 1.0f };
-			cameraTransform_.rotate = { 0.3f, 0.0f, 0.0f };
-			cameraTransform_.translate = { 0.0f, 8.0f, -15.0f };
-			camera_->SetTransform(cameraTransform_);
-			gameCamera_->SetTransform(cameraTransform_);
+			SetCameraToBehind();
 		}
 		ImGui::SameLine();
 		if (ImGui::Button("Left Side View")) {
@@ -50,11 +48,7 @@ void GameScene::ImGui()
 		}
 		ImGui::SameLine();
 		if (ImGui::Button("Right Side View")) {
-			cameraTransform_.scale = { 1.0f, 1.0f, 1.0f };
-			cameraTransform_.rotate = { 0.3f, -1.0472f, 0.0f }; // -60 degrees (-90 + 30)
-			cameraTransform_.translate = { 30.0f, 15.0f, -5.0f }; 
-			camera_->SetTransform(cameraTransform_);
-			gameCamera_->SetTransform(cameraTransform_);
+			SetCameraToRightSide();
 		}
 	}
 
@@ -386,6 +380,8 @@ void GameScene::Update() {
 		camera_->SetDebugCamera(true);
 	}
 
+	UpdateCameraTransition();
+
 	camera_->Update();
 	view = camera_->GetViewMatrix();
 
@@ -643,3 +639,79 @@ void GameScene::CheckKeepRolling()
 	}
 	player_->SetKeepRolling(keepRolling);
 }
+
+void GameScene::SetCameraToRightSide() {
+	Transform target;
+	target.scale = { 1.0f, 1.0f, 1.0f };
+	target.rotate = { 0.3f, -1.0472f, 0.0f };
+	target.translate = { 30.0f, 15.0f, -5.0f };
+	StartCameraTransition(target, 1);
+}
+
+void GameScene::SetCameraToBehind() {
+	Transform target;
+	target.scale = { 1.0f, 1.0f, 1.0f };
+	target.rotate = { 0.3f, 0.0f, 0.0f };
+	target.translate = { 0.0f, 8.0f, -15.0f };
+	StartCameraTransition(target, 3);
+}
+
+void GameScene::StartCameraTransition(const Transform& targetTransform, int laneCount) {
+	// 障害物の生成を即座に停止
+	stageSettings_->SetSpawningPaused(true);
+
+	// トランジションの予約を行う
+	isCameraTransitionPending_ = true;
+	pendingCameraTargetTransform_ = targetTransform;
+	pendingLaneCount_ = laneCount;
+}
+
+void GameScene::UpdateCameraTransition() {
+	if (isCameraTransitionPending_) {
+		// アクティブな障害物が残っているかチェック
+		bool hasActiveObstacles = false;
+		for (int i = 0; i < stageSettings_->GetMaxObstacles(); i++) {
+			Obstacle* obstacle = stageSettings_->GetObstacle(i);
+			if (obstacle->GetIsActive()) {
+				hasActiveObstacles = true;
+				break;
+			}
+		}
+
+		// 障害物が全て消えたら、実際のトランジションを開始する
+		if (!hasActiveObstacles) {
+			isCameraTransitionPending_ = false;
+			isCameraTransitioning_ = true;
+			cameraTransitionTimer_ = 0.0f;
+			startCameraTransform_ = cameraTransform_;
+			targetCameraTransform_ = pendingCameraTargetTransform_;
+			stageSettings_->SetLaneCount(pendingLaneCount_);
+		}
+	}
+
+	if (!isCameraTransitioning_) return;
+
+	cameraTransitionTimer_ += 1.0f / 60.0f; // 毎フレームの時間を加算 (FPS固定なら)
+	float t = cameraTransitionTimer_ / cameraTransitionDuration_;
+	
+	if (t >= 1.0f) {
+		t = 1.0f;
+		isCameraTransitioning_ = false;
+		stageSettings_->SetSpawningPaused(false);
+	}
+
+	// easeInOut（スムーズな動きのため）
+	float easeT = t * t * (3.0f - 2.0f * t);
+
+	cameraTransform_.translate = Lerp(startCameraTransform_.translate, targetCameraTransform_.translate, easeT);
+	
+	// 弧を描くためのオフセット (Y軸方向に膨らむ)
+	float arcHeight = 10.0f; 
+	cameraTransform_.translate.y += std::sin(easeT * 3.14159265f) * arcHeight;
+
+	cameraTransform_.rotate = Lerp(startCameraTransform_.rotate, targetCameraTransform_.rotate, easeT);
+	cameraTransform_.scale = Lerp(startCameraTransform_.scale, targetCameraTransform_.scale, easeT);
+
+	camera_->SetTransform(cameraTransform_);
+	gameCamera_->SetTransform(cameraTransform_);
+}

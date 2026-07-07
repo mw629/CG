@@ -25,7 +25,7 @@ private:
 	int laneIndex_ = 0;// 現在のレーン位置
 	int targetLaneIndex_ = 0;// 目標のレーン位置
 
-	float laneChangeSpeed_ = 0.1f; // レーン移動の速度
+	float laneChangeSpeed_ = 0.2f; // レーン移動の速度
 	float lerpTime_ = 0.0f; // 補間用タイマー
 	float startX_ = 0.0f;   // 移動開始時のX座標
 	MoveDirection moveDirection_ = MoveDirection::None; // 移動方向
@@ -46,6 +46,12 @@ private:
 	float rollTimer_ = 0.0f;
 	float rollDuration_ = 45.0f; // 転がりの継続フレーム数
 	bool keepRolling_ = false; // 強制的にしゃがみを維持するフラグ
+
+	// 各アクションの硬直（クールタイム）用変数
+	float laneChangeRecovery_ = 0.0f; // レーン移動終了後の硬直フレーム数
+	float jumpRecovery_ = 0.0f;       // ジャンプ着地後の硬直フレーム数
+	float rollRecovery_ = 0.0f;       // 転がり終了後の硬直フレーム数
+	float currentRecoveryTimer_ = 0.0f; // 現在の硬直タイマー
 
 	// ヒット時の演出用変数
 	bool isHit_ = false;

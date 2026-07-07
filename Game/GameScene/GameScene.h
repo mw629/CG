@@ -37,6 +37,20 @@ private:
 	// ゲーム状態
 	GameState gameState_ = GameState::Playing;
 
+	// カメラ補間用変数
+	bool isCameraTransitionPending_ = false;
+	Transform pendingCameraTargetTransform_;
+	int pendingLaneCount_ = 3;
+
+	bool isCameraTransitioning_ = false;
+	float cameraTransitionTimer_ = 0.0f;
+	float cameraTransitionDuration_ = 1.0f; // 1秒で移動
+	Transform startCameraTransform_;
+	Transform targetCameraTransform_;
+
+	void StartCameraTransition(const Transform& targetTransform, int laneCount);
+	void UpdateCameraTransition();
+
 	//<<Common>>
 	
 	//スカイボックス
@@ -89,6 +103,8 @@ public:
 
 	void Draw()override;
 
+	void SetCameraToRightSide();
+	void SetCameraToBehind();
 
 	void PlayingUpdate();
 	
