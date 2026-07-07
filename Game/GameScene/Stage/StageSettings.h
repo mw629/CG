@@ -30,8 +30,14 @@ private:
 	static const int kChunkCount_ = 5;      // チャンクの数
 	float chunkLength_ = 10.0f;              // 1チャンクの奥行き（Z軸方向のサイズ）
 
-	std::shared_ptr<RenderObject> roadChunks_[kChunkCount_];
-	Transform roadTransforms_[kChunkCount_];
+	std::vector<std::vector<std::shared_ptr<RenderObject>>> roadChunks_;
+	std::vector<std::vector<Transform>> roadTransforms_;
+
+	ModelData roadModelData_;
+	class GameObjectManager* manager_ = nullptr;
+	std::vector<std::shared_ptr<RenderObject>> chunkPool_;
+
+	void GenerateRoadChunks(Matrix4x4 view = IdentityMatrix());
 
 	// テクスチャ
 	std::unique_ptr<Texture> texture_ = std::make_unique<Texture>();
@@ -49,6 +55,9 @@ private:
 
 	// 生成の一時停止フラグ
 	bool isSpawningPaused_ = false;
+
+	// 変更フラグ
+	bool isDirty_ = false;
 
 	// 狭まる区間（レーン減少）の管理
 	bool isNarrowingSection_ = false;
@@ -73,11 +82,17 @@ public:
 	// セッター
 	void SetLaneCount(int count) {
 		if (count < 1) count = 1;
+		if (laneCount_ == count) return;
 		laneCount_ = count;
 		minLaneIndex_ = -(laneCount_ / 2);
 		maxLaneIndex_ = (laneCount_ - 1) / 2;
+		isDirty_ = true;
 	}
-	void SetLaneWidth(float width) { laneWidth_ = width; }
+	void SetLaneWidth(float width) {
+		if (laneWidth_ == width) return;
+		laneWidth_ = width;
+		isDirty_ = true;
+	}
 	float GetScrollSpeed() const { return scrollSpeed_; }
 	float GetBaseScrollSpeed() const { return baseScrollSpeed_; }
 	float GetMaxScrollSpeed() const { return maxScrollSpeed_; }
