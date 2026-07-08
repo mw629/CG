@@ -48,14 +48,29 @@ void CharacterAnimator::Initialize(ModelData modelData, const std::string& direc
 
 void CharacterAnimator::SettingWvp(Matrix4x4 viewMatrix) {
 	Matrix4x4 projectionMatrix = MakePerspectiveFovMatrix(0.45f, float(kClientWidth_) / float(kClientHeight_), 0.1f, 10000.0f);
-	Matrix4x4 worldMatrix = MakeAffineMatrix(transform_.translate, transform_.scale, transform_.rotate);
-	Matrix4x4 worldViewProjectionMatrix = MultiplyMatrix4x4(worldMatrix, MultiplyMatrix4x4(viewMatrix, projectionMatrix));
-	Matrix4x4 worldInverseTranspose = TransposeMatrix4x4(Inverse(worldViewProjectionMatrix));
 
+	if (isInstancing_ && !instancingTransforms_.empty()) {
+		int count = min(maxInstanceCount_, static_cast<int>(instancingTransforms_.size()));
+		for (int i = 0; i < count; ++i) {
+			Matrix4x4 worldMatrix = MakeAffineMatrix(instancingTransforms_[i].translate, instancingTransforms_[i].scale, instancingTransforms_[i].rotate);
+			Matrix4x4 worldViewProjectionMatrix = MultiplyMatrix4x4(worldMatrix, MultiplyMatrix4x4(viewMatrix, projectionMatrix));
+			Matrix4x4 worldInverseTranspose = TransposeMatrix4x4(Inverse(worldMatrix));
 
-	GetWvpData()->WVP = worldMatrix * worldViewProjectionMatrix;
-	GetWvpData()->World = localMatrix_ * worldMatrix;
-	GetWvpData()->WorldInverseTranspose = worldInverseTranspose;
+			wvpData_[s_wvpIndex][i].WVP = worldViewProjectionMatrix;
+			wvpData_[s_wvpIndex][i].World = worldMatrix; // localMatrix_ is handled inside Animation if needed, or maybe we don't multiply localMatrix_ here if skeleton handles it? Wait, localMatrix_ was multiplied here in the original code. Let's keep it if noUpdate uses it, but noUpdate sets it to localMatrix_ * worldMatrix. Wait, for Skinning, world position is just worldMatrix.
+			wvpData_[s_wvpIndex][i].WorldInverseTranspose = worldInverseTranspose;
+			wvpData_[s_wvpIndex][i].numBones = skeleton_.joints.size();
+		}
+	} else {
+		Matrix4x4 worldMatrix = MakeAffineMatrix(transform_.translate, transform_.scale, transform_.rotate);
+		Matrix4x4 worldViewProjectionMatrix = MultiplyMatrix4x4(worldMatrix, MultiplyMatrix4x4(viewMatrix, projectionMatrix));
+		Matrix4x4 worldInverseTranspose = TransposeMatrix4x4(Inverse(worldViewProjectionMatrix));
+
+		wvpData_[s_wvpIndex][0].WVP = worldMatrix * worldViewProjectionMatrix;
+		wvpData_[s_wvpIndex][0].World = localMatrix_ * worldMatrix;
+		wvpData_[s_wvpIndex][0].WorldInverseTranspose = worldInverseTranspose;
+		wvpData_[s_wvpIndex][0].numBones = skeleton_.joints.size();
+	}
 }
 
 Skeleton CharacterAnimator::CreateSkeleton(const Node& rootNode)
@@ -90,15 +105,15 @@ int32_t CharacterAnimator::CreateJoint(const Node& node, const std::optional<int
 
 }
 
-void CharacterAnimator::ApplyAnimation()
+void CharacterAnimator::ApplyAnimation(float time)
 {
 	for (Joint& joint : skeleton_.joints) {
 		//対象のJointにAnimationがあれば、値の適応を行う。下記のif文はC++17から可能になった初期化月if文
 		if (auto it = animation_.AnimationNodes.find(joint.name); it != animation_.AnimationNodes.end()) {
 			const AnimationNode& rootAnimationNode = (*it).second;
-			joint.transform.translate = CalculateValue(rootAnimationNode.translate, animationTime_);
-			joint.transform.rotate = CalculateValue(rootAnimationNode.rotate, animationTime_);
-			joint.transform.scale = CalculateValue(rootAnimationNode.scale, animationTime_);
+			joint.transform.translate = CalculateValue(rootAnimationNode.translate, time);
+			joint.transform.rotate = CalculateValue(rootAnimationNode.rotate, time);
+			joint.transform.scale = CalculateValue(rootAnimationNode.scale, time);
 		}
 	}
 }
@@ -117,14 +132,15 @@ void CharacterAnimator::SkeletonUpdate()
 	}
 }
 
-void CharacterAnimator::SkinClusterUpdate()
+void CharacterAnimator::SkinClusterUpdate(int instanceIndex)
 {
+	size_t offset = instanceIndex * skeleton_.joints.size();
 	for (size_t jointIndex = 0; jointIndex < skeleton_.joints.size(); ++jointIndex) {
 		assert(jointIndex < skinCluster_.inverseBindPoseMatrices.size());
-		skinCluster_.mappedPalette[jointIndex].skeletonSpaceMatrix =
+		skinCluster_.mappedPalette[offset + jointIndex].skeletonSpaceMatrix =
 			skinCluster_.inverseBindPoseMatrices[jointIndex] * skeleton_.joints[jointIndex].skeletonSpaceMatrix;
-		skinCluster_.mappedPalette[jointIndex].skeletonSpaceInverseTransposeMatrix =
-			TransposeMatrix4x4(skinCluster_.mappedPalette[jointIndex].skeletonSpaceMatrix);
+		skinCluster_.mappedPalette[offset + jointIndex].skeletonSpaceInverseTransposeMatrix =
+			TransposeMatrix4x4(skinCluster_.mappedPalette[offset + jointIndex].skeletonSpaceMatrix);
 	}
 }
 
@@ -148,17 +164,26 @@ void CharacterAnimator::noUpdate(Matrix4x4 viewMatrix)
 
 void CharacterAnimator::Update(Matrix4x4 viewMatrix)
 {
+	if (isInstancing_ && !instancingTransforms_.empty()) {
+		int count = min(maxInstanceCount_, static_cast<int>(instancingTransforms_.size()));
+		for (int i = 0; i < count; ++i) {
+			instancingAnimationTimes_[i] += 1.0f / 60.0f;//時間を進める
+			instancingAnimationTimes_[i] = std::fmod(instancingAnimationTimes_[i], animation_.duration);
 
-	animationTime_ += 1.0f / 60.0f;//時間を進める
-	animationTime_ = std::fmod(animationTime_, animation_.duration);
+			ApplyAnimation(instancingAnimationTimes_[i]);
+			SkeletonUpdate();
+			SkinClusterUpdate(i);
+		}
+	} else {
+		animationTime_ += 1.0f / 60.0f;//時間を進める
+		animationTime_ = std::fmod(animationTime_, animation_.duration);
 
-	ApplyAnimation();
-
-	SkeletonUpdate();
-	SkinClusterUpdate();
+		ApplyAnimation(animationTime_);
+		SkeletonUpdate();
+		SkinClusterUpdate(0);
+	}
 
 	SettingWvp(viewMatrix);
-
 }
 
 
@@ -207,10 +232,10 @@ void CharacterAnimator::CreateSkinCluster()
 
 
 	//palette用のResourceを確保
-	skinCluster_.paletteResource = GraphicsDevice::CreateBufferResource(sizeof(WellForGPU) * skeleton_.joints.size());
+	skinCluster_.paletteResource = GraphicsDevice::CreateBufferResource(sizeof(WellForGPU) * skeleton_.joints.size() * maxInstanceCount_);
 	WellForGPU* mappedPalette = nullptr;
 	skinCluster_.paletteResource->Map(0, nullptr, reinterpret_cast<void**>(&mappedPalette));
-	skinCluster_.mappedPalette = { mappedPalette,skeleton_.joints.size() };
+	skinCluster_.mappedPalette = { mappedPalette, skeleton_.joints.size() * maxInstanceCount_ };
 	skinCluster_.paletteSrvHandle.first = GetCPUDescriptorHandle(descriptorHeap->GetSrvDescriptorHeap(), descriptorHeap->GetDescriptorSizeSRV());
 	skinCluster_.paletteSrvHandle.second = GetGPUDescriptorHandle(descriptorHeap->GetSrvDescriptorHeap(), descriptorHeap->GetDescriptorSizeSRV());
 
@@ -221,7 +246,7 @@ void CharacterAnimator::CreateSkinCluster()
 	paletteSrvDesc.ViewDimension = D3D12_SRV_DIMENSION_BUFFER;
 	paletteSrvDesc.Buffer.FirstElement = 0;
 	paletteSrvDesc.Buffer.Flags = D3D12_BUFFER_SRV_FLAG_NONE;
-	paletteSrvDesc.Buffer.NumElements = UINT(skeleton_.joints.size());
+	paletteSrvDesc.Buffer.NumElements = UINT(skeleton_.joints.size() * maxInstanceCount_);
 	paletteSrvDesc.Buffer.StructureByteStride = sizeof(WellForGPU);
 	device->CreateShaderResourceView(skinCluster_.paletteResource.Get(), &paletteSrvDesc, skinCluster_.paletteSrvHandle.first);
 

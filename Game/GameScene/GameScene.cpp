@@ -305,7 +305,7 @@ void GameScene::Initialize() {
 	skyBox_.get()->name_ = "SkyBox";
 
 	// プレイヤーの初期化
-	ModelData modelData = AssimpLoadObjFile("Resources/Model/Player", "player.obj");
+	ModelData modelData = AssimpLoadObjFile("Resources/Model/Pengine", "Pengine.obj");
 	player_->Initialize(modelData);
 
 	// オブジェクトマネージャーへの登録
@@ -367,6 +367,17 @@ void GameScene::Initialize() {
 void GameScene::Update() {
 	ObjectBase::SetWvpIndex(0);
 	EffectDefinition::SetWvpIndex(0);
+
+#ifdef DEBUG
+	if (Input::PushKey(DIK_Q)) {
+		SetCameraToBehind();
+	}
+	if (Input::PushKey(DIK_E)) {
+		SetCameraToRightSide();
+	}
+#endif // DEBUG
+
+	
 
 	// PostEffect::SetActivePostEffect(PostEffect::Type::GaussianFilter);
 

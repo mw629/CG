@@ -36,6 +36,10 @@ protected:
 	uint32_t* indexData_ = nullptr;
 	int indexSize_;
 
+	bool isInstancing_ = false;
+	std::vector<Transform> instancingTransforms_;
+	int maxInstanceCount_ = 1000;
+
 public:
 	virtual ~ObjectBase();
 
@@ -57,6 +61,11 @@ public:
 		if(matComp) matComp->GetMaterialFactory()->SetMaterialLighting(isActive);
 	}
 	void SetTexture(D3D12_GPU_DESCRIPTOR_HANDLE textureSrvHandleGPU) { textureSrvHandleGPU_ = textureSrvHandleGPU; }
+
+	void SetInstancing(bool isInstancing) { isInstancing_ = isInstancing; }
+	void AddInstanceTransform(Transform transform) { instancingTransforms_.push_back(transform); }
+	void ClearInstanceTransforms() { instancingTransforms_.clear(); }
+	int GetInstanceCount() { return isInstancing_ ? static_cast<int>(instancingTransforms_.size()) : 1; }
 
 	//getter
 	Transform GetTransform() const { return transform_; }

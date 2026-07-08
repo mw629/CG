@@ -37,10 +37,10 @@ public:
 	int32_t CreateJoint(const Node& node,
 		const std::optional<int32_t>& parent, std::vector<Joint>& joints);
 
-	void ApplyAnimation();
+	void ApplyAnimation(float time);
 	
 	void SkeletonUpdate();
-	void SkinClusterUpdate();
+	void SkinClusterUpdate(int instanceIndex);
 
 	void noUpdate(Matrix4x4 viewMatrix);
 	void Update(Matrix4x4 viewMatrix);
@@ -52,12 +52,21 @@ public:
 
 	void CreateSkinCluster();
 
+	std::vector<float> instancingAnimationTimes_;
+	void AddInstanceAnimator(Transform transform, float animationTime) {
+		AddInstanceTransform(transform);
+		instancingAnimationTimes_.push_back(animationTime);
+	}
+	void ClearInstanceAnimators() {
+		ClearInstanceTransforms();
+		instancingAnimationTimes_.clear();
+	}
 
 	// 追加: インフルエンス用 VBV を取得
 	D3D12_VERTEX_BUFFER_VIEW* GetInfluenceBufferView() { return &skinCluster_.influenceBufferView; }
 
-	// 追加: スキンパレット SRV の GPU ハンドルを取得
-	D3D12_GPU_DESCRIPTOR_HANDLE GetPaletteSrvHandleGPU() const { return skinCluster_.paletteSrvHandle.second; }
+	// 追加: スキンパレット SRV の GPU ハンドル (インスタンス対応であればGPUのVADDRになるがDrawでGetPaletteResourceGPUを呼ぶように変更済)
+	ID3D12Resource* GetPaletteResourceGPU() const { return skinCluster_.paletteResource.Get(); }
 
 	Mesh GetMesh()override { return modelData_.mesh; }
 };

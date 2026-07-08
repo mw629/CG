@@ -77,9 +77,9 @@ void GraphicsPipelineState::CreateGraphicsPSO(const ShaderName& shaderName, cons
 				nameMap[bindDesc.Name] = static_cast<UINT>(rootParams.size());
 				rootParams.push_back(param);
 			}
-			else if (bindDesc.Type == D3D_SIT_TEXTURE || bindDesc.Type == D3D_SIT_UAV_RWTYPED || bindDesc.Type == D3D_SIT_UAV_RWSTRUCTURED || bindDesc.Type == D3D_SIT_STRUCTURED) {
+			else if (bindDesc.Type == D3D_SIT_TEXTURE || bindDesc.Type == D3D_SIT_UAV_RWTYPED || bindDesc.Type == D3D_SIT_UAV_RWSTRUCTURED) {
 				D3D12_DESCRIPTOR_RANGE range = {};
-				range.RangeType = (bindDesc.Type == D3D_SIT_TEXTURE || bindDesc.Type == D3D_SIT_STRUCTURED) ? D3D12_DESCRIPTOR_RANGE_TYPE_SRV : D3D12_DESCRIPTOR_RANGE_TYPE_UAV;
+				range.RangeType = (bindDesc.Type == D3D_SIT_TEXTURE) ? D3D12_DESCRIPTOR_RANGE_TYPE_SRV : D3D12_DESCRIPTOR_RANGE_TYPE_UAV;
 				range.BaseShaderRegister = bindDesc.BindPoint;
 				range.NumDescriptors = bindDesc.BindCount;
 				range.RegisterSpace = bindDesc.Space;
@@ -91,6 +91,16 @@ void GraphicsPipelineState::CreateGraphicsPSO(const ShaderName& shaderName, cons
 				param.ShaderVisibility = visibility;
 				param.DescriptorTable.NumDescriptorRanges = 1;
 				param.DescriptorTable.pDescriptorRanges = &ranges.back();
+
+				nameMap[bindDesc.Name] = static_cast<UINT>(rootParams.size());
+				rootParams.push_back(param);
+			}
+			else if (bindDesc.Type == D3D_SIT_STRUCTURED) {
+				D3D12_ROOT_PARAMETER param = {};
+				param.ParameterType = D3D12_ROOT_PARAMETER_TYPE_SRV;
+				param.ShaderVisibility = visibility;
+				param.Descriptor.ShaderRegister = bindDesc.BindPoint;
+				param.Descriptor.RegisterSpace = bindDesc.Space;
 
 				nameMap[bindDesc.Name] = static_cast<UINT>(rootParams.size());
 				rootParams.push_back(param);

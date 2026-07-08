@@ -26,16 +26,15 @@ void ObjectBase::SetObjectResource(Vector2 ClientSize)
 void ObjectBase::CreateWVP()
 {
 	for (int i = 0; i < 2; i++) {
-		//Sprite用ののTransformationMatrix用のリソースを作る。Matrix4x41つ分のサイズを用意する
-		wvpDataResource_[i] = GraphicsDevice::CreateBufferResource(sizeof(TransformationMatrix));
-		//データを書き込む
+		wvpDataResource_[i] = GraphicsDevice::CreateBufferResource(sizeof(TransformationMatrix) * maxInstanceCount_);
 
-		//書き込むためのアドレスを取得
 		wvpDataResource_[i]->Map(0, nullptr, reinterpret_cast<void**>(&wvpData_[i]));
-		//単位行列をかきこんでおく
-		wvpData_[i]->WVP = IdentityMatrix();
-		wvpData_[i]->World = IdentityMatrix();
-		wvpData_[i]->WorldInverseTranspose = IdentityMatrix();
+		for (int j = 0; j < maxInstanceCount_; j++) {
+			wvpData_[i][j].WVP = IdentityMatrix();
+			wvpData_[i][j].World = IdentityMatrix();
+			wvpData_[i][j].WorldInverseTranspose = IdentityMatrix();
+			wvpData_[i][j].numBones = 0;
+		}
 	}
 }
 
@@ -65,14 +64,29 @@ void ObjectBase::CreateIndexResource()
 void ObjectBase::SettingWvp(Matrix4x4 viewMatrix)
 {
 	Matrix4x4 projectionMatri = MakePerspectiveFovMatrix(0.45f, float(kClientWidth_) / float(kClientHeight_), 0.1f, 100.0f);
-	Matrix4x4 worldMatrix = MakeAffineMatrix(transform_.translate, transform_.scale, transform_.rotate);
-	Matrix4x4 worldViewProjectionMatrix = MultiplyMatrix4x4(worldMatrix, MultiplyMatrix4x4(viewMatrix, projectionMatri));
-	Matrix4x4 worldInverseTranspose = TransposeMatrix4x4(Inverse(worldMatrix)); // 法線変換用の行列を計算
 
-	wvpData_[s_wvpIndex]->WVP = worldViewProjectionMatrix;
-	wvpData_[s_wvpIndex]->World = worldMatrix;
-	wvpData_[s_wvpIndex]->WorldInverseTranspose = worldInverseTranspose;
+	if (isInstancing_ && !instancingTransforms_.empty()) {
+		int count = min(maxInstanceCount_, static_cast<int>(instancingTransforms_.size()));
+		for (int i = 0; i < count; ++i) {
+			Matrix4x4 worldMatrix = MakeAffineMatrix(instancingTransforms_[i].translate, instancingTransforms_[i].scale, instancingTransforms_[i].rotate);
+			Matrix4x4 worldViewProjectionMatrix = MultiplyMatrix4x4(worldMatrix, MultiplyMatrix4x4(viewMatrix, projectionMatri));
+			Matrix4x4 worldInverseTranspose = TransposeMatrix4x4(Inverse(worldMatrix));
 
+			wvpData_[s_wvpIndex][i].WVP = worldViewProjectionMatrix;
+			wvpData_[s_wvpIndex][i].World = worldMatrix;
+			wvpData_[s_wvpIndex][i].WorldInverseTranspose = worldInverseTranspose;
+			wvpData_[s_wvpIndex][i].numBones = 0;
+		}
+	} else {
+		Matrix4x4 worldMatrix = MakeAffineMatrix(transform_.translate, transform_.scale, transform_.rotate);
+		Matrix4x4 worldViewProjectionMatrix = MultiplyMatrix4x4(worldMatrix, MultiplyMatrix4x4(viewMatrix, projectionMatri));
+		Matrix4x4 worldInverseTranspose = TransposeMatrix4x4(Inverse(worldMatrix)); // 法線変換用の行列を計算
+
+		wvpData_[s_wvpIndex][0].WVP = worldViewProjectionMatrix;
+		wvpData_[s_wvpIndex][0].World = worldMatrix;
+		wvpData_[s_wvpIndex][0].WorldInverseTranspose = worldInverseTranspose;
+		wvpData_[s_wvpIndex][0].numBones = 0;
+	}
 };
 
 void ObjectBase::CreateObject()
