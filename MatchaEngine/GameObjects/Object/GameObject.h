@@ -66,7 +66,7 @@ public:
             component->Update(view, speedMultiplier);
         }
     }
-    virtual void OnCollision(GameObject* other) {}
+    virtual void OnCollision(GameObject* /*other*/) {}
 
     virtual void Draw() {
         for (auto& component : components_) {

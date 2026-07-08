@@ -38,7 +38,7 @@ const ShaderName RadialBlurShader = "RadialBlurShader";
 const ShaderName DissolveShader = "DissolveShader";
 const ShaderName RandomShader = "RandomShader";
 
-static const char* ShaderNameToString(const ShaderName& name)
+inline const char* ShaderNameToString(const ShaderName& name)
 {
 	return name.c_str();
 }
@@ -58,7 +58,7 @@ struct PipelineConfig {
 	D3D12_FILL_MODE fillMode = D3D12_FILL_MODE_SOLID;
 };
 
-static const char* BlendModeToString(BlendMode mode)
+inline const char* BlendModeToString(BlendMode mode)
 {
 	switch (mode) {
 	case kBlendModeNone: return "kBlendModeNone";

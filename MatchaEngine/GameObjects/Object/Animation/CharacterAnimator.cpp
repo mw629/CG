@@ -50,7 +50,7 @@ void CharacterAnimator::SettingWvp(Matrix4x4 viewMatrix) {
 	Matrix4x4 projectionMatrix = MakePerspectiveFovMatrix(0.45f, float(kClientWidth_) / float(kClientHeight_), 0.1f, 10000.0f);
 
 	if (isInstancing_ && !instancingTransforms_.empty()) {
-		int count = min(maxInstanceCount_, static_cast<int>(instancingTransforms_.size()));
+		int count = std::min(maxInstanceCount_, static_cast<int>(instancingTransforms_.size()));
 		for (int i = 0; i < count; ++i) {
 			Matrix4x4 worldMatrix = MakeAffineMatrix(instancingTransforms_[i].translate, instancingTransforms_[i].scale, instancingTransforms_[i].rotate);
 			Matrix4x4 worldViewProjectionMatrix = MultiplyMatrix4x4(worldMatrix, MultiplyMatrix4x4(viewMatrix, projectionMatrix));
@@ -59,7 +59,7 @@ void CharacterAnimator::SettingWvp(Matrix4x4 viewMatrix) {
 			wvpData_[s_wvpIndex][i].WVP = worldViewProjectionMatrix;
 			wvpData_[s_wvpIndex][i].World = worldMatrix; // localMatrix_ is handled inside Animation if needed, or maybe we don't multiply localMatrix_ here if skeleton handles it? Wait, localMatrix_ was multiplied here in the original code. Let's keep it if noUpdate uses it, but noUpdate sets it to localMatrix_ * worldMatrix. Wait, for Skinning, world position is just worldMatrix.
 			wvpData_[s_wvpIndex][i].WorldInverseTranspose = worldInverseTranspose;
-			wvpData_[s_wvpIndex][i].numBones = skeleton_.joints.size();
+			wvpData_[s_wvpIndex][i].numBones = static_cast<uint32_t>(skeleton_.joints.size());
 		}
 	} else {
 		Matrix4x4 worldMatrix = MakeAffineMatrix(transform_.translate, transform_.scale, transform_.rotate);
@@ -69,7 +69,7 @@ void CharacterAnimator::SettingWvp(Matrix4x4 viewMatrix) {
 		wvpData_[s_wvpIndex][0].WVP = worldMatrix * worldViewProjectionMatrix;
 		wvpData_[s_wvpIndex][0].World = localMatrix_ * worldMatrix;
 		wvpData_[s_wvpIndex][0].WorldInverseTranspose = worldInverseTranspose;
-		wvpData_[s_wvpIndex][0].numBones = skeleton_.joints.size();
+		wvpData_[s_wvpIndex][0].numBones = static_cast<uint32_t>(skeleton_.joints.size());
 	}
 }
 
@@ -165,7 +165,7 @@ void CharacterAnimator::noUpdate(Matrix4x4 viewMatrix)
 void CharacterAnimator::Update(Matrix4x4 viewMatrix)
 {
 	if (isInstancing_ && !instancingTransforms_.empty()) {
-		int count = min(maxInstanceCount_, static_cast<int>(instancingTransforms_.size()));
+		int count = std::min(maxInstanceCount_, static_cast<int>(instancingTransforms_.size()));
 		for (int i = 0; i < count; ++i) {
 			instancingAnimationTimes_[i] += 1.0f / 60.0f;//時間を進める
 			instancingAnimationTimes_[i] = std::fmod(instancingAnimationTimes_[i], animation_.duration);

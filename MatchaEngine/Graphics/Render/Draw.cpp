@@ -112,7 +112,7 @@ void Draw::DrawAnimation(CharacterAnimator* obj)
 	BlendMode blend = obj->GetBlend();
 	SetCBV(shader, blend, "gMaterial", obj->GetMartial()->GetMaterialResource()->GetGPUVirtualAddress());
 	SetSRV(shader, blend, "gTransformationMatrix", obj->GetWvpDataResource()->GetGPUVirtualAddress());
-	SetSRV(shader, blend, "gMatrixPalette", obj->GetPaletteResourceGPU());
+	SetSRV(shader, blend, "gMatrixPalette", obj->GetPaletteResourceGPU()->GetGPUVirtualAddress());
 	SetTable(shader, blend, "gTexture", obj->GetTextureSrvHandleGPU());
 	SetCBV(shader, blend, "gCamera", camera->GetCameraResource()->GetGPUVirtualAddress());
 	SetCBV(shader, blend, "gDirectionalLightGroup", lightManager_->GetDirectionalLightResource()->GetGPUVirtualAddress());
@@ -161,7 +161,7 @@ void Draw::DrawParticle(EffectDefinition* particle)
 	ShaderName shader = particle->GetShader();
 	BlendMode blend = particle->GetBlend();
 	SetCBV(shader, blend, "gMaterial", particle->GetMartial()->GetMaterialResource()->GetGPUVirtualAddress());
-	SetTable(shader, blend, "gParticle", particle->GetInstancingSrvHandleGPU());
+	SetSRV(shader, blend, "gParticle", particle->GetInstancingResource()->GetGPUVirtualAddress());
 	SetTable(shader, blend, "gTexture", particle->GetTextureSrvHandleGPU());
 	commandList_->DrawInstanced(particle->GetVertexSize(), instanceCount, 0, 0);
 
@@ -185,7 +185,7 @@ void Draw::DrawSprite(Sprite* sprite)
 	SetCBV(shader, blend, "gSpotLightGroup", lightManager_->GetSpotLightResource()->GetGPUVirtualAddress());
 	SetTable(shader, blend, "gEnvironmentTexture", environmentTextureSrvHandleGPU_);
 
-	commandList_->DrawIndexedInstanced(6, sprite->GetInstanceCount(), 0, 0, 0);
+	commandList_->DrawIndexedInstanced(6, 1, 0, 0, 0);
 }
 
 void Draw::DrawSphere(Sphere* sphere)
@@ -227,7 +227,7 @@ void Draw::DrawTriangle(Triangle* triangle)
 	SetTable(shader, blend, "gEnvironmentTexture", environmentTextureSrvHandleGPU_);
 
 
-	commandList_->DrawInstanced(3, triangle->GetInstanceCount(), 0, 0);
+	commandList_->DrawInstanced(3, 1, 0, 0);
 }
 
 
