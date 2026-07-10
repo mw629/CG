@@ -305,7 +305,7 @@ void GameScene::Initialize() {
 	skyBox_.get()->name_ = "SkyBox";
 
 	// プレイヤーの初期化
-	ModelData modelData = AssimpLoadObjFile("Resources/Model/Pengine", "Pengine.obj");
+	ModelData modelData = AssimpLoadObjFile("Resources/Model/Player", "Player.obj");
 	player_->Initialize(modelData);
 
 	// オブジェクトマネージャーへの登録
