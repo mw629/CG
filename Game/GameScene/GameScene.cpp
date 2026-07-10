@@ -113,10 +113,13 @@ void GameScene::ImGui()
 			gameState_ = GameState::Playing;
 			camera_->SetDebugCamera(false);
 			stageSettings_->Reset();
+			SetCameraToBehind();
 			player_->Reset();
 			currentDistance_ = 0.0f;
 			currentScore_ = 0.0f;
 			bonusEnemyHitCount_ = 0;
+			isRightSideMode_ = false;
+			rightSideDistance_ = 0.0f;
 		}
 	}
 
@@ -223,11 +226,14 @@ void GameScene::ImGui()
 		if (ImGui::Button("Restart (1)", ImVec2(200, 40))) {
 			gameState_ = GameState::Playing;
 			stageSettings_->Reset();
+			SetCameraToBehind();
 			// PostEffect::SetActivePostEffect(PostEffect::Type::Normal);
 			player_->Reset();
 			currentDistance_ = 0.0f;
 			currentScore_ = 0.0f;
 			bonusEnemyHitCount_ = 0;
+			isRightSideMode_ = false;
+			rightSideDistance_ = 0.0f;
 		}
 		if (ImGui::Button("Return to Title (2)", ImVec2(200, 40))) {
 			nextSceneID_ = SceneID::Title;
@@ -362,6 +368,8 @@ void GameScene::Initialize() {
 	currentDistance_ = 0.0f;
 	currentScore_ = 0.0f;
 	bonusEnemyHitCount_ = 0;
+	isRightSideMode_ = false;
+	rightSideDistance_ = 0.0f;
 }
 
 void GameScene::Update() {
@@ -426,12 +434,15 @@ void GameScene::Update() {
 		if (Input::PushKey(DIK_1)) {
 			gameState_ = GameState::Playing;
 			stageSettings_->Reset();
+			SetCameraToBehind();
 			// PostEffect::SetActivePostEffect(PostEffect::Type::Normal);
 			player_->Reset();
 			particleManager_->ClearHitParticles(); // 前回の煙をリセット
 			currentDistance_ = 0.0f;
 			currentScore_ = 0.0f;
 			bonusEnemyHitCount_ = 0;
+			isRightSideMode_ = false;
+			rightSideDistance_ = 0.0f;
 		}
 		// 2でタイトルへ
 		if (Input::PushKey(DIK_2)) {
@@ -492,6 +503,16 @@ void GameScene::PlayingUpdate()
 
 	CheckKeepRolling();
 	
+	// 右サイドモード（カメラアイテム取得後）の更新
+	if (isRightSideMode_) {
+		rightSideDistance_ += stageSettings_->GetScrollSpeed() * timeScale;
+		if (rightSideDistance_ >= 200.0f) {
+			SetCameraToBehind();
+			isRightSideMode_ = false;
+			rightSideDistance_ = 0.0f;
+		}
+	}
+
 	// Update Player lane constraints
 	player_->SetLaneLimits(stageSettings_->GetMinLaneIndex(), stageSettings_->GetMaxLaneIndex(), stageSettings_->GetLaneWidth());
 
@@ -577,6 +598,19 @@ void GameScene::CheckCollisions()
 				// プレイヤーの足元にCylinderエフェクトを出す
 				particleManager_->StartBonusEffect(120.0f); // 60FPS環境で2秒間
 				particleManager_->EmitBonusCylinder(player_->GetTransform().translate);
+
+				continue; // ゲームオーバーにはならず、次の判定へ
+			}
+
+			if (obstacle->GetType() == Obstacle::Type::CameraItem) {
+				obstacle->OnHit();
+				// カメラ右移動の呼び出し
+				SetCameraToRightSide();
+				isRightSideMode_ = true;
+				rightSideDistance_ = 0.0f;
+
+				// プレイヤーの足元にRingエフェクトを出す(ボーナスと同様の演出)
+				particleManager_->EmitShockwave(player_->GetTransform().translate);
 
 				continue; // ゲームオーバーにはならず、次の判定へ
 			}

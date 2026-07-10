@@ -50,6 +50,9 @@ private:
 	float obstacleInterval_ = 30.0f; // 障害物の生成間隔
 	float distanceSinceLastSpawn_ = 0.0f; // 前回生成からの移動距離
 
+	float cameraItemInterval_ = 500.0f; // カメラアイテムの生成間隔
+	float distanceSinceLastCameraItem_ = 0.0f; // 前回カメラアイテム生成からの移動距離
+
 	// ゲームオーバーフラグ
 	bool isGameOver_ = false;
 

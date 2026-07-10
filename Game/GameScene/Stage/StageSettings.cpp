@@ -161,10 +161,21 @@ void StageSettings::Update(Matrix4x4 view, float timeScale)
 
 	// 障害物の定期生成
 	distanceSinceLastSpawn_ += currentScroll;
+	distanceSinceLastCameraItem_ += currentScroll;
+
 	while (distanceSinceLastSpawn_ >= obstacleInterval_) {
 		// 奥の固定位置(チャンクの向こう側)に生成
 		if (!isSpawningPaused_) {
-			SpawnObstacles(45.0f);
+			// 500mを超えていて、かつ1レーンでない時に通常の障害物の代わりにアイテムを配置する
+			if (distanceSinceLastCameraItem_ >= cameraItemInterval_ && laneCount_ != 1) {
+				obstacles_[nextObstacleIndex_]->SetType(Obstacle::Type::CameraItem);
+				obstacles_[nextObstacleIndex_]->Spawn(0.0f, 2.5f, 45.0f); // 中央レーンに生成
+				nextObstacleIndex_ = (nextObstacleIndex_ + 1) % kMaxObstacles_;
+				
+				distanceSinceLastCameraItem_ -= cameraItemInterval_;
+			} else {
+				SpawnObstacles(45.0f);
+			}
 		}
 		distanceSinceLastSpawn_ -= obstacleInterval_;
 	}
@@ -340,4 +351,5 @@ void StageSettings::Reset()
 	
 	// リセット時は最初は少し進んでから障害物が出るようにする
 	distanceSinceLastSpawn_ = obstacleInterval_ - 10.0f;
+	distanceSinceLastCameraItem_ = 0.0f;
 }

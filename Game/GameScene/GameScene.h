@@ -48,6 +48,10 @@ private:
 	Transform startCameraTransform_;
 	Transform targetCameraTransform_;
 
+	// 右サイドカメラ（アイテム取得後）の管理
+	bool isRightSideMode_ = false;
+	float rightSideDistance_ = 0.0f;
+
 	void StartCameraTransition(const Transform& targetTransform, int laneCount);
 	void UpdateCameraTransition();
 

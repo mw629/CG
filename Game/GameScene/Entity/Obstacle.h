@@ -17,7 +17,8 @@ public:
 		High,  // 転がりで避ける（高い障害物・バー）
 		Wall,  // レーン移動で避ける（壁）
 		Bonus, // 当たると吹き飛ぶボーナスエネミー
-		GuideFloor // 中央へ誘導するトリガー床
+		GuideFloor, // 中央へ誘導するトリガー床
+		CameraItem // 取るとカメラが移動するアイテム
 	};
 
 private:
