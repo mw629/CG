@@ -132,13 +132,20 @@ void Obstacle::StageUpdate(Matrix4x4 view, float scrollSpeed) {
   GameObject::Update(view, 1.0f);
 }
 
-void Obstacle::OnHit() {
+void Obstacle::OnBlowAway() {
   if (isHit_)
     return;
   isHit_ = true;
   // 上と手前(画面方向)に勢いよく飛ぶ
   float randX = ((float)rand() / RAND_MAX - 0.5f) * 0.4f;
   velocity_ = {randX, 0.6f, -0.8f};
+}
+
+void Obstacle::OnHit() {
+    if (isHit_)
+        return;
+    isHit_ = true;
+   
 }
 
 void Obstacle::Draw() {

@@ -589,7 +589,7 @@ void GameScene::CheckCollisions()
 
 			if (obstacle->GetType() == Obstacle::Type::Bonus) {
 				// ボーナスエネミーに当たった場合の処理（吹き飛ばす）
-				obstacle->OnHit();
+				obstacle->OnBlowAway();
 				bonusEnemyHitCount_++; // スコア（距離）ボーナス
 
 				// プレイヤーの足元にRingエフェクトを出す

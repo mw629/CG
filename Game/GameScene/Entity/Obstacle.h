@@ -54,10 +54,12 @@ public:
 	void StageUpdate(Matrix4x4 view, float scrollSpeed);
 
 	/// <summary>
-	/// プレイヤーに当たった時の処理
+	/// プレイヤーに当たった時のふっとび処理
 	/// </summary>
-	void OnHit();
+	void OnBlowAway();
 	
+	void OnHit();
+
 	// Override standard Update and Draw to avoid GameObjectManager from automatically updating scroll/drawing without context
 	void Update(Matrix4x4 view, float speedMultiplier = 1.0f) override {}
 	void Draw() override;
