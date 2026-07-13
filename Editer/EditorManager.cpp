@@ -23,6 +23,8 @@
 #include "../MatchaEngine/Graphics/GraphicsDevice.h"
 #include "../MatchaEngine/Common/CommandContext.h"
 #include "../MatchaEngine/Graphics/Render/Draw.h"
+#include "../MatchaEngine/GameObjects/Object/3d/Model.h"
+#include "../MatchaEngine/Resource/Load.h"
 
 #ifdef _USE_IMGUI
 static std::filesystem::path s_selectedResourceDir = "resources";
@@ -246,6 +248,7 @@ void EditorManager::Update(Engine* engine)
 			ImGui::MenuItem(LanguageManager::Tr("Resources"), nullptr, &showResourcesWindow_);
 			ImGui::MenuItem(LanguageManager::Tr("Logs"), nullptr, &showLogsWindow_);
 			ImGui::MenuItem(LanguageManager::Tr("Particle Editor"), nullptr, &showParticleViewer_);
+			ImGui::MenuItem(LanguageManager::Tr("Object Editor"), nullptr, &showModelViewer_);
 			ImGui::MenuItem(LanguageManager::Tr("Game View"), nullptr, &showGameViewWindow_);
 			ImGui::EndMenu();
 		}
@@ -724,6 +727,154 @@ void EditorManager::Update(Engine* engine)
 		particleRenderTexture_->TransitionToShaderResource(cmdList);
 
 		// Restore engine's main render target
+		D3D12_CPU_DESCRIPTOR_HANDLE mainRtv = engine->GetRenderTexture()->GetRtvHandle();
+		engine->depthStencil->SetDSV(cmdList, &mainRtv);
+		cmdList->RSSetViewports(1, engine->viewportScissor->GetViewport());
+		cmdList->RSSetScissorRects(1, engine->viewportScissor->GetScissorRect());
+	}
+
+	// Model Viewer Window
+	if (showModelViewer_) {
+		if (!isModelViewerInitialized_) {
+			modelRenderTexture_ = std::make_unique<RenderTexture>();
+			modelDepthStencil_ = std::make_unique<DepthStencil>();
+			previewModel_ = std::make_unique<Model>();
+			modelCamera_ = std::make_unique<Camera>();
+			modelGrid_ = std::make_unique<Grid>();
+
+			modelRenderTexture_->Initialize(engine->graphics->GetDevice(), 512, 512, engine->descriptorHeap->GetSrvDescriptorHeap(), engine->descriptorHeap->GetDescriptorSizeSRV());
+			modelDepthStencil_->CreateDepthStencil(engine->graphics->GetDevice(), 512, 512);
+			modelGrid_->CreateGrid();
+
+			Transform camT = { {1.0f,1.0f,1.0f}, {0.0f,0.0f,0.0f}, {0.0f, 2.0f, -10.0f} };
+			modelCamera_->SetTransform(camT);
+			modelCamera_->Update();
+
+			isModelViewerInitialized_ = true;
+		}
+
+		ImGui::SetNextWindowSize(ImVec2(800, 600), ImGuiCond_FirstUseEver);
+		if (ImGui::Begin(LanguageManager::Tr("Object Editor"), &showModelViewer_)) {
+			ImGui::Columns(2, "ModelEditorColumns", true);
+			ImGui::SetColumnWidth(0, 532.0f);
+
+			ImGui::Text(LanguageManager::Tr("Preview:"));
+			ImVec2 vMin = ImGui::GetCursorScreenPos();
+			ImGui::Image((ImTextureID)modelRenderTexture_->GetSrvHandleGPU().ptr, ImVec2(512, 512));
+			if (ImGui::BeginDragDropTarget()) {
+				if (const ImGuiPayload* payload = ImGui::AcceptDragDropPayload("RESOURCE_FILE")) {
+					const char* dropPath = (const char*)payload->Data;
+					std::string pathStr = dropPath;
+					if (pathStr.length() > 4 && (pathStr.substr(pathStr.length() - 4) == ".obj" || pathStr.substr(pathStr.length() - 5) == ".gltf")) {
+						currentModelPath_ = pathStr;
+						std::filesystem::path p(pathStr);
+						std::string dir = p.parent_path().string() + "/";
+						std::string file = p.filename().string();
+						ModelData data;
+						if (file.find(".obj") != std::string::npos) {
+							data = LoadObjFile(dir, file);
+						} else {
+							data = AssimpLoadObjFile(dir, file);
+						}
+						previewModel_->Initialize(data);
+						previewModel_->name_ = "Preview Model";
+					}
+				}
+				ImGui::EndDragDropTarget();
+			}
+
+			ImGuizmo::SetOrthographic(false);
+			ImGuizmo::SetDrawlist(ImGui::GetWindowDrawList());
+			ImGuizmo::SetRect(vMin.x, vMin.y, 512.0f, 512.0f);
+
+			Matrix4x4 viewMat = modelCamera_->GetViewMatrix();
+			Matrix4x4 projMat = MakePerspectiveFovMatrix(0.45f, 1.0f, 0.1f, 100.0f);
+
+			Transform t = previewModel_->GetTransform();
+			Matrix4x4 worldMat = MakeAffineMatrix(t.translate, t.scale, t.rotate);
+
+			static ImGuizmo::OPERATION currentOpModel = ImGuizmo::TRANSLATE;
+
+			ImGuizmo::Manipulate(&viewMat.m[0][0], &projMat.m[0][0], currentOpModel, ImGuizmo::LOCAL, &worldMat.m[0][0]);
+
+			if (ImGuizmo::IsUsing()) {
+				float tr[3], r[3], s[3];
+				ImGuizmo::DecomposeMatrixToComponents(&worldMat.m[0][0], tr, r, s);
+				float pi = 3.1415926535f;
+				t.translate = { tr[0], tr[1], tr[2] };
+				t.rotate = { r[0] * pi / 180.0f, r[1] * pi / 180.0f, r[2] * pi / 180.0f };
+				t.scale = { s[0], s[1], s[2] };
+				previewModel_->SetTransform(t);
+			}
+
+			ImGui::NextColumn();
+
+			ImGui::BeginChild("ModelControls", ImVec2(0, 0), false, ImGuiWindowFlags_HorizontalScrollbar);
+
+			ImGui::Text(LanguageManager::Tr("Controls:"));
+			ImGui::Checkbox(LanguageManager::Tr("Show Grid"), &showGridInModelViewer_);
+
+			ImGui::Separator();
+			ImGui::Text(LanguageManager::Tr("Gizmo Operation:"));
+			if (ImGui::RadioButton(LanguageManager::Tr("Translate##m"), currentOpModel == ImGuizmo::TRANSLATE)) currentOpModel = ImGuizmo::TRANSLATE;
+			ImGui::SameLine();
+			if (ImGui::RadioButton(LanguageManager::Tr("Rotate##m"), currentOpModel == ImGuizmo::ROTATE)) currentOpModel = ImGuizmo::ROTATE;
+			ImGui::SameLine();
+			if (ImGui::RadioButton(LanguageManager::Tr("Scale##m"), currentOpModel == ImGuizmo::SCALE)) currentOpModel = ImGuizmo::SCALE;
+
+			Transform& camT2 = const_cast<Transform&>(modelCamera_->GetTransform());
+			if (ImGui::DragFloat3(LanguageManager::Tr("Camera Pos##m"), &camT2.translate.x, 0.1f)) {
+				modelCamera_->SetTransform(camT2);
+			}
+
+			ImGui::Separator();
+			ImGui::TextWrapped(LanguageManager::Tr("Drop .obj or .gltf file here to preview"));
+			ImGui::TextDisabled("%s", currentModelPath_.empty() ? "None" : currentModelPath_.c_str());
+
+			if (!currentModelPath_.empty()) {
+				ImGui::Separator();
+				if (ImGui::Button(LanguageManager::Tr("Clear Model"))) {
+					currentModelPath_ = "";
+					previewModel_ = std::make_unique<Model>(); // Reset model
+				}
+				ImGui::Separator();
+				previewModel_->ImGui();
+			}
+
+			ImGui::EndChild();
+			ImGui::Columns(1);
+		}
+		ImGui::End();
+
+		modelCamera_->Update();
+		previewModel_->Update(modelCamera_->GetViewMatrix());
+		if (!currentModelPath_.empty()) {
+			previewModel_->SettingWvp(modelCamera_->GetViewMatrix());
+		}
+
+		auto cmdList = engine->command->GetCommandList();
+		modelRenderTexture_->TransitionToRenderTarget(cmdList);
+		modelRenderTexture_->Clear(cmdList);
+		D3D12_CPU_DESCRIPTOR_HANDLE rtvHandle = modelRenderTexture_->GetRtvHandle();
+		modelDepthStencil_->SetDSV(cmdList, &rtvHandle);
+
+		D3D12_VIEWPORT vp = { 0.0f, 0.0f, 512.0f, 512.0f, 0.0f, 1.0f };
+		D3D12_RECT scissor = { 0, 0, 512, 512 };
+		cmdList->RSSetViewports(1, &vp);
+		cmdList->RSSetScissorRects(1, &scissor);
+
+		Draw::SetCamera(modelCamera_.get());
+		if (showGridInModelViewer_) {
+			modelGrid_->SettingWvp(modelCamera_->GetViewMatrix());
+			Draw::DrawGrid(modelGrid_.get());
+		}
+		if (!currentModelPath_.empty()) {
+			Draw::DrawModel(previewModel_.get());
+		}
+
+		modelRenderTexture_->TransitionToShaderResource(cmdList);
+
+		// Restore main
 		D3D12_CPU_DESCRIPTOR_HANDLE mainRtv = engine->GetRenderTexture()->GetRtvHandle();
 		engine->depthStencil->SetDSV(cmdList, &mainRtv);
 		cmdList->RSSetViewports(1, engine->viewportScissor->GetViewport());

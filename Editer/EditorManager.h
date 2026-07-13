@@ -9,6 +9,7 @@ class DepthStencil;
 class Emitter;
 class Camera;
 class Grid;
+class Model;
 
 class EditorManager {
 public:
@@ -50,6 +51,16 @@ private:
 	std::unique_ptr<RenderTexture> gameViewRenderTexture_;
 	std::unique_ptr<DepthStencil> gameViewDepthStencil_;
 	bool isGameViewInitialized_ = false;
+
+	bool showModelViewer_ = false;
+	std::unique_ptr<RenderTexture> modelRenderTexture_;
+	std::unique_ptr<DepthStencil> modelDepthStencil_;
+	std::unique_ptr<Model> previewModel_;
+	std::unique_ptr<Camera> modelCamera_;
+	std::unique_ptr<Grid> modelGrid_;
+	bool isModelViewerInitialized_ = false;
+	bool showGridInModelViewer_ = true;
+	std::string currentModelPath_ = "";
 
 public:
 	~EditorManager();
