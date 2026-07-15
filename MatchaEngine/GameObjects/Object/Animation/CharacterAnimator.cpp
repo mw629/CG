@@ -44,6 +44,19 @@ void CharacterAnimator::Initialize(ModelData modelData, const std::string& direc
 	if (matComp && !modelData_.material.textureDilePath.empty()) {
 		matComp->SetTexturePath(modelData_.material.textureDilePath);
 	}
+	
+	subMeshMaterials_.clear();
+	for (const auto& subMesh : modelData_.subMeshes) {
+		ModelSubMeshMaterial mat;
+		if (subMesh.textureIndex != -1) {
+			mat.textureSrvHandleGPU = texture->TextureData(subMesh.textureIndex);
+		} else {
+			mat.textureSrvHandleGPU = textureSrvHandleGPU_;
+		}
+		mat.materialFactory = std::make_unique<MaterialFactory>();
+		mat.materialFactory->CreateMartial(true, 0.0f);
+		subMeshMaterials_.push_back(std::move(mat));
+	}
 	CreateObject();
 
 	SetShader(AnimationObj);
@@ -298,46 +311,64 @@ void CharacterAnimator::CreateSkinCluster()
 	paletteSrvDesc.Buffer.StructureByteStride = sizeof(WellForGPU);
 	device->CreateShaderResourceView(skinCluster_.paletteResource.Get(), &paletteSrvDesc, skinCluster_.paletteSrvHandle.first);
 
-	//influence用のResourceを確保。頂点ごとにinfluence情報をついかできるようにする
-	skinCluster_.influenceResource = GraphicsDevice::CreateBufferResource(sizeof(VertexInfluence) * modelData_.mesh.vertexSize);
-	VertexInfluence* mappedInfluence = nullptr;
-	skinCluster_.influenceResource->Map(0, nullptr, reinterpret_cast<void**>(&mappedInfluence));
-	std::memset(mappedInfluence, 0, sizeof(VertexInfluence) * modelData_.mesh.vertexSize);//0梅wightを0にしておく
-	//skinCluster_.mappedInfluence = { mappedInfluence, modelData_.mesh.vertexSize };
-	skinCluster_.mappedInfluence = { mappedInfluence, static_cast<std::span<VertexInfluence>::size_type>(modelData_.mesh.vertexSize) };
-
-	//Influence用のVBVを作成
-	skinCluster_.influenceBufferView.BufferLocation = skinCluster_.influenceResource->GetGPUVirtualAddress();
-	skinCluster_.influenceBufferView.SizeInBytes = UINT(sizeof(VertexInfluence) * modelData_.mesh.vertexSize);
-	skinCluster_.influenceBufferView.StrideInBytes = sizeof(VertexInfluence);
-
 	//InverseBindPoseMatrixを格納する場所を作成して、単位行列で埋める
 	skinCluster_.inverseBindPoseMatrices.resize(skeleton_.joints.size());
-	// std::generate(...) の代わりに for 文で初期化
-	//std::generate(skinCluster_.inverseBindPoseMatrices.begin(), skinCluster_.inverseBindPoseMatrices.end(), IdentityMatrix());
 	for (size_t i = 0; i < skinCluster_.inverseBindPoseMatrices.size(); ++i) {
 		skinCluster_.inverseBindPoseMatrices[i] = IdentityMatrix();
 	}
 
-	for (const auto& JointWeight : modelData_.skinClusterData) {//modelのSkinClusterの情報解析
+	// global skin cluster data just in case some root nodes are missing
+	for (const auto& JointWeight : modelData_.skinClusterData) {
 		auto it = skeleton_.jointMap.find(JointWeight.first);
-		if (it == skeleton_.jointMap.end()) {
-			continue;
+		if (it != skeleton_.jointMap.end()) {
+			skinCluster_.inverseBindPoseMatrices[(*it).second] = JointWeight.second.inverseBindPoseMatrix;
 		}
-		//(*it).secondにはjointのindexが入っているので、外套のindexのinverseBindPoseMatrixを代入
-		skinCluster_.inverseBindPoseMatrices[(*it).second] = JointWeight.second.inverseBindPoseMatrix;
-		for (const auto& vertexWight : JointWeight.second.vertexWeights) {
-			auto& currentInfluece = skinCluster_.mappedInfluence[vertexWight.VertexIndex];//外套のvertexIndexのinfluence情報を参照しておく
-			for (uint32_t index = 0; index < kNumMaxInfluence; ++index) {//空いているところに入れる
-				if (currentInfluece.wights[index] == 0.0f) {//wight==0が空いている状態なので、そに場所にwightとjointのindexを代入
-					currentInfluece.wights[index] = vertexWight.weight;
-					currentInfluece.jointIndices[index] = (*it).second;
-					break;
+	}
+
+	subMeshInfluenceResources_.clear();
+	subMeshInfluenceBufferViews_.clear();
+
+	for (size_t meshIndex = 0; meshIndex < modelData_.subMeshes.size(); ++meshIndex) {
+		const auto& subMesh = modelData_.subMeshes[meshIndex];
+		
+		Microsoft::WRL::ComPtr<ID3D12Resource> influenceResource = GraphicsDevice::CreateBufferResource(sizeof(VertexInfluence) * subMesh.mesh.vertexSize);
+		VertexInfluence* mappedInfluence = nullptr;
+		influenceResource->Map(0, nullptr, reinterpret_cast<void**>(&mappedInfluence));
+		std::memset(mappedInfluence, 0, sizeof(VertexInfluence) * subMesh.mesh.vertexSize);
+		std::span<VertexInfluence> mappedSpan = { mappedInfluence, static_cast<std::span<VertexInfluence>::size_type>(subMesh.mesh.vertexSize) };
+
+		D3D12_VERTEX_BUFFER_VIEW influenceBufferView;
+		influenceBufferView.BufferLocation = influenceResource->GetGPUVirtualAddress();
+		influenceBufferView.SizeInBytes = UINT(sizeof(VertexInfluence) * subMesh.mesh.vertexSize);
+		influenceBufferView.StrideInBytes = sizeof(VertexInfluence);
+
+		for (const auto& JointWeight : subMesh.skinClusterData) {
+			auto it = skeleton_.jointMap.find(JointWeight.first);
+			if (it == skeleton_.jointMap.end()) {
+				continue;
+			}
+			skinCluster_.inverseBindPoseMatrices[(*it).second] = JointWeight.second.inverseBindPoseMatrix;
+			
+			for (const auto& vertexWight : JointWeight.second.vertexWeights) {
+				auto& currentInfluece = mappedSpan[vertexWight.VertexIndex];
+				for (uint32_t index = 0; index < kNumMaxInfluence; ++index) {
+					if (currentInfluece.wights[index] == 0.0f) {
+						currentInfluece.wights[index] = vertexWight.weight;
+						currentInfluece.jointIndices[index] = (*it).second;
+						break;
+					}
 				}
 			}
 		}
 
+		subMeshInfluenceResources_.push_back(influenceResource);
+		subMeshInfluenceBufferViews_.push_back(influenceBufferView);
 	}
 
+	// For backward compatibility / original mesh
+	if (!subMeshInfluenceResources_.empty()) {
+		skinCluster_.influenceResource = subMeshInfluenceResources_[0];
+		skinCluster_.influenceBufferView = subMeshInfluenceBufferViews_[0];
+	}
 }
 

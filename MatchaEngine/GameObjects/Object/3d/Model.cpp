@@ -30,6 +30,19 @@ void Model::Initialize(ModelData modelData)
 		matComp->SetTexturePath(modelData.material.textureDilePath);
 	}
 
+	subMeshMaterials_.clear();
+	for (const auto& subMesh : modelData.subMeshes) {
+		ModelSubMeshMaterial mat;
+		if (subMesh.textureIndex != -1) {
+			mat.textureSrvHandleGPU = texture->TextureData(subMesh.textureIndex);
+		} else {
+			mat.textureSrvHandleGPU = textureSrvHandleGPU_;
+		}
+		mat.materialFactory = std::make_unique<MaterialFactory>();
+		mat.materialFactory->CreateMartial(true, 0.0f);
+		subMeshMaterials_.push_back(std::move(mat));
+	}
+
 	CreateObject();
 }
 

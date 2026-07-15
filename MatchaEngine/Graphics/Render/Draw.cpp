@@ -86,32 +86,41 @@ void Draw::DrawAnimation(CharacterAnimator* obj)
 {
 	preDraw(obj->GetShader(), obj->GetBlend());
 
-	Mesh mesh = obj->GetMesh();
-
-	// インデックス設定
-	commandList_->IASetIndexBuffer(&mesh.indexBufferView_);
-
-	// VBV を複数渡す（頂点データ + インフルエンスデータ）
-	D3D12_VERTEX_BUFFER_VIEW vbvs[2];
-	vbvs[0] = mesh.vertexBufferView;
-	vbvs[1] = *obj->GetInfluenceBufferView();
-	commandList_->IASetVertexBuffers(0, 2, vbvs);
-
-
-
-	// ルートをアニメーション用レイアウトに合わせて設定
 	ShaderName shader = obj->GetShader();
 	BlendMode blend = obj->GetBlend();
-	SetCBV(shader, blend, "gMaterial", obj->GetMartial()->GetMaterialResource()->GetGPUVirtualAddress());
+
+	// 共通の設定
 	SetSRV(shader, blend, "gTransformationMatrix", obj->GetWvpDataResource()->GetGPUVirtualAddress());
 	SetSRV(shader, blend, "gMatrixPalette", obj->GetPaletteResourceGPU()->GetGPUVirtualAddress());
-	SetTable(shader, blend, "gTexture", obj->GetTextureSrvHandleGPU());
 	SetCBV(shader, blend, "gCamera", camera_->GetCameraResource()->GetGPUVirtualAddress());
 	SetCBV(shader, blend, "gDirectionalLightGroup", lightManager_->GetDirectionalLightResource()->GetGPUVirtualAddress());
 	SetCBV(shader, blend, "gPointLightGroup", lightManager_->GetPointLightResource()->GetGPUVirtualAddress());
 	SetCBV(shader, blend, "gSpotLightGroup", lightManager_->GetSpotLightResource()->GetGPUVirtualAddress());
 
-	commandList_->DrawIndexedInstanced(UINT(mesh.indexBufferView_.SizeInBytes / sizeof(uint32_t)), obj->GetInstanceCount(), 0, 0, 0);
+	auto& subMeshMaterials = obj->GetSubMeshMaterials();
+	auto modelData = obj->GetModelData();
+
+	for (size_t i = 0; i < modelData.subMeshes.size(); ++i) {
+		const auto& subMesh = modelData.subMeshes[i];
+		Mesh mesh = subMesh.mesh;
+
+		commandList_->IASetIndexBuffer(&mesh.indexBufferView_);
+
+		D3D12_VERTEX_BUFFER_VIEW vbvs[2];
+		vbvs[0] = mesh.vertexBufferView;
+		vbvs[1] = *obj->GetSubMeshInfluenceBufferView(i);
+		commandList_->IASetVertexBuffers(0, 2, vbvs);
+
+		if (i < subMeshMaterials.size()) {
+			SetCBV(shader, blend, "gMaterial", subMeshMaterials[i].materialFactory->GetMaterialResource()->GetGPUVirtualAddress());
+			SetTable(shader, blend, "gTexture", subMeshMaterials[i].textureSrvHandleGPU);
+		} else {
+			SetCBV(shader, blend, "gMaterial", obj->GetMartial()->GetMaterialResource()->GetGPUVirtualAddress());
+			SetTable(shader, blend, "gTexture", obj->GetTextureSrvHandleGPU());
+		}
+
+		commandList_->DrawIndexedInstanced(UINT(mesh.indexBufferView_.SizeInBytes / sizeof(uint32_t)), obj->GetInstanceCount(), 0, 0, 0);
+	}
 
 	if (obj->GetVisibleBones()) {
 		DrawAllLines(obj->GetBoneRenderer(), false); // 深度テストなしで手前に表示
@@ -123,24 +132,36 @@ void Draw::DrawModel(Model* model)
 {
 	preDraw(model->GetShader(), model->GetBlend());
 
-	Mesh mesh = ModelManager::GetModelData(model->GetModelNumber()).mesh;
-
-
-	//objectの描画
-	commandList_->IASetIndexBuffer(&mesh.indexBufferView_);
-	commandList_->IASetVertexBuffers(0, 1, &mesh.vertexBufferView);  // アドレスを渡す
 	ShaderName shader = model->GetShader();
 	BlendMode blend = model->GetBlend();
-	SetCBV(shader, blend, "gMaterial", model->GetMartial()->GetMaterialResource()->GetGPUVirtualAddress());
+
 	SetSRV(shader, blend, "gTransformationMatrix", model->GetWvpDataResource()->GetGPUVirtualAddress());
-	SetTable(shader, blend, "gTexture", model->GetTextureSrvHandleGPU());
 	SetCBV(shader, blend, "gCamera", camera_->GetCameraResource()->GetGPUVirtualAddress());
 	SetCBV(shader, blend, "gDirectionalLightGroup", lightManager_->GetDirectionalLightResource()->GetGPUVirtualAddress());
 	SetCBV(shader, blend, "gPointLightGroup", lightManager_->GetPointLightResource()->GetGPUVirtualAddress());
 	SetCBV(shader, blend, "gSpotLightGroup", lightManager_->GetSpotLightResource()->GetGPUVirtualAddress());
 	SetTable(shader, blend, "gEnvironmentTexture", environmentTextureSrvHandleGPU_);
 
-	commandList_->DrawIndexedInstanced(UINT(mesh.indexBufferView_.SizeInBytes / sizeof(uint32_t)), model->GetInstanceCount(), 0, 0, 0);
+	auto& subMeshMaterials = model->GetSubMeshMaterials();
+	auto modelData = ModelManager::GetModelData(model->GetModelNumber());
+
+	for (size_t i = 0; i < modelData.subMeshes.size(); ++i) {
+		const auto& subMesh = modelData.subMeshes[i];
+		Mesh mesh = subMesh.mesh;
+
+		commandList_->IASetIndexBuffer(&mesh.indexBufferView_);
+		commandList_->IASetVertexBuffers(0, 1, &mesh.vertexBufferView);
+
+		if (i < subMeshMaterials.size()) {
+			SetCBV(shader, blend, "gMaterial", subMeshMaterials[i].materialFactory->GetMaterialResource()->GetGPUVirtualAddress());
+			SetTable(shader, blend, "gTexture", subMeshMaterials[i].textureSrvHandleGPU);
+		} else {
+			SetCBV(shader, blend, "gMaterial", model->GetMartial()->GetMaterialResource()->GetGPUVirtualAddress());
+			SetTable(shader, blend, "gTexture", model->GetTextureSrvHandleGPU());
+		}
+
+		commandList_->DrawIndexedInstanced(UINT(mesh.indexBufferView_.SizeInBytes / sizeof(uint32_t)), model->GetInstanceCount(), 0, 0, 0);
+	}
 }
 
 void Draw::DrawParticle(EffectDefinition* particle)

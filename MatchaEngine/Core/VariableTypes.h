@@ -192,11 +192,24 @@ struct JointWeightData {
   std::vector<VertexWeightData> vertexWeights;
 };
 
+struct SubMesh {
+  Mesh mesh;
+  MaterialData material;
+  int textureIndex;
+
+  std::map<std::string, JointWeightData> skinClusterData;
+
+  Microsoft::WRL::ComPtr<ID3D12Resource> influenceResource;
+  D3D12_VERTEX_BUFFER_VIEW influenceBufferView{};
+};
+
 struct ModelData {
   int modelNumber;
   Mesh mesh;
   MaterialData material;
   int textureIndex;
+
+  std::vector<SubMesh> subMeshes;
 
   // アニメーション
   Node rootNode;

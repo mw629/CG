@@ -22,6 +22,10 @@ private:
 	bool isVisibleBones_ = false;
 	LineRenderer* boneRenderer_ = nullptr;
 
+	std::vector<ModelSubMeshMaterial> subMeshMaterials_;
+	std::vector<Microsoft::WRL::ComPtr<ID3D12Resource>> subMeshInfluenceResources_;
+	std::vector<D3D12_VERTEX_BUFFER_VIEW> subMeshInfluenceBufferViews_;
+
 public:
 
 	~CharacterAnimator()override;
@@ -64,8 +68,12 @@ public:
 		instancingAnimationTimes_.clear();
 	}
 
-	// 追加: インフルエンス用 VBV を取得
+	// 追加: インフルエンス用 VBV を取得 (後方互換性)
 	D3D12_VERTEX_BUFFER_VIEW* GetInfluenceBufferView() { return &skinCluster_.influenceBufferView; }
+
+	// Multi-mesh support
+	const std::vector<ModelSubMeshMaterial>& GetSubMeshMaterials() const { return subMeshMaterials_; }
+	D3D12_VERTEX_BUFFER_VIEW* GetSubMeshInfluenceBufferView(size_t index) { return &subMeshInfluenceBufferViews_[index]; }
 
 	// 追加: スキンパレット SRV の GPU ハンドル (インスタンス対応であればGPUのVADDRになるがDrawでGetPaletteResourceGPUを呼ぶように変更済)
 	ID3D12Resource* GetPaletteResourceGPU() const { return skinCluster_.paletteResource.Get(); }
