@@ -20,6 +20,7 @@ public:
 protected:
     Transform transform_{ {1.0f,1.0f,1.0f}, {0.0f,0.0f,0.0f}, {0.0f,0.0f,0.0f} };
     bool isActive_ = true;
+    bool isLocked_ = false;
     std::vector<std::shared_ptr<Component>> components_;
 
 public:
@@ -67,6 +68,10 @@ public:
         }
     }
     virtual void OnCollision(GameObject* /*other*/) {}
+
+    virtual std::shared_ptr<GameObject> Clone() {
+        return nullptr; // 基底クラスではnullptr。必要に応じて派生クラスで実装
+    }
 
     virtual void Draw(class Draw& draw) {
         for (auto& component : components_) {
@@ -144,4 +149,7 @@ public:
 
     bool GetIsActive() const { return isActive_; }
     void SetIsActive(bool active) { isActive_ = active; }
+
+    bool GetIsLocked() const { return isLocked_; }
+    void SetIsLocked(bool locked) { isLocked_ = locked; }
 };

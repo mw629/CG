@@ -21,6 +21,75 @@ void GameObjectManager::RemoveObject(std::shared_ptr<GameObject> obj)
     }
 }
 
+void GameObjectManager::CopyObject(std::shared_ptr<GameObject> obj)
+{
+    if (!obj) return;
+
+    nlohmann::json objJson;
+    objJson["name"] = obj->GetName() + " (Copy)";
+    objJson["isActive"] = obj->GetIsActive();
+    objJson["isLocked"] = obj->GetIsLocked();
+    
+    const Transform& t = obj->GetTransform();
+    objJson["transform"]["translate"] = { t.translate.x, t.translate.y, t.translate.z };
+    objJson["transform"]["rotate"] = { t.rotate.x, t.rotate.y, t.rotate.z };
+    objJson["transform"]["scale"] = { t.scale.x, t.scale.y, t.scale.z };
+    
+    std::string type = "";
+    if (auto renderObj = std::dynamic_pointer_cast<RenderObject>(obj)) {
+        type = "RenderObject";
+        objJson["type"] = "RenderObject";
+        objJson["modelFilePath"] = renderObj->modelFilePath_;
+    }
+
+    std::shared_ptr<GameObject> targetObj = nullptr;
+
+    if (type == "RenderObject") {
+        std::string filePath = objJson.value("modelFilePath", "");
+        size_t lastSlash = filePath.find_last_of("/\\");
+        if (lastSlash != std::string::npos) {
+            std::string dirPath = filePath.substr(0, lastSlash);
+            std::string fileName = filePath.substr(lastSlash + 1);
+            try {
+                ModelData modelData = AssetManager::LoadModel(dirPath, fileName);
+                auto model = std::make_shared<Model>();
+                model->Initialize(modelData);
+                model->name_ = fileName;
+                
+                auto renderObj = std::make_shared<RenderObject>(model);
+                renderObj->SetName(objJson["name"]);
+                renderObj->modelFilePath_ = filePath;
+                targetObj = renderObj;
+                objects_.push_back(targetObj);
+            } catch (...) {}
+        }
+    } else {
+        targetObj = std::make_shared<GameObject>();
+        targetObj->SetName(objJson["name"]);
+        objects_.push_back(targetObj);
+    }
+
+    if (targetObj) {
+        targetObj->SetIsActive(objJson["isActive"]);
+        targetObj->SetIsLocked(objJson["isLocked"]);
+        
+        Transform t2;
+        t2.translate.x = objJson["transform"]["translate"][0];
+        t2.translate.y = objJson["transform"]["translate"][1];
+        t2.translate.z = objJson["transform"]["translate"][2];
+        
+        t2.rotate.x = objJson["transform"]["rotate"][0];
+        t2.rotate.y = objJson["transform"]["rotate"][1];
+        t2.rotate.z = objJson["transform"]["rotate"][2];
+        
+        t2.scale.x = objJson["transform"]["scale"][0];
+        t2.scale.y = objJson["transform"]["scale"][1];
+        t2.scale.z = objJson["transform"]["scale"][2];
+        
+        targetObj->SetTransform(t2);
+    }
+}
+
 void GameObjectManager::Clear()
 {
     objects_.clear();
@@ -71,6 +140,7 @@ void GameObjectManager::SaveScene(const std::string& filepath)
         nlohmann::json objJson;
         objJson["name"] = obj->GetName();
         objJson["isActive"] = obj->GetIsActive();
+        objJson["isLocked"] = obj->GetIsLocked();
         
         const Transform& t = obj->GetTransform();
         objJson["transform"]["translate"] = { t.translate.x, t.translate.y, t.translate.z };
@@ -143,6 +213,7 @@ void GameObjectManager::LoadScene(const std::string& filepath)
 
             if (targetObj) {
                 targetObj->SetIsActive(objJson["isActive"]);
+                if (objJson.contains("isLocked")) targetObj->SetIsLocked(objJson["isLocked"]);
                 
                 if (objJson.contains("transform")) {
                     Transform t;

@@ -85,6 +85,8 @@ public:
 	static void SetCurrentFileName(const std::string& name) { s_currentFileName_ = name; }
 	static std::string GetCurrentFileName() { return s_currentFileName_; }
 
+	static int s_gizmoOp; // 0: Translate, 1: Rotate, 2: Scale
+
 	// 毎フレーム呼ばれるエディタUIの更新処理
 	void Update(Engine* engine);
 };

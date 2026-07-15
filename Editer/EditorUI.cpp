@@ -7,6 +7,7 @@
 #endif
 
 #include "LanguageManager.h"
+#include "EditorManager.h"
 
 void EditorUI::ProcessMousePicking(GameObjectManager* gameObjectManager, const Matrix4x4& view, const Matrix4x4& projection) {
 #ifdef _USE_IMGUI
@@ -84,7 +85,7 @@ void EditorUI::ProcessMousePicking(GameObjectManager* gameObjectManager, const M
 
 void EditorUI::DrawGizmo(const Matrix4x4& view, const Matrix4x4& projection) {
 #ifdef _USE_IMGUI
-    if (!selectedObject_) return;
+    if (!selectedObject_ || selectedObject_->GetIsLocked()) return;
 
     // 現在アクティブなウィンドウのContentRegionの座標を取得
     // (SceneウィンドウのBegin/Endの間から呼ばれることを前提とする)
@@ -98,14 +99,19 @@ void EditorUI::DrawGizmo(const Matrix4x4& view, const Matrix4x4& projection) {
     ImGuizmo::SetOrthographic(false);
     ImGuizmo::SetDrawlist(ImGui::GetWindowDrawList());
     ImGuizmo::SetRect(scenePos.x, scenePos.y, sceneSize.x, sceneSize.y);
+    ImGuizmo::SetGizmoSizeClipSpace(0.15f);
 
     Transform t = selectedObject_->GetTransform();
     Matrix4x4 world = MakeAffineMatrix(t.translate, t.scale, t.rotate);
 
+    ImGuizmo::OPERATION op = ImGuizmo::TRANSLATE;
+    if (EditorManager::s_gizmoOp == 1) op = ImGuizmo::ROTATE;
+    else if (EditorManager::s_gizmoOp == 2) op = ImGuizmo::SCALE;
+
     ImGuizmo::Manipulate(
         &view.m[0][0],
         &projection.m[0][0],
-        ImGuizmo::TRANSLATE | ImGuizmo::ROTATE | ImGuizmo::SCALE,
+        op,
         ImGuizmo::LOCAL,
         &world.m[0][0]
     );
@@ -137,9 +143,22 @@ void EditorUI::Draw(GameObjectManager* gameObjectManager, const Matrix4x4& view,
 
     // Hierarchy Window
     ImGui::Begin(LanguageManager::Tr("Hierarchy"));
+    std::shared_ptr<GameObject> objToDelete = nullptr;
+    std::shared_ptr<GameObject> objToCopy = nullptr;
+
     for (auto& obj : gameObjectManager->GetObjects()) {
         if (!obj) continue;
         
+        ImGui::AlignTextToFramePadding();
+        bool isLocked = obj->GetIsLocked();
+        ImGui::PushID(obj.get());
+        if (ImGui::Checkbox("##lock", &isLocked)) {
+            obj->SetIsLocked(isLocked);
+        }
+        ImGui::PopID();
+        
+        ImGui::SameLine();
+
         ImGuiTreeNodeFlags flags = ImGuiTreeNodeFlags_OpenOnArrow | ImGuiTreeNodeFlags_OpenOnDoubleClick | ImGuiTreeNodeFlags_SpanAvailWidth | ImGuiTreeNodeFlags_Leaf;
         if (selectedObject_ == obj) {
             flags |= ImGuiTreeNodeFlags_Selected;
@@ -155,14 +174,35 @@ void EditorUI::Draw(GameObjectManager* gameObjectManager, const Matrix4x4& view,
             ImGui::PopStyleColor();
         }
 
-        if (ImGui::IsItemClicked()) {
+        if (ImGui::IsItemClicked(0) || ImGui::IsItemClicked(1)) {
             selectedObject_ = obj;
+        }
+
+        if (ImGui::BeginPopupContextItem()) {
+            if (ImGui::MenuItem(LanguageManager::Tr("Copy"))) {
+                objToCopy = obj;
+            }
+            if (ImGui::MenuItem(LanguageManager::Tr("Delete"))) {
+                objToDelete = obj;
+            }
+            ImGui::EndPopup();
         }
 
         if (isOpen) {
             ImGui::TreePop();
         }
     }
+
+    if (objToDelete) {
+        gameObjectManager->RemoveObject(objToDelete);
+        if (selectedObject_ == objToDelete) {
+            selectedObject_ = nullptr;
+        }
+    }
+    if (objToCopy) {
+        gameObjectManager->CopyObject(objToCopy);
+    }
+
     ImGui::End();
 
     // Inspector Window
@@ -175,9 +215,22 @@ void EditorUI::Draw(GameObjectManager* gameObjectManager, const Matrix4x4& view,
         if (ImGui::Checkbox(LanguageManager::Tr("Active"), &isActive)) {
             selectedObject_->SetIsActive(isActive);
         }
+        ImGui::SameLine();
+        bool isLocked = selectedObject_->GetIsLocked();
+        if (ImGui::Checkbox(LanguageManager::Tr("Locked"), &isLocked)) {
+            selectedObject_->SetIsLocked(isLocked);
+        }
         ImGui::Separator();
 
+        if (selectedObject_->GetIsLocked()) {
+            ImGui::BeginDisabled();
+        }
+
         selectedObject_->ImGui();
+
+        if (selectedObject_->GetIsLocked()) {
+            ImGui::EndDisabled();
+        }
     } else {
         ImGui::Text(LanguageManager::Tr("No object selected."));
     }

@@ -31,6 +31,8 @@ static std::filesystem::path s_selectedResourceDir = "resources";
 static std::unordered_map<std::string, D3D12_GPU_DESCRIPTOR_HANDLE> s_iconCache;
 static std::unique_ptr<Texture> s_editorTexture;
 
+int EditorManager::s_gizmoOp = 0;
+
 void DrawDirectoryTree(const std::filesystem::path& dirPath) {
 	try {
 		for (const auto& entry : std::filesystem::directory_iterator(dirPath)) {
@@ -464,7 +466,31 @@ void EditorManager::Update(Engine* engine)
 
 	ImGui::Begin(LanguageManager::Tr("Scene"));
 
+	// --- ギズモ操作ボタン ---
+	ImGui::PushStyleVar(ImGuiStyleVar_ItemSpacing, ImVec2(2, 0));
+	
+	ImVec4 activeCol = ImGui::GetStyleColorVec4(ImGuiCol_ButtonActive);
+	ImVec4 defaultCol = ImGui::GetStyleColorVec4(ImGuiCol_Button);
+	
+	ImGui::PushStyleColor(ImGuiCol_Button, s_gizmoOp == 0 ? activeCol : defaultCol);
+	if (ImGui::Button("T")) s_gizmoOp = 0;
+	ImGui::PopStyleColor();
+	ImGui::SameLine();
+	
+	ImGui::PushStyleColor(ImGuiCol_Button, s_gizmoOp == 1 ? activeCol : defaultCol);
+	if (ImGui::Button("R")) s_gizmoOp = 1;
+	ImGui::PopStyleColor();
+	ImGui::SameLine();
+	
+	ImGui::PushStyleColor(ImGuiCol_Button, s_gizmoOp == 2 ? activeCol : defaultCol);
+	if (ImGui::Button("S")) s_gizmoOp = 2;
+	ImGui::PopStyleColor();
+	
+	ImGui::PopStyleVar();
+	ImGui::SameLine();
+	
 	// --- アスペクト比設定 ---
+	ImGui::SetNextItemWidth(120);
 	const char* aspectLabels[] = { "Free", "16:9", "4:3", "1:1", "21:9" };
 	const float aspectRatios[] = { 0.0f, 16.0f / 9.0f, 4.0f / 3.0f, 1.0f, 21.0f / 9.0f };
 	ImGui::Combo(LanguageManager::Tr("Aspect Ratio"), &sceneAspectRatioIndex_, aspectLabels, IM_ARRAYSIZE(aspectLabels));
@@ -617,6 +643,7 @@ void EditorManager::Update(Engine* engine)
 			ImGuizmo::SetOrthographic(false);
 			ImGuizmo::SetDrawlist(ImGui::GetWindowDrawList());
 			ImGuizmo::SetRect(vMin.x, vMin.y, 512.0f, 512.0f);
+			ImGuizmo::SetGizmoSizeClipSpace(0.15f);
 
 			Matrix4x4 viewMat = previewCamera_->GetViewMatrix();
 			Matrix4x4 projMat = MakePerspectiveFovMatrix(0.45f, 1.0f, 0.1f, 100.0f);
@@ -786,6 +813,7 @@ void EditorManager::Update(Engine* engine)
 			ImGuizmo::SetOrthographic(false);
 			ImGuizmo::SetDrawlist(ImGui::GetWindowDrawList());
 			ImGuizmo::SetRect(vMin.x, vMin.y, 512.0f, 512.0f);
+			ImGuizmo::SetGizmoSizeClipSpace(0.15f);
 
 			Matrix4x4 viewMat = modelCamera_->GetViewMatrix();
 			Matrix4x4 projMat = MakePerspectiveFovMatrix(0.45f, 1.0f, 0.1f, 100.0f);
