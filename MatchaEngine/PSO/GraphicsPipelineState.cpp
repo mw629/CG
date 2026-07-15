@@ -140,7 +140,7 @@ void GraphicsPipelineState::CreateGraphicsPSO(const ShaderName& shaderName, cons
 	graphicsPipelineStateDesc_[shaderName][blendMode].NumRenderTargets = 1;
 	graphicsPipelineStateDesc_[shaderName][blendMode].RTVFormats[0] = DXGI_FORMAT_R8G8B8A8_UNORM_SRGB;
 	//利用するトポロジ（形状）のタイプ
-	if (shaderName == "LineShader") {
+	if (shaderName == "LineShader" || shaderName == "LineShaderNoDepth") {
 		graphicsPipelineStateDesc_[shaderName][blendMode].PrimitiveTopologyType = D3D12_PRIMITIVE_TOPOLOGY_TYPE_LINE;
 	}
 	else if (shaderName == "ParticleShader") {
@@ -206,6 +206,7 @@ void GraphicsPipelineState::ALLPSOCreate(std::ostream& os, ID3D12Device* device)
 		
 		//LineShaderはライン描画用のシェーダー。描画モードはラインリストで、頂点バッファの内容をそのままスクリーンに打ち込むようなイメージ。深度は書き込む
 		{ LineShader, { L"Resources/Shader/LineShader/Line.VS.hlsl", L"Resources/Shader/LineShader/Line.PS.hlsl", lineInput, true, D3D12_DEPTH_WRITE_MASK_ALL, D3D12_COMPARISON_FUNC_LESS_EQUAL, D3D12_CULL_MODE_NONE, D3D12_FILL_MODE_SOLID } },
+		{ LineShaderNoDepth, { L"Resources/Shader/LineShader/Line.VS.hlsl", L"Resources/Shader/LineShader/Line.PS.hlsl", lineInput, false, D3D12_DEPTH_WRITE_MASK_ZERO, D3D12_COMPARISON_FUNC_ALWAYS, D3D12_CULL_MODE_NONE, D3D12_FILL_MODE_SOLID } },
 		
 		//SkyBoxShaderはスカイボックス用のシェーダー。描画モードは三角形で、頂点バッファの内容をそのままスクリーンに打ち込むようなイメージ。深度は書き込まないが、比較は通常の3Dオブジェクトと同じにすることで、スカイボックスが常に一番奥に描画されるようにする
 		{ SkyBoxShader, { L"Resources/Shader/SkyBoxShader/SkyBox.VS.hlsl", L"Resources/Shader/SkyBoxShader/SkyBox.PS.hlsl", objInput, true, D3D12_DEPTH_WRITE_MASK_ZERO, D3D12_COMPARISON_FUNC_LESS_EQUAL, D3D12_CULL_MODE_FRONT, D3D12_FILL_MODE_SOLID } },

@@ -15,6 +15,7 @@
 #include "Triangle.h"
 #include "Line.h"
 #include "Grid.h"
+#include "LineRenderer.h"
 #include "Camera.h"
 
 #include "CharacterAnimator.h"
@@ -49,6 +50,9 @@ public:
 	static void DrawLine(Line* line);
 
 	static void DrawGrid(Grid* grid);
+
+	static void DrawAllLines(LineRenderer* lineRenderer, bool depthTest = true);
+
 
 	static void DrawPostEffect(D3D12_GPU_DESCRIPTOR_HANDLE textureHandle, ShaderName shader = "CopyShader", class PostEffect* postEffect = nullptr, D3D12_GPU_DESCRIPTOR_HANDLE depthTextureHandle = {0});
 

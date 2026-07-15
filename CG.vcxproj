@@ -154,6 +154,7 @@ copy "$(WindowsSdkDir)bin\$(TargetPlatformVersion)\x64\dxil.dll" "$(TargetDir)dx
     <ClCompile Include="Editer\EditorManager.cpp" />
     <ClCompile Include="Editer\LanguageManager.cpp" />
     <ClCompile Include="Game\JsonScene\JsonScene.cpp" />
+    <ClCompile Include="MatchaEngine\Graphics\Render\LineRenderer.cpp" />
     <ClCompile Include="MatchaEngine\System\GameObjectManager.cpp" />
     <ClCompile Include="MatchaEngine\System\CollisionManager.cpp" />
     <ClCompile Include="MatchaEngine\GameObjects\Component\MaterialComponent.cpp" />
@@ -343,6 +344,7 @@ copy "$(WindowsSdkDir)bin\$(TargetPlatformVersion)\x64\dxil.dll" "$(TargetDir)dx
     <ClInclude Include="Editer\EditorManager.h" />
     <ClInclude Include="Editer\LanguageManager.h" />
     <ClInclude Include="Game\JsonScene\JsonScene.h" />
+    <ClInclude Include="MatchaEngine\Graphics\Render\LineRenderer.h" />
     <ClInclude Include="MatchaEngine\System\GameObjectManager.h" />
     <ClInclude Include="MatchaEngine\System\CollisionManager.h" />
     <ClInclude Include="MatchaEngine\Resource\AssetManager.h" />

@@ -3,6 +3,7 @@
 #include "DebugCamera.h"
 #include <d3d12.h>
 #include <wrl.h>
+#include "Calculation.h"
 
 class Camera
 {
@@ -11,6 +12,13 @@ private:
 	Transform transform_{ {1.0f,1.0f,1.0f},{0.0f,0.0f,0.0f},{0.0f,0.0f,0.0f} };
 
 	Matrix4x4 viewMatrix_{};
+	Matrix4x4 projectionMatrix_{};
+
+	float fovY_ = 0.45f;
+	float aspectRatio_ = 1280.0f / 720.0f;
+	float nearClip_ = 0.1f;
+	float farClip_ = 100.0f;
+
 
 	DebugCamera debugCamera_;
 
@@ -29,6 +37,8 @@ public:
 	void Initialize();
 	void Update();
 	Matrix4x4 GetViewMatrix()const { return viewMatrix_; }
+	Matrix4x4 GetProjectionMatrix() const { return projectionMatrix_; }
+	Matrix4x4 GetViewProjectionMatrix() const { return MultiplyMatrix4x4(viewMatrix_, projectionMatrix_); }
 
 	const Transform& GetTransform() const { return transform_; }
 	void SetTransform(Transform transform) { transform_ = transform; }

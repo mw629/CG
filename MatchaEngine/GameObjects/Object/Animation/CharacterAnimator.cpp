@@ -3,6 +3,7 @@
 #include "DescriptorHeap.h"
 #include <Load.h>
 #include <algorithm>
+#include "../../../Graphics/Render/LineRenderer.h"
 
 namespace {
 	ID3D12Device* device;
@@ -11,6 +12,10 @@ namespace {
 
 CharacterAnimator::~CharacterAnimator()
 {
+	if (boneRenderer_) {
+		delete boneRenderer_;
+		boneRenderer_ = nullptr;
+	}
 }
 
 CharacterAnimator::CharacterAnimator()
@@ -29,6 +34,8 @@ void CharacterAnimator::Initialize(ModelData modelData, const std::string& direc
 	animation_ = LoadAnimationFile(directoryPath, filename);
 	textureSrvHandleGPU_ = texture->TextureData(modelData_.textureIndex);
 
+	localMatrix_ = modelData_.rootNode.localMatrix;
+
 	skeleton_ = CreateSkeleton(modelData_.rootNode);
 	CreateSkinCluster();
 
@@ -41,6 +48,8 @@ void CharacterAnimator::Initialize(ModelData modelData, const std::string& direc
 
 	SetShader(AnimationObj);
 
+	boneRenderer_ = new LineRenderer();
+	boneRenderer_->Initialize();
 }
 
 
@@ -64,10 +73,10 @@ void CharacterAnimator::SettingWvp(Matrix4x4 viewMatrix) {
 	} else {
 		Matrix4x4 worldMatrix = MakeAffineMatrix(transform_.translate, transform_.scale, transform_.rotate);
 		Matrix4x4 worldViewProjectionMatrix = MultiplyMatrix4x4(worldMatrix, MultiplyMatrix4x4(viewMatrix, projectionMatrix));
-		Matrix4x4 worldInverseTranspose = TransposeMatrix4x4(Inverse(worldViewProjectionMatrix));
+		Matrix4x4 worldInverseTranspose = TransposeMatrix4x4(Inverse(worldMatrix));
 
-		wvpData_[s_wvpIndex][0].WVP = worldMatrix * worldViewProjectionMatrix;
-		wvpData_[s_wvpIndex][0].World = localMatrix_ * worldMatrix;
+		wvpData_[s_wvpIndex][0].WVP = worldViewProjectionMatrix;
+		wvpData_[s_wvpIndex][0].World = worldMatrix;
 		wvpData_[s_wvpIndex][0].WorldInverseTranspose = worldInverseTranspose;
 		wvpData_[s_wvpIndex][0].numBones = static_cast<uint32_t>(skeleton_.joints.size());
 	}
@@ -184,6 +193,7 @@ void CharacterAnimator::Update(Matrix4x4 viewMatrix)
 	}
 
 	SettingWvp(viewMatrix);
+	UpdateBoneRenderer();
 }
 
 
@@ -225,6 +235,44 @@ Quaternion CharacterAnimator::CalculateValue(const std::vector<KeyframeQuaternio
 	}
 	// 範囲外の場合は最後の値を返す
 	return keyframe.back().value;
+}
+
+void CharacterAnimator::UpdateBoneRenderer()
+{
+	if (!isVisibleBones_ || !boneRenderer_) return;
+
+	if (isInstancing_ && !instancingTransforms_.empty()) {
+		int count = std::min(maxInstanceCount_, static_cast<int>(instancingTransforms_.size()));
+		for (int i = 0; i < count; ++i) {
+			Matrix4x4 worldMatrix = MakeAffineMatrix(instancingTransforms_[i].translate, instancingTransforms_[i].scale, instancingTransforms_[i].rotate);
+
+			for (const Joint& joint : skeleton_.joints) {
+				if (joint.parent) {
+					Matrix4x4 currentJointMat = joint.skeletonSpaceMatrix * worldMatrix;
+					Matrix4x4 parentJointMat = skeleton_.joints[*joint.parent].skeletonSpaceMatrix * worldMatrix;
+
+					Vector3 startPos = { currentJointMat.m[3][0], currentJointMat.m[3][1], currentJointMat.m[3][2] };
+					Vector3 endPos = { parentJointMat.m[3][0], parentJointMat.m[3][1], parentJointMat.m[3][2] };
+					
+					boneRenderer_->AddLine(startPos, endPos, { 1.0f, 0.0f, 1.0f, 1.0f }); // 派手なマゼンタ色
+				}
+			}
+		}
+	} else {
+		Matrix4x4 worldMatrix = MakeAffineMatrix(transform_.translate, transform_.scale, transform_.rotate);
+
+		for (const Joint& joint : skeleton_.joints) {
+			if (joint.parent) {
+				Matrix4x4 currentJointMat = joint.skeletonSpaceMatrix * worldMatrix;
+				Matrix4x4 parentJointMat = skeleton_.joints[*joint.parent].skeletonSpaceMatrix * worldMatrix;
+
+				Vector3 startPos = { currentJointMat.m[3][0], currentJointMat.m[3][1], currentJointMat.m[3][2] };
+				Vector3 endPos = { parentJointMat.m[3][0], parentJointMat.m[3][1], parentJointMat.m[3][2] };
+				
+				boneRenderer_->AddLine(startPos, endPos, { 1.0f, 0.0f, 1.0f, 1.0f }); // 派手なマゼンタ色
+			}
+		}
+	}
 }
 
 void CharacterAnimator::CreateSkinCluster()

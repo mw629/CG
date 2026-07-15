@@ -24,16 +24,15 @@ void TestScene::ImGui()
 		ImGui::Text("Pos: %4.1f, %4.1f", spriteData_.transform.translate.x, spriteData_.transform.translate.y);
 	}
 
-	skyBox_.get()->ImGui();
-	sphere_.get()->ImGui();
-	animation_.get()->ImGui();	
-	model_.get()->ImGui();
-
 	for (int i = 0, n = static_cast<int>(particle_.size()); i < n; ++i) {
 		particle_[i].get()->ImGui();
 	}
 
 	ImGui::End();
+
+	if (editorUI_ && gameObjectManager_) {
+		editorUI_->Draw(gameObjectManager_.get(), camera_->GetViewMatrix(), camera_->GetProjectionMatrix());
+	}
 
 #endif // _USE_IMGUI
 }
@@ -57,6 +56,7 @@ void TestScene::Initialize() {
 	ModelData animModel = AssimpLoadObjFile("Resources/Model/human", "sneakWalk.gltf");
 	animation_.get()->Initialize(animModel, "Resources/Model/human", "sneakWalk.gltf");
 	animation_.get()->name_ = "Animation Model";
+	animation_.get()->SetVisibleBones(true); // ボーンを表示
 
 	//NoodeAnimationの初期化
 	ModelData cubeModel = AssimpLoadObjFile("Resources/AnimatedCube", "AnimatedCube.gltf");
@@ -157,8 +157,19 @@ void TestScene::Initialize() {
 	sprite_.get()->Initialize(spriteData_, texture);
 
 	ring_.get()->Initialize(texture);
-   cylinder_.get()->Initialize(texture);
+	cylinder_.get()->Initialize(texture);
 	cylinder_.get()->SetTransform(cylinderTransform_);
+    
+	if (gameObjectManager_) {
+		gameObjectManager_->AddObject(std::make_shared<RenderObject>(model_));
+		gameObjectManager_->AddObject(std::make_shared<RenderObject>(animation_));
+		gameObjectManager_->AddObject(std::make_shared<RenderObject>(nodeAnimation_));
+		gameObjectManager_->AddObject(std::make_shared<RenderObject>(sphere_));
+		gameObjectManager_->AddObject(std::make_shared<RenderObject>(skyBox_));
+		gameObjectManager_->AddObject(std::make_shared<RenderObject>(floor));
+		gameObjectManager_->AddObject(std::make_shared<RenderObject>(ring_));
+		gameObjectManager_->AddObject(std::make_shared<RenderObject>(cylinder_));
+	}
 }
 
 void TestScene::Update() {
@@ -205,14 +216,14 @@ void TestScene::Draw() {
 	//Draw::DrawObj(cylinder_.get());
 
 	Draw::DrawObj(skyBox_.get());
-	Draw::DrawObj(model_.get());
-	Draw::DrawObj(floor.get());
-	Draw::DrawObj(nodeAnimation_.get());
+	//Draw::DrawObj(model_.get());
+	//Draw::DrawObj(floor.get());
+	//Draw::DrawObj(nodeAnimation_.get());
 	Draw::DrawAnimation(animation_.get());
 
 	//Draw::DrawObj(sphere_.get());
 	for (int i = 0, n = static_cast<int>(particle_.size()); i < n; ++i) {
-		particle_[i].get()->Draw();
+	//	particle_[i].get()->Draw();
 	}
 	//Draw::DrawSprite(sprite_.get());
 }

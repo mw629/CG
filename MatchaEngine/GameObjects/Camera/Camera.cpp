@@ -27,6 +27,8 @@ void Camera::ImGui()
 void Camera::Initialize() {
 	debugCamera_.Initialize();
 	viewMatrix_ = Inverse(MakeAffineMatrix(transform_.translate,transform_.scale,transform_.rotate));
+	projectionMatrix_ = MakePerspectiveFovMatrix(fovY_, aspectRatio_, nearClip_, farClip_);
+
 	
 	// カメラ用のConstantBufferを作成
 	cameraResource_ = GraphicsDevice::CreateBufferResource(sizeof(CameraForGPU));
@@ -55,5 +57,6 @@ void Camera::Update() {
     }
 
     cameraData_->worldPosition = eye;
+    projectionMatrix_ = MakePerspectiveFovMatrix(fovY_, aspectRatio_, nearClip_, farClip_);
 }
 

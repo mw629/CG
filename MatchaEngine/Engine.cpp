@@ -158,6 +158,8 @@ void Engine::Setting()
 
 	// ダミーテクスチャ（0番目）としてロードしておくことで、テクスチャ無しのオブジェクトが描画されたときのクラッシュを防ぐ
 	std::unique_ptr<Texture> dummyTex = std::make_unique<Texture>();
+	lineRenderer = std::make_unique<LineRenderer>();
+	lineRenderer->Initialize();
 	try {
 		dummyTex->CreateTexture("Resources/DDS/SnowWorld.dds");
 	} catch (...) {
@@ -187,9 +189,13 @@ void Engine::Setting()
 
 void Engine::PostDraw()
 {
+	// Draw all lines using the active camera from Draw class
+	Draw::DrawAllLines(lineRenderer.get());
+
 	//Scene描画が終わったRenderTextureをShaderResourceへ
 	renderTextures[0]->TransitionToShaderResource(command->GetCommandList());
 	depthStencil->TransitionToShaderResource(command->GetCommandList());
+
 
 	int currentRT = 0;
 	int nextRT = 1;

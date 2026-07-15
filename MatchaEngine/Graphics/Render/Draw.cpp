@@ -120,6 +120,10 @@ void Draw::DrawAnimation(CharacterAnimator* obj)
 	SetCBV(shader, blend, "gSpotLightGroup", lightManager_->GetSpotLightResource()->GetGPUVirtualAddress());
 
 	commandList_->DrawIndexedInstanced(UINT(mesh.indexBufferView_.SizeInBytes / sizeof(uint32_t)), obj->GetInstanceCount(), 0, 0, 0);
+
+	if (obj->GetVisibleBones()) {
+		DrawAllLines(obj->GetBoneRenderer(), false); // 深度テストなしで手前に表示
+	}
 }
 
 
@@ -248,6 +252,15 @@ void Draw::DrawGrid(Grid* grid)
 	commandList_->IASetVertexBuffers(0, 1, grid->GetVertexBufferView());//VBVを設定
 	SetCBV("LineShader", kBlendModeNormal, "gTransform", grid->GetVertexResource()->GetGPUVirtualAddress());
 	commandList_->DrawInstanced(grid->GetSubdivision() * 4, 1, 0, 0);
+}
+
+void Draw::DrawAllLines(LineRenderer* lineRenderer, bool depthTest)
+{
+	if (!lineRenderer) return;
+	ShaderName shader = depthTest ? "LineShader" : "LineShaderNoDepth";
+	preDraw(shader, kBlendModeNormal);
+	SetCBV(shader, kBlendModeNormal, "gTransform", lineRenderer->GetWVPResource()->GetGPUVirtualAddress());
+	lineRenderer->DrawAll(commandList_, camera);
 }
 
 void Draw::DrawPostEffect(D3D12_GPU_DESCRIPTOR_HANDLE textureHandle, ShaderName shader, PostEffect* postEffect, D3D12_GPU_DESCRIPTOR_HANDLE depthTextureHandle)

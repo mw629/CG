@@ -18,10 +18,6 @@ private:
 
 	Matrix4x4 localMatrix_;
 
-	// スケルトン描画用
-	std::vector<std::unique_ptr<Line>> skeletonLines_;
-	bool isDrawSkeleton_ = true;
-
 public:
 
 	~TransformAnimation()override;

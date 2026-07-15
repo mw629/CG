@@ -26,6 +26,7 @@ const ShaderName ParticleShader = "ParticleShader";
 const ShaderName SmokeShader = "SmokeShader";
 const ShaderName ToonParticleShader = "ToonParticleShader";
 const ShaderName LineShader = "LineShader";
+const ShaderName LineShaderNoDepth = "LineShaderNoDepth";
 const ShaderName SkyBoxShader = "SkyBoxShader";
 const ShaderName CopyImageShader = "CopyShader";
 const ShaderName GrayScaleShader = "GrayScaleShader";

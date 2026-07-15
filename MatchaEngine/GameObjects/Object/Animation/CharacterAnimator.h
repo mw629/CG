@@ -3,6 +3,7 @@
 #include "ObjectBase.h"
 #include <Model.h>
 #include "Line.h"
+class LineRenderer;
 
 class CharacterAnimator :public ObjectBase
 {
@@ -18,9 +19,8 @@ private:
 
 	Matrix4x4 localMatrix_;
 
-	// スケルトン描画用
-	std::vector<std::unique_ptr<Line>> skeletonLines_;
-	bool isDrawSkeleton_ = true;
+	bool isVisibleBones_ = false;
+	LineRenderer* boneRenderer_ = nullptr;
 
 public:
 
@@ -45,6 +45,8 @@ public:
 	void noUpdate(Matrix4x4 viewMatrix);
 	void Update(Matrix4x4 viewMatrix);
 
+	void UpdateBoneRenderer();
+
 	ModelData GetModelData() { return modelData_; }
 
 	Vector3 CalculateValue(const std::vector<KeyframeVector3>& keyframe, float time);
@@ -67,6 +69,10 @@ public:
 
 	// 追加: スキンパレット SRV の GPU ハンドル (インスタンス対応であればGPUのVADDRになるがDrawでGetPaletteResourceGPUを呼ぶように変更済)
 	ID3D12Resource* GetPaletteResourceGPU() const { return skinCluster_.paletteResource.Get(); }
+
+	void SetVisibleBones(bool visible) { isVisibleBones_ = visible; }
+	bool GetVisibleBones() const { return isVisibleBones_; }
+	LineRenderer* GetBoneRenderer() const { return boneRenderer_; }
 
 	Mesh GetMesh()override { return modelData_.mesh; }
 };

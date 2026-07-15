@@ -38,6 +38,8 @@
 #include "Cube.h"
 #include "Line.h"
 #include "Grid.h"
+#include "LineRenderer.h"
+
 
 //Graphics
 
@@ -115,8 +117,10 @@ public:
 
 	std::unique_ptr<GraphicsPipelineState> graphicsPipelineState;
 	std::unique_ptr<LightManager> lightManager;
+	std::unique_ptr<LineRenderer> lineRenderer;
 
 	ID3D12DescriptorHeap* descriptorHeaps[1];
+
 
 	static bool isEnd_;
 
