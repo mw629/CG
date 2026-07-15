@@ -4,6 +4,7 @@
 #include <Load.h>
 #include <algorithm>
 #include "../../../Graphics/Render/LineRenderer.h"
+#include <Sphere.h>
 
 namespace {
 	ID3D12Device* device;
@@ -38,6 +39,20 @@ void CharacterAnimator::Initialize(ModelData modelData, const std::string& direc
 
 	skeleton_ = CreateSkeleton(modelData_.rootNode);
 	CreateSkinCluster();
+	
+	jointSpheres_.resize(skeleton_.joints.size());
+	for (size_t i = 0; i < skeleton_.joints.size(); ++i) {
+		jointSpheres_[i] = std::make_shared<Sphere>();
+		jointSpheres_[i]->SetMaxInstanceCount(1);
+		jointSpheres_[i]->SetSubdivision(8);
+		jointSpheres_[i]->Initialize(modelData_.textureIndex);
+		jointSpheres_[i]->SetName(skeleton_.joints[i].name);
+		if (auto mat = jointSpheres_[i]->GetComponent<MaterialComponent>()) {
+			mat->GetMaterialFactory()->SetColor({ 0.0f, 1.0f, 0.0f, 1.0f });
+			mat->SetShader("WireFrameShaderNoDepth");
+			mat->GetMaterialFactory()->SetMaterialLighting(false);
+		}
+	}
 
 	AddComponent<MaterialComponent>();
 	auto matComp = GetComponent<MaterialComponent>();
@@ -207,6 +222,21 @@ void CharacterAnimator::Update(Matrix4x4 viewMatrix)
 
 	SettingWvp(viewMatrix);
 	UpdateBoneRenderer();
+	
+	Matrix4x4 worldMatrix = MakeAffineMatrix(transform_.translate, transform_.scale, transform_.rotate);
+	if (isInstancing_ && !instancingTransforms_.empty()) {
+		worldMatrix = MakeAffineMatrix(instancingTransforms_[0].translate, instancingTransforms_[0].scale, instancingTransforms_[0].rotate);
+	}
+	for (size_t i = 0; i < skeleton_.joints.size(); ++i) {
+		if (i < jointSpheres_.size() && jointSpheres_[i]) {
+			Matrix4x4 currentJointMat = skeleton_.joints[i].skeletonSpaceMatrix * worldMatrix;
+			Transform t = jointSpheres_[i]->GetTransform();
+			t.translate = { currentJointMat.m[3][0], currentJointMat.m[3][1], currentJointMat.m[3][2] };
+			t.scale = { 0.01f, 0.01f, 0.01f };
+			jointSpheres_[i]->SetTransform(t);
+			jointSpheres_[i]->SettingWvp(viewMatrix);
+		}
+	}
 }
 
 

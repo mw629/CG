@@ -124,6 +124,12 @@ void Draw::DrawAnimation(CharacterAnimator* obj)
 
 	if (obj->GetVisibleBones()) {
 		DrawAllLines(obj->GetBoneRenderer(), false); // 深度テストなしで手前に表示
+		const auto& skeleton = obj->GetSkeleton();
+		for (int i = 0; i < skeleton.joints.size(); ++i) {
+			if (auto sphere = obj->GetJointSphere(i)) {
+				DrawSphere(sphere.get());
+			}
+		}
 	}
 }
 

@@ -8,6 +8,9 @@
 
 #include "LanguageManager.h"
 #include "EditorManager.h"
+#include "../MatchaEngine/GameObjects/Object/Animation/CharacterAnimator.h"
+#include "../MatchaEngine/GameObjects/Object/RenderObject.h"
+#include "../MatchaEngine/GameObjects/Object/3d/Sphere.h"
 
 void EditorUI::ProcessMousePicking(GameObjectManager* gameObjectManager, const Matrix4x4& view, const Matrix4x4& projection) {
 #ifdef _USE_IMGUI
@@ -146,6 +149,43 @@ void EditorUI::Draw(GameObjectManager* gameObjectManager, const Matrix4x4& view,
     std::shared_ptr<GameObject> objToDelete = nullptr;
     std::shared_ptr<GameObject> objToCopy = nullptr;
 
+    auto DrawJoint = [&](auto& self, std::shared_ptr<CharacterAnimator> animator, int32_t jointIndex) -> void {
+        const Skeleton& skeleton = animator->GetSkeleton();
+        if (jointIndex < 0 || jointIndex >= (int32_t)skeleton.joints.size()) return;
+        const Joint& joint = skeleton.joints[jointIndex];
+        
+        std::shared_ptr<Sphere> sphereObj = animator->GetJointSphere(jointIndex);
+        
+        ImGuiTreeNodeFlags jointFlags = ImGuiTreeNodeFlags_OpenOnArrow | ImGuiTreeNodeFlags_OpenOnDoubleClick | ImGuiTreeNodeFlags_SpanAvailWidth;
+        if (joint.children.empty()) {
+            jointFlags |= ImGuiTreeNodeFlags_Leaf;
+        }
+        
+        if (sphereObj && selectedObject_ == sphereObj) {
+            jointFlags |= ImGuiTreeNodeFlags_Selected;
+        }
+        
+        ImGui::PushID(&joint);
+        bool isJointOpen = false;
+        if (sphereObj) {
+            isJointOpen = ImGui::TreeNodeEx((void*)sphereObj.get(), jointFlags, "%s", sphereObj->GetName().c_str());
+            if (ImGui::IsItemClicked(0) || ImGui::IsItemClicked(1)) {
+                selectedObject_ = sphereObj;
+            }
+        } else {
+            isJointOpen = ImGui::TreeNodeEx((void*)&joint, jointFlags, "%s", joint.name.c_str());
+        }
+        
+        if (isJointOpen) {
+            for (int32_t childIndex : joint.children) {
+                self(self, animator, childIndex);
+            }
+            ImGui::TreePop();
+        }
+        ImGui::PopID();
+    };
+
+
     for (auto& obj : gameObjectManager->GetObjects()) {
         if (!obj) continue;
         
@@ -189,6 +229,18 @@ void EditorUI::Draw(GameObjectManager* gameObjectManager, const Matrix4x4& view,
         }
 
         if (isOpen) {
+            std::shared_ptr<CharacterAnimator> animator = std::dynamic_pointer_cast<CharacterAnimator>(obj);
+            if (!animator) {
+                if (auto renderObj = std::dynamic_pointer_cast<RenderObject>(obj)) {
+                    animator = std::dynamic_pointer_cast<CharacterAnimator>(renderObj->GetObjectBase());
+                }
+            }
+            if (animator) {
+                const Skeleton& skeleton = animator->GetSkeleton();
+                if (skeleton.joints.size() > 0) {
+                    DrawJoint(DrawJoint, animator, skeleton.root);
+                }
+            }
             ImGui::TreePop();
         }
     }

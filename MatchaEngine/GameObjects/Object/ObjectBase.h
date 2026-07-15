@@ -43,6 +43,8 @@ protected:
 public:
 	virtual ~ObjectBase();
 
+	void SetMaxInstanceCount(int count) { maxInstanceCount_ = count; }
+
 	static void SetObjectResource(Vector2 ClientSize);
 	static void SetWvpIndex(int index) { s_wvpIndex = index; }
 

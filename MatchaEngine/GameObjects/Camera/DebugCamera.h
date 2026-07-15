@@ -10,7 +10,8 @@ private:
     Vector3 up_{};
 
     Vector2 mousePrevPos_{};
-    bool isMiddleMouseButtonPressed_=false;
+    bool isRightMouseButtonPressed_ = false;
+    bool isMiddleMouseButtonPressed_ = false;
 
     float radius_=0.0f;
     float phi_=0.0f;

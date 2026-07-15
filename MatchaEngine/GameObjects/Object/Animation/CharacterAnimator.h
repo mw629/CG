@@ -21,6 +21,7 @@ private:
 
 	bool isVisibleBones_ = false;
 	LineRenderer* boneRenderer_ = nullptr;
+	std::vector<std::shared_ptr<class Sphere>> jointSpheres_;
 
 	std::vector<ModelSubMeshMaterial> subMeshMaterials_;
 	std::vector<Microsoft::WRL::ComPtr<ID3D12Resource>> subMeshInfluenceResources_;
@@ -81,6 +82,12 @@ public:
 	void SetVisibleBones(bool visible) { isVisibleBones_ = visible; }
 	bool GetVisibleBones() const { return isVisibleBones_; }
 	LineRenderer* GetBoneRenderer() const { return boneRenderer_; }
+
+	const Skeleton& GetSkeleton() const { return skeleton_; }
+	std::shared_ptr<class Sphere> GetJointSphere(int32_t index) const {
+		if (index >= 0 && index < jointSpheres_.size()) return jointSpheres_[index];
+		return nullptr;
+	}
 
 	Mesh GetMesh()override { return modelData_.mesh; }
 };
