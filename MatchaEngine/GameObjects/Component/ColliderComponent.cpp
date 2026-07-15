@@ -73,14 +73,14 @@ void ColliderComponent::Update(Matrix4x4 view, float speedMultiplier)
 #endif
 }
 
-void ColliderComponent::Draw()
+void ColliderComponent::Draw(class Draw& draw)
 {
 #ifdef _DEBUG
 	if (shape_ == ColliderShape::Box && debugCube_) {
-		Draw::DrawObj(debugCube_.get());
+		draw.DrawObj(debugCube_.get());
 	}
 	else if (shape_ == ColliderShape::Sphere && debugSphere_) {
-		Draw::DrawObj(debugSphere_.get());
+		draw.DrawObj(debugSphere_.get());
 	}
 #endif
 }

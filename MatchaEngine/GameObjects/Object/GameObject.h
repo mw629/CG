@@ -68,9 +68,9 @@ public:
     }
     virtual void OnCollision(GameObject* /*other*/) {}
 
-    virtual void Draw() {
+    virtual void Draw(class Draw& draw) {
         for (auto& component : components_) {
-            component->Draw();
+            component->Draw(draw);
         }
     }
     virtual void ImGui(bool drawTransform = true) {

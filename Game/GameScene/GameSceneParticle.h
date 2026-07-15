@@ -23,7 +23,7 @@ public:
 	void StartBonusEffect(float duration);
 	void UpdateBonusEffectEmit(float timeScale, const Vector3& playerPos);
 
-	void Draw();
+	void Draw(class Draw& draw);
 	void ImGui();
 
 private:

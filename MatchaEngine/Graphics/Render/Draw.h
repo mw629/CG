@@ -25,35 +25,45 @@
 class Draw {
 public:
 
-	static void Initialize(ID3D12GraphicsCommandList* commandList, GraphicsPipelineState* graphicsPipelineState, 
+	void Initialize(ID3D12GraphicsCommandList* commandList, GraphicsPipelineState* graphicsPipelineState, 
 		LightManager* lightManager);
 
-	static void SetCamera(Camera* setcamera);
-	static void SetEnvironmentTexture(int textureHandel);
+	void SetCamera(Camera* setcamera);
+	void SetEnvironmentTexture(int textureHandel);
 
-	static void preDraw(ShaderName shader, BlendMode blend);
+	void preDraw(ShaderName shader, BlendMode blend);
 
-	static void DrawObj(ObjectBase *obj);
+	void DrawObj(ObjectBase *obj);
 
-	static void DrawAnimation(CharacterAnimator* obj);
+	void DrawAnimation(CharacterAnimator* obj);
 
-	static void DrawModel(Model* model);
+	void DrawModel(Model* model);
 
-   static void DrawParticle(EffectDefinition* particle);
+   void DrawParticle(EffectDefinition* particle);
 
-	static void DrawSprite(Sprite* sprite);
+	void DrawSprite(Sprite* sprite);
 
-	static void DrawSphere(Sphere* sphere);
+	void DrawSphere(Sphere* sphere);
 
-	static void DrawTriangle(Triangle* triangle);
+	void DrawTriangle(Triangle* triangle);
 
-	static void DrawLine(Line* line);
+	void DrawLine(Line* line);
 
-	static void DrawGrid(Grid* grid);
+	void DrawGrid(Grid* grid);
 
-	static void DrawAllLines(LineRenderer* lineRenderer, bool depthTest = true);
+	void DrawAllLines(LineRenderer* lineRenderer, bool depthTest = true);
 
 
-	static void DrawPostEffect(D3D12_GPU_DESCRIPTOR_HANDLE textureHandle, ShaderName shader = "CopyShader", class PostEffect* postEffect = nullptr, D3D12_GPU_DESCRIPTOR_HANDLE depthTextureHandle = {0});
+	void DrawPostEffect(D3D12_GPU_DESCRIPTOR_HANDLE textureHandle, ShaderName shader = "CopyShader", class PostEffect* postEffect = nullptr, D3D12_GPU_DESCRIPTOR_HANDLE depthTextureHandle = {0});
 
+private:
+	void SetCBV(ShaderName shader, BlendMode blend, const std::string& name, D3D12_GPU_VIRTUAL_ADDRESS address);
+	void SetSRV(ShaderName shader, BlendMode blend, const std::string& name, D3D12_GPU_VIRTUAL_ADDRESS address);
+	void SetTable(ShaderName shader, BlendMode blend, const std::string& name, D3D12_GPU_DESCRIPTOR_HANDLE handle);
+
+	ID3D12GraphicsCommandList* commandList_{};
+	GraphicsPipelineState* graphicsPipelineState_{};
+	LightManager* lightManager_{};
+	Camera* camera_{};
+	D3D12_GPU_DESCRIPTOR_HANDLE environmentTextureSrvHandleGPU_{};
 };

@@ -199,7 +199,7 @@ void StageSettings::EditorUpdate(Matrix4x4 view)
 	}
 }
 
-void StageSettings::Draw()
+void StageSettings::Draw(class Draw& draw)
 {
 	// 描画はGameObjectManagerが一括で行うため、ここでは何もしない
 }

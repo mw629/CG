@@ -85,7 +85,7 @@ public:
 		laneWidth_ = laneWidth;
 	}
 
-	void Draw() override;
+	void Draw(class Draw& draw) override;
 	void ImGuiInnerComponents() override;
 
 	bool HasMaterial() const override {

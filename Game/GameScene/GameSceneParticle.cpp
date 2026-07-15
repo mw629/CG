@@ -1,4 +1,5 @@
 #include "GameSceneParticle.h"
+#include "Graphics/Render/Draw.h"
 #include <cmath>
 #include <cstdlib>
 #include <imgui.h>
@@ -180,12 +181,12 @@ void GameSceneParticle::UpdateBonusEffectEmit(float timeScale, const Vector3& pl
 	}
 }
 
-void GameSceneParticle::Draw()
+void GameSceneParticle::Draw(class Draw& draw)
 {
-	hitEffect_->Draw();
-	shockwaveEffect_->Draw();
-	bonusCylinderEffect_->Draw();
-	dustEffect_->Draw();
+	hitEffect_->Draw(draw);
+	shockwaveEffect_->Draw(draw);
+	bonusCylinderEffect_->Draw(draw);
+	dustEffect_->Draw(draw);
 }
 
 void GameSceneParticle::ImGui()

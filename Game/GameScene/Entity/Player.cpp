@@ -1,4 +1,5 @@
 #include "Player.h"
+#include "Graphics/Render/Draw.h"
 
 Player::Player()
 {
@@ -203,10 +204,10 @@ void Player::PlayerMove(float speedMultiplier)
 	model_.get()->SetTransform(transform_);
 }
 
-void Player::Draw()
+void Player::Draw(class Draw& draw)
 {
-	Draw::DrawObj(model_.get());
-	GameObject::Draw();
+	draw.DrawObj(model_.get());
+	GameObject::Draw(draw);
 }
 
 void Player::ImGuiInnerComponents()

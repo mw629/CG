@@ -19,9 +19,9 @@ public:
 
 	void Update();
 
-	void Draw();
+	void Draw(class Draw& draw);
 
-	void Run();
+	void Run(class Draw& draw);
 
 	std::unique_ptr<IScene> CreateScene(int sceneID);
 

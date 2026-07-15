@@ -11,6 +11,8 @@ class Camera;
 class Grid;
 class Model;
 
+class Draw;
+
 class EditorManager {
 public:
 	// Sceneウィンドウ内のオーバーレイ描画用コールバック型
@@ -20,7 +22,7 @@ public:
 	// FileDropコールバック型
 	using FileDropCallback = std::function<void(const std::string&)>;
 	// Game View描画コールバック型
-	using GameViewDrawCallback = std::function<void()>;
+	using GameViewDrawCallback = std::function<void(Draw&)>;
 
 private:
 	static bool isPlaying_;

@@ -717,12 +717,12 @@ void EditorManager::Update(Engine* engine)
 		cmdList->RSSetViewports(1, &vp);
 		cmdList->RSSetScissorRects(1, &scissor);
 
-		Draw::SetCamera(previewCamera_.get());
+		engine->draw->SetCamera(previewCamera_.get());
 		if (showGridInViewer_) {
 			previewGrid_->SettingWvp(previewCamera_->GetViewMatrix());
-			Draw::DrawGrid(previewGrid_.get());
+			engine->draw->DrawGrid(previewGrid_.get());
 		}
-		previewParticle_->Draw();
+		previewParticle_->Draw(*engine->draw);
 
 		particleRenderTexture_->TransitionToShaderResource(cmdList);
 
@@ -863,13 +863,13 @@ void EditorManager::Update(Engine* engine)
 		cmdList->RSSetViewports(1, &vp);
 		cmdList->RSSetScissorRects(1, &scissor);
 
-		Draw::SetCamera(modelCamera_.get());
+		engine->draw->SetCamera(modelCamera_.get());
 		if (showGridInModelViewer_) {
 			modelGrid_->SettingWvp(modelCamera_->GetViewMatrix());
-			Draw::DrawGrid(modelGrid_.get());
+			engine->draw->DrawGrid(modelGrid_.get());
 		}
 		if (!currentModelPath_.empty()) {
-			Draw::DrawModel(previewModel_.get());
+			engine->draw->DrawModel(previewModel_.get());
 		}
 
 		modelRenderTexture_->TransitionToShaderResource(cmdList);
@@ -929,7 +929,7 @@ void EditorManager::Update(Engine* engine)
 		cmdList->RSSetScissorRects(1, &scissor);
 
 		if (s_gameViewDrawCallback_) {
-			s_gameViewDrawCallback_();
+			s_gameViewDrawCallback_(*engine->draw);
 		}
 
 		gameViewRenderTexture_->TransitionToShaderResource(cmdList);

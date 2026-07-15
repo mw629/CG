@@ -35,11 +35,11 @@ void GameObjectManager::UpdateAll(Matrix4x4 view, float speedMultiplier)
     }
 }
 
-void GameObjectManager::DrawAll()
+void GameObjectManager::DrawAll(class Draw& draw)
 {
     for (auto& obj : objects_) {
         if (obj && obj->GetIsActive()) {
-            obj->Draw();
+            obj->Draw(draw);
         }
     }
 }

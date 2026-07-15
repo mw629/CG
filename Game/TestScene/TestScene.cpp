@@ -1,4 +1,5 @@
 #include "TestScene.h"
+#include "Graphics/Render/Draw.h"
 #include <imgui.h>
 #include <memory>
 
@@ -206,24 +207,24 @@ void TestScene::Update() {
 	nodeAnimation_.get()->Update(view);
 }
 
-void TestScene::Draw() {
+void TestScene::Draw(class Draw& draw) {
 
-	Draw::SetCamera(camera_.get());
+	draw.SetCamera(camera_.get());
 	// Set the SkyBox texture as environment map
-	Draw::SetEnvironmentTexture(skyBoxTexture_);
+	draw.SetEnvironmentTexture(skyBoxTexture_);
 
-	//Draw::DrawObj(ring_.get());
-	//Draw::DrawObj(cylinder_.get());
+	//draw.DrawObj(ring_.get());
+	//draw.DrawObj(cylinder_.get());
 
-	Draw::DrawObj(skyBox_.get());
-	//Draw::DrawObj(model_.get());
-	//Draw::DrawObj(floor.get());
-	//Draw::DrawObj(nodeAnimation_.get());
-	Draw::DrawAnimation(animation_.get());
+	draw.DrawObj(skyBox_.get());
+	//draw.DrawObj(model_.get());
+	//draw.DrawObj(floor.get());
+	//draw.DrawObj(nodeAnimation_.get());
+	draw.DrawAnimation(animation_.get());
 
-	//Draw::DrawObj(sphere_.get());
+	//draw.DrawObj(sphere_.get());
 	for (int i = 0, n = static_cast<int>(particle_.size()); i < n; ++i) {
-	//	particle_[i].get()->Draw();
+	//	particle_[i].get()->Draw(draw);
 	}
-	//Draw::DrawSprite(sprite_.get());
+	//draw.DrawSprite(sprite_.get());
 }

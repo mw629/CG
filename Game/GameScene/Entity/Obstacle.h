@@ -62,7 +62,7 @@ public:
 
 	// Override standard Update and Draw to avoid GameObjectManager from automatically updating scroll/drawing without context
 	void Update(Matrix4x4 view, float speedMultiplier = 1.0f) override {}
-	void Draw() override;
+	void Draw(class Draw& draw) override;
 	void ImGuiInnerComponents() override;
 
 	bool HasMaterial() const override {

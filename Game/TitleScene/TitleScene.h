@@ -17,7 +17,7 @@ public:
 
 	void Update()override;
 
-	void Draw()override;
+	void Draw(class Draw& draw)override;
 
 
 };

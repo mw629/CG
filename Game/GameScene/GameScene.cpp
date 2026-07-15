@@ -1,4 +1,5 @@
 #include "GameScene.h"
+#include "Graphics/Render/Draw.h"
 #include <imgui.h>
 #include <memory>
 #include <System/CollisionManager.h>
@@ -272,7 +273,7 @@ void GameScene::Initialize() {
 	gameCamera_->Update();
 
 	// Game View描画コールバックの登録
-	EditorManager::SetGameViewDrawCallback([this]() {
+	EditorManager::SetGameViewDrawCallback([this](class Draw& draw) {
 		Matrix4x4 gameViewMat = gameCamera_->GetViewMatrix();
 
 		// 一時的にSkyBoxをGameCameraの位置へ移動
@@ -289,11 +290,11 @@ void GameScene::Initialize() {
 		stageSettings_->EditorUpdate(gameViewMat);
 		particleManager_->EditorUpdate(gameViewMat);
 
-		Draw::SetCamera(gameCamera_.get());
-		Draw::SetEnvironmentTexture(skyBoxTexture_);
-		gameObjectManager_->DrawAll();
-		stageSettings_->Draw();
-		particleManager_->Draw();
+		draw.SetCamera(gameCamera_.get());
+		draw.SetEnvironmentTexture(skyBoxTexture_);
+		gameObjectManager_->DrawAll(draw);
+		stageSettings_->Draw(draw);
+		particleManager_->Draw(draw);
 
 		// SkyBoxの位置を元に戻す
 		skyBox_->SetTransform(originalSkyBoxT);
@@ -455,25 +456,25 @@ void GameScene::Update() {
 	}
 }
 
-void GameScene::Draw() {
+void GameScene::Draw(class Draw& draw) {
 	//カメラの設定
-	Draw::SetCamera(camera_.get());
+	draw.SetCamera(camera_.get());
 	//背景の設定
-	Draw::SetEnvironmentTexture(skyBoxTexture_);
+	draw.SetEnvironmentTexture(skyBoxTexture_);
 
 	// オブジェクトの一括描画（SkyBox, Player など）
-	gameObjectManager_->DrawAll();
+	gameObjectManager_->DrawAll(draw);
 
 	// ステージ描画（道路 + 障害物）
-	stageSettings_->Draw();
+	stageSettings_->Draw(draw);
 
 	// ポーズ中の描画
 	if (gameState_ == GameState::Paused) {
-		pauseSystem_->Draw();
+		pauseSystem_->Draw(draw);
 	}
 
 	// ヒットエフェクトの描画
-	particleManager_->Draw();
+	particleManager_->Draw(draw);
 }
 
 void GameScene::PlayerHitUpdate()

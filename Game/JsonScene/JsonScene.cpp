@@ -154,12 +154,12 @@ void JsonScene::Update()
 	gameObjectManager_->UpdateAll(view_, speedMultiplier);
 }
 
-void JsonScene::Draw()
+void JsonScene::Draw(class Draw& draw)
 {
 	if (showInitJsonSelectPopup_) {
 		return;
 	}
 
-	Draw::SetCamera(camera_.get());
-	gameObjectManager_->DrawAll();
+	draw.SetCamera(camera_.get());
+	gameObjectManager_->DrawAll(draw);
 }

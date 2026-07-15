@@ -1,4 +1,5 @@
 #include "Obstacle.h"
+#include "Graphics/Render/Draw.h"
 
 Obstacle::Obstacle() {
   name_ = "Obstacle";
@@ -148,10 +149,10 @@ void Obstacle::OnHit() {
    
 }
 
-void Obstacle::Draw() {
+void Obstacle::Draw(class Draw& draw) {
   if (!isActive_) return;
-  Draw::DrawObj(model_.get());
-  GameObject::Draw();
+  draw.DrawObj(model_.get());
+  GameObject::Draw(draw);
 }
 
 void Obstacle::ImGuiInnerComponents() {

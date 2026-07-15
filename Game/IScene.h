@@ -29,7 +29,7 @@ public:
 
 	virtual void Update() = 0;
 
-	virtual void Draw() = 0;
+	virtual void Draw(class Draw& draw) = 0;
 
 	int GetSceneID() { return sceneID_; }
 	int GetNextSceneID() { return nextSceneID_; }

@@ -82,7 +82,7 @@ public:
 
 	void EditorUpdate(Matrix4x4 viewMatrix);
 
-	void Draw();
+	void Draw(class Draw& draw);
 	
 	EffectDefinitionData MakeNewParticle();
 	EffectDefinitionData MakeNewParticle(Vector3 scale);//サイズを変えれるnew

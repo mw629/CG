@@ -152,7 +152,7 @@ void Engine::Setting()
 
 	Audio::Initialize();
 
-	Draw::Initialize(command.get()->GetCommandList(), graphicsPipelineState.get(),
+	draw->Initialize(command.get()->GetCommandList(), graphicsPipelineState.get(),
 		lightManager.get());
 	Texture::Initialize(graphics->GetDevice(), command->GetCommandList(), descriptorHeap.get(), textureLoader.get());
 
@@ -190,7 +190,7 @@ void Engine::Setting()
 void Engine::PostDraw()
 {
 	// Draw all lines using the active camera from Draw class
-	Draw::DrawAllLines(lineRenderer.get());
+	draw->DrawAllLines(lineRenderer.get());
 
 	//Scene描画が終わったRenderTextureをShaderResourceへ
 	renderTextures[0]->TransitionToShaderResource(command->GetCommandList());
@@ -212,7 +212,7 @@ void Engine::PostDraw()
 		command->GetCommandList()->RSSetViewports(1, viewportScissor->GetViewport());
 		command->GetCommandList()->RSSetScissorRects(1, viewportScissor->GetScissorRect());
 
-		Draw::DrawPostEffect(renderTextures[currentRT]->GetSrvHandleGPU(), effect->GetActiveShaderName(), effect.get(), depthStencil->GetSrvHandleGPU());
+		draw->DrawPostEffect(renderTextures[currentRT]->GetSrvHandleGPU(), effect->GetActiveShaderName(), effect.get(), depthStencil->GetSrvHandleGPU());
 
 		renderTextures[nextRT]->TransitionToShaderResource(command->GetCommandList());
 
@@ -231,7 +231,7 @@ void Engine::PostDraw()
 	// _USE_IMGUI有効時はSceneウィンドウ内のImGui::Imageで描画するため
 	// Swapchainへの全画面PostEffect描画はスキップ
 #else
-	Draw::DrawPostEffect(renderTextures[currentRT]->GetSrvHandleGPU(), "CopyShader", nullptr, depthStencil->GetSrvHandleGPU());
+	draw->DrawPostEffect(renderTextures[currentRT]->GetSrvHandleGPU(), "CopyShader", nullptr, depthStencil->GetSrvHandleGPU());
 #endif
 
 #ifdef _USE_IMGUI

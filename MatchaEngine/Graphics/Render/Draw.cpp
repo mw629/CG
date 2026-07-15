@@ -5,33 +5,25 @@
 #include "PostEffect.h"
 #include "Texture.h"
 
-namespace {
-	ID3D12GraphicsCommandList* commandList_{};
-	GraphicsPipelineState* graphicsPipelineState_;
-	LightManager* lightManager_;
-	Camera* camera;
-	D3D12_GPU_DESCRIPTOR_HANDLE environmentTextureSrvHandleGPU_{};
+void Draw::SetCBV(ShaderName shader, BlendMode blend, const std::string& name, D3D12_GPU_VIRTUAL_ADDRESS address) {
+	UINT index = graphicsPipelineState_->GetRootParameterIndex(shader, blend, name);
+	if (index != static_cast<UINT>(-1)) commandList_->SetGraphicsRootConstantBufferView(index, address);
+}
 
-	void SetCBV(ShaderName shader, BlendMode blend, const std::string& name, D3D12_GPU_VIRTUAL_ADDRESS address) {
-		UINT index = graphicsPipelineState_->GetRootParameterIndex(shader, blend, name);
-		if (index != static_cast<UINT>(-1)) commandList_->SetGraphicsRootConstantBufferView(index, address);
-	}
+void Draw::SetSRV(ShaderName shader, BlendMode blend, const std::string& name, D3D12_GPU_VIRTUAL_ADDRESS address) {
+	UINT index = graphicsPipelineState_->GetRootParameterIndex(shader, blend, name);
+	if (index != static_cast<UINT>(-1)) commandList_->SetGraphicsRootShaderResourceView(index, address);
+}
 
-	void SetSRV(ShaderName shader, BlendMode blend, const std::string& name, D3D12_GPU_VIRTUAL_ADDRESS address) {
-		UINT index = graphicsPipelineState_->GetRootParameterIndex(shader, blend, name);
-		if (index != static_cast<UINT>(-1)) commandList_->SetGraphicsRootShaderResourceView(index, address);
+void Draw::SetTable(ShaderName shader, BlendMode blend, const std::string& name, D3D12_GPU_DESCRIPTOR_HANDLE handle) {
+	D3D12_GPU_DESCRIPTOR_HANDLE useHandle = handle;
+	if (useHandle.ptr == 0) {
+		Texture tex;
+		useHandle = tex.TextureData(0);
 	}
-
-	void SetTable(ShaderName shader, BlendMode blend, const std::string& name, D3D12_GPU_DESCRIPTOR_HANDLE handle) {
-		D3D12_GPU_DESCRIPTOR_HANDLE useHandle = handle;
-		if (useHandle.ptr == 0) {
-			Texture tex;
-			useHandle = tex.TextureData(0);
-		}
-		if (useHandle.ptr == 0) return;
-		UINT index = graphicsPipelineState_->GetRootParameterIndex(shader, blend, name);
-		if (index != static_cast<UINT>(-1)) commandList_->SetGraphicsRootDescriptorTable(index, useHandle);
-	}
+	if (useHandle.ptr == 0) return;
+	UINT index = graphicsPipelineState_->GetRootParameterIndex(shader, blend, name);
+	if (index != static_cast<UINT>(-1)) commandList_->SetGraphicsRootDescriptorTable(index, useHandle);
 }
 
 void Draw::Initialize(ID3D12GraphicsCommandList* commandList, GraphicsPipelineState* graphicsPipelineState,
@@ -44,7 +36,7 @@ void Draw::Initialize(ID3D12GraphicsCommandList* commandList, GraphicsPipelineSt
 
 void Draw::SetCamera(Camera* setCamera)
 {
-	camera = setCamera;
+	camera_ = setCamera;
 }
 
 void Draw::SetEnvironmentTexture(int handle)
@@ -80,7 +72,7 @@ void Draw::DrawObj(ObjectBase* obj)
 	SetCBV(shader, blend, "gMaterial", obj->GetMartial()->GetMaterialResource()->GetGPUVirtualAddress());
 	SetSRV(shader, blend, "gTransformationMatrix", obj->GetWvpDataResource()->GetGPUVirtualAddress());
 	SetTable(shader, blend, "gTexture", obj->GetTextureSrvHandleGPU());
-	SetCBV(shader, blend, "gCamera", camera->GetCameraResource()->GetGPUVirtualAddress());
+	SetCBV(shader, blend, "gCamera", camera_->GetCameraResource()->GetGPUVirtualAddress());
 	SetCBV(shader, blend, "gDirectionalLightGroup", lightManager_->GetDirectionalLightResource()->GetGPUVirtualAddress());
 	SetCBV(shader, blend, "gPointLightGroup", lightManager_->GetPointLightResource()->GetGPUVirtualAddress());
 	SetCBV(shader, blend, "gSpotLightGroup", lightManager_->GetSpotLightResource()->GetGPUVirtualAddress());
@@ -114,7 +106,7 @@ void Draw::DrawAnimation(CharacterAnimator* obj)
 	SetSRV(shader, blend, "gTransformationMatrix", obj->GetWvpDataResource()->GetGPUVirtualAddress());
 	SetSRV(shader, blend, "gMatrixPalette", obj->GetPaletteResourceGPU()->GetGPUVirtualAddress());
 	SetTable(shader, blend, "gTexture", obj->GetTextureSrvHandleGPU());
-	SetCBV(shader, blend, "gCamera", camera->GetCameraResource()->GetGPUVirtualAddress());
+	SetCBV(shader, blend, "gCamera", camera_->GetCameraResource()->GetGPUVirtualAddress());
 	SetCBV(shader, blend, "gDirectionalLightGroup", lightManager_->GetDirectionalLightResource()->GetGPUVirtualAddress());
 	SetCBV(shader, blend, "gPointLightGroup", lightManager_->GetPointLightResource()->GetGPUVirtualAddress());
 	SetCBV(shader, blend, "gSpotLightGroup", lightManager_->GetSpotLightResource()->GetGPUVirtualAddress());
@@ -142,7 +134,7 @@ void Draw::DrawModel(Model* model)
 	SetCBV(shader, blend, "gMaterial", model->GetMartial()->GetMaterialResource()->GetGPUVirtualAddress());
 	SetSRV(shader, blend, "gTransformationMatrix", model->GetWvpDataResource()->GetGPUVirtualAddress());
 	SetTable(shader, blend, "gTexture", model->GetTextureSrvHandleGPU());
-	SetCBV(shader, blend, "gCamera", camera->GetCameraResource()->GetGPUVirtualAddress());
+	SetCBV(shader, blend, "gCamera", camera_->GetCameraResource()->GetGPUVirtualAddress());
 	SetCBV(shader, blend, "gDirectionalLightGroup", lightManager_->GetDirectionalLightResource()->GetGPUVirtualAddress());
 	SetCBV(shader, blend, "gPointLightGroup", lightManager_->GetPointLightResource()->GetGPUVirtualAddress());
 	SetCBV(shader, blend, "gSpotLightGroup", lightManager_->GetSpotLightResource()->GetGPUVirtualAddress());
@@ -183,7 +175,7 @@ void Draw::DrawSprite(Sprite* sprite)
 	SetCBV(shader, blend, "gMaterial", sprite->GetMartial()->GetMaterialResource()->GetGPUVirtualAddress());
 	SetSRV(shader, blend, "gTransformationMatrix", sprite->GetVertexResource()->GetGPUVirtualAddress());
 	SetTable(shader, blend, "gTexture", sprite->GetTextureSrvHandleGPU());
-	SetCBV(shader, blend, "gCamera", camera->GetCameraResource()->GetGPUVirtualAddress());
+	SetCBV(shader, blend, "gCamera", camera_->GetCameraResource()->GetGPUVirtualAddress());
 	SetCBV(shader, blend, "gDirectionalLightGroup", lightManager_->GetDirectionalLightResource()->GetGPUVirtualAddress());
 	SetCBV(shader, blend, "gPointLightGroup", lightManager_->GetPointLightResource()->GetGPUVirtualAddress());
 	SetCBV(shader, blend, "gSpotLightGroup", lightManager_->GetSpotLightResource()->GetGPUVirtualAddress());
@@ -205,7 +197,7 @@ void Draw::DrawSphere(Sphere* sphere)
 	SetCBV(shader, blend, "gMaterial", sphere->GetMartial()->GetMaterialResource()->GetGPUVirtualAddress());
 	SetSRV(shader, blend, "gTransformationMatrix", sphere->GetWvpDataResource()->GetGPUVirtualAddress());
 	SetTable(shader, blend, "gTexture", sphere->GetTextureSrvHandleGPU());
-	SetCBV(shader, blend, "gCamera", camera->GetCameraResource()->GetGPUVirtualAddress());
+	SetCBV(shader, blend, "gCamera", camera_->GetCameraResource()->GetGPUVirtualAddress());
 	SetCBV(shader, blend, "gDirectionalLightGroup", lightManager_->GetDirectionalLightResource()->GetGPUVirtualAddress());
 	SetCBV(shader, blend, "gPointLightGroup", lightManager_->GetPointLightResource()->GetGPUVirtualAddress());
 	SetCBV(shader, blend, "gSpotLightGroup", lightManager_->GetSpotLightResource()->GetGPUVirtualAddress());
@@ -224,7 +216,7 @@ void Draw::DrawTriangle(Triangle* triangle)
 	SetCBV(shader, blend, "gMaterial", triangle->GetMartial()->GetMaterialResource()->GetGPUVirtualAddress());
 	SetSRV(shader, blend, "gTransformationMatrix", triangle->GetVertexResource()->GetGPUVirtualAddress());
 	SetTable(shader, blend, "gTexture", triangle->GetTextureSrvHandleGPU());
-	SetCBV(shader, blend, "gCamera", camera->GetCameraResource()->GetGPUVirtualAddress());
+	SetCBV(shader, blend, "gCamera", camera_->GetCameraResource()->GetGPUVirtualAddress());
 	SetCBV(shader, blend, "gDirectionalLightGroup", lightManager_->GetDirectionalLightResource()->GetGPUVirtualAddress());
 	SetCBV(shader, blend, "gPointLightGroup", lightManager_->GetPointLightResource()->GetGPUVirtualAddress());
 	SetCBV(shader, blend, "gSpotLightGroup", lightManager_->GetSpotLightResource()->GetGPUVirtualAddress());
@@ -260,7 +252,7 @@ void Draw::DrawAllLines(LineRenderer* lineRenderer, bool depthTest)
 	ShaderName shader = depthTest ? "LineShader" : "LineShaderNoDepth";
 	preDraw(shader, kBlendModeNormal);
 	SetCBV(shader, kBlendModeNormal, "gTransform", lineRenderer->GetWVPResource()->GetGPUVirtualAddress());
-	lineRenderer->DrawAll(commandList_, camera);
+	lineRenderer->DrawAll(commandList_, camera_);
 }
 
 void Draw::DrawPostEffect(D3D12_GPU_DESCRIPTOR_HANDLE textureHandle, ShaderName shader, PostEffect* postEffect, D3D12_GPU_DESCRIPTOR_HANDLE depthTextureHandle)

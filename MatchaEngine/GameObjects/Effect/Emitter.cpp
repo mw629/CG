@@ -584,8 +584,8 @@ void Emitter::EditorUpdate(Matrix4x4 viewMatrix)
 	effectDefinition_.get()->Updata(viewMatrix, effectDefinitionData_);
 }
 
-void Emitter::Draw() {
-	Draw::DrawParticle(effectDefinition_.get());
+void Emitter::Draw(class Draw& draw) {
+	draw.DrawParticle(effectDefinition_.get());
 }
 
 EffectDefinitionData Emitter::MakeNewParticle()

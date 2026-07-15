@@ -35,13 +35,13 @@ public:
         }
     }
 
-    void Draw() override {
-        GameObject::Draw();
+    void Draw(class Draw& draw) override {
+        GameObject::Draw(draw);
         if (objectBase_) {
             if (auto model = dynamic_cast<Model*>(objectBase_.get())) {
-                Draw::DrawModel(model);
+                draw.DrawModel(model);
             } else {
-                Draw::DrawObj(objectBase_.get());
+                draw.DrawObj(objectBase_.get());
             }
         }
     }

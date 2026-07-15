@@ -1,4 +1,5 @@
 #include "TitleScene.h"
+#include "Graphics/Render/Draw.h"
 #include <imgui.h>
 
 void TitleScene::ImGui()
@@ -33,6 +34,6 @@ void TitleScene::Update()
 	}
 }
 
-void TitleScene::Draw()
+void TitleScene::Draw(class Draw& draw)
 {
 }

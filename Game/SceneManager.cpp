@@ -33,15 +33,15 @@ void SceneManager::Update() {
 	scene_->Update();
 }
 
-void SceneManager::Draw() {
-	scene_->Draw();
+void SceneManager::Draw(class Draw& draw) {
+	scene_->Draw(draw);
 }
 
-void SceneManager::Run()
+void SceneManager::Run(class Draw& draw)
 {
 	ImGui();
 	Update();
-	Draw();
+	Draw(draw);
 }
 
 std::unique_ptr<IScene> SceneManager::CreateScene(int sceneID)
