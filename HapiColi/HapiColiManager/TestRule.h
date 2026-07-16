@@ -53,4 +53,21 @@ namespace HapiColi
         std::string m_subjectId;
         std::string m_targetId;
     };
+
+    // Expected an object to hit another object at least once (partially)
+    class ExpectedPartialHitRule : public TestRule
+    {
+    public:
+        ExpectedPartialHitRule(const std::string& subjectId, const std::string& targetId)
+            : m_subjectId(subjectId), m_targetId(targetId) {}
+
+        bool Evaluate(const FrameData& frame, TestResult& outResult) override;
+        std::string GetName() const override { return "ExpectedPartialHitRule"; }
+        std::string GetSubjectId() const override { return m_subjectId; }
+        std::string GetTargetId() const override { return m_targetId; }
+
+    private:
+        std::string m_subjectId;
+        std::string m_targetId;
+    };
 }

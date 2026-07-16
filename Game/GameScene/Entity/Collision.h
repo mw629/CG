@@ -28,6 +28,11 @@ public:
 	static bool CheckAABBSphere(const AABB& aabb, const CollisionSphere& sphere);
 
 	/// <summary>
+	/// Sphere同士の交差判定
+	/// </summary>
+	static bool CheckSphere(const CollisionSphere& a, const CollisionSphere& b);
+
+	/// <summary>
 	/// TransformとサイズからAABBを生成する
 	/// </summary>
 	/// <param name="transform">トランスフォーム</param>

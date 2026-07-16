@@ -23,7 +23,7 @@ namespace HapiColi
                 {
                     unintendedCollisions++;
                 }
-                else if (result.reason == "Failed to hit target")
+                else if (result.reason == "Failed to hit target" || result.reason == "Failed to hit target even partially")
                 {
                     missedCollisions++;
                 }

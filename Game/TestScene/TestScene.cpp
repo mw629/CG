@@ -26,6 +26,7 @@ void TestScene::ImGui()
 
 	skyBox_.get()->ImGui();
 	sphere_.get()->ImGui();
+	sphere2_.get()->ImGui();
 	animation_.get()->ImGui();	
 	model_.get()->ImGui();
 
@@ -73,6 +74,10 @@ void TestScene::Initialize() {
 	sphere_.get()->Initialize(texture1);
 	sphere_.get()->SetTransform(modelTransform_);
 	sphere_.get()->name_ = "MonsterBall Sphere";
+
+	sphere2_.get()->Initialize(texture1);
+	sphere2_.get()->SetTransform(transform2_);
+	sphere2_.get()->name_ = "Player Sphere 2";
 
 	skyBoxTexture_ = texture_.get()->CreateTexture("resources/DDS/rostock_laage_airport_4k.dds");
 	skyBox_.get()->Initialize(skyBoxTexture_);
@@ -220,6 +225,9 @@ void TestScene::Update() {
 						} else if (obj.id == "Target_Box") {
 							Transform_.translate = { obj.position.x, obj.position.y, obj.position.z };
 							sphere_.get()->SetTransform(Transform_);
+						} else if (obj.id == "Sphere2") {
+							transform2_.translate = { obj.position.x, obj.position.y, obj.position.z };
+							sphere2_.get()->SetTransform(transform2_);
 						}
 					}
 				}
@@ -235,11 +243,17 @@ void TestScene::Update() {
 	if (shouldUpdateScene) {
 		// 移動処理 (model_ を操作)
 		float moveSpeed = 0.1f * timeScale;
-		if (Input::PressKey(DIK_UP) || Input::PressKey(DIK_W)) { modelTransform_.translate.z += moveSpeed; }
-		if (Input::PressKey(DIK_DOWN) || Input::PressKey(DIK_S)) { modelTransform_.translate.z -= moveSpeed; }
-		if (Input::PressKey(DIK_LEFT) || Input::PressKey(DIK_A)) { modelTransform_.translate.x -= moveSpeed; }
-		if (Input::PressKey(DIK_RIGHT) || Input::PressKey(DIK_D)) { modelTransform_.translate.x += moveSpeed; }
+		if (Input::PressKey(DIK_W)) { modelTransform_.translate.z += moveSpeed; }
+		if (Input::PressKey(DIK_S)) { modelTransform_.translate.z -= moveSpeed; }
+		if (Input::PressKey(DIK_A)) { modelTransform_.translate.x -= moveSpeed; }
+		if (Input::PressKey(DIK_D)) { modelTransform_.translate.x += moveSpeed; }
 		model_.get()->SetTransform(modelTransform_);
+
+		if (Input::PressKey(DIK_UP)) { transform2_.translate.z += moveSpeed; }
+		if (Input::PressKey(DIK_DOWN)) { transform2_.translate.z -= moveSpeed; }
+		if (Input::PressKey(DIK_LEFT)) { transform2_.translate.x -= moveSpeed; }
+		if (Input::PressKey(DIK_RIGHT)) { transform2_.translate.x += moveSpeed; }
+		sphere2_.get()->SetTransform(transform2_);
 	}
 
 	camera_.get()->Update();
@@ -253,6 +267,7 @@ void TestScene::Update() {
 	floor->SettingWvp(view);
 
 	sphere_.get()->SettingWvp(view);
+	sphere2_.get()->SettingWvp(view);
 	skyBox_.get()->SettingWvp(view);
 
 	for (int i = 0; i < particle_.size(); ++i) {
@@ -309,7 +324,22 @@ void TestScene::Update() {
 	bool hitBox = Collision::CheckAABB(modelAABB, targetAABB);
 	bool hitSphere = Collision::CheckAABBSphere(targetAABB, modelSphere);
 
-	isCollision_ = hitBox || hitSphere;
+	AABB sphere2Col = Collision::MakeAABB(transform2_, 2.0f, 2.0f, 2.0f);
+	sphere2Col.min.y -= 1.0f;
+	sphere2Col.max.y -= 1.0f;
+	Vector3 sphere2Center = { (sphere2Col.min.x + sphere2Col.max.x)*0.5f, (sphere2Col.min.y + sphere2Col.max.y)*0.5f, (sphere2Col.min.z + sphere2Col.max.z)*0.5f };
+	Vector3 sphere2Size = { sphere2Col.max.x - sphere2Col.min.x, sphere2Col.max.y - sphere2Col.min.y, sphere2Col.max.z - sphere2Col.min.z };
+	HapiColi::ObjectData sphere2Data = HapiColi::ObjectData::CreateBox(
+		"Sphere2",
+		{sphere2Center.x, sphere2Center.y, sphere2Center.z},
+		{sphere2Size.x, sphere2Size.y, sphere2Size.z}
+	);
+
+	bool hitSphere2Box = Collision::CheckAABB(targetAABB, sphere2Col);
+	bool hitSphere2Model = Collision::CheckAABB(modelAABB, sphere2Col);
+	bool hitSphere2Sphere = Collision::CheckAABBSphere(sphere2Col, modelSphere);
+
+	isCollision_ = hitBox || hitSphere || hitSphere2Box || hitSphere2Model || hitSphere2Sphere;
 	
 	HapiColi::HapiColi::GetInstance().UpdateFuzzTarget("Model vs Box Fuzzing", modelBoxData, targetBoxData);
 
@@ -343,9 +373,25 @@ void TestScene::Update() {
 		targetBoxData.SetCollision(modelSphereData.id);
 	}
 
+	if (hitSphere2Box) {
+		sphere2Data.SetCollision(targetBoxData.id);
+		targetBoxData.SetCollision(sphere2Data.id);
+	}
+
+	if (hitSphere2Model) {
+		sphere2Data.SetCollision(modelBoxData.id);
+		modelBoxData.SetCollision(sphere2Data.id);
+	}
+
+	if (hitSphere2Sphere) {
+		sphere2Data.SetCollision(modelSphereData.id);
+		modelSphereData.SetCollision(sphere2Data.id);
+	}
+
 	HapiColi::HapiColi::GetInstance().RecordObject(modelBoxData);
 	HapiColi::HapiColi::GetInstance().RecordObject(modelSphereData);
 	HapiColi::HapiColi::GetInstance().RecordObject(targetBoxData);
+	HapiColi::HapiColi::GetInstance().RecordObject(sphere2Data);
 
 	HapiColi::HapiColi::GetInstance().EndFrame();
 }
@@ -365,6 +411,7 @@ void TestScene::Draw() {
 	//Draw::DrawObj(nodeAnimation_.get());
 	//Draw::DrawAnimation(animation_.get());
 	Draw::DrawSphere(sphere_.get());
+	Draw::DrawSphere(sphere2_.get());
 	for (int i = 0, n = static_cast<int>(particle_.size()); i < n; ++i) {
 		//particle_[i].get()->Draw();
 	}

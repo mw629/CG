@@ -159,7 +159,7 @@ namespace HapiColi
         ImGui::End(); // End Debugger window temporarily
 
         ImGui::SetNextWindowPos(ImVec2(50, 50), ImGuiCond_FirstUseEver);
-        ImGui::SetNextWindowSize(ImVec2(400, 250), ImGuiCond_FirstUseEver);
+        ImGui::SetNextWindowSize(ImVec2(400, 400), ImGuiCond_FirstUseEver);
         ImGui::Begin(GetText("HapiColi Playback", u8"HapiColi 再生 (Playback)"));
         if (true) // Just an always-true block to keep the scope clean, replacing CollapsingHeader
         {
@@ -208,6 +208,61 @@ namespace HapiColi
                             playback->SetReplayFrameIndex(currentFrame);
                             playback->SetReplayPlaying(false);
                         }
+
+                        ImGui::Separator();
+                        ImGui::Text(GetText("Collision Info", u8"衝突情報"));
+                        
+                        const auto& frameData = m_manager->GetRecorder()->GetRecordedFrames()[currentFrame];
+                        if (ImGui::BeginTable("ReplayCollisionTable", 4, ImGuiTableFlags_Borders | ImGuiTableFlags_RowBg | ImGuiTableFlags_SizingStretchProp))
+                        {
+                            ImGui::TableSetupColumn(GetText("Object ID", u8"オブジェクトID"), ImGuiTableColumnFlags_WidthStretch);
+                            ImGui::TableSetupColumn(GetText("State", u8"衝突状態"), ImGuiTableColumnFlags_WidthFixed, 80.0f);
+                            ImGui::TableSetupColumn(GetText("Collided With", u8"衝突相手"), ImGuiTableColumnFlags_WidthStretch);
+                            ImGui::TableSetupColumn(GetText("Details", u8"詳細情報"), ImGuiTableColumnFlags_WidthStretch);
+                            ImGui::TableHeadersRow();
+
+                            for (const auto& obj : frameData.objects)
+                            {
+                                ImGui::TableNextRow();
+                                ImGui::TableSetColumnIndex(0);
+                                ImGui::TextUnformatted(obj.id.c_str());
+
+                                ImGui::TableSetColumnIndex(1);
+                                if (obj.collision.isColliding)
+                                {
+                                    ImGui::TextColored(ImVec4(1.0f, 0.4f, 0.4f, 1.0f), GetText("Hit", u8"衝突中"));
+                                }
+                                else
+                                {
+                                    ImGui::TextDisabled(GetText("No Hit", u8"衝突なし"));
+                                }
+
+                                ImGui::TableSetColumnIndex(2);
+                                if (obj.collision.isColliding && !obj.collision.collidedWithId.empty())
+                                {
+                                    ImGui::TextUnformatted(obj.collision.collidedWithId.c_str());
+                                }
+                                else
+                                {
+                                    ImGui::TextUnformatted("-");
+                                }
+
+                                ImGui::TableSetColumnIndex(3);
+                                if (obj.collision.isColliding)
+                                {
+                                    ImGui::Text("Pt:(%.1f,%.1f,%.1f) D:%.2f",
+                                        obj.collision.contactPoint.x,
+                                        obj.collision.contactPoint.y,
+                                        obj.collision.contactPoint.z,
+                                        obj.collision.penetrationDepth);
+                                }
+                                else
+                                {
+                                    ImGui::TextUnformatted("-");
+                                }
+                            }
+                            ImGui::EndTable();
+                        }
                     }
                     else
                     {
@@ -227,8 +282,9 @@ namespace HapiColi
             if (m_activeInputTarget == 0) ImGui::PopStyleColor();
             if (ImGui::IsItemFocused() || ImGui::IsItemActivated() || ImGui::IsItemClicked()) m_activeInputTarget = 0;
 
-            ImGui::RadioButton(GetText("Expected Hit", u8"当たるべき"), &m_ruleType, 0); ImGui::SameLine();
-            ImGui::RadioButton(GetText("Expected No Hit", u8"当たらないべき"), &m_ruleType, 1);
+            ImGui::RadioButton(GetText("Expected Hit", u8"常に当たるべき"), &m_ruleType, 0); ImGui::SameLine();
+            ImGui::RadioButton(GetText("Expected No Hit", u8"当たらないべき"), &m_ruleType, 1); ImGui::SameLine();
+            ImGui::RadioButton(GetText("Expected Partial Hit", u8"部分的に当たるべき"), &m_ruleType, 2);
 
             if (m_activeInputTarget == 1) ImGui::PushStyleColor(ImGuiCol_FrameBg, ImVec4(0.4f, 0.4f, 0.0f, 1.0f));
             ImGui::InputText(GetText("Target ID", u8"対象ID"), m_ruleTargetBuffer, sizeof(m_ruleTargetBuffer));
@@ -243,8 +299,10 @@ namespace HapiColi
                 {
                     if (m_ruleType == 0)
                         m_manager->GetAnalyzer()->AddRule(std::make_shared<ExpectedHitRule>(subject, target));
-                    else
+                    else if (m_ruleType == 1)
                         m_manager->GetAnalyzer()->AddRule(std::make_shared<ExpectedNoHitRule>(subject, target));
+                    else if (m_ruleType == 2)
+                        m_manager->GetAnalyzer()->AddRule(std::make_shared<ExpectedPartialHitRule>(subject, target));
                 }
             }
 
@@ -282,11 +340,12 @@ namespace HapiColi
                             ImGui::TableNextRow();
                             ImGui::TableSetColumnIndex(0);
 
-                            bool isHit = (rules[i]->GetName() == "ExpectedHitRule");
-                            if (isHit)
-                                ImGui::TextColored(ImVec4(0.4f, 1.0f, 0.4f, 1.0f), GetText("Hit",   u8"当たるべき"));
-                            else
+                            if (rules[i]->GetName() == "ExpectedHitRule")
+                                ImGui::TextColored(ImVec4(0.4f, 1.0f, 0.4f, 1.0f), GetText("Hit",   u8"常に当たるべき"));
+                            else if (rules[i]->GetName() == "ExpectedNoHitRule")
                                 ImGui::TextColored(ImVec4(1.0f, 0.5f, 0.5f, 1.0f), GetText("NoHit", u8"当たらないべき"));
+                            else if (rules[i]->GetName() == "ExpectedPartialHitRule")
+                                ImGui::TextColored(ImVec4(0.4f, 0.8f, 1.0f, 1.0f), GetText("PartialHit", u8"部分的に当たるべき"));
 
                             ImGui::TableSetColumnIndex(1);
                             ImGui::TextUnformatted(rules[i]->GetSubjectId().c_str());

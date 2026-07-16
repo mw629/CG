@@ -42,6 +42,16 @@ bool Collision::CheckAABBSphere(const AABB& aabb, const CollisionSphere& sphere)
 	return sqDist <= sphere.radius * sphere.radius;
 }
 
+bool Collision::CheckSphere(const CollisionSphere& a, const CollisionSphere& b)
+{
+	float dx = a.center.x - b.center.x;
+	float dy = a.center.y - b.center.y;
+	float dz = a.center.z - b.center.z;
+	float distSq = dx * dx + dy * dy + dz * dz;
+	float radiusSum = a.radius + b.radius;
+	return distSq <= radiusSum * radiusSum;
+}
+
 CollisionSphere Collision::MakeSphere(const Transform& transform, float radius)
 {
 	CollisionSphere sphere;
