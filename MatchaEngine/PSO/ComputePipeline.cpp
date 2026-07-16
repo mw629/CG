@@ -49,6 +49,7 @@ void ComputePipeline::CreatePipeline(std::ostream& os, ID3D12Device* device)
 				param.Descriptor.RegisterSpace = bindDesc.Space;
 
 				nameMap[bindDesc.Name] = static_cast<UINT>(rootParams.size());
+				rootParameterIndexMap_[bindDesc.Name] = static_cast<UINT>(rootParams.size());
 				rootParams.push_back(param);
 			}
 			else if (bindDesc.Type == D3D_SIT_TEXTURE || bindDesc.Type == D3D_SIT_UAV_RWTYPED || bindDesc.Type == D3D_SIT_UAV_RWSTRUCTURED || bindDesc.Type == D3D_SIT_STRUCTURED) {
@@ -67,6 +68,7 @@ void ComputePipeline::CreatePipeline(std::ostream& os, ID3D12Device* device)
 				param.DescriptorTable.pDescriptorRanges = &ranges.back();
 
 				nameMap[bindDesc.Name] = static_cast<UINT>(rootParams.size());
+				rootParameterIndexMap_[bindDesc.Name] = static_cast<UINT>(rootParams.size());
 				rootParams.push_back(param);
 			}
 		}

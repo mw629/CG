@@ -84,18 +84,58 @@ void Draw::DrawObj(ObjectBase* obj)
 
 void Draw::DrawAnimation(CharacterAnimator* obj)
 {
-	preDraw(obj->GetShader(), obj->GetBlend());
-
-	ShaderName shader = obj->GetShader();
+	ShaderName shader = ObjectShader;
 	BlendMode blend = obj->GetBlend();
+
+	ComputePipeline* cp = graphicsPipelineState_->GetComputePipeline();
+	if (cp) {
+		commandList_->SetComputeRootSignature(cp->GetRootSignature());
+		commandList_->SetPipelineState(cp->GetPipelineState());
+
+		UINT paramPalette = cp->GetRootParameterIndex("gMatrixPalette");
+		UINT paramInput = cp->GetRootParameterIndex("gInputVertices");
+		UINT paramInfluences = cp->GetRootParameterIndex("gInfluences");
+		UINT paramOutput = cp->GetRootParameterIndex("gOutputVertices");
+		UINT paramInfo = cp->GetRootParameterIndex("gSkinningInformation");
+
+		auto modelData = obj->GetModelData();
+		for (size_t i = 0; i < modelData.subMeshes.size(); ++i) {
+			const auto& subMesh = modelData.subMeshes[i];
+
+			// Transition to UAV
+			D3D12_RESOURCE_BARRIER barrier = {};
+			barrier.Type = D3D12_RESOURCE_BARRIER_TYPE_TRANSITION;
+			barrier.Transition.pResource = obj->GetSubMeshSkinnedResource(i);
+			barrier.Transition.StateBefore = D3D12_RESOURCE_STATE_VERTEX_AND_CONSTANT_BUFFER;
+			barrier.Transition.StateAfter = D3D12_RESOURCE_STATE_UNORDERED_ACCESS;
+			barrier.Transition.Subresource = D3D12_RESOURCE_BARRIER_ALL_SUBRESOURCES;
+			commandList_->ResourceBarrier(1, &barrier);
+
+			// Bind compute root descriptors/tables
+			if (paramPalette != static_cast<UINT>(-1)) commandList_->SetComputeRootDescriptorTable(paramPalette, obj->GetPaletteSrvHandleGPU());
+			if (paramInput != static_cast<UINT>(-1)) commandList_->SetComputeRootDescriptorTable(paramInput, obj->GetSubMeshInputVertexSrvHandle(i));
+			if (paramInfluences != static_cast<UINT>(-1)) commandList_->SetComputeRootDescriptorTable(paramInfluences, obj->GetSubMeshInfluenceSrvHandle(i));
+			if (paramOutput != static_cast<UINT>(-1)) commandList_->SetComputeRootDescriptorTable(paramOutput, obj->GetSubMeshOutputVertexUavHandle(i));
+			if (paramInfo != static_cast<UINT>(-1)) commandList_->SetComputeRootConstantBufferView(paramInfo, obj->GetSubMeshSkinningInfoResource(i)->GetGPUVirtualAddress());
+
+			commandList_->Dispatch((static_cast<UINT>(subMesh.mesh.vertexSize) + 1023) / 1024, 1, 1);
+
+			// Transition back to vertex buffer
+			barrier.Transition.StateBefore = D3D12_RESOURCE_STATE_UNORDERED_ACCESS;
+			barrier.Transition.StateAfter = D3D12_RESOURCE_STATE_VERTEX_AND_CONSTANT_BUFFER;
+			commandList_->ResourceBarrier(1, &barrier);
+		}
+	}
+
+	preDraw(shader, blend);
 
 	// 共通の設定
 	SetSRV(shader, blend, "gTransformationMatrix", obj->GetWvpDataResource()->GetGPUVirtualAddress());
-	SetSRV(shader, blend, "gMatrixPalette", obj->GetPaletteResourceGPU()->GetGPUVirtualAddress());
 	SetCBV(shader, blend, "gCamera", camera_->GetCameraResource()->GetGPUVirtualAddress());
 	SetCBV(shader, blend, "gDirectionalLightGroup", lightManager_->GetDirectionalLightResource()->GetGPUVirtualAddress());
 	SetCBV(shader, blend, "gPointLightGroup", lightManager_->GetPointLightResource()->GetGPUVirtualAddress());
 	SetCBV(shader, blend, "gSpotLightGroup", lightManager_->GetSpotLightResource()->GetGPUVirtualAddress());
+	SetTable(shader, blend, "gEnvironmentTexture", environmentTextureSrvHandleGPU_);
 
 	auto& subMeshMaterials = obj->GetSubMeshMaterials();
 	auto modelData = obj->GetModelData();
@@ -106,10 +146,9 @@ void Draw::DrawAnimation(CharacterAnimator* obj)
 
 		commandList_->IASetIndexBuffer(&mesh.indexBufferView_);
 
-		D3D12_VERTEX_BUFFER_VIEW vbvs[2];
-		vbvs[0] = mesh.vertexBufferView;
-		vbvs[1] = *obj->GetSubMeshInfluenceBufferView(i);
-		commandList_->IASetVertexBuffers(0, 2, vbvs);
+		// Bind skinned VB view instead of the original unskinned + influence vbvs
+		D3D12_VERTEX_BUFFER_VIEW vbv = *obj->GetSubMeshSkinnedBufferView(i);
+		commandList_->IASetVertexBuffers(0, 1, &vbv);
 
 		if (i < subMeshMaterials.size()) {
 			SetCBV(shader, blend, "gMaterial", subMeshMaterials[i].materialFactory->GetMaterialResource()->GetGPUVirtualAddress());

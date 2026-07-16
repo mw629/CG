@@ -3,6 +3,7 @@
 #include "RootSignature.h"
 #include "PipelineState.h"
 #include "Sampler.h"
+#include "ComputePipeline.h"
 #include <map>
 #include <string>
 
@@ -17,6 +18,8 @@ private:
 
 	std::map<ShaderName, std::map<BlendMode, std::map<std::string, UINT>>> rootParameterIndexMap_;
 
+	std::unique_ptr<ComputePipeline> computePipeline_;
+
 	HRESULT hr_;
 
 public:
@@ -30,6 +33,7 @@ public:
 	D3D12_GRAPHICS_PIPELINE_STATE_DESC GetGraphicsPipelineStateDesc(const ShaderName& shaderName, BlendMode blendMode) { return graphicsPipelineStateDesc_[shaderName][blendMode]; }
 	ID3D12PipelineState* GetGraphicsPipelineState(const ShaderName& shaderName, BlendMode blendMode) { return graphicsPipelineState_[shaderName][blendMode].Get(); }
 	RootSignature* GetRootSignature(const ShaderName& shaderName, BlendMode blendMode) { return rootSignature_[shaderName][blendMode].get(); }
+	ComputePipeline* GetComputePipeline() const { return computePipeline_.get(); }
 
 	UINT GetRootParameterIndex(ShaderName shaderName, BlendMode blendMode, const std::string& name) {
 		auto itShader = rootParameterIndexMap_.find(shaderName);

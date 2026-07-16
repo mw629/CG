@@ -393,6 +393,75 @@ void CharacterAnimator::CreateSkinCluster()
 
 		subMeshInfluenceResources_.push_back(influenceResource);
 		subMeshInfluenceBufferViews_.push_back(influenceBufferView);
+
+		// GPU Skinning output resource (UAV + VB compatibility)
+		Microsoft::WRL::ComPtr<ID3D12Resource> skinnedResource = GraphicsDevice::CreateUAVBufferResource(sizeof(VertexData) * subMesh.mesh.vertexSize);
+		D3D12_VERTEX_BUFFER_VIEW skinnedBufferView{};
+		skinnedBufferView.BufferLocation = skinnedResource->GetGPUVirtualAddress();
+		skinnedBufferView.SizeInBytes = UINT(sizeof(VertexData) * subMesh.mesh.vertexSize);
+		skinnedBufferView.StrideInBytes = sizeof(VertexData);
+
+		subMeshSkinnedResources_.push_back(skinnedResource);
+		subMeshSkinnedBufferViews_.push_back(skinnedBufferView);
+
+		// Allocate and create Input Vertex SRV (t1)
+		std::pair<D3D12_CPU_DESCRIPTOR_HANDLE, D3D12_GPU_DESCRIPTOR_HANDLE> inputVertexSrvHandle;
+		inputVertexSrvHandle.first = GetCPUDescriptorHandle(descriptorHeap->GetSrvDescriptorHeap(), descriptorHeap->GetDescriptorSizeSRV());
+		inputVertexSrvHandle.second = GetGPUDescriptorHandle(descriptorHeap->GetSrvDescriptorHeap(), descriptorHeap->GetDescriptorSizeSRV());
+
+		D3D12_SHADER_RESOURCE_VIEW_DESC inputVertexSrvDesc{};
+		inputVertexSrvDesc.Format = DXGI_FORMAT_UNKNOWN;
+		inputVertexSrvDesc.Shader4ComponentMapping = D3D12_DEFAULT_SHADER_4_COMPONENT_MAPPING;
+		inputVertexSrvDesc.ViewDimension = D3D12_SRV_DIMENSION_BUFFER;
+		inputVertexSrvDesc.Buffer.FirstElement = 0;
+		inputVertexSrvDesc.Buffer.Flags = D3D12_BUFFER_SRV_FLAG_NONE;
+		inputVertexSrvDesc.Buffer.NumElements = UINT(subMesh.mesh.vertexSize);
+		inputVertexSrvDesc.Buffer.StructureByteStride = sizeof(VertexData);
+		device->CreateShaderResourceView(subMesh.mesh.vertexResource.Get(), &inputVertexSrvDesc, inputVertexSrvHandle.first);
+
+		subMeshInputVertexSrvHandles_.push_back(inputVertexSrvHandle);
+
+		// Allocate and create Influence SRV (t2)
+		std::pair<D3D12_CPU_DESCRIPTOR_HANDLE, D3D12_GPU_DESCRIPTOR_HANDLE> influenceSrvHandle;
+		influenceSrvHandle.first = GetCPUDescriptorHandle(descriptorHeap->GetSrvDescriptorHeap(), descriptorHeap->GetDescriptorSizeSRV());
+		influenceSrvHandle.second = GetGPUDescriptorHandle(descriptorHeap->GetSrvDescriptorHeap(), descriptorHeap->GetDescriptorSizeSRV());
+
+		D3D12_SHADER_RESOURCE_VIEW_DESC influenceSrvDesc{};
+		influenceSrvDesc.Format = DXGI_FORMAT_UNKNOWN;
+		influenceSrvDesc.Shader4ComponentMapping = D3D12_DEFAULT_SHADER_4_COMPONENT_MAPPING;
+		influenceSrvDesc.ViewDimension = D3D12_SRV_DIMENSION_BUFFER;
+		influenceSrvDesc.Buffer.FirstElement = 0;
+		influenceSrvDesc.Buffer.Flags = D3D12_BUFFER_SRV_FLAG_NONE;
+		influenceSrvDesc.Buffer.NumElements = UINT(subMesh.mesh.vertexSize);
+		influenceSrvDesc.Buffer.StructureByteStride = sizeof(VertexInfluence);
+		device->CreateShaderResourceView(influenceResource.Get(), &influenceSrvDesc, influenceSrvHandle.first);
+
+		subMeshInfluenceSrvHandles_.push_back(influenceSrvHandle);
+
+		// Allocate and create Output Vertex UAV (u0)
+		std::pair<D3D12_CPU_DESCRIPTOR_HANDLE, D3D12_GPU_DESCRIPTOR_HANDLE> outputVertexUavHandle;
+		outputVertexUavHandle.first = GetCPUDescriptorHandle(descriptorHeap->GetSrvDescriptorHeap(), descriptorHeap->GetDescriptorSizeSRV());
+		outputVertexUavHandle.second = GetGPUDescriptorHandle(descriptorHeap->GetSrvDescriptorHeap(), descriptorHeap->GetDescriptorSizeSRV());
+
+		D3D12_UNORDERED_ACCESS_VIEW_DESC outputVertexUavDesc{};
+		outputVertexUavDesc.Format = DXGI_FORMAT_UNKNOWN;
+		outputVertexUavDesc.ViewDimension = D3D12_UAV_DIMENSION_BUFFER;
+		outputVertexUavDesc.Buffer.FirstElement = 0;
+		outputVertexUavDesc.Buffer.Flags = D3D12_BUFFER_UAV_FLAG_NONE;
+		outputVertexUavDesc.Buffer.NumElements = UINT(subMesh.mesh.vertexSize);
+		outputVertexUavDesc.Buffer.StructureByteStride = sizeof(VertexData);
+		device->CreateUnorderedAccessView(skinnedResource.Get(), nullptr, &outputVertexUavDesc, outputVertexUavHandle.first);
+
+		subMeshOutputVertexUavHandles_.push_back(outputVertexUavHandle);
+
+		// Create Constant Buffer for Skinning Information (b0)
+		Microsoft::WRL::ComPtr<ID3D12Resource> skinningInfoResource = GraphicsDevice::CreateBufferResource(sizeof(uint32_t));
+		uint32_t* mappedInfo = nullptr;
+		skinningInfoResource->Map(0, nullptr, reinterpret_cast<void**>(&mappedInfo));
+		mappedInfo[0] = static_cast<uint32_t>(subMesh.mesh.vertexSize);
+		skinningInfoResource->Unmap(0, nullptr);
+
+		subMeshSkinningInfoResources_.push_back(skinningInfoResource);
 	}
 
 	// For backward compatibility / original mesh

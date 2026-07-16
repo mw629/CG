@@ -242,4 +242,7 @@ void GraphicsPipelineState::ALLPSOCreate(std::ostream& os, ID3D12Device* device)
 			CreateGraphicsPSO(pair.first, pair.second, static_cast<BlendMode>(j), os, device);
 		}
 	}
+
+	computePipeline_ = std::make_unique<ComputePipeline>();
+	computePipeline_->CreatePipeline(os, device);
 }

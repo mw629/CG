@@ -27,6 +27,14 @@ private:
 	std::vector<Microsoft::WRL::ComPtr<ID3D12Resource>> subMeshInfluenceResources_;
 	std::vector<D3D12_VERTEX_BUFFER_VIEW> subMeshInfluenceBufferViews_;
 
+	// GPU Skinning (Compute Shader) variables
+	std::vector<Microsoft::WRL::ComPtr<ID3D12Resource>> subMeshSkinnedResources_;
+	std::vector<D3D12_VERTEX_BUFFER_VIEW> subMeshSkinnedBufferViews_;
+	std::vector<std::pair<D3D12_CPU_DESCRIPTOR_HANDLE, D3D12_GPU_DESCRIPTOR_HANDLE>> subMeshInputVertexSrvHandles_;
+	std::vector<std::pair<D3D12_CPU_DESCRIPTOR_HANDLE, D3D12_GPU_DESCRIPTOR_HANDLE>> subMeshInfluenceSrvHandles_;
+	std::vector<std::pair<D3D12_CPU_DESCRIPTOR_HANDLE, D3D12_GPU_DESCRIPTOR_HANDLE>> subMeshOutputVertexUavHandles_;
+	std::vector<Microsoft::WRL::ComPtr<ID3D12Resource>> subMeshSkinningInfoResources_;
+
 public:
 
 	~CharacterAnimator()override;
@@ -75,6 +83,15 @@ public:
 	// Multi-mesh support
 	const std::vector<ModelSubMeshMaterial>& GetSubMeshMaterials() const { return subMeshMaterials_; }
 	D3D12_VERTEX_BUFFER_VIEW* GetSubMeshInfluenceBufferView(size_t index) { return &subMeshInfluenceBufferViews_[index]; }
+
+	// GPU Skinning (Compute Shader) support
+	D3D12_VERTEX_BUFFER_VIEW* GetSubMeshSkinnedBufferView(size_t index) { return &subMeshSkinnedBufferViews_[index]; }
+	ID3D12Resource* GetSubMeshSkinnedResource(size_t index) { return subMeshSkinnedResources_[index].Get(); }
+	D3D12_GPU_DESCRIPTOR_HANDLE GetSubMeshInputVertexSrvHandle(size_t index) const { return subMeshInputVertexSrvHandles_[index].second; }
+	D3D12_GPU_DESCRIPTOR_HANDLE GetSubMeshInfluenceSrvHandle(size_t index) const { return subMeshInfluenceSrvHandles_[index].second; }
+	D3D12_GPU_DESCRIPTOR_HANDLE GetSubMeshOutputVertexUavHandle(size_t index) const { return subMeshOutputVertexUavHandles_[index].second; }
+	ID3D12Resource* GetSubMeshSkinningInfoResource(size_t index) const { return subMeshSkinningInfoResources_[index].Get(); }
+	D3D12_GPU_DESCRIPTOR_HANDLE GetPaletteSrvHandleGPU() const { return skinCluster_.paletteSrvHandle.second; }
 
 	// 追加: スキンパレット SRV の GPU ハンドル (インスタンス対応であればGPUのVADDRになるがDrawでGetPaletteResourceGPUを呼ぶように変更済)
 	ID3D12Resource* GetPaletteResourceGPU() const { return skinCluster_.paletteResource.Get(); }
