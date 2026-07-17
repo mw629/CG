@@ -27,11 +27,12 @@ void Draw::SetTable(ShaderName shader, BlendMode blend, const std::string& name,
 }
 
 void Draw::Initialize(ID3D12GraphicsCommandList* commandList, GraphicsPipelineState* graphicsPipelineState,
-	LightManager* lightManager)
+	LightManager* lightManager, LineRenderer* lineRenderer)
 {
 	commandList_ = commandList;
 	graphicsPipelineState_ = graphicsPipelineState;
 	lightManager_ = lightManager;
+	lineRenderer_ = lineRenderer;
 }
 
 void Draw::SetCamera(Camera* setCamera)

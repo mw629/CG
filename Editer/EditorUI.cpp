@@ -11,6 +11,9 @@
 #include "../MatchaEngine/GameObjects/Object/Animation/CharacterAnimator.h"
 #include "../MatchaEngine/GameObjects/Object/RenderObject.h"
 #include "../MatchaEngine/GameObjects/Object/3d/Sphere.h"
+#include "../MatchaEngine/GameObjects/Light/DirectionalLight.h"
+#include "../MatchaEngine/GameObjects/Light/PointLight.h"
+#include "../MatchaEngine/GameObjects/Light/SpotLight.h"
 
 void EditorUI::ProcessMousePicking(GameObjectManager* gameObjectManager, const Matrix4x4& view, const Matrix4x4& projection) {
 #ifdef _USE_IMGUI
@@ -243,6 +246,27 @@ void EditorUI::Draw(GameObjectManager* gameObjectManager, const Matrix4x4& view,
             }
             ImGui::TreePop();
         }
+    }
+
+    if (ImGui::BeginPopupContextWindow(nullptr, ImGuiPopupFlags_MouseButtonRight | ImGuiPopupFlags_NoOpenOverItems)) {
+        if (ImGui::MenuItem("Create Empty")) {
+            auto emptyObj = std::make_shared<GameObject>();
+            emptyObj->SetName("GameObject");
+            gameObjectManager->AddObject(emptyObj);
+        }
+        if (ImGui::MenuItem("Create Directional Light")) {
+            auto light = std::make_shared<DirectionalLight>();
+            gameObjectManager->AddObject(light);
+        }
+        if (ImGui::MenuItem("Create Point Light")) {
+            auto light = std::make_shared<PointLight>();
+            gameObjectManager->AddObject(light);
+        }
+        if (ImGui::MenuItem("Create Spot Light")) {
+            auto light = std::make_shared<SpotLight>();
+            gameObjectManager->AddObject(light);
+        }
+        ImGui::EndPopup();
     }
 
     if (objToDelete) {

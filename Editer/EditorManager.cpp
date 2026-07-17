@@ -2,6 +2,8 @@
 #include <Engine.h>
 #include <filesystem>
 #include <vector>
+#include <chrono>
+#include <windows.h>
 
 #ifdef _USE_IMGUI
 #include "../externals/imgui/imgui.h"
@@ -199,6 +201,75 @@ EditorManager::GameViewDrawCallback EditorManager::s_gameViewDrawCallback_ = nul
 std::string EditorManager::s_currentFileName_ = "scene";
 
 EditorManager::~EditorManager() = default;
+
+#ifdef _USE_IMGUI
+static float CalculateCPUUsage() {
+    static FILETIME prevIdleTime = {};
+    static FILETIME prevKernelTime = {};
+    static FILETIME prevUserTime = {};
+    static bool firstCall = true;
+
+    FILETIME idleTime, kernelTime, userTime;
+    if (!GetSystemTimes(&idleTime, &kernelTime, &userTime)) {
+        return 0.0f;
+    }
+
+    if (firstCall) {
+        prevIdleTime = idleTime;
+        prevKernelTime = kernelTime;
+        prevUserTime = userTime;
+        firstCall = false;
+        return 0.0f;
+    }
+
+    auto FileTimeToQuad = [](const FILETIME& ft) -> ULONGLONG {
+        return (static_cast<ULONGLONG>(ft.dwHighDateTime) << 32) | ft.dwLowDateTime;
+    };
+
+    ULONGLONG idle = FileTimeToQuad(idleTime) - FileTimeToQuad(prevIdleTime);
+    ULONGLONG kernel = FileTimeToQuad(kernelTime) - FileTimeToQuad(prevKernelTime);
+    ULONGLONG user = FileTimeToQuad(userTime) - FileTimeToQuad(prevUserTime);
+
+    prevIdleTime = idleTime;
+    prevKernelTime = kernelTime;
+    prevUserTime = userTime;
+
+    ULONGLONG total = kernel + user;
+    if (total == 0) return 0.0f;
+
+    if (total < idle) return 0.0f;
+    ULONGLONG active = total - idle;
+
+    return (static_cast<float>(active) / static_cast<float>(total)) * 100.0f;
+}
+
+static float GetCPUUsageSmooth() {
+    static float s_cpuUsage = 0.0f;
+    static auto lastTime = std::chrono::steady_clock::now();
+    
+    auto now = std::chrono::steady_clock::now();
+    auto elapsed = std::chrono::duration_cast<std::chrono::milliseconds>(now - lastTime).count();
+    if (elapsed >= 200) { // Update every 200ms
+        s_cpuUsage = CalculateCPUUsage();
+        lastTime = now;
+    }
+    return s_cpuUsage;
+}
+
+static void GetGPUMemoryInfo(Engine* engine, float& currentUsageMB, float& budgetMB) {
+    currentUsageMB = 0.0f;
+    budgetMB = 0.0f;
+    if (!engine || !engine->graphics) return;
+    IDXGIAdapter4* adapter = engine->graphics->GetUseAdapter();
+    if (!adapter) return;
+
+    DXGI_QUERY_VIDEO_MEMORY_INFO info{};
+    if (SUCCEEDED(adapter->QueryVideoMemoryInfo(0, DXGI_MEMORY_SEGMENT_GROUP_LOCAL, &info))) {
+        currentUsageMB = static_cast<float>(info.CurrentUsage) / (1024.0f * 1024.0f);
+        budgetMB = static_cast<float>(info.Budget) / (1024.0f * 1024.0f);
+    }
+}
+#endif // _USE_IMGUI
 
 void EditorManager::Update(Engine* engine)
 {
@@ -398,7 +469,43 @@ void EditorManager::Update(Engine* engine)
 		if (ImGui::BeginTabBar("DebugTabs")) {
 			if (ImGui::BeginTabItem(LanguageManager::Tr("System Data"))) {
 				ImGui::Text(LanguageManager::Tr("--- Performance ---"));
-				ImGui::Text("FPS: %.1f (%.3f ms/frame)", ImGui::GetIO().Framerate, 1000.0f / ImGui::GetIO().Framerate);
+
+				// FPS Graph and numeric
+				float currentFps = ImGui::GetIO().Framerate;
+				static float fpsHistory[100] = {};
+				for (int i = 0; i < 99; ++i) {
+					fpsHistory[i] = fpsHistory[i + 1];
+				}
+				fpsHistory[99] = currentFps;
+				ImGui::Text("FPS: %.1f (%.3f ms/frame)", currentFps, 1000.0f / currentFps);
+				ImGui::PlotLines("##FPSGraph", fpsHistory, 100, 0, nullptr, 0.0f, 120.0f, ImVec2(0, 60.0f));
+
+				// CPU Graph and numeric
+				float currentCpu = GetCPUUsageSmooth();
+				static float cpuHistory[100] = {};
+				for (int i = 0; i < 99; ++i) {
+					cpuHistory[i] = cpuHistory[i + 1];
+				}
+				cpuHistory[99] = currentCpu;
+				ImGui::Text(LanguageManager::Tr("CPU Usage: %.1f %%"), currentCpu);
+				ImGui::PlotLines("##CPUGraph", cpuHistory, 100, 0, nullptr, 0.0f, 100.0f, ImVec2(0, 60.0f));
+
+				// GPU Graph and numeric
+				float currentGpuUsage = 0.0f;
+				float gpuBudget = 0.0f;
+				GetGPUMemoryInfo(engine, currentGpuUsage, gpuBudget);
+				static float gpuHistory[100] = {};
+				for (int i = 0; i < 99; ++i) {
+					gpuHistory[i] = gpuHistory[i + 1];
+				}
+				gpuHistory[99] = currentGpuUsage;
+				if (gpuBudget > 0.0f) {
+					ImGui::Text(LanguageManager::Tr("GPU VRAM: %.1f MB / %.1f MB"), currentGpuUsage, gpuBudget);
+					ImGui::PlotLines("##GPUGraph", gpuHistory, 100, 0, nullptr, 0.0f, gpuBudget, ImVec2(0, 60.0f));
+				} else {
+					ImGui::Text(LanguageManager::Tr("GPU VRAM: %.1f MB"), currentGpuUsage);
+					ImGui::PlotLines("##GPUGraph", gpuHistory, 100, 0, nullptr, 0.0f, 4096.0f, ImVec2(0, 60.0f));
+				}
 
 				static int frameCount = 0;
 				frameCount++;

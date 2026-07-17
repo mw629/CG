@@ -26,7 +26,10 @@ class Draw {
 public:
 
 	void Initialize(ID3D12GraphicsCommandList* commandList, GraphicsPipelineState* graphicsPipelineState, 
-		LightManager* lightManager);
+		LightManager* lightManager, LineRenderer* lineRenderer = nullptr);
+
+	LightManager* GetLightManager() const { return lightManager_; }
+	LineRenderer* GetLineRenderer() const { return lineRenderer_; }
 
 	void SetCamera(Camera* setcamera);
 	void SetEnvironmentTexture(int textureHandel);
@@ -64,6 +67,7 @@ private:
 	ID3D12GraphicsCommandList* commandList_{};
 	GraphicsPipelineState* graphicsPipelineState_{};
 	LightManager* lightManager_{};
+	LineRenderer* lineRenderer_{};
 	Camera* camera_{};
 	D3D12_GPU_DESCRIPTOR_HANDLE environmentTextureSrvHandleGPU_{};
 };

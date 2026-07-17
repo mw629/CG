@@ -153,7 +153,7 @@ void Engine::Setting()
 	Audio::Initialize();
 
 	draw->Initialize(command.get()->GetCommandList(), graphicsPipelineState.get(),
-		lightManager.get());
+		lightManager.get(), lineRenderer.get());
 	Texture::Initialize(graphics->GetDevice(), command->GetCommandList(), descriptorHeap.get(), textureLoader.get());
 
 	// ダミーテクスチャ（0番目）としてロードしておくことで、テクスチャ無しのオブジェクトが描画されたときのクラッシュを防ぐ
