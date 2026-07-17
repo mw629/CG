@@ -152,14 +152,15 @@ void Engine::Setting()
 
 	Audio::Initialize();
 
+	lineRenderer = std::make_unique<LineRenderer>();
+	lineRenderer->Initialize();
+
 	draw->Initialize(command.get()->GetCommandList(), graphicsPipelineState.get(),
 		lightManager.get(), lineRenderer.get());
 	Texture::Initialize(graphics->GetDevice(), command->GetCommandList(), descriptorHeap.get(), textureLoader.get());
 
 	// ダミーテクスチャ（0番目）としてロードしておくことで、テクスチャ無しのオブジェクトが描画されたときのクラッシュを防ぐ
 	std::unique_ptr<Texture> dummyTex = std::make_unique<Texture>();
-	lineRenderer = std::make_unique<LineRenderer>();
-	lineRenderer->Initialize();
 	try {
 		dummyTex->CreateTexture("Resources/DDS/SnowWorld.dds");
 	} catch (...) {

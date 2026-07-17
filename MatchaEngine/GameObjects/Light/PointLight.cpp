@@ -27,7 +27,7 @@ void PointLight::ImGui(bool drawTransform)
 void PointLight::Draw(class Draw& draw)
 {
 #ifdef _USE_IMGUI
-	if (!EditorManager::IsPlaying() && draw.GetLineRenderer()) {
+	if (!EditorManager::IsPlaying() && draw.GetLineRenderer() && GameObject::selectedObject_ == this) {
 		Vector3 center = transform_.translate;
 		Vector4 col = color_;
 		float r = radius_;

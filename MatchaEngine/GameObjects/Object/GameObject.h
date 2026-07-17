@@ -17,6 +17,7 @@ class GameObject
 {
 public:
     std::string name_ = "GameObject";
+    static inline GameObject* selectedObject_ = nullptr;
 protected:
     Transform transform_{ {1.0f,1.0f,1.0f}, {0.0f,0.0f,0.0f}, {0.0f,0.0f,0.0f} };
     bool isActive_ = true;

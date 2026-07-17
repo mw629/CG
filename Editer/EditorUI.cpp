@@ -84,7 +84,7 @@ void EditorUI::ProcessMousePicking(GameObjectManager* gameObjectManager, const M
     }
 
     if (closestObj) {
-        selectedObject_ = closestObj;
+        SetSelectedObject(closestObj);
     }
 #endif
 }
@@ -173,7 +173,7 @@ void EditorUI::Draw(GameObjectManager* gameObjectManager, const Matrix4x4& view,
         if (sphereObj) {
             isJointOpen = ImGui::TreeNodeEx((void*)sphereObj.get(), jointFlags, "%s", sphereObj->GetName().c_str());
             if (ImGui::IsItemClicked(0) || ImGui::IsItemClicked(1)) {
-                selectedObject_ = sphereObj;
+                SetSelectedObject(sphereObj);
             }
         } else {
             isJointOpen = ImGui::TreeNodeEx((void*)&joint, jointFlags, "%s", joint.name.c_str());
@@ -218,7 +218,7 @@ void EditorUI::Draw(GameObjectManager* gameObjectManager, const Matrix4x4& view,
         }
 
         if (ImGui::IsItemClicked(0) || ImGui::IsItemClicked(1)) {
-            selectedObject_ = obj;
+            SetSelectedObject(obj);
         }
 
         if (ImGui::BeginPopupContextItem()) {
@@ -272,7 +272,7 @@ void EditorUI::Draw(GameObjectManager* gameObjectManager, const Matrix4x4& view,
     if (objToDelete) {
         gameObjectManager->RemoveObject(objToDelete);
         if (selectedObject_ == objToDelete) {
-            selectedObject_ = nullptr;
+            SetSelectedObject(nullptr);
         }
     }
     if (objToCopy) {
