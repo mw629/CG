@@ -37,6 +37,7 @@ public:
 		GrayScale,
 		Sepia,
 		OutLine,
+		LuminanceOutLine,
 		Smoothing,
 		Vignetting,
 		RadialBlur,

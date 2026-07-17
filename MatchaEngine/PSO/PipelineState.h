@@ -33,6 +33,7 @@ const ShaderName CopyImageShader = "CopyShader";
 const ShaderName GrayScaleShader = "GrayScaleShader";
 const ShaderName GrayScaleSepiaToneShader = "GrayScaleSepiaToneShader";
 const ShaderName OutLineShader = "OutLineShader";
+const ShaderName LuminanceOutLineShader = "LuminanceOutLineShader";
 const ShaderName SmoothingShader = "SmoothingShader";
 const ShaderName GaussianFilterShader = "GaussianFilterShader";
 const ShaderName VignettingShader = "VignettingShader";
