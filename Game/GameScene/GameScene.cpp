@@ -563,7 +563,7 @@ void GameScene::CheckCollisions()
 	// 全障害物との当たり判定
 	for (int i = 0; i < stageSettings_->GetMaxObstacles(); i++) {
 		Obstacle* obstacle = stageSettings_->GetObstacle(i);
-		if (!obstacle->GetIsActive()) continue;
+		if (!obstacle->GetIsActive() || obstacle->GetIsHit()) continue;
 
 		AABB obstacleAABB = Collision::MakeAABB(
 			obstacle->GetTransform(),
@@ -614,6 +614,38 @@ void GameScene::CheckCollisions()
 				particleManager_->EmitShockwave(player_->GetTransform().translate);
 
 				continue; // ゲームオーバーにはならず、次の判定へ
+			}
+
+			if (obstacle->GetType() == Obstacle::Type::BarrierItem) {
+				obstacle->OnHit();
+				player_->SetHasBarrier(true);
+				particleManager_->EmitShockwave(player_->GetTransform().translate);
+				continue;
+			}
+
+			if (obstacle->GetType() == Obstacle::Type::ClearItem) {
+				obstacle->OnHit();
+				particleManager_->EmitShockwave(player_->GetTransform().translate);
+				
+				// 画面内の障害物を吹き飛ばす
+				for (int j = 0; j < stageSettings_->GetMaxObstacles(); j++) {
+					Obstacle* obs = stageSettings_->GetObstacle(j);
+					if (obs->GetIsActive() && 
+						(obs->GetType() == Obstacle::Type::Low || 
+						 obs->GetType() == Obstacle::Type::High || 
+						 obs->GetType() == Obstacle::Type::Wall)) {
+						obs->OnBlowAway(); 
+					}
+				}
+				continue;
+			}
+
+			// プレイヤーがバリアを持っている場合は消費して防ぐ
+			if (player_->GetHasBarrier()) {
+				player_->SetHasBarrier(false);
+				obstacle->OnBlowAway();
+				particleManager_->EmitHitEffect(player_->GetTransform().translate);
+				continue; // ゲームオーバーにならず次へ
 			}
 
 			// 衝突！ヒット演出へ移行
@@ -677,7 +709,7 @@ void GameScene::CheckKeepRolling()
 
 		for (int i = 0; i < stageSettings_->GetMaxObstacles(); i++) {
 			Obstacle* obstacle = stageSettings_->GetObstacle(i);
-			if (!obstacle->GetIsActive()) continue;
+			if (!obstacle->GetIsActive() || obstacle->GetIsHit()) continue;
 
 			if (obstacle->GetType() == Obstacle::Type::High) {
 				AABB obstacleAABB = Collision::MakeAABB(

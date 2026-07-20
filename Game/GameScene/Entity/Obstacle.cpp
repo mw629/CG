@@ -79,6 +79,22 @@ void Obstacle::SetType(Type type) {
     model_->GetMartial()->SetColor({1.0f, 0.0f, 1.0f, 1.0f}); // マゼンタ
     model_->SetShader("ObjectShader");
     break;
+  case Type::BarrierItem:
+    collisionWidth_ = 1.0f;
+    collisionHeight_ = 1.0f;
+    collisionDepth_ = 1.0f;
+    transform_.scale = {1.0f, 1.0f, 1.0f};
+    model_->GetMartial()->SetColor({0.0f, 1.0f, 0.0f, 1.0f}); // 緑（バリア）
+    model_->SetShader("ObjectShader");
+    break;
+  case Type::ClearItem:
+    collisionWidth_ = 1.0f;
+    collisionHeight_ = 1.0f;
+    collisionDepth_ = 1.0f;
+    transform_.scale = {1.0f, 1.0f, 1.0f};
+    model_->GetMartial()->SetColor({1.0f, 0.5f, 0.0f, 1.0f}); // オレンジ（ボム/クリア）
+    model_->SetShader("ObjectShader");
+    break;
   }
 
   model_->SetTransform(transform_);

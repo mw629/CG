@@ -45,6 +45,8 @@ void Player::Reset()
 	forcedCenterDuration_ = 30.0f;
 	forcedCenterStartX_ = 0.0f;
 
+	SetHasBarrier(false);
+
 	model_.get()->SetTransform(transform_);
 }
 
@@ -295,5 +297,17 @@ void Player::StartForceToCenter(float duration)
 		isRolling_ = false;
 		transform_.scale.y = 1.0f;
 		transform_.translate.y = baseHeight_;
+	}
+}
+
+void Player::SetHasBarrier(bool hasBarrier)
+{
+	hasBarrier_ = hasBarrier;
+	if (model_ && model_->GetMartial()) {
+		if (hasBarrier_) {
+			model_->GetMartial()->SetColor({ 0.0f, 1.0f, 1.0f, 1.0f }); // シアン
+		} else {
+			model_->GetMartial()->SetColor({ 1.0f, 1.0f, 1.0f, 1.0f }); // 白（デフォルト）
+		}
 	}
 }

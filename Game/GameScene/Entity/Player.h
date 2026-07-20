@@ -66,6 +66,9 @@ private:
 	float forcedCenterDuration_ = 30.0f; // 中央に到達するまでのフレーム数
 	float forcedCenterStartX_ = 0.0f;
 
+	// バリアアイテム取得時の状態
+	bool hasBarrier_ = false;
+
 public:
 
 	Player();
@@ -95,6 +98,9 @@ public:
 	// GetTransform() is inherited from GameObject
 	bool GetIsRolling() const { return isRolling_; }
 	void SetKeepRolling(bool keep) { keepRolling_ = keep; }
+
+	bool GetHasBarrier() const { return hasBarrier_; }
+	void SetHasBarrier(bool hasBarrier);
 
 	// ヒット演出用
 	void OnHit(bool isTrip = false);

@@ -18,7 +18,9 @@ public:
 		Wall,  // レーン移動で避ける（壁）
 		Bonus, // 当たると吹き飛ぶボーナスエネミー
 		GuideFloor, // 中央へ誘導するトリガー床
-		CameraItem // 取るとカメラが移動するアイテム
+		CameraItem, // 取るとカメラが移動するアイテム
+		BarrierItem, // バリアを張るアイテム
+		ClearItem // 障害物を消すアイテム
 	};
 
 private:
@@ -76,6 +78,7 @@ public:
 
 	// ゲッター
 	Type GetType() const { return type_; }
+	bool GetIsHit() const { return isHit_; }
 	float GetCollisionWidth() const { return collisionWidth_; }
 	float GetCollisionHeight() const { return collisionHeight_; }
 	float GetCollisionDepth() const { return collisionDepth_; }

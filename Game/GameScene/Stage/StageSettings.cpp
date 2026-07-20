@@ -266,9 +266,10 @@ void StageSettings::SpawnObstacles(float z)
 		}
 	}
 
-	// たまにボーナスエネミーを配置する (約10%の確率)
-	// ただし1レーンの場合はボーナスエネミーを出さない
+	// たまにボーナスまたはアイテムを配置する (約10%の確率)
+	// ただし1レーンの場合は出さない
 	int bonusLane = -1;
+	Obstacle::Type itemType = Obstacle::Type::Bonus;
 	if (laneCount_ > 1 && std::rand() % 10 == 0) {
 		// 障害物があるレーンを優先して選ぶ
 		std::vector<int> obstacleLanes;
@@ -283,6 +284,11 @@ void StageSettings::SpawnObstacles(float z)
 		} else {
 			bonusLane = std::rand() % laneCount_;
 		}
+		
+		int randItem = std::rand() % 3;
+		if (randItem == 0) itemType = Obstacle::Type::Bonus;
+		else if (randItem == 1) itemType = Obstacle::Type::BarrierItem;
+		else if (randItem == 2) itemType = Obstacle::Type::ClearItem;
 	}
 
 	// 決定した内容で各レーンに生成
@@ -292,9 +298,9 @@ void StageSettings::SpawnObstacles(float z)
 		int lane = minLaneIndex_ + i; // -1, 0, 1
 		float x = static_cast<float>(lane) * laneWidth_;
 
-		// ボーナスエネミーの生成（障害物の手前に配置）
+		// ボーナスまたはアイテムの生成（障害物の手前に配置）
 		if (i == bonusLane) {
-			obstacles_[nextObstacleIndex_]->SetType(Obstacle::Type::Bonus);
+			obstacles_[nextObstacleIndex_]->SetType(itemType);
 			obstacles_[nextObstacleIndex_]->Spawn(x, 2.5f, z - 5.0f);
 			nextObstacleIndex_ = (nextObstacleIndex_ + 1) % kMaxObstacles_;
 		}
