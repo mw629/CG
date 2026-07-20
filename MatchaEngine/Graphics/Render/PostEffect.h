@@ -2,6 +2,7 @@
 #include <wrl.h>
 #include <d3d12.h>
 #include <string>
+#include <vector>
 #include <unordered_map>
 #include "../../Core/VariableTypes.h"
 
@@ -32,19 +33,9 @@ struct PostEffectShaderData {
 
 class PostEffect {
 public:
-	enum class Type {
-		Normal,
-		GrayScale,
-		Sepia,
-		OutLine,
-		LuminanceOutLine,
-		Smoothing,
-		Vignetting,
-		RadialBlur,
-		Dissolve,
-		GaussianFilter,
-		Random
-	};
+	// ---- 後方互換のためのシェーダー名定数 ----
+	static constexpr const char* kNormalShaderName   = "CopyShader";
+	static constexpr const char* kShaderSuffix       = "Shader";
 
 private:
 	Microsoft::WRL::ComPtr<ID3D12Resource> constantBufferResource_;
@@ -69,7 +60,7 @@ private:
 	std::unordered_map<std::string, std::string> texturePaths_;
 	std::string maskTexturePath_ = "Resources/Texture/noise0.png";
 
-	Type activeType_ = Type::Normal;
+	// アクティブなシェーダー名（文字列で一元管理）
 	std::string activeShaderName_ = "CopyShader";
 
 public:
@@ -128,12 +119,31 @@ public:
 
 	void ImGuiWindow();
 
-	// Methods for managing active post effect
+	// ---- アクティブポストエフェクト管理 ----
 	static std::vector<PostEffect*> s_instances;
-	static void SetActivePostEffect(Type type);
-	void SetActivePostEffectByName(const std::string& name) { activeShaderName_ = name; }
-	Type GetActivePostEffect() const { return activeType_; }
+
+	// スキャン済みのシェーダー名リスト（表示名 → シェーダー名）
+	// 例: "GrayScale" → "GrayScaleShader"
+	static std::vector<std::pair<std::string, std::string>> s_registeredEffects;
+
+	// PostEffectフォルダをスキャンしてs_registeredEffectsを構築する（起動時に1回呼ぶ）
+	static void ScanPostEffectShaders(const std::string& shaderDir = "Resources/Shader/PostEffect");
+
+	// シェーダー名で直接セット
+	void SetActivePostEffect(const std::string& shaderName) { activeShaderName_ = shaderName; }
+
+	// 先頭インスタンスにシェーダー名でセット（グローバル操作）
+	static void SetActivePostEffectGlobal(const std::string& shaderName) {
+		if (!s_instances.empty()) {
+			s_instances[0]->activeShaderName_ = shaderName;
+		}
+	}
+
+	// アクティブなシェーダー名取得
 	std::string GetActiveShaderName() const { return activeShaderName_; }
+
+	// Normal (CopyShader) かどうか判定
+	bool IsNormalEffect() const { return activeShaderName_ == kNormalShaderName; }
 
 	void SetBlurStrength(float strength) {
 		blurStrength_ = strength;

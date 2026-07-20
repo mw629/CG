@@ -213,18 +213,38 @@ void GraphicsPipelineState::ALLPSOCreate(std::ostream& os, ID3D12Device* device)
 		{ SkyBoxShader, { L"Resources/Shader/SkyBoxShader/SkyBox.VS.hlsl", L"Resources/Shader/SkyBoxShader/SkyBox.PS.hlsl", objInput, true, D3D12_DEPTH_WRITE_MASK_ZERO, D3D12_COMPARISON_FUNC_LESS_EQUAL, D3D12_CULL_MODE_FRONT, D3D12_FILL_MODE_SOLID } },
 
 		//ポストエフェクト用のシェーダーは全て同じ入力レイアウトを使用する
-		{ CopyImageShader, {  L"Resources/Shader/PostEffect/PostEffect.VS.hlsl", L"Resources/Shader/PostEffect/CopyImage.PS.hlsl", lineInput, false, D3D12_DEPTH_WRITE_MASK_ZERO, D3D12_COMPARISON_FUNC_ALWAYS, D3D12_CULL_MODE_NONE, D3D12_FILL_MODE_SOLID } },
-		{ GrayScaleShader, {  L"Resources/Shader/PostEffect/PostEffect.VS.hlsl", L"Resources/Shader/PostEffect/GrayScale.PS.hlsl", lineInput, false, D3D12_DEPTH_WRITE_MASK_ZERO, D3D12_COMPARISON_FUNC_ALWAYS, D3D12_CULL_MODE_NONE, D3D12_FILL_MODE_SOLID } },
-		{ GrayScaleSepiaToneShader, { L"Resources/Shader/PostEffect/PostEffect.VS.hlsl", L"Resources/Shader/PostEffect/GrayScaleSepiaTone.PS.hlsl", lineInput, false, D3D12_DEPTH_WRITE_MASK_ZERO, D3D12_COMPARISON_FUNC_ALWAYS, D3D12_CULL_MODE_NONE, D3D12_FILL_MODE_SOLID } },
-		{ OutLineShader,{ L"Resources/Shader/PostEffect/PostEffect.VS.hlsl", L"Resources/Shader/PostEffect/OutLine.PS.hlsl", lineInput, false, D3D12_DEPTH_WRITE_MASK_ZERO, D3D12_COMPARISON_FUNC_ALWAYS, D3D12_CULL_MODE_NONE, D3D12_FILL_MODE_SOLID } },
-		{ LuminanceOutLineShader,{ L"Resources/Shader/PostEffect/PostEffect.VS.hlsl", L"Resources/Shader/PostEffect/LuminanceOutLine.PS.hlsl", lineInput, false, D3D12_DEPTH_WRITE_MASK_ZERO, D3D12_COMPARISON_FUNC_ALWAYS, D3D12_CULL_MODE_NONE, D3D12_FILL_MODE_SOLID } },
-		{ SmoothingShader, { L"Resources/Shader/PostEffect/PostEffect.VS.hlsl", L"Resources/Shader/PostEffect/Smoothing.PS.hlsl", lineInput, false, D3D12_DEPTH_WRITE_MASK_ZERO, D3D12_COMPARISON_FUNC_ALWAYS, D3D12_CULL_MODE_NONE, D3D12_FILL_MODE_SOLID } },
-		{ GaussianFilterShader, { L"Resources/Shader/PostEffect/PostEffect.VS.hlsl", L"Resources/Shader/PostEffect/GaussianFilter.PS.hlsl", lineInput, false, D3D12_DEPTH_WRITE_MASK_ZERO, D3D12_COMPARISON_FUNC_ALWAYS, D3D12_CULL_MODE_NONE, D3D12_FILL_MODE_SOLID } },
-		{ VignettingShader, { L"Resources/Shader/PostEffect/PostEffect.VS.hlsl", L"Resources/Shader/PostEffect/Vignetting.PS.hlsl", lineInput, false, D3D12_DEPTH_WRITE_MASK_ZERO, D3D12_COMPARISON_FUNC_ALWAYS, D3D12_CULL_MODE_NONE, D3D12_FILL_MODE_SOLID } },
-		{ RadialBlurShader, { L"Resources/Shader/PostEffect/PostEffect.VS.hlsl", L"Resources/Shader/PostEffect/RadialBlur.PS.hlsl", lineInput, false, D3D12_DEPTH_WRITE_MASK_ZERO, D3D12_COMPARISON_FUNC_ALWAYS, D3D12_CULL_MODE_NONE, D3D12_FILL_MODE_SOLID } },
-		{ DissolveShader, { L"Resources/Shader/PostEffect/PostEffect.VS.hlsl", L"Resources/Shader/PostEffect/Dissolve.PS.hlsl", lineInput, false, D3D12_DEPTH_WRITE_MASK_ZERO, D3D12_COMPARISON_FUNC_ALWAYS, D3D12_CULL_MODE_NONE, D3D12_FILL_MODE_SOLID } },
-		{ RandomShader, { L"Resources/Shader/PostEffect/PostEffect.VS.hlsl", L"Resources/Shader/PostEffect/Random.PS.hlsl", lineInput, false, D3D12_DEPTH_WRITE_MASK_ZERO, D3D12_COMPARISON_FUNC_ALWAYS, D3D12_CULL_MODE_NONE, D3D12_FILL_MODE_SOLID } }
+		// CopyImage (Normal) は先頭に固定登録
+		{ CopyImageShader, { L"Resources/Shader/PostEffect/PostEffect.VS.hlsl", L"Resources/Shader/PostEffect/CopyImage.PS.hlsl", lineInput, false, D3D12_DEPTH_WRITE_MASK_ZERO, D3D12_COMPARISON_FUNC_ALWAYS, D3D12_CULL_MODE_NONE, D3D12_FILL_MODE_SOLID } },
 	};
+
+	// ---- ポストエフェクトシェーダーをフォルダから自動スキャン ----
+	// "Resources/Shader/PostEffect/" 内の *.PS.hlsl を列挙してPSOを自動生成。
+	// 新しいポストエフェクトを追加するには HLSLファイルを置くだけでよい。
+	std::filesystem::path postEffectShaderDir = "Resources/Shader/PostEffect";
+	if (std::filesystem::exists(postEffectShaderDir)) {
+		std::vector<std::filesystem::path> psFiles;
+		for (const auto& entry : std::filesystem::directory_iterator(postEffectShaderDir)) {
+			const std::string filename = entry.path().filename().string();
+			// "*.PS.hlsl" でかつ "CopyImage" (固定登録済み) は除外
+			if (filename.size() > 8 &&
+				filename.substr(filename.size() - 8) == ".PS.hlsl" &&
+				filename.find("CopyImage") == std::string::npos)
+			{
+				psFiles.push_back(entry.path());
+			}
+		}
+		// ファイル名でソートして順序を安定させる
+		std::sort(psFiles.begin(), psFiles.end());
+
+		for (const auto& psPath : psFiles) {
+			const std::string filename = psPath.filename().string();
+			// "GrayScale.PS.hlsl" → shaderName = "GrayScaleShader"
+			const std::string stem = filename.substr(0, filename.find(".PS.hlsl"));
+			const std::string shaderNameStr = stem + "Shader";
+			const std::wstring psWPath = psPath.wstring();
+			configs.push_back({ shaderNameStr, { L"Resources/Shader/PostEffect/PostEffect.VS.hlsl", psWPath, lineInput, false, D3D12_DEPTH_WRITE_MASK_ZERO, D3D12_COMPARISON_FUNC_ALWAYS, D3D12_CULL_MODE_NONE, D3D12_FILL_MODE_SOLID } });
+		}
+	}
 
 	std::filesystem::path particleShaderDir = "Resources/Shader/ParticleShader";
 	if (std::filesystem::exists(particleShaderDir)) {

@@ -2,9 +2,12 @@
 #include "../GraphicsDevice.h"
 #include "../../Resource/Texture.h"
 #include <imgui.h>
+#include <filesystem>
+#include <algorithm>
 
 
 std::vector<PostEffect*> PostEffect::s_instances;
+std::vector<std::pair<std::string, std::string>> PostEffect::s_registeredEffects;
 
 PostEffect::PostEffect() {
 	s_instances.push_back(this);
@@ -131,6 +134,45 @@ void PostEffect::SetMaskTexturePath(const std::string& filePath) {
 	SetTexturePath("gMaskTexture", filePath);
 }
 
+// -----------------------------------------------------------------------
+// PostEffectシェーダーフォルダをスキャンして s_registeredEffects を構築
+// -----------------------------------------------------------------------
+void PostEffect::ScanPostEffectShaders(const std::string& shaderDir) {
+	s_registeredEffects.clear();
+
+	// "Normal (CopyImage)" を先頭に固定登録
+	s_registeredEffects.emplace_back("Normal (CopyImage)", "CopyShader");
+
+	std::filesystem::path dir(shaderDir);
+	if (!std::filesystem::exists(dir)) return;
+
+	// *.PS.hlsl ファイルをスキャン（アルファベット順でソート）
+	std::vector<std::filesystem::path> psFiles;
+	for (const auto& entry : std::filesystem::directory_iterator(dir)) {
+		const std::string filename = entry.path().filename().string();
+		// "*.PS.hlsl" パターンのみ対象、"CopyImage" と VS は除外
+		if (filename.size() > 8 &&
+			filename.substr(filename.size() - 8) == ".PS.hlsl" &&
+			filename.find("CopyImage") == std::string::npos)
+		{
+			psFiles.push_back(entry.path());
+		}
+	}
+	// ファイル名でソート（表示順を安定させる）
+	std::sort(psFiles.begin(), psFiles.end());
+
+	for (const auto& path : psFiles) {
+		const std::string filename = path.filename().string();
+		// "GrayScale.PS.hlsl" → displayName = "GrayScale", shaderName = "GrayScaleShader"
+		const std::string stem = filename.substr(0, filename.find(".PS.hlsl"));
+		const std::string shaderName = stem + "Shader";
+		s_registeredEffects.emplace_back(stem, shaderName);
+	}
+}
+
+// -----------------------------------------------------------------------
+// ImGui ウィンドウ
+// -----------------------------------------------------------------------
 void PostEffect::ImGuiWindow() {
 #ifdef _USE_IMGUI
 	if (ImGui::TreeNode(("Post Effect Parameters##" + std::to_string((size_t)this)).c_str())) {
@@ -154,7 +196,8 @@ void PostEffect::ImGuiWindow() {
 			cbData_->kernelSize = kernelSize_;
 		}
 
-		if (activeType_ == Type::Smoothing || activeType_ == Type::GaussianFilter) {
+		// Smoothing / GaussianFilter の追加パラメーター
+		if (activeShaderName_ == "SmoothingShader" || activeShaderName_ == "GaussianFilterShader") {
 			ImGui::SliderFloat("Blur Strength##PostEffect", &blurStrength_, 0.0f, 10.0f);
 
 			ImGui::Text("Kernel Size:"); ImGui::SameLine();
@@ -162,8 +205,8 @@ void PostEffect::ImGuiWindow() {
 			ImGui::RadioButton("5x5##KernelSize", &kernelSize_, 5);
 		}
 
-
-		if (activeType_ == Type::Dissolve) {
+		// Dissolve の追加パラメーター
+		if (activeShaderName_ == "DissolveShader") {
 			char buffer[256];
 			strcpy_s(buffer, sizeof(buffer), maskTexturePath_.c_str());
 			if (ImGui::InputText("Mask Texture##PostEffect", buffer, sizeof(buffer), ImGuiInputTextFlags_EnterReturnsTrue)) {
@@ -174,50 +217,36 @@ void PostEffect::ImGuiWindow() {
 		ImGui::TreePop();
 	}
 
-	// Post Effect type selection
+	// ---- Post Effect 種類選択 (スキャン結果から動的生成) ----
 	if (ImGui::TreeNode(("Post Effect Selection##" + std::to_string((size_t)this)).c_str())) {
-		int currentEffectIndex = static_cast<int>(activeType_);
-		const char* effectNames[] = { "Normal", "GrayScale", "Sepia", "OutLine", "LuminanceOutLine", "Smoothing", "Vignetting", "RadialBlur", "Dissolve", "GaussianFilter","Random"};
 
-		if (ImGui::Combo("Post Effect Type", &currentEffectIndex, effectNames, IM_ARRAYSIZE(effectNames))) {
-			activeType_ = static_cast<Type>(currentEffectIndex);
-			switch (activeType_) {
-			case Type::Normal:           activeShaderName_ = "CopyShader"; break;
-			case Type::GrayScale:        activeShaderName_ = "GrayScaleShader"; break;
-			case Type::Sepia:            activeShaderName_ = "GrayScaleSepiaToneShader"; break;
-			case Type::OutLine:          activeShaderName_ = "OutLineShader"; break;
-			case Type::LuminanceOutLine: activeShaderName_ = "LuminanceOutLineShader"; break;
-			case Type::Smoothing:        activeShaderName_ = "SmoothingShader"; break;
-			case Type::Vignetting:       activeShaderName_ = "VignettingShader"; break;
-			case Type::RadialBlur:       activeShaderName_ = "RadialBlurShader"; break;
-			case Type::Dissolve:         activeShaderName_ = "DissolveShader"; break;
-			case Type::GaussianFilter:   activeShaderName_ = "GaussianFilterShader"; break;
-			case Type::Random:           activeShaderName_ = "RandomShader"; break;
-			default:                     activeShaderName_ = "CopyShader"; break;
+		if (s_registeredEffects.empty()) {
+			ImGui::TextColored(ImVec4(1, 0.5f, 0, 1), "No post effects found. Call PostEffect::ScanPostEffectShaders() at startup.");
+		} else {
+			// 現在のインデックスを探す
+			int currentIndex = 0;
+			for (int i = 0; i < (int)s_registeredEffects.size(); ++i) {
+				if (s_registeredEffects[i].second == activeShaderName_) {
+					currentIndex = i;
+					break;
+				}
+			}
+
+			// 表示名リストを構築
+			std::vector<const char*> displayNames;
+			displayNames.reserve(s_registeredEffects.size());
+			for (const auto& e : s_registeredEffects) {
+				displayNames.push_back(e.first.c_str());
+			}
+
+			if (ImGui::Combo("Post Effect Type", &currentIndex,
+				displayNames.data(), (int)displayNames.size()))
+			{
+				activeShaderName_ = s_registeredEffects[currentIndex].second;
 			}
 		}
 
 		ImGui::TreePop();
 	}
 #endif
-}
-
-void PostEffect::SetActivePostEffect(Type type) {
-	if (!s_instances.empty()) {
-		s_instances[0]->activeType_ = type;
-		switch (type) {
-		case Type::Normal:           s_instances[0]->activeShaderName_ = "CopyShader"; break;
-		case Type::GrayScale:        s_instances[0]->activeShaderName_ = "GrayScaleShader"; break;
-		case Type::Sepia:            s_instances[0]->activeShaderName_ = "GrayScaleSepiaToneShader"; break;
-		case Type::OutLine:          s_instances[0]->activeShaderName_ = "OutLineShader"; break;
-		case Type::LuminanceOutLine: s_instances[0]->activeShaderName_ = "LuminanceOutLineShader"; break;
-		case Type::Smoothing:        s_instances[0]->activeShaderName_ = "SmoothingShader"; break;
-		case Type::Vignetting:       s_instances[0]->activeShaderName_ = "VignettingShader"; break;
-		case Type::RadialBlur:       s_instances[0]->activeShaderName_ = "RadialBlurShader"; break;
-		case Type::Dissolve:         s_instances[0]->activeShaderName_ = "DissolveShader"; break;
-		case Type::GaussianFilter:   s_instances[0]->activeShaderName_ = "GaussianFilterShader"; break;
-		case Type::Random:           s_instances[0]->activeShaderName_ = "RandomShader"; break;
-		default:                     s_instances[0]->activeShaderName_ = "CopyShader"; break;
-		}
-	}
 }

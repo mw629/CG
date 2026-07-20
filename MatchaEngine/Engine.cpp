@@ -118,6 +118,9 @@ void Engine::Setting()
 
 	graphicsPipelineState.get()->ALLPSOCreate(logStream, graphics.get()->GetDevice());
 
+	// ポストエフェクトシェーダーフォルダをスキャンしてImGuiリストを自動構築
+	PostEffect::ScanPostEffectShaders();
+
 
 	lightManager = std::make_unique<LightManager>();
 	lightManager->Initialize();
@@ -202,7 +205,7 @@ void Engine::PostDraw()
 	int nextRT = 1;
 
 	for (auto& effect : postEffects_) {
-		if (effect->GetActivePostEffect() == PostEffect::Type::Normal) continue; // Skip Normal (CopyShader) if we want, or keep it. Let's process it so we don't break ping-pong if user adds Normal on purpose.
+		if (effect->IsNormalEffect()) continue; // Normal (CopyShader) はスキップ
 
 		renderTextures[nextRT]->TransitionToRenderTarget(command->GetCommandList());
 		// renderTextures[nextRT]->Clear(command->GetCommandList()); // No need to clear since we render full screen
@@ -247,7 +250,7 @@ void Engine::PostDraw()
 RenderTexture* Engine::GetFinalRenderTexture() {
 	int finalIndex = 0;
 	for (auto& effect : postEffects_) {
-		if (effect->GetActivePostEffect() != PostEffect::Type::Normal) {
+		if (!effect->IsNormalEffect()) {
 			finalIndex = 1 - finalIndex;
 		}
 	}

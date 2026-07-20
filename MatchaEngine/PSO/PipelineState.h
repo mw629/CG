@@ -40,6 +40,7 @@ const ShaderName VignettingShader = "VignettingShader";
 const ShaderName RadialBlurShader = "RadialBlurShader";
 const ShaderName DissolveShader = "DissolveShader";
 const ShaderName RandomShader = "RandomShader";
+const ShaderName MonochromeShader = "MonochromeShader";
 
 inline const char* ShaderNameToString(const ShaderName& name)
 {
