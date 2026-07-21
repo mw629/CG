@@ -353,6 +353,12 @@ void Draw::DrawPostEffect(D3D12_GPU_DESCRIPTOR_HANDLE textureHandle, ShaderName 
 			commandList_->SetGraphicsRootConstantBufferView(cbIndex, postEffect->GetConstantBufferResource()->GetGPUVirtualAddress());
 		}
 
+		// Pixelate 用定数バッファ (register b1) をバインド
+		UINT pixelCbIndex = graphicsPipelineState_->GetRootParameterIndex(shader, BlendMode::kBlendModeNone, "PixelationParams");
+		if (pixelCbIndex != static_cast<UINT>(-1) && postEffect->GetPixelationBufferResource()) {
+			commandList_->SetGraphicsRootConstantBufferView(pixelCbIndex, postEffect->GetPixelationBufferResource()->GetGPUVirtualAddress());
+		}
+
 		// Bind any additional textures registered in the post effect
 		for (const auto& [name, path] : postEffect->GetTexturePaths()) {
 			UINT texIndex = graphicsPipelineState_->GetRootParameterIndex(shader, BlendMode::kBlendModeNone, name);
