@@ -40,7 +40,7 @@
                     1.0
                 ],
                 "translate": [
-                    0.0,
+                    -2.0,
                     3.0,
                     0.0
                 ]
@@ -65,7 +65,7 @@
                 "translate": [
                     -2.0,
                     -23.0,
-                    0.0
+                    14.734031677246094
                 ]
             },
             "type": "RenderObject"
@@ -89,7 +89,7 @@
                 "translate": [
                     0.0,
                     -23.0,
-                    0.0
+                    14.734031677246094
                 ]
             },
             "type": "RenderObject"
@@ -113,7 +113,7 @@
                 "translate": [
                     2.0,
                     -23.0,
-                    0.0
+                    14.734031677246094
                 ]
             },
             "type": "RenderObject"
@@ -137,7 +137,7 @@
                 "translate": [
                     -2.0,
                     -23.0,
-                    10.0
+                    24.73403549194336
                 ]
             },
             "type": "RenderObject"
@@ -161,7 +161,7 @@
                 "translate": [
                     0.0,
                     -23.0,
-                    10.0
+                    24.73403549194336
                 ]
             },
             "type": "RenderObject"
@@ -185,7 +185,7 @@
                 "translate": [
                     2.0,
                     -23.0,
-                    10.0
+                    24.73403549194336
                 ]
             },
             "type": "RenderObject"
@@ -209,7 +209,7 @@
                 "translate": [
                     -2.0,
                     -23.0,
-                    20.0
+                    34.734031677246094
                 ]
             },
             "type": "RenderObject"
@@ -233,7 +233,7 @@
                 "translate": [
                     0.0,
                     -23.0,
-                    20.0
+                    34.734031677246094
                 ]
             },
             "type": "RenderObject"
@@ -257,7 +257,7 @@
                 "translate": [
                     2.0,
                     -23.0,
-                    20.0
+                    34.734031677246094
                 ]
             },
             "type": "RenderObject"
@@ -281,7 +281,7 @@
                 "translate": [
                     -2.0,
                     -23.0,
-                    30.0
+                    -5.510963439941406
                 ]
             },
             "type": "RenderObject"
@@ -305,7 +305,7 @@
                 "translate": [
                     0.0,
                     -23.0,
-                    30.0
+                    -5.510963439941406
                 ]
             },
             "type": "RenderObject"
@@ -329,7 +329,7 @@
                 "translate": [
                     2.0,
                     -23.0,
-                    30.0
+                    -5.510963439941406
                 ]
             },
             "type": "RenderObject"
@@ -353,7 +353,7 @@
                 "translate": [
                     -2.0,
                     -23.0,
-                    40.0
+                    4.48903226852417
                 ]
             },
             "type": "RenderObject"
@@ -377,7 +377,7 @@
                 "translate": [
                     0.0,
                     -23.0,
-                    40.0
+                    4.48903226852417
                 ]
             },
             "type": "RenderObject"
@@ -401,13 +401,61 @@
                 "translate": [
                     2.0,
                     -23.0,
-                    40.0
+                    4.48903226852417
                 ]
             },
             "type": "RenderObject"
         },
         {
-            "isActive": false,
+            "isActive": true,
+            "isLocked": false,
+            "modelFilePath": "",
+            "name": "SidePlaneL",
+            "transform": {
+                "rotate": [
+                    1.570796012878418,
+                    0.0,
+                    0.0
+                ],
+                "scale": [
+                    50.0,
+                    20.0,
+                    1.0
+                ],
+                "translate": [
+                    -53.0,
+                    2.0,
+                    15.0
+                ]
+            },
+            "type": "RenderObject"
+        },
+        {
+            "isActive": true,
+            "isLocked": false,
+            "modelFilePath": "",
+            "name": "SidePlaneR",
+            "transform": {
+                "rotate": [
+                    1.570796012878418,
+                    0.0,
+                    0.0
+                ],
+                "scale": [
+                    50.0,
+                    20.0,
+                    1.0
+                ],
+                "translate": [
+                    53.0,
+                    2.0,
+                    15.0
+                ]
+            },
+            "type": "RenderObject"
+        },
+        {
+            "isActive": true,
             "isLocked": false,
             "name": "Obstacle 0",
             "transform": {
@@ -422,9 +470,9 @@
                     1.0
                 ],
                 "translate": [
-                    0.0,
-                    0.0,
-                    0.0
+                    2.0,
+                    4.599999904632568,
+                    39.475013732910156
                 ]
             }
         },
@@ -859,9 +907,9 @@
             "name": "Directional Light",
             "transform": {
                 "rotate": [
-                    0.0,
-                    0.0,
-                    0.0
+                    0.5,
+                    -1.0,
+                    0.5
                 ],
                 "scale": [
                     1.0,
@@ -869,9 +917,9 @@
                     1.0
                 ],
                 "translate": [
-                    0.0,
-                    0.0,
-                    0.0
+                    -50.0,
+                    100.0,
+                    -50.0
                 ]
             },
             "type": "DirectionalLight"
