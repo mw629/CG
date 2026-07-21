@@ -24,11 +24,14 @@ struct PostEffectShaderData {
 	float blurStrength;
 	int kernelSize;
 	float padding[2];
+	float color[3];
+	float paddingColor;
 	PaddedFloat kernel3x3[3][3];
 	PaddedFloat kernel5x5[5][5];
 	PaddedFloat2 index3x3[3][3];
 	PaddedFloat2 index5x5[5][5];
 	Matrix4x4 ProjectionInverse;
+	Matrix4x4 ViewInverse;
 };
 
 // cbuffer PixelationParams : register(b1) に対応する構造体
@@ -55,9 +58,10 @@ private:
 
 	float time_ = 0.0f;
 	float ratio_ = 1.0f;
-	float value1_ = 0.0f;
+	float value1_ = 8.0f;  // Posterization の段階数デフォルト値
 	float value2_ = 0.0f;
 	float blurStrength_ = 1.0f;
+	float color_[3];
 
 	float kernel3x3_[3][3];
 	float kernel5x5_[5][5];
@@ -190,6 +194,21 @@ public:
 
 	void SetProjectionInverse(const Matrix4x4& projectionInverse) {
 		if (cbData_) cbData_->ProjectionInverse = projectionInverse;
+	}
+
+	void SetViewInverse(const Matrix4x4& viewInverse) {
+		if (cbData_) cbData_->ViewInverse = viewInverse;
+	}
+
+	void SetColor(float r, float g, float b) {
+		color_[0] = r;
+		color_[1] = g;
+		color_[2] = b;
+		if (cbData_) {
+			cbData_->color[0] = r;
+			cbData_->color[1] = g;
+			cbData_->color[2] = b;
+		}
 	}
 
 	// Convenience method to set all parameters at once

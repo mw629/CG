@@ -21,6 +21,11 @@ PostEffect::PostEffect() {
 			kernel5x5_[y][x] = 1.0f / 25.0f;
 		}
 	}
+	cbData_ = nullptr;
+	pixelationData_ = nullptr;
+	color_[0] = 0.8f;
+	color_[1] = 0.8f;
+	color_[2] = 0.8f;
 	for (int y = 0; y < 3; ++y) {
 		for (int x = 0; x < 3; ++x) {
 			index3x3_[y][x][0] = (float)(x - 1);
@@ -111,6 +116,9 @@ void PostEffect::Update(float deltaTime) {
 		cbData_->value2 = value2_;
 		cbData_->blurStrength = blurStrength_;
 		cbData_->kernelSize = kernelSize_;
+		cbData_->color[0] = color_[0];
+		cbData_->color[1] = color_[1];
+		cbData_->color[2] = color_[2];
 		for (int y = 0; y < 3; ++y) {
 			for (int x = 0; x < 3; ++x) {
 				cbData_->kernel3x3[y][x].v = kernel3x3_[y][x];
@@ -205,8 +213,9 @@ void PostEffect::ImGuiWindow() {
 		if (ImGui::Button("Stop Timer")) { StopTimer(); }
 
 		ImGui::SliderFloat("Ratio##PostEffect", &ratio_, 0.0f, 1.0f);
-		ImGui::SliderFloat("Value1##PostEffect", &value1_, 0.0f, 10.0f);
-		ImGui::SliderFloat("Value2##PostEffect", &value2_, 0.0f, 10.0f);
+		ImGui::SliderFloat("Value1##PostEffect", &value1_, 0.0f, 100.0f);
+		ImGui::SliderFloat("Value2##PostEffect", &value2_, 0.0f, 100.0f);
+		ImGui::ColorEdit3("Color##PostEffect", color_);
 
 		if (cbData_) {
 			cbData_->time = time_;
@@ -215,6 +224,9 @@ void PostEffect::ImGuiWindow() {
 			cbData_->value2 = value2_;
 			cbData_->blurStrength = blurStrength_;
 			cbData_->kernelSize = kernelSize_;
+			cbData_->color[0] = color_[0];
+			cbData_->color[1] = color_[1];
+			cbData_->color[2] = color_[2];
 		}
 
 		// Smoothing / GaussianFilter の追加パラメーター

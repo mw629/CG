@@ -1,6 +1,7 @@
 #include "StageSettings.h"
 #include <cstdlib>
 #include <ctime>
+#include "AssetManager.h"
 
 void StageSettings::Initialize(ModelData roadModelData, ModelData obstacleModelData, ModelData bonusModelData, class GameObjectManager* manager)
 {
@@ -9,6 +10,9 @@ void StageSettings::Initialize(ModelData roadModelData, ModelData obstacleModelD
 
 	// グラウンドテクスチャをロード
 	texture_->CreateTexture("Resources/Model/Ground/Ground.png");
+	texture_->CreateTexture("Resources/Texture/white64x64.png");
+
+	planeModelData_ = AssetManager::LoadModel("Resources/Model/obj", "plane.obj");
 
 	roadModelData_ = roadModelData;
 	manager_ = manager;
@@ -95,7 +99,52 @@ void StageSettings::GenerateRoadChunks(Matrix4x4 view)
 
 			if (manager_) manager_->AddObject(renderObj);
 		}
+
 	}
+
+	// サイドプレーンの生成/更新
+	float leftBound = static_cast<float>(minLaneIndex_) * laneWidth_ - (laneWidth_ / 2.0f);
+	float rightBound = static_cast<float>(maxLaneIndex_) * laneWidth_ + (laneWidth_ / 2.0f);
+
+	if (!sidePlaneL_) {
+		auto leftModel = std::make_shared<Model>();
+		leftModel->Initialize(planeModelData_);
+		if (auto matComp = leftModel->GetComponent<MaterialComponent>()) {
+			matComp->GetMaterialFactory()->SetColor({ 0.0f, 0.0f, 1.0f, 1.0f });
+			matComp->GetMaterialFactory()->SetMaterialLighting(false);
+			matComp->SetTexturePath("Resources/Texture/white64x64.png");
+		}
+		leftModel->SetTexture(texture_->TextureData("Resources/Texture/white64x64.png"));
+		sidePlaneL_ = std::make_shared<RenderObject>(leftModel);
+		sidePlaneL_->SetName("SidePlaneL");
+		if (manager_) manager_->AddObject(sidePlaneL_);
+	}
+	Transform tL;
+	tL.scale = { 50.0f, chunkLength_ * 2.0f, 1.0f }; // plane.objは2x2なので、Yスケール*2=長さ。4チャンク分=chunkLength_*4 -> scale=chunkLength_*2
+	tL.rotate = { 1.570796f, 0.0f, 0.0f };
+	tL.translate = { leftBound - 50.0f, 2.0f, chunkLength_ * 1.5f }; // カメラの手前から奥までカバーするように配置
+	sidePlaneL_->SetTransform(tL);
+	sidePlaneL_->Update(view, 0.0f);
+
+	if (!sidePlaneR_) {
+		auto rightModel = std::make_shared<Model>();
+		rightModel->Initialize(planeModelData_);
+		if (auto matComp = rightModel->GetComponent<MaterialComponent>()) {
+			matComp->GetMaterialFactory()->SetColor({ 0.0f, 0.0f, 1.0f, 1.0f });
+			matComp->GetMaterialFactory()->SetMaterialLighting(false);
+			matComp->SetTexturePath("Resources/Texture/white64x64.png");
+		}
+		rightModel->SetTexture(texture_->TextureData("Resources/Texture/white64x64.png"));
+		sidePlaneR_ = std::make_shared<RenderObject>(rightModel);
+		sidePlaneR_->SetName("SidePlaneR");
+		if (manager_) manager_->AddObject(sidePlaneR_);
+	}
+	Transform tR;
+	tR.scale = { 50.0f, chunkLength_ * 2.0f, 1.0f };
+	tR.rotate = { 1.570796f, 0.0f, 0.0f };
+	tR.translate = { rightBound + 50.0f, 2.0f, chunkLength_ * 1.5f };
+	sidePlaneR_->SetTransform(tR);
+	sidePlaneR_->Update(view, 0.0f);
 }
 
 void StageSettings::Update(Matrix4x4 view, float timeScale)
