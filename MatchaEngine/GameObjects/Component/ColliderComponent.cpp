@@ -1,6 +1,5 @@
 #include "ColliderComponent.h"
 #include "../Object/GameObject.h"
-#include "../../System/CollisionManager.h"
 #include "../../Graphics/Render/Draw.h"
 #include "../Object/3d/Cube.h"
 #include "../Object/3d/Sphere.h"
@@ -12,14 +11,11 @@ ColliderComponent::ColliderComponent()
 
 ColliderComponent::~ColliderComponent()
 {
-	// 破棄時にCollisionManagerから登録解除
-	CollisionManager::GetInstance()->UnregisterCollider(this);
 }
 
 void ColliderComponent::Initialize()
 {
-	// 生成時にCollisionManagerへ登録
-	CollisionManager::GetInstance()->RegisterCollider(this);
+	Component::Initialize();
 
 #ifdef _DEBUG
 	debugCube_ = std::make_shared<Cube>();

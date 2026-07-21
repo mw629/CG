@@ -13,7 +13,6 @@
 
 GameScene::~GameScene()
 {
-	CollisionManager::GetInstance()->Clear();
 }
 
 void GameScene::ImGui()
@@ -263,6 +262,9 @@ void GameScene::Initialize() {
 
 	// パーティクルマネージャーの初期化
 	particleManager_->Initialize();
+
+	// コリジョンマネージャーの初期化
+	collisionManager_ = std::make_unique<CollisionManager>();
 
 	// camera_->SetDebugCamera() は上記で設定済み
 	camera_->SetTransform(cameraTransform_);
@@ -526,7 +528,7 @@ void GameScene::PlayingUpdate()
 	CheckCollisions();
 
 	// Componentベースの当たり判定チェック
-	CollisionManager::GetInstance()->UpdateCollisions();
+	collisionManager_->UpdateCollisions(gameObjectManager_.get());
 
 	particleManager_->PlayingUpdate(view, player_->GetTransform().translate);
 	particleManager_->UpdateBonusEffectEmit(timeScale, player_->GetTransform().translate);

@@ -11,6 +11,7 @@
 #include "RenderObject.h"
 #include "../../Editer/EditorUI.h"
 #include "GameSceneParticle.h"
+#include <System/CollisionManager.h>
 
 class GameScene :public IScene
 {
@@ -68,9 +69,11 @@ private:
 	// オブジェクト管理
 	std::unique_ptr<GameObjectManager> gameObjectManager_ = std::make_unique<GameObjectManager>();
 	// エディターUI
-	std::unique_ptr<EditorUI> editorUI_ = std::make_unique<EditorUI>();
+	std::unique_ptr<class EditorUI> editorUI_ = std::make_unique<EditorUI>();
 	// ステージ管理
 	std::unique_ptr<StageSettings> stageSettings_ = std::make_unique<StageSettings>();
+	// コリジョン管理
+	std::unique_ptr<class CollisionManager> collisionManager_;
 
 
 	//<< Paused >>//
