@@ -31,6 +31,14 @@ struct PostEffectShaderData {
 	Matrix4x4 ProjectionInverse;
 };
 
+// cbuffer PixelationParams : register(b1) に対応する構造体
+struct PixelationParams {
+	float blockCountX;   // 横方向のブロック数 (例: 32)
+	float blockCountY;   // 縦方向のブロック数 (例: 24)
+	float usePixelation; // 1.0で有効、0.0で無効
+	float padding;       // 16バイトアライメント用
+};
+
 class PostEffect {
 public:
 	// ---- 後方互換のためのシェーダー名定数 ----
@@ -40,6 +48,10 @@ public:
 private:
 	Microsoft::WRL::ComPtr<ID3D12Resource> constantBufferResource_;
 	PostEffectShaderData* cbData_ = nullptr;
+
+	// Pixelate用 定数バッファ (register b1)
+	Microsoft::WRL::ComPtr<ID3D12Resource> pixelationBufferResource_;
+	PixelationParams* pixelationData_ = nullptr;
 
 	float time_ = 0.0f;
 	float ratio_ = 1.0f;
@@ -54,6 +66,11 @@ private:
 	float index5x5_[5][5][2];
 	
 	int kernelSize_ = 5;
+
+	// Pixelate パラメータ
+	float blockCountX_ = 32.0f;
+	float blockCountY_ = 24.0f;
+	bool usePixelation_ = true;
 	
 	bool isTimerRunning_ = true;
 
@@ -116,6 +133,7 @@ public:
 	}
 
 	ID3D12Resource* GetConstantBufferResource() const { return constantBufferResource_.Get(); }
+	ID3D12Resource* GetPixelationBufferResource() const { return pixelationBufferResource_.Get(); }
 
 	void ImGuiWindow();
 
@@ -150,6 +168,25 @@ public:
 		if (cbData_) cbData_->blurStrength = blurStrength_;
 	}
 	float GetBlurStrength() const { return blurStrength_; }
+
+	// ---- Pixelate パラメータ ----
+	void SetBlockCountX(float count) {
+		blockCountX_ = count;
+		if (pixelationData_) pixelationData_->blockCountX = blockCountX_;
+	}
+	float GetBlockCountX() const { return blockCountX_; }
+
+	void SetBlockCountY(float count) {
+		blockCountY_ = count;
+		if (pixelationData_) pixelationData_->blockCountY = blockCountY_;
+	}
+	float GetBlockCountY() const { return blockCountY_; }
+
+	void SetUsePixelation(bool enable) {
+		usePixelation_ = enable;
+		if (pixelationData_) pixelationData_->usePixelation = enable ? 1.0f : 0.0f;
+	}
+	bool GetUsePixelation() const { return usePixelation_; }
 
 	void SetProjectionInverse(const Matrix4x4& projectionInverse) {
 		if (cbData_) cbData_->ProjectionInverse = projectionInverse;

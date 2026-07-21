@@ -43,12 +43,20 @@ PostEffect::~PostEffect() {
 	if (constantBufferResource_) {
 		constantBufferResource_->Unmap(0, nullptr);
 	}
+	if (pixelationBufferResource_) {
+		pixelationBufferResource_->Unmap(0, nullptr);
+	}
 }
 
 void PostEffect::Initialize() {
 	constantBufferResource_ = GraphicsDevice::CreateBufferResource(sizeof(PostEffectShaderData));
 	cbData_ = nullptr;
 	constantBufferResource_->Map(0, nullptr, reinterpret_cast<void**>(&cbData_));
+
+	// Pixelate用定数バッファ (register b1)
+	pixelationBufferResource_ = GraphicsDevice::CreateBufferResource(sizeof(PixelationParams));
+	pixelationData_ = nullptr;
+	pixelationBufferResource_->Map(0, nullptr, reinterpret_cast<void**>(&pixelationData_));
 
 	if (cbData_) {
 		cbData_->time = time_;
@@ -79,6 +87,13 @@ void PostEffect::Initialize() {
 				cbData_->index5x5[y][x].v[1] = index5x5_[y][x][1];
 			}
 		}
+	}
+
+	if (pixelationData_) {
+		pixelationData_->blockCountX = blockCountX_;
+		pixelationData_->blockCountY = blockCountY_;
+		pixelationData_->usePixelation = usePixelation_ ? 1.0f : 0.0f;
+		pixelationData_->padding = 0.0f;
 	}
 
 	SetMaskTexturePath(maskTexturePath_);
@@ -118,6 +133,12 @@ void PostEffect::Update(float deltaTime) {
 				cbData_->index5x5[y][x].v[1] = index5x5_[y][x][1];
 			}
 		}
+	}
+
+	if (pixelationData_) {
+		pixelationData_->blockCountX = blockCountX_;
+		pixelationData_->blockCountY = blockCountY_;
+		pixelationData_->usePixelation = usePixelation_ ? 1.0f : 0.0f;
 	}
 }
 
@@ -212,6 +233,13 @@ void PostEffect::ImGuiWindow() {
 			if (ImGui::InputText("Mask Texture##PostEffect", buffer, sizeof(buffer), ImGuiInputTextFlags_EnterReturnsTrue)) {
 				SetMaskTexturePath(buffer);
 			}
+		}
+
+		// Pixelate の追加パラメーター
+		if (activeShaderName_ == "PixelateShader") {
+			ImGui::Checkbox("Use Pixelation##PostEffect", &usePixelation_);
+			ImGui::SliderFloat("Block Count X##PostEffect", &blockCountX_, 2.0f, 320.0f);
+			ImGui::SliderFloat("Block Count Y##PostEffect", &blockCountY_, 2.0f, 240.0f);
 		}
 
 		ImGui::TreePop();
