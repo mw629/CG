@@ -37,6 +37,13 @@ public:
 		}
 	}
 
+	void SetTexture(D3D12_GPU_DESCRIPTOR_HANDLE textureSrvHandleGPU) {
+		ObjectBase::SetTexture(textureSrvHandleGPU);
+		for (auto& mat : subMeshMaterials_) {
+			mat.textureSrvHandleGPU = textureSrvHandleGPU;
+		}
+	}
+
 	void SetColor(Vector4 color) {
 		if (auto matComp = GetComponent<MaterialComponent>()) {
 			if (matComp->GetMaterialFactory()) {

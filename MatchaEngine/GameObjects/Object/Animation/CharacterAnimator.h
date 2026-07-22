@@ -46,6 +46,13 @@ public:
 
 	void SettingWvp(Matrix4x4 viewMatrix) override;
 
+	void SetTexture(D3D12_GPU_DESCRIPTOR_HANDLE textureSrvHandleGPU) {
+		ObjectBase::SetTexture(textureSrvHandleGPU);
+		for (auto& mat : subMeshMaterials_) {
+			mat.textureSrvHandleGPU = textureSrvHandleGPU;
+		}
+	}
+
 	Skeleton CreateSkeleton(const Node& rootNode);
 	int32_t CreateJoint(const Node& node,
 		const std::optional<int32_t>& parent, std::vector<Joint>& joints);
