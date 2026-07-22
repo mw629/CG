@@ -55,8 +55,8 @@ void TestScene::Initialize() {
 
 
 	//Animationの初期化
-	ModelData animModel = AssimpLoadObjFile("Resources/Model/human", "sneakWalk.gltf");
-	animation_.get()->Initialize(animModel, "Resources/Model/human", "sneakWalk.gltf");
+	ModelData animModel = AssimpLoadObjFile("Resources/gltf/human", "sneakWalk.gltf");
+	animation_.get()->Initialize(animModel, "Resources/gltf/human", "sneakWalk.gltf");
 	animation_.get()->name_ = "Animation Model";
 	animation_.get()->SetVisibleBones(true); // ボーンを表示
 

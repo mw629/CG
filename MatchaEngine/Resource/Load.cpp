@@ -137,7 +137,11 @@ ModelData LoadObjFile(const std::string& directoryPath, const std::string& filen
 	std::string filePath = directoryPath + "/" + filename;
 	const aiScene* scene = impoter.ReadFile(filePath.c_str(),
 		aiProcess_FlipWindingOrder | aiProcess_FlipUVs | aiProcess_Triangulate);
-	assert(scene->HasMeshes());
+	if (!scene || !scene->HasMeshes()) {
+		std::string errorMessage = "Failed to load model file.\nPath: " + filePath;
+		MessageBoxA(nullptr, errorMessage.c_str(), "Model Load Error", MB_OK | MB_ICONERROR);
+		assert(false && "Model Load Error");
+	}
 
 	std::unique_ptr<Texture> texture = std::make_unique<Texture>();
 
@@ -246,7 +250,11 @@ ModelData AssimpLoadObjFile(const std::string& directoryPath, const std::string&
 	std::string filePath = directoryPath + "/" + filename;
 	const aiScene* scene = impoter.ReadFile(filePath.c_str(),
 		aiProcess_FlipWindingOrder | aiProcess_FlipUVs | aiProcess_Triangulate);
-	assert(scene->HasMeshes());
+	if (!scene || !scene->HasMeshes()) {
+		std::string errorMessage = "Failed to load model file.\nPath: " + filePath;
+		MessageBoxA(nullptr, errorMessage.c_str(), "Model Load Error", MB_OK | MB_ICONERROR);
+		assert(false && "Model Load Error");
+	}
 
 	std::unique_ptr<Texture> texture = std::make_unique<Texture>();
 
@@ -374,7 +382,11 @@ Animation LoadAnimationFile(const std::string& directoryPath, const std::string&
 	Assimp::Importer importer;
 	std::string filePath = directoryPath + "/" + filename;
 	const aiScene* scene = importer.ReadFile(filePath.c_str(), 0);
-	assert(scene->mNumAnimations != 0);//アニメーションがない
+	if (!scene || scene->mNumAnimations == 0) {
+		std::string errorMessage = "Failed to load animation file.\nPath: " + filePath;
+		MessageBoxA(nullptr, errorMessage.c_str(), "Animation Load Error", MB_OK | MB_ICONERROR);
+		assert(false && "Animation Load Error");
+	}
 	aiAnimation* animationAssimp = scene->mAnimations[0];//最初のアニメーションだけ採用。複数対応させるべき
 	animation.duration = float(animationAssimp->mDuration / animationAssimp->mTicksPerSecond);//時間単位を秒に変換
 
@@ -427,7 +439,11 @@ DirectX::ScratchImage LoadTexture(const std::string& filePath) {
 	else {
 		hr = DirectX::LoadFromWICFile(filePathW.c_str(), DirectX::WIC_FLAGS_FORCE_SRGB, nullptr, image);
 	}
-	assert(SUCCEEDED(hr));
+	if (FAILED(hr)) {
+		std::string errorMessage = "Failed to load texture file.\nPath: " + filePath;
+		MessageBoxA(nullptr, errorMessage.c_str(), "Texture Load Error", MB_OK | MB_ICONERROR);
+		assert(SUCCEEDED(hr) && "Texture Load Error");
+	}
 
 	//ミニマップの作成
 	DirectX::ScratchImage mipImages{};
@@ -437,7 +453,11 @@ DirectX::ScratchImage LoadTexture(const std::string& filePath) {
 	else {
 		hr = DirectX::GenerateMipMaps(image.GetImages(), image.GetImageCount(), image.GetMetadata(), DirectX::TEX_FILTER_SRGB, 4, mipImages);
 	}
-	assert(SUCCEEDED(hr));
+	if (FAILED(hr)) {
+		std::string errorMessage = "Failed to generate mipmaps for texture.\nPath: " + filePath;
+		MessageBoxA(nullptr, errorMessage.c_str(), "Texture Mipmap Error", MB_OK | MB_ICONERROR);
+		assert(SUCCEEDED(hr) && "Texture Mipmap Error");
+	}
 
 	//ミニマップ付きのデータを返す
 	return mipImages;
