@@ -28,6 +28,35 @@ public:
 	
 	void CreateObject()override;
 
+	void SetLighting(bool isActive) {
+		ObjectBase::SetLighting(isActive);
+		for (auto& mat : subMeshMaterials_) {
+			if (mat.materialFactory) {
+				mat.materialFactory->SetMaterialLighting(isActive);
+			}
+		}
+	}
+
+	void SetTexture(D3D12_GPU_DESCRIPTOR_HANDLE textureSrvHandleGPU) {
+		ObjectBase::SetTexture(textureSrvHandleGPU);
+		for (auto& mat : subMeshMaterials_) {
+			mat.textureSrvHandleGPU = textureSrvHandleGPU;
+		}
+	}
+
+	void SetColor(Vector4 color) {
+		if (auto matComp = GetComponent<MaterialComponent>()) {
+			if (matComp->GetMaterialFactory()) {
+				matComp->GetMaterialFactory()->SetColor(color);
+			}
+		}
+		for (auto& mat : subMeshMaterials_) {
+			if (mat.materialFactory) {
+				mat.materialFactory->SetColor(color);
+			}
+		}
+	}
+
 	Mesh GetMesh() override;
 
 	int GetModelNumber() { return modelNumber_; }

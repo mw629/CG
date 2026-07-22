@@ -33,6 +33,11 @@ private:
 	std::vector<std::vector<std::shared_ptr<RenderObject>>> roadChunks_;
 	std::vector<std::vector<Transform>> roadTransforms_;
 
+	// サイドプレーン用
+	std::shared_ptr<RenderObject> sidePlaneL_;
+	std::shared_ptr<RenderObject> sidePlaneR_;
+	ModelData planeModelData_;
+
 	ModelData roadModelData_;
 	class GameObjectManager* manager_ = nullptr;
 	std::vector<std::shared_ptr<RenderObject>> chunkPool_;

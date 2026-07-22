@@ -1,6 +1,7 @@
 #include "StageSettings.h"
 #include <cstdlib>
 #include <ctime>
+#include "AssetManager.h"
 
 void StageSettings::Initialize(ModelData roadModelData, ModelData obstacleModelData, ModelData bonusModelData, class GameObjectManager* manager)
 {
@@ -9,6 +10,9 @@ void StageSettings::Initialize(ModelData roadModelData, ModelData obstacleModelD
 
 	// グラウンドテクスチャをロード
 	texture_->CreateTexture("Resources/Model/Ground/Ground.png");
+	texture_->CreateTexture("Resources/Texture/white64x64.png");
+
+	planeModelData_ = AssetManager::LoadModel("Resources/Model/obj", "plane.obj");
 
 	roadModelData_ = roadModelData;
 	manager_ = manager;
@@ -19,13 +23,13 @@ void StageSettings::Initialize(ModelData roadModelData, ModelData obstacleModelD
 	// 障害物の初期化
 	for (int i = 0; i < kMaxObstacles_; i++) {
 		obstacles_[i] = std::make_shared<Obstacle>();
-        obstacles_[i]->SetName("Obstacle " + std::to_string(i));
+		obstacles_[i]->SetName("Obstacle " + std::to_string(i));
 
 		// ランダムなタイプで初期化
 		Obstacle::Type type = static_cast<Obstacle::Type>(std::rand() % 3);
 		obstacles_[i]->Initialize(obstacleModelData, bonusModelData, type);
-        
-        if (manager) manager->AddObject(obstacles_[i]);
+
+		if (manager) manager->AddObject(obstacles_[i]);
 	}
 }
 
@@ -36,7 +40,8 @@ void StageSettings::GenerateRoadChunks(Matrix4x4 view)
 	for (int zIndex = 0; zIndex < kChunkCount_; zIndex++) {
 		if (zIndex < roadTransforms_.size() && !roadTransforms_[zIndex].empty()) {
 			currentZs[zIndex] = roadTransforms_[zIndex][0].translate.z;
-		} else {
+		}
+		else {
 			currentZs[zIndex] = static_cast<float>(zIndex) * chunkLength_;
 		}
 	}
@@ -61,17 +66,19 @@ void StageSettings::GenerateRoadChunks(Matrix4x4 view)
 
 		for (int laneIdx = 0; laneIdx < laneCount_; laneIdx++) {
 			std::shared_ptr<RenderObject> renderObj;
-			
+
 			// プールから取得するか、新規作成する
 			if (!chunkPool_.empty()) {
 				renderObj = chunkPool_.back();
 				chunkPool_.pop_back();
-			} else {
+			}
+			else {
 				auto roadModel = std::make_shared<Model>();
 				roadModel->Initialize(roadModelData_);
 				if (auto matComp = roadModel->GetComponent<MaterialComponent>()) {
 					matComp->SetTexturePath("Resources/Model/Ground/Ground.png");
 				}
+				roadModel->SetLighting(false);
 				roadModel->SetTexture(texture_->TextureData("Resources/Model/Ground/Ground.png"));
 
 				renderObj = std::make_shared<RenderObject>(roadModel);
@@ -95,7 +102,52 @@ void StageSettings::GenerateRoadChunks(Matrix4x4 view)
 
 			if (manager_) manager_->AddObject(renderObj);
 		}
+
 	}
+
+	// サイドプレーンの生成/更新
+	float leftBound = static_cast<float>(minLaneIndex_) * laneWidth_ - (laneWidth_ / 2.0f);
+	float rightBound = static_cast<float>(maxLaneIndex_) * laneWidth_ + (laneWidth_ / 2.0f);
+
+	if (!sidePlaneL_) {
+		auto leftModel = std::make_shared<Model>();
+		leftModel->Initialize(planeModelData_);
+		leftModel->SetColor({ 0.0f, 0.0f, 1.0f, 1.0f });
+		leftModel->SetLighting(false);
+		if (auto matComp = leftModel->GetComponent<MaterialComponent>()) {
+			matComp->SetTexturePath("Resources/Texture/white64x64.png");
+		}
+		leftModel->SetTexture(texture_->TextureData("Resources/Texture/white64x64.png"));
+		sidePlaneL_ = std::make_shared<RenderObject>(leftModel);
+		sidePlaneL_->SetName("SidePlaneL");
+		if (manager_) manager_->AddObject(sidePlaneL_);
+	}
+	Transform tL;
+	tL.scale = { 50.0f, chunkLength_ * 2.0f, 1.0f }; // plane.objは2x2なので、Yスケール*2=長さ。4チャンク分=chunkLength_*4 -> scale=chunkLength_*2
+	tL.rotate = { 1.570796f, 0.0f, 0.0f };
+	tL.translate = { leftBound - 50.0f, 2.0f, chunkLength_ * 1.5f }; // カメラの手前から奥までカバーするように配置
+	sidePlaneL_->SetTransform(tL);
+	sidePlaneL_->Update(view, 0.0f);
+
+	if (!sidePlaneR_) {
+		auto rightModel = std::make_shared<Model>();
+		rightModel->Initialize(planeModelData_);
+		rightModel->SetColor({ 0.0f, 0.0f, 1.0f, 1.0f });
+		rightModel->SetLighting(false);
+		if (auto matComp = rightModel->GetComponent<MaterialComponent>()) {
+			matComp->SetTexturePath("Resources/Texture/white64x64.png");
+		}
+		rightModel->SetTexture(texture_->TextureData("Resources/Texture/white64x64.png"));
+		sidePlaneR_ = std::make_shared<RenderObject>(rightModel);
+		sidePlaneR_->SetName("SidePlaneR");
+		if (manager_) manager_->AddObject(sidePlaneR_);
+	}
+	Transform tR;
+	tR.scale = { 50.0f, chunkLength_ * 2.0f, 1.0f };
+	tR.rotate = { 1.570796f, 0.0f, 0.0f };
+	tR.translate = { rightBound + 50.0f, 2.0f, chunkLength_ * 1.5f };
+	sidePlaneR_->SetTransform(tR);
+	sidePlaneR_->Update(view, 0.0f);
 }
 
 void StageSettings::Update(Matrix4x4 view, float timeScale)
@@ -171,9 +223,10 @@ void StageSettings::Update(Matrix4x4 view, float timeScale)
 				obstacles_[nextObstacleIndex_]->SetType(Obstacle::Type::CameraItem);
 				obstacles_[nextObstacleIndex_]->Spawn(0.0f, 2.5f, 45.0f); // 中央レーンに生成
 				nextObstacleIndex_ = (nextObstacleIndex_ + 1) % kMaxObstacles_;
-				
+
 				distanceSinceLastCameraItem_ -= cameraItemInterval_;
-			} else {
+			}
+			else {
 				SpawnObstacles(45.0f);
 			}
 		}
@@ -216,9 +269,9 @@ void StageSettings::SpawnObstacles(float z)
 		obstacles_[nextObstacleIndex_]->SetType(Obstacle::Type::GuideFloor);
 		obstacles_[nextObstacleIndex_]->Spawn(laneWidth_, 2.0f, z);
 		nextObstacleIndex_ = (nextObstacleIndex_ + 1) % kMaxObstacles_;
-		
+
 		// 中央レーンは安全にするか、ボーナスを置く
-		return; 
+		return;
 	}
 	// =============================
 
@@ -231,7 +284,8 @@ void StageSettings::SpawnObstacles(float z)
 		laneSpawns[i] = std::rand() % 4; // 0~3
 		if (laneSpawns[i] == 3) {
 			wallCount++;
-		} else if (laneSpawns[i] == 0) {
+		}
+		else if (laneSpawns[i] == 0) {
 			noneCount++;
 		}
 	}
@@ -242,7 +296,8 @@ void StageSettings::SpawnObstacles(float z)
 		if (laneCount_ == 1) {
 			// レーンが1つの場合はWall(3)を生成しないようにする(1:Low, 2:High)
 			laneSpawns[changeIndex] = 1 + (std::rand() % 2);
-		} else {
+		}
+		else {
 			laneSpawns[changeIndex] = 1 + (std::rand() % 3); // 1, 2, 3 のどれか
 		}
 	}
@@ -261,7 +316,8 @@ void StageSettings::SpawnObstacles(float z)
 		if (laneCount_ == 1) {
 			// 1レーンしかなく全てWallの場合は、必ず通れる障害物にする
 			laneSpawns[changeIndex] = 1 + (std::rand() % 2); // 1:Low または 2:High
-		} else {
+		}
+		else {
 			laneSpawns[changeIndex] = 0; // Noneに変更
 		}
 	}
@@ -281,10 +337,11 @@ void StageSettings::SpawnObstacles(float z)
 
 		if (!obstacleLanes.empty()) {
 			bonusLane = obstacleLanes[std::rand() % obstacleLanes.size()];
-		} else {
+		}
+		else {
 			bonusLane = std::rand() % laneCount_;
 		}
-		
+
 		int randItem = std::rand() % 3;
 		if (randItem == 0) itemType = Obstacle::Type::Bonus;
 		else if (randItem == 1) itemType = Obstacle::Type::BarrierItem;
@@ -313,10 +370,12 @@ void StageSettings::SpawnObstacles(float z)
 			if (laneSpawns[i] == 1) {
 				type = Obstacle::Type::Low;
 				y = 2.5f;
-			} else if (laneSpawns[i] == 2) {
+			}
+			else if (laneSpawns[i] == 2) {
 				type = Obstacle::Type::High;
 				y = 4.6f;
-			} else if (laneSpawns[i] == 3) {
+			}
+			else if (laneSpawns[i] == 3) {
 				type = Obstacle::Type::Wall;
 				y = 3.5f;
 			}
@@ -324,7 +383,7 @@ void StageSettings::SpawnObstacles(float z)
 			// 障害物のタイプを変更して配置
 			obstacles_[nextObstacleIndex_]->SetType(type);
 			obstacles_[nextObstacleIndex_]->Spawn(x, y, z);
-			
+
 			// 次のインデックスへ（リングバッファ的に使う）
 			nextObstacleIndex_ = (nextObstacleIndex_ + 1) % kMaxObstacles_;
 		}
@@ -354,7 +413,7 @@ void StageSettings::Reset()
 		obstacles_[i]->Deactivate();
 	}
 	nextObstacleIndex_ = 0;
-	
+
 	// リセット時は最初は少し進んでから障害物が出るようにする
 	distanceSinceLastSpawn_ = obstacleInterval_ - 10.0f;
 	distanceSinceLastCameraItem_ = 0.0f;
