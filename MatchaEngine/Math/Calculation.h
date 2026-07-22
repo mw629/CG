@@ -198,6 +198,11 @@ Matrix4x4 IdentityMatrix();
 /// <returns>アフィン行列</returns>
 Matrix4x4 MakeAffineMatrix(Vector3 pos, Vector3 scale, Vector3 angle);
 
+/// <summary>
+/// 4x4行列からスケール、回転(オイラー角)、平行移動を抽出します。
+/// </summary>
+Transform DecomposeMatrix(const Matrix4x4& m);
+
 Matrix4x4 MakeAffineMatrix(Vector3 pos, Vector3 scale,Quaternion  roteta);
 
 

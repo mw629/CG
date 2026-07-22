@@ -12,6 +12,7 @@ private:
 	ModelData modelData_{};
 
 	Animation animation_;
+	std::string currentAnimationName_ = "";
 	float animationTime_ = 0.0f;
 
 	Skeleton skeleton_;
@@ -34,6 +35,16 @@ public:
 	void ApplyAnimation();
 
 	void Update(Matrix4x4 viewMatrix);
+
+	void SetAnimationTime(float time) { animationTime_ = time; }
+	float GetAnimationTime() const { return animationTime_; }
+	float GetDuration() const { 
+		if (animation_.animationClips.find(currentAnimationName_) != animation_.animationClips.end()) {
+			return animation_.animationClips.at(currentAnimationName_).duration;
+		}
+		return 0.0f;
+	}
+	void SetAnimation(const std::string& name) { currentAnimationName_ = name; animationTime_ = 0.0f; }
 
 	ModelData GetModelData() { return modelData_; }
 

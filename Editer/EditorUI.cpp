@@ -81,6 +81,30 @@ void EditorUI::ProcessMousePicking(GameObjectManager* gameObjectManager, const M
                 closestObj  = obj;
             }
         }
+
+        std::shared_ptr<CharacterAnimator> animator = std::dynamic_pointer_cast<CharacterAnimator>(obj);
+        if (!animator) {
+            if (auto renderObj = std::dynamic_pointer_cast<RenderObject>(obj)) {
+                animator = std::dynamic_pointer_cast<CharacterAnimator>(renderObj->GetObjectBase());
+            }
+        }
+
+        if (animator && animator->GetVisibleBones()) {
+            const Skeleton& skeleton = animator->GetSkeleton();
+            for (size_t i = 0; i < skeleton.joints.size(); ++i) {
+                std::shared_ptr<Sphere> sphereObj = animator->GetJointSphere((int32_t)i);
+                if (sphereObj) {
+                    AABB boneAabb = GetAABB(sphereObj->GetTransform(), 0.5f, 0.5f);
+                    float boneDist = 0.0f;
+                    if (CheckRayAABB(ray, boneAabb, boneDist)) {
+                        if (boneDist < closestDist) {
+                            closestDist = boneDist;
+                            closestObj = sphereObj;
+                        }
+                    }
+                }
+            }
+        }
     }
 
     if (closestObj) {
@@ -152,6 +176,13 @@ void EditorUI::Draw(GameObjectManager* gameObjectManager, const Matrix4x4& view,
     std::shared_ptr<GameObject> objToDelete = nullptr;
     std::shared_ptr<GameObject> objToCopy = nullptr;
 
+    static std::shared_ptr<GameObject> s_lastSelectedObject = nullptr;
+    bool bFocusSelection = false;
+    if (selectedObject_ != s_lastSelectedObject) {
+        bFocusSelection = true;
+        s_lastSelectedObject = selectedObject_;
+    }
+
     auto DrawJoint = [&](auto& self, std::shared_ptr<CharacterAnimator> animator, int32_t jointIndex) -> void {
         const Skeleton& skeleton = animator->GetSkeleton();
         if (jointIndex < 0 || jointIndex >= (int32_t)skeleton.joints.size()) return;
@@ -168,10 +199,28 @@ void EditorUI::Draw(GameObjectManager* gameObjectManager, const Matrix4x4& view,
             jointFlags |= ImGuiTreeNodeFlags_Selected;
         }
         
+        bool bContainsSelected = false;
+        if (bFocusSelection && selectedObject_) {
+            auto checkDescendant = [&](auto& checkSelf, int32_t jIdx) -> bool {
+                std::shared_ptr<Sphere> so = animator->GetJointSphere(jIdx);
+                if (so && so == selectedObject_) return true;
+                const Joint& j = skeleton.joints[jIdx];
+                for (int32_t childIdx : j.children) {
+                    if (checkSelf(checkSelf, childIdx)) return true;
+                }
+                return false;
+            };
+            bContainsSelected = checkDescendant(checkDescendant, jointIndex);
+            if (bContainsSelected) {
+                ImGui::SetNextItemOpen(true, ImGuiCond_Always);
+            }
+        }
+        
         ImGui::PushID(&joint);
         bool isJointOpen = false;
         if (sphereObj) {
             isJointOpen = ImGui::TreeNodeEx((void*)sphereObj.get(), jointFlags, "%s", sphereObj->GetName().c_str());
+            if (bContainsSelected && sphereObj == selectedObject_) ImGui::SetScrollHereY();
             if (ImGui::IsItemClicked(0) || ImGui::IsItemClicked(1)) {
                 SetSelectedObject(sphereObj);
             }
@@ -192,6 +241,37 @@ void EditorUI::Draw(GameObjectManager* gameObjectManager, const Matrix4x4& view,
     for (auto& obj : gameObjectManager->GetObjects()) {
         if (!obj) continue;
         
+        std::shared_ptr<CharacterAnimator> animator = std::dynamic_pointer_cast<CharacterAnimator>(obj);
+        if (!animator) {
+            if (auto renderObj = std::dynamic_pointer_cast<RenderObject>(obj)) {
+                animator = std::dynamic_pointer_cast<CharacterAnimator>(renderObj->GetObjectBase());
+            }
+        }
+
+        bool bContainsSelected = false;
+        if (bFocusSelection && selectedObject_) {
+            if (obj == selectedObject_) {
+                bContainsSelected = true;
+            } else if (animator) {
+                const Skeleton& skeleton = animator->GetSkeleton();
+                if (skeleton.joints.size() > 0) {
+                    auto checkDescendant = [&](auto& checkSelf, int32_t jIdx) -> bool {
+                        std::shared_ptr<Sphere> so = animator->GetJointSphere(jIdx);
+                        if (so && so == selectedObject_) return true;
+                        const Joint& j = skeleton.joints[jIdx];
+                        for (int32_t childIdx : j.children) {
+                            if (checkSelf(checkSelf, childIdx)) return true;
+                        }
+                        return false;
+                    };
+                    bContainsSelected = checkDescendant(checkDescendant, skeleton.root);
+                }
+            }
+            if (bContainsSelected) {
+                ImGui::SetNextItemOpen(true, ImGuiCond_Always);
+            }
+        }
+
         ImGui::AlignTextToFramePadding();
         bool isLocked = obj->GetIsLocked();
         ImGui::PushID(obj.get());
@@ -202,7 +282,11 @@ void EditorUI::Draw(GameObjectManager* gameObjectManager, const Matrix4x4& view,
         
         ImGui::SameLine();
 
-        ImGuiTreeNodeFlags flags = ImGuiTreeNodeFlags_OpenOnArrow | ImGuiTreeNodeFlags_OpenOnDoubleClick | ImGuiTreeNodeFlags_SpanAvailWidth | ImGuiTreeNodeFlags_Leaf;
+        ImGuiTreeNodeFlags flags = ImGuiTreeNodeFlags_OpenOnArrow | ImGuiTreeNodeFlags_OpenOnDoubleClick | ImGuiTreeNodeFlags_SpanAvailWidth;
+        if (!animator || animator->GetSkeleton().joints.empty()) {
+            flags |= ImGuiTreeNodeFlags_Leaf;
+        }
+
         if (selectedObject_ == obj) {
             flags |= ImGuiTreeNodeFlags_Selected;
         }
@@ -212,6 +296,7 @@ void EditorUI::Draw(GameObjectManager* gameObjectManager, const Matrix4x4& view,
         }
 
         bool isOpen = ImGui::TreeNodeEx((void*)obj.get(), flags, "%s", obj->GetName().c_str());
+        if (bContainsSelected && obj == selectedObject_) ImGui::SetScrollHereY();
         
         if (!obj->GetIsActive()) {
             ImGui::PopStyleColor();
@@ -232,12 +317,6 @@ void EditorUI::Draw(GameObjectManager* gameObjectManager, const Matrix4x4& view,
         }
 
         if (isOpen) {
-            std::shared_ptr<CharacterAnimator> animator = std::dynamic_pointer_cast<CharacterAnimator>(obj);
-            if (!animator) {
-                if (auto renderObj = std::dynamic_pointer_cast<RenderObject>(obj)) {
-                    animator = std::dynamic_pointer_cast<CharacterAnimator>(renderObj->GetObjectBase());
-                }
-            }
             if (animator) {
                 const Skeleton& skeleton = animator->GetSkeleton();
                 if (skeleton.joints.size() > 0) {

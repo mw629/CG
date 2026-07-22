@@ -1,5 +1,6 @@
 #include "TestScene.h"
 #include "Graphics/Render/Draw.h"
+#include "../../Editer/EditorManager.h"
 #include <imgui.h>
 #include <memory>
 #include <cmath>
@@ -36,6 +37,12 @@ void TestScene::ImGui()
 		editorUI_->Draw(gameObjectManager_.get(), camera_->GetViewMatrix(), camera_->GetProjectionMatrix());
 	}
 
+	EditorManager::SetSceneOverlayCallback([this]() {
+		if (editorUI_) {
+			editorUI_->DrawGizmoInScene(camera_->GetViewMatrix(), camera_->GetProjectionMatrix());
+		}
+	});
+
 #endif // _USE_IMGUI
 }
 
@@ -57,6 +64,9 @@ void TestScene::Initialize() {
 	//Animationの初期化
 	ModelData animModel = AssimpLoadObjFile("Resources/gltf/human", "sneakWalk.gltf");
 	animation_.get()->Initialize(animModel, "Resources/gltf/human", "sneakWalk.gltf");
+	animation_->LoadAdditionalAnimation("Resources/gltf/human", "sneakWalk.gltf", "sneakWalk");
+	animation_->LoadAdditionalAnimation("Resources/gltf/human", "walk.gltf", "walk");
+	animation_->SetAnimation("sneakWalk");
 	animation_.get()->name_ = "Animation Model";
 	animation_.get()->SetVisibleBones(true); // ボーンを表示
 
@@ -208,6 +218,15 @@ void TestScene::Update() {
 
 	Vector3 moveInput = GamePadInput::GetLeftStick();
 	Vector3 moveDirection = { moveInput.x, 0.0f, moveInput.y };
+
+	if (Input::PushKey(DIK_SPACE)) {
+		isSneaking_ = !isSneaking_;
+		if (isSneaking_) {
+			animation_->SetAnimation("sneakWalk");
+		} else {
+			animation_->SetAnimation("walk");
+		}
+	}
 
 	if (Input::PressKey(DIK_D) || Input::PressKey(DIK_RIGHT)) moveDirection.x += 1.0f;
 	if (Input::PressKey(DIK_A) || Input::PressKey(DIK_LEFT))  moveDirection.x -= 1.0f;

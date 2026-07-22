@@ -12,7 +12,10 @@ private:
 	ModelData modelData_{};
 
 	Animation animation_;
+	std::string currentAnimationName_ = "";
 	float animationTime_ = 0.0f;
+
+	std::map<BoneType, std::string> boneTypeMap_;
 
 	Skeleton skeleton_;
 	SkinCluster skinCluster_;
@@ -43,6 +46,7 @@ public:
 	static void SetData(ID3D12Device* SetDevice, DescriptorHeap* SetDescriptorHeap);
 
 	void Initialize(ModelData modelData, const std::string& directoryPath, const std::string& filename);
+	void LoadAdditionalAnimation(const std::string& directoryPath, const std::string& filename, const std::string& overrideName = "");
 
 	void SettingWvp(Matrix4x4 viewMatrix) override;
 
@@ -68,11 +72,20 @@ public:
 
 	void SetAnimationTime(float time) { animationTime_ = time; }
 	float GetAnimationTime() const { return animationTime_; }
-	float GetDuration() const { return animation_.duration; }
+	float GetDuration() const { 
+		if (animation_.animationClips.find(currentAnimationName_) != animation_.animationClips.end()) {
+			return animation_.animationClips.at(currentAnimationName_).duration;
+		}
+		return 0.0f;
+	}
+	void SetAnimation(const std::string& name) { currentAnimationName_ = name; animationTime_ = 0.0f; }
 
 	void UpdateBoneRenderer();
 
 	ModelData GetModelData() { return modelData_; }
+
+	void SetBoneMapping(BoneType type, const std::string& boneName) { boneTypeMap_[type] = boneName; }
+	Transform GetBoneTransform(BoneType type);
 
 	Vector3 CalculateValue(const std::vector<KeyframeVector3>& keyframe, float time);
 	Quaternion CalculateValue(const std::vector<KeyframeQuaternion>& keyframe, float time);

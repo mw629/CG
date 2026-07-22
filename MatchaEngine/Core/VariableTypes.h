@@ -40,6 +40,31 @@ struct PolarCoordinates {
   float phi;
 };
 
+enum class BoneType {
+  Root,
+  Spine,
+  Chest,
+  Neck,
+  Head,
+  LeftShoulder,
+  LeftArm,
+  LeftForeArm,
+  LeftHand,
+  RightShoulder,
+  RightArm,
+  RightForeArm,
+  RightHand,
+  LeftUpLeg,
+  LeftLeg,
+  LeftFoot,
+  LeftToeBase,
+  RightUpLeg,
+  RightLeg,
+  RightFoot,
+  RightToeBase,
+  Custom
+};
+
 /// <summary>
 /// 3Dオブジェクトのスケール、回転、平行移動を表す構造体です。
 /// </summary>
@@ -241,10 +266,14 @@ struct AnimationNode {
   std::vector<KeyframeVector3> scale;
 };
 
-struct Animation {
+struct AnimationClip {
   float duration; // アニメーション全体の尺
   // AnimationNodeの集合。Node名で弾けるようにしておく
   std::map<std::string, AnimationNode> AnimationNodes;
+};
+
+struct Animation {
+  std::map<std::string, AnimationClip> animationClips;
 };
 
 struct Segment {

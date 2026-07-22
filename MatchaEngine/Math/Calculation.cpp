@@ -2,6 +2,7 @@
 //#include <math.h>
 #include <cmath>
 #include "assert.h"
+#include <algorithm>
 
 
 
@@ -467,6 +468,38 @@ Matrix4x4 MakeAffineMatrix(Vector3 pos, Vector3 scale, Quaternion rotate)
 	result.m[3][3] = 1.0f;
 
 	return result;
+}
+
+Transform DecomposeMatrix(const Matrix4x4& m) {
+    Transform result;
+    // 平行移動成分の抽出
+    result.translate.x = m.m[3][0];
+    result.translate.y = m.m[3][1];
+    result.translate.z = m.m[3][2];
+
+    // スケール成分の抽出
+    result.scale.x = std::sqrt(m.m[0][0] * m.m[0][0] + m.m[0][1] * m.m[0][1] + m.m[0][2] * m.m[0][2]);
+    result.scale.y = std::sqrt(m.m[1][0] * m.m[1][0] + m.m[1][1] * m.m[1][1] + m.m[1][2] * m.m[1][2]);
+    result.scale.z = std::sqrt(m.m[2][0] * m.m[2][0] + m.m[2][1] * m.m[2][1] + m.m[2][2] * m.m[2][2]);
+
+    // 回転行列成分の抽出（スケールを分離）
+    Matrix4x4 rot = m;
+    if (result.scale.x != 0.0f) { rot.m[0][0] /= result.scale.x; rot.m[0][1] /= result.scale.x; rot.m[0][2] /= result.scale.x; }
+    if (result.scale.y != 0.0f) { rot.m[1][0] /= result.scale.y; rot.m[1][1] /= result.scale.y; rot.m[1][2] /= result.scale.y; }
+    if (result.scale.z != 0.0f) { rot.m[2][0] /= result.scale.z; rot.m[2][1] /= result.scale.z; rot.m[2][2] /= result.scale.z; }
+
+    // オイラー角（X->Y->Zの順でMakeAffineMatrixが作成されていると仮定）
+    result.rotate.y = std::asin(-std::clamp(rot.m[0][2], -1.0f, 1.0f));
+
+    if (std::abs(rot.m[0][2]) < 0.99999f) {
+        result.rotate.x = std::atan2(rot.m[1][2], rot.m[2][2]);
+        result.rotate.z = std::atan2(rot.m[0][1], rot.m[0][0]);
+    } else {
+        result.rotate.x = std::atan2(-rot.m[2][1], rot.m[1][1]);
+        result.rotate.z = 0.0f;
+    }
+
+    return result;
 }
 
 Matrix4x4 MakeAffineMatrix(Matrix4x4 translationMatrix, Vector3 scale, Matrix4x4 rotationMatrix)

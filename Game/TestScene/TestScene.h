@@ -51,6 +51,7 @@ private:
 	std::shared_ptr<TransformAnimation> nodeAnimation_ = std::make_shared<TransformAnimation>();
 
 	bool bill = true;
+	bool isSneaking_ = true;
 
 public:
 	~TestScene()override;

@@ -65,14 +65,10 @@ void JsonScene::ImGui()
 	Matrix4x4 projection = MakePerspectiveFovMatrix(0.45f, float(1280.0f) / float(720.0f), 0.1f, 100.0f);
 	editorUI_->Draw(gameObjectManager_.get(), view_, projection);
 
-	if (!EditorManager::IsPlaying()) {
-		EditorManager::SetSceneOverlayCallback([this]() {
-			Matrix4x4 proj = MakePerspectiveFovMatrix(0.45f, float(1280.0f) / float(720.0f), 0.1f, 100.0f);
-			editorUI_->DrawGizmoInScene(view_, proj);
-		});
-	} else {
-		EditorManager::ClearSceneOverlayCallback();
-	}
+	EditorManager::SetSceneOverlayCallback([this]() {
+		Matrix4x4 proj = MakePerspectiveFovMatrix(0.45f, float(1280.0f) / float(720.0f), 0.1f, 100.0f);
+		editorUI_->DrawGizmoInScene(view_, proj);
+	});
 #endif
 }
 

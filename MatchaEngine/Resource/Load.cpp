@@ -387,39 +387,47 @@ Animation LoadAnimationFile(const std::string& directoryPath, const std::string&
 		MessageBoxA(nullptr, errorMessage.c_str(), "Animation Load Error", MB_OK | MB_ICONERROR);
 		assert(false && "Animation Load Error");
 	}
-	aiAnimation* animationAssimp = scene->mAnimations[0];//最初のアニメーションだけ採用。複数対応させるべき
-	animation.duration = float(animationAssimp->mDuration / animationAssimp->mTicksPerSecond);//時間単位を秒に変換
+	for (unsigned int i = 0; i < scene->mNumAnimations; ++i) {
+		aiAnimation* animationAssimp = scene->mAnimations[i];
+		AnimationClip clip;
+		clip.duration = float(animationAssimp->mDuration / animationAssimp->mTicksPerSecond);//時間単位を秒に変換
 
-	//AnimationNodeを解析
-	for (uint32_t channelIndex = 0; channelIndex < animationAssimp->mNumChannels; ++channelIndex) {
+		//AnimationNodeを解析
+		for (uint32_t channelIndex = 0; channelIndex < animationAssimp->mNumChannels; ++channelIndex) {
 
-		aiNodeAnim* AnimationNodeAssimp = animationAssimp->mChannels[channelIndex];
-		AnimationNode& AnimationNode = animation.AnimationNodes[AnimationNodeAssimp->mNodeName.C_Str()];
+			aiNodeAnim* AnimationNodeAssimp = animationAssimp->mChannels[channelIndex];
+			AnimationNode& AnimationNode = clip.AnimationNodes[AnimationNodeAssimp->mNodeName.C_Str()];
 
-		//Translate
-		for (uint32_t keyIndex = 0; keyIndex < AnimationNodeAssimp->mNumPositionKeys; ++keyIndex) {
-			aiVectorKey& keyAssimp = AnimationNodeAssimp->mPositionKeys[keyIndex];
-			KeyframeVector3 keyframe;
-			keyframe.time = float(keyAssimp.mTime / animationAssimp->mTicksPerSecond);//ここも秒に変換
-			keyframe.value = { -keyAssimp.mValue.x,keyAssimp.mValue.y,keyAssimp.mValue.z };//右手→左手
-			AnimationNode.translate.push_back(keyframe);
+			//Translate
+			for (uint32_t keyIndex = 0; keyIndex < AnimationNodeAssimp->mNumPositionKeys; ++keyIndex) {
+				aiVectorKey& keyAssimp = AnimationNodeAssimp->mPositionKeys[keyIndex];
+				KeyframeVector3 keyframe;
+				keyframe.time = float(keyAssimp.mTime / animationAssimp->mTicksPerSecond);//ここも秒に変換
+				keyframe.value = { -keyAssimp.mValue.x,keyAssimp.mValue.y,keyAssimp.mValue.z };//右手→左手
+				AnimationNode.translate.push_back(keyframe);
+			}
+			//Rotate
+			for (uint32_t keyIndex = 0; keyIndex < AnimationNodeAssimp->mNumRotationKeys; ++keyIndex) {
+				aiQuatKey& keyAssimp = AnimationNodeAssimp->mRotationKeys[keyIndex];
+				KeyframeQuaternion keyframe;
+				keyframe.time = float(keyAssimp.mTime / animationAssimp->mTicksPerSecond);//ここも秒に変換
+				keyframe.value = { keyAssimp.mValue.x, -keyAssimp.mValue.y, -keyAssimp.mValue.z, keyAssimp.mValue.w };
+				AnimationNode.rotate.push_back(keyframe);
+			}
+			//Scale
+			for (uint32_t keyIndex = 0; keyIndex < AnimationNodeAssimp->mNumScalingKeys; ++keyIndex) {
+				aiVectorKey& keyAssimp = AnimationNodeAssimp->mScalingKeys[keyIndex];
+				KeyframeVector3 keyframe;
+				keyframe.time = float(keyAssimp.mTime / animationAssimp->mTicksPerSecond);//ここも秒に変換
+				keyframe.value = { keyAssimp.mValue.x, keyAssimp.mValue.y, keyAssimp.mValue.z };
+				AnimationNode.scale.push_back(keyframe);
+			}
 		}
-		//Rotate
-		for (uint32_t keyIndex = 0; keyIndex < AnimationNodeAssimp->mNumRotationKeys; ++keyIndex) {
-			aiQuatKey& keyAssimp = AnimationNodeAssimp->mRotationKeys[keyIndex];
-			KeyframeQuaternion keyframe;
-			keyframe.time = float(keyAssimp.mTime / animationAssimp->mTicksPerSecond);//ここも秒に変換
-			keyframe.value = { keyAssimp.mValue.x, -keyAssimp.mValue.y, -keyAssimp.mValue.z, keyAssimp.mValue.w };
-			AnimationNode.rotate.push_back(keyframe);
+		std::string clipName = animationAssimp->mName.C_Str();
+		if (clipName.empty()) {
+			clipName = "Anim_" + std::to_string(i);
 		}
-		//Scale
-		for (uint32_t keyIndex = 0; keyIndex < AnimationNodeAssimp->mNumScalingKeys; ++keyIndex) {
-			aiVectorKey& keyAssimp = AnimationNodeAssimp->mScalingKeys[keyIndex];
-			KeyframeVector3 keyframe;
-			keyframe.time = float(keyAssimp.mTime / animationAssimp->mTicksPerSecond);//ここも秒に変換
-			keyframe.value = { keyAssimp.mValue.x, keyAssimp.mValue.y, keyAssimp.mValue.z };
-			AnimationNode.scale.push_back(keyframe);
-		}
+		animation.animationClips[clipName] = clip;
 	}
 	return animation;
 }

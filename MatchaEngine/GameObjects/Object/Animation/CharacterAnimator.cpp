@@ -33,6 +33,9 @@ void CharacterAnimator::Initialize(ModelData modelData, const std::string& direc
 {
 	modelData_ = modelData;
 	animation_ = LoadAnimationFile(directoryPath, filename);
+	if (!animation_.animationClips.empty()) {
+		currentAnimationName_ = animation_.animationClips.begin()->first;
+	}
 	textureSrvHandleGPU_ = texture->TextureData(modelData_.textureIndex);
 
 	localMatrix_ = modelData_.rootNode.localMatrix;
@@ -77,6 +80,15 @@ void CharacterAnimator::Initialize(ModelData modelData, const std::string& direc
 
 	boneRenderer_ = new LineRenderer();
 	boneRenderer_->Initialize();
+}
+
+void CharacterAnimator::LoadAdditionalAnimation(const std::string& directoryPath, const std::string& filename, const std::string& overrideName)
+{
+	Animation newAnim = LoadAnimationFile(directoryPath, filename);
+	for (const auto& pair : newAnim.animationClips) {
+		std::string name = overrideName.empty() ? pair.first : overrideName;
+		animation_.animationClips[name] = pair.second;
+	}
 }
 
 
@@ -143,9 +155,12 @@ int32_t CharacterAnimator::CreateJoint(const Node& node, const std::optional<int
 
 void CharacterAnimator::ApplyAnimation(float time)
 {
+	if (animation_.animationClips.find(currentAnimationName_) == animation_.animationClips.end()) return;
+	const AnimationClip& clip = animation_.animationClips.at(currentAnimationName_);
+
 	for (Joint& joint : skeleton_.joints) {
 		//対象のJointにAnimationがあれば、値の適応を行う。下記のif文はC++17から可能になった初期化月if文
-		if (auto it = animation_.AnimationNodes.find(joint.name); it != animation_.AnimationNodes.end()) {
+		if (auto it = clip.AnimationNodes.find(joint.name); it != clip.AnimationNodes.end()) {
 			const AnimationNode& rootAnimationNode = (*it).second;
 			joint.transform.translate = CalculateValue(rootAnimationNode.translate, time);
 			joint.transform.rotate = CalculateValue(rootAnimationNode.rotate, time);
@@ -185,9 +200,15 @@ void CharacterAnimator::SkinClusterUpdate(int instanceIndex)
 
 void CharacterAnimator::noUpdate(Matrix4x4 viewMatrix)
 {
+	if (animation_.animationClips.find(currentAnimationName_) == animation_.animationClips.end()) {
+		SettingWvp(viewMatrix);
+		return;
+	}
+	AnimationClip& clip = animation_.animationClips.at(currentAnimationName_);
+
 	animationTime_ += 1.0f / 60.0f;//時間を進める
-	animationTime_ = std::fmod(animationTime_, animation_.duration);//リピート再生
-	AnimationNode& rootAnimationNode = animation_.AnimationNodes[modelData_.rootNode.name];
+	animationTime_ = std::fmod(animationTime_, clip.duration);//リピート再生
+	AnimationNode& rootAnimationNode = clip.AnimationNodes[modelData_.rootNode.name];
 
 	Vector3 translate = CalculateValue(rootAnimationNode.translate, animationTime_);
 	Quaternion rotate = CalculateValue(rootAnimationNode.rotate, animationTime_);
@@ -200,23 +221,26 @@ void CharacterAnimator::noUpdate(Matrix4x4 viewMatrix)
 
 void CharacterAnimator::Update(Matrix4x4 viewMatrix)
 {
-	if (isInstancing_ && !instancingTransforms_.empty()) {
-		int count = std::min(maxInstanceCount_, static_cast<int>(instancingTransforms_.size()));
-		for (int i = 0; i < count; ++i) {
-			instancingAnimationTimes_[i] += 1.0f / 60.0f;//時間を進める
-			instancingAnimationTimes_[i] = std::fmod(instancingAnimationTimes_[i], animation_.duration);
+	float currentDuration = GetDuration();
+	if (currentDuration > 0.0f) {
+		if (isInstancing_ && !instancingTransforms_.empty()) {
+			int count = std::min(maxInstanceCount_, static_cast<int>(instancingTransforms_.size()));
+			for (int i = 0; i < count; ++i) {
+				instancingAnimationTimes_[i] += 1.0f / 60.0f;//時間を進める
+				instancingAnimationTimes_[i] = std::fmod(instancingAnimationTimes_[i], currentDuration);
 
-			ApplyAnimation(instancingAnimationTimes_[i]);
+				ApplyAnimation(instancingAnimationTimes_[i]);
+				SkeletonUpdate();
+				SkinClusterUpdate(i);
+			}
+		} else {
+			animationTime_ += 1.0f / 60.0f;//時間を進める
+			animationTime_ = std::fmod(animationTime_, currentDuration);
+
+			ApplyAnimation(animationTime_);
 			SkeletonUpdate();
-			SkinClusterUpdate(i);
+			SkinClusterUpdate(0);
 		}
-	} else {
-		animationTime_ += 1.0f / 60.0f;//時間を進める
-		animationTime_ = std::fmod(animationTime_, animation_.duration);
-
-		ApplyAnimation(animationTime_);
-		SkeletonUpdate();
-		SkinClusterUpdate(0);
 	}
 
 	SettingWvp(viewMatrix);
@@ -240,29 +264,32 @@ void CharacterAnimator::Update(Matrix4x4 viewMatrix)
 
 void CharacterAnimator::UpdateWithDelta(Matrix4x4 viewMatrix, float deltaAnimationTime)
 {
-	if (isInstancing_ && !instancingTransforms_.empty()) {
-		int count = std::min(maxInstanceCount_, static_cast<int>(instancingTransforms_.size()));
-		for (int i = 0; i < count; ++i) {
-			instancingAnimationTimes_[i] += deltaAnimationTime;
-			instancingAnimationTimes_[i] = std::fmod(instancingAnimationTimes_[i], animation_.duration);
-			if (instancingAnimationTimes_[i] < 0.0f) {
-				instancingAnimationTimes_[i] += animation_.duration;
+	float currentDuration = GetDuration();
+	if (currentDuration > 0.0f) {
+		if (isInstancing_ && !instancingTransforms_.empty()) {
+			int count = std::min(maxInstanceCount_, static_cast<int>(instancingTransforms_.size()));
+			for (int i = 0; i < count; ++i) {
+				instancingAnimationTimes_[i] += deltaAnimationTime;
+				instancingAnimationTimes_[i] = std::fmod(instancingAnimationTimes_[i], currentDuration);
+				if (instancingAnimationTimes_[i] < 0.0f) {
+					instancingAnimationTimes_[i] += currentDuration;
+				}
+
+				ApplyAnimation(instancingAnimationTimes_[i]);
+				SkeletonUpdate();
+				SkinClusterUpdate(i);
+			}
+		} else {
+			animationTime_ += deltaAnimationTime;
+			animationTime_ = std::fmod(animationTime_, currentDuration);
+			if (animationTime_ < 0.0f) {
+				animationTime_ += currentDuration;
 			}
 
-			ApplyAnimation(instancingAnimationTimes_[i]);
+			ApplyAnimation(animationTime_);
 			SkeletonUpdate();
-			SkinClusterUpdate(i);
+			SkinClusterUpdate(0);
 		}
-	} else {
-		animationTime_ += deltaAnimationTime;
-		animationTime_ = std::fmod(animationTime_, animation_.duration);
-		if (animationTime_ < 0.0f) {
-			animationTime_ += animation_.duration;
-		}
-
-		ApplyAnimation(animationTime_);
-		SkeletonUpdate();
-		SkinClusterUpdate(0);
 	}
 
 	SettingWvp(viewMatrix);
@@ -516,3 +543,17 @@ void CharacterAnimator::CreateSkinCluster()
 	}
 }
 
+Transform CharacterAnimator::GetBoneTransform(BoneType type)
+{
+	if (boneTypeMap_.find(type) != boneTypeMap_.end()) {
+		std::string boneName = boneTypeMap_[type];
+		auto it = skeleton_.jointMap.find(boneName);
+		if (it != skeleton_.jointMap.end()) {
+			int32_t index = it->second;
+			Matrix4x4 worldMatrix = MakeAffineMatrix(transform_.translate, transform_.scale, transform_.rotate);
+			Matrix4x4 boneWorldMatrix = MultiplyMatrix4x4(skeleton_.joints[index].skeletonSpaceMatrix, worldMatrix);
+			return DecomposeMatrix(boneWorldMatrix);
+		}
+	}
+	return Transform();
+}
