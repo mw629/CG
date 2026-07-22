@@ -26,9 +26,6 @@ void Obstacle::SetType(Type type) {
     }
 
     model_->SetShader("ObjectShader");
-    if (model_->GetMartial()) {
-        model_->GetMartial()->SetMaterialLighting(false);
-    }
 
     // タイプに応じて当たり判定サイズとスケールを設定
     switch (type_) {

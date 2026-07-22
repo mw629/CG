@@ -39,7 +39,7 @@ void Model::Initialize(ModelData modelData)
 			mat.textureSrvHandleGPU = textureSrvHandleGPU_;
 		}
 		mat.materialFactory = std::make_unique<MaterialFactory>();
-		mat.materialFactory->CreateMartial(true, 0.0f);
+		mat.materialFactory->CreateMartial(false, 0.0f);
 		subMeshMaterials_.push_back(std::move(mat));
 	}
 

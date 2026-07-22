@@ -64,6 +64,11 @@ public:
 
 	void noUpdate(Matrix4x4 viewMatrix);
 	void Update(Matrix4x4 viewMatrix);
+	void UpdateWithDelta(Matrix4x4 viewMatrix, float deltaAnimationTime);
+
+	void SetAnimationTime(float time) { animationTime_ = time; }
+	float GetAnimationTime() const { return animationTime_; }
+	float GetDuration() const { return animation_.duration; }
 
 	void UpdateBoneRenderer();
 

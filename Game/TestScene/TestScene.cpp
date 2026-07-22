@@ -2,6 +2,7 @@
 #include "Graphics/Render/Draw.h"
 #include <imgui.h>
 #include <memory>
+#include <cmath>
 
 TestScene::~TestScene()
 {
@@ -203,7 +204,38 @@ void TestScene::Update() {
 		}
 	}
 
-	animation_.get()->Update(view);
+	Transform animationTransform = animation_->GetTransform();
+
+	Vector3 moveInput = GamePadInput::GetLeftStick();
+	Vector3 moveDirection = { moveInput.x, 0.0f, moveInput.y };
+
+	if (Input::PressKey(DIK_D) || Input::PressKey(DIK_RIGHT)) moveDirection.x += 1.0f;
+	if (Input::PressKey(DIK_A) || Input::PressKey(DIK_LEFT))  moveDirection.x -= 1.0f;
+	if (Input::PressKey(DIK_W) || Input::PressKey(DIK_UP))    moveDirection.z += 1.0f;
+	if (Input::PressKey(DIK_S) || Input::PressKey(DIK_DOWN))  moveDirection.z -= 1.0f;
+
+	float lengthSq = moveDirection.x * moveDirection.x + moveDirection.z * moveDirection.z;
+	if (lengthSq > 0.0001f) {
+		float length = std::sqrt(lengthSq);
+		moveDirection.x /= length;
+		moveDirection.z /= length;
+		if (length > 1.0f) length = 1.0f;
+
+		float speed = 0.05f;
+		float moveDist = length * speed;
+		animationTransform.translate.x += moveDirection.x * moveDist;
+		animationTransform.translate.z += moveDirection.z * moveDist;
+
+		animationTransform.rotate.y = std::atan2(moveDirection.x, moveDirection.z);
+		animation_->SetTransform(animationTransform);
+
+		float animSpeedScale = 1.0f;
+		animation_.get()->UpdateWithDelta(view, moveDist * animSpeedScale);
+	}
+	else {
+		animation_.get()->SetAnimationTime(0.0f);
+		animation_.get()->UpdateWithDelta(view, 0.0f);
+	}
 	nodeAnimation_.get()->Update(view);
 }
 

@@ -21,7 +21,7 @@ private:
     Transform uvTransform_{ {1.0f,1.0f,1.0f}, {0.0f,0.0f,0.0f}, {0.0f,0.0f,0.0f} };
 
 public:
-    MaterialComponent(bool lighting = true, float environmentCoefficient = 0.0f);
+    MaterialComponent(bool lighting = false, float environmentCoefficient = 0.0f);
     ~MaterialComponent() override = default;
 
     void Initialize() override;

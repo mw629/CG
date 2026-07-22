@@ -22,7 +22,6 @@ void ColliderComponent::Initialize()
 	debugCube_->Initialize(0);
 	if (auto mat = debugCube_->GetComponent<MaterialComponent>()) {
 		mat->SetShader("WireFrameShader");
-		mat->GetMaterialFactory()->SetMaterialLighting(false);
 		mat->GetMaterialFactory()->SetColor({ 1.0f, 0.0f, 0.0f, 1.0f });
 	}
 
@@ -30,7 +29,6 @@ void ColliderComponent::Initialize()
 	debugSphere_->Initialize(0);
 	if (auto mat = debugSphere_->GetComponent<MaterialComponent>()) {
 		mat->SetShader("WireFrameShader");
-		mat->GetMaterialFactory()->SetMaterialLighting(false);
 		mat->GetMaterialFactory()->SetColor({ 1.0f, 0.0f, 0.0f, 1.0f });
 	}
 #endif

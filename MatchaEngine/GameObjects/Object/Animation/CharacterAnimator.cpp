@@ -50,7 +50,6 @@ void CharacterAnimator::Initialize(ModelData modelData, const std::string& direc
 		if (auto mat = jointSpheres_[i]->GetComponent<MaterialComponent>()) {
 			mat->GetMaterialFactory()->SetColor({ 0.0f, 1.0f, 0.0f, 1.0f });
 			mat->SetShader("WireFrameShaderNoDepth");
-			mat->GetMaterialFactory()->SetMaterialLighting(false);
 		}
 	}
 
@@ -69,7 +68,7 @@ void CharacterAnimator::Initialize(ModelData modelData, const std::string& direc
 			mat.textureSrvHandleGPU = textureSrvHandleGPU_;
 		}
 		mat.materialFactory = std::make_unique<MaterialFactory>();
-		mat.materialFactory->CreateMartial(true, 0.0f);
+		mat.materialFactory->CreateMartial(false, 0.0f);
 		subMeshMaterials_.push_back(std::move(mat));
 	}
 	CreateObject();
@@ -223,6 +222,52 @@ void CharacterAnimator::Update(Matrix4x4 viewMatrix)
 	SettingWvp(viewMatrix);
 	UpdateBoneRenderer();
 	
+	Matrix4x4 worldMatrix = MakeAffineMatrix(transform_.translate, transform_.scale, transform_.rotate);
+	if (isInstancing_ && !instancingTransforms_.empty()) {
+		worldMatrix = MakeAffineMatrix(instancingTransforms_[0].translate, instancingTransforms_[0].scale, instancingTransforms_[0].rotate);
+	}
+	for (size_t i = 0; i < skeleton_.joints.size(); ++i) {
+		if (i < jointSpheres_.size() && jointSpheres_[i]) {
+			Matrix4x4 currentJointMat = skeleton_.joints[i].skeletonSpaceMatrix * worldMatrix;
+			Transform t = jointSpheres_[i]->GetTransform();
+			t.translate = { currentJointMat.m[3][0], currentJointMat.m[3][1], currentJointMat.m[3][2] };
+			t.scale = { 0.01f, 0.01f, 0.01f };
+			jointSpheres_[i]->SetTransform(t);
+			jointSpheres_[i]->SettingWvp(viewMatrix);
+		}
+	}
+}
+
+void CharacterAnimator::UpdateWithDelta(Matrix4x4 viewMatrix, float deltaAnimationTime)
+{
+	if (isInstancing_ && !instancingTransforms_.empty()) {
+		int count = std::min(maxInstanceCount_, static_cast<int>(instancingTransforms_.size()));
+		for (int i = 0; i < count; ++i) {
+			instancingAnimationTimes_[i] += deltaAnimationTime;
+			instancingAnimationTimes_[i] = std::fmod(instancingAnimationTimes_[i], animation_.duration);
+			if (instancingAnimationTimes_[i] < 0.0f) {
+				instancingAnimationTimes_[i] += animation_.duration;
+			}
+
+			ApplyAnimation(instancingAnimationTimes_[i]);
+			SkeletonUpdate();
+			SkinClusterUpdate(i);
+		}
+	} else {
+		animationTime_ += deltaAnimationTime;
+		animationTime_ = std::fmod(animationTime_, animation_.duration);
+		if (animationTime_ < 0.0f) {
+			animationTime_ += animation_.duration;
+		}
+
+		ApplyAnimation(animationTime_);
+		SkeletonUpdate();
+		SkinClusterUpdate(0);
+	}
+
+	SettingWvp(viewMatrix);
+	UpdateBoneRenderer();
+
 	Matrix4x4 worldMatrix = MakeAffineMatrix(transform_.translate, transform_.scale, transform_.rotate);
 	if (isInstancing_ && !instancingTransforms_.empty()) {
 		worldMatrix = MakeAffineMatrix(instancingTransforms_[0].translate, instancingTransforms_[0].scale, instancingTransforms_[0].rotate);
