@@ -34,8 +34,7 @@ private:
 	std::vector<std::vector<Transform>> roadTransforms_;
 
 	// サイドプレーン用
-	std::shared_ptr<RenderObject> sidePlaneL_;
-	std::shared_ptr<RenderObject> sidePlaneR_;
+	std::shared_ptr<RenderObject> sidePlanes_[2];
 	ModelData planeModelData_;
 
 	ModelData roadModelData_;
