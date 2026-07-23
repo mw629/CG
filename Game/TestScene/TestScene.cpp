@@ -247,7 +247,7 @@ void TestScene::Update() {
 	Vector3 moveInput = GamePadInput::GetLeftStick();
 	Vector3 moveDirection = { moveInput.x, 0.0f, moveInput.y };
 
-	if (Input::PushKey(DIK_SPACE)) {
+	if (Input::PushKey(DIK_SPACE)||GamePadInput::PushButton(XINPUT_GAMEPAD_A)) {
 		isSneaking_ = !isSneaking_;
 		if (isSneaking_) {
 			animation_->SetAnimation("sneakWalk", 1.0f);

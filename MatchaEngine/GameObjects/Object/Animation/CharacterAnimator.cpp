@@ -153,7 +153,51 @@ int32_t CharacterAnimator::CreateJoint(const Node& node, const std::optional<int
 
 }
 
-void CharacterAnimator::ApplyAnimation(float time, float previousTime, float blendFactor)
+void CharacterAnimator::SetAnimation(const std::string& name, float blendDuration)
+{
+	if (currentAnimationName_ == name) return;
+	if (blendDuration > 0.0f && !currentAnimationName_.empty()) {
+		if (isBlending_) {
+			// 連続で発動した場合など、現在地から補間を開始するためのスナップショット作成
+			if (isInstancing_ && !instancingTransforms_.empty()) {
+				instancingSnapshotPoses_.resize(instancingTransforms_.size());
+				for (size_t i = 0; i < instancingTransforms_.size(); ++i) {
+					ApplyAnimation(instancingAnimationTimes_[i], instancingPreviousAnimationTimes_[i], EaseInOutSine(blendTimer_ / blendDuration_), static_cast<int>(i));
+					instancingSnapshotPoses_[i].resize(skeleton_.joints.size());
+					for (size_t j = 0; j < skeleton_.joints.size(); ++j) {
+						instancingSnapshotPoses_[i][j] = skeleton_.joints[j].transform;
+					}
+				}
+			} else {
+				ApplyAnimation(animationTime_, previousAnimationTime_, EaseInOutSine(blendTimer_ / blendDuration_), 0);
+				singleSnapshotPose_.resize(skeleton_.joints.size());
+				for (size_t j = 0; j < skeleton_.joints.size(); ++j) {
+					singleSnapshotPose_[j] = skeleton_.joints[j].transform;
+				}
+			}
+			isSnapshotBlending_ = true;
+		} else {
+			isSnapshotBlending_ = false;
+		}
+
+		previousAnimationName_ = currentAnimationName_;
+		previousAnimationTime_ = animationTime_;
+		instancingPreviousAnimationTimes_ = instancingAnimationTimes_;
+		blendDuration_ = blendDuration;
+		blendTimer_ = 0.0f;
+		isBlending_ = true;
+	} else {
+		isBlending_ = false;
+		isSnapshotBlending_ = false;
+	}
+	currentAnimationName_ = name; 
+	animationTime_ = 0.0f; 
+	if (isInstancing_ && !instancingTransforms_.empty()) {
+		std::fill(instancingAnimationTimes_.begin(), instancingAnimationTimes_.end(), 0.0f);
+	}
+}
+
+void CharacterAnimator::ApplyAnimation(float time, float previousTime, float blendFactor, int instanceIndex)
 {
 	if (animation_.animationClips.find(currentAnimationName_) == animation_.animationClips.end()) return;
 	const AnimationClip& clip = animation_.animationClips.at(currentAnimationName_);
@@ -163,7 +207,17 @@ void CharacterAnimator::ApplyAnimation(float time, float previousTime, float ble
 		prevClip = &animation_.animationClips.at(previousAnimationName_);
 	}
 
-	for (Joint& joint : skeleton_.joints) {
+	const std::vector<QuaternionTransform>* snapshot = nullptr;
+	if (isSnapshotBlending_ && isBlending_) {
+		if (isInstancing_ && instanceIndex >= 0 && instanceIndex < instancingSnapshotPoses_.size()) {
+			snapshot = &instancingSnapshotPoses_[instanceIndex];
+		} else if (!isInstancing_ && !singleSnapshotPose_.empty()) {
+			snapshot = &singleSnapshotPose_;
+		}
+	}
+
+	for (size_t i = 0; i < skeleton_.joints.size(); ++i) {
+		Joint& joint = skeleton_.joints[i];
 		QuaternionTransform currentTransform = joint.transform;
 		bool hasCurrent = false;
 		if (auto it = clip.AnimationNodes.find(joint.name); it != clip.AnimationNodes.end()) {
@@ -174,7 +228,14 @@ void CharacterAnimator::ApplyAnimation(float time, float previousTime, float ble
 			hasCurrent = true;
 		}
 
-		if (prevClip) {
+		if (snapshot && snapshot->size() == skeleton_.joints.size()) {
+			if (hasCurrent) {
+				QuaternionTransform prevTransform = (*snapshot)[i];
+				joint.transform.translate = Lerp(prevTransform.translate, currentTransform.translate, blendFactor);
+				joint.transform.rotate = Lerp(prevTransform.rotate, currentTransform.rotate, blendFactor);
+				joint.transform.scale = Lerp(prevTransform.scale, currentTransform.scale, blendFactor);
+			}
+		} else if (prevClip) {
 			QuaternionTransform prevTransform = joint.transform;
 			bool hasPrev = false;
 			if (auto it = prevClip->AnimationNodes.find(joint.name); it != prevClip->AnimationNodes.end()) {
@@ -279,9 +340,9 @@ void CharacterAnimator::Update(Matrix4x4 viewMatrix)
 					if (previousDuration > 0.0f) {
 						instancingPreviousAnimationTimes_[i] = std::fmod(instancingPreviousAnimationTimes_[i], previousDuration);
 					}
-					ApplyAnimation(instancingAnimationTimes_[i], instancingPreviousAnimationTimes_[i], blendFactor);
+					ApplyAnimation(instancingAnimationTimes_[i], instancingPreviousAnimationTimes_[i], blendFactor, i);
 				} else {
-					ApplyAnimation(instancingAnimationTimes_[i]);
+					ApplyAnimation(instancingAnimationTimes_[i], 0.0f, 1.0f, i);
 				}
 				SkeletonUpdate();
 				SkinClusterUpdate(i);
@@ -295,9 +356,9 @@ void CharacterAnimator::Update(Matrix4x4 viewMatrix)
 				if (previousDuration > 0.0f) {
 					previousAnimationTime_ = std::fmod(previousAnimationTime_, previousDuration);
 				}
-				ApplyAnimation(animationTime_, previousAnimationTime_, blendFactor);
+				ApplyAnimation(animationTime_, previousAnimationTime_, blendFactor, 0);
 			} else {
-				ApplyAnimation(animationTime_);
+				ApplyAnimation(animationTime_, 0.0f, 1.0f, 0);
 			}
 			SkeletonUpdate();
 			SkinClusterUpdate(0);
@@ -355,9 +416,9 @@ void CharacterAnimator::UpdateWithDelta(Matrix4x4 viewMatrix, float deltaAnimati
 						instancingPreviousAnimationTimes_[i] = std::fmod(instancingPreviousAnimationTimes_[i], previousDuration);
 						if (instancingPreviousAnimationTimes_[i] < 0.0f) instancingPreviousAnimationTimes_[i] += previousDuration;
 					}
-					ApplyAnimation(instancingAnimationTimes_[i], instancingPreviousAnimationTimes_[i], blendFactor);
+					ApplyAnimation(instancingAnimationTimes_[i], instancingPreviousAnimationTimes_[i], blendFactor, i);
 				} else {
-					ApplyAnimation(instancingAnimationTimes_[i]);
+					ApplyAnimation(instancingAnimationTimes_[i], 0.0f, 1.0f, i);
 				}
 				SkeletonUpdate();
 				SkinClusterUpdate(i);
@@ -375,9 +436,9 @@ void CharacterAnimator::UpdateWithDelta(Matrix4x4 viewMatrix, float deltaAnimati
 					previousAnimationTime_ = std::fmod(previousAnimationTime_, previousDuration);
 					if (previousAnimationTime_ < 0.0f) previousAnimationTime_ += previousDuration;
 				}
-				ApplyAnimation(animationTime_, previousAnimationTime_, blendFactor);
+				ApplyAnimation(animationTime_, previousAnimationTime_, blendFactor, 0);
 			} else {
-				ApplyAnimation(animationTime_);
+				ApplyAnimation(animationTime_, 0.0f, 1.0f, 0);
 			}
 			SkeletonUpdate();
 			SkinClusterUpdate(0);

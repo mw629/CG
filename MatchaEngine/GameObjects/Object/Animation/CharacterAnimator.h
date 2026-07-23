@@ -20,6 +20,9 @@ private:
 	float blendDuration_ = 0.0f;
 	float blendTimer_ = 0.0f;
 	bool isBlending_ = false;
+	bool isSnapshotBlending_ = false;
+	std::vector<std::vector<QuaternionTransform>> instancingSnapshotPoses_;
+	std::vector<QuaternionTransform> singleSnapshotPose_;
 
 	std::map<BoneType, std::string> boneTypeMap_;
 
@@ -67,7 +70,7 @@ public:
 	int32_t CreateJoint(const Node& node,
 		const std::optional<int32_t>& parent, std::vector<Joint>& joints);
 
-	void ApplyAnimation(float time, float previousTime = 0.0f, float blendFactor = 1.0f);
+	void ApplyAnimation(float time, float previousTime = 0.0f, float blendFactor = 1.0f, int instanceIndex = -1);
 	
 	void SkeletonUpdate();
 	void SkinClusterUpdate(int instanceIndex);
@@ -90,24 +93,7 @@ public:
 	/// </summary>
 	/// <param name="name">アニメションの時間</param>
 	/// <param name="blendDuration">遷移タイム</param>
-	void SetAnimation(const std::string& name, float blendDuration = 0.0f) { 
-		if (currentAnimationName_ == name) return;
-		if (blendDuration > 0.0f && !currentAnimationName_.empty()) {
-			previousAnimationName_ = currentAnimationName_;
-			previousAnimationTime_ = animationTime_;
-			instancingPreviousAnimationTimes_ = instancingAnimationTimes_;
-			blendDuration_ = blendDuration;
-			blendTimer_ = 0.0f;
-			isBlending_ = true;
-		} else {
-			isBlending_ = false;
-		}
-		currentAnimationName_ = name; 
-		animationTime_ = 0.0f; 
-		if (isInstancing_ && !instancingTransforms_.empty()) {
-			std::fill(instancingAnimationTimes_.begin(), instancingAnimationTimes_.end(), 0.0f);
-		}
-	}
+	void SetAnimation(const std::string& name, float blendDuration = 0.0f);
 
 	void UpdateBoneRenderer();
 
