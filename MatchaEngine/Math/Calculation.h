@@ -75,6 +75,8 @@ float Lerp(float a, float b, float t);
 Vector3 Lerp(const Vector3& a, const Vector3& b, float t);
 Quaternion Lerp(const Quaternion& a, const Quaternion& b, float t);
 
+float EaseInOutSine(float x);
+
 //行列の計算
 
 /// <summary>

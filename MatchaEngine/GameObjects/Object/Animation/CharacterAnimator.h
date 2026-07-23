@@ -15,6 +15,12 @@ private:
 	std::string currentAnimationName_ = "";
 	float animationTime_ = 0.0f;
 
+	std::string previousAnimationName_ = "";
+	float previousAnimationTime_ = 0.0f;
+	float blendDuration_ = 0.0f;
+	float blendTimer_ = 0.0f;
+	bool isBlending_ = false;
+
 	std::map<BoneType, std::string> boneTypeMap_;
 
 	Skeleton skeleton_;
@@ -61,7 +67,7 @@ public:
 	int32_t CreateJoint(const Node& node,
 		const std::optional<int32_t>& parent, std::vector<Joint>& joints);
 
-	void ApplyAnimation(float time);
+	void ApplyAnimation(float time, float previousTime = 0.0f, float blendFactor = 1.0f);
 	
 	void SkeletonUpdate();
 	void SkinClusterUpdate(int instanceIndex);
@@ -78,7 +84,24 @@ public:
 		}
 		return 0.0f;
 	}
-	void SetAnimation(const std::string& name) { currentAnimationName_ = name; animationTime_ = 0.0f; }
+	void SetAnimation(const std::string& name, float blendDuration = 0.0f) { 
+		if (currentAnimationName_ == name) return;
+		if (blendDuration > 0.0f && !currentAnimationName_.empty()) {
+			previousAnimationName_ = currentAnimationName_;
+			previousAnimationTime_ = animationTime_;
+			instancingPreviousAnimationTimes_ = instancingAnimationTimes_;
+			blendDuration_ = blendDuration;
+			blendTimer_ = 0.0f;
+			isBlending_ = true;
+		} else {
+			isBlending_ = false;
+		}
+		currentAnimationName_ = name; 
+		animationTime_ = 0.0f; 
+		if (isInstancing_ && !instancingTransforms_.empty()) {
+			std::fill(instancingAnimationTimes_.begin(), instancingAnimationTimes_.end(), 0.0f);
+		}
+	}
 
 	void UpdateBoneRenderer();
 
@@ -93,13 +116,18 @@ public:
 	void CreateSkinCluster();
 
 	std::vector<float> instancingAnimationTimes_;
+	std::vector<float> instancingPreviousAnimationTimes_;
 	void AddInstanceAnimator(Transform transform, float animationTime) {
 		AddInstanceTransform(transform);
 		instancingAnimationTimes_.push_back(animationTime);
+		if (isBlending_) {
+			instancingPreviousAnimationTimes_.push_back(animationTime);
+		}
 	}
 	void ClearInstanceAnimators() {
 		ClearInstanceTransforms();
 		instancingAnimationTimes_.clear();
+		instancingPreviousAnimationTimes_.clear();
 	}
 
 	// 追加: インフルエンス用 VBV を取得 (後方互換性)

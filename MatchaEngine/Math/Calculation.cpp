@@ -106,6 +106,9 @@ Quaternion Lerp(const Quaternion& a, const Quaternion& b, float t) {
 	return result;
 }
 
+float EaseInOutSine(float x) {
+	return -(std::cos(3.14159265f * x) - 1.0f) / 2.0f;
+}
 
 // 行列
 
