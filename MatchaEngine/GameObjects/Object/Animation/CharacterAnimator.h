@@ -84,6 +84,12 @@ public:
 		}
 		return 0.0f;
 	}
+
+	/// <summary>
+	///	animatioを設定する。blendDurationを指定すると前のアニメーションからブレンドして遷移する。
+	/// </summary>
+	/// <param name="name">アニメションの時間</param>
+	/// <param name="blendDuration">遷移タイム</param>
 	void SetAnimation(const std::string& name, float blendDuration = 0.0f) { 
 		if (currentAnimationName_ == name) return;
 		if (blendDuration > 0.0f && !currentAnimationName_.empty()) {
