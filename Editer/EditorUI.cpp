@@ -41,9 +41,9 @@ void EditorUI::ProcessMousePicking(GameObjectManager* gameObjectManager, const M
     float mx = mousePos.x;
     float my = mousePos.y;
 
-    // Sceneウィンドウの屋根左山の絶対座標とサイズ
-    ImVec2 scenePos = ImVec2(vMin.x + windowPos.x, vMin.y + windowPos.y);
-    ImVec2 sceneSize = ImVec2(vMax.x - vMin.x, vMax.y - vMin.y);
+    // Sceneウィンドウの実際の描画領域（レターボックス等を考慮した絶対座標）
+    ImVec2 scenePos = EditorManager::s_sceneImagePos;
+    ImVec2 sceneSize = EditorManager::s_sceneImageSize;
 
     // NDC変換 (Sceneウィンドウ内を-1〜1にマッピング)
     float ndcX = (2.0f * (mx - scenePos.x)) / sceneSize.x - 1.0f;
@@ -123,8 +123,9 @@ void EditorUI::DrawGizmo(const Matrix4x4& view, const Matrix4x4& projection) {
     ImVec2 vMax = ImGui::GetWindowContentRegionMax();
     ImVec2 windowPos = ImGui::GetWindowPos();
 
-    ImVec2 scenePos = ImVec2(vMin.x + windowPos.x, vMin.y + windowPos.y);
-    ImVec2 sceneSize = ImVec2(vMax.x - vMin.x, vMax.y - vMin.y);
+    // Sceneウィンドウの実際の描画領域
+    ImVec2 scenePos = EditorManager::s_sceneImagePos;
+    ImVec2 sceneSize = EditorManager::s_sceneImageSize;
 
     ImGuizmo::SetOrthographic(false);
     ImGuizmo::SetDrawlist(ImGui::GetWindowDrawList());
@@ -132,7 +133,8 @@ void EditorUI::DrawGizmo(const Matrix4x4& view, const Matrix4x4& projection) {
     ImGuizmo::SetGizmoSizeClipSpace(0.15f);
 
     Transform t = selectedObject_->GetTransform();
-    Matrix4x4 world = MakeAffineMatrix(t.translate, t.scale, t.rotate);
+    // ギズモ操作時にスケールが小さいとバグるため、スケールは1にする
+    Matrix4x4 world = MakeAffineMatrix(t.translate, {1.0f, 1.0f, 1.0f}, t.rotate);
 
     ImGuizmo::OPERATION op = ImGuizmo::TRANSLATE;
     if (EditorManager::s_gizmoOp == 1) op = ImGuizmo::ROTATE;
@@ -155,7 +157,10 @@ void EditorUI::DrawGizmo(const Matrix4x4& view, const Matrix4x4& projection) {
         float pi = 3.1415926535f;
         t.translate = { translation[0], translation[1], translation[2] };
         t.rotate = { rotation[0] * pi / 180.0f, rotation[1] * pi / 180.0f, rotation[2] * pi / 180.0f };
-        t.scale = { scale[0], scale[1], scale[2] };
+        // スケールはギズモでの操作結果に依存させず元の値を維持（SCALEモード時は必要なら別途対応）
+        if (op == ImGuizmo::SCALE) {
+            t.scale = { scale[0] * t.scale.x, scale[1] * t.scale.y, scale[2] * t.scale.z };
+        }
 
         selectedObject_->SetTransform(t);
     }

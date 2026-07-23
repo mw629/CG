@@ -20,6 +20,7 @@ private:
 	Transform cameraTransform_{ {1.0f,1.0f,1.0f},{0.0f,0.0f,0.0f,},{0.0f,2.0f,-5.0f} };
 
     std::vector<std::unique_ptr<Emitter>> particle_;
+	std::unique_ptr<Emitter> leftHandParticle_ = std::make_unique<Emitter>();
 
 	std::unique_ptr<Sprite> sprite_ = std::make_unique<Sprite>();
 	SpriteData spriteData_{
@@ -39,6 +40,9 @@ private:
 
 	std::shared_ptr<Cylinder> cylinder_ = std::make_shared<Cylinder>();
 	Transform cylinderTransform_{ {1.0f,1.0f,1.0f},{0.0f,0.0f,0.0f,},{2.0f,2.0f,1.5f} };
+
+	std::shared_ptr<Model> axe_ = std::make_shared<Model>();
+	Transform axeOffset_{ {1.0f,1.0f,1.0f},{0.0f,0.0f,0.0f,},{0.0f,0.0f,0.0f} };
 
 	std::shared_ptr<Cube> skyBox_ = std::make_shared<Cube>();
 	int skyBoxTexture_;

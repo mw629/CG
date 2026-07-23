@@ -30,6 +30,20 @@ void TestScene::ImGui()
 	for (int i = 0, n = static_cast<int>(particle_.size()); i < n; ++i) {
 		particle_[i].get()->ImGui();
 	}
+	leftHandParticle_->ImGui();
+
+	if (ImGui::CollapsingHeader("Animation Settings", ImGuiTreeNodeFlags_DefaultOpen)) {
+		bool isVisibleBones = animation_.get()->GetVisibleBones();
+		if (ImGui::Checkbox("Show Bones", &isVisibleBones)) {
+			animation_.get()->SetVisibleBones(isVisibleBones);
+		}
+	}
+
+	if (ImGui::CollapsingHeader("Axe Settings", ImGuiTreeNodeFlags_DefaultOpen)) {
+		ImGui::DragFloat3("Offset Pos", &axeOffset_.translate.x, 0.01f);
+		ImGui::DragFloat3("Offset Rot", &axeOffset_.rotate.x, 0.01f);
+		ImGui::DragFloat3("Offset Scale", &axeOffset_.scale.x, 0.01f);
+	}
 
 	ImGui::End();
 
@@ -69,6 +83,16 @@ void TestScene::Initialize() {
 	animation_->SetAnimation("sneakWalk");
 	animation_.get()->name_ = "Animation Model";
 	animation_.get()->SetVisibleBones(true); // ボーンを表示
+
+	// 手のボーンを登録
+	animation_->SetBoneMapping(BoneType::RightHand, "mixamorig:RightHand");
+	animation_->SetBoneMapping(BoneType::LeftHand, "mixamorig:LeftHand");
+
+	// Axeの初期化
+	ModelData axeData = AssimpLoadObjFile("Resources/Model/Axe", "Axe.obj");
+	axe_.get()->Initialize(axeData);
+	axe_.get()->name_ = "Axe Model";
+	axeOffset_.scale = { 100.0f, 100.0f, 100.0f }; // キャラクター(gltf)のスケールが0.01の場合があるので、武器は100倍にして表示サイズを合わせる
 
 	//NoodeAnimationの初期化
 	ModelData cubeModel = AssimpLoadObjFile("Resources/AnimatedCube", "AnimatedCube.gltf");
@@ -164,6 +188,9 @@ void TestScene::Initialize() {
 	};
 	particle_.push_back(std::move(particleRing));
 
+	leftHandParticle_->Initialize();
+	leftHandParticle_->LoadFromJson("Particle1.json");
+	leftHandParticle_->name_ = "LeftHand Particle";
 
 	int texture = texture_.get()->CreateTexture("Resources/Texture/uvChecker.png");
 	sprite_.get()->Initialize(spriteData_, texture);
@@ -181,6 +208,7 @@ void TestScene::Initialize() {
 		gameObjectManager_->AddObject(std::make_shared<RenderObject>(floor));
 		gameObjectManager_->AddObject(std::make_shared<RenderObject>(ring_));
 		gameObjectManager_->AddObject(std::make_shared<RenderObject>(cylinder_));
+		gameObjectManager_->AddObject(std::make_shared<RenderObject>(axe_));
 	}
 }
 
@@ -256,6 +284,21 @@ void TestScene::Update() {
 		animation_.get()->UpdateWithDelta(view, 0.0f);
 	}
 	nodeAnimation_.get()->Update(view);
+
+	// Axeのアタッチ処理
+	Transform handTransform = animation_->GetBoneTransform(BoneType::RightHand);
+	Matrix4x4 boneMatrix = MakeAffineMatrix(handTransform.translate, handTransform.scale, handTransform.rotate);
+	Matrix4x4 offsetMatrix = MakeAffineMatrix(axeOffset_.translate, axeOffset_.scale, axeOffset_.rotate);
+	Matrix4x4 finalMatrix = MultiplyMatrix4x4(offsetMatrix, boneMatrix);
+	axe_->SetTransform(DecomposeMatrix(finalMatrix));
+	axe_->SettingWvp(view);
+
+	// 左手パーティクルのアタッチ処理
+	Transform leftHandTransform = animation_->GetBoneTransform(BoneType::LeftHand);
+	EmitterData lhEmitterData = leftHandParticle_->GetEmitterData();
+	lhEmitterData.transform.translate = leftHandTransform.translate;
+	leftHandParticle_->SetEmitterData(lhEmitterData);
+	leftHandParticle_->Update(view);
 }
 
 void TestScene::Draw(class Draw& draw) {
@@ -272,8 +315,10 @@ void TestScene::Draw(class Draw& draw) {
 	//draw.DrawObj(floor.get());
 	//draw.DrawObj(nodeAnimation_.get());
 	draw.DrawAnimation(animation_.get());
+	draw.DrawModel(axe_.get());
 
 	//draw.DrawObj(sphere_.get());
+	leftHandParticle_->Draw(draw);
 	for (int i = 0, n = static_cast<int>(particle_.size()); i < n; ++i) {
 	//	particle_[i].get()->Draw(draw);
 	}

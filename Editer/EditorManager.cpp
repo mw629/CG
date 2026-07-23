@@ -193,6 +193,10 @@ float EditorManager::playSpeed_ = 1.0f;
 bool EditorManager::isPlaying_ = true;
 float EditorManager::playSpeed_ = 1.0f;
 #endif
+
+ImVec2 EditorManager::s_sceneImagePos = ImVec2(0, 0);
+ImVec2 EditorManager::s_sceneImageSize = ImVec2(0, 0);
+
 EditorManager::SceneOverlayCallback EditorManager::s_sceneOverlayCallback_ = nullptr;
 EditorManager::EditorCallback EditorManager::s_saveCallback_ = nullptr;
 EditorManager::EditorCallback EditorManager::s_loadCallback_ = nullptr;
@@ -626,6 +630,9 @@ void EditorManager::Update(Engine* engine)
 		float offsetY = (availSize.y - imageSize.y) * 0.5f;
 		ImGui::SetCursorPos(ImVec2(cursorStart.x + offsetX, cursorStart.y + offsetY));
 	}
+
+	s_sceneImagePos = ImGui::GetCursorScreenPos();
+	s_sceneImageSize = imageSize;
 
 	if (engine->GetFinalRenderTexture()) {
 		ImGui::Image((ImTextureID)engine->GetFinalRenderTexture()->GetSrvHandleGPU().ptr, imageSize);

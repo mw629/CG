@@ -253,8 +253,7 @@ void CharacterAnimator::Update(Matrix4x4 viewMatrix)
 	for (size_t i = 0; i < skeleton_.joints.size(); ++i) {
 		if (i < jointSpheres_.size() && jointSpheres_[i]) {
 			Matrix4x4 currentJointMat = skeleton_.joints[i].skeletonSpaceMatrix * worldMatrix;
-			Transform t = jointSpheres_[i]->GetTransform();
-			t.translate = { currentJointMat.m[3][0], currentJointMat.m[3][1], currentJointMat.m[3][2] };
+			Transform t = DecomposeMatrix(currentJointMat);
 			t.scale = { 0.01f, 0.01f, 0.01f };
 			jointSpheres_[i]->SetTransform(t);
 			jointSpheres_[i]->SettingWvp(viewMatrix);
@@ -302,8 +301,7 @@ void CharacterAnimator::UpdateWithDelta(Matrix4x4 viewMatrix, float deltaAnimati
 	for (size_t i = 0; i < skeleton_.joints.size(); ++i) {
 		if (i < jointSpheres_.size() && jointSpheres_[i]) {
 			Matrix4x4 currentJointMat = skeleton_.joints[i].skeletonSpaceMatrix * worldMatrix;
-			Transform t = jointSpheres_[i]->GetTransform();
-			t.translate = { currentJointMat.m[3][0], currentJointMat.m[3][1], currentJointMat.m[3][2] };
+			Transform t = DecomposeMatrix(currentJointMat);
 			t.scale = { 0.01f, 0.01f, 0.01f };
 			jointSpheres_[i]->SetTransform(t);
 			jointSpheres_[i]->SettingWvp(viewMatrix);

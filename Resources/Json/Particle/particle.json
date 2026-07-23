@@ -1,0 +1,90 @@
+{
+    "emitter": {
+        "count": 5,
+        "frequency": 0.10000000149011612,
+        "transform": {
+            "rotate": [
+                0.0,
+                0.0,
+                0.0
+            ],
+            "scale": [
+                0.009999999776482582,
+                0.009999999776482582,
+                0.009999999776482582
+            ],
+            "translate": [
+                0.0,
+                0.0,
+                0.0
+            ]
+        }
+    },
+    "movement": {
+        "acceleration": [
+            0.0,
+            0.0,
+            0.0
+        ],
+        "baseVelocity": [
+            0.0,
+            0.0,
+            0.0
+        ],
+        "sizeDelta": [
+            1.0,
+            1.0,
+            1.0
+        ],
+        "sizeVariance": [
+            0.0,
+            0.0,
+            0.0
+        ],
+        "velocityVariance": [
+            0.01666666753590107,
+            0.01666666753590107,
+            0.01666666753590107
+        ]
+    },
+    "particle": {
+        "color": [
+            1.0,
+            1.0,
+            1.0,
+            1.0
+        ],
+        "lifeTime": 2.0,
+        "transform": {
+            "rotate": [
+                0.0,
+                0.0,
+                0.0
+            ],
+            "scale": [
+                0.10000000149011612,
+                0.10000000149011612,
+                0.10000000149011612
+            ],
+            "translate": [
+                0.0,
+                0.0,
+                0.0
+            ]
+        }
+    },
+    "visual": {
+        "blendMode": 2,
+        "cylinderBottomRadius": 1.0,
+        "cylinderDivide": 32,
+        "cylinderHeight": 3.0,
+        "cylinderTopRadius": 1.0,
+        "isBillboard": true,
+        "ringDivide": 32,
+        "ringInnerRadius": 0.800000011920929,
+        "ringOuterRadius": 1.0,
+        "shader": "ParticleShader",
+        "shape": 0,
+        "texturePath": "Resources/Texture/circle.png"
+    }
+}
