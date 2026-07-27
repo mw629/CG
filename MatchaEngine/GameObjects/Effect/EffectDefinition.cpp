@@ -10,6 +10,15 @@
 #include "../Graphics/DescriptorHeap.h"
 #include <Resource/Load.h>
 
+struct Particle {
+	Vector3 translate;
+	Vector3 scale;
+	Vector3 velocity;
+	float lifeTime;
+	float currentTime;
+	Vector4 color;
+};
+
 namespace {
 	ID3D12Device* device_;
 	float kClientWidth;
@@ -279,3 +288,49 @@ void EffectDefinition::Updata(Matrix4x4 viewMatrix, std::list<EffectDefinitionDa
     SettingWvp(viewMatrix);
 }
 
+#include "../PSO/ComputePipeline.h"
+
+void EffectDefinition::InitializeGPUParticle(ID3D12GraphicsCommandList* commandList, ComputePipeline* cp)
+{
+	if (isGpuInitialized_) return;
+
+	// 1. Particle構造体のサイズ分（1024個）のUAV用リソースを作成
+	gpuParticleResource_ = GraphicsDevice::CreateUAVBufferResource(sizeof(Particle) * 1024);
+
+	// 2. UAVの作成
+	D3D12_UNORDERED_ACCESS_VIEW_DESC uavDesc{};
+	uavDesc.Format = DXGI_FORMAT_UNKNOWN;
+	uavDesc.ViewDimension = D3D12_UAV_DIMENSION_BUFFER;
+	uavDesc.Buffer.FirstElement = 0;
+	uavDesc.Buffer.NumElements = 1024;
+	uavDesc.Buffer.StructureByteStride = sizeof(Particle);
+	uavDesc.Buffer.CounterOffsetInBytes = 0;
+	uavDesc.Buffer.Flags = D3D12_BUFFER_UAV_FLAG_NONE;
+
+	// ディスクリプタヒープからUAV用のハンドルを取得
+	gpuParticleUavHandleCPU_ = GetCPUDescriptorHandle(descriptorHeap_->GetSrvDescriptorHeap(), descriptorHeap_->GetDescriptorSizeSRV());
+	gpuParticleUavHandleGPU_ = GetGPUDescriptorHandle(descriptorHeap_->GetSrvDescriptorHeap(), descriptorHeap_->GetDescriptorSizeSRV());
+
+	device_->CreateUnorderedAccessView(gpuParticleResource_.Get(), nullptr, &uavDesc, gpuParticleUavHandleCPU_);
+
+	// 3. コンピュートシェーダーを実行 (Dispatch)
+	commandList->SetComputeRootSignature(cp->GetRootSignature("Particle.CS"));
+	commandList->SetPipelineState(cp->GetPipelineState("Particle.CS"));
+
+	// ComputeShaderの gParticles (register u0) にバインド
+	UINT paramIndex = cp->GetRootParameterIndex("Particle.CS", "gParticles");
+	if (paramIndex != static_cast<UINT>(-1)) {
+		commandList->SetComputeRootDescriptorTable(paramIndex, gpuParticleUavHandleGPU_);
+	}
+
+	commandList->Dispatch(1, 1, 1); // 1024スレッド
+
+	// バリアを張る
+	D3D12_RESOURCE_BARRIER barrier{};
+	barrier.Type = D3D12_RESOURCE_BARRIER_TYPE_UAV;
+	barrier.Flags = D3D12_RESOURCE_BARRIER_FLAG_NONE;
+	barrier.UAV.pResource = gpuParticleResource_.Get();
+	commandList->ResourceBarrier(1, &barrier);
+
+	isGpuInitialized_ = true;
+}

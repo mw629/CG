@@ -212,6 +212,11 @@ void Draw::DrawModel(Model* model)
 
 void Draw::DrawParticle(EffectDefinition* particle)
 {
+	// 初期化チェック
+	if (!particle->IsGpuInitialized()) {
+		particle->InitializeGPUParticle(commandList_, graphicsPipelineState_->GetComputePipeline());
+	}
+
 	// インスタンス数が0なら描画しない
    const UINT instanceCount = static_cast<UINT>(particle->GetEffectDefinitionNum());
 	if (instanceCount == 0) {

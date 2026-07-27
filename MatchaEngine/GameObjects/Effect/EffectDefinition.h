@@ -116,6 +116,15 @@ public:
 
 	std::list<EffectDefinitionData> GetEffectDefinitionData() { return effectDefinitionData_; }
 
+	// GPU Particle用のリソースとUAVハンドル
+	bool isGpuInitialized_ = false;
+	Microsoft::WRL::ComPtr<ID3D12Resource> gpuParticleResource_;
+	D3D12_CPU_DESCRIPTOR_HANDLE gpuParticleUavHandleCPU_{};
+	D3D12_GPU_DESCRIPTOR_HANDLE gpuParticleUavHandleGPU_{};
+
+	void InitializeGPUParticle(ID3D12GraphicsCommandList* commandList, class ComputePipeline* cp);
+	bool IsGpuInitialized() const { return isGpuInitialized_; }
+
 private:
 	ShaderName shader_ = "ParticleShader";
 	BlendMode blend_ = BlendMode::kBlendModeAdd;
