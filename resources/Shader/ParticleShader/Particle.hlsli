@@ -6,6 +6,22 @@ struct VertexShaderOutput
     
 };
 
+struct Particle
+{
+    float32_t3 translate;
+    float32_t3 scale;
+    float32_t3 velocity;
+    float32_t lifeTime;
+    float32_t currentTime;
+    float32_t4 color;
+};
+
+struct PreView
+{
+    float32_t4x4 viewProjrction;
+    float32_t4x4 billboardMatrix;
+};
+
 struct ParticleForGPU
 {
     float32_t4x4 WVP;
