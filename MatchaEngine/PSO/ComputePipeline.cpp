@@ -14,14 +14,15 @@ void ComputePipeline::CreatePipeline(std::ostream& os, ID3D12Device* device)
 	DirectXShaderCompiler directXShaderCompiler{};
 	directXShaderCompiler.CreateDXC();
 
-	std::filesystem::path computeShaderDir = "Resources/Shader/ComputeShader";
+	std::filesystem::path computeShaderDir = "Resources/Shader";
 	std::vector<std::filesystem::path> csFiles;
 
 	if (std::filesystem::exists(computeShaderDir)) {
-		for (const auto& entry : std::filesystem::directory_iterator(computeShaderDir)) {
+		for (const auto& entry : std::filesystem::recursive_directory_iterator(computeShaderDir)) {
 			if (!entry.is_regular_file()) continue;
+			if (std::filesystem::file_size(entry.path()) == 0) continue;
 			std::string filename = entry.path().filename().string();
-			if (filename.size() >= 5 && filename.substr(filename.size() - 5) == ".hlsl") {
+			if (filename.size() >= 8 && filename.substr(filename.size() - 8) == ".CS.hlsl") {
 				csFiles.push_back(entry.path());
 			}
 		}

@@ -1,13 +1,6 @@
+#include "Particle.hlsli"
 
-struct Particle
-{
-    float32_t3 translate;
-    float32_t3 scale;
-    float32_t3 velocity;
-    float32_t lifeTime;
-    float32_t currentTime;
-    float32_t4 color;
-};
+
 
 static const uint32_t kMaxParticles = 1024;
 
@@ -18,10 +11,11 @@ RWStructuredBuffer<Particle> gParticles : register(u0);
 void main( uint3 DTid : SV_DispatchThreadID )
 {
     uint32_t particleIndex = DTid.x;
-    if (particleIndex >= kMaxParticles)
+    if (particleIndex < kMaxParticles)
     {
-        //particle構造体の全要素を0で埋める
+         //particle構造体の全要素を0で埋める
         gParticles[particleIndex] = (Particle) 0;
     }
     
+   
 }
