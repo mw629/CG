@@ -295,9 +295,7 @@ void TestScene::Update() {
 
 	// 左手パーティクルのアタッチ処理
 	Transform leftHandTransform = animation_->GetBoneTransform(BoneType::LeftHand);
-	EmitterData lhEmitterData = leftHandParticle_->GetEmitterData();
-	lhEmitterData.transform.translate = leftHandTransform.translate;
-	leftHandParticle_->SetEmitterData(lhEmitterData);
+	leftHandParticle_->SetPosition(leftHandTransform.translate);
 	leftHandParticle_->Update(view);
 }
 

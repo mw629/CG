@@ -84,6 +84,11 @@ void Emitter::ImGui() {
 		}
 
 		if (ImGui::TreeNode(LanguageManager::Tr("Visual Settings"))) {
+			bool useGpu = effectDefinition_ ? effectDefinition_->GetUseGpuParticle() : true;
+			if (ImGui::Checkbox(LanguageManager::Tr("Use GPU Particle (Compute Shader)"), &useGpu)) {
+				SetUseGpuParticle(useGpu);
+			}
+
 			bool isBillboard = GetBillboard();
 			if (ImGui::Checkbox(LanguageManager::Tr("Billboard"), &isBillboard)) {
 				SetBillboard(isBillboard);
@@ -255,6 +260,7 @@ void Emitter::SaveToJson(const std::string& name)
 	root["visual"]["blendMode"] = static_cast<int>(GetBlend());
 	root["visual"]["isBillboard"] = GetBillboard();
 	root["visual"]["shader"] = shaderName_;
+	root["visual"]["useGpuParticle"] = GetUseGpuParticle();
 
 	root["visual"]["cylinderDivide"] = shapeData_.cylinderDivide;
 	root["visual"]["cylinderTopRadius"] = shapeData_.cylinderTopRadius;
@@ -268,6 +274,52 @@ void Emitter::SaveToJson(const std::string& name)
 	std::ofstream file(filepath);
 	if (file.is_open()) {
 		file << root.dump(4);
+	}
+}
+
+void Emitter::SyncGpuParticleParameters(bool emitNow)
+{
+	if (!effectDefinition_) return;
+
+	effectDefinition_->SetIsBoxEmitter(emitterType_ == EmitterType::Box);
+
+	PerFrameForGPU perFrame{};
+	perFrame.deltaTime = 1.0f / 60.0f;
+	perFrame.time = 0.0f;
+	perFrame.acceleration = movementData_.acceleration;
+	perFrame.sizeDelta = movementData_.sizeDelta;
+	effectDefinition_->SetGpuPerFrameData(perFrame);
+
+	if (emitterType_ == EmitterType::Box) {
+		EmitterBoxForGPU box{};
+		box.translate = emitter_.transform.translate + SetEffectDefinitionData_.transform.translate;
+		box.size = emitter_.transform.scale;
+		box.count = static_cast<float>(emitter_.count);
+		box.frequency = emitter_.frequency;
+		box.emit = emitNow ? 1 : 0;
+		box.baseScale = SetEffectDefinitionData_.transform.scale;
+		box.sizeVariance = movementData_.sizeVariance;
+		box.baseVelocity = movementData_.baseVelocity;
+		box.velocityVariance = movementData_.velocityVariance;
+		box.color = SetEffectDefinitionData_.color;
+		box.lifeTime = SetEffectDefinitionData_.lifeTime;
+		box.baseRotate = SetEffectDefinitionData_.transform.rotate + emitter_.transform.rotate;
+		effectDefinition_->SetGpuEmitterBoxData(box);
+	} else {
+		EmitterSphereForGPU sphere{};
+		sphere.translate = emitterSphere_.translate + SetEffectDefinitionData_.transform.translate;
+		sphere.radius = emitterSphere_.radius;
+		sphere.count = static_cast<float>(emitterSphere_.count);
+		sphere.frequency = emitterSphere_.frequency;
+		sphere.emit = emitNow ? 1 : 0;
+		sphere.baseScale = SetEffectDefinitionData_.transform.scale;
+		sphere.sizeVariance = movementData_.sizeVariance;
+		sphere.baseVelocity = movementData_.baseVelocity;
+		sphere.velocityVariance = movementData_.velocityVariance;
+		sphere.color = SetEffectDefinitionData_.color;
+		sphere.lifeTime = SetEffectDefinitionData_.lifeTime;
+		sphere.baseRotate = SetEffectDefinitionData_.transform.rotate;
+		effectDefinition_->SetGpuEmitterSphereData(sphere);
 	}
 }
 
@@ -409,6 +461,9 @@ void Emitter::LoadFromJson(const std::string& name)
 		if (root["visual"].contains("shader")) {
 			SetShader(root["visual"]["shader"].get<std::string>());
 		}
+		if (root["visual"].contains("useGpuParticle")) {
+			SetUseGpuParticle(root["visual"]["useGpuParticle"].get<bool>());
+		}
 	}
 }
 
@@ -503,17 +558,22 @@ void Emitter::Update(Matrix4x4 viewMatrix) {
 		++particleIterator;//これを忘れた未来の僕がいるならこれを忘れた今の僕が悲しむ
 	}
 
+	bool emitFrame = false;
 	if (!isStop_) {
 		float& freqTime = (emitterType_ == EmitterType::Sphere) ? emitterSphere_.frequencyTime : emitter_.frequencyTime;
 		float freq = (emitterType_ == EmitterType::Sphere) ? emitterSphere_.frequency : emitter_.frequency;
 		freqTime += 1.0f / 60.0f;
-		if (freq <= freqTime) {
+		if (freq <= 0.0f || freq <= freqTime) {
 			Emit();
-			freqTime -= freq;
+			emitFrame = true;
+			if (freq > 0.0f) freqTime -= freq;
 		}
 	}
 
 	effectDefinition_.get()->Updata(viewMatrix, effectDefinitionData_);
+	if (GetUseGpuParticle()) {
+		SyncGpuParticleParameters(emitFrame);
+	}
 }
 
 void Emitter::Update(Matrix4x4 viewMatrix, std::function<EffectDefinitionData(const EffectDefinitionData&)> moveBehavior)
@@ -553,20 +613,22 @@ void Emitter::Update(Matrix4x4 viewMatrix, std::function<EffectDefinitionData(co
 		++particleIterator;
 		++i;
 	}
+	bool emitFrame = false;
 	if (!isStop_) {
 		float& freqTime = (emitterType_ == EmitterType::Sphere) ? emitterSphere_.frequencyTime : emitter_.frequencyTime;
 		float freq = (emitterType_ == EmitterType::Sphere) ? emitterSphere_.frequency : emitter_.frequency;
 		freqTime += 1.0f / 60.0f;
-		if (freq <= freqTime) {
+		if (freq <= 0.0f || freq <= freqTime) {
 			Emit();
-			freqTime -= freq;
+			emitFrame = true;
+			if (freq > 0.0f) freqTime -= freq;
 		}
 	}
 
-	
-
-
 	effectDefinition_.get()->Updata(viewMatrix, effectDefinitionData_);
+	if (GetUseGpuParticle()) {
+		SyncGpuParticleParameters(emitFrame);
+	}
 }
 
 void Emitter::Update(EmitterData emitter, Matrix4x4 viewMatrix, std::function<EffectDefinitionData(const EffectDefinitionData&)> moveBehavior)
@@ -604,17 +666,22 @@ void Emitter::Update(EmitterData emitter, Matrix4x4 viewMatrix, std::function<Ef
 		++particleIterator;
 		++i;
 	}
+	bool emitFrame = false;
 	if (!isStop_) {
 		float& freqTime = (emitterType_ == EmitterType::Sphere) ? emitterSphere_.frequencyTime : emitter_.frequencyTime;
 		float freq = (emitterType_ == EmitterType::Sphere) ? emitterSphere_.frequency : emitter_.frequency;
 		freqTime += 1.0f / 60.0f;
-		if (freq <= freqTime) {
+		if (freq <= 0.0f || freq <= freqTime) {
 			Emit();
-			freqTime -= freq;
+			emitFrame = true;
+			if (freq > 0.0f) freqTime -= freq;
 		}
 	}
 	
 	effectDefinition_.get()->Updata(viewMatrix, effectDefinitionData_);
+	if (GetUseGpuParticle()) {
+		SyncGpuParticleParameters(emitFrame);
+	}
 }
 
 void Emitter::Update(Matrix4x4 viewMatrix, Vector3 scale)
@@ -639,17 +706,22 @@ void Emitter::Update(Matrix4x4 viewMatrix, Vector3 scale)
 
 		++particleIterator;//これを忘れた未来の僕がいるならこれを忘れた今の僕が悲しむ
 	}
+	bool emitFrame = false;
 	if (!isStop_) {
 		float& freqTime = (emitterType_ == EmitterType::Sphere) ? emitterSphere_.frequencyTime : emitter_.frequencyTime;
 		float freq = (emitterType_ == EmitterType::Sphere) ? emitterSphere_.frequency : emitter_.frequency;
 		freqTime += 1.0f / 60.0f;
-		if (freq <= freqTime) {
+		if (freq <= 0.0f || freq <= freqTime) {
 			Emit();
-			freqTime -= freq;
+			emitFrame = true;
+			if (freq > 0.0f) freqTime -= freq;
 		}
 	}
 
 	effectDefinition_.get()->Updata(viewMatrix, effectDefinitionData_);
+	if (GetUseGpuParticle()) {
+		SyncGpuParticleParameters(emitFrame);
+	}
 }
 
 void Emitter::EditorUpdate(Matrix4x4 viewMatrix)
@@ -657,6 +729,9 @@ void Emitter::EditorUpdate(Matrix4x4 viewMatrix)
 	// Editor mode doesn't progress the particle time or physics
 	// It just updates the transform matrices for the camera.
 	effectDefinition_.get()->Updata(viewMatrix, effectDefinitionData_);
+	if (GetUseGpuParticle()) {
+		SyncGpuParticleParameters(false);
+	}
 }
 
 void Emitter::Draw(class Draw& draw) {
@@ -672,7 +747,7 @@ EffectDefinitionData Emitter::MakeNewParticle()
 	Vector3 possion = { 0.0f, 0.0f, 0.0f };
 	if (emitterType_ == EmitterType::Box) {
 		possion = { distribution(randomEngine), distribution(randomEngine), distribution(randomEngine) };
-		data.transform.translate = SetEffectDefinitionData_.transform.translate + possion * emitter_.transform.scale + emitter_.transform.translate;
+		data.transform.translate = SetEffectDefinitionData_.transform.translate + possion * (emitter_.transform.scale * 0.5f) + emitter_.transform.translate;
 	}
 	else if (emitterType_ == EmitterType::Sphere) {
 		do {
@@ -707,7 +782,7 @@ EffectDefinitionData Emitter::MakeNewParticle(Vector3 scale)
 	Vector3 possion = { 0.0f, 0.0f, 0.0f };
 	if (emitterType_ == EmitterType::Box) {
 		possion = { distribution(randomEngine), distribution(randomEngine), distribution(randomEngine) };
-		data.transform.translate = SetEffectDefinitionData_.transform.translate + possion * emitter_.transform.scale + emitter_.transform.translate;
+		data.transform.translate = SetEffectDefinitionData_.transform.translate + possion * (emitter_.transform.scale * 0.5f) + emitter_.transform.translate;
 	}
 	else if (emitterType_ == EmitterType::Sphere) {
 		do {

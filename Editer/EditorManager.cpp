@@ -194,8 +194,10 @@ bool EditorManager::isPlaying_ = true;
 float EditorManager::playSpeed_ = 1.0f;
 #endif
 
+#ifdef _USE_IMGUI
 ImVec2 EditorManager::s_sceneImagePos = ImVec2(0, 0);
 ImVec2 EditorManager::s_sceneImageSize = ImVec2(0, 0);
+#endif
 
 EditorManager::SceneOverlayCallback EditorManager::s_sceneOverlayCallback_ = nullptr;
 EditorManager::EditorCallback EditorManager::s_saveCallback_ = nullptr;
@@ -565,6 +567,56 @@ void EditorManager::Update(Engine* engine)
 			if (ImGui::BeginTabItem(LanguageManager::Tr("Resource List"))) {
 				if (engine->GetTextureLoader()) {
 					engine->GetTextureLoader()->Draw();
+				}
+				ImGui::EndTabItem();
+			}
+
+			if (ImGui::BeginTabItem("GPU Profiler")) {
+				GpuProfiler* profiler = engine->GetGpuProfiler();
+				if (profiler) {
+					float totalMs = profiler->GetTotalTimeMs();
+					ImGui::Text("Total Measured GPU Time: %.3f ms (%.1f us)", totalMs, totalMs * 1000.0f);
+					ImGui::Separator();
+
+					const auto& results = profiler->GetResults();
+					if (results.empty()) {
+						ImGui::TextDisabled("No active GPU profiles recorded in this frame.");
+					} else {
+						if (ImGui::BeginTable("GpuProfilerTable", 4, ImGuiTableFlags_Borders | ImGuiTableFlags_RowBg | ImGuiTableFlags_Resizable)) {
+							ImGui::TableSetupColumn("Compute Shader / Task");
+							ImGui::TableSetupColumn("Time (ms)");
+							ImGui::TableSetupColumn("Avg (ms)");
+							ImGui::TableSetupColumn("Max (ms)");
+							ImGui::TableHeadersRow();
+
+							for (const auto& res : results) {
+								ImGui::TableNextRow();
+								ImGui::TableSetColumnIndex(0);
+								ImGui::Text("%s", res.name.c_str());
+
+								ImGui::TableSetColumnIndex(1);
+								ImGui::Text("%.3f ms", res.timeMs);
+
+								ImGui::TableSetColumnIndex(2);
+								ImGui::Text("%.3f ms", res.avgTimeMs);
+
+								ImGui::TableSetColumnIndex(3);
+								ImGui::Text("%.3f ms", res.maxTimeMs);
+							}
+							ImGui::EndTable();
+						}
+
+						ImGui::Spacing();
+						ImGui::Text("Breakdown:");
+						for (const auto& res : results) {
+							float fraction = totalMs > 0.0001f ? (res.timeMs / totalMs) : 0.0f;
+							char overlay[64];
+							snprintf(overlay, sizeof(overlay), "%s: %.3f ms (%.1f%%)", res.name.c_str(), res.timeMs, fraction * 100.0f);
+							ImGui::ProgressBar(fraction, ImVec2(-1.0f, 0.0f), overlay);
+						}
+					}
+				} else {
+					ImGui::TextDisabled("GPU Profiler is not initialized.");
 				}
 				ImGui::EndTabItem();
 			}

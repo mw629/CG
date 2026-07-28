@@ -91,8 +91,10 @@ public:
 
 	static int s_gizmoOp; // 0: Translate, 1: Rotate, 2: Scale
 
+#ifdef _USE_IMGUI
 	static ImVec2 s_sceneImagePos;
 	static ImVec2 s_sceneImageSize;
+#endif // _USE_IMGUI
 
 	// 毎フレーム呼ばれるエディタUIの更新処理
 	void Update(Engine* engine);

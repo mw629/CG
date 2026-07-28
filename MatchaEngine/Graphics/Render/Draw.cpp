@@ -4,6 +4,7 @@
 #include "ModelManager.h"
 #include "PostEffect.h"
 #include "Texture.h"
+#include "Graphics/GpuProfiler.h"
 
 void Draw::SetCBV(ShaderName shader, BlendMode blend, const std::string& name, D3D12_GPU_VIRTUAL_ADDRESS address) {
 	UINT index = graphicsPipelineState_->GetRootParameterIndex(shader, blend, name);
@@ -119,7 +120,9 @@ void Draw::DrawAnimation(CharacterAnimator* obj)
 			if (paramOutput != static_cast<UINT>(-1)) commandList_->SetComputeRootDescriptorTable(paramOutput, obj->GetSubMeshOutputVertexUavHandle(i));
 			if (paramInfo != static_cast<UINT>(-1)) commandList_->SetComputeRootConstantBufferView(paramInfo, obj->GetSubMeshSkinningInfoResource(i)->GetGPUVirtualAddress());
 
+			if (gpuProfiler_) gpuProfiler_->BeginProfile(commandList_, "Skinning.CS");
 			commandList_->Dispatch((static_cast<UINT>(subMesh.mesh.vertexSize) + 1023) / 1024, 1, 1);
+			if (gpuProfiler_) gpuProfiler_->EndProfile(commandList_, "Skinning.CS");
 
 			// Transition back to vertex buffer
 			barrier.Transition.StateBefore = D3D12_RESOURCE_STATE_UNORDERED_ACCESS;
@@ -212,20 +215,42 @@ void Draw::DrawModel(Model* model)
 
 void Draw::DrawParticle(EffectDefinition* particle)
 {
-	// 初期化チェック
-	if (!particle->IsGpuInitialized()) {
-		particle->InitializeGPUParticle(commandList_, graphicsPipelineState_->GetComputePipeline());
+	if (!particle) return;
+
+	// GPU Particle モードが有効な場合
+	if (particle->GetUseGpuParticle()) {
+		if (!particle->IsGpuInitialized()) {
+			particle->InitializeGPUParticle(commandList_, graphicsPipelineState_->GetComputePipeline());
+		}
+
+		// GPU Compute Shader Dispatch (EmitParticle -> UpdateParticle)
+		particle->DispatchGPUParticle(commandList_, graphicsPipelineState_->GetComputePipeline());
+
+		preDraw(particle->GetShader(), particle->GetBlend());
+
+		commandList_->IASetVertexBuffers(0, 1, particle->GetVertexBufferView());
+		ShaderName shader = particle->GetShader();
+		BlendMode blend = particle->GetBlend();
+		SetCBV(shader, blend, "gMaterial", particle->GetMartial()->GetMaterialResource()->GetGPUVirtualAddress());
+		SetCBV(shader, blend, "gPerView", particle->GetPerViewResource()->GetGPUVirtualAddress());
+		SetTable(shader, blend, "gTexture", particle->GetTextureSrvHandleGPU());
+
+		if (particle->GetGpuParticleResource()) {
+			SetSRV(shader, blend, "gParticle", particle->GetGpuParticleResource()->GetGPUVirtualAddress());
+			commandList_->DrawInstanced(particle->GetVertexSize(), 10000, 0, 0);
+		}
+		return;
 	}
 
-	// インスタンス数が0なら描画しない
-   const UINT instanceCount = static_cast<UINT>(particle->GetEffectDefinitionNum());
+	// 従来の CPU Particle 描画
+	const UINT instanceCount = static_cast<UINT>(particle->GetEffectDefinitionNum());
 	if (instanceCount == 0) {
 		return;
 	}
 
 	preDraw(particle->GetShader(), particle->GetBlend());
 
-	commandList_->IASetVertexBuffers(0, 1, particle->GetVertexBufferView());//VBVを設定
+	commandList_->IASetVertexBuffers(0, 1, particle->GetVertexBufferView());
 	ShaderName shader = particle->GetShader();
 	BlendMode blend = particle->GetBlend();
 	SetCBV(shader, blend, "gMaterial", particle->GetMartial()->GetMaterialResource()->GetGPUVirtualAddress());
@@ -234,7 +259,6 @@ void Draw::DrawParticle(EffectDefinition* particle)
 	SetTable(shader, blend, "gTexture", particle->GetTextureSrvHandleGPU());
 
 	commandList_->DrawInstanced(particle->GetVertexSize(), instanceCount, 0, 0);
-
 }
 
 void Draw::DrawSprite(Sprite* sprite)

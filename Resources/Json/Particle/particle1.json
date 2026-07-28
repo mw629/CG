@@ -2,6 +2,16 @@
     "emitter": {
         "count": 5,
         "frequency": 0.10000000149011612,
+        "sphere": {
+            "count": 2,
+            "frequency": 0.5,
+            "radius": 0.009999999776482582,
+            "translate": [
+                0.0,
+                0.0,
+                0.0
+            ]
+        },
         "transform": {
             "rotate": [
                 0.0,
@@ -9,21 +19,22 @@
                 0.0
             ],
             "scale": [
-                0.0010000000474974513,
-                0.0010000000474974513,
-                0.0010000000474974513
+                1.0,
+                1.0,
+                1.0
             ],
             "translate": [
                 0.0,
                 0.0,
                 0.0
             ]
-        }
+        },
+        "type": 1
     },
     "movement": {
         "acceleration": [
             0.0,
-            0.0,
+            0.00019999999494757503,
             0.0
         ],
         "baseVelocity": [
@@ -32,9 +43,9 @@
             0.0
         ],
         "sizeDelta": [
-            1.0,
-            1.0,
-            1.0
+            0.9900000095367432,
+            0.9900000095367432,
+            0.9900000095367432
         ],
         "sizeVariance": [
             0.0,
@@ -42,19 +53,19 @@
             0.0
         ],
         "velocityVariance": [
-            0.007000000216066837,
-            0.007000000216066837,
-            0.007000000216066837
+            0.0,
+            0.0,
+            0.0
         ]
     },
     "particle": {
         "color": [
             1.0,
-            1.0,
-            1.0,
+            0.0,
+            0.0,
             1.0
         ],
-        "lifeTime": 1.7899999618530273,
+        "lifeTime": 2.299999952316284,
         "transform": {
             "rotate": [
                 0.0,
@@ -62,9 +73,9 @@
                 0.0
             ],
             "scale": [
-                0.01,
-                0.01,
-                0.01
+                0.10000000149011612,
+                0.10000000149011612,
+                0.10000000149011612
             ],
             "translate": [
                 0.0,
@@ -74,9 +85,9 @@
         }
     },
     "visual": {
-        "blendMode": 2,
+        "blendMode": 1,
         "cylinderBottomRadius": 1.0,
-        "cylinderDivide": 32,
+        "cylinderDivide": 3,
         "cylinderHeight": 3.0,
         "cylinderTopRadius": 1.0,
         "isBillboard": true,
@@ -84,7 +95,8 @@
         "ringInnerRadius": 0.800000011920929,
         "ringOuterRadius": 1.0,
         "shader": "ParticleShader",
-        "shape": 0,
-        "texturePath": "Resources/Texture/circle.png"
+        "shape": 1,
+        "texturePath": "Resources/Texture/circle.png",
+        "useGpuParticle": true
     }
 }

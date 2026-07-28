@@ -85,8 +85,21 @@ public:
 	void SetEmitterData(const EmitterData& data) { emitter_ = data; }
 	EmitterData GetEmitterData() const { return emitter_; }
 
+	void SetPosition(const Vector3& pos) {
+		emitter_.transform.translate = pos;
+		emitterSphere_.translate = pos;
+	}
+	Vector3 GetPosition() const {
+		return (emitterType_ == EmitterType::Sphere) ? emitterSphere_.translate : emitter_.transform.translate;
+	}
+
 	void SetStop(bool isStop) { isStop_ = isStop; }
 	void ClearParticles() { effectDefinitionData_.clear(); }
+
+	void SetUseGpuParticle(bool enable) { if (effectDefinition_) effectDefinition_->SetUseGpuParticle(enable); }
+	bool GetUseGpuParticle() const { return effectDefinition_ ? effectDefinition_->GetUseGpuParticle() : false; }
+
+	void SyncGpuParticleParameters(bool emitNow = true);
 
 	void ImGui();
 

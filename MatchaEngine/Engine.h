@@ -53,6 +53,7 @@
 #include "SwapChain.h"
 #include "ViewportScissor.h"
 #include "RenderTexture.h"
+#include "Graphics/GpuProfiler.h"
 //PSO
 #include "PipelineState.h"
 #include "ShaderCompiler.h"
@@ -118,6 +119,7 @@ public:
 	std::unique_ptr<GraphicsPipelineState> graphicsPipelineState;
 	std::unique_ptr<LightManager> lightManager;
 	std::unique_ptr<LineRenderer> lineRenderer;
+	std::unique_ptr<GpuProfiler> gpuProfiler;
 
 	ID3D12DescriptorHeap* descriptorHeaps[1];
 
@@ -153,6 +155,7 @@ public:
 	RenderTexture* GetFinalRenderTexture(); // Return the final texture after all post effects
 	int32_t GetClientWidth() const { return kClientWidth_; }
 	int32_t GetClientHeight() const { return kClientHeight_; }
+	GpuProfiler* GetGpuProfiler() { return gpuProfiler.get(); }
 
 	static void SetEnd(bool isEnd) { isEnd_ = isEnd; }
 	static bool IsEnd() { return isEnd_; }

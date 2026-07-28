@@ -9,6 +9,9 @@
 #include <d3dx12.h> 
 #include "../Graphics/DescriptorHeap.h"
 #include <Resource/Load.h>
+#include "Graphics/GpuProfiler.h"
+
+GpuProfiler* EffectDefinition::gpuProfiler_ = nullptr;
 
 
 namespace {
@@ -283,19 +286,40 @@ void EffectDefinition::Updata(Matrix4x4 viewMatrix, std::list<EffectDefinitionDa
 
 #include "../PSO/ComputePipeline.h"
 
+void EffectDefinition::SetGpuEmitterBoxData(const EmitterBoxForGPU& data) {
+	pendingBoxData_ = data;
+	if (emitterBoxData_) {
+		*emitterBoxData_ = data;
+	}
+}
+
+void EffectDefinition::SetGpuEmitterSphereData(const EmitterSphereForGPU& data) {
+	pendingSphereData_ = data;
+	if (emitterSphereData_) {
+		*emitterSphereData_ = data;
+	}
+}
+
+void EffectDefinition::SetGpuPerFrameData(const PerFrameForGPU& data) {
+	pendingPerFrameData_ = data;
+	if (perFrameData_) {
+		*perFrameData_ = data;
+	}
+}
+
 void EffectDefinition::InitializeGPUParticle(ID3D12GraphicsCommandList* commandList, ComputePipeline* cp)
 {
 	if (isGpuInitialized_) return;
 
-	// 1. Particle構造体のサイズ分（1024個）のUAV用リソースを作成
-	gpuParticleResource_ = GraphicsDevice::CreateUAVBufferResource(sizeof(Particle) * 1024);
+	// 1. Particle構造体のサイズ分（10000個）のUAV用リソースを作成
+	gpuParticleResource_ = GraphicsDevice::CreateUAVBufferResource(sizeof(Particle) * 10000);
 
 	// 2. UAVの作成
 	D3D12_UNORDERED_ACCESS_VIEW_DESC uavDesc{};
 	uavDesc.Format = DXGI_FORMAT_UNKNOWN;
 	uavDesc.ViewDimension = D3D12_UAV_DIMENSION_BUFFER;
 	uavDesc.Buffer.FirstElement = 0;
-	uavDesc.Buffer.NumElements = 1024;
+	uavDesc.Buffer.NumElements = 10000;
 	uavDesc.Buffer.StructureByteStride = sizeof(Particle);
 	uavDesc.Buffer.CounterOffsetInBytes = 0;
 	uavDesc.Buffer.Flags = D3D12_BUFFER_UAV_FLAG_NONE;
@@ -305,6 +329,36 @@ void EffectDefinition::InitializeGPUParticle(ID3D12GraphicsCommandList* commandL
 	gpuParticleUavHandleGPU_ = GetGPUDescriptorHandle(descriptorHeap_->GetSrvDescriptorHeap(), descriptorHeap_->GetDescriptorSizeSRV());
 
 	device_->CreateUnorderedAccessView(gpuParticleResource_.Get(), nullptr, &uavDesc, gpuParticleUavHandleCPU_);
+
+	// FreeCounter用 (int32_t 1個分) のUAVリソースを作成
+	gpuFreeCounterResource_ = GraphicsDevice::CreateUAVBufferResource(sizeof(int32_t));
+
+	D3D12_UNORDERED_ACCESS_VIEW_DESC counterUavDesc{};
+	counterUavDesc.Format = DXGI_FORMAT_UNKNOWN;
+	counterUavDesc.ViewDimension = D3D12_UAV_DIMENSION_BUFFER;
+	counterUavDesc.Buffer.FirstElement = 0;
+	counterUavDesc.Buffer.NumElements = 1;
+	counterUavDesc.Buffer.StructureByteStride = sizeof(int32_t);
+	counterUavDesc.Buffer.CounterOffsetInBytes = 0;
+	counterUavDesc.Buffer.Flags = D3D12_BUFFER_UAV_FLAG_NONE;
+
+	gpuFreeCounterUavHandleCPU_ = GetCPUDescriptorHandle(descriptorHeap_->GetSrvDescriptorHeap(), descriptorHeap_->GetDescriptorSizeSRV());
+	gpuFreeCounterUavHandleGPU_ = GetGPUDescriptorHandle(descriptorHeap_->GetSrvDescriptorHeap(), descriptorHeap_->GetDescriptorSizeSRV());
+
+	device_->CreateUnorderedAccessView(gpuFreeCounterResource_.Get(), nullptr, &counterUavDesc, gpuFreeCounterUavHandleCPU_);
+
+	// 定数バッファの作成
+	perFrameResource_ = GraphicsDevice::CreateBufferResource(sizeof(PerFrameForGPU));
+	perFrameResource_->Map(0, nullptr, reinterpret_cast<void**>(&perFrameData_));
+	if (perFrameData_) *perFrameData_ = pendingPerFrameData_;
+
+	emitterSphereResource_ = GraphicsDevice::CreateBufferResource(sizeof(EmitterSphereForGPU));
+	emitterSphereResource_->Map(0, nullptr, reinterpret_cast<void**>(&emitterSphereData_));
+	if (emitterSphereData_) *emitterSphereData_ = pendingSphereData_;
+
+	emitterBoxResource_ = GraphicsDevice::CreateBufferResource(sizeof(EmitterBoxForGPU));
+	emitterBoxResource_->Map(0, nullptr, reinterpret_cast<void**>(&emitterBoxData_));
+	if (emitterBoxData_) *emitterBoxData_ = pendingBoxData_;
 
 	// 3. コンピュートシェーダーを実行 (Dispatch)
 	commandList->SetComputeRootSignature(cp->GetRootSignature("InitializeParticle.CS"));
@@ -316,14 +370,134 @@ void EffectDefinition::InitializeGPUParticle(ID3D12GraphicsCommandList* commandL
 		commandList->SetComputeRootDescriptorTable(paramIndex, gpuParticleUavHandleGPU_);
 	}
 
-	commandList->Dispatch(1, 1, 1); // 1024スレッド
+	// ComputeShaderの gFreeCounter (register u1) にバインド
+	UINT counterIndex = cp->GetRootParameterIndex("InitializeParticle.CS", "gFreeCounter");
+	if (counterIndex != static_cast<UINT>(-1)) {
+		commandList->SetComputeRootDescriptorTable(counterIndex, gpuFreeCounterUavHandleGPU_);
+	}
+
+	commandList->Dispatch(10, 1, 1);
 
 	// バリアを張る
-	D3D12_RESOURCE_BARRIER barrier{};
-	barrier.Type = D3D12_RESOURCE_BARRIER_TYPE_UAV;
-	barrier.Flags = D3D12_RESOURCE_BARRIER_FLAG_NONE;
-	barrier.UAV.pResource = gpuParticleResource_.Get();
-	commandList->ResourceBarrier(1, &barrier);
+	D3D12_RESOURCE_BARRIER barriers{};
+	barriers.Type = D3D12_RESOURCE_BARRIER_TYPE_UAV;
+	barriers.Flags = D3D12_RESOURCE_BARRIER_FLAG_NONE;
+	barriers.UAV.pResource = gpuParticleResource_.Get();
+
+	commandList->ResourceBarrier(1,&barriers);
 
 	isGpuInitialized_ = true;
 }
+
+static float s_gpuParticleTime = 0.0f;
+
+void EffectDefinition::DispatchGPUParticle(ID3D12GraphicsCommandList* commandList, ComputePipeline* cp, float deltaTime)
+{
+	if (!isGpuInitialized_ || !cp) return;
+
+	s_gpuParticleTime += deltaTime;
+
+	// -------------------------------------------------------------
+	// 1. EmitParticle の Dispatch
+	// -------------------------------------------------------------
+	std::string emitShader = isBoxEmitter_ ? "BoxEmitterParticle.CS" : "SphereEmitterParticle.CS";
+	if (!cp->GetPipelineState(emitShader)) {
+		emitShader = "SphereEmitterParticle.CS";
+	}
+
+	if (cp->GetPipelineState(emitShader)) {
+		commandList->SetComputeRootSignature(cp->GetRootSignature(emitShader));
+		commandList->SetPipelineState(cp->GetPipelineState(emitShader));
+
+		UINT count = 1;
+		if (isBoxEmitter_) {
+			if (emitterBoxData_) {
+				emitterBoxData_->frequencyTime = s_gpuParticleTime;
+				count = static_cast<UINT>(emitterBoxData_->count);
+			}
+			UINT pEmitter = cp->GetRootParameterIndex(emitShader, "gEmitterBox");
+			if (pEmitter != static_cast<UINT>(-1)) {
+				commandList->SetComputeRootConstantBufferView(pEmitter, emitterBoxResource_->GetGPUVirtualAddress());
+			}
+		} else {
+			if (emitterSphereData_) {
+				emitterSphereData_->frequencyTime = s_gpuParticleTime;
+				count = static_cast<UINT>(emitterSphereData_->count);
+			}
+			UINT pEmitter = cp->GetRootParameterIndex(emitShader, "gEmitterSphere");
+			if (pEmitter != static_cast<UINT>(-1)) {
+				commandList->SetComputeRootConstantBufferView(pEmitter, emitterSphereResource_->GetGPUVirtualAddress());
+			}
+		}
+
+		if (perFrameData_) {
+			perFrameData_->deltaTime = deltaTime;
+			perFrameData_->time = s_gpuParticleTime;
+		}
+
+		UINT pPerFrame = cp->GetRootParameterIndex(emitShader, "gPerFrame");
+		if (pPerFrame != static_cast<UINT>(-1)) {
+			commandList->SetComputeRootConstantBufferView(pPerFrame, perFrameResource_->GetGPUVirtualAddress());
+		}
+
+		UINT pParticles = cp->GetRootParameterIndex(emitShader, "gParticles");
+		if (pParticles != static_cast<UINT>(-1)) {
+			commandList->SetComputeRootDescriptorTable(pParticles, gpuParticleUavHandleGPU_);
+		}
+
+		UINT pCounter = cp->GetRootParameterIndex(emitShader, "gFreeCounter");
+		if (pCounter != static_cast<UINT>(-1)) {
+			commandList->SetComputeRootDescriptorTable(pCounter, gpuFreeCounterUavHandleGPU_);
+		}
+
+		UINT emitThreadGroups = (count + 1023) / 1024;
+		if (emitThreadGroups < 1) emitThreadGroups = 1;
+
+		if (gpuProfiler_) gpuProfiler_->BeginProfile(commandList, emitShader);
+		commandList->Dispatch(emitThreadGroups, 1, 1);
+		if (gpuProfiler_) gpuProfiler_->EndProfile(commandList, emitShader);
+
+		D3D12_RESOURCE_BARRIER barrier{};
+		barrier.Type = D3D12_RESOURCE_BARRIER_TYPE_UAV;
+		barrier.UAV.pResource = gpuParticleResource_.Get();
+		commandList->ResourceBarrier(1, &barrier);
+	}
+
+	// -------------------------------------------------------------
+	// 2. UpdateParticle の Dispatch
+	// -------------------------------------------------------------
+	std::string updateShader = "UpdateParticle.CS";
+	if (!cp->GetPipelineState(updateShader)) {
+		updateShader = "UpdateParicle.CS";
+	}
+
+	if (cp->GetPipelineState(updateShader)) {
+		commandList->SetComputeRootSignature(cp->GetRootSignature(updateShader));
+		commandList->SetPipelineState(cp->GetPipelineState(updateShader));
+
+		if (perFrameData_) {
+			perFrameData_->deltaTime = deltaTime;
+			perFrameData_->time = s_gpuParticleTime;
+		}
+
+		UINT pParticles = cp->GetRootParameterIndex(updateShader, "gParticles");
+		if (pParticles != static_cast<UINT>(-1)) {
+			commandList->SetComputeRootDescriptorTable(pParticles, gpuParticleUavHandleGPU_);
+		}
+
+		UINT pPerFrame = cp->GetRootParameterIndex(updateShader, "gPerFrame");
+		if (pPerFrame != static_cast<UINT>(-1)) {
+			commandList->SetComputeRootConstantBufferView(pPerFrame, perFrameResource_->GetGPUVirtualAddress());
+		}
+
+		if (gpuProfiler_) gpuProfiler_->BeginProfile(commandList, updateShader);
+		commandList->Dispatch(10, 1, 1);
+		if (gpuProfiler_) gpuProfiler_->EndProfile(commandList, updateShader);
+
+		D3D12_RESOURCE_BARRIER barrier{};
+		barrier.Type = D3D12_RESOURCE_BARRIER_TYPE_UAV;
+		barrier.UAV.pResource = gpuParticleResource_.Get();
+		commandList->ResourceBarrier(1, &barrier);
+	}
+}
+

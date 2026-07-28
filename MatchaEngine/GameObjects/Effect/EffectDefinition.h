@@ -33,6 +33,60 @@ struct EffectShapeData {
 	float ringInnerRadius = 0.8f;
 };
 
+struct PerFrameForGPU {
+	float deltaTime = 1.0f / 60.0f;
+	float time = 0.0f;
+	Vector2 padding0 = { 0.0f, 0.0f };
+	Vector3 acceleration = { 0.0f, 0.0f, 0.0f };
+	float padding1 = 0.0f;
+	Vector3 sizeDelta = { 1.0f, 1.0f, 1.0f };
+	float padding2 = 0.0f;
+};
+
+struct EmitterSphereForGPU {
+	Vector3 translate = { 0.0f, 0.0f, 0.0f };
+	float radius = 1.0f;
+	float count = 1.0f;
+	float frequency = 0.5f;
+	float frequencyTime = 0.0f;
+	uint32_t emit = 1;
+
+	Vector3 baseScale = { 1.0f, 1.0f, 1.0f };
+	float lifeTime = 3.0f;
+	Vector3 sizeVariance = { 0.0f, 0.0f, 0.0f };
+	float padding0 = 0.0f;
+	Vector3 baseVelocity = { 0.0f, 0.0f, 0.0f };
+	float padding1 = 0.0f;
+	Vector3 velocityVariance = { 0.0f, 0.0f, 0.0f };
+	float padding2 = 0.0f;
+	Vector4 color = { 1.0f, 1.0f, 1.0f, 1.0f };
+	Vector3 baseRotate = { 0.0f, 0.0f, 0.0f };
+	float padding3 = 0.0f;
+};
+
+struct EmitterBoxForGPU {
+	Vector3 translate = { 0.0f, 0.0f, 0.0f };
+	float count = 1.0f;
+	Vector3 size = { 1.0f, 1.0f, 1.0f };
+	float frequency = 0.5f;
+	float frequencyTime = 0.0f;
+	uint32_t emit = 1;
+	float lifeTime = 3.0f;
+	float padding0 = 0.0f;
+
+	Vector3 baseScale = { 1.0f, 1.0f, 1.0f };
+	float padding1 = 0.0f;
+	Vector3 sizeVariance = { 0.0f, 0.0f, 0.0f };
+	float padding2 = 0.0f;
+	Vector3 baseVelocity = { 0.0f, 0.0f, 0.0f };
+	float padding3 = 0.0f;
+	Vector3 velocityVariance = { 0.0f, 0.0f, 0.0f };
+	float padding4 = 0.0f;
+	Vector4 color = { 1.0f, 1.0f, 1.0f, 1.0f };
+	Vector3 baseRotate = { 0.0f, 0.0f, 0.0f };
+	float padding5 = 0.0f;
+};
+
 class EffectDefinition : public GameObject
 {
 private:
@@ -76,7 +130,13 @@ public:
 	static void SetDevice(ID3D12Device* device);
 	static void SetScreenSize(Vector2 screenSize);
 	static void SetDescriptorHeap(DescriptorHeap* descriptorHeap);
+	static void SetGpuProfiler(class GpuProfiler* profiler) { gpuProfiler_ = profiler; }
 	static void SetWvpIndex(int index) { s_wvpIndex = index; }
+
+private:
+	static class GpuProfiler* gpuProfiler_;
+
+public:
 
 	void Initialize(EffectShape shape = EffectShape::Plane);
 	void Initialize(int TextureHandle, EffectShape shape = EffectShape::Plane);
@@ -127,7 +187,39 @@ public:
 	D3D12_CPU_DESCRIPTOR_HANDLE gpuParticleUavHandleCPU_{};
 	D3D12_GPU_DESCRIPTOR_HANDLE gpuParticleUavHandleGPU_{};
 
+	Microsoft::WRL::ComPtr<ID3D12Resource> gpuFreeCounterResource_;
+	D3D12_CPU_DESCRIPTOR_HANDLE gpuFreeCounterUavHandleCPU_{};
+	D3D12_GPU_DESCRIPTOR_HANDLE gpuFreeCounterUavHandleGPU_{};
+
+	Microsoft::WRL::ComPtr<ID3D12Resource> perFrameResource_;
+	struct PerFrameForGPU* perFrameData_ = nullptr;
+
+	Microsoft::WRL::ComPtr<ID3D12Resource> emitterSphereResource_;
+	struct EmitterSphereForGPU* emitterSphereData_ = nullptr;
+
+	Microsoft::WRL::ComPtr<ID3D12Resource> emitterBoxResource_;
+	struct EmitterBoxForGPU* emitterBoxData_ = nullptr;
+
+	struct EmitterBoxForGPU pendingBoxData_{};
+	struct EmitterSphereForGPU pendingSphereData_{};
+	struct PerFrameForGPU pendingPerFrameData_{};
+
+	ID3D12Resource* GetGpuParticleResource() { return gpuParticleResource_.Get(); }
+
+	bool useGpuParticle_ = true;
+	void SetUseGpuParticle(bool enable) { useGpuParticle_ = enable; }
+	bool GetUseGpuParticle() const { return useGpuParticle_; }
+
+	bool isBoxEmitter_ = false;
+	void SetIsBoxEmitter(bool isBox) { isBoxEmitter_ = isBox; }
+	bool GetIsBoxEmitter() const { return isBoxEmitter_; }
+
+	void SetGpuEmitterBoxData(const struct EmitterBoxForGPU& data);
+	void SetGpuEmitterSphereData(const struct EmitterSphereForGPU& data);
+	void SetGpuPerFrameData(const struct PerFrameForGPU& data);
+
 	void InitializeGPUParticle(ID3D12GraphicsCommandList* commandList, class ComputePipeline* cp);
+	void DispatchGPUParticle(ID3D12GraphicsCommandList* commandList, class ComputePipeline* cp, float deltaTime = 1.0f / 60.0f);
 	bool IsGpuInitialized() const { return isGpuInitialized_; }
 
 private:

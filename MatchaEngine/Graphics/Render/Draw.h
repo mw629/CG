@@ -33,6 +33,7 @@ public:
 
 	void SetCamera(Camera* setcamera);
 	void SetEnvironmentTexture(int textureHandel);
+	void SetGpuProfiler(class GpuProfiler* profiler) { gpuProfiler_ = profiler; }
 
 	void preDraw(ShaderName shader, BlendMode blend);
 
@@ -70,4 +71,5 @@ private:
 	LineRenderer* lineRenderer_{};
 	Camera* camera_{};
 	D3D12_GPU_DESCRIPTOR_HANDLE environmentTextureSrvHandleGPU_{};
+	class GpuProfiler* gpuProfiler_{};
 };

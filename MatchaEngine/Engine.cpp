@@ -111,6 +111,9 @@ void Engine::Setting()
 
 	gpuSyncManager.Initialize(graphics.get()->GetDevice());
 
+	gpuProfiler = std::make_unique<GpuProfiler>();
+	gpuProfiler->Initialize(graphics->GetDevice(), command->GetCommandQueue());
+
 	depthStencil->CreateDepthStencil(graphics->GetDevice(), kClientWidth_, kClientHeight_, descriptorHeap->GetSrvDescriptorHeap(), descriptorHeap->GetDescriptorSizeSRV());
 
 	renderTextures[0]->Initialize(graphics->GetDevice(), kClientWidth_, kClientHeight_, descriptorHeap->GetSrvDescriptorHeap(), descriptorHeap->GetDescriptorSizeSRV());
@@ -185,6 +188,8 @@ void Engine::Setting()
 
   EffectDefinition::SetDescriptorHeap(descriptorHeap.get());
   EffectDefinition::SetDevice(graphics.get()->GetDevice());
+  EffectDefinition::SetGpuProfiler(gpuProfiler.get());
+  draw->SetGpuProfiler(gpuProfiler.get());
 
   postEffects_.push_back(std::make_unique<PostEffect>());
   postEffects_[0]->Initialize();
@@ -242,6 +247,10 @@ void Engine::PostDraw()
 	imGuiManager->Render(command->GetCommandList());
 #endif // _USE_IMGUI
 
+	if (gpuProfiler) {
+		gpuProfiler->EndFrame(command->GetCommandList());
+	}
+
 	//画面に描く処理はすべて終わり、画面に映すので、状態を遷移
 	//今回RenderTargetからPresentにする
 	resourceBarrierHelper->TransitionToPresent(command->GetCommandList());
@@ -296,6 +305,10 @@ void Engine::NewFrame() {
 #ifdef _USE_IMGUI
 	imGuiManager->NewFrame();
 #endif // _USE_IMGUI
+
+	if (gpuProfiler) {
+		gpuProfiler->BeginFrame(command->GetCommandList());
+	}
 
 	//コマンドを積み込んで確定させる//
 	renderTextures[0]->TransitionToRenderTarget(command->GetCommandList());

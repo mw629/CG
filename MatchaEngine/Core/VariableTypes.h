@@ -107,6 +107,7 @@ struct ParticleForGPU {
 struct Particle {
   Vector3 translate;
   Vector3 scale;
+  Vector3 rotate;
   Vector3 velocity;
   float lifeTime;
   float currentTime;
