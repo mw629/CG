@@ -39,15 +39,29 @@ void Emitter::ImGui() {
 	ImGui::PushID(this);
 	if (ImGui::CollapsingHeader(name_.c_str())) {
 		if (ImGui::TreeNode(LanguageManager::Tr("Emitter Settings"))) {
-			if (ImGui::TreeNode(LanguageManager::Tr("Transform"))) {
-				ImGui::DragFloat3(LanguageManager::Tr("Position"), &emitter_.transform.translate.x, 0.01f, -FLT_MAX, FLT_MAX, "%.2f");
-				ImGui::DragFloat3(LanguageManager::Tr("Rotation"), &emitter_.transform.rotate.x, 0.01f, -FLT_MAX, FLT_MAX, "%.2f");
-				ImGui::DragFloat3(LanguageManager::Tr("Spawn Area Scale"), &emitter_.transform.scale.x, 0.01f, -FLT_MAX, FLT_MAX, "%.2f");
-				ImGui::TreePop();
+			const char* emitterTypes[] = { "Box", "Sphere" };
+			int currentType = static_cast<int>(emitterType_);
+			if (ImGui::Combo(LanguageManager::Tr("Emitter Type"), &currentType, emitterTypes, IM_ARRAYSIZE(emitterTypes))) {
+				emitterType_ = static_cast<EmitterType>(currentType);
 			}
-			ImGui::DragInt(LanguageManager::Tr("Count"), reinterpret_cast<int*>(&emitter_.count), 1, 0, 10000);
-			ImGui::DragFloat(LanguageManager::Tr("Frequency"), &emitter_.frequency, 0.01f, 0.0f, 10.0f, "%.2f");
-			ImGui::DragFloat(LanguageManager::Tr("Frequency Time"), &emitter_.frequencyTime, 0.01f, 0.0f, 9999.0f, "%.2f");
+
+			if (emitterType_ == EmitterType::Box) {
+				if (ImGui::TreeNode(LanguageManager::Tr("Transform"))) {
+					ImGui::DragFloat3(LanguageManager::Tr("Position"), &emitter_.transform.translate.x, 0.01f, -FLT_MAX, FLT_MAX, "%.2f");
+					ImGui::DragFloat3(LanguageManager::Tr("Rotation"), &emitter_.transform.rotate.x, 0.01f, -FLT_MAX, FLT_MAX, "%.2f");
+					ImGui::DragFloat3(LanguageManager::Tr("Spawn Area Scale"), &emitter_.transform.scale.x, 0.01f, -FLT_MAX, FLT_MAX, "%.2f");
+					ImGui::TreePop();
+				}
+				ImGui::DragInt(LanguageManager::Tr("Count"), reinterpret_cast<int*>(&emitter_.count), 1, 0, 10000);
+				ImGui::DragFloat(LanguageManager::Tr("Frequency"), &emitter_.frequency, 0.01f, 0.0f, 10.0f, "%.2f");
+				ImGui::DragFloat(LanguageManager::Tr("Frequency Time"), &emitter_.frequencyTime, 0.01f, 0.0f, 9999.0f, "%.2f");
+			} else if (emitterType_ == EmitterType::Sphere) {
+				ImGui::DragFloat3(LanguageManager::Tr("Position"), &emitterSphere_.translate.x, 0.01f, -FLT_MAX, FLT_MAX, "%.2f");
+				ImGui::DragFloat(LanguageManager::Tr("Radius"), &emitterSphere_.radius, 0.01f, 0.0f, FLT_MAX, "%.2f");
+				ImGui::DragInt(LanguageManager::Tr("Count"), reinterpret_cast<int*>(&emitterSphere_.count), 1, 0, 10000);
+				ImGui::DragFloat(LanguageManager::Tr("Frequency"), &emitterSphere_.frequency, 0.01f, 0.0f, 10.0f, "%.2f");
+				ImGui::DragFloat(LanguageManager::Tr("Frequency Time"), &emitterSphere_.frequencyTime, 0.01f, 0.0f, 9999.0f, "%.2f");
+			}
 			ImGui::TreePop();
 		}
 
@@ -212,11 +226,17 @@ void Emitter::SaveToJson(const std::string& name)
 
 	nlohmann::json root;
 
+	root["emitter"]["type"] = static_cast<int>(emitterType_);
 	root["emitter"]["transform"]["translate"] = { emitter_.transform.translate.x, emitter_.transform.translate.y, emitter_.transform.translate.z };
 	root["emitter"]["transform"]["rotate"] = { emitter_.transform.rotate.x, emitter_.transform.rotate.y, emitter_.transform.rotate.z };
 	root["emitter"]["transform"]["scale"] = { emitter_.transform.scale.x, emitter_.transform.scale.y, emitter_.transform.scale.z };
 	root["emitter"]["count"] = emitter_.count;
 	root["emitter"]["frequency"] = emitter_.frequency;
+
+	root["emitter"]["sphere"]["translate"] = { emitterSphere_.translate.x, emitterSphere_.translate.y, emitterSphere_.translate.z };
+	root["emitter"]["sphere"]["radius"] = emitterSphere_.radius;
+	root["emitter"]["sphere"]["count"] = emitterSphere_.count;
+	root["emitter"]["sphere"]["frequency"] = emitterSphere_.frequency;
 
 	root["particle"]["transform"]["translate"] = { SetEffectDefinitionData_.transform.translate.x, SetEffectDefinitionData_.transform.translate.y, SetEffectDefinitionData_.transform.translate.z };
 	root["particle"]["transform"]["scale"] = { SetEffectDefinitionData_.transform.scale.x, SetEffectDefinitionData_.transform.scale.y, SetEffectDefinitionData_.transform.scale.z };
@@ -265,6 +285,9 @@ void Emitter::LoadFromJson(const std::string& name)
 	file >> root;
 
 	if (root.contains("emitter")) {
+		if (root["emitter"].contains("type")) {
+			emitterType_ = static_cast<EmitterType>(root["emitter"]["type"].get<int>());
+		}
 		if (root["emitter"].contains("transform")) {
 			emitter_.transform.translate.x = root["emitter"]["transform"]["translate"][0];
 			emitter_.transform.translate.y = root["emitter"]["transform"]["translate"][1];
@@ -278,8 +301,19 @@ void Emitter::LoadFromJson(const std::string& name)
 			emitter_.transform.scale.y = root["emitter"]["transform"]["scale"][1];
 			emitter_.transform.scale.z = root["emitter"]["transform"]["scale"][2];
 		}
-		emitter_.count = root["emitter"]["count"];
-		emitter_.frequency = root["emitter"]["frequency"];
+		if (root["emitter"].contains("count")) emitter_.count = root["emitter"]["count"];
+		if (root["emitter"].contains("frequency")) emitter_.frequency = root["emitter"]["frequency"];
+
+		if (root["emitter"].contains("sphere")) {
+			if (root["emitter"]["sphere"].contains("translate")) {
+				emitterSphere_.translate.x = root["emitter"]["sphere"]["translate"][0];
+				emitterSphere_.translate.y = root["emitter"]["sphere"]["translate"][1];
+				emitterSphere_.translate.z = root["emitter"]["sphere"]["translate"][2];
+			}
+			if (root["emitter"]["sphere"].contains("radius")) emitterSphere_.radius = root["emitter"]["sphere"]["radius"];
+			if (root["emitter"]["sphere"].contains("count")) emitterSphere_.count = root["emitter"]["sphere"]["count"];
+			if (root["emitter"]["sphere"].contains("frequency")) emitterSphere_.frequency = root["emitter"]["sphere"]["frequency"];
+		}
 	}
 
 	if (root.contains("particle")) {
@@ -407,6 +441,38 @@ void Emitter::Initialize(EmitterData emitter, EffectDefinitionData effectDefinit
 void Emitter::Initialize(EmitterData emitter, EffectDefinitionData particleData, int TextureHandle, EffectShape shape)
 {
 	emitter_ = emitter;
+	emitterType_ = EmitterType::Box;
+	SetEffectDefinitionData_ = particleData;
+	randomEngine.seed(seedGenerator_());
+	effectDefinition_.get()->Initialize(TextureHandle, shape);
+	effectDefinition_->SetShader(shaderName_);
+}
+
+void Emitter::Initialize(EmitterSphere emitterSphere, EffectShape shape)
+{
+	shape_ = shape;
+	emitterSphere_ = emitterSphere;
+	emitterType_ = EmitterType::Sphere;
+	randomEngine.seed(seedGenerator_());
+	effectDefinition_.get()->Initialize(shape_);
+	effectDefinition_->SetShader(shaderName_);
+}
+
+void Emitter::Initialize(EmitterSphere emitterSphere, EffectDefinitionData effectDefinitionData, EffectShape shape)
+{
+	shape_ = shape;
+	emitterSphere_ = emitterSphere;
+	emitterType_ = EmitterType::Sphere;
+	SetEffectDefinitionData_ = effectDefinitionData;
+	randomEngine.seed(seedGenerator_());
+	effectDefinition_.get()->Initialize(shape_);
+	effectDefinition_->SetShader(shaderName_);
+}
+
+void Emitter::Initialize(EmitterSphere emitterSphere, EffectDefinitionData particleData, int TextureHandle, EffectShape shape)
+{
+	emitterSphere_ = emitterSphere;
+	emitterType_ = EmitterType::Sphere;
 	SetEffectDefinitionData_ = particleData;
 	randomEngine.seed(seedGenerator_());
 	effectDefinition_.get()->Initialize(TextureHandle, shape);
@@ -438,10 +504,12 @@ void Emitter::Update(Matrix4x4 viewMatrix) {
 	}
 
 	if (!isStop_) {
-		emitter_.frequencyTime += 1.0f / 60.0f;
-		if (emitter_.frequency <= emitter_.frequencyTime) {
+		float& freqTime = (emitterType_ == EmitterType::Sphere) ? emitterSphere_.frequencyTime : emitter_.frequencyTime;
+		float freq = (emitterType_ == EmitterType::Sphere) ? emitterSphere_.frequency : emitter_.frequency;
+		freqTime += 1.0f / 60.0f;
+		if (freq <= freqTime) {
 			Emit();
-			emitter_.frequencyTime -= emitter_.frequency;
+			freqTime -= freq;
 		}
 	}
 
@@ -486,10 +554,12 @@ void Emitter::Update(Matrix4x4 viewMatrix, std::function<EffectDefinitionData(co
 		++i;
 	}
 	if (!isStop_) {
-		emitter_.frequencyTime += 1.0f / 60.0f;
-		if (emitter_.frequency <= emitter_.frequencyTime) {
+		float& freqTime = (emitterType_ == EmitterType::Sphere) ? emitterSphere_.frequencyTime : emitter_.frequencyTime;
+		float freq = (emitterType_ == EmitterType::Sphere) ? emitterSphere_.frequency : emitter_.frequency;
+		freqTime += 1.0f / 60.0f;
+		if (freq <= freqTime) {
 			Emit();
-			emitter_.frequencyTime -= emitter_.frequency;
+			freqTime -= freq;
 		}
 	}
 
@@ -502,6 +572,7 @@ void Emitter::Update(Matrix4x4 viewMatrix, std::function<EffectDefinitionData(co
 void Emitter::Update(EmitterData emitter, Matrix4x4 viewMatrix, std::function<EffectDefinitionData(const EffectDefinitionData&)> moveBehavior)
 {
 	emitter_ = emitter;
+	emitterType_ = EmitterType::Box;
 
 	int i = 0;
 	for (std::list<EffectDefinitionData>::iterator particleIterator = effectDefinitionData_.begin();
@@ -534,10 +605,12 @@ void Emitter::Update(EmitterData emitter, Matrix4x4 viewMatrix, std::function<Ef
 		++i;
 	}
 	if (!isStop_) {
-		emitter_.frequencyTime += 1.0f / 60.0f;
-		if (emitter_.frequency <= emitter_.frequencyTime) {
+		float& freqTime = (emitterType_ == EmitterType::Sphere) ? emitterSphere_.frequencyTime : emitter_.frequencyTime;
+		float freq = (emitterType_ == EmitterType::Sphere) ? emitterSphere_.frequency : emitter_.frequency;
+		freqTime += 1.0f / 60.0f;
+		if (freq <= freqTime) {
 			Emit();
-			emitter_.frequencyTime -= emitter_.frequency;
+			freqTime -= freq;
 		}
 	}
 	
@@ -567,10 +640,12 @@ void Emitter::Update(Matrix4x4 viewMatrix, Vector3 scale)
 		++particleIterator;//これを忘れた未来の僕がいるならこれを忘れた今の僕が悲しむ
 	}
 	if (!isStop_) {
-		emitter_.frequencyTime += 1.0f / 60.0f;
-		if (emitter_.frequency <= emitter_.frequencyTime) {
+		float& freqTime = (emitterType_ == EmitterType::Sphere) ? emitterSphere_.frequencyTime : emitter_.frequencyTime;
+		float freq = (emitterType_ == EmitterType::Sphere) ? emitterSphere_.frequency : emitter_.frequency;
+		freqTime += 1.0f / 60.0f;
+		if (freq <= freqTime) {
 			Emit();
-			emitter_.frequencyTime -= emitter_.frequency;
+			freqTime -= freq;
 		}
 	}
 
@@ -593,8 +668,19 @@ EffectDefinitionData Emitter::MakeNewParticle()
 	std::uniform_real_distribution<float> distribution(-1.0f, 1.0f);
 	EffectDefinitionData data;
 	data = SetEffectDefinitionData_;
-	Vector3 possion = { distribution(randomEngine),distribution(randomEngine) ,distribution(randomEngine) };
-	data.transform.translate = SetEffectDefinitionData_.transform.translate + possion * emitter_.transform.scale + emitter_.transform.translate;
+
+	Vector3 possion = { 0.0f, 0.0f, 0.0f };
+	if (emitterType_ == EmitterType::Box) {
+		possion = { distribution(randomEngine), distribution(randomEngine), distribution(randomEngine) };
+		data.transform.translate = SetEffectDefinitionData_.transform.translate + possion * emitter_.transform.scale + emitter_.transform.translate;
+	}
+	else if (emitterType_ == EmitterType::Sphere) {
+		do {
+			possion = { distribution(randomEngine), distribution(randomEngine), distribution(randomEngine) };
+		} while (possion.x * possion.x + possion.y * possion.y + possion.z * possion.z > 1.0f);
+		data.transform.translate = SetEffectDefinitionData_.transform.translate + possion * emitterSphere_.radius + emitterSphere_.translate;
+	}
+
 	data.transform.scale.x += distribution(randomEngine) * movementData_.sizeVariance.x;
 	data.transform.scale.y += distribution(randomEngine) * movementData_.sizeVariance.y;
 	data.transform.scale.z += distribution(randomEngine) * movementData_.sizeVariance.z;
@@ -617,8 +703,19 @@ EffectDefinitionData Emitter::MakeNewParticle(Vector3 scale)
 	EffectDefinitionData data;
 	data.transform = SetEffectDefinitionData_.transform;
 	data.transform.scale = scale;
-	Vector3 possion = { distribution(randomEngine),distribution(randomEngine) ,distribution(randomEngine) };
-	data.transform.translate = SetEffectDefinitionData_.transform.translate + possion * emitter_.transform.scale + emitter_.transform.translate;
+
+	Vector3 possion = { 0.0f, 0.0f, 0.0f };
+	if (emitterType_ == EmitterType::Box) {
+		possion = { distribution(randomEngine), distribution(randomEngine), distribution(randomEngine) };
+		data.transform.translate = SetEffectDefinitionData_.transform.translate + possion * emitter_.transform.scale + emitter_.transform.translate;
+	}
+	else if (emitterType_ == EmitterType::Sphere) {
+		do {
+			possion = { distribution(randomEngine), distribution(randomEngine), distribution(randomEngine) };
+		} while (possion.x * possion.x + possion.y * possion.y + possion.z * possion.z > 1.0f);
+		data.transform.translate = SetEffectDefinitionData_.transform.translate + possion * emitterSphere_.radius + emitterSphere_.translate;
+	}
+
 	data.transform.scale = scale;
 	data.transform.scale.x += distribution(randomEngine) * movementData_.sizeVariance.x;
 	data.transform.scale.y += distribution(randomEngine) * movementData_.sizeVariance.y;
@@ -693,7 +790,8 @@ bool Emitter::OnCollision(EffectDefinitionData particleData)
 
 void Emitter::Emit()
 {
-	for (uint32_t count = 0; count < emitter_.count; ++count) {
+	uint32_t count = (emitterType_ == EmitterType::Sphere) ? emitterSphere_.count : emitter_.count;
+	for (uint32_t i = 0; i < count; ++i) {
 		effectDefinitionData_.push_back(MakeNewParticle());
 	}
 }

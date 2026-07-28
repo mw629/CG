@@ -3,11 +3,26 @@
 #include <functional>
 #include "EffectDefinition.h"
 
+enum class EmitterType {
+	Box,
+	Sphere
+};
+
 struct EmitterData {
 	Transform transform = { {1.0f,1.0f,1.0f} ,{0.0f,0.0f,0.0f},{0.0f,0.0f,0.0f} };//エミッタのTransform
 	uint32_t count = 10;//発生数
 	float frequency=0.5f;//発生頻度
 	float frequencyTime=0.0f;//頻度用時刻
+};
+using EmitterBox = EmitterData;
+
+struct EmitterSphere {
+	Vector3 translate = { 0.0f, 0.0f, 0.0f }; // 位置
+	float radius = 1.0f; // 射出半径
+	uint32_t count = 10; // 射出数
+	float frequency = 0.5f; // 射出間隔
+	float frequencyTime = 0.0f; // 射出間隔調整時間
+	uint32_t emit = 0; // 射出許可
 };
 
 struct AccelerationFiled {
@@ -39,7 +54,9 @@ private:
 	EffectShape shape_ = EffectShape::Plane;
 	EffectShapeData shapeData_;
 
+	EmitterType emitterType_ = EmitterType::Box;
 	EmitterData emitter_;
+	EmitterSphere emitterSphere_;
 	std::mt19937 randomEngine;
 
 	ShaderName shaderName_ = "ParticleShader";
@@ -58,6 +75,13 @@ public:
 	// 生成時の振る舞いを注入する関数
 	std::function<void(EffectDefinitionData&)> generatorBehavior = nullptr;
 
+	void SetEmitterType(EmitterType type) { emitterType_ = type; }
+	EmitterType GetEmitterType() const { return emitterType_; }
+
+	void SetEmitterSphere(const EmitterSphere& sphere) { emitterSphere_ = sphere; emitterType_ = EmitterType::Sphere; }
+	EmitterSphere GetEmitterSphere() const { return emitterSphere_; }
+	EmitterSphere* GetEmitterSpherePtr() { return &emitterSphere_; }
+
 	void SetEmitterData(const EmitterData& data) { emitter_ = data; }
 	EmitterData GetEmitterData() const { return emitter_; }
 
@@ -74,6 +98,10 @@ public:
 	void Initialize(EmitterData emitter, EffectShape shape = EffectShape::Plane);
 	void Initialize(EmitterData emitter,EffectDefinitionData particleData, EffectShape shape = EffectShape::Plane);
 	void Initialize(EmitterData emitter, EffectDefinitionData particleData,int TextureHandle, EffectShape shape = EffectShape::Plane);
+
+	void Initialize(EmitterSphere emitterSphere, EffectShape shape = EffectShape::Plane);
+	void Initialize(EmitterSphere emitterSphere, EffectDefinitionData particleData, EffectShape shape = EffectShape::Plane);
+	void Initialize(EmitterSphere emitterSphere, EffectDefinitionData particleData, int TextureHandle, EffectShape shape = EffectShape::Plane);
 
 	void Update(Matrix4x4 viewMatrix);
 	void Update(Matrix4x4 viewMatrix, std::function<EffectDefinitionData(const EffectDefinitionData&)> moveBehavior);//動きに変化をつけたい場合

@@ -763,38 +763,72 @@ void EditorManager::Update(Engine* engine)
 			Matrix4x4 projMat = MakePerspectiveFovMatrix(0.45f, 1.0f, 0.1f, 100.0f);
 
 			EmitterData ed = previewParticle_->GetEmitterData();
-			Matrix4x4 worldMat = MakeAffineMatrix(ed.transform.translate, ed.transform.scale, ed.transform.rotate);
+			EmitterSphere es = previewParticle_->GetEmitterSphere();
+			EmitterType eType = previewParticle_->GetEmitterType();
+			Matrix4x4 worldMat;
+			if (eType == EmitterType::Sphere) {
+				worldMat = MakeAffineMatrix(es.translate, Vector3{ es.radius * 2.0f, es.radius * 2.0f, es.radius * 2.0f }, Vector3{ 0.0f, 0.0f, 0.0f });
+			} else {
+				worldMat = MakeAffineMatrix(ed.transform.translate, ed.transform.scale, ed.transform.rotate);
+			}
 
 			static ImGuizmo::OPERATION currentOp = ImGuizmo::TRANSLATE;
 
-			// Draw a wireframe cube at Emitter location if enabled
+			// Draw a wireframe cube or sphere at Emitter location if enabled
 			if (showEmitterCube_) {
 				auto drawList = ImGui::GetWindowDrawList();
 				Matrix4x4 viewProj = MultiplyMatrix4x4(viewMat, projMat);
 				Matrix4x4 wvp = MultiplyMatrix4x4(worldMat, viewProj);
-				Vector3 corners[8] = {
-					{-0.5f, -0.5f, -0.5f}, { 0.5f, -0.5f, -0.5f}, { 0.5f,  0.5f, -0.5f}, {-0.5f,  0.5f, -0.5f},
-					{-0.5f, -0.5f,  0.5f}, { 0.5f, -0.5f,  0.5f}, { 0.5f,  0.5f,  0.5f}, {-0.5f,  0.5f,  0.5f}
-				};
-				ImVec2 points[8];
-				bool allInFront = true;
-				for (int i = 0; i < 8; ++i) {
-					float w = corners[i].x * wvp.m[0][3] + corners[i].y * wvp.m[1][3] + corners[i].z * wvp.m[2][3] + wvp.m[3][3];
-					if (w < 0.1f) allInFront = false;
-					Vector3 projected = TransformMatrix(corners[i], wvp);
-					points[i].x = vMin.x + (projected.x + 1.0f) * 0.5f * 512.0f;
-					points[i].y = vMin.y + (1.0f - projected.y) * 0.5f * 512.0f;
-				}
-				
-				if (allInFront) {
-					ImU32 color = IM_COL32(255, 255, 255, 255);
-					int edges[12][2] = {
-						{0,1}, {1,2}, {2,3}, {3,0},
-						{4,5}, {5,6}, {6,7}, {7,4},
-						{0,4}, {1,5}, {2,6}, {3,7}
+				ImU32 color = IM_COL32(255, 255, 255, 255);
+
+				if (eType == EmitterType::Sphere) {
+					const int kSegments = 24;
+					float pi = 3.1415926535f;
+					auto DrawCirclePlane = [&](auto getCornerPoint) {
+						ImVec2 pts[24];
+						bool allValid = true;
+						for (int i = 0; i < kSegments; ++i) {
+							float angle = (2.0f * pi * i) / kSegments;
+							Vector3 pt = getCornerPoint(0.5f * std::cos(angle), 0.5f * std::sin(angle));
+							float w = pt.x * wvp.m[0][3] + pt.y * wvp.m[1][3] + pt.z * wvp.m[2][3] + wvp.m[3][3];
+							if (w < 0.1f) allValid = false;
+							Vector3 projected = TransformMatrix(pt, wvp);
+							pts[i].x = vMin.x + (projected.x + 1.0f) * 0.5f * 512.0f;
+							pts[i].y = vMin.y + (1.0f - projected.y) * 0.5f * 512.0f;
+						}
+						if (allValid) {
+							for (int i = 0; i < kSegments; ++i) {
+								drawList->AddLine(pts[i], pts[(i + 1) % kSegments], color, 2.0f);
+							}
+						}
 					};
-					for (int i = 0; i < 12; ++i) {
-						drawList->AddLine(points[edges[i][0]], points[edges[i][1]], color, 2.0f);
+					DrawCirclePlane([](float c, float s) { return Vector3{ c, s, 0.0f }; });
+					DrawCirclePlane([](float c, float s) { return Vector3{ 0.0f, c, s }; });
+					DrawCirclePlane([](float c, float s) { return Vector3{ c, 0.0f, s }; });
+				} else {
+					Vector3 corners[8] = {
+						{-0.5f, -0.5f, -0.5f}, { 0.5f, -0.5f, -0.5f}, { 0.5f,  0.5f, -0.5f}, {-0.5f,  0.5f, -0.5f},
+						{-0.5f, -0.5f,  0.5f}, { 0.5f, -0.5f,  0.5f}, { 0.5f,  0.5f,  0.5f}, {-0.5f,  0.5f,  0.5f}
+					};
+					ImVec2 points[8];
+					bool allInFront = true;
+					for (int i = 0; i < 8; ++i) {
+						float w = corners[i].x * wvp.m[0][3] + corners[i].y * wvp.m[1][3] + corners[i].z * wvp.m[2][3] + wvp.m[3][3];
+						if (w < 0.1f) allInFront = false;
+						Vector3 projected = TransformMatrix(corners[i], wvp);
+						points[i].x = vMin.x + (projected.x + 1.0f) * 0.5f * 512.0f;
+						points[i].y = vMin.y + (1.0f - projected.y) * 0.5f * 512.0f;
+					}
+					
+					if (allInFront) {
+						int edges[12][2] = {
+							{0,1}, {1,2}, {2,3}, {3,0},
+							{4,5}, {5,6}, {6,7}, {7,4},
+							{0,4}, {1,5}, {2,6}, {3,7}
+						};
+						for (int i = 0; i < 12; ++i) {
+							drawList->AddLine(points[edges[i][0]], points[edges[i][1]], color, 2.0f);
+						}
 					}
 				}
 			}
@@ -804,10 +838,16 @@ void EditorManager::Update(Engine* engine)
 				float t[3], r[3], s[3];
 				ImGuizmo::DecomposeMatrixToComponents(&worldMat.m[0][0], t, r, s);
 				float pi = 3.1415926535f;
-				ed.transform.translate = { t[0], t[1], t[2] };
-				ed.transform.rotate = { r[0] * pi / 180.0f, r[1] * pi / 180.0f, r[2] * pi / 180.0f };
-				ed.transform.scale = { s[0], s[1], s[2] };
-				previewParticle_->SetEmitterData(ed);
+				if (eType == EmitterType::Sphere) {
+					es.translate = { t[0], t[1], t[2] };
+					es.radius = (s[0] + s[1] + s[2]) / 6.0f;
+					previewParticle_->SetEmitterSphere(es);
+				} else {
+					ed.transform.translate = { t[0], t[1], t[2] };
+					ed.transform.rotate = { r[0] * pi / 180.0f, r[1] * pi / 180.0f, r[2] * pi / 180.0f };
+					ed.transform.scale = { s[0], s[1], s[2] };
+					previewParticle_->SetEmitterData(ed);
+				}
 			}
 
 			ImGui::NextColumn();

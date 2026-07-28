@@ -328,6 +328,7 @@
     <FxCompile Include="resources\Shader\SkinningObject3d.CS.hlsl" />
     <FxCompile Include="Resources\Shader\ParticleShader\ToonParticle.PS.hlsl" />
     <FxCompile Include="Resources\Shader\ComputeShader\Particle.CS.hlsl" />
+    <FxCompile Include="Resources\Shader\ParticleShader\UpdateParicle.C.hlsl" />
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="externals\imgui\imconfig.h">
