@@ -1,0 +1,54 @@
+{
+  "emitter": {
+    "count": 4,
+    "frequency": 0.01,
+    "sphere": {
+      "count": 4,
+      "frequency": 0.01,
+      "radius": 1.0,
+      "translate": [ 0.0, 0.0, 0.0 ]
+    },
+    "transform": {
+      "rotate": [ 0.0, 0.0, 0.0 ],
+      "scale": [ 3.0, 0.2, 3.0 ],
+      "translate": [ 0.0, 0.0, 0.0 ]
+    },
+    "type": 0
+  },
+  "field": {
+    "position": [ 0.0, 0.0, 0.0 ],
+    "strength": 1.0,
+    "type": 2
+  },
+  "movement": {
+    "acceleration": [ 0.0, 0.0, 0.0 ],
+    "baseVelocity": [ 0.0, 0.01, 0.0 ],
+    "sizeDelta": [ 1.0, 1.0, 1.0 ],
+    "sizeVariance": [ 0.3, 0.3, 0.3 ],
+    "velocityVariance": [ 0.02, 0.01, 0.02 ]
+  },
+  "particle": {
+    "color": [ 0.5, 0.9, 1.0, 1.0 ],
+    "lifeTime": 3.0,
+    "transform": {
+      "rotate": [ 0.0, 0.0, 0.0 ],
+      "scale": [ 0.3, 0.3, 0.3 ],
+      "translate": [ 0.0, 0.0, 0.0 ]
+    }
+  },
+  "visual": {
+    "blendMode": 2,
+    "cylinderBottomRadius": 1.0,
+    "cylinderDivide": 32,
+    "cylinderHeight": 3.0,
+    "cylinderTopRadius": 1.0,
+    "isBillboard": true,
+    "ringDivide": 32,
+    "ringInnerRadius": 0.8,
+    "ringOuterRadius": 1.0,
+    "shader": "ParticleShader",
+    "shape": 0,
+    "texturePath": "Resources/Texture/circle.png",
+    "useGpuParticle": true
+  }
+}

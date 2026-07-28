@@ -306,6 +306,9 @@
     <ClCompile Include="MatchaEngine\Graphics\Render\LineRenderer.cpp">
       <Filter>ソース ファイル</Filter>
     </ClCompile>
+    <ClCompile Include="MatchaEngine\Graphics\GpuProfiler.cpp">
+      <Filter>ソース ファイル</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <FxCompile Include="resources\Shader\Object3d.VS.hlsl">
@@ -328,7 +331,6 @@
     <FxCompile Include="resources\Shader\SkinningObject3d.CS.hlsl" />
     <FxCompile Include="Resources\Shader\ParticleShader\ToonParticle.PS.hlsl" />
     <FxCompile Include="Resources\Shader\ComputeShader\Particle.CS.hlsl" />
-    <FxCompile Include="Resources\Shader\ParticleShader\UpdateParicle.CS.hlsl" />
     <FxCompile Include="Resources\Shader\ParticleShader\SphereEmitterParticle.CS.hlsl" />
   </ItemGroup>
   <ItemGroup>
@@ -609,6 +611,9 @@
       <Filter>ヘッダー ファイル</Filter>
     </ClInclude>
     <ClInclude Include="MatchaEngine\Graphics\Render\LineRenderer.h">
+      <Filter>ヘッダー ファイル</Filter>
+    </ClInclude>
+    <ClInclude Include="MatchaEngine\Graphics\GpuProfiler.h">
       <Filter>ヘッダー ファイル</Filter>
     </ClInclude>
   </ItemGroup>

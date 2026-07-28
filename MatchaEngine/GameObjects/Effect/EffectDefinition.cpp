@@ -227,7 +227,7 @@ void EffectDefinition::DeleteParticle(int ParticleNum)
 
 void EffectDefinition::SettingWvp(Matrix4x4 viewMatrix)
 {
-    Matrix4x4 projectionMatrix = MakePerspectiveFovMatrix(0.45f, float(kClientWidth) / float(kClientHeight), 0.1f, 100.0f);
+    Matrix4x4 projectionMatrix = MakePerspectiveFovMatrix(0.45f, float(kClientWidth) / float(kClientHeight), 0.1f, 10000.0f);
     Matrix4x4 viewProjection = MultiplyMatrix4x4(viewMatrix, projectionMatrix);
 
     Matrix4x4 billboard = IdentityMatrix();

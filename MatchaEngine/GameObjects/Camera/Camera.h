@@ -17,7 +17,7 @@ private:
 	float fovY_ = 0.45f;
 	float aspectRatio_ = 1280.0f / 720.0f;
 	float nearClip_ = 0.1f;
-	float farClip_ = 100.0f;
+	float farClip_ = 10000.0f;
 
 
 	DebugCamera debugCamera_;

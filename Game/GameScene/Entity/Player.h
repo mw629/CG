@@ -4,6 +4,8 @@
 #include <Engine.h>
 
 #include "GameObject.h"
+#include <CharacterAnimator.h>
+#include <Emitter.h>
 
 class Player : public GameObject
 {
@@ -18,7 +20,10 @@ private:
 	};
 
 
-	std::unique_ptr<Model> model_ = std::make_unique<Model>();
+	std::unique_ptr<CharacterAnimator> model_ = std::make_unique<CharacterAnimator>();
+	std::unique_ptr<Model> axe_ = std::make_unique<Model>();
+	Transform axeOffset_{ {100.0f,100.0f,100.0f},{0.0f,0.0f,0.0f,},{0.0f,0.0f,0.0f} };
+	std::unique_ptr<Emitter> leftHandParticle_ = std::make_unique<Emitter>();
 	// transform_ is inherited from GameObject
 
 	//レーン移動のための変数
@@ -89,6 +94,7 @@ public:
 	}
 
 	void Draw(class Draw& draw) override;
+	void DrawParticle(class Draw& draw);
 	void ImGuiInnerComponents() override;
 
 	bool HasMaterial() const override {

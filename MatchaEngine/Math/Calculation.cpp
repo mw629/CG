@@ -106,6 +106,42 @@ Quaternion Lerp(const Quaternion& a, const Quaternion& b, float t) {
 	return result;
 }
 
+Quaternion Slerp(const Quaternion& a, const Quaternion& b, float t) {
+    float dot = a.x * b.x + a.y * b.y + a.z * b.z + a.w * b.w;
+    Quaternion q2 = b;
+    
+    // 最短経路での補間
+    if (dot < 0.0f) {
+        q2.x = -b.x;
+        q2.y = -b.y;
+        q2.z = -b.z;
+        q2.w = -b.w;
+        dot = -dot;
+    }
+    
+    // ドット積が1に非常に近い場合（角度が非常に小さい場合）、ゼロ除算を防ぐためにLerpを使用
+    const float DOT_THRESHOLD = 0.9995f;
+    if (dot > DOT_THRESHOLD) {
+        return Lerp(a, q2, t);
+    }
+    
+    float theta_0 = std::acos(dot);
+    float theta = theta_0 * t;
+    
+    float sin_theta = std::sin(theta);
+    float sin_theta_0 = std::sin(theta_0);
+    
+    float s0 = std::cos(theta) - dot * sin_theta / sin_theta_0;
+    float s1 = sin_theta / sin_theta_0;
+    
+    Quaternion result;
+    result.x = (a.x * s0) + (q2.x * s1);
+    result.y = (a.y * s0) + (q2.y * s1);
+    result.z = (a.z * s0) + (q2.z * s1);
+    result.w = (a.w * s0) + (q2.w * s1);
+    return result;
+}
+
 float EaseInOutSine(float x) {
 	return -(std::cos(3.14159265f * x) - 1.0f) / 2.0f;
 }

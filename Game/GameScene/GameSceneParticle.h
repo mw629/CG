@@ -16,7 +16,7 @@ public:
 
 	void EmitDust(const Vector3& playerPos);
 	void EmitShockwave(const Vector3& playerPos);
-	void EmitBonusCylinder(const Vector3& playerPos);
+	void EmitBonusTornado(const Vector3& playerPos);
 	void EmitHitEffect(const Vector3& playerPos);
 	void ClearHitParticles();
 
@@ -30,7 +30,7 @@ private:
 	std::unique_ptr<Emitter> hitEffect_;
 	std::unique_ptr<Emitter> dustEffect_;
 	std::unique_ptr<Emitter> shockwaveEffect_;
-	std::unique_ptr<Emitter> bonusCylinderEffect_;
+	std::unique_ptr<Emitter> bonusTornadoEffect_;
 
 	bool isBonusEffectActive_ = false;
 	float bonusEffectTimer_ = 0.0f;

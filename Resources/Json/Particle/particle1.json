@@ -43,9 +43,9 @@
             0.0
         ],
         "sizeDelta": [
-            0.9900000095367432,
-            0.9900000095367432,
-            0.9900000095367432
+            1.0,
+            1.0,
+            1.0
         ],
         "sizeVariance": [
             0.0,
@@ -94,9 +94,9 @@
         "ringDivide": 32,
         "ringInnerRadius": 0.800000011920929,
         "ringOuterRadius": 1.0,
-        "shader": "ParticleShader",
+        "shader": "ToonParticleShader",
         "shape": 1,
-        "texturePath": "Resources/Texture/circle.png",
+        "texturePath": "resources/Texture/white64x64.png",
         "useGpuParticle": true
     }
 }

@@ -38,6 +38,18 @@ struct ParticleMovementData {
 	Vector3 sizeDelta = { 1.0f, 1.0f, 1.0f }; // Multiplied each frame
 };
 
+enum class FieldType {
+	None = 0,
+	PointGravity = 1,
+	Vortex = 2
+};
+
+struct FieldData {
+	FieldType type = FieldType::None;
+	float strength = 1.0f;
+	Vector3 position = { 0.0f, 0.0f, 0.0f };
+};
+
 class Emitter
 {
 private:
@@ -49,6 +61,7 @@ private:
 
 	EffectDefinitionData SetEffectDefinitionData_;
 	ParticleMovementData movementData_;
+	FieldData fieldData_;
 
 	std::string texturePath_ = "Resources/Texture/circle.png";
 	EffectShape shape_ = EffectShape::Plane;

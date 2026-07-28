@@ -161,14 +161,14 @@ void GameScene::ImGui()
 
 	ImGui::End();
 
-	Matrix4x4 projection = MakePerspectiveFovMatrix(0.45f, float(1280.0f) / float(720.0f), 0.1f, 100.0f);
+	Matrix4x4 projection = MakePerspectiveFovMatrix(0.45f, float(1280.0f) / float(720.0f), 0.1f, 10000.0f);
 	editorUI_->Draw(gameObjectManager_.get(), view, projection);
 
 	// Stopモードの時だけギズモ描画コールバックをSceneウィンドウに登録する
 #ifdef _USE_IMGUI
 	if (!EditorManager::IsPlaying()) {
 		EditorManager::SetSceneOverlayCallback([this]() {
-			Matrix4x4 proj = MakePerspectiveFovMatrix(0.45f, float(1280.0f) / float(720.0f), 0.1f, 100.0f);
+			Matrix4x4 proj = MakePerspectiveFovMatrix(0.45f, float(1280.0f) / float(720.0f), 0.1f, 10000.0f);
 			editorUI_->DrawGizmoInScene(view, proj);
 		});
 	} else {
@@ -477,6 +477,11 @@ void GameScene::Draw(class Draw& draw) {
 
 	// ヒットエフェクトの描画
 	particleManager_->Draw(draw);
+	
+	// プレイヤーのパーティクル（左手など）の描画
+	if (player_) {
+		player_->DrawParticle(draw);
+	}
 }
 
 void GameScene::PlayerHitUpdate()
@@ -598,9 +603,9 @@ void GameScene::CheckCollisions()
 				// プレイヤーの足元にRingエフェクトを出す
 				particleManager_->EmitShockwave(player_->GetTransform().translate);
 
-				// プレイヤーの足元にCylinderエフェクトを出す
+				// プレイヤーの足元にTornadoエフェクトを出す
 				particleManager_->StartBonusEffect(120.0f); // 60FPS環境で2秒間
-				particleManager_->EmitBonusCylinder(player_->GetTransform().translate);
+				particleManager_->EmitBonusTornado(player_->GetTransform().translate);
 
 				continue; // ゲームオーバーにはならず、次の判定へ
 			}

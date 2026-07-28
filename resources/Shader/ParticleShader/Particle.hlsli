@@ -80,6 +80,13 @@ struct PerFrame
     float32_t padding1;
     float32_t3 sizeDelta;
     float32_t padding2;
+    
+    // Field Settings
+    uint32_t fieldType;
+    float32_t fieldStrength;
+    float32_t2 padding3;
+    float32_t3 fieldPosition;
+    float32_t padding4;
 };
 
 

@@ -812,7 +812,7 @@ void EditorManager::Update(Engine* engine)
 			ImGuizmo::SetGizmoSizeClipSpace(0.15f);
 
 			Matrix4x4 viewMat = previewCamera_->GetViewMatrix();
-			Matrix4x4 projMat = MakePerspectiveFovMatrix(0.45f, 1.0f, 0.1f, 100.0f);
+			Matrix4x4 projMat = MakePerspectiveFovMatrix(0.45f, 1.0f, 0.1f, 10000.0f);
 
 			EmitterData ed = previewParticle_->GetEmitterData();
 			EmitterSphere es = previewParticle_->GetEmitterSphere();
@@ -1022,7 +1022,7 @@ void EditorManager::Update(Engine* engine)
 			ImGuizmo::SetGizmoSizeClipSpace(0.15f);
 
 			Matrix4x4 viewMat = modelCamera_->GetViewMatrix();
-			Matrix4x4 projMat = MakePerspectiveFovMatrix(0.45f, 1.0f, 0.1f, 100.0f);
+			Matrix4x4 projMat = MakePerspectiveFovMatrix(0.45f, 1.0f, 0.1f, 10000.0f);
 
 			Transform t = previewModel_->GetTransform();
 			Matrix4x4 worldMat = MakeAffineMatrix(t.translate, t.scale, t.rotate);

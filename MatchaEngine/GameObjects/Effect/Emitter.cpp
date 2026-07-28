@@ -80,6 +80,20 @@ void Emitter::ImGui() {
 			ImGui::DragFloat3(LanguageManager::Tr("Acceleration (Gravity)"), &movementData_.acceleration.x, 0.0001f, -FLT_MAX, FLT_MAX, "%.4f");
 			ImGui::DragFloat3(LanguageManager::Tr("Size Variance"), &movementData_.sizeVariance.x, 0.01f, 0.0f, FLT_MAX, "%.2f");
 			ImGui::DragFloat3(LanguageManager::Tr("Size Multiplier"), &movementData_.sizeDelta.x, 0.001f, 0.0f, FLT_MAX, "%.3f");
+
+			if (ImGui::TreeNode(LanguageManager::Tr("Field Settings (GPU Only)"))) {
+				const char* fieldTypes[] = { "None", "PointGravity (Attractor)", "Vortex" };
+				int currentFieldType = static_cast<int>(fieldData_.type);
+				if (ImGui::Combo(LanguageManager::Tr("Field Type"), &currentFieldType, fieldTypes, IM_ARRAYSIZE(fieldTypes))) {
+					fieldData_.type = static_cast<FieldType>(currentFieldType);
+				}
+				if (fieldData_.type != FieldType::None) {
+					ImGui::DragFloat(LanguageManager::Tr("Field Strength"), &fieldData_.strength, 0.01f, -FLT_MAX, FLT_MAX, "%.3f");
+					ImGui::DragFloat3(LanguageManager::Tr("Field Position"), &fieldData_.position.x, 0.01f, -FLT_MAX, FLT_MAX, "%.2f");
+				}
+				ImGui::TreePop();
+			}
+
 			ImGui::TreePop();
 		}
 
@@ -255,6 +269,10 @@ void Emitter::SaveToJson(const std::string& name)
 	root["movement"]["sizeVariance"] = { movementData_.sizeVariance.x, movementData_.sizeVariance.y, movementData_.sizeVariance.z };
 	root["movement"]["sizeDelta"] = { movementData_.sizeDelta.x, movementData_.sizeDelta.y, movementData_.sizeDelta.z };
 
+	root["field"]["type"] = static_cast<int>(fieldData_.type);
+	root["field"]["strength"] = fieldData_.strength;
+	root["field"]["position"] = { fieldData_.position.x, fieldData_.position.y, fieldData_.position.z };
+
 	root["visual"]["texturePath"] = texturePath_;
 	root["visual"]["shape"] = static_cast<int>(shape_);
 	root["visual"]["blendMode"] = static_cast<int>(GetBlend());
@@ -288,6 +306,11 @@ void Emitter::SyncGpuParticleParameters(bool emitNow)
 	perFrame.time = 0.0f;
 	perFrame.acceleration = movementData_.acceleration;
 	perFrame.sizeDelta = movementData_.sizeDelta;
+	
+	perFrame.fieldType = static_cast<uint32_t>(fieldData_.type);
+	perFrame.fieldStrength = fieldData_.strength;
+	perFrame.fieldPosition = fieldData_.position;
+
 	effectDefinition_->SetGpuPerFrameData(perFrame);
 
 	if (emitterType_ == EmitterType::Box) {
@@ -432,6 +455,16 @@ void Emitter::LoadFromJson(const std::string& name)
 		movementData_.baseVelocity.x = root["particle"]["velocity"][0];
 		movementData_.baseVelocity.y = root["particle"]["velocity"][1];
 		movementData_.baseVelocity.z = root["particle"]["velocity"][2];
+	}
+
+	if (root.contains("field")) {
+		if (root["field"].contains("type")) fieldData_.type = static_cast<FieldType>(root["field"]["type"].get<int>());
+		if (root["field"].contains("strength")) fieldData_.strength = root["field"]["strength"];
+		if (root["field"].contains("position")) {
+			fieldData_.position.x = root["field"]["position"][0];
+			fieldData_.position.y = root["field"]["position"][1];
+			fieldData_.position.z = root["field"]["position"][2];
+		}
 	}
 
 	if (root.contains("visual")) {

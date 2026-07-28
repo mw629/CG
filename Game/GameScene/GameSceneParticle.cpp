@@ -9,7 +9,7 @@ GameSceneParticle::GameSceneParticle()
 	hitEffect_ = std::make_unique<Emitter>();
 	dustEffect_ = std::make_unique<Emitter>();
 	shockwaveEffect_ = std::make_unique<Emitter>();
-	bonusCylinderEffect_ = std::make_unique<Emitter>();
+	bonusTornadoEffect_ = std::make_unique<Emitter>();
 }
 
 void GameSceneParticle::Initialize()
@@ -71,15 +71,12 @@ void GameSceneParticle::Initialize()
 		p.transform.rotate.x = 3.14159265f / 2.0f; // 盾（縦）になっているリングを90度回転させて地面と平行（横）にする
 	};
 
-	// ボーナスヒット時のシリンダーエフェクトの初期化
-	bonusCylinderEffect_->Initialize();
-	bonusCylinderEffect_->LoadFromJson("BonusCylinder");
-	bonusCylinderEffect_->name_ = "Bonus Cylinder";
-	bonusCylinderEffect_->SetStop(true);
-	bonusCylinderEffect_->generatorBehavior = [](EffectDefinitionData& p) {
-		p.velocity = { 0.0f, 0.0f, 0.0f }; // 発生時は移動なし
-		p.transform.rotate.x = 0.0f; 
-	};
+	// ボーナスヒット時のトルネードエフェクトの初期化
+	bonusTornadoEffect_->Initialize();
+	bonusTornadoEffect_->LoadFromJson("tornado.json");
+	bonusTornadoEffect_->name_ = "Bonus Tornado";
+	bonusTornadoEffect_->SetStop(true);
+	bonusTornadoEffect_->generatorBehavior = nullptr;
 }
 
 void GameSceneParticle::PlayingUpdate(const Matrix4x4& view, const Vector3& playerPos)
@@ -95,8 +92,8 @@ void GameSceneParticle::PlayingUpdate(const Matrix4x4& view, const Vector3& play
 		return next;
 	});
 
-	// ボーナスシリンダーの更新（エディタと同じ挙動にするため、独自拡張を削除）
-	bonusCylinderEffect_->Update(view);
+	// ボーナストルネードの更新（エディタと同じ挙動にするため、独自拡張を削除）
+	bonusTornadoEffect_->Update(view);
 
 	// 砂埃のUpdate
 	dustEffect_->Update(view);
@@ -113,7 +110,7 @@ void GameSceneParticle::EditorUpdate(const Matrix4x4& view)
 	hitEffect_->EditorUpdate(view);
 	dustEffect_->EditorUpdate(view);
 	shockwaveEffect_->EditorUpdate(view);
-	bonusCylinderEffect_->EditorUpdate(view);
+	bonusTornadoEffect_->EditorUpdate(view);
 }
 
 void GameSceneParticle::EmitDust(const Vector3& playerPos)
@@ -134,14 +131,14 @@ void GameSceneParticle::EmitShockwave(const Vector3& playerPos)
 	shockwaveEffect_->Emit();
 }
 
-void GameSceneParticle::EmitBonusCylinder(const Vector3& playerPos)
+void GameSceneParticle::EmitBonusTornado(const Vector3& playerPos)
 {
-	EmitterData cylinderData = bonusCylinderEffect_->GetEmitterData();
-	cylinderData.transform.translate = playerPos;
+	EmitterData tornadoData = bonusTornadoEffect_->GetEmitterData();
+	tornadoData.transform.translate = playerPos;
 	// 足元（Y=2.0付近）を基準にするため少し下げる
-	cylinderData.transform.translate.y -= 1.0f; 
-	bonusCylinderEffect_->SetEmitterData(cylinderData);
-	bonusCylinderEffect_->Emit();
+	tornadoData.transform.translate.y -= 1.0f; 
+	bonusTornadoEffect_->SetEmitterData(tornadoData);
+	bonusTornadoEffect_->Emit();
 }
 
 void GameSceneParticle::EmitHitEffect(const Vector3& playerPos)
@@ -170,11 +167,11 @@ void GameSceneParticle::UpdateBonusEffectEmit(float timeScale, const Vector3& pl
 	if (isBonusEffectActive_) {
 		bonusEffectTimer_ -= 1.0f * timeScale;
 		if (bonusEffectTimer_ > 0.0f) {
-			EmitterData cylinderData = bonusCylinderEffect_->GetEmitterData();
-			cylinderData.transform.translate = playerPos;
-			cylinderData.transform.translate.y -= 1.0f; 
-			bonusCylinderEffect_->SetEmitterData(cylinderData);
-			bonusCylinderEffect_->Emit();
+			EmitterData tornadoData = bonusTornadoEffect_->GetEmitterData();
+			tornadoData.transform.translate = playerPos;
+			tornadoData.transform.translate.y -= 1.0f; 
+			bonusTornadoEffect_->SetEmitterData(tornadoData);
+			bonusTornadoEffect_->Emit();
 		} else {
 			isBonusEffectActive_ = false;
 		}
@@ -185,7 +182,7 @@ void GameSceneParticle::Draw(class Draw& draw)
 {
 	hitEffect_->Draw(draw);
 	shockwaveEffect_->Draw(draw);
-	bonusCylinderEffect_->Draw(draw);
+	bonusTornadoEffect_->Draw(draw);
 	dustEffect_->Draw(draw);
 }
 
@@ -196,7 +193,7 @@ void GameSceneParticle::ImGui()
 		if (hitEffect_) hitEffect_->ImGui();
 		if (dustEffect_) dustEffect_->ImGui();
 		if (shockwaveEffect_) shockwaveEffect_->ImGui();
-		if (bonusCylinderEffect_) bonusCylinderEffect_->ImGui();
+		if (bonusTornadoEffect_) bonusTornadoEffect_->ImGui();
 	}
 #endif
 }

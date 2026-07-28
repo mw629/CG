@@ -41,6 +41,13 @@ struct PerFrameForGPU {
 	float padding1 = 0.0f;
 	Vector3 sizeDelta = { 1.0f, 1.0f, 1.0f };
 	float padding2 = 0.0f;
+
+	// Field Settings
+	uint32_t fieldType = 0; // 0: None, 1: PointGravity, 2: Vortex
+	float fieldStrength = 0.0f;
+	Vector2 padding3 = { 0.0f, 0.0f };
+	Vector3 fieldPosition = { 0.0f, 0.0f, 0.0f };
+	float padding4 = 0.0f;
 };
 
 struct EmitterSphereForGPU {
