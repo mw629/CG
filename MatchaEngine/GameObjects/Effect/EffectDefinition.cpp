@@ -10,14 +10,6 @@
 #include "../Graphics/DescriptorHeap.h"
 #include <Resource/Load.h>
 
-struct Particle {
-	Vector3 translate;
-	Vector3 scale;
-	Vector3 velocity;
-	float lifeTime;
-	float currentTime;
-	Vector4 color;
-};
 
 namespace {
 	ID3D12Device* device_;
@@ -174,16 +166,17 @@ void EffectDefinition::CreateWVP()
 {
 
 	for (int j = 0; j < 2; j++) {
-		//Sprite用ののTransformationMatrix用のリソースを作る。Matrix4x41つ分のサイズを用意する
-		instancingResource_[j] = GraphicsDevice::CreateBufferResource(sizeof(ParticleForGPU) * effectDefinitionMaxNum_);
-		//データを書き込む
-		//書き込むためのアドレスを取得
+		// Particle構造体用のインスタンシングリソースを作成
+		instancingResource_[j] = GraphicsDevice::CreateBufferResource(sizeof(Particle) * effectDefinitionMaxNum_);
 		instancingResource_[j]->Map(0, nullptr, reinterpret_cast<void**>(&instancingData_[j]));
-		//単位行列をかきこんでおく
-		for (int i = 0; i < effectDefinitionMaxNum_; i++) {
-			instancingData_[j][i].WVP = IdentityMatrix();
-			instancingData_[j][i].World = IdentityMatrix();
-			instancingData_[j][i].color = Vector4(1.0f, 1.0f, 1.0f, 1.0f);
+		std::memset(instancingData_[j], 0, sizeof(Particle) * effectDefinitionMaxNum_);
+
+		// PerView構造体用の定数バッファリソースを作成
+		perViewResource_[j] = GraphicsDevice::CreateBufferResource(sizeof(PerView));
+		perViewResource_[j]->Map(0, nullptr, reinterpret_cast<void**>(&perViewData_[j]));
+		if (perViewData_[j]) {
+			perViewData_[j]->viewProjection = IdentityMatrix();
+			perViewData_[j]->billboardMatrix = IdentityMatrix();
 		}
 	}
 }
@@ -197,7 +190,7 @@ void EffectDefinition::CreateSRV()
 		instancingSrvDesc_.Buffer.FirstElement = 0;
 		instancingSrvDesc_.Buffer.Flags = D3D12_BUFFER_SRV_FLAG_NONE;
 		instancingSrvDesc_.Buffer.NumElements = effectDefinitionMaxNum_;
-		instancingSrvDesc_.Buffer.StructureByteStride = sizeof(ParticleForGPU);
+		instancingSrvDesc_.Buffer.StructureByteStride = sizeof(Particle);
 		instancingSrvHandleCPU_[j] = GetCPUDescriptorHandle(descriptorHeap_->GetSrvDescriptorHeap(), descriptorHeap_->GetDescriptorSizeSRV());
 		instancingSrvHandleGPU_[j] = GetGPUDescriptorHandle(descriptorHeap_->GetSrvDescriptorHeap(), descriptorHeap_->GetDescriptorSizeSRV());
 
@@ -231,31 +224,30 @@ void EffectDefinition::DeleteParticle(int ParticleNum)
 
 void EffectDefinition::SettingWvp(Matrix4x4 viewMatrix)
 {
-    Matrix4x4 billboard = viewMatrix;
-    billboard = Inverse(billboard);
-    billboard.m[3][0] = billboard.m[3][1] = billboard.m[3][2] = 0.0f;
+    Matrix4x4 projectionMatrix = MakePerspectiveFovMatrix(0.45f, float(kClientWidth) / float(kClientHeight), 0.1f, 100.0f);
+    Matrix4x4 viewProjection = MultiplyMatrix4x4(viewMatrix, projectionMatrix);
 
-    Matrix4x4 projectionMatri = MakePerspectiveFovMatrix(0.45f, float(kClientWidth) / float(kClientHeight), 0.1f, 100.0f);
+    Matrix4x4 billboard = IdentityMatrix();
+    if (isBillboard_) {
+        billboard = Inverse(viewMatrix);
+        billboard.m[3][0] = billboard.m[3][1] = billboard.m[3][2] = 0.0f;
+    }
+
+    if (perViewData_[s_wvpIndex]) {
+        perViewData_[s_wvpIndex]->viewProjection = viewProjection;
+        perViewData_[s_wvpIndex]->billboardMatrix = billboard;
+    }
 
     auto particleIter = effectDefinitionData_.begin();
     auto instancingIter = instancingData_[s_wvpIndex];
 
     int i = 0;
     while (particleIter != effectDefinitionData_.end() && i < effectDefinitionMaxNum_) {
-        Matrix4x4 worldMatrixObj;
-        if (!isBillboard_) {
-            worldMatrixObj = MakeAffineMatrix(particleIter->transform.translate, particleIter->transform.scale, particleIter->transform.rotate);
-        } else {
-            Matrix4x4 scaleRot = MakeAffineMatrix({0.0f, 0.0f, 0.0f}, particleIter->transform.scale, particleIter->transform.rotate);
-            worldMatrixObj = MultiplyMatrix4x4(scaleRot, billboard);
-            worldMatrixObj.m[3][0] = particleIter->transform.translate.x;
-            worldMatrixObj.m[3][1] = particleIter->transform.translate.y;
-            worldMatrixObj.m[3][2] = particleIter->transform.translate.z;
-        }
-        Matrix4x4 worldViewProjectionMatrixObj = MultiplyMatrix4x4(worldMatrixObj, MultiplyMatrix4x4(viewMatrix, projectionMatri));
-
-        instancingIter[i].WVP = worldViewProjectionMatrixObj;
-        instancingIter[i].World = worldMatrixObj;
+        instancingIter[i].translate = particleIter->transform.translate;
+        instancingIter[i].scale = particleIter->transform.scale;
+        instancingIter[i].velocity = particleIter->velocity;
+        instancingIter[i].lifeTime = particleIter->lifeTime;
+        instancingIter[i].currentTime = particleIter->currentTime;
         instancingIter[i].color = particleIter->color;
 
         ++particleIter;
@@ -265,6 +257,7 @@ void EffectDefinition::SettingWvp(Matrix4x4 viewMatrix)
     // 実際に書き込んだ要素数を反映
 	effectDefinitionNum_ = i;
 }
+
 
 void EffectDefinition::SetData(std::list<EffectDefinitionData> effectDefinitionData)
 {
@@ -314,11 +307,11 @@ void EffectDefinition::InitializeGPUParticle(ID3D12GraphicsCommandList* commandL
 	device_->CreateUnorderedAccessView(gpuParticleResource_.Get(), nullptr, &uavDesc, gpuParticleUavHandleCPU_);
 
 	// 3. コンピュートシェーダーを実行 (Dispatch)
-	commandList->SetComputeRootSignature(cp->GetRootSignature("Particle.CS"));
-	commandList->SetPipelineState(cp->GetPipelineState("Particle.CS"));
+	commandList->SetComputeRootSignature(cp->GetRootSignature("InitializeParticle.CS"));
+	commandList->SetPipelineState(cp->GetPipelineState("InitializeParticle.CS"));
 
 	// ComputeShaderの gParticles (register u0) にバインド
-	UINT paramIndex = cp->GetRootParameterIndex("Particle.CS", "gParticles");
+	UINT paramIndex = cp->GetRootParameterIndex("InitializeParticle.CS", "gParticles");
 	if (paramIndex != static_cast<UINT>(-1)) {
 		commandList->SetComputeRootDescriptorTable(paramIndex, gpuParticleUavHandleGPU_);
 	}

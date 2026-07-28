@@ -16,9 +16,9 @@ struct Particle
     float32_t4 color;
 };
 
-struct PreView
+struct PerView
 {
-    float32_t4x4 viewProjrction;
+    float32_t4x4 viewProjection;
     float32_t4x4 billboardMatrix;
 };
 

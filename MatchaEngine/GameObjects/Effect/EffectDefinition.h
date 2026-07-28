@@ -46,13 +46,16 @@ private:
 	D3D12_VERTEX_BUFFER_VIEW vertexBufferView_{};
 	VertexData* vertexData_ = nullptr;
 	Microsoft::WRL::ComPtr<ID3D12Resource> instancingResource_[2];
-	ParticleForGPU* instancingData_[2] = { nullptr, nullptr };
+	Particle* instancingData_[2] = { nullptr, nullptr };
+	Microsoft::WRL::ComPtr<ID3D12Resource> perViewResource_[2];
+	PerView* perViewData_[2] = { nullptr, nullptr };
 	D3D12_SHADER_RESOURCE_VIEW_DESC instancingSrvDesc_{};
 
 	D3D12_CPU_DESCRIPTOR_HANDLE instancingSrvHandleCPU_[2];
 	D3D12_GPU_DESCRIPTOR_HANDLE instancingSrvHandleGPU_[2];
 
 	static int s_wvpIndex;
+
 
 
 
@@ -107,6 +110,8 @@ public:
 
 	D3D12_VERTEX_BUFFER_VIEW* GetVertexBufferView() { return &vertexBufferView_; }
 	ID3D12Resource* GetInstancingResource() { return instancingResource_[s_wvpIndex].Get(); }
+	ID3D12Resource* GetPerViewResource() { return perViewResource_[s_wvpIndex].Get(); }
+
 
 	D3D12_CPU_DESCRIPTOR_HANDLE GetInstancingSrvHandleCPU() { return instancingSrvHandleCPU_[s_wvpIndex]; }
 	D3D12_GPU_DESCRIPTOR_HANDLE GetInstancingSrvHandleGPU() { return instancingSrvHandleGPU_[s_wvpIndex]; }

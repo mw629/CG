@@ -104,6 +104,21 @@ struct ParticleForGPU {
   Vector4 color;
 };
 
+struct Particle {
+  Vector3 translate;
+  Vector3 scale;
+  Vector3 velocity;
+  float lifeTime;
+  float currentTime;
+  Vector4 color;
+};
+
+struct PerView {
+  Matrix4x4 viewProjection;
+  Matrix4x4 billboardMatrix;
+};
+
+
 struct CameraForGPU {
   Vector3 worldPosition;
 };

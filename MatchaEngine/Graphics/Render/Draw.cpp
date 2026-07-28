@@ -229,8 +229,10 @@ void Draw::DrawParticle(EffectDefinition* particle)
 	ShaderName shader = particle->GetShader();
 	BlendMode blend = particle->GetBlend();
 	SetCBV(shader, blend, "gMaterial", particle->GetMartial()->GetMaterialResource()->GetGPUVirtualAddress());
+	SetCBV(shader, blend, "gPerView", particle->GetPerViewResource()->GetGPUVirtualAddress());
 	SetSRV(shader, blend, "gParticle", particle->GetInstancingResource()->GetGPUVirtualAddress());
 	SetTable(shader, blend, "gTexture", particle->GetTextureSrvHandleGPU());
+
 	commandList_->DrawInstanced(particle->GetVertexSize(), instanceCount, 0, 0);
 
 }
