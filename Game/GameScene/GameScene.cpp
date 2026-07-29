@@ -159,6 +159,84 @@ void GameScene::ImGui()
 
 	particleManager_->ImGui();
 
+	if (ImGui::CollapsingHeader("Post Effect Manager (All 16 Shaders)", ImGuiTreeNodeFlags_DefaultOpen)) {
+		ImGui::Checkbox("Auto Dynamic State Mode", &autoPostEffectEnabled_);
+		ImGui::SameLine();
+		ImGui::Checkbox("Retro Pixel Mode Trigger", &enableRetroPixelMode_);
+
+		if (PostEffect::s_instances.size() >= 1) {
+			ImGui::Text("Pass 0 (Environment Base): %s", PostEffect::s_instances[0]->GetActiveShaderName().c_str());
+		}
+		if (PostEffect::s_instances.size() >= 2) {
+			ImGui::Text("Pass 1 (Dynamic Overlay): %s", PostEffect::s_instances[1]->GetActiveShaderName().c_str());
+		}
+
+		if (autoPostEffectEnabled_) {
+			ImGui::TextColored(ImVec4(0.2f, 0.9f, 0.3f, 1.0f), "Auto-triggering all 16 shaders based on game events!");
+			ImGui::Separator();
+			ImGui::Text("Event Simulators:");
+			if (ImGui::Button("Simulate Hit (Glitch)")) {
+				gameState_ = GameState::PlayerHit;
+				hitGlitchTimer_ = 0.0f;
+			}
+			ImGui::SameLine();
+			if (ImGui::Button("Simulate Game Over (Dissolve->Gray)")) {
+				gameState_ = GameState::GameOver;
+				dissolveTimer_ = 0.0f;
+			}
+			ImGui::SameLine();
+			if (ImGui::Button("Simulate Clear (Sepia)")) {
+				gameState_ = GameState::GameClear;
+			}
+		} else {
+			ImGui::TextColored(ImVec4(0.9f, 0.6f, 0.2f, 1.0f), "Manual Override Mode (Select any of 16 shaders below):");
+			if (!PostEffect::s_registeredEffects.empty()) {
+				std::vector<const char*> names;
+				for (const auto& e : PostEffect::s_registeredEffects) {
+					names.push_back(e.first.c_str());
+				}
+				ImGui::Combo("Pass 0 Shader", &manualPass0Index_, names.data(), (int)names.size());
+				ImGui::Combo("Pass 1 Shader", &manualPass1Index_, names.data(), (int)names.size());
+			}
+		}
+
+		ImGui::Separator();
+		if (ImGui::TreeNode("Pass 0 Inspector & Fine-Tuning")) {
+			if (PostEffect::s_instances.size() >= 1) {
+				PostEffect::s_instances[0]->ImGuiWindow();
+			}
+			ImGui::TreePop();
+		}
+		if (ImGui::TreeNode("Pass 1 Inspector & Fine-Tuning")) {
+			if (PostEffect::s_instances.size() >= 2) {
+				PostEffect::s_instances[1]->ImGuiWindow();
+			}
+			ImGui::TreePop();
+		}
+	}
+
+	if (ImGui::CollapsingHeader("Light Settings & Bloom Control", ImGuiTreeNodeFlags_DefaultOpen)) {
+		if (mainLight_) {
+			ImGui::Text("Main Directional Light:");
+			ImGui::ColorEdit4("Dir Color", &mainLight_->color_.x);
+			ImGui::DragFloat("Dir Intensity", &mainLight_->intensity_, 0.05f, 0.0f, 10.0f);
+		}
+		if (playerPointLight_) {
+			ImGui::Separator();
+			ImGui::Text("Player Point Light:");
+			ImGui::ColorEdit4("Point Color", &playerPointLight_->color_.x);
+			ImGui::DragFloat("Point Intensity", &playerPointLight_->intensity_, 0.1f, 0.0f, 20.0f);
+			ImGui::DragFloat("Point Radius", &playerPointLight_->radius_, 0.5f, 1.0f, 50.0f);
+		}
+		if (stageSpotLight_) {
+			ImGui::Separator();
+			ImGui::Text("Stage Spot Light:");
+			ImGui::ColorEdit4("Spot Color", &stageSpotLight_->color_.x);
+			ImGui::DragFloat("Spot Intensity", &stageSpotLight_->intensity_, 0.1f, 0.0f, 20.0f);
+			ImGui::DragFloat("Spot Distance", &stageSpotLight_->distance_, 0.5f, 1.0f, 100.0f);
+		}
+	}
+
 	ImGui::End();
 
 	Matrix4x4 projection = MakePerspectiveFovMatrix(0.45f, float(1280.0f) / float(720.0f), 0.1f, 100.0f);
@@ -325,6 +403,45 @@ void GameScene::Initialize() {
 	player_->SetName("Player");
 	gameObjectManager_->AddObject(player_);
 
+	// ライティングの設置（DirectionalLight, PointLight, SpotLight）
+	mainLight_ = std::make_shared<DirectionalLight>();
+	mainLight_->SetName("MainDirectionalLight");
+	mainLight_->color_ = { 1.3f, 1.25f, 1.15f, 1.0f }; // 温かい強力な主太陽光
+	mainLight_->intensity_ = 1.5f;
+	Transform mainLightT;
+	mainLightT.scale = { 1.0f, 1.0f, 1.0f };
+	mainLightT.rotate = { 0.75f, -0.6f, 0.0f }; // 斜め上からの光で強烈なハイライトと陰影を付与
+	mainLightT.translate = { 0.0f, 25.0f, -10.0f };
+	mainLight_->SetTransform(mainLightT);
+	gameObjectManager_->AddObject(mainLight_);
+
+	playerPointLight_ = std::make_shared<PointLight>();
+	playerPointLight_->SetName("PlayerPointLight");
+	playerPointLight_->color_ = { 1.0f, 0.85f, 0.4f, 1.0f }; // プレイヤー追従ゴールドポイントライト
+	playerPointLight_->intensity_ = 4.0f;
+	playerPointLight_->radius_ = 20.0f;
+	playerPointLight_->decay_ = 1.2f;
+	Transform playerLightT;
+	playerLightT.scale = { 1.0f, 1.0f, 1.0f };
+	playerLightT.translate = { 0.0f, 3.0f, 0.0f };
+	playerPointLight_->SetTransform(playerLightT);
+	gameObjectManager_->AddObject(playerPointLight_);
+
+	stageSpotLight_ = std::make_shared<SpotLight>();
+	stageSpotLight_->SetName("StageSpotLight");
+	stageSpotLight_->color_ = { 0.8f, 0.95f, 1.0f, 1.0f }; // スポットライト
+	stageSpotLight_->intensity_ = 3.5f;
+	stageSpotLight_->distance_ = 50.0f;
+	stageSpotLight_->decay_ = 1.2f;
+	stageSpotLight_->cosAngle_ = std::cos(0.5f);
+	stageSpotLight_->cosFalloffStart_ = std::cos(0.3f);
+	Transform spotT;
+	spotT.scale = { 1.0f, 1.0f, 1.0f };
+	spotT.rotate = { 0.65f, 0.0f, 0.0f };
+	spotT.translate = { 0.0f, 20.0f, -8.0f };
+	stageSpotLight_->SetTransform(spotT);
+	gameObjectManager_->AddObject(stageSpotLight_);
+
 	// エディターでの保存・読み込み先をJsonSceneに設定
 	EditorManager::SetSaveCallback([this](const std::string& filePath) {
 		gameObjectManager_->SaveScene(filePath);
@@ -456,6 +573,130 @@ void GameScene::Update() {
 	else if (gameState_ == GameState::Editor) {
 		EditorUpdate();
 	}
+
+	UpdatePostEffects();
+}
+
+void GameScene::UpdatePostEffects() {
+	if (PostEffect::s_instances.empty()) return;
+
+	PostEffect* pass0 = PostEffect::s_instances[0]; // Environment / Base Pass
+	PostEffect* pass1 = (PostEffect::s_instances.size() >= 2) ? PostEffect::s_instances[1] : nullptr; // Dynamic State / Event Pass
+
+	if (!autoPostEffectEnabled_) {
+		// 手動指定モード
+		if (!PostEffect::s_registeredEffects.empty()) {
+			if (manualPass0Index_ >= 0 && manualPass0Index_ < (int)PostEffect::s_registeredEffects.size()) {
+				pass0->SetActivePostEffect(PostEffect::s_registeredEffects[manualPass0Index_].second);
+			}
+			if (pass1 && manualPass1Index_ >= 0 && manualPass1Index_ < (int)PostEffect::s_registeredEffects.size()) {
+				pass1->SetActivePostEffect(PostEffect::s_registeredEffects[manualPass1Index_].second);
+			}
+		}
+		return;
+	}
+
+	// 自動状態連動モード (全16種類のエフェクトを状況に応じてダイナミック切り替え)
+	
+	// Pass 0: 3Dステージ全体の環境レイヤー (FogShader)
+	pass0->SetActivePostEffect("FogShader");
+	pass0->SetRatio(0.5f);
+	pass0->SetValue1(0.05f); // 密度
+	pass0->SetValue2(8.0f);  // 開始距離
+	pass0->SetColor(0.7f, 0.8f, 0.95f);
+
+	if (!pass1) return;
+
+	// Pass 1: ゲームステート・イベントに応じた動的オーバーレイエフェクト
+	switch (gameState_) {
+	case GameState::Editor:
+		// 1. Editorモード: LuminanceOutLineShader (CAD/図面風・アニメ調エッジ)
+		pass1->SetActivePostEffect("LuminanceOutLineShader");
+		break;
+
+	case GameState::Paused:
+		// 2. Paused状態: GaussianFilterShader (高品質ガウスぼかし)
+		pass1->SetActivePostEffect("GaussianFilterShader");
+		pass1->SetBlurStrength(3.5f);
+		break;
+
+	case GameState::PlayerHit:
+		// 3. PlayerHit状態: RandomShader (ノイズ・グリッチ衝突インパクト)
+		hitGlitchTimer_ += 1.0f / 60.0f;
+		pass1->SetActivePostEffect("RandomShader");
+		pass1->SetValue1(0.7f); // ノイズ強度
+		pass1->SetRatio(1.0f);
+		break;
+
+	case GameState::GameOver:
+		// 4 & 5. GameOver移行期: DissolveShader → GrayScaleShader (分解 → 彩度喪失モノクロ)
+		dissolveTimer_ += 1.0f / 60.0f;
+		if (dissolveTimer_ < 1.2f) {
+			pass1->SetActivePostEffect("DissolveShader");
+			pass1->SetTime(dissolveTimer_);
+		} else {
+			pass1->SetActivePostEffect("GrayScaleShader");
+		}
+		break;
+
+	case GameState::GameClear:
+		// 6. GameClear状態: GrayScaleSepiaToneShader (黄金色のノスタルジックセピア)
+		pass1->SetActivePostEffect("GrayScaleSepiaToneShader");
+		break;
+
+	case GameState::Playing:
+	default:
+		// プレイ中の状況判定
+		hitGlitchTimer_ = 0.0f;
+		dissolveTimer_ = 0.0f;
+
+		if (isCameraTransitioning_) {
+			// 7. カメラ視点移動中: SmoothingShader (フォーカスソフトブラー)
+			pass1->SetActivePostEffect("SmoothingShader");
+			pass1->SetBlurStrength(2.0f);
+		}
+		else if (isRightSideMode_) {
+			// 8. 右サイドカメラモード (CameraItem取得): OutLineShader (3D深度輪郭強調)
+			pass1->SetActivePostEffect("OutLineShader");
+		}
+		else if (player_->GetIsRolling()) {
+			// 9. プレイヤーローリング中: RadialBlurShader (超高速放射状ブラー)
+			pass1->SetActivePostEffect("RadialBlurShader");
+			pass1->SetBlurStrength(3.0f);
+		}
+		else if (stageSettings_->GetScrollSpeed() >= stageSettings_->GetMaxScrollSpeed() * 0.85f) {
+			// 10. 最高速ブースト到達時: BloomShader (輝度発光・エネルギーブースト)
+			pass1->SetActivePostEffect("BloomShader");
+			pass1->SetValue1(0.7f); // Luminance threshold
+			pass1->SetValue2(1.5f); // Bloom intensity
+		}
+		else if (bonusEnemyHitCount_ > 0 && (bonusEnemyHitCount_ % 3 == 0)) {
+			// 11. ボーナスエネミー連続Hit中 (Combo Spree): HalftoneDotShader (コミック風ハーフトーン網点)
+			pass1->SetActivePostEffect("HalftoneDotShader");
+			pass1->SetValue1(12.0f); // 格子サイズ
+			pass1->SetValue2(0.5f);  // ボケ足
+			pass1->SetRatio(0.6f);   // 適用度
+		}
+		else if (player_->GetHasBarrier() || enableRetroPixelMode_) {
+			// 12. バリア獲得 / レトロモード: PixelateShader (モザイクピクセルアート)
+			pass1->SetActivePostEffect("PixelateShader");
+			pass1->SetUsePixelation(true);
+			pass1->SetBlockCountX(160.0f);
+			pass1->SetBlockCountY(90.0f);
+		}
+		else if (currentScore_ >= 800.0f) {
+			// 13. マイルストーンハイスコア到達: PosterizationShader (色階調ポスタリゼーション)
+			pass1->SetActivePostEffect("PosterizationShader");
+			pass1->SetValue1(5.0f); // 色階調ステップ数
+		}
+		else {
+			// 14 & 15. 通常走航時: VignettingShader (四隅ヴィネット) または CopyShader (ノーマル)
+			pass1->SetActivePostEffect("VignettingShader");
+			pass1->SetValue1(0.85f);
+			pass1->SetValue2(0.35f);
+		}
+		break;
+	}
 }
 
 void GameScene::Draw(class Draw& draw) {
@@ -513,6 +754,25 @@ void GameScene::PlayingUpdate()
 			SetCameraToBehind();
 			isRightSideMode_ = false;
 			rightSideDistance_ = 0.0f;
+		}
+	}
+
+	// プレイヤー追従ライトの位置・強度更新 (ライティングとBloomの相乗効果演出)
+	if (playerPointLight_ && player_) {
+		const Transform& pTransform = player_->GetTransform();
+		Transform lightT = playerPointLight_->GetTransform();
+		lightT.translate = { pTransform.translate.x, pTransform.translate.y + 2.5f, pTransform.translate.z + 1.0f };
+		playerPointLight_->SetTransform(lightT);
+
+		if (player_->GetIsRolling()) {
+			playerPointLight_->color_ = { 0.3f, 0.9f, 1.0f, 1.0f }; // ローリング時シアン光
+			playerPointLight_->intensity_ = 5.5f;
+		} else if (stageSettings_->GetScrollSpeed() >= stageSettings_->GetMaxScrollSpeed() * 0.85f) {
+			playerPointLight_->color_ = { 1.0f, 0.95f, 0.7f, 1.0f }; // 最高速ゴールドブースト光
+			playerPointLight_->intensity_ = 6.0f;
+		} else {
+			playerPointLight_->color_ = { 1.0f, 0.85f, 0.4f, 1.0f };
+			playerPointLight_->intensity_ = 4.0f;
 		}
 	}
 

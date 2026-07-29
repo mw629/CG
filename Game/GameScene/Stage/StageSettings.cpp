@@ -78,7 +78,12 @@ void StageSettings::GenerateRoadChunks(Matrix4x4 view)
 				if (auto matComp = roadModel->GetComponent<MaterialComponent>()) {
 					matComp->SetTexturePath("Resources/Model/Ground/Ground.png");
 				}
-				roadModel->SetLighting(false);
+				roadModel->SetLighting(true);
+				if (auto matComp = roadModel->GetComponent<MaterialComponent>()) {
+					if (matComp->GetMaterialFactory() && matComp->GetMaterialFactory()->GetMaterialData()) {
+						matComp->GetMaterialFactory()->GetMaterialData()->shininess = 35.0f;
+					}
+				}
 				roadModel->SetTexture(texture_->TextureData("Resources/Model/Ground/Ground.png"));
 
 				renderObj = std::make_shared<RenderObject>(roadModel);
@@ -118,7 +123,12 @@ void StageSettings::GenerateRoadChunks(Matrix4x4 view)
 			auto model = std::make_shared<Model>();
 			model->Initialize(planeModelData_);
 			model->SetColor({ 0.0f, 0.0f, 1.0f, 1.0f });
-			model->SetLighting(false);
+			model->SetLighting(true);
+			if (auto matComp = model->GetComponent<MaterialComponent>()) {
+				if (matComp->GetMaterialFactory() && matComp->GetMaterialFactory()->GetMaterialData()) {
+					matComp->GetMaterialFactory()->GetMaterialData()->shininess = 25.0f;
+				}
+			}
 			if (auto matComp = model->GetComponent<MaterialComponent>()) {
 				matComp->SetTexturePath("Resources/Texture/white64x64.png");
 			}

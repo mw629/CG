@@ -12,6 +12,9 @@
 #include "../../Editer/EditorUI.h"
 #include "GameSceneParticle.h"
 #include <System/CollisionManager.h>
+#include <GameObjects/Light/DirectionalLight.h>
+#include <GameObjects/Light/PointLight.h>
+#include <GameObjects/Light/SpotLight.h>
 
 class GameScene :public IScene
 {
@@ -98,6 +101,24 @@ private:
 
 	// 初期読み込みするSceneJsonのファイルパス (変更することで読み込むJsonを決定できる)
 	std::string initialSceneJson_ = "Resources/Json/Scene/scene.json";
+
+	//<< Lighting & Bloom setup >>//
+	std::shared_ptr<DirectionalLight> mainLight_;
+	std::shared_ptr<PointLight> playerPointLight_;
+	std::shared_ptr<SpotLight> stageSpotLight_;
+
+	//<< Post Effects Management >>//
+	bool autoPostEffectEnabled_ = true; // true: ゲーム状態に応じて全16種を動的自動適用, false: ImGui手動指定
+	float hitGlitchTimer_ = 0.0f;       // PlayerHit時のRandomShader (Glitch)タイマー
+	float dissolveTimer_ = 0.0f;        // GameOver移行時のDissolveShaderタイマー
+	bool enableRetroPixelMode_ = false; // レトロモード (PixelateShader)
+
+	// ImGui手動オーバーライド用
+	int manualPass0Index_ = 0;
+	int manualPass1Index_ = 0;
+
+	// ポストエフェクトの動的状態同期更新
+	void UpdatePostEffects();
 
 public:
 	~GameScene()override;

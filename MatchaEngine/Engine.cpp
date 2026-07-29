@@ -188,6 +188,8 @@ void Engine::Setting()
 
   postEffects_.push_back(std::make_unique<PostEffect>());
   postEffects_[0]->Initialize();
+  postEffects_.push_back(std::make_unique<PostEffect>());
+  postEffects_[1]->Initialize();
 }
 
 

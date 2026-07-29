@@ -27,7 +27,10 @@ void Obstacle::SetType(Type type) {
 
     model_->SetShader("ObjectShader");
     if (model_->GetMartial()) {
-        model_->GetMartial()->SetMaterialLighting(false);
+        model_->GetMartial()->SetMaterialLighting(true);
+        if (model_->GetMartial()->GetMaterialData()) {
+            model_->GetMartial()->GetMaterialData()->shininess = 64.0f;
+        }
     }
 
     // タイプに応じて当たり判定サイズとスケールを設定

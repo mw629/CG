@@ -14,7 +14,10 @@ void Player::Initialize(ModelData modelData)
 	transform_.translate.y = baseHeight_;
 	model_.get()->Initialize(modelData);
 	if (model_->GetMartial()) {
-		model_->GetMartial()->SetMaterialLighting(false);
+		model_->GetMartial()->SetMaterialLighting(true);
+		if (model_->GetMartial()->GetMaterialData()) {
+			model_->GetMartial()->GetMaterialData()->shininess = 64.0f;
+		}
 	}
 	model_.get()->SetTransform(transform_);
 }
