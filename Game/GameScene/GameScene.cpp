@@ -13,6 +13,11 @@
 
 GameScene::~GameScene()
 {
+	EditorManager::SetGameViewDrawCallback(nullptr);
+	EditorManager::SetSaveCallback(nullptr);
+	EditorManager::SetLoadCallback(nullptr);
+	EditorManager::SetFileDropCallback(nullptr);
+	EditorManager::ClearSceneOverlayCallback();
 }
 
 void GameScene::ImGui()
@@ -235,8 +240,8 @@ void GameScene::ImGui()
 			isRightSideMode_ = false;
 			rightSideDistance_ = 0.0f;
 		}
-		if (ImGui::Button("Return to Title (2)", ImVec2(200, 40))) {
-			nextSceneID_ = SceneID::Title;
+		if (ImGui::Button("Go to Result (2)", ImVec2(200, 40))) {
+			nextSceneID_ = SceneID::Clear;
 			sceneChangeRequest_ = true;
 		}
 		ImGui::End();
@@ -447,9 +452,9 @@ void GameScene::Update() {
 			isRightSideMode_ = false;
 			rightSideDistance_ = 0.0f;
 		}
-		// 2でタイトルへ
+		// 2でリザルトへ
 		if (Input::PushKey(DIK_2)) {
-			nextSceneID_ = SceneID::Title;
+			nextSceneID_ = SceneID::Clear;
 			sceneChangeRequest_ = true;
 		}
 	}

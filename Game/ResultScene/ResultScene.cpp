@@ -1,23 +1,23 @@
-#include "TitleScene.h"
+#include "ResultScene.h"
 #include "Graphics/Render/Draw.h"
 #include <imgui.h>
 
-void TitleScene::ImGui()
+void ResultScene::ImGui()
 {
 #ifdef _USE_IMGUI
-ImGui::Text("TITLE");
+	ImGui::Text("RESULT");
 #endif // _USE_IMGUI
 }
 
-void TitleScene::Initialize()
+void ResultScene::Initialize()
 {
-	sceneID_ = SceneID::Title;
+	sceneID_ = SceneID::Clear;
 
 	camera_ = std::make_unique<Camera>();
 	camera_->Update();
 
 	std::unique_ptr<Texture> texture = std::make_unique<Texture>();
-	int backImageHandle = texture.get()->CreateTexture("Resources/Texture/Title.png");
+	int backImageHandle = texture.get()->CreateTexture("Resources/Texture/Result.png");
 
 	spriteData_.transform.scale = { 1.0f, 1.0f, 1.0f };
 	spriteData_.transform.translate = { 640.0f, 360.0f, 0.0f };
@@ -34,17 +34,18 @@ void TitleScene::Initialize()
 	spritePos[1] = { 1280.0f, 720.0f };
 }
 
-void TitleScene::Update()
+void ResultScene::Update()
 {
 	camera_->Update();
 	backImage_->Update(spriteData_);
-	if (Input::PushKey(DIK_SPACE)||GamePadInput::PressButton(XINPUT_GAMEPAD_A)) {
-		nextSceneID_ = SceneID::Game;
+
+	if (Input::PushKey(DIK_SPACE) || GamePadInput::PressButton(XINPUT_GAMEPAD_A)) {
+		nextSceneID_ = SceneID::Title;
 		sceneChangeRequest_ = true;
 	}
 }
 
-void TitleScene::Draw(class Draw& draw)
+void ResultScene::Draw(class Draw& draw)
 {
 	draw.SetCamera(camera_.get());
 	draw.DrawSprite(backImage_.get());

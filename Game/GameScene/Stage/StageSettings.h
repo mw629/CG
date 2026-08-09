@@ -24,7 +24,7 @@ private:
 	float scrollSpeed_ = 0.2f;          // 現在のスクロール速度
 	float baseScrollSpeed_ = 0.2f;      // 初期スクロール速度
 	float maxScrollSpeed_ = 1.0f;       // 最大スクロール速度
-	float scrollAcceleration_ = 0.001f; // 毎フレームの加速量
+	float scrollAcceleration_ = 0.0f; // 毎フレームの加速量
 
 	// 道路チャンク
 	static const int kChunkCount_ = 5;      // チャンクの数

@@ -16,6 +16,8 @@ public:
 	void ImGui();
 
 	void Initialize();
+	
+	void PreUpdate();
 
 	void Update();
 

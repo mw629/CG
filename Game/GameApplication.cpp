@@ -21,6 +21,8 @@ void GameApplication::Run() {
 
 		engine.get()->NewFrame();
 
+		sceneManager.get()->PreUpdate();
+
 		editorManager->Update(engine.get());
 
 #ifdef _USE_IMGUI

@@ -75,10 +75,10 @@ void Sprite::CreateVertexData()
 	vertexResource_->Map(0, nullptr, reinterpret_cast<void**>(&vertexData_));
 	//１枚目の三角形
 
-	leftTop_.x = transform_.translate.x - (size_.x / 2.0f);
-	leftTop_.y = transform_.translate.y - (size_.y / 2.0f);
-	rigthBottom_.x = transform_.translate.x + (size_.x / 2.0f);
-	rigthBottom_.y = transform_.translate.y + (size_.y / 2.0f);
+	leftTop_.x = -(size_.x / 2.0f);
+	leftTop_.y = -(size_.y / 2.0f);
+	rigthBottom_.x = (size_.x / 2.0f);
+	rigthBottom_.y = (size_.y / 2.0f);
 
 	//１枚目の三角形
 	vertexData_[0].position = { leftTop_.x,rigthBottom_.y,0.0f,1.0f };//左下
@@ -164,10 +164,10 @@ void Sprite::Update(SpriteData spriteData)
 	SetSize(spriteData.size);
 	SetTextureArea(spriteData.textureArea);
 
-	leftTop_.x = transform_.translate.x - (size_.x / 2.0f);
-	leftTop_.y = transform_.translate.y - (size_.y / 2.0f);
-	rigthBottom_.x = transform_.translate.x + (size_.x / 2.0f);
-	rigthBottom_.y = transform_.translate.y + (size_.y / 2.0f);
+	leftTop_.x = -(size_.x / 2.0f);
+	leftTop_.y = -(size_.y / 2.0f);
+	rigthBottom_.x = (size_.x / 2.0f);
+	rigthBottom_.y = (size_.y / 2.0f);
 
 	//１枚目の三角形
 	vertexData_[0].position = { leftTop_.x,rigthBottom_.y,0.0f,1.0f };//左下
