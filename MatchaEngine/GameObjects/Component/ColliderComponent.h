@@ -40,6 +40,8 @@ public:
 	void ImGui() override;
 #endif
 
+	static bool s_isDrawDebug_;
+
 	ColliderShape GetShape() const { return shape_; }
 	
 	// ワールド座標系でのAABBを取得

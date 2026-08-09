@@ -384,14 +384,17 @@ void GameScene::Update() {
 	ObjectBase::SetWvpIndex(0);
 	EffectDefinition::SetWvpIndex(0);
 
-#ifdef DEBUG
+#ifdef _DEBUG
 	if (Input::PushKey(DIK_Q)) {
 		SetCameraToBehind();
 	}
 	if (Input::PushKey(DIK_E)) {
 		SetCameraToRightSide();
 	}
-#endif // DEBUG
+	if (Input::PushKey(DIK_F1)) {
+		ColliderComponent::s_isDrawDebug_ = !ColliderComponent::s_isDrawDebug_;
+	}
+#endif // _DEBUG
 
 	
 

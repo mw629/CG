@@ -35,6 +35,11 @@ void Player::Initialize(ModelData modelData) {
   leftHandParticle_->LoadFromJson("particle1.json");
   leftHandParticle_->name_ = "Player LeftHand Particle";
 
+  // コライダーの初期化
+  auto collider = AddComponent<ColliderComponent>();
+  collider->SetShape(ColliderShape::Box);
+  collider->SetSize({0.8f, 1.5f, 0.8f});
+
   Transform drawTransform = transform_;
   drawTransform.scale.y = 1.0f;
   drawTransform.translate.y -= (isRolling_ ? 0.5f : 1.0f);
@@ -78,7 +83,6 @@ void Player::Reset() {
 }
 
 void Player::Update(Matrix4x4 view, float speedMultiplier) {
-  GameObject::Update(view, speedMultiplier);
   if (isHit_) {
     // SpeedMultiplier is ignored for hit update so animation plays consistently
     // even if the game scroll stops.
@@ -114,6 +118,11 @@ void Player::Update(Matrix4x4 view, float speedMultiplier) {
   Transform leftHandTransform = model_->GetBoneTransform(BoneType::LeftHand);
   leftHandParticle_->SetPosition(leftHandTransform.translate);
   leftHandParticle_->Update(view);
+
+  if (auto collider = GetComponent<ColliderComponent>()) {
+    collider->SetSize({0.8f, isRolling_ ? 0.5f : 1.5f, 0.8f});
+  }
+  GameObject::Update(view, speedMultiplier);
 }
 
 void Player::PlayerMove(float speedMultiplier) {

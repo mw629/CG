@@ -5,6 +5,8 @@
 #include "../Object/3d/Sphere.h"
 #include <imgui.h>
 
+bool ColliderComponent::s_isDrawDebug_ = false;
+
 ColliderComponent::ColliderComponent()
 {
 }
@@ -18,15 +20,18 @@ void ColliderComponent::Initialize()
 	Component::Initialize();
 
 #ifdef _DEBUG
+	Texture tex;
+	int whiteTex = tex.CreateTexture("Resources/Texture/white64x64.png");
+
 	debugCube_ = std::make_shared<Cube>();
-	debugCube_->Initialize(0);
+	debugCube_->Initialize(whiteTex);
 	if (auto mat = debugCube_->GetComponent<MaterialComponent>()) {
 		mat->SetShader("WireFrameShader");
 		mat->GetMaterialFactory()->SetColor({ 1.0f, 0.0f, 0.0f, 1.0f });
 	}
 
 	debugSphere_ = std::make_shared<Sphere>();
-	debugSphere_->Initialize(0);
+	debugSphere_->Initialize(whiteTex);
 	if (auto mat = debugSphere_->GetComponent<MaterialComponent>()) {
 		mat->SetShader("WireFrameShader");
 		mat->GetMaterialFactory()->SetColor({ 1.0f, 0.0f, 0.0f, 1.0f });
@@ -70,6 +75,8 @@ void ColliderComponent::Update(Matrix4x4 view, float speedMultiplier)
 void ColliderComponent::Draw(class Draw& draw)
 {
 #ifdef _DEBUG
+	if (!s_isDrawDebug_) return;
+
 	if (shape_ == ColliderShape::Box && debugCube_) {
 		draw.DrawObj(debugCube_.get());
 	}
