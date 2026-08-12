@@ -786,8 +786,8 @@ void GameScene::ChangePlayingState(PlayingState newState, bool force) {
 
   case PlayingState::Boss:
     // ボス用のカメラ位置（ここをいじればすぐに変更できます）
-    target.rotate = {0.3f, 0.0f, 0.0f};
-    target.translate = {0.0f, 8.0f, -15.0f};
+    target.rotate = {0.3f, 3.25f, 0.0f};
+    target.translate = {0.0f, 8.0f, 14.0f};
     laneCount = 3;
     isRightSideMode_ = false;
     rightSideDistance_ = 0.0f;
