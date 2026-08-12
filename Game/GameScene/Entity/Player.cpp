@@ -1,5 +1,6 @@
 #include "Player.h"
 #include "Graphics/Render/Draw.h"
+#include "../GameSceneManager.h"
 
 Player::Player() {}
 
@@ -166,12 +167,10 @@ void Player::PlayerMove(float speedMultiplier) {
   else if (laneIndex_ == targetLaneIndex_) {
     // キー入力で目標レーンを設定
     if (canAct) {
-      if (Input::PushKey(DIK_A) || Input::PushKey(DIK_LEFT) ||
-          GamePadInput::PushButton(XINPUT_GAMEPAD_DPAD_LEFT)) {
+      if (GameSceneManager::GetInstance()->IsPushLeft()) {
         targetLaneIndex_ = laneIndex_ - 1;
       }
-      if (Input::PushKey(DIK_D) || Input::PushKey(DIK_RIGHT) ||
-          GamePadInput::PushButton(XINPUT_GAMEPAD_DPAD_RIGHT)) {
+      if (GameSceneManager::GetInstance()->IsPushRight()) {
         targetLaneIndex_ = laneIndex_ + 1;
       }
     }
@@ -217,10 +216,7 @@ void Player::PlayerMove(float speedMultiplier) {
   // === アクション（ジャンプと転がり） ===
   // 地上にいてジャンプ中でなければアクション可能（転がり中でもジャンプでキャンセル可能）
   if (!isJumping_ && canAct) {
-    if (Input::PushKey(DIK_W) || Input::PushKey(DIK_SPACE) ||
-        Input::PushKey(DIK_UP) ||
-        GamePadInput::PushButton(XINPUT_GAMEPAD_DPAD_UP) ||
-        GamePadInput::PushButton(XINPUT_GAMEPAD_A)) {
+    if (GameSceneManager::GetInstance()->IsPushJump()) {
       if (!(isRolling_ && keepRolling_)) {
         isJumping_ = true;
         velocityY_ = jumpPower_ * speedMultiplier;
@@ -233,10 +229,7 @@ void Player::PlayerMove(float speedMultiplier) {
           model_->SetAnimation("walk", 1.0f);
         }
       }
-    } else if (!isRolling_ &&
-               (Input::PushKey(DIK_S) || Input::PushKey(DIK_DOWN) ||
-                GamePadInput::PushButton(XINPUT_GAMEPAD_DPAD_DOWN) ||
-                GamePadInput::PushButton(XINPUT_GAMEPAD_B))) {
+    } else if (!isRolling_ && GameSceneManager::GetInstance()->IsPushRoll()) {
       isRolling_ = true;
       rollTimer_ = rollDuration_;
       model_->SetAnimation("sneakWalk", 1.0f);

@@ -152,9 +152,11 @@ copy "$(WindowsSdkDir)bin\$(TargetPlatformVersion)\x64\dxil.dll" "$(TargetDir)dx
     </PostBuildEvent>
   </ItemDefinitionGroup>
   <ItemGroup>
+    <ClCompile Include="Game\GameScene\Entity\Boss.cpp" />
     <ClCompile Include="Editer\EditorUI.cpp" />
     <ClCompile Include="Editer\EditorManager.cpp" />
     <ClCompile Include="Editer\LanguageManager.cpp" />
+    <ClCompile Include="Game\GameScene\GameSceneManager.cpp" />
     <ClCompile Include="Game\JsonScene\JsonScene.cpp" />
     <ClCompile Include="MatchaEngine\Graphics\Render\LineRenderer.cpp" />
     <ClCompile Include="MatchaEngine\System\GameObjectManager.cpp" />
@@ -366,9 +368,11 @@ copy "$(WindowsSdkDir)bin\$(TargetPlatformVersion)\x64\dxil.dll" "$(TargetDir)dx
     </FxCompile>
   </ItemGroup>
   <ItemGroup>
+    <ClInclude Include="Game\GameScene\Entity\Boss.h" />
     <ClInclude Include="Editer\EditorUI.h" />
     <ClInclude Include="Editer\EditorManager.h" />
     <ClInclude Include="Editer\LanguageManager.h" />
+    <ClInclude Include="Game\GameScene\GameSceneManager.h" />
     <ClInclude Include="Game\JsonScene\JsonScene.h" />
     <ClInclude Include="MatchaEngine\Graphics\Render\LineRenderer.h" />
     <ClInclude Include="MatchaEngine\System\GameObjectManager.h" />
