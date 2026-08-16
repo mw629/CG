@@ -8,7 +8,9 @@
 #include <Engine.h>
 #include <Entity/Collision.h>
 #include <Entity/Player.h>
+#include <Entity/Boss.h>
 #include <Stage/StageSettings.h>
+
 #include <System/CollisionManager.h>
 #include <System/PauseSystem.h>
 #include <memory>
@@ -61,6 +63,10 @@ private:
 	//<< Playing >>//
 	// プレイヤー管理
 	std::shared_ptr<Player> player_ = std::make_shared<Player>();
+	// ボス管理
+	std::shared_ptr<Boss> boss_ = std::make_shared<Boss>();
+	float bossAttackTimer_ = 0.0f;
+
 	// オブジェクト管理
 	std::unique_ptr<GameObjectManager> gameObjectManager_ =
 		std::make_unique<GameObjectManager>();

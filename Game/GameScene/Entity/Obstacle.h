@@ -20,7 +20,9 @@ public:
     CameraItem,  // 取るとカメラが移動するアイテム
     BarrierItem, // バリアを張るアイテム
     ClearItem,   // 障害物を消すアイテム
-    BossItem     // ボス戦へ移行するアイテム
+    BossItem,    // ボス戦へ移行するアイテム
+    BossAttack,  // ボスの攻撃（白、飛び越え不可）
+    BossAttackReflectable // ボスの攻撃（緑、跳ね返し可能）
   };
 
 private:
@@ -30,8 +32,10 @@ private:
   Type type_ = Type::Wall;
 
   bool isHit_ = false;
+  bool isReflected_ = false; // ボスへの跳ね返しフラグ
   Vector3 velocity_{0.0f, 0.0f, 0.0f};
   float gravity_ = 0.015f;
+
 
   // 当たり判定のサイズ
   float collisionWidth_ = 1.0f;
@@ -61,6 +65,8 @@ public:
   void OnBlowAway();
 
   void OnHit();
+  void SetReflected(bool reflected) { isReflected_ = reflected; }
+  bool GetIsReflected() const { return isReflected_; }
 
   // Override standard Update and Draw to avoid GameObjectManager from
   // automatically updating scroll/drawing without context

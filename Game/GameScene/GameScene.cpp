@@ -83,6 +83,14 @@ void GameScene::ImGui() {
       ImGui::TreePop();
     }
 
+    // ボス情報
+    if (playingState_ == PlayingState::Boss && boss_->GetIsActive()) {
+      if (ImGui::TreeNode("Boss Info")) {
+        ImGui::Text("HP: %d / 20", boss_->GetHP());
+        ImGui::TreePop();
+      }
+    }
+
     // ステージ情報
     if (ImGui::TreeNode("Stage Info")) {
       ImGui::Text("Scroll Speed: %.3f", stageSettings_->GetScrollSpeed());
@@ -341,6 +349,12 @@ void GameScene::Initialize() {
       AssimpLoadObjFile("Resources/Model/Player", "Player.obj");
   player_->Initialize(modelData);
 
+  // ボスの初期化
+  ModelData bossModelData =
+      AssetManager::LoadModel("Resources/Block", "Block.obj");
+  boss_->Initialize(bossModelData);
+  boss_->SetName("Boss");
+
   // オブジェクトマネージャーへの登録
   gameObjectManager_->Clear();
   auto skyboxRenderObj = std::make_shared<RenderObject>(skyBox_);
@@ -348,6 +362,8 @@ void GameScene::Initialize() {
   gameObjectManager_->AddObject(skyboxRenderObj);
   player_->SetName("Player");
   gameObjectManager_->AddObject(player_);
+  gameObjectManager_->AddObject(boss_);
+
 
   // エディターでの保存・読み込み先をJsonSceneに設定
   EditorManager::SetSaveCallback([this](const std::string &filePath) {
@@ -540,6 +556,87 @@ void GameScene::PlayingUpdate() {
     }
   }
 
+  // ボス戦の更新
+  if (playingState_ == PlayingState::Boss && boss_->GetIsActive()) {
+    bossAttackTimer_ += timeScale;
+    // 攻撃の生成（約2秒に1回）
+    if (bossAttackTimer_ >= 120.0f) {
+      bossAttackTimer_ -= 120.0f;
+
+      // 3レーンのうち、1つを安全地帯、1つを白、1つを緑にする
+      int safeLane = rand() % 3;
+      int greenLane = (safeLane + 1 + rand() % 2) % 3;
+
+      for (int i = 0; i < 3; i++) {
+        if (i == safeLane) continue;
+
+        Obstacle::Type type = Obstacle::Type::BossAttack;
+        if (i == greenLane) {
+          type = Obstacle::Type::BossAttackReflectable;
+        }
+
+        // 未使用のObstacleを探す
+        for (int j = 0; j < stageSettings_->GetMaxObstacles(); j++) {
+          Obstacle *obs = stageSettings_->GetObstacle(j);
+          if (!obs->GetIsActive()) {
+            obs->SetType(type);
+            float x = (i - 1) * stageSettings_->GetLaneWidth();
+            obs->Spawn(x, 2.5f, -38.0f);
+            break;
+          }
+        }
+      }
+    }
+
+    // 跳ね返し入力判定
+    bool push1 = Input::PushKey(DIK_1) || Input::PushKey(DIK_NUMPAD1);
+    bool push2 = Input::PushKey(DIK_2) || Input::PushKey(DIK_NUMPAD2);
+    bool push3 = Input::PushKey(DIK_3) || Input::PushKey(DIK_NUMPAD3);
+
+    AABB bossAABB = Collision::MakeAABB(boss_->GetTransform(), 5.0f, 5.0f, 5.0f);
+
+    for (int j = 0; j < stageSettings_->GetMaxObstacles(); j++) {
+      Obstacle *obs = stageSettings_->GetObstacle(j);
+      if (!obs->GetIsActive()) continue;
+
+      if (obs->GetType() == Obstacle::Type::BossAttackReflectable && !obs->GetIsReflected()) {
+        float obsX = obs->GetTransform().translate.x;
+        float laneW = stageSettings_->GetLaneWidth();
+        int lane = 1; // 0:Left, 1:Center, 2:Right
+        if (obsX < -laneW / 2.0f) lane = 0;
+        else if (obsX > laneW / 2.0f) lane = 2;
+
+        // プレイヤーの手前にいる時に跳ね返せる
+        float z = obs->GetTransform().translate.z;
+        if (z > -15.0f && z < 15.0f) {
+          if ((lane == 0 && push1) || (lane == 1 && push2) || (lane == 2 && push3)) {
+            obs->SetReflected(true);
+            particleManager_->EmitShockwave(obs->GetTransform().translate);
+
+            // 跳ね返した瞬間にボスのHPを減らす
+            boss_->OnDamage();
+            particleManager_->EmitHitEffect(boss_->GetTransform().translate);
+            
+            if (boss_->GetHP() <= 0) {
+              boss_->SetIsActive(false);
+              ChangePlayingState(PlayingState::ThreeLane);
+              
+              // 画面内のボス攻撃をすべて消す
+              for (int k = 0; k < stageSettings_->GetMaxObstacles(); k++) {
+                Obstacle *o = stageSettings_->GetObstacle(k);
+                if (o->GetIsActive() && (o->GetType() == Obstacle::Type::BossAttack || o->GetType() == Obstacle::Type::BossAttackReflectable)) {
+                  o->OnBlowAway();
+                }
+              }
+              break; // HP0になったらループを抜ける
+            }
+          }
+        }
+      }
+    }
+  }
+
+
   // Update Player lane constraints
   player_->SetLaneLimits(stageSettings_->GetMinLaneIndex(),
                          stageSettings_->GetMaxLaneIndex(),
@@ -668,6 +765,12 @@ void GameScene::CheckCollisions() {
         particleManager_->EmitShockwave(player_->GetTransform().translate);
         continue;
       }
+      
+      if (obstacle->GetType() == Obstacle::Type::BossAttack || obstacle->GetType() == Obstacle::Type::BossAttackReflectable) {
+        // 跳ね返されている緑障害物はプレイヤーに当たらない
+        if (obstacle->GetIsReflected()) continue;
+      }
+
 
       // プレイヤーがバリアを持っている場合は消費して防ぐ
       if (player_->GetHasBarrier()) {
@@ -792,8 +895,11 @@ void GameScene::ChangePlayingState(PlayingState newState, bool force) {
     isRightSideMode_ = false;
     rightSideDistance_ = 0.0f;
     stageSettings_->SetSpawningPaused(true);
+    boss_->Spawn(0.0f, 6.0f, -40.0f);
+    bossAttackTimer_ = 0.0f;
     break;
   }
+
 
   StartCameraTransition(target, laneCount);
 }

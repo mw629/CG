@@ -105,7 +105,24 @@ void Obstacle::SetType(Type type) {
     model_->GetMartial()->SetColor({1.0f, 0.0f, 0.0f, 1.0f}); // 赤（ボス）
     model_->SetShader("ObjectShader");
     break;
+  case Type::BossAttack:
+    collisionWidth_ = 1.5f;
+    collisionHeight_ = 3.0f; // 飛び越え不可
+    collisionDepth_ = 1.0f;
+    transform_.scale = {1.5f, 3.0f, 1.0f};
+    model_->GetMartial()->SetColor({1.0f, 1.0f, 1.0f, 1.0f}); // 白
+    model_->SetShader("IceShader");
+    break;
+  case Type::BossAttackReflectable:
+    collisionWidth_ = 1.5f;
+    collisionHeight_ = 3.0f; // 飛び越え不可
+    collisionDepth_ = 1.0f;
+    transform_.scale = {1.5f, 3.0f, 1.0f};
+    model_->GetMartial()->SetColor({0.0f, 1.0f, 0.0f, 1.0f}); // 緑
+    model_->SetShader("IceShader");
+    break;
   }
+
 
   model_->SetTransform(transform_);
 }
@@ -114,7 +131,9 @@ void Obstacle::Spawn(float x, float y, float z) {
   transform_.translate = {x, y, z};
   isActive_ = true;
   isHit_ = false; // 初期化
+  isReflected_ = false;
   model_->SetTransform(transform_);
+
 }
 
 void Obstacle::StageUpdate(Matrix4x4 view, float scrollSpeed) {
@@ -142,15 +161,35 @@ void Obstacle::StageUpdate(Matrix4x4 view, float scrollSpeed) {
     if (transform_.translate.y < -20.0f) {
       isActive_ = false; // 画面外で消す
     }
-  } else {
-    // 手前にスクロール
-    transform_.translate.z -= scrollSpeed;
+  } else if (isReflected_) {
+    // 跳ね返された場合（ボスへ向かう = -Z方向へ高速移動）
+    transform_.translate.z -= scrollSpeed * 3.0f; // 3倍の速度で跳ね返す
+    
+    // 回転させながら飛ぶ
+    transform_.rotate.x -= 0.3f;
 
-    // カメラの後ろ（手前）を過ぎたら非アクティブにする
-    if (transform_.translate.z < -10.0f) {
+    if (transform_.translate.z < -60.0f) {
       isActive_ = false;
     }
+  } else {
+    // スクロール
+    if (type_ == Type::BossAttack || type_ == Type::BossAttackReflectable) {
+      // ボスの攻撃は奥から手前(+Z方向)へ
+      transform_.translate.z += scrollSpeed;
+      if (transform_.translate.z > 20.0f) {
+        isActive_ = false;
+      }
+    } else {
+      // 手前にスクロール
+      transform_.translate.z -= scrollSpeed;
+
+      // カメラの後ろ（手前）を過ぎたら非アクティブにする
+      if (transform_.translate.z < -10.0f) {
+        isActive_ = false;
+      }
+    }
   }
+
 
   model_.get()->SetTransform(transform_);
   model_.get()->SettingWvp(view);
