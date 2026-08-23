@@ -3,12 +3,24 @@
 #include <memory>
 #include "GameObject.h"
 
+enum class BossState {
+  Appearance, // 出現
+  Battle,     // 戦闘
+  Defeat,     // 撃破
+  Victory     // 勝利（プレイヤー敗北）
+};
+
 class Boss : public GameObject {
 private:
   std::unique_ptr<Model> model_ = std::make_unique<Model>();
   int hp_ = 5;
   bool isHit_ = false;
   float hitTimer_ = 0.0f;
+  BossState state_ = BossState::Appearance;
+  float stateTimer_ = 0.0f;
+  
+  Vector3 startPos_;
+  Vector3 targetPos_;
 
 public:
   Boss();
@@ -29,4 +41,7 @@ public:
 
   void OnDamage();
   int GetHP() const { return hp_; }
+  
+  BossState GetState() const { return state_; }
+  void ChangeState(BossState nextState);
 };

@@ -557,10 +557,13 @@ void GameScene::PlayingUpdate() {
   }
 
   // ボス戦の更新
-  if (playingState_ == PlayingState::Boss && boss_->GetIsActive()) {
-    bossAttackTimer_ += timeScale;
-    // 攻撃の生成（約2秒に1回）
-    if (bossAttackTimer_ >= 120.0f) {
+  if (playingState_ == PlayingState::Boss) {
+    if (!boss_->GetIsActive()) {
+      ChangePlayingState(PlayingState::ThreeLane);
+    } else if (boss_->GetState() == BossState::Battle) {
+      bossAttackTimer_ += timeScale;
+      // 攻撃の生成（約2秒に1回）
+      if (bossAttackTimer_ >= 120.0f) {
       bossAttackTimer_ -= 120.0f;
 
       // 3レーンのうち、1つを安全地帯、1つを白、1つを緑にする
@@ -581,7 +584,7 @@ void GameScene::PlayingUpdate() {
           if (!obs->GetIsActive()) {
             obs->SetType(type);
             float x = (i - 1) * stageSettings_->GetLaneWidth();
-            obs->Spawn(x, 2.5f, -38.0f);
+            obs->Spawn(x, 2.5f, -13.0f); // ボスが-15.0fなので、少し手前から出現
             break;
           }
         }
@@ -617,10 +620,7 @@ void GameScene::PlayingUpdate() {
             boss_->OnDamage();
             particleManager_->EmitHitEffect(boss_->GetTransform().translate);
             
-            if (boss_->GetHP() <= 0) {
-              boss_->SetIsActive(false);
-              ChangePlayingState(PlayingState::ThreeLane);
-              
+            if (boss_->GetState() == BossState::Defeat) {
               // 画面内のボス攻撃をすべて消す
               for (int k = 0; k < stageSettings_->GetMaxObstacles(); k++) {
                 Obstacle *o = stageSettings_->GetObstacle(k);
@@ -628,14 +628,13 @@ void GameScene::PlayingUpdate() {
                   o->OnBlowAway();
                 }
               }
-              break; // HP0になったらループを抜ける
             }
           }
         }
       }
     }
   }
-
+}
 
   // Update Player lane constraints
   player_->SetLaneLimits(stageSettings_->GetMinLaneIndex(),
@@ -782,6 +781,10 @@ void GameScene::CheckCollisions() {
 
       // 衝突！ヒット演出へ移行
       gameState_ = GameState::PlayerHit;
+      if (playingState_ == PlayingState::Boss && boss_->GetIsActive()) {
+        boss_->ChangeState(BossState::Victory);
+      }
+      
       stageSettings_->SetGameOver(true);
       // PostEffect::SetActivePostEffect(PostEffect::Type::GrayScale);
 
@@ -895,7 +898,7 @@ void GameScene::ChangePlayingState(PlayingState newState, bool force) {
     isRightSideMode_ = false;
     rightSideDistance_ = 0.0f;
     stageSettings_->SetSpawningPaused(true);
-    boss_->Spawn(0.0f, 6.0f, -40.0f);
+    boss_->Spawn(-9.0f, 6.0f, -15.0f); // さらにレーン側に寄せる
     bossAttackTimer_ = 0.0f;
     break;
   }
