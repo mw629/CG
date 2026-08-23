@@ -614,19 +614,24 @@ void GameScene::PlayingUpdate() {
         if (z > -15.0f && z < 15.0f) {
           if ((lane == 0 && push1) || (lane == 1 && push2) || (lane == 2 && push3)) {
             obs->SetReflected(true);
+            obs->SetReflectedTarget(boss_->GetTransform().translate);
             particleManager_->EmitShockwave(obs->GetTransform().translate);
-
-            // 跳ね返した瞬間にボスのHPを減らす
-            boss_->OnDamage();
-            particleManager_->EmitHitEffect(boss_->GetTransform().translate);
-            
-            if (boss_->GetState() == BossState::Defeat) {
-              // 画面内のボス攻撃をすべて消す
-              for (int k = 0; k < stageSettings_->GetMaxObstacles(); k++) {
-                Obstacle *o = stageSettings_->GetObstacle(k);
-                if (o->GetIsActive() && (o->GetType() == Obstacle::Type::BossAttack || o->GetType() == Obstacle::Type::BossAttackReflectable)) {
-                  o->OnBlowAway();
-                }
+          }
+        }
+      } else if (obs->GetIsReflected()) {
+        // 跳ね返った障害物とボスとの当たり判定
+        AABB obsAABB = Collision::MakeAABB(obs->GetTransform(), obs->GetCollisionWidth(), obs->GetCollisionHeight(), obs->GetCollisionDepth());
+        if (Collision::CheckAABB(bossAABB, obsAABB)) {
+          obs->Deactivate(); // 障害物を消す
+          boss_->OnDamage();
+          particleManager_->EmitHitEffect(boss_->GetTransform().translate);
+          
+          if (boss_->GetState() == BossState::Defeat) {
+            // 画面内のボス攻撃をすべて消す
+            for (int k = 0; k < stageSettings_->GetMaxObstacles(); k++) {
+              Obstacle *o = stageSettings_->GetObstacle(k);
+              if (o->GetIsActive() && (o->GetType() == Obstacle::Type::BossAttack || o->GetType() == Obstacle::Type::BossAttackReflectable)) {
+                o->OnBlowAway();
               }
             }
           }

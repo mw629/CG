@@ -33,6 +33,7 @@ private:
 
   bool isHit_ = false;
   bool isReflected_ = false; // ボスへの跳ね返しフラグ
+  Vector3 reflectedTarget_{0.0f, 0.0f, 0.0f}; // 跳ね返された際の目標座標
   Vector3 velocity_{0.0f, 0.0f, 0.0f};
   float gravity_ = 0.015f;
 
@@ -67,6 +68,7 @@ public:
   void OnHit();
   void SetReflected(bool reflected) { isReflected_ = reflected; }
   bool GetIsReflected() const { return isReflected_; }
+  void SetReflectedTarget(const Vector3& target) { reflectedTarget_ = target; }
 
   // Override standard Update and Draw to avoid GameObjectManager from
   // automatically updating scroll/drawing without context

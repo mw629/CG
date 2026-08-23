@@ -162,15 +162,26 @@ void Obstacle::StageUpdate(Matrix4x4 view, float scrollSpeed) {
       isActive_ = false; // 画面外で消す
     }
   } else if (isReflected_) {
-    // 跳ね返された場合（ボスへ向かう = -Z方向へ高速移動）
-    transform_.translate.z -= scrollSpeed * 3.0f; // 3倍の速度で跳ね返す
+    // ボス（ターゲット）へ向かって飛ぶ
+    Vector3 dir = {
+      reflectedTarget_.x - transform_.translate.x,
+      reflectedTarget_.y - transform_.translate.y,
+      reflectedTarget_.z - transform_.translate.z
+    };
+    float len = std::sqrt(dir.x * dir.x + dir.y * dir.y + dir.z * dir.z);
+    
+    if (len > 0.1f) {
+      dir.x /= len; dir.y /= len; dir.z /= len;
+      float speed = scrollSpeed * 5.0f; // 5倍の速度で飛んでいく
+      if (speed > len) speed = len; // 行き過ぎ防止
+      transform_.translate.x += dir.x * speed;
+      transform_.translate.y += dir.y * speed;
+      transform_.translate.z += dir.z * speed;
+    }
     
     // 回転させながら飛ぶ
     transform_.rotate.x -= 0.3f;
-
-    if (transform_.translate.z < -60.0f) {
-      isActive_ = false;
-    }
+    transform_.rotate.y += 0.2f;
   } else {
     // スクロール
     if (type_ == Type::BossAttack || type_ == Type::BossAttackReflectable) {
