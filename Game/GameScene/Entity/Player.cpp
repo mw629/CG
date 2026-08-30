@@ -1,6 +1,7 @@
 #include "Player.h"
-#include "Graphics/Render/Draw.h"
 #include "../GameSceneManager.h"
+#include "Graphics/Render/Draw.h"
+
 
 Player::Player() {}
 
@@ -280,9 +281,7 @@ void Player::Draw(class Draw &draw) {
   GameObject::Draw(draw);
 }
 
-void Player::DrawParticle(class Draw &draw) {
-  leftHandParticle_->Draw(draw);
-}
+void Player::DrawParticle(class Draw &draw) { leftHandParticle_->Draw(draw); }
 
 void Player::ImGuiInnerComponents() {
   if (model_) {

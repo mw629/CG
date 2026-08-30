@@ -79,6 +79,7 @@ private:
 	
 	bool isStop_=false;
 	bool isHit_ = false;
+	bool manualEmitTriggered_ = false;
 
 
 public:

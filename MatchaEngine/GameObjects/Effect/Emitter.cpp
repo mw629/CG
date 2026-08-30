@@ -592,6 +592,10 @@ void Emitter::Update(Matrix4x4 viewMatrix) {
 	}
 
 	bool emitFrame = false;
+	if (manualEmitTriggered_) {
+		emitFrame = true;
+		manualEmitTriggered_ = false;
+	}
 	if (!isStop_) {
 		float& freqTime = (emitterType_ == EmitterType::Sphere) ? emitterSphere_.frequencyTime : emitter_.frequencyTime;
 		float freq = (emitterType_ == EmitterType::Sphere) ? emitterSphere_.frequency : emitter_.frequency;
@@ -647,6 +651,10 @@ void Emitter::Update(Matrix4x4 viewMatrix, std::function<EffectDefinitionData(co
 		++i;
 	}
 	bool emitFrame = false;
+	if (manualEmitTriggered_) {
+		emitFrame = true;
+		manualEmitTriggered_ = false;
+	}
 	if (!isStop_) {
 		float& freqTime = (emitterType_ == EmitterType::Sphere) ? emitterSphere_.frequencyTime : emitter_.frequencyTime;
 		float freq = (emitterType_ == EmitterType::Sphere) ? emitterSphere_.frequency : emitter_.frequency;
@@ -700,6 +708,10 @@ void Emitter::Update(EmitterData emitter, Matrix4x4 viewMatrix, std::function<Ef
 		++i;
 	}
 	bool emitFrame = false;
+	if (manualEmitTriggered_) {
+		emitFrame = true;
+		manualEmitTriggered_ = false;
+	}
 	if (!isStop_) {
 		float& freqTime = (emitterType_ == EmitterType::Sphere) ? emitterSphere_.frequencyTime : emitter_.frequencyTime;
 		float freq = (emitterType_ == EmitterType::Sphere) ? emitterSphere_.frequency : emitter_.frequency;
@@ -740,6 +752,10 @@ void Emitter::Update(Matrix4x4 viewMatrix, Vector3 scale)
 		++particleIterator;//これを忘れた未来の僕がいるならこれを忘れた今の僕が悲しむ
 	}
 	bool emitFrame = false;
+	if (manualEmitTriggered_) {
+		emitFrame = true;
+		manualEmitTriggered_ = false;
+	}
 	if (!isStop_) {
 		float& freqTime = (emitterType_ == EmitterType::Sphere) ? emitterSphere_.frequencyTime : emitter_.frequencyTime;
 		float freq = (emitterType_ == EmitterType::Sphere) ? emitterSphere_.frequency : emitter_.frequency;
@@ -902,5 +918,6 @@ void Emitter::Emit()
 	for (uint32_t i = 0; i < count; ++i) {
 		effectDefinitionData_.push_back(MakeNewParticle());
 	}
+	manualEmitTriggered_ = true;
 }
 

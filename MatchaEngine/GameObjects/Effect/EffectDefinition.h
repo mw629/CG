@@ -188,8 +188,11 @@ public:
 
 	std::list<EffectDefinitionData> GetEffectDefinitionData() { return effectDefinitionData_; }
 
-	// GPU Particle用のリソースとUAVハンドル
 	bool isGpuInitialized_ = false;
+	float gpuParticleTime_ = 0.0f;
+	D3D12_RESOURCE_STATES gpuParticleState_ = D3D12_RESOURCE_STATE_VERTEX_AND_CONSTANT_BUFFER;
+	D3D12_RESOURCE_STATES gpuCounterState_ = D3D12_RESOURCE_STATE_VERTEX_AND_CONSTANT_BUFFER;
+
 	Microsoft::WRL::ComPtr<ID3D12Resource> gpuParticleResource_;
 	D3D12_CPU_DESCRIPTOR_HANDLE gpuParticleUavHandleCPU_{};
 	D3D12_GPU_DESCRIPTOR_HANDLE gpuParticleUavHandleGPU_{};

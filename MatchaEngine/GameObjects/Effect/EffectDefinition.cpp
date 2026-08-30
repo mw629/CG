@@ -360,6 +360,25 @@ void EffectDefinition::InitializeGPUParticle(ID3D12GraphicsCommandList* commandL
 	emitterBoxResource_->Map(0, nullptr, reinterpret_cast<void**>(&emitterBoxData_));
 	if (emitterBoxData_) *emitterBoxData_ = pendingBoxData_;
 
+	if (gpuParticleState_ != D3D12_RESOURCE_STATE_UNORDERED_ACCESS) {
+		D3D12_RESOURCE_BARRIER barrier{};
+		barrier.Type = D3D12_RESOURCE_BARRIER_TYPE_TRANSITION;
+		barrier.Transition.pResource = gpuParticleResource_.Get();
+		barrier.Transition.StateBefore = gpuParticleState_;
+		barrier.Transition.StateAfter = D3D12_RESOURCE_STATE_UNORDERED_ACCESS;
+		commandList->ResourceBarrier(1, &barrier);
+		gpuParticleState_ = D3D12_RESOURCE_STATE_UNORDERED_ACCESS;
+	}
+	if (gpuCounterState_ != D3D12_RESOURCE_STATE_UNORDERED_ACCESS) {
+		D3D12_RESOURCE_BARRIER barrier{};
+		barrier.Type = D3D12_RESOURCE_BARRIER_TYPE_TRANSITION;
+		barrier.Transition.pResource = gpuFreeCounterResource_.Get();
+		barrier.Transition.StateBefore = gpuCounterState_;
+		barrier.Transition.StateAfter = D3D12_RESOURCE_STATE_UNORDERED_ACCESS;
+		commandList->ResourceBarrier(1, &barrier);
+		gpuCounterState_ = D3D12_RESOURCE_STATE_UNORDERED_ACCESS;
+	}
+
 	// 3. コンピュートシェーダーを実行 (Dispatch)
 	commandList->SetComputeRootSignature(cp->GetRootSignature("InitializeParticle.CS"));
 	commandList->SetPipelineState(cp->GetPipelineState("InitializeParticle.CS"));
@@ -389,13 +408,30 @@ void EffectDefinition::InitializeGPUParticle(ID3D12GraphicsCommandList* commandL
 	isGpuInitialized_ = true;
 }
 
-static float s_gpuParticleTime = 0.0f;
-
 void EffectDefinition::DispatchGPUParticle(ID3D12GraphicsCommandList* commandList, ComputePipeline* cp, float deltaTime)
 {
 	if (!isGpuInitialized_ || !cp) return;
 
-	s_gpuParticleTime += deltaTime;
+	gpuParticleTime_ += deltaTime;
+
+	if (gpuParticleState_ != D3D12_RESOURCE_STATE_UNORDERED_ACCESS) {
+		D3D12_RESOURCE_BARRIER barrier{};
+		barrier.Type = D3D12_RESOURCE_BARRIER_TYPE_TRANSITION;
+		barrier.Transition.pResource = gpuParticleResource_.Get();
+		barrier.Transition.StateBefore = gpuParticleState_;
+		barrier.Transition.StateAfter = D3D12_RESOURCE_STATE_UNORDERED_ACCESS;
+		commandList->ResourceBarrier(1, &barrier);
+		gpuParticleState_ = D3D12_RESOURCE_STATE_UNORDERED_ACCESS;
+	}
+	if (gpuCounterState_ != D3D12_RESOURCE_STATE_UNORDERED_ACCESS) {
+		D3D12_RESOURCE_BARRIER barrier{};
+		barrier.Type = D3D12_RESOURCE_BARRIER_TYPE_TRANSITION;
+		barrier.Transition.pResource = gpuFreeCounterResource_.Get();
+		barrier.Transition.StateBefore = gpuCounterState_;
+		barrier.Transition.StateAfter = D3D12_RESOURCE_STATE_UNORDERED_ACCESS;
+		commandList->ResourceBarrier(1, &barrier);
+		gpuCounterState_ = D3D12_RESOURCE_STATE_UNORDERED_ACCESS;
+	}
 
 	// -------------------------------------------------------------
 	// 1. EmitParticle の Dispatch
@@ -412,7 +448,7 @@ void EffectDefinition::DispatchGPUParticle(ID3D12GraphicsCommandList* commandLis
 		UINT count = 1;
 		if (isBoxEmitter_) {
 			if (emitterBoxData_) {
-				emitterBoxData_->frequencyTime = s_gpuParticleTime;
+				emitterBoxData_->frequencyTime = gpuParticleTime_;
 				count = static_cast<UINT>(emitterBoxData_->count);
 			}
 			UINT pEmitter = cp->GetRootParameterIndex(emitShader, "gEmitterBox");
@@ -421,7 +457,7 @@ void EffectDefinition::DispatchGPUParticle(ID3D12GraphicsCommandList* commandLis
 			}
 		} else {
 			if (emitterSphereData_) {
-				emitterSphereData_->frequencyTime = s_gpuParticleTime;
+				emitterSphereData_->frequencyTime = gpuParticleTime_;
 				count = static_cast<UINT>(emitterSphereData_->count);
 			}
 			UINT pEmitter = cp->GetRootParameterIndex(emitShader, "gEmitterSphere");
@@ -432,7 +468,7 @@ void EffectDefinition::DispatchGPUParticle(ID3D12GraphicsCommandList* commandLis
 
 		if (perFrameData_) {
 			perFrameData_->deltaTime = deltaTime;
-			perFrameData_->time = s_gpuParticleTime;
+			perFrameData_->time = gpuParticleTime_;
 		}
 
 		UINT pPerFrame = cp->GetRootParameterIndex(emitShader, "gPerFrame");
@@ -477,7 +513,7 @@ void EffectDefinition::DispatchGPUParticle(ID3D12GraphicsCommandList* commandLis
 
 		if (perFrameData_) {
 			perFrameData_->deltaTime = deltaTime;
-			perFrameData_->time = s_gpuParticleTime;
+			perFrameData_->time = gpuParticleTime_;
 		}
 
 		UINT pParticles = cp->GetRootParameterIndex(updateShader, "gParticles");
@@ -498,6 +534,16 @@ void EffectDefinition::DispatchGPUParticle(ID3D12GraphicsCommandList* commandLis
 		barrier.Type = D3D12_RESOURCE_BARRIER_TYPE_UAV;
 		barrier.UAV.pResource = gpuParticleResource_.Get();
 		commandList->ResourceBarrier(1, &barrier);
+	}
+
+	if (gpuParticleState_ != D3D12_RESOURCE_STATE_NON_PIXEL_SHADER_RESOURCE) {
+		D3D12_RESOURCE_BARRIER barrier{};
+		barrier.Type = D3D12_RESOURCE_BARRIER_TYPE_TRANSITION;
+		barrier.Transition.pResource = gpuParticleResource_.Get();
+		barrier.Transition.StateBefore = gpuParticleState_;
+		barrier.Transition.StateAfter = D3D12_RESOURCE_STATE_NON_PIXEL_SHADER_RESOURCE;
+		commandList->ResourceBarrier(1, &barrier);
+		gpuParticleState_ = D3D12_RESOURCE_STATE_NON_PIXEL_SHADER_RESOURCE;
 	}
 }
 
