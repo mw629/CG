@@ -10,6 +10,7 @@ GameSceneParticle::GameSceneParticle()
 	dustEffect_ = std::make_unique<Emitter>();
 	shockwaveEffect_ = std::make_unique<Emitter>();
 	bonusTornadoEffect_ = std::make_unique<Emitter>();
+	snowEffect_ = std::make_unique<Emitter>();
 }
 
 void GameSceneParticle::Initialize()
@@ -77,10 +78,20 @@ void GameSceneParticle::Initialize()
 	bonusTornadoEffect_->name_ = "Bonus Tornado";
 	bonusTornadoEffect_->SetStop(true);
 	bonusTornadoEffect_->generatorBehavior = nullptr;
+
+	// 雪エフェクト（GPUパーティクル）の初期化
+	snowEffect_->Initialize();
+	snowEffect_->LoadFromJson("snow");
+	snowEffect_->SetUseGpuParticle(true); // 確実にGPUパーティクルを有効化
+	snowEffect_->SetBlend(BlendMode::kBlendModeAdd); // 加算ブレンドに設定（確実に描画されるように）
+	snowEffect_->name_ = "Snow Effect";
+	snowEffect_->SetStop(false); // 常に降らせる
+	snowEffect_->generatorBehavior = nullptr; // JSONの設定に従う
 }
 
 void GameSceneParticle::PlayingUpdate(const Matrix4x4& view, const Vector3& playerPos)
 {
+	/* ほかのパーティクルは一旦無効化
 	hitEffect_->Update(view);
 	
 	shockwaveEffect_->Update(view, [](const EffectDefinitionData& p) {
@@ -97,20 +108,39 @@ void GameSceneParticle::PlayingUpdate(const Matrix4x4& view, const Vector3& play
 
 	// 砂埃のUpdate
 	dustEffect_->Update(view);
+	*/
+
+	// 雪エフェクトの更新はAlwaysUpdateに移動
 }
 
 void GameSceneParticle::PlayerHitUpdate(const Matrix4x4& view)
 {
-	hitEffect_->Update(view);
-	dustEffect_->Update(view);
+	// hitEffect_->Update(view);
+	// dustEffect_->Update(view);
+	// snowEffect_->Update(view); // AlwaysUpdateに移動
 }
 
 void GameSceneParticle::EditorUpdate(const Matrix4x4& view)
 {
-	hitEffect_->EditorUpdate(view);
-	dustEffect_->EditorUpdate(view);
-	shockwaveEffect_->EditorUpdate(view);
-	bonusTornadoEffect_->EditorUpdate(view);
+	// hitEffect_->EditorUpdate(view);
+	// dustEffect_->EditorUpdate(view);
+	// shockwaveEffect_->EditorUpdate(view);
+	// bonusTornadoEffect_->EditorUpdate(view);
+	// snowEffect_->EditorUpdate(view); // AlwaysUpdateに移動
+}
+
+void GameSceneParticle::AlwaysUpdate(const Matrix4x4& view, const Vector3& cameraPos)
+{
+	// 雪エフェクトの更新
+	// カメラの周囲に常に雪が降るように追従させる
+	EmitterData sd = snowEffect_->GetEmitterData();
+	sd.transform.translate.x = cameraPos.x;
+	sd.transform.translate.y = cameraPos.y + 15.0f; // カメラより少し上から降らせる
+	sd.transform.translate.z = cameraPos.z + 20.0f; // カメラの少し前を中心に
+	snowEffect_->SetEmitterData(sd);
+	
+	// Editorモード等でも常に更新されるようにする
+	snowEffect_->Update(view);
 }
 
 void GameSceneParticle::EmitDust(const Vector3& playerPos)
@@ -180,20 +210,22 @@ void GameSceneParticle::UpdateBonusEffectEmit(float timeScale, const Vector3& pl
 
 void GameSceneParticle::Draw(class Draw& draw)
 {
-	hitEffect_->Draw(draw);
-	shockwaveEffect_->Draw(draw);
-	bonusTornadoEffect_->Draw(draw);
-	dustEffect_->Draw(draw);
+	// hitEffect_->Draw(draw);
+	// shockwaveEffect_->Draw(draw);
+	// bonusTornadoEffect_->Draw(draw);
+	// dustEffect_->Draw(draw);
+	snowEffect_->Draw(draw);
 }
 
 void GameSceneParticle::ImGui()
 {
 #ifdef _USE_IMGUI
 	if (ImGui::CollapsingHeader("Particles")) {
-		if (hitEffect_) hitEffect_->ImGui();
-		if (dustEffect_) dustEffect_->ImGui();
-		if (shockwaveEffect_) shockwaveEffect_->ImGui();
-		if (bonusTornadoEffect_) bonusTornadoEffect_->ImGui();
+		// if (hitEffect_) hitEffect_->ImGui();
+		// if (dustEffect_) dustEffect_->ImGui();
+		// if (shockwaveEffect_) shockwaveEffect_->ImGui();
+		// if (bonusTornadoEffect_) bonusTornadoEffect_->ImGui();
+		if (snowEffect_) snowEffect_->ImGui();
 	}
 #endif
 }

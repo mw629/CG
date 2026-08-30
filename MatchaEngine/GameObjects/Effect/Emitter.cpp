@@ -301,9 +301,12 @@ void Emitter::SyncGpuParticleParameters(bool emitNow)
 
 	effectDefinition_->SetIsBoxEmitter(emitterType_ == EmitterType::Box);
 
+	static float globalTime = 0.0f;
+	globalTime += 1.0f / 60.0f;
+
 	PerFrameForGPU perFrame{};
 	perFrame.deltaTime = 1.0f / 60.0f;
-	perFrame.time = 0.0f;
+	perFrame.time = globalTime;
 	perFrame.acceleration = movementData_.acceleration;
 	perFrame.sizeDelta = movementData_.sizeDelta;
 	

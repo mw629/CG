@@ -493,6 +493,9 @@ void GameScene::Update() {
   } else if (gameState_ == GameState::Editor) {
     EditorUpdate();
   }
+
+  // 雪などの常時出続けるパーティクルの更新
+  particleManager_->AlwaysUpdate(view, camera_->GetTransform().translate);
 }
 
 void GameScene::Draw(class Draw &draw) {
