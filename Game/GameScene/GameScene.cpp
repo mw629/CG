@@ -558,9 +558,9 @@ void GameScene::PlayingUpdate() {
 
   // ボス戦の更新
   if (playingState_ == PlayingState::Boss) {
-    if (!boss_->GetIsActive()) {
+    if (!boss_->GetIsActive() && !isCameraTransitioning_ && !isCameraTransitionPending_) {
       ChangePlayingState(PlayingState::ThreeLane);
-    } else if (boss_->GetState() == BossState::Battle) {
+    } else if (boss_->GetIsActive() && boss_->GetState() == BossState::Battle) {
       bossAttackTimer_ += timeScale;
       // 攻撃の生成（約2秒に1回）
       if (bossAttackTimer_ >= 120.0f) {
@@ -903,7 +903,6 @@ void GameScene::ChangePlayingState(PlayingState newState, bool force) {
     isRightSideMode_ = false;
     rightSideDistance_ = 0.0f;
     stageSettings_->SetSpawningPaused(true);
-    boss_->Spawn(-9.0f, 6.0f, -15.0f); // さらにレーン側に寄せる
     bossAttackTimer_ = 0.0f;
     break;
   }
@@ -958,6 +957,11 @@ void GameScene::UpdateCameraTransition() {
     isCameraTransitioning_ = false;
     if (playingState_ != PlayingState::Boss) {
       stageSettings_->SetSpawningPaused(false);
+    } else {
+      // カメラ遷移が終わってからボスを出現させる
+      if (!boss_->GetIsActive()) {
+        boss_->Spawn(-9.0f, 6.0f, -15.0f);
+      }
     }
   }
 
