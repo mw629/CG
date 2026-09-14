@@ -53,8 +53,8 @@ private:
 	float barrierBreakTimer_ = 0.0f;
 	float barrierBreakDuration_ = 0.35f;
 	float barrierPulseTimer_ = 0.0f;
-	Vector3 barrierOffset_ = { 0.0f, 0.6f, 1.2f };
-	Vector3 barrierBaseScale_ = { 1.2f, 1.2f, 1.2f };
+	Vector3 barrierOffset_ = { 0.0f, 0.0f, 1.2f };
+	Vector3 barrierBaseScale_ = { 0.6f, 0.6f, 0.6f };
 	Vector4 barrierBaseColor_ = { 0.25f, 0.8f, 1.0f, 0.85f };
 	Vector4 barrierFlashColor_ = { 1.0f, 1.0f, 1.0f, 0.95f };
 	Vector3 lastPlayerPos_ = { 0.0f, 0.0f, 0.0f };
