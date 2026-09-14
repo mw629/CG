@@ -41,8 +41,12 @@ public:
 	Matrix4x4 GetViewProjectionMatrix() const { return MultiplyMatrix4x4(viewMatrix_, projectionMatrix_); }
 
 	const Transform& GetTransform() const { return transform_; }
-	void SetTransform(Transform transform) { transform_ = transform; }
+	void SetTransform(Transform transform);
 	void SetDebugCamera(bool isDebug) { isDebugCamera_ = isDebug; }
+	bool GetDebugCamera() const { return isDebugCamera_; }
+
+	void SetAspectRatio(float aspectRatio) { aspectRatio_ = aspectRatio; }
+	float GetAspectRatio() const { return aspectRatio_; }
 	
 	ID3D12Resource* GetCameraResource() const { return cameraResource_.Get(); }
 

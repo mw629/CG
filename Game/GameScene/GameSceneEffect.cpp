@@ -1,19 +1,18 @@
-#include "GameSceneParticle.h"
+#include "GameSceneEffect.h"
 #include "Graphics/Render/Draw.h"
 #include <cmath>
 #include <cstdlib>
 #include <imgui.h>
 
-GameSceneParticle::GameSceneParticle()
+GameSceneEffect::GameSceneEffect()
 {
 	hitEffect_ = std::make_unique<Emitter>();
 	dustEffect_ = std::make_unique<Emitter>();
 	shockwaveEffect_ = std::make_unique<Emitter>();
-	bonusTornadoEffect_ = std::make_unique<Emitter>();
 	snowEffect_ = std::make_unique<Emitter>();
 }
 
-void GameSceneParticle::Initialize()
+void GameSceneEffect::Initialize()
 {
 	// ヒットエフェクトの初期化（ヒットスパーク演出）
 	EmitterData hitEmitter;
@@ -72,13 +71,6 @@ void GameSceneParticle::Initialize()
 		p.transform.rotate.x = 3.14159265f / 2.0f; // 盾（縦）になっているリングを90度回転させて地面と平行（横）にする
 	};
 
-	// ボーナスヒット時のトルネードエフェクトの初期化
-	bonusTornadoEffect_->Initialize();
-	bonusTornadoEffect_->LoadFromJson("tornado.json");
-	bonusTornadoEffect_->name_ = "Bonus Tornado";
-	bonusTornadoEffect_->SetStop(true);
-	bonusTornadoEffect_->generatorBehavior = nullptr;
-
 	// 雪エフェクト（GPUパーティクル）の初期化
 	snowEffect_->Initialize();
 	snowEffect_->LoadFromJson("snow");
@@ -89,7 +81,7 @@ void GameSceneParticle::Initialize()
 	snowEffect_->generatorBehavior = nullptr; // JSONの設定に従う
 }
 
-void GameSceneParticle::PlayingUpdate(const Matrix4x4& view, const Vector3& playerPos)
+void GameSceneEffect::PlayingUpdate(const Matrix4x4& view, const Vector3& playerPos)
 {
 	/* ほかのパーティクルは一旦無効化
 	hitEffect_->Update(view);
@@ -103,9 +95,6 @@ void GameSceneParticle::PlayingUpdate(const Matrix4x4& view, const Vector3& play
 		return next;
 	});
 
-	// ボーナストルネードの更新（エディタと同じ挙動にするため、独自拡張を削除）
-	bonusTornadoEffect_->Update(view);
-
 	// 砂埃のUpdate
 	dustEffect_->Update(view);
 	*/
@@ -113,23 +102,22 @@ void GameSceneParticle::PlayingUpdate(const Matrix4x4& view, const Vector3& play
 	// 雪エフェクトの更新はAlwaysUpdateに移動
 }
 
-void GameSceneParticle::PlayerHitUpdate(const Matrix4x4& view)
+void GameSceneEffect::PlayerHitUpdate(const Matrix4x4& view)
 {
 	// hitEffect_->Update(view);
 	// dustEffect_->Update(view);
 	// snowEffect_->Update(view); // AlwaysUpdateに移動
 }
 
-void GameSceneParticle::EditorUpdate(const Matrix4x4& view)
+void GameSceneEffect::EditorUpdate(const Matrix4x4& view)
 {
 	// hitEffect_->EditorUpdate(view);
 	// dustEffect_->EditorUpdate(view);
 	// shockwaveEffect_->EditorUpdate(view);
-	// bonusTornadoEffect_->EditorUpdate(view);
 	// snowEffect_->EditorUpdate(view); // AlwaysUpdateに移動
 }
 
-void GameSceneParticle::AlwaysUpdate(const Matrix4x4& view, const Vector3& cameraPos)
+void GameSceneEffect::AlwaysUpdate(const Matrix4x4& view, const Vector3& cameraPos)
 {
 	// 雪エフェクトの更新
 	// カメラの周囲に常に雪が降るように追従させる
@@ -143,7 +131,7 @@ void GameSceneParticle::AlwaysUpdate(const Matrix4x4& view, const Vector3& camer
 	snowEffect_->Update(view);
 }
 
-void GameSceneParticle::EmitDust(const Vector3& playerPos)
+void GameSceneEffect::EmitDust(const Vector3& playerPos)
 {
 	EmitterData ed = dustEffect_->GetEmitterData();
 	ed.transform.translate = playerPos;
@@ -152,7 +140,7 @@ void GameSceneParticle::EmitDust(const Vector3& playerPos)
 	dustEffect_->Emit();
 }
 
-void GameSceneParticle::EmitShockwave(const Vector3& playerPos)
+void GameSceneEffect::EmitShockwave(const Vector3& playerPos)
 {
 	EmitterData ringData = shockwaveEffect_->GetEmitterData();
 	ringData.transform.translate = playerPos;
@@ -161,17 +149,7 @@ void GameSceneParticle::EmitShockwave(const Vector3& playerPos)
 	shockwaveEffect_->Emit();
 }
 
-void GameSceneParticle::EmitBonusTornado(const Vector3& playerPos)
-{
-	EmitterData tornadoData = bonusTornadoEffect_->GetEmitterData();
-	tornadoData.transform.translate = playerPos;
-	// 足元（Y=2.0付近）を基準にするため少し下げる
-	tornadoData.transform.translate.y -= 1.0f; 
-	bonusTornadoEffect_->SetEmitterData(tornadoData);
-	bonusTornadoEffect_->Emit();
-}
-
-void GameSceneParticle::EmitHitEffect(const Vector3& playerPos)
+void GameSceneEffect::EmitHitEffect(const Vector3& playerPos)
 {
 	EmitterData emData = hitEffect_->GetEmitterData();
 	emData.transform.translate = playerPos;
@@ -181,50 +159,26 @@ void GameSceneParticle::EmitHitEffect(const Vector3& playerPos)
 	hitEffect_->Emit();
 }
 
-void GameSceneParticle::ClearHitParticles()
+void GameSceneEffect::ClearHitParticles()
 {
 	hitEffect_->ClearParticles();
 }
 
-void GameSceneParticle::StartBonusEffect(float duration)
-{
-	isBonusEffectActive_ = true;
-	bonusEffectTimer_ = duration;
-}
-
-void GameSceneParticle::UpdateBonusEffectEmit(float timeScale, const Vector3& playerPos)
-{
-	if (isBonusEffectActive_) {
-		bonusEffectTimer_ -= 1.0f * timeScale;
-		if (bonusEffectTimer_ > 0.0f) {
-			EmitterData tornadoData = bonusTornadoEffect_->GetEmitterData();
-			tornadoData.transform.translate = playerPos;
-			tornadoData.transform.translate.y -= 1.0f; 
-			bonusTornadoEffect_->SetEmitterData(tornadoData);
-			bonusTornadoEffect_->Emit();
-		} else {
-			isBonusEffectActive_ = false;
-		}
-	}
-}
-
-void GameSceneParticle::Draw(class Draw& draw)
+void GameSceneEffect::Draw(class Draw& draw)
 {
 	// hitEffect_->Draw(draw);
 	// shockwaveEffect_->Draw(draw);
-	// bonusTornadoEffect_->Draw(draw);
 	// dustEffect_->Draw(draw);
 	snowEffect_->Draw(draw);
 }
 
-void GameSceneParticle::ImGui()
+void GameSceneEffect::ImGui()
 {
 #ifdef _USE_IMGUI
 	if (ImGui::CollapsingHeader("Particles")) {
 		// if (hitEffect_) hitEffect_->ImGui();
 		// if (dustEffect_) dustEffect_->ImGui();
 		// if (shockwaveEffect_) shockwaveEffect_->ImGui();
-		// if (bonusTornadoEffect_) bonusTornadoEffect_->ImGui();
 		if (snowEffect_) snowEffect_->ImGui();
 	}
 #endif

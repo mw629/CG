@@ -38,6 +38,13 @@ void Camera::Initialize() {
 	cameraData_->worldPosition = transform_.translate;
 }
 
+void Camera::SetTransform(Transform transform) {
+	transform_ = transform;
+	if (isDebugCamera_) {
+		debugCamera_.SetEye(transform.translate);
+	}
+}
+
 void Camera::Update() {
     debugCamera_.Update();
 
@@ -49,6 +56,7 @@ void Camera::Update() {
     if (isDebugCamera_) {
         viewMatrix_ = debugCamera_.GetViewMatrix();
         eye = debugCamera_.GetEye();
+        transform_.translate = eye;
     }
     else {
         Matrix4x4 cameraMatrix = MakeAffineMatrix(transform_.translate, transform_.scale, transform_.rotate);

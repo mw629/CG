@@ -20,7 +20,6 @@ private:
 	Transform cameraTransform_{ {1.0f,1.0f,1.0f},{0.0f,0.0f,0.0f,},{0.0f,2.0f,-5.0f} };
 
     std::vector<std::unique_ptr<Emitter>> particle_;
-	std::unique_ptr<Emitter> leftHandParticle_ = std::make_unique<Emitter>();
 
 	std::unique_ptr<Sprite> sprite_ = std::make_unique<Sprite>();
 	SpriteData spriteData_{

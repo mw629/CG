@@ -39,7 +39,7 @@ void Emitter::ImGui() {
 	ImGui::PushID(this);
 	if (ImGui::CollapsingHeader(name_.c_str())) {
 		if (ImGui::TreeNode(LanguageManager::Tr("Emitter Settings"))) {
-			const char* emitterTypes[] = { "Box", "Sphere" };
+			const char* emitterTypes[] = { "Box", "Sphere", "Circle", "Cone" };
 			int currentType = static_cast<int>(emitterType_);
 			if (ImGui::Combo(LanguageManager::Tr("Emitter Type"), &currentType, emitterTypes, IM_ARRAYSIZE(emitterTypes))) {
 				emitterType_ = static_cast<EmitterType>(currentType);
@@ -61,6 +61,31 @@ void Emitter::ImGui() {
 				ImGui::DragInt(LanguageManager::Tr("Count"), reinterpret_cast<int*>(&emitterSphere_.count), 1, 0, 10000);
 				ImGui::DragFloat(LanguageManager::Tr("Frequency"), &emitterSphere_.frequency, 0.01f, 0.0f, 10.0f, "%.2f");
 				ImGui::DragFloat(LanguageManager::Tr("Frequency Time"), &emitterSphere_.frequencyTime, 0.01f, 0.0f, 9999.0f, "%.2f");
+			} else if (emitterType_ == EmitterType::Circle) {
+				ImGui::DragFloat3(LanguageManager::Tr("Position"), &emitterCircle_.translate.x, 0.01f, -FLT_MAX, FLT_MAX, "%.2f");
+				ImGui::DragFloat3(LanguageManager::Tr("Rotation"), &emitterCircle_.rotate.x, 0.01f, -FLT_MAX, FLT_MAX, "%.2f");
+				ImGui::DragFloat(LanguageManager::Tr("Outer Radius"), &emitterCircle_.outerRadius, 0.01f, 0.0f, FLT_MAX, "%.2f");
+				ImGui::DragFloat(LanguageManager::Tr("Inner Radius"), &emitterCircle_.innerRadius, 0.01f, 0.0f, emitterCircle_.outerRadius, "%.2f");
+				ImGui::DragFloat(LanguageManager::Tr("Radial Velocity"), &emitterCircle_.radialVelocity, 0.01f, -FLT_MAX, FLT_MAX, "%.2f");
+				ImGui::DragInt(LanguageManager::Tr("Count"), reinterpret_cast<int*>(&emitterCircle_.count), 1, 0, 10000);
+				ImGui::DragFloat(LanguageManager::Tr("Frequency"), &emitterCircle_.frequency, 0.01f, 0.0f, 10.0f, "%.2f");
+			} else if (emitterType_ == EmitterType::Cone) {
+				ImGui::DragFloat3(LanguageManager::Tr("Position"), &emitterCone_.translate.x, 0.01f, -FLT_MAX, FLT_MAX, "%.2f");
+				ImGui::DragFloat3(LanguageManager::Tr("Rotation"), &emitterCone_.rotate.x, 0.01f, -FLT_MAX, FLT_MAX, "%.2f");
+				ImGui::DragFloat(LanguageManager::Tr("Radius"), &emitterCone_.radius, 0.01f, 0.0f, FLT_MAX, "%.2f");
+				ImGui::SliderAngle(LanguageManager::Tr("Angle"), &emitterCone_.angle, 0.0f, 90.0f);
+				ImGui::DragFloat(LanguageManager::Tr("Speed"), &emitterCone_.speed, 0.01f, -FLT_MAX, FLT_MAX, "%.2f");
+				ImGui::DragInt(LanguageManager::Tr("Count"), reinterpret_cast<int*>(&emitterCone_.count), 1, 0, 10000);
+				ImGui::DragFloat(LanguageManager::Tr("Frequency"), &emitterCone_.frequency, 0.01f, 0.0f, 10.0f, "%.2f");
+			}
+			ImGui::TreePop();
+		}
+
+		if (ImGui::TreeNode(LanguageManager::Tr("Spawn / Burst Mode"))) {
+			ImGui::Checkbox(LanguageManager::Tr("Loop Emission"), &isLoop_);
+			ImGui::DragInt(LanguageManager::Tr("Burst Count"), reinterpret_cast<int*>(&burstCount_), 1, 1, 10000);
+			if (ImGui::Button(LanguageManager::Tr("Trigger Burst"))) {
+				TriggerBurst();
 			}
 			ImGui::TreePop();
 		}
@@ -69,14 +94,41 @@ void Emitter::ImGui() {
 			ImGui::DragFloat3(LanguageManager::Tr("Base Position"), &SetEffectDefinitionData_.transform.translate.x, 0.01f, -FLT_MAX, FLT_MAX, "%.2f");
 			ImGui::DragFloat3(LanguageManager::Tr("Base Size (Scale)"), &SetEffectDefinitionData_.transform.scale.x, 0.01f, -FLT_MAX, FLT_MAX, "%.2f");
 			ImGui::DragFloat3(LanguageManager::Tr("Base Rotation"), &SetEffectDefinitionData_.transform.rotate.x, 0.01f, -FLT_MAX, FLT_MAX, "%.2f");
-			ImGui::ColorEdit4(LanguageManager::Tr("Color"), &SetEffectDefinitionData_.color.x);
+			ImGui::Checkbox(LanguageManager::Tr("Align to Velocity"), &alignToVelocity_);
+			ImGui::ColorEdit4(LanguageManager::Tr("Base Color"), &SetEffectDefinitionData_.color.x);
 			ImGui::DragFloat(LanguageManager::Tr("LifeTime"), &SetEffectDefinitionData_.lifeTime, 0.01f, 0.0f, FLT_MAX, "%.2f");
+			ImGui::TreePop();
+		}
+
+		if (ImGui::TreeNode(LanguageManager::Tr("Scale Over Lifetime"))) {
+			ImGui::Checkbox(LanguageManager::Tr("Enable Scale Over Lifetime"), &enableScaleOverLifetime_);
+			if (enableScaleOverLifetime_) {
+				const char* curves[] = { "Linear", "BellCurve (0 -> 1 -> 0)" };
+				ImGui::Combo(LanguageManager::Tr("Curve Type"), &scaleCurveType_, curves, IM_ARRAYSIZE(curves));
+				if (scaleCurveType_ == 0) {
+					ImGui::DragFloat3(LanguageManager::Tr("Start Scale"), &startScale_.x, 0.01f, 0.0f, FLT_MAX, "%.2f");
+					ImGui::DragFloat3(LanguageManager::Tr("End Scale"), &endScale_.x, 0.01f, 0.0f, FLT_MAX, "%.2f");
+				} else {
+					ImGui::DragFloat3(LanguageManager::Tr("Peak Scale"), &startScale_.x, 0.01f, 0.0f, FLT_MAX, "%.2f");
+				}
+			}
+			ImGui::TreePop();
+		}
+
+		if (ImGui::TreeNode(LanguageManager::Tr("Color Over Lifetime"))) {
+			ImGui::Checkbox(LanguageManager::Tr("Enable Color Over Lifetime"), &enableColorOverLifetime_);
+			if (enableColorOverLifetime_) {
+				ImGui::ColorEdit4(LanguageManager::Tr("Start Color"), &startColor_.x);
+				ImGui::ColorEdit4(LanguageManager::Tr("End Color"), &endColor_.x);
+			}
 			ImGui::TreePop();
 		}
 
 		if (ImGui::TreeNode(LanguageManager::Tr("Particle Movement Settings"))) {
 			ImGui::DragFloat3(LanguageManager::Tr("Base Velocity"), &movementData_.baseVelocity.x, 0.001f, -FLT_MAX, FLT_MAX, "%.3f");
 			ImGui::DragFloat3(LanguageManager::Tr("Velocity Variance"), &movementData_.velocityVariance.x, 0.001f, 0.0f, FLT_MAX, "%.3f");
+			ImGui::DragFloat(LanguageManager::Tr("Radial Speed"), &movementData_.radialSpeed, 0.001f, -FLT_MAX, FLT_MAX, "%.3f");
+			ImGui::DragFloat(LanguageManager::Tr("Radial Speed Variance"), &movementData_.radialSpeedVariance, 0.001f, 0.0f, FLT_MAX, "%.3f");
 			ImGui::DragFloat3(LanguageManager::Tr("Acceleration (Gravity)"), &movementData_.acceleration.x, 0.0001f, -FLT_MAX, FLT_MAX, "%.4f");
 			ImGui::DragFloat3(LanguageManager::Tr("Size Variance"), &movementData_.sizeVariance.x, 0.01f, 0.0f, FLT_MAX, "%.2f");
 			ImGui::DragFloat3(LanguageManager::Tr("Size Multiplier"), &movementData_.sizeDelta.x, 0.001f, 0.0f, FLT_MAX, "%.3f");
@@ -108,7 +160,7 @@ void Emitter::ImGui() {
 				SetBillboard(isBillboard);
 			}
 
-			const char* shapes[] = { "Plane", "Cylinder", "Ring" };
+			const char* shapes[] = { "Plane", "Cylinder", "Ring", "Cube" };
 			int currentShape = static_cast<int>(shape_);
 			if (ImGui::Combo(LanguageManager::Tr("Shape"), &currentShape, shapes, IM_ARRAYSIZE(shapes))) {
 				SetShape(static_cast<EffectShape>(currentShape));
@@ -155,6 +207,8 @@ void Emitter::ImGui() {
 				shapeChanged |= ImGui::DragInt(LanguageManager::Tr("Ring Divide"), &shapeData_.ringDivide, 1.0f, 3, 128);
 				shapeChanged |= ImGui::DragFloat(LanguageManager::Tr("Ring Outer Radius"), &shapeData_.ringOuterRadius, 0.05f, 0.0f, 100.0f);
 				shapeChanged |= ImGui::DragFloat(LanguageManager::Tr("Ring Inner Radius"), &shapeData_.ringInnerRadius, 0.05f, 0.0f, 100.0f);
+			} else if (shape_ == EffectShape::Cube) {
+				shapeChanged |= ImGui::DragFloat3(LanguageManager::Tr("Cube Size"), &shapeData_.cubeSize.x, 0.05f, 0.0f, 100.0f);
 			}
 			if (shapeChanged) {
 				SetShapeData(shapeData_);
@@ -257,14 +311,45 @@ void Emitter::SaveToJson(const std::string& name)
 	root["emitter"]["sphere"]["count"] = emitterSphere_.count;
 	root["emitter"]["sphere"]["frequency"] = emitterSphere_.frequency;
 
+	root["emitter"]["circle"]["translate"] = { emitterCircle_.translate.x, emitterCircle_.translate.y, emitterCircle_.translate.z };
+	root["emitter"]["circle"]["rotate"] = { emitterCircle_.rotate.x, emitterCircle_.rotate.y, emitterCircle_.rotate.z };
+	root["emitter"]["circle"]["outerRadius"] = emitterCircle_.outerRadius;
+	root["emitter"]["circle"]["innerRadius"] = emitterCircle_.innerRadius;
+	root["emitter"]["circle"]["radialVelocity"] = emitterCircle_.radialVelocity;
+	root["emitter"]["circle"]["count"] = emitterCircle_.count;
+	root["emitter"]["circle"]["frequency"] = emitterCircle_.frequency;
+
+	root["emitter"]["cone"]["translate"] = { emitterCone_.translate.x, emitterCone_.translate.y, emitterCone_.translate.z };
+	root["emitter"]["cone"]["rotate"] = { emitterCone_.rotate.x, emitterCone_.rotate.y, emitterCone_.rotate.z };
+	root["emitter"]["cone"]["radius"] = emitterCone_.radius;
+	root["emitter"]["cone"]["angle"] = emitterCone_.angle;
+	root["emitter"]["cone"]["speed"] = emitterCone_.speed;
+	root["emitter"]["cone"]["count"] = emitterCone_.count;
+	root["emitter"]["cone"]["frequency"] = emitterCone_.frequency;
+
+	root["spawn"]["isLoop"] = isLoop_;
+	root["spawn"]["burstCount"] = burstCount_;
+
 	root["particle"]["transform"]["translate"] = { SetEffectDefinitionData_.transform.translate.x, SetEffectDefinitionData_.transform.translate.y, SetEffectDefinitionData_.transform.translate.z };
 	root["particle"]["transform"]["scale"] = { SetEffectDefinitionData_.transform.scale.x, SetEffectDefinitionData_.transform.scale.y, SetEffectDefinitionData_.transform.scale.z };
 	root["particle"]["transform"]["rotate"] = { SetEffectDefinitionData_.transform.rotate.x, SetEffectDefinitionData_.transform.rotate.y, SetEffectDefinitionData_.transform.rotate.z };
 	root["particle"]["color"] = { SetEffectDefinitionData_.color.x, SetEffectDefinitionData_.color.y, SetEffectDefinitionData_.color.z, SetEffectDefinitionData_.color.w };
 	root["particle"]["lifeTime"] = SetEffectDefinitionData_.lifeTime;
+	root["particle"]["alignToVelocity"] = alignToVelocity_;
+
+	root["scaleOverLifetime"]["enable"] = enableScaleOverLifetime_;
+	root["scaleOverLifetime"]["curveType"] = scaleCurveType_;
+	root["scaleOverLifetime"]["startScale"] = { startScale_.x, startScale_.y, startScale_.z };
+	root["scaleOverLifetime"]["endScale"] = { endScale_.x, endScale_.y, endScale_.z };
+
+	root["colorOverLifetime"]["enable"] = enableColorOverLifetime_;
+	root["colorOverLifetime"]["startColor"] = { startColor_.x, startColor_.y, startColor_.z, startColor_.w };
+	root["colorOverLifetime"]["endColor"] = { endColor_.x, endColor_.y, endColor_.z, endColor_.w };
 
 	root["movement"]["baseVelocity"] = { movementData_.baseVelocity.x, movementData_.baseVelocity.y, movementData_.baseVelocity.z };
 	root["movement"]["velocityVariance"] = { movementData_.velocityVariance.x, movementData_.velocityVariance.y, movementData_.velocityVariance.z };
+	root["movement"]["radialSpeed"] = movementData_.radialSpeed;
+	root["movement"]["radialSpeedVariance"] = movementData_.radialSpeedVariance;
 	root["movement"]["acceleration"] = { movementData_.acceleration.x, movementData_.acceleration.y, movementData_.acceleration.z };
 	root["movement"]["sizeVariance"] = { movementData_.sizeVariance.x, movementData_.sizeVariance.y, movementData_.sizeVariance.z };
 	root["movement"]["sizeDelta"] = { movementData_.sizeDelta.x, movementData_.sizeDelta.y, movementData_.sizeDelta.z };
@@ -288,6 +373,8 @@ void Emitter::SaveToJson(const std::string& name)
 	root["visual"]["ringDivide"] = shapeData_.ringDivide;
 	root["visual"]["ringOuterRadius"] = shapeData_.ringOuterRadius;
 	root["visual"]["ringInnerRadius"] = shapeData_.ringInnerRadius;
+
+	root["visual"]["cubeSize"] = { shapeData_.cubeSize.x, shapeData_.cubeSize.y, shapeData_.cubeSize.z };
 
 	std::ofstream file(filepath);
 	if (file.is_open()) {
@@ -331,7 +418,7 @@ void Emitter::SyncGpuParticleParameters(bool emitNow)
 		box.lifeTime = SetEffectDefinitionData_.lifeTime;
 		box.baseRotate = SetEffectDefinitionData_.transform.rotate + emitter_.transform.rotate;
 		effectDefinition_->SetGpuEmitterBoxData(box);
-	} else {
+	} else if (emitterType_ == EmitterType::Sphere) {
 		EmitterSphereForGPU sphere{};
 		sphere.translate = emitterSphere_.translate + SetEffectDefinitionData_.transform.translate;
 		sphere.radius = emitterSphere_.radius;
@@ -346,6 +433,9 @@ void Emitter::SyncGpuParticleParameters(bool emitNow)
 		sphere.lifeTime = SetEffectDefinitionData_.lifeTime;
 		sphere.baseRotate = SetEffectDefinitionData_.transform.rotate;
 		effectDefinition_->SetGpuEmitterSphereData(sphere);
+	} else {
+		// Circle や Cone は GPU コンピュートシェーダーが存在しないため、CPU パーティクルに自動切り替え
+		SetUseGpuParticle(false);
 	}
 }
 
@@ -392,6 +482,78 @@ void Emitter::LoadFromJson(const std::string& name)
 			if (root["emitter"]["sphere"].contains("count")) emitterSphere_.count = root["emitter"]["sphere"]["count"];
 			if (root["emitter"]["sphere"].contains("frequency")) emitterSphere_.frequency = root["emitter"]["sphere"]["frequency"];
 		}
+
+		if (root["emitter"].contains("circle")) {
+			if (root["emitter"]["circle"].contains("translate")) {
+				emitterCircle_.translate.x = root["emitter"]["circle"]["translate"][0];
+				emitterCircle_.translate.y = root["emitter"]["circle"]["translate"][1];
+				emitterCircle_.translate.z = root["emitter"]["circle"]["translate"][2];
+			}
+			if (root["emitter"]["circle"].contains("rotate")) {
+				emitterCircle_.rotate.x = root["emitter"]["circle"]["rotate"][0];
+				emitterCircle_.rotate.y = root["emitter"]["circle"]["rotate"][1];
+				emitterCircle_.rotate.z = root["emitter"]["circle"]["rotate"][2];
+			}
+			if (root["emitter"]["circle"].contains("outerRadius")) emitterCircle_.outerRadius = root["emitter"]["circle"]["outerRadius"];
+			if (root["emitter"]["circle"].contains("innerRadius")) emitterCircle_.innerRadius = root["emitter"]["circle"]["innerRadius"];
+			if (root["emitter"]["circle"].contains("radialVelocity")) emitterCircle_.radialVelocity = root["emitter"]["circle"]["radialVelocity"];
+			if (root["emitter"]["circle"].contains("count")) emitterCircle_.count = root["emitter"]["circle"]["count"];
+			if (root["emitter"]["circle"].contains("frequency")) emitterCircle_.frequency = root["emitter"]["circle"]["frequency"];
+		}
+
+		if (root["emitter"].contains("cone")) {
+			if (root["emitter"]["cone"].contains("translate")) {
+				emitterCone_.translate.x = root["emitter"]["cone"]["translate"][0];
+				emitterCone_.translate.y = root["emitter"]["cone"]["translate"][1];
+				emitterCone_.translate.z = root["emitter"]["cone"]["translate"][2];
+			}
+			if (root["emitter"]["cone"].contains("rotate")) {
+				emitterCone_.rotate.x = root["emitter"]["cone"]["rotate"][0];
+				emitterCone_.rotate.y = root["emitter"]["cone"]["rotate"][1];
+				emitterCone_.rotate.z = root["emitter"]["cone"]["rotate"][2];
+			}
+			if (root["emitter"]["cone"].contains("radius")) emitterCone_.radius = root["emitter"]["cone"]["radius"];
+			if (root["emitter"]["cone"].contains("angle")) emitterCone_.angle = root["emitter"]["cone"]["angle"];
+			if (root["emitter"]["cone"].contains("speed")) emitterCone_.speed = root["emitter"]["cone"]["speed"];
+			if (root["emitter"]["cone"].contains("count")) emitterCone_.count = root["emitter"]["cone"]["count"];
+			if (root["emitter"]["cone"].contains("frequency")) emitterCone_.frequency = root["emitter"]["cone"]["frequency"];
+		}
+	}
+
+	if (root.contains("spawn")) {
+		if (root["spawn"].contains("isLoop")) isLoop_ = root["spawn"]["isLoop"].get<bool>();
+		if (root["spawn"].contains("burstCount")) burstCount_ = root["spawn"]["burstCount"].get<uint32_t>();
+	}
+
+	if (root.contains("scaleOverLifetime")) {
+		if (root["scaleOverLifetime"].contains("enable")) enableScaleOverLifetime_ = root["scaleOverLifetime"]["enable"].get<bool>();
+		if (root["scaleOverLifetime"].contains("curveType")) scaleCurveType_ = root["scaleOverLifetime"]["curveType"].get<int>();
+		if (root["scaleOverLifetime"].contains("startScale")) {
+			startScale_.x = root["scaleOverLifetime"]["startScale"][0];
+			startScale_.y = root["scaleOverLifetime"]["startScale"][1];
+			startScale_.z = root["scaleOverLifetime"]["startScale"][2];
+		}
+		if (root["scaleOverLifetime"].contains("endScale")) {
+			endScale_.x = root["scaleOverLifetime"]["endScale"][0];
+			endScale_.y = root["scaleOverLifetime"]["endScale"][1];
+			endScale_.z = root["scaleOverLifetime"]["endScale"][2];
+		}
+	}
+
+	if (root.contains("colorOverLifetime")) {
+		if (root["colorOverLifetime"].contains("enable")) enableColorOverLifetime_ = root["colorOverLifetime"]["enable"].get<bool>();
+		if (root["colorOverLifetime"].contains("startColor")) {
+			startColor_.x = root["colorOverLifetime"]["startColor"][0];
+			startColor_.y = root["colorOverLifetime"]["startColor"][1];
+			startColor_.z = root["colorOverLifetime"]["startColor"][2];
+			startColor_.w = root["colorOverLifetime"]["startColor"][3];
+		}
+		if (root["colorOverLifetime"].contains("endColor")) {
+			endColor_.x = root["colorOverLifetime"]["endColor"][0];
+			endColor_.y = root["colorOverLifetime"]["endColor"][1];
+			endColor_.z = root["colorOverLifetime"]["endColor"][2];
+			endColor_.w = root["colorOverLifetime"]["endColor"][3];
+		}
 	}
 
 	if (root.contains("particle")) {
@@ -418,7 +580,12 @@ void Emitter::LoadFromJson(const std::string& name)
 			SetEffectDefinitionData_.color.z = root["particle"]["color"][2];
 			SetEffectDefinitionData_.color.w = root["particle"]["color"][3];
 		}
-		SetEffectDefinitionData_.lifeTime = root["particle"]["lifeTime"];
+		if (root["particle"].contains("lifeTime")) {
+			SetEffectDefinitionData_.lifeTime = root["particle"]["lifeTime"];
+		}
+		if (root["particle"].contains("alignToVelocity")) {
+			alignToVelocity_ = root["particle"]["alignToVelocity"].get<bool>();
+		}
 	}
 
 	if (root.contains("movement")) {
@@ -431,6 +598,12 @@ void Emitter::LoadFromJson(const std::string& name)
 			movementData_.velocityVariance.x = root["movement"]["velocityVariance"][0];
 			movementData_.velocityVariance.y = root["movement"]["velocityVariance"][1];
 			movementData_.velocityVariance.z = root["movement"]["velocityVariance"][2];
+		}
+		if (root["movement"].contains("radialSpeed")) {
+			movementData_.radialSpeed = root["movement"]["radialSpeed"].get<float>();
+		}
+		if (root["movement"].contains("radialSpeedVariance")) {
+			movementData_.radialSpeedVariance = root["movement"]["radialSpeedVariance"].get<float>();
 		}
 		if (root["movement"].contains("acceleration")) {
 			movementData_.acceleration.x = root["movement"]["acceleration"][0];
@@ -483,6 +656,12 @@ void Emitter::LoadFromJson(const std::string& name)
 			shapeData_.ringDivide = root["visual"]["ringDivide"];
 			shapeData_.ringOuterRadius = root["visual"]["ringOuterRadius"];
 			shapeData_.ringInnerRadius = root["visual"]["ringInnerRadius"];
+		}
+
+		if (root["visual"].contains("cubeSize")) {
+			shapeData_.cubeSize.x = root["visual"]["cubeSize"][0];
+			shapeData_.cubeSize.y = root["visual"]["cubeSize"][1];
+			shapeData_.cubeSize.z = root["visual"]["cubeSize"][2];
 		}
 
 		if (root["visual"].contains("shape")) {
@@ -575,23 +754,58 @@ void Emitter::Update(Matrix4x4 viewMatrix) {
 	for (std::list<EffectDefinitionData>::iterator particleIterator = effectDefinitionData_.begin();
 		particleIterator != effectDefinitionData_.end(); ) {
 
-		// ループの先頭に追加
 		if (particleIterator->currentTime >= particleIterator->lifeTime) {
 			particleIterator = effectDefinitionData_.erase(particleIterator);
 			continue;
 		}
 
-		// 位置とスケールを更新
 		particleIterator->velocity += movementData_.acceleration;
-		particleIterator->transform.scale.x *= movementData_.sizeDelta.x;
-		particleIterator->transform.scale.y *= movementData_.sizeDelta.y;
-		particleIterator->transform.scale.z *= movementData_.sizeDelta.z;
 		particleIterator->transform.translate += particleIterator->velocity;
 
-		particleIterator->color.w -= 1.0f / (particleIterator->lifeTime * 60.0f);
-		particleIterator->currentTime += 1.0f / 60.0f;
+		float t = particleIterator->currentTime / particleIterator->lifeTime;
+		t = std::clamp(t, 0.0f, 1.0f);
 
-		++particleIterator;//これを忘れた未来の僕がいるならこれを忘れた今の僕が悲しむ
+		if (particleIterator->enableScaleOverLifetime) {
+			if (particleIterator->scaleCurveType == 1) { // BellCurve
+				float bell = std::sin(t * 3.1415926535f);
+				particleIterator->transform.scale = particleIterator->baseScale * bell;
+			} else { // Linear
+				particleIterator->transform.scale = {
+					particleIterator->baseScale.x + (particleIterator->endScale.x - particleIterator->baseScale.x) * t,
+					particleIterator->baseScale.y + (particleIterator->endScale.y - particleIterator->baseScale.y) * t,
+					particleIterator->baseScale.z + (particleIterator->endScale.z - particleIterator->baseScale.z) * t
+				};
+			}
+		} else {
+			particleIterator->transform.scale.x *= movementData_.sizeDelta.x;
+			particleIterator->transform.scale.y *= movementData_.sizeDelta.y;
+			particleIterator->transform.scale.z *= movementData_.sizeDelta.z;
+		}
+
+		if (particleIterator->alignToVelocity) {
+			float lenSq = particleIterator->velocity.x * particleIterator->velocity.x + 
+			              particleIterator->velocity.y * particleIterator->velocity.y + 
+			              particleIterator->velocity.z * particleIterator->velocity.z;
+			if (lenSq > 0.000001f) {
+				particleIterator->transform.rotate.y = std::atan2(particleIterator->velocity.x, particleIterator->velocity.z);
+				float horizDist = std::sqrt(particleIterator->velocity.x * particleIterator->velocity.x + particleIterator->velocity.z * particleIterator->velocity.z);
+				particleIterator->transform.rotate.x = -std::atan2(particleIterator->velocity.y, horizDist);
+			}
+		}
+
+		if (particleIterator->enableColorOverLifetime) {
+			particleIterator->color = {
+				particleIterator->startColor.x + (particleIterator->endColor.x - particleIterator->startColor.x) * t,
+				particleIterator->startColor.y + (particleIterator->endColor.y - particleIterator->startColor.y) * t,
+				particleIterator->startColor.z + (particleIterator->endColor.z - particleIterator->startColor.z) * t,
+				particleIterator->startColor.w + (particleIterator->endColor.w - particleIterator->startColor.w) * t
+			};
+		} else {
+			particleIterator->color.w -= 1.0f / (particleIterator->lifeTime * 60.0f);
+		}
+
+		particleIterator->currentTime += 1.0f / 60.0f;
+		++particleIterator;
 	}
 
 	bool emitFrame = false;
@@ -599,14 +813,32 @@ void Emitter::Update(Matrix4x4 viewMatrix) {
 		emitFrame = true;
 		manualEmitTriggered_ = false;
 	}
-	if (!isStop_) {
-		float& freqTime = (emitterType_ == EmitterType::Sphere) ? emitterSphere_.frequencyTime : emitter_.frequencyTime;
-		float freq = (emitterType_ == EmitterType::Sphere) ? emitterSphere_.frequency : emitter_.frequency;
-		freqTime += 1.0f / 60.0f;
-		if (freq <= 0.0f || freq <= freqTime) {
+	if (!isStop_ && isLoop_) {
+		float* pFreqTime = &emitter_.frequencyTime;
+		float freq = emitter_.frequency;
+		switch (emitterType_) {
+		case EmitterType::Sphere:
+			pFreqTime = &emitterSphere_.frequencyTime;
+			freq = emitterSphere_.frequency;
+			break;
+		case EmitterType::Circle:
+			pFreqTime = &emitterCircle_.frequencyTime;
+			freq = emitterCircle_.frequency;
+			break;
+		case EmitterType::Cone:
+			pFreqTime = &emitterCone_.frequencyTime;
+			freq = emitterCone_.frequency;
+			break;
+		case EmitterType::Box:
+		default:
+			break;
+		}
+
+		*pFreqTime += 1.0f / 60.0f;
+		if (freq <= 0.0f || freq <= *pFreqTime) {
 			Emit();
 			emitFrame = true;
-			if (freq > 0.0f) freqTime -= freq;
+			if (freq > 0.0f) *pFreqTime -= freq;
 		}
 	}
 
@@ -618,54 +850,104 @@ void Emitter::Update(Matrix4x4 viewMatrix) {
 
 void Emitter::Update(Matrix4x4 viewMatrix, std::function<EffectDefinitionData(const EffectDefinitionData&)> moveBehavior)
 {
-	int i = 0;
 	for (std::list<EffectDefinitionData>::iterator particleIterator = effectDefinitionData_.begin();
 		particleIterator != effectDefinitionData_.end(); ) {
 
-		// ループの先頭に追加
 		if (particleIterator->currentTime >= particleIterator->lifeTime) {
 			particleIterator = effectDefinitionData_.erase(particleIterator);
 			continue;
 		}
 
-		// 外部のムーブ関数で更新結果を受け取る
 		EffectDefinitionData updated = *particleIterator;
 		if (moveBehavior) {
 			updated = moveBehavior(*particleIterator);
 		}
-		// 必要なフィールドを反映
 		particleIterator->velocity = updated.velocity + movementData_.acceleration;
 
-		if (OnCollision(*particleIterator)&& isHit_) {
+		if (OnCollision(*particleIterator) && isHit_) {
 			(*particleIterator).velocity += accelerationFiled_.acceleration / 60.0f;
 		}
 
 		particleIterator->transform.translate = updated.transform.translate + particleIterator->velocity;
-		particleIterator->transform.scale.x = updated.transform.scale.x * movementData_.sizeDelta.x;
-		particleIterator->transform.scale.y = updated.transform.scale.y * movementData_.sizeDelta.y;
-		particleIterator->transform.scale.z = updated.transform.scale.z * movementData_.sizeDelta.z;
 		particleIterator->transform.rotate = updated.transform.rotate;
 
-		// 共通の寿命更新
-		particleIterator->color.w -= 1.0f / (particleIterator->lifeTime * 60.0f);
-		particleIterator->currentTime += 1.0f / 60.0f;
+		float t = particleIterator->currentTime / particleIterator->lifeTime;
+		t = std::clamp(t, 0.0f, 1.0f);
 
+		if (particleIterator->enableScaleOverLifetime) {
+			if (particleIterator->scaleCurveType == 1) {
+				float bell = std::sin(t * 3.1415926535f);
+				particleIterator->transform.scale = particleIterator->baseScale * bell;
+			} else {
+				particleIterator->transform.scale = {
+					particleIterator->baseScale.x + (particleIterator->endScale.x - particleIterator->baseScale.x) * t,
+					particleIterator->baseScale.y + (particleIterator->endScale.y - particleIterator->baseScale.y) * t,
+					particleIterator->baseScale.z + (particleIterator->endScale.z - particleIterator->baseScale.z) * t
+				};
+			}
+		} else {
+			particleIterator->transform.scale.x = updated.transform.scale.x * movementData_.sizeDelta.x;
+			particleIterator->transform.scale.y = updated.transform.scale.y * movementData_.sizeDelta.y;
+			particleIterator->transform.scale.z = updated.transform.scale.z * movementData_.sizeDelta.z;
+		}
+
+		if (particleIterator->alignToVelocity) {
+			float lenSq = particleIterator->velocity.x * particleIterator->velocity.x + 
+			              particleIterator->velocity.y * particleIterator->velocity.y + 
+			              particleIterator->velocity.z * particleIterator->velocity.z;
+			if (lenSq > 0.000001f) {
+				particleIterator->transform.rotate.y = std::atan2(particleIterator->velocity.x, particleIterator->velocity.z);
+				float horizDist = std::sqrt(particleIterator->velocity.x * particleIterator->velocity.x + particleIterator->velocity.z * particleIterator->velocity.z);
+				particleIterator->transform.rotate.x = -std::atan2(particleIterator->velocity.y, horizDist);
+			}
+		}
+
+		if (particleIterator->enableColorOverLifetime) {
+			particleIterator->color = {
+				particleIterator->startColor.x + (particleIterator->endColor.x - particleIterator->startColor.x) * t,
+				particleIterator->startColor.y + (particleIterator->endColor.y - particleIterator->startColor.y) * t,
+				particleIterator->startColor.z + (particleIterator->endColor.z - particleIterator->startColor.z) * t,
+				particleIterator->startColor.w + (particleIterator->endColor.w - particleIterator->startColor.w) * t
+			};
+		} else {
+			particleIterator->color.w -= 1.0f / (particleIterator->lifeTime * 60.0f);
+		}
+
+		particleIterator->currentTime += 1.0f / 60.0f;
 		++particleIterator;
-		++i;
 	}
+
 	bool emitFrame = false;
 	if (manualEmitTriggered_) {
 		emitFrame = true;
 		manualEmitTriggered_ = false;
 	}
-	if (!isStop_) {
-		float& freqTime = (emitterType_ == EmitterType::Sphere) ? emitterSphere_.frequencyTime : emitter_.frequencyTime;
-		float freq = (emitterType_ == EmitterType::Sphere) ? emitterSphere_.frequency : emitter_.frequency;
-		freqTime += 1.0f / 60.0f;
-		if (freq <= 0.0f || freq <= freqTime) {
+	if (!isStop_ && isLoop_) {
+		float* pFreqTime = &emitter_.frequencyTime;
+		float freq = emitter_.frequency;
+		switch (emitterType_) {
+		case EmitterType::Sphere:
+			pFreqTime = &emitterSphere_.frequencyTime;
+			freq = emitterSphere_.frequency;
+			break;
+		case EmitterType::Circle:
+			pFreqTime = &emitterCircle_.frequencyTime;
+			freq = emitterCircle_.frequency;
+			break;
+		case EmitterType::Cone:
+			pFreqTime = &emitterCone_.frequencyTime;
+			freq = emitterCone_.frequency;
+			break;
+		case EmitterType::Box:
+		default:
+			break;
+		}
+
+		*pFreqTime += 1.0f / 60.0f;
+		if (freq <= 0.0f || freq <= *pFreqTime) {
 			Emit();
 			emitFrame = true;
-			if (freq > 0.0f) freqTime -= freq;
+			if (freq > 0.0f) *pFreqTime -= freq;
 		}
 	}
 
@@ -679,107 +961,17 @@ void Emitter::Update(EmitterData emitter, Matrix4x4 viewMatrix, std::function<Ef
 {
 	emitter_ = emitter;
 	emitterType_ = EmitterType::Box;
-
-	int i = 0;
-	for (std::list<EffectDefinitionData>::iterator particleIterator = effectDefinitionData_.begin();
-		particleIterator != effectDefinitionData_.end(); ) {
-
-		// ループの先頭に追加
-		if (particleIterator->currentTime >= particleIterator->lifeTime) {
-			particleIterator = effectDefinitionData_.erase(particleIterator);
-			continue;
-		}
-
-		// 外部のムーブ関数で更新結果を受け取る
-		EffectDefinitionData updated = *particleIterator;
-		if (moveBehavior) {
-			updated = moveBehavior(*particleIterator);
-		}
-		// 必要なフィールドを反映
-		particleIterator->velocity = updated.velocity + movementData_.acceleration;
-		particleIterator->transform.translate = updated.transform.translate + particleIterator->velocity;
-		particleIterator->transform.scale.x = updated.transform.scale.x * movementData_.sizeDelta.x;
-		particleIterator->transform.scale.y = updated.transform.scale.y * movementData_.sizeDelta.y;
-		particleIterator->transform.scale.z = updated.transform.scale.z * movementData_.sizeDelta.z;
-		particleIterator->transform.rotate = updated.transform.rotate;
-
-		// 共通の寿命更新
-		particleIterator->color.w -= 1.0f / (particleIterator->lifeTime * 60.0f);
-		particleIterator->currentTime += 1.0f / 60.0f;
-
-		++particleIterator;
-		++i;
-	}
-	bool emitFrame = false;
-	if (manualEmitTriggered_) {
-		emitFrame = true;
-		manualEmitTriggered_ = false;
-	}
-	if (!isStop_) {
-		float& freqTime = (emitterType_ == EmitterType::Sphere) ? emitterSphere_.frequencyTime : emitter_.frequencyTime;
-		float freq = (emitterType_ == EmitterType::Sphere) ? emitterSphere_.frequency : emitter_.frequency;
-		freqTime += 1.0f / 60.0f;
-		if (freq <= 0.0f || freq <= freqTime) {
-			Emit();
-			emitFrame = true;
-			if (freq > 0.0f) freqTime -= freq;
-		}
-	}
-	
-	effectDefinition_.get()->Updata(viewMatrix, effectDefinitionData_);
-	if (GetUseGpuParticle()) {
-		SyncGpuParticleParameters(emitFrame);
-	}
+	Update(viewMatrix, moveBehavior);
 }
 
 void Emitter::Update(Matrix4x4 viewMatrix, Vector3 scale)
 {
-	for (std::list<EffectDefinitionData>::iterator particleIterator = effectDefinitionData_.begin();
-		particleIterator != effectDefinitionData_.end(); ) {
-
-		// ループの先頭に追加
-		if (particleIterator->currentTime >= particleIterator->lifeTime) {
-			particleIterator = effectDefinitionData_.erase(particleIterator);
-			continue;
-		}
-		// 位置とスケールを更新
-		particleIterator->velocity += movementData_.acceleration;
-		particleIterator->transform.scale.x *= movementData_.sizeDelta.x;
-		particleIterator->transform.scale.y *= movementData_.sizeDelta.y;
-		particleIterator->transform.scale.z *= movementData_.sizeDelta.z;
-		particleIterator->transform.translate += particleIterator->velocity;
-
-		particleIterator->color.w -= 1.0f / (particleIterator->lifeTime * 60.0f);
-		particleIterator->currentTime += 1.0f / 60.0f;
-
-		++particleIterator;//これを忘れた未来の僕がいるならこれを忘れた今の僕が悲しむ
-	}
-	bool emitFrame = false;
-	if (manualEmitTriggered_) {
-		emitFrame = true;
-		manualEmitTriggered_ = false;
-	}
-	if (!isStop_) {
-		float& freqTime = (emitterType_ == EmitterType::Sphere) ? emitterSphere_.frequencyTime : emitter_.frequencyTime;
-		float freq = (emitterType_ == EmitterType::Sphere) ? emitterSphere_.frequency : emitter_.frequency;
-		freqTime += 1.0f / 60.0f;
-		if (freq <= 0.0f || freq <= freqTime) {
-			Emit();
-			emitFrame = true;
-			if (freq > 0.0f) freqTime -= freq;
-		}
-	}
-
-	effectDefinition_.get()->Updata(viewMatrix, effectDefinitionData_);
-	if (GetUseGpuParticle()) {
-		SyncGpuParticleParameters(emitFrame);
-	}
+	SetEffectDefinitionData_.transform.scale = scale;
+	Update(viewMatrix);
 }
 
 void Emitter::EditorUpdate(Matrix4x4 viewMatrix)
 {
-	// Editor mode doesn't progress the particle time or physics
-	// It just updates the transform matrices for the camera.
 	effectDefinition_.get()->Updata(viewMatrix, effectDefinitionData_);
 	if (GetUseGpuParticle()) {
 		SyncGpuParticleParameters(false);
@@ -790,32 +982,124 @@ void Emitter::Draw(class Draw& draw) {
 	draw.DrawParticle(effectDefinition_.get());
 }
 
+void Emitter::TriggerBurst()
+{
+	for (uint32_t i = 0; i < burstCount_; ++i) {
+		effectDefinitionData_.push_back(MakeNewParticle());
+	}
+	manualEmitTriggered_ = true;
+}
+
 EffectDefinitionData Emitter::MakeNewParticle()
 {
 	std::uniform_real_distribution<float> distribution(-1.0f, 1.0f);
-	EffectDefinitionData data;
-	data = SetEffectDefinitionData_;
+	std::uniform_real_distribution<float> dist01(0.0f, 1.0f);
+	const float kPi = 3.1415926535f;
+
+	EffectDefinitionData data = SetEffectDefinitionData_;
 
 	Vector3 possion = { 0.0f, 0.0f, 0.0f };
+	Vector3 radialDir = { 0.0f, 0.0f, 0.0f };
+	float emitterRadialVel = 0.0f;
+
 	if (emitterType_ == EmitterType::Box) {
 		possion = { distribution(randomEngine), distribution(randomEngine), distribution(randomEngine) };
 		data.transform.translate = SetEffectDefinitionData_.transform.translate + possion * (emitter_.transform.scale * 0.5f) + emitter_.transform.translate;
+		float len = Length(possion);
+		if (len > 0.0001f) {
+			radialDir = Normalize(possion);
+		}
 	}
 	else if (emitterType_ == EmitterType::Sphere) {
 		do {
 			possion = { distribution(randomEngine), distribution(randomEngine), distribution(randomEngine) };
 		} while (possion.x * possion.x + possion.y * possion.y + possion.z * possion.z > 1.0f);
+		float len = Length(possion);
+		if (len > 0.0001f) {
+			radialDir = Normalize(possion);
+		}
 		data.transform.translate = SetEffectDefinitionData_.transform.translate + possion * emitterSphere_.radius + emitterSphere_.translate;
+	}
+	else if (emitterType_ == EmitterType::Circle) {
+		float angle = dist01(randomEngine) * 2.0f * kPi;
+		float rMin = (std::min)(emitterCircle_.innerRadius, emitterCircle_.outerRadius);
+		float rMax = (std::max)(emitterCircle_.innerRadius, emitterCircle_.outerRadius);
+		float u = dist01(randomEngine);
+		float r = (rMin == rMax) ? rMax : std::sqrt(rMin * rMin + u * (rMax * rMax - rMin * rMin));
+		Vector3 localCircle = { r * std::cos(angle), 0.0f, r * std::sin(angle) };
+		Vector3 localDir = { std::cos(angle), 0.0f, std::sin(angle) };
+
+		Vector3 rotatedPos = localCircle;
+		radialDir = localDir;
+		if (emitterCircle_.rotate.x != 0.0f || emitterCircle_.rotate.y != 0.0f || emitterCircle_.rotate.z != 0.0f) {
+			Matrix4x4 rotMat = Rotation(emitterCircle_.rotate);
+			rotatedPos = TransformMatrix(localCircle, rotMat);
+			radialDir = TransformMatrix(localDir, rotMat);
+		}
+		data.transform.translate = SetEffectDefinitionData_.transform.translate + rotatedPos + emitterCircle_.translate;
+		emitterRadialVel = emitterCircle_.radialVelocity;
+	}
+	else if (emitterType_ == EmitterType::Cone) {
+		float r = emitterCone_.radius * std::sqrt(dist01(randomEngine));
+		float circleAngle = dist01(randomEngine) * 2.0f * kPi;
+		Vector3 localDisk = { r * std::cos(circleAngle), 0.0f, r * std::sin(circleAngle) };
+
+		float coneAngle = dist01(randomEngine) * emitterCone_.angle;
+		float phi = dist01(randomEngine) * 2.0f * kPi;
+		Vector3 coneDir = { std::sin(coneAngle) * std::cos(phi), std::cos(coneAngle), std::sin(coneAngle) * std::sin(phi) };
+
+		Vector3 rotatedDisk = localDisk;
+		radialDir = coneDir;
+		if (emitterCone_.rotate.x != 0.0f || emitterCone_.rotate.y != 0.0f || emitterCone_.rotate.z != 0.0f) {
+			Matrix4x4 rotMat = Rotation(emitterCone_.rotate);
+			rotatedDisk = TransformMatrix(localDisk, rotMat);
+			radialDir = TransformMatrix(coneDir, rotMat);
+		}
+		data.transform.translate = SetEffectDefinitionData_.transform.translate + rotatedDisk + emitterCone_.translate;
+		emitterRadialVel = emitterCone_.speed;
 	}
 
 	data.transform.scale.x += distribution(randomEngine) * movementData_.sizeVariance.x;
 	data.transform.scale.y += distribution(randomEngine) * movementData_.sizeVariance.y;
 	data.transform.scale.z += distribution(randomEngine) * movementData_.sizeVariance.z;
-	data.velocity = { 
+
+	Vector3 baseVel = { 
 		movementData_.baseVelocity.x + distribution(randomEngine) * movementData_.velocityVariance.x,
 		movementData_.baseVelocity.y + distribution(randomEngine) * movementData_.velocityVariance.y,
 		movementData_.baseVelocity.z + distribution(randomEngine) * movementData_.velocityVariance.z 
 	};
+	float radSpeed = movementData_.radialSpeed + distribution(randomEngine) * movementData_.radialSpeedVariance + emitterRadialVel;
+	data.velocity = baseVel + radialDir * radSpeed;
+
+	data.baseScale = data.transform.scale;
+	data.endScale = endScale_;
+	data.startColor = startColor_;
+	data.endColor = endColor_;
+	data.scaleCurveType = scaleCurveType_;
+	data.enableColorOverLifetime = enableColorOverLifetime_;
+	data.enableScaleOverLifetime = enableScaleOverLifetime_;
+	data.alignToVelocity = alignToVelocity_;
+
+	if (enableColorOverLifetime_) {
+		data.color = startColor_;
+	}
+	if (enableScaleOverLifetime_) {
+		if (scaleCurveType_ == 1) {
+			data.transform.scale = { 0.0f, 0.0f, 0.0f };
+		} else {
+			data.transform.scale = startScale_;
+			data.baseScale = startScale_;
+		}
+	}
+
+	if (alignToVelocity_) {
+		float lenSq = data.velocity.x * data.velocity.x + data.velocity.y * data.velocity.y + data.velocity.z * data.velocity.z;
+		if (lenSq > 0.000001f) {
+			data.transform.rotate.y = std::atan2(data.velocity.x, data.velocity.z);
+			float horizDist = std::sqrt(data.velocity.x * data.velocity.x + data.velocity.z * data.velocity.z);
+			data.transform.rotate.x = -std::atan2(data.velocity.y, horizDist);
+		}
+	}
 
 	if (generatorBehavior) {
 		generatorBehavior(data);
@@ -826,40 +1110,9 @@ EffectDefinitionData Emitter::MakeNewParticle()
 
 EffectDefinitionData Emitter::MakeNewParticle(Vector3 scale)
 {
-	std::uniform_real_distribution<float> distribution(-1.0f, 1.0f);
-	EffectDefinitionData data;
-	data.transform = SetEffectDefinitionData_.transform;
+	EffectDefinitionData data = MakeNewParticle();
 	data.transform.scale = scale;
-
-	Vector3 possion = { 0.0f, 0.0f, 0.0f };
-	if (emitterType_ == EmitterType::Box) {
-		possion = { distribution(randomEngine), distribution(randomEngine), distribution(randomEngine) };
-		data.transform.translate = SetEffectDefinitionData_.transform.translate + possion * (emitter_.transform.scale * 0.5f) + emitter_.transform.translate;
-	}
-	else if (emitterType_ == EmitterType::Sphere) {
-		do {
-			possion = { distribution(randomEngine), distribution(randomEngine), distribution(randomEngine) };
-		} while (possion.x * possion.x + possion.y * possion.y + possion.z * possion.z > 1.0f);
-		data.transform.translate = SetEffectDefinitionData_.transform.translate + possion * emitterSphere_.radius + emitterSphere_.translate;
-	}
-
-	data.transform.scale = scale;
-	data.transform.scale.x += distribution(randomEngine) * movementData_.sizeVariance.x;
-	data.transform.scale.y += distribution(randomEngine) * movementData_.sizeVariance.y;
-	data.transform.scale.z += distribution(randomEngine) * movementData_.sizeVariance.z;
-	data.velocity = { 
-		movementData_.baseVelocity.x + distribution(randomEngine) * movementData_.velocityVariance.x,
-		movementData_.baseVelocity.y + distribution(randomEngine) * movementData_.velocityVariance.y,
-		movementData_.baseVelocity.z + distribution(randomEngine) * movementData_.velocityVariance.z 
-	};
-	data.color = { 1.0f, 1.0f, 1.0f, 1.0f }; // 色を初期化
-	data.lifeTime = 3.0f; // ライフタイムを設定
-	data.currentTime = 0.0f;
-
-	if (generatorBehavior) {
-		generatorBehavior(data);
-	}
-
+	data.baseScale = scale;
 	return data;
 }
 
@@ -872,21 +1125,15 @@ EffectDefinitionData Emitter::particleMove(EffectDefinitionData p)
 
 EffectDefinitionData Emitter::particleMoveFire(EffectDefinitionData p)
 {
-	// 上昇力（炎が上に伸びる）
 	p.velocity.y += 0.01f / 60.0f;
-
-	// ランダムに左右へゆらぐ
 	float randX = ((float)rand() / RAND_MAX - 0.5f) * 0.02f / 60.0f;
 	float randZ = ((float)rand() / RAND_MAX - 0.5f) * 0.02f / 60.0f;
 	p.velocity.x += randX;
 	p.velocity.z += randZ;
-
-	// 徐々に縮む
 	p.transform.scale.x *= 0.999f;
 	p.transform.scale.y *= 0.999f;
 	p.transform.scale.z *= 0.999f;
 	return p;
-
 }
 
 void Emitter::EmitSize()
@@ -912,15 +1159,22 @@ bool Emitter::OnCollision(EffectDefinitionData particleData)
 		return true;
 	}
 	return false;
-
 }
 
 void Emitter::Emit()
 {
-	uint32_t count = (emitterType_ == EmitterType::Sphere) ? emitterSphere_.count : emitter_.count;
+	uint32_t count = emitter_.count;
+	switch (emitterType_) {
+	case EmitterType::Sphere: count = emitterSphere_.count; break;
+	case EmitterType::Circle: count = emitterCircle_.count; break;
+	case EmitterType::Cone:   count = emitterCone_.count; break;
+	case EmitterType::Box:
+	default: break;
+	}
 	for (uint32_t i = 0; i < count; ++i) {
 		effectDefinitionData_.push_back(MakeNewParticle());
 	}
 	manualEmitTriggered_ = true;
 }
+
 

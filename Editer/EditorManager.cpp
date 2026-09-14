@@ -787,8 +787,10 @@ void EditorManager::Update(Engine* engine)
 			baseData.color = { 1.0f,1.0f,1.0f,1.0f };
 			baseData.lifeTime = 2.0f;
 			previewParticle_->Initialize(ed, baseData, EffectShape::Plane);
+			previewParticle_->SetUseGpuParticle(false);
 			previewParticle_->name_ = "Preview Particle";
 
+			previewCamera_->SetAspectRatio(1.0f);
 			Transform camT = { {1.0f,1.0f,1.0f}, {0.0f,0.0f,0.0f}, {0.0f, 2.0f, -10.0f} };
 			previewCamera_->SetTransform(camT);
 			previewCamera_->Update();
@@ -811,22 +813,30 @@ void EditorManager::Update(Engine* engine)
 			ImGuizmo::SetRect(vMin.x, vMin.y, 512.0f, 512.0f);
 			ImGuizmo::SetGizmoSizeClipSpace(0.15f);
 
+			previewCamera_->Update();
 			Matrix4x4 viewMat = previewCamera_->GetViewMatrix();
-			Matrix4x4 projMat = MakePerspectiveFovMatrix(0.45f, 1.0f, 0.1f, 10000.0f);
+			Matrix4x4 projMat = previewCamera_->GetProjectionMatrix();
 
 			EmitterData ed = previewParticle_->GetEmitterData();
 			EmitterSphere es = previewParticle_->GetEmitterSphere();
+			EmitterCircle ec = previewParticle_->GetEmitterCircle();
+			EmitterCone econe = previewParticle_->GetEmitterCone();
 			EmitterType eType = previewParticle_->GetEmitterType();
+			Vector3 basePos = previewParticle_->GetBaseParticleData().transform.translate;
 			Matrix4x4 worldMat;
 			if (eType == EmitterType::Sphere) {
-				worldMat = MakeAffineMatrix(es.translate, Vector3{ es.radius * 2.0f, es.radius * 2.0f, es.radius * 2.0f }, Vector3{ 0.0f, 0.0f, 0.0f });
+				worldMat = MakeAffineMatrix(es.translate + basePos, Vector3{ es.radius * 2.0f, es.radius * 2.0f, es.radius * 2.0f }, Vector3{ 0.0f, 0.0f, 0.0f });
+			} else if (eType == EmitterType::Circle) {
+				worldMat = MakeAffineMatrix(ec.translate + basePos, Vector3{ ec.outerRadius * 2.0f, 1.0f, ec.outerRadius * 2.0f }, ec.rotate);
+			} else if (eType == EmitterType::Cone) {
+				worldMat = MakeAffineMatrix(econe.translate + basePos, Vector3{ econe.radius * 2.0f, 1.0f, econe.radius * 2.0f }, econe.rotate);
 			} else {
-				worldMat = MakeAffineMatrix(ed.transform.translate, ed.transform.scale, ed.transform.rotate);
+				worldMat = MakeAffineMatrix(ed.transform.translate + basePos, ed.transform.scale, ed.transform.rotate);
 			}
 
 			static ImGuizmo::OPERATION currentOp = ImGuizmo::TRANSLATE;
 
-			// Draw a wireframe cube or sphere at Emitter location if enabled
+			// Draw a wireframe cube, sphere, circle, or cone at Emitter location if enabled
 			if (showEmitterCube_) {
 				auto drawList = ImGui::GetWindowDrawList();
 				Matrix4x4 viewProj = MultiplyMatrix4x4(viewMat, projMat);
@@ -857,6 +867,68 @@ void EditorManager::Update(Engine* engine)
 					DrawCirclePlane([](float c, float s) { return Vector3{ c, s, 0.0f }; });
 					DrawCirclePlane([](float c, float s) { return Vector3{ 0.0f, c, s }; });
 					DrawCirclePlane([](float c, float s) { return Vector3{ c, 0.0f, s }; });
+				} else if (eType == EmitterType::Circle) {
+					const int kSegments = 32;
+					float pi = 3.1415926535f;
+					auto DrawCircleRadius = [&](float radius, ImU32 col) {
+						ImVec2 pts[32];
+						bool allValid = true;
+						for (int i = 0; i < kSegments; ++i) {
+							float angle = (2.0f * pi * i) / kSegments;
+							Vector3 pt = { radius * std::cos(angle), 0.0f, radius * std::sin(angle) };
+							Matrix4x4 rot = Rotation(ec.rotate);
+							Vector3 wPos = ec.translate + basePos + TransformMatrix(pt, rot);
+							float w = wPos.x * viewProj.m[0][3] + wPos.y * viewProj.m[1][3] + wPos.z * viewProj.m[2][3] + viewProj.m[3][3];
+							if (w < 0.1f) allValid = false;
+							Vector3 projected = TransformMatrix(wPos, viewProj);
+							pts[i].x = vMin.x + (projected.x + 1.0f) * 0.5f * 512.0f;
+							pts[i].y = vMin.y + (1.0f - projected.y) * 0.5f * 512.0f;
+						}
+						if (allValid) {
+							for (int i = 0; i < kSegments; ++i) {
+								drawList->AddLine(pts[i], pts[(i + 1) % kSegments], col, 2.0f);
+							}
+						}
+					};
+					DrawCircleRadius(ec.outerRadius, IM_COL32(0, 255, 255, 255));
+					if (ec.innerRadius > 0.01f) {
+						DrawCircleRadius(ec.innerRadius, IM_COL32(0, 180, 255, 180));
+					}
+				} else if (eType == EmitterType::Cone) {
+					const int kSegments = 24;
+					float pi = 3.1415926535f;
+					Matrix4x4 rot = Rotation(econe.rotate);
+					ImVec2 pts[24];
+					bool allValid = true;
+					for (int i = 0; i < kSegments; ++i) {
+						float angle = (2.0f * pi * i) / kSegments;
+						Vector3 pt = { econe.radius * std::cos(angle), 0.0f, econe.radius * std::sin(angle) };
+						Vector3 wPos = econe.translate + basePos + TransformMatrix(pt, rot);
+						float w = wPos.x * viewProj.m[0][3] + wPos.y * viewProj.m[1][3] + wPos.z * viewProj.m[2][3] + viewProj.m[3][3];
+						if (w < 0.1f) allValid = false;
+						Vector3 projected = TransformMatrix(wPos, viewProj);
+						pts[i].x = vMin.x + (projected.x + 1.0f) * 0.5f * 512.0f;
+						pts[i].y = vMin.y + (1.0f - projected.y) * 0.5f * 512.0f;
+					}
+					if (allValid) {
+						for (int i = 0; i < kSegments; ++i) {
+							drawList->AddLine(pts[i], pts[(i + 1) % kSegments], IM_COL32(255, 200, 0, 255), 2.0f);
+						}
+					}
+					float coneHeight = 2.0f;
+					float topRadius = econe.radius + std::tan(econe.angle) * coneHeight;
+					for (int k = 0; k < 4; ++k) {
+						float angle = (pi * 0.5f) * k;
+						Vector3 pBase = { econe.radius * std::cos(angle), 0.0f, econe.radius * std::sin(angle) };
+						Vector3 pTop = { topRadius * std::cos(angle), coneHeight, topRadius * std::sin(angle) };
+						Vector3 wBase = econe.translate + basePos + TransformMatrix(pBase, rot);
+						Vector3 wTop = econe.translate + basePos + TransformMatrix(pTop, rot);
+						Vector3 prjBase = TransformMatrix(wBase, viewProj);
+						Vector3 prjTop = TransformMatrix(wTop, viewProj);
+						ImVec2 bScreen = { vMin.x + (prjBase.x + 1.0f) * 0.5f * 512.0f, vMin.y + (1.0f - prjBase.y) * 0.5f * 512.0f };
+						ImVec2 tScreen = { vMin.x + (prjTop.x + 1.0f) * 0.5f * 512.0f, vMin.y + (1.0f - prjTop.y) * 0.5f * 512.0f };
+						drawList->AddLine(bScreen, tScreen, IM_COL32(255, 200, 0, 180), 1.5f);
+					}
 				} else {
 					Vector3 corners[8] = {
 						{-0.5f, -0.5f, -0.5f}, { 0.5f, -0.5f, -0.5f}, { 0.5f,  0.5f, -0.5f}, {-0.5f,  0.5f, -0.5f},
@@ -891,11 +963,21 @@ void EditorManager::Update(Engine* engine)
 				ImGuizmo::DecomposeMatrixToComponents(&worldMat.m[0][0], t, r, s);
 				float pi = 3.1415926535f;
 				if (eType == EmitterType::Sphere) {
-					es.translate = { t[0], t[1], t[2] };
+					es.translate = { t[0] - basePos.x, t[1] - basePos.y, t[2] - basePos.z };
 					es.radius = (s[0] + s[1] + s[2]) / 6.0f;
 					previewParticle_->SetEmitterSphere(es);
+				} else if (eType == EmitterType::Circle) {
+					ec.translate = { t[0] - basePos.x, t[1] - basePos.y, t[2] - basePos.z };
+					ec.rotate = { r[0] * pi / 180.0f, r[1] * pi / 180.0f, r[2] * pi / 180.0f };
+					ec.outerRadius = (s[0] + s[2]) * 0.25f;
+					previewParticle_->SetEmitterCircle(ec);
+				} else if (eType == EmitterType::Cone) {
+					econe.translate = { t[0] - basePos.x, t[1] - basePos.y, t[2] - basePos.z };
+					econe.rotate = { r[0] * pi / 180.0f, r[1] * pi / 180.0f, r[2] * pi / 180.0f };
+					econe.radius = (s[0] + s[2]) * 0.25f;
+					previewParticle_->SetEmitterCone(econe);
 				} else {
-					ed.transform.translate = { t[0], t[1], t[2] };
+					ed.transform.translate = { t[0] - basePos.x, t[1] - basePos.y, t[2] - basePos.z };
 					ed.transform.rotate = { r[0] * pi / 180.0f, r[1] * pi / 180.0f, r[2] * pi / 180.0f };
 					ed.transform.scale = { s[0], s[1], s[2] };
 					previewParticle_->SetEmitterData(ed);
@@ -936,6 +1018,8 @@ void EditorManager::Update(Engine* engine)
 
 		// Draw the particle into the render texture AFTER ImGui has processed (and potentially recreated resources)
 		previewCamera_->Update();
+		Matrix4x4 projMat = previewCamera_->GetProjectionMatrix();
+		previewParticle_->SetCustomProjectionMatrix(projMat);
 		previewParticle_->Update(previewCamera_->GetViewMatrix());
 
 		auto cmdList = engine->command->GetCommandList();
@@ -952,7 +1036,7 @@ void EditorManager::Update(Engine* engine)
 
 		engine->draw->SetCamera(previewCamera_.get());
 		if (showGridInViewer_) {
-			previewGrid_->SettingWvp(previewCamera_->GetViewMatrix());
+			previewGrid_->SettingWvp(previewCamera_->GetViewMatrix(), &projMat);
 			engine->draw->DrawGrid(previewGrid_.get());
 		}
 		previewParticle_->Draw(*engine->draw);
@@ -979,6 +1063,7 @@ void EditorManager::Update(Engine* engine)
 			modelDepthStencil_->CreateDepthStencil(engine->graphics->GetDevice(), 512, 512);
 			modelGrid_->CreateGrid();
 
+			modelCamera_->SetAspectRatio(1.0f);
 			Transform camT = { {1.0f,1.0f,1.0f}, {0.0f,0.0f,0.0f}, {0.0f, 2.0f, -10.0f} };
 			modelCamera_->SetTransform(camT);
 			modelCamera_->Update();
@@ -1021,8 +1106,9 @@ void EditorManager::Update(Engine* engine)
 			ImGuizmo::SetRect(vMin.x, vMin.y, 512.0f, 512.0f);
 			ImGuizmo::SetGizmoSizeClipSpace(0.15f);
 
+			modelCamera_->Update();
 			Matrix4x4 viewMat = modelCamera_->GetViewMatrix();
-			Matrix4x4 projMat = MakePerspectiveFovMatrix(0.45f, 1.0f, 0.1f, 10000.0f);
+			Matrix4x4 projMat = modelCamera_->GetProjectionMatrix();
 
 			Transform t = previewModel_->GetTransform();
 			Matrix4x4 worldMat = MakeAffineMatrix(t.translate, t.scale, t.rotate);
@@ -1081,9 +1167,10 @@ void EditorManager::Update(Engine* engine)
 		ImGui::End();
 
 		modelCamera_->Update();
+		Matrix4x4 modelProjMat = modelCamera_->GetProjectionMatrix();
 		previewModel_->Update(modelCamera_->GetViewMatrix());
 		if (!currentModelPath_.empty()) {
-			previewModel_->SettingWvp(modelCamera_->GetViewMatrix());
+			previewModel_->SettingWvp(modelCamera_->GetViewMatrix(), &modelProjMat);
 		}
 
 		auto cmdList = engine->command->GetCommandList();
@@ -1099,7 +1186,7 @@ void EditorManager::Update(Engine* engine)
 
 		engine->draw->SetCamera(modelCamera_.get());
 		if (showGridInModelViewer_) {
-			modelGrid_->SettingWvp(modelCamera_->GetViewMatrix());
+			modelGrid_->SettingWvp(modelCamera_->GetViewMatrix(), &modelProjMat);
 			engine->draw->DrawGrid(modelGrid_.get());
 		}
 		if (!currentModelPath_.empty()) {

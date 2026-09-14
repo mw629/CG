@@ -148,6 +148,34 @@ void EffectDefinition::CreateVertexData()
 			vertices.push_back(c);
 			vertices.push_back(b);
 		}
+	} else if (shape_ == EffectShape::Cube) {
+		vertexSize_ = 36;
+		float hx = shapeData_.cubeSize.x * 0.5f;
+		float hy = shapeData_.cubeSize.y * 0.5f;
+		float hz = shapeData_.cubeSize.z * 0.5f;
+
+		auto addQuad = [&](const Vector3& p0, const Vector3& p1, const Vector3& p2, const Vector3& p3, const Vector3& n) {
+			vertices.push_back({ { p0.x, p0.y, p0.z, 1.0f }, { 0.0f, 0.0f }, n });
+			vertices.push_back({ { p1.x, p1.y, p1.z, 1.0f }, { 1.0f, 0.0f }, n });
+			vertices.push_back({ { p2.x, p2.y, p2.z, 1.0f }, { 0.0f, 1.0f }, n });
+
+			vertices.push_back({ { p2.x, p2.y, p2.z, 1.0f }, { 0.0f, 1.0f }, n });
+			vertices.push_back({ { p1.x, p1.y, p1.z, 1.0f }, { 1.0f, 0.0f }, n });
+			vertices.push_back({ { p3.x, p3.y, p3.z, 1.0f }, { 1.0f, 1.0f }, n });
+		};
+
+		// Front (+Z)
+		addQuad({ -hx,  hy,  hz }, {  hx,  hy,  hz }, { -hx, -hy,  hz }, {  hx, -hy,  hz }, { 0.0f, 0.0f, 1.0f });
+		// Back (-Z)
+		addQuad({  hx,  hy, -hz }, { -hx,  hy, -hz }, {  hx, -hy, -hz }, { -hx, -hy, -hz }, { 0.0f, 0.0f, -1.0f });
+		// Right (+X)
+		addQuad({  hx,  hy,  hz }, {  hx,  hy, -hz }, {  hx, -hy,  hz }, {  hx, -hy, -hz }, { 1.0f, 0.0f, 0.0f });
+		// Left (-X)
+		addQuad({ -hx,  hy, -hz }, { -hx,  hy,  hz }, { -hx, -hy, -hz }, { -hx, -hy,  hz }, { -1.0f, 0.0f, 0.0f });
+		// Top (+Y)
+		addQuad({ -hx,  hy, -hz }, {  hx,  hy, -hz }, { -hx,  hy,  hz }, {  hx,  hy,  hz }, { 0.0f, 1.0f, 0.0f });
+		// Bottom (-Y)
+		addQuad({ -hx, -hy,  hz }, {  hx, -hy,  hz }, { -hx, -hy, -hz }, {  hx, -hy, -hz }, { 0.0f, -1.0f, 0.0f });
 	}
 
 	//頂点リソースを作る
@@ -227,7 +255,9 @@ void EffectDefinition::DeleteParticle(int ParticleNum)
 
 void EffectDefinition::SettingWvp(Matrix4x4 viewMatrix)
 {
-    Matrix4x4 projectionMatrix = MakePerspectiveFovMatrix(0.45f, float(kClientWidth) / float(kClientHeight), 0.1f, 10000.0f);
+    Matrix4x4 projectionMatrix = hasCustomProjectionMatrix_
+        ? customProjectionMatrix_
+        : MakePerspectiveFovMatrix(0.45f, float(kClientWidth) / float(kClientHeight), 0.1f, 10000.0f);
     Matrix4x4 viewProjection = MultiplyMatrix4x4(viewMatrix, projectionMatrix);
 
     Matrix4x4 billboard = IdentityMatrix();

@@ -14,12 +14,23 @@ struct EffectDefinitionData {
 	Vector4 color = {1.0f,1.0f,1.0f,1.0f};
 	float lifeTime=3.0f;
 	float currentTime = 0.0f;
+
+	// Over Lifetime Settings
+	Vector3 baseScale = { 1.0f, 1.0f, 1.0f };
+	Vector3 endScale = { 0.0f, 0.0f, 0.0f };
+	Vector4 startColor = { 1.0f, 1.0f, 1.0f, 1.0f };
+	Vector4 endColor = { 1.0f, 1.0f, 1.0f, 0.0f };
+	int scaleCurveType = 0; // 0: None, 1: Linear, 2: BellCurve
+	bool enableColorOverLifetime = false;
+	bool enableScaleOverLifetime = false;
+	bool alignToVelocity = false;
 };
 
 enum class EffectShape {
 	Plane,
 	Cylinder,
-	Ring
+	Ring,
+	Cube
 };
 
 struct EffectShapeData {
@@ -31,6 +42,8 @@ struct EffectShapeData {
 	int ringDivide = 32;
 	float ringOuterRadius = 1.0f;
 	float ringInnerRadius = 0.8f;
+
+	Vector3 cubeSize = { 1.0f, 1.0f, 1.0f };
 };
 
 struct PerFrameForGPU {
@@ -130,6 +143,9 @@ private:
 	EffectShape shape_ = EffectShape::Plane;
 	uint32_t vertexSize_ = 6;
 
+	Matrix4x4 customProjectionMatrix_{};
+	bool hasCustomProjectionMatrix_ = false;
+
 	static int DescriptorNum;
 
 public:
@@ -167,6 +183,16 @@ public:
 
 	void SetBillboard(bool flag) { isBillboard_ = flag; }
 	bool GetBillboard() const { return isBillboard_; }
+
+	void SetCustomProjectionMatrix(const Matrix4x4& proj) {
+		customProjectionMatrix_ = proj;
+		hasCustomProjectionMatrix_ = true;
+	}
+	void ClearCustomProjectionMatrix() {
+		hasCustomProjectionMatrix_ = false;
+	}
+	bool HasCustomProjectionMatrix() const { return hasCustomProjectionMatrix_; }
+	const Matrix4x4& GetCustomProjectionMatrix() const { return customProjectionMatrix_; }
 
 	ModelData GetModelData() { return modelData_; }
 	MaterialFactory* GetMartial() { 
@@ -216,7 +242,7 @@ public:
 
 	ID3D12Resource* GetGpuParticleResource() { return gpuParticleResource_.Get(); }
 
-	bool useGpuParticle_ = true;
+	bool useGpuParticle_ = false;
 	void SetUseGpuParticle(bool enable) { useGpuParticle_ = enable; }
 	bool GetUseGpuParticle() const { return useGpuParticle_; }
 

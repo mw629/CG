@@ -48,12 +48,16 @@ void Model::Initialize(ModelData modelData)
 
 
 void Model::SettingWvp(Matrix4x4 viewMatrix) {
+	SettingWvp(viewMatrix, nullptr);
+}
 
-	Matrix4x4 projectionMatri = MakePerspectiveFovMatrix(0.45f, float(kClientWidth_) / float(kClientHeight_), 0.1f, 10000.0f);
+void Model::SettingWvp(Matrix4x4 viewMatrix, const Matrix4x4* customProjection) {
+	Matrix4x4 projectionMatri = customProjection
+		? *customProjection
+		: MakePerspectiveFovMatrix(0.45f, float(kClientWidth_) / float(kClientHeight_), 0.1f, 10000.0f);
 	Matrix4x4 worldMatrixObj = MakeAffineMatrix(transform_.translate, transform_.scale, transform_.rotate);
 	Matrix4x4 worldViewProjectionMatrixObj = MultiplyMatrix4x4(worldMatrixObj, MultiplyMatrix4x4(viewMatrix, projectionMatri));
 	Matrix4x4 worldInverseTranspose = TransposeMatrix4x4(Inverse(worldMatrixObj));
-
 
 	GetWvpData()->WVP = MultiplyMatrix4x4(rootNode_.localMatrix, worldViewProjectionMatrixObj);
 	GetWvpData()->World = MultiplyMatrix4x4(rootNode_.localMatrix, worldMatrixObj);

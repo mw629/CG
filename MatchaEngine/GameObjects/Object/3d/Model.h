@@ -25,6 +25,7 @@ public:
 	void Initialize(ModelData modelData);
 
 	void SettingWvp(Matrix4x4 viewMatrix) override;
+	void SettingWvp(Matrix4x4 viewMatrix, const Matrix4x4* customProjection);
 	
 	void CreateObject()override;
 

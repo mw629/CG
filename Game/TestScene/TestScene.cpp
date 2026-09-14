@@ -30,7 +30,6 @@ void TestScene::ImGui()
 	for (int i = 0, n = static_cast<int>(particle_.size()); i < n; ++i) {
 		particle_[i].get()->ImGui();
 	}
-	leftHandParticle_->ImGui();
 
 	if (ImGui::CollapsingHeader("Animation Settings", ImGuiTreeNodeFlags_DefaultOpen)) {
 		bool isVisibleBones = animation_.get()->GetVisibleBones();
@@ -188,10 +187,6 @@ void TestScene::Initialize() {
 	};
 	particle_.push_back(std::move(particleRing));
 
-	leftHandParticle_->Initialize();
-	leftHandParticle_->LoadFromJson("Particle1.json");
-	leftHandParticle_->name_ = "LeftHand Particle";
-
 	int texture = texture_.get()->CreateTexture("Resources/Texture/uvChecker.png");
 	sprite_.get()->Initialize(spriteData_, texture);
 
@@ -292,11 +287,6 @@ void TestScene::Update() {
 	Matrix4x4 finalMatrix = MultiplyMatrix4x4(offsetMatrix, boneMatrix);
 	axe_->SetTransform(DecomposeMatrix(finalMatrix));
 	axe_->SettingWvp(view);
-
-	// 左手パーティクルのアタッチ処理
-	Transform leftHandTransform = animation_->GetBoneTransform(BoneType::LeftHand);
-	leftHandParticle_->SetPosition(leftHandTransform.translate);
-	leftHandParticle_->Update(view);
 }
 
 void TestScene::Draw(class Draw& draw) {
@@ -316,7 +306,6 @@ void TestScene::Draw(class Draw& draw) {
 	draw.DrawModel(axe_.get());
 
 	//draw.DrawObj(sphere_.get());
-	leftHandParticle_->Draw(draw);
 	for (int i = 0, n = static_cast<int>(particle_.size()); i < n; ++i) {
 	//	particle_[i].get()->Draw(draw);
 	}

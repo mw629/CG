@@ -6,7 +6,6 @@
 
 #include "GameObject.h"
 #include <CharacterAnimator.h>
-#include <Emitter.h>
 
 class Player : public GameObject {
 private:
@@ -22,7 +21,6 @@ private:
                            0.0f,
                        },
                        {0.0f, 0.0f, 0.0f}};
-  std::unique_ptr<Emitter> leftHandParticle_ = std::make_unique<Emitter>();
   // transform_ is inherited from GameObject
 
   // レーン移動のための変数
@@ -92,7 +90,6 @@ public:
   }
 
   void Draw(class Draw &draw) override;
-  void DrawParticle(class Draw &draw);
   void ImGuiInnerComponents() override;
 
   bool HasMaterial() const override {

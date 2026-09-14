@@ -1,5 +1,6 @@
 #include "StageSettings.h"
 #include "AssetManager.h"
+#include <algorithm>
 #include <cstdlib>
 #include <ctime>
 
@@ -10,6 +11,9 @@ void StageSettings::Initialize(ModelData roadModelData,
                                class GameObjectManager *manager) {
   // 乱数の初期化
   std::srand(static_cast<unsigned int>(std::time(nullptr)));
+
+  // 初回生成間隔の計算
+  CalculateNextObstacleInterval();
 
   // グラウンドテクスチャをロード
   texture_->CreateTexture("Resources/Model/Ground/Ground.png");
@@ -35,6 +39,23 @@ void StageSettings::Initialize(ModelData roadModelData,
     if (manager)
       manager->AddObject(obstacles_[i]);
   }
+}
+
+void StageSettings::CalculateNextObstacleInterval() {
+  // 猶予フレームを最小〜最大の間でランダムに選定（等間隔にならないようにバリエーションを持たせる）
+  float graceFrames = minGraceFrames_; // 決定された猶予フレーム数
+  int frameRange = static_cast<int>(maxGraceFrames_ - minGraceFrames_); // 変動フレーム幅
+  if (frameRange > 0) {
+    graceFrames += static_cast<float>(std::rand() % (frameRange + 1));
+  }
+
+  // 移動速度（スクロール速度）に（アクション所要フレーム＋猶予フレーム）を乗算して次回間隔（距離）を計算
+  float effectiveSpeed = (std::max)(scrollSpeed_, 0.05f); // 停止時や低速時の0除算・0距離を防ぐ実効速度
+  float totalFrames = baseActionFrames_ + graceFrames;   // 回避に必要な合計フレーム数
+  float calculatedDistance = effectiveSpeed * totalFrames; // 移動速度と猶予フレームから計算された距離
+
+  // 確実に避けられる距離範囲（最小距離〜最大距離）に制限
+  obstacleInterval_ = (std::min)((std::max)(minObstacleDistance_, calculatedDistance), maxObstacleDistance_); // 次回生成までの距離
 }
 
 void StageSettings::GenerateRoadChunks(Matrix4x4 view) {
@@ -227,6 +248,9 @@ void StageSettings::Update(Matrix4x4 view, float timeScale) {
       }
     }
     distanceSinceLastSpawn_ -= obstacleInterval_;
+
+    // 次回生成までの間隔を移動速度＋猶予フレームに基づいて動的に再計算
+    CalculateNextObstacleInterval();
   }
 
   // 障害物の更新
@@ -263,10 +287,54 @@ void StageSettings::SpawnObstacles(float z) {
     obstacles_[nextObstacleIndex_]->Spawn(laneWidth_, 2.0f, z);
     nextObstacleIndex_ = (nextObstacleIndex_ + 1) % kMaxObstacles_;
 
-    // 中央レーンは安全にするか、ボーナスを置く
+    consecutiveNoSpawnCount_ = 0; // 障害物が配置されたため連続空ウェーブをリセット
     return;
   }
   // =============================
+
+  // === 時々障害物が出ない（空ウェーブ/安全区間）判定 ===
+  bool isEmptyWave = false; // 障害物を一切生成しない空ウェーブフラグ
+  if (consecutiveNoSpawnCount_ < maxConsecutiveNoSpawn_) {
+    int roll = std::rand() % 100; // 0〜99の乱数
+    int chancePercent = static_cast<int>(noSpawnChance_ * 100.0f); // 確率をパーセンテージに変換
+    if (roll < chancePercent) {
+      isEmptyWave = true;
+      consecutiveNoSpawnCount_++; // 連続空ウェーブ回数をカウント
+    } else {
+      consecutiveNoSpawnCount_ = 0; // 障害物が出るためリセット
+    }
+  } else {
+    consecutiveNoSpawnCount_ = 0; // 連続上限に達したためリセット
+  }
+
+  // たまにボーナスまたはアイテムを配置する (約10%の確率)
+  // ただし1レーンの場合は出さない
+  int bonusLane = -1; // ボーナスを配置するレーン番号（-1は配置なし）
+  Obstacle::Type itemType = Obstacle::Type::Bonus; // アイテムの種類
+  if (laneCount_ > 1 && std::rand() % 10 == 0) {
+    bonusLane = std::rand() % laneCount_;
+    int randItem = std::rand() % 4; // アイテム種別の抽選用乱数
+    if (randItem == 0)
+      itemType = Obstacle::Type::Bonus;
+    else if (randItem == 1)
+      itemType = Obstacle::Type::BarrierItem;
+    else if (randItem == 2)
+      itemType = Obstacle::Type::ClearItem;
+    else if (randItem == 3)
+      itemType = Obstacle::Type::BossItem;
+  }
+
+  // 空ウェーブの場合は障害物を配置せず、アイテムのみ生成（または完全な安全区間）
+  if (isEmptyWave) {
+    if (bonusLane != -1) {
+      int lane = minLaneIndex_ + bonusLane; // アイテム配置対象のレーン番号
+      float x = static_cast<float>(lane) * laneWidth_; // レーンのワールドX座標
+      obstacles_[nextObstacleIndex_]->SetType(itemType);
+      obstacles_[nextObstacleIndex_]->Spawn(x, 2.5f, z - 5.0f);
+      nextObstacleIndex_ = (nextObstacleIndex_ + 1) % kMaxObstacles_;
+    }
+    return; // 障害物は出さずに終了
+  }
 
   // レーンの状態を決定 (0: None, 1: Low, 2: High, 3: Wall, 4: Bonus)
   std::vector<int> laneSpawns(laneCount_);
@@ -312,34 +380,17 @@ void StageSettings::SpawnObstacles(float z) {
     }
   }
 
-  // たまにボーナスまたはアイテムを配置する (約10%の確率)
-  // ただし1レーンの場合は出さない
-  int bonusLane = -1;
-  Obstacle::Type itemType = Obstacle::Type::Bonus;
-  if (laneCount_ > 1 && std::rand() % 10 == 0) {
-    // 障害物があるレーンを優先して選ぶ
-    std::vector<int> obstacleLanes;
+  // ボーナス配置時に障害物があるレーンを優先する処理（通常ウェーブ時）
+  if (bonusLane != -1) {
+    std::vector<int> obstacleLanes; // 障害物が存在するレーンのリスト
     for (int i = 0; i < laneCount_; i++) {
       if (laneSpawns[i] != 0) {
         obstacleLanes.push_back(i);
       }
     }
-
     if (!obstacleLanes.empty()) {
       bonusLane = obstacleLanes[std::rand() % obstacleLanes.size()];
-    } else {
-      bonusLane = std::rand() % laneCount_;
     }
-
-    int randItem = std::rand() % 4;
-    if (randItem == 0)
-      itemType = Obstacle::Type::Bonus;
-    else if (randItem == 1)
-      itemType = Obstacle::Type::BarrierItem;
-    else if (randItem == 2)
-      itemType = Obstacle::Type::ClearItem;
-    else if (randItem == 3)
-      itemType = Obstacle::Type::BossItem;
   }
 
   // 決定した内容で各レーンに生成
@@ -347,8 +398,8 @@ void StageSettings::SpawnObstacles(float z) {
     if (laneSpawns[i] == 0 && i != bonusLane)
       continue; // None 且つ ボーナスも無いならスキップ
 
-    int lane = minLaneIndex_ + i; // -1, 0, 1
-    float x = static_cast<float>(lane) * laneWidth_;
+    int lane = minLaneIndex_ + i; // レーンインデックス（-1, 0, 1）
+    float x = static_cast<float>(lane) * laneWidth_; // レーンのX座標
 
     // ボーナスまたはアイテムの生成（障害物の手前に配置）
     if (i == bonusLane) {
@@ -359,8 +410,8 @@ void StageSettings::SpawnObstacles(float z) {
 
     // 障害物の生成
     if (laneSpawns[i] != 0) {
-      Obstacle::Type type;
-      float y = 2.5f;
+      Obstacle::Type type = Obstacle::Type::Low; // 障害物タイプ
+      float y = 2.5f; // 障害物のY座標
 
       if (laneSpawns[i] == 1) {
         type = Obstacle::Type::Low;
@@ -388,8 +439,13 @@ void StageSettings::Reset() {
   isNarrowingSection_ = false;
   isSpawningPaused_ = false;
 
+  consecutiveNoSpawnCount_ = 0; // 連続空ウェーブ回数をリセット
+
   // スクロール速度を初期値にリセット
   scrollSpeed_ = baseScrollSpeed_;
+
+  // 初回生成間隔の計算
+  CalculateNextObstacleInterval();
 
   // 道路チャンクの位置をリセット
   for (int i = 0; i < kChunkCount_; i++) {
@@ -408,7 +464,7 @@ void StageSettings::Reset() {
   }
   nextObstacleIndex_ = 0;
 
-  // リセット時は最初は少し進んでから障害物が出るようにする
-  distanceSinceLastSpawn_ = obstacleInterval_ - 10.0f;
+  // リセット後も間を空けずすぐに障害物が出現するように設定
+  distanceSinceLastSpawn_ = (std::max)(0.0f, obstacleInterval_ - 3.0f);
   distanceSinceLastCameraItem_ = 0.0f;
 }

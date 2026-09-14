@@ -32,11 +32,6 @@ void Player::Initialize(ModelData modelData) {
   axeOffset_.rotate = {0.0f, 0.0f, 0.0f};
   axeOffset_.translate = {0.0f, 0.0f, 0.0f};
 
-  // パーティクルの初期化
-  leftHandParticle_->Initialize();
-  leftHandParticle_->LoadFromJson("particle1.json");
-  leftHandParticle_->name_ = "Player LeftHand Particle";
-
   // コライダーの初期化
   auto collider = AddComponent<ColliderComponent>();
   collider->SetShape(ColliderShape::Box);
@@ -115,11 +110,6 @@ void Player::Update(Matrix4x4 view, float speedMultiplier) {
   Matrix4x4 finalMatrix = MultiplyMatrix4x4(offsetMatrix, boneMatrix);
   axe_->SetTransform(DecomposeMatrix(finalMatrix));
   axe_->SettingWvp(view);
-
-  // 左手パーティクルのアタッチ処理
-  Transform leftHandTransform = model_->GetBoneTransform(BoneType::LeftHand);
-  leftHandParticle_->SetPosition(leftHandTransform.translate);
-  leftHandParticle_->Update(view);
 
   if (auto collider = GetComponent<ColliderComponent>()) {
     collider->SetSize({0.8f, isRolling_ ? 0.5f : 1.5f, 0.8f});
@@ -280,8 +270,6 @@ void Player::Draw(class Draw &draw) {
   draw.DrawModel(axe_.get());
   GameObject::Draw(draw);
 }
-
-void Player::DrawParticle(class Draw &draw) { leftHandParticle_->Draw(draw); }
 
 void Player::ImGuiInnerComponents() {
   if (model_) {

@@ -174,13 +174,54 @@ void GameScene::ImGui() {
       stageSettings_->SetScrollAcceleration(accel);
     }
 
-    float interval = stageSettings_->GetObstacleInterval();
-    if (ImGui::SliderFloat("Obstacle Interval", &interval, 5.0f, 50.0f)) {
-      stageSettings_->SetObstacleInterval(interval);
+    float minDistance = stageSettings_->GetMinObstacleDistance(); // 確実に避けられる最小間隔距離
+    float maxDistance = stageSettings_->GetMaxObstacleDistance(); // 避けられる最大間隔距離
+    if (ImGui::SliderFloat("Min Obstacle Distance", &minDistance, 3.0f, 30.0f, "%.1f m")) {
+      if (minDistance > maxDistance)
+        maxDistance = minDistance;
+      stageSettings_->SetMinObstacleDistance(minDistance);
+      stageSettings_->SetMaxObstacleDistance(maxDistance);
     }
+    if (ImGui::SliderFloat("Max Obstacle Distance", &maxDistance, 5.0f, 50.0f, "%.1f m")) {
+      if (maxDistance < minDistance)
+        minDistance = maxDistance;
+      stageSettings_->SetMinObstacleDistance(minDistance);
+      stageSettings_->SetMaxObstacleDistance(maxDistance);
+    }
+
+    float baseActionFrames = stageSettings_->GetBaseActionFrames(); // 回避アクション所要フレーム数
+    if (ImGui::SliderFloat("Base Action Frames", &baseActionFrames, 0.0f, 40.0f, "%.0f f")) {
+      stageSettings_->SetBaseActionFrames(baseActionFrames);
+    }
+
+    float minGrace = stageSettings_->GetMinGraceFrames(); // 最小猶予フレーム数
+    float maxGrace = stageSettings_->GetMaxGraceFrames(); // 最大猶予フレーム数
+    if (ImGui::SliderFloat("Min Grace Frames", &minGrace, 5.0f, 60.0f, "%.0f f")) {
+      if (minGrace > maxGrace)
+        maxGrace = minGrace;
+      stageSettings_->SetMinGraceFrames(minGrace);
+      stageSettings_->SetMaxGraceFrames(maxGrace);
+    }
+    if (ImGui::SliderFloat("Max Grace Frames", &maxGrace, 5.0f, 80.0f, "%.0f f")) {
+      if (maxGrace < minGrace)
+        minGrace = maxGrace;
+      stageSettings_->SetMinGraceFrames(minGrace);
+      stageSettings_->SetMaxGraceFrames(maxGrace);
+    }
+
+    float noSpawnChance = stageSettings_->GetNoSpawnChance() * 100.0f; // 障害物が出ない確率（%）
+    if (ImGui::SliderFloat("No Spawn Chance (%)", &noSpawnChance, 0.0f, 30.0f, "%.1f %%")) {
+      stageSettings_->SetNoSpawnChance(noSpawnChance / 100.0f);
+    }
+
+    float currentSpeed = stageSettings_->GetScrollSpeed(); // 現在のスクロール速度
+    float curInterval = stageSettings_->GetObstacleInterval(); // 現在の次回生成間隔
+    float estFrames = currentSpeed > 0.0f ? (curInterval / currentSpeed) : 0.0f; // 到達までの推定フレーム数
+    ImGui::Text("Next Spawn: %.1f m (approx. %.0f frames / %.2f s)", curInterval, estFrames, estFrames / 60.0f);
+    ImGui::Text("Dodgeable Range: %.1f m ~ %.1f m", minDistance, maxDistance);
   }
 
-  particleManager_->ImGui();
+  effectManager_->ImGui();
 
   ImGui::End();
 
@@ -290,7 +331,7 @@ void GameScene::Initialize() {
   sceneChangeRequest_ = false;
 
   // パーティクルマネージャーの初期化
-  particleManager_->Initialize();
+  effectManager_->Initialize();
 
   // コリジョンマネージャーの初期化
   collisionManager_ = std::make_unique<CollisionManager>();
@@ -321,13 +362,13 @@ void GameScene::Initialize() {
 
     gameObjectManager_->UpdateAll(gameViewMat, 0.0f);
     stageSettings_->EditorUpdate(gameViewMat);
-    particleManager_->EditorUpdate(gameViewMat);
+    effectManager_->EditorUpdate(gameViewMat);
 
     draw.SetCamera(gameCamera_.get());
     draw.SetEnvironmentTexture(skyBoxTexture_);
     gameObjectManager_->DrawAll(draw);
     stageSettings_->Draw(draw);
-    particleManager_->Draw(draw);
+    effectManager_->Draw(draw);
 
     // SkyBoxの位置を元に戻す
     skyBox_->SetTransform(originalSkyBoxT);
@@ -479,7 +520,7 @@ void GameScene::Update() {
       stageSettings_->Reset();
       // PostEffect::SetActivePostEffect(PostEffect::Type::Normal);
       player_->Reset();
-      particleManager_->ClearHitParticles(); // 前回の煙をリセット
+      effectManager_->ClearHitParticles(); // 前回の煙をリセット
       currentDistance_ = 0.0f;
       currentScore_ = 0.0f;
       bonusEnemyHitCount_ = 0;
@@ -495,7 +536,7 @@ void GameScene::Update() {
   }
 
   // 雪などの常時出続けるパーティクルの更新
-  particleManager_->AlwaysUpdate(view, camera_->GetTransform().translate);
+  effectManager_->AlwaysUpdate(view, camera_->GetTransform().translate);
 }
 
 void GameScene::Draw(class Draw &draw) {
@@ -516,17 +557,12 @@ void GameScene::Draw(class Draw &draw) {
   }
 
   // ヒットエフェクトの描画
-  particleManager_->Draw(draw);
-
-  // プレイヤーのパーティクル（左手など）の描画
-  if (player_) {
-    player_->DrawParticle(draw);
-  }
+  effectManager_->Draw(draw);
 }
 
 void GameScene::PlayerHitUpdate() {
   // カメラやビューの更新は GameScene::Update で行われている
-  particleManager_->PlayerHitUpdate(view);
+  effectManager_->PlayerHitUpdate(view);
 
   // プレイヤーのノックバックアニメーションを更新
   // (GameScene側の全体更新は停止し、プレイヤーのみ更新)
@@ -618,7 +654,7 @@ void GameScene::PlayingUpdate() {
           if ((lane == 0 && push1) || (lane == 1 && push2) || (lane == 2 && push3)) {
             obs->SetReflected(true);
             obs->SetReflectedTarget(boss_->GetTransform().translate);
-            particleManager_->EmitShockwave(obs->GetTransform().translate);
+            effectManager_->EmitShockwave(obs->GetTransform().translate);
           }
         }
       } else if (obs->GetIsReflected()) {
@@ -627,7 +663,7 @@ void GameScene::PlayingUpdate() {
         if (Collision::CheckAABB(bossAABB, obsAABB)) {
           obs->Deactivate(); // 障害物を消す
           boss_->OnDamage();
-          particleManager_->EmitHitEffect(boss_->GetTransform().translate);
+          effectManager_->EmitHitEffect(boss_->GetTransform().translate);
           
           if (boss_->GetState() == BossState::Defeat) {
             // 画面内のボス攻撃をすべて消す
@@ -660,15 +696,13 @@ void GameScene::PlayingUpdate() {
   // Componentベースの当たり判定チェック
   collisionManager_->UpdateCollisions(gameObjectManager_.get());
 
-  particleManager_->PlayingUpdate(view, player_->GetTransform().translate);
-  particleManager_->UpdateBonusEffectEmit(timeScale,
-                                          player_->GetTransform().translate);
+  effectManager_->PlayingUpdate(view, player_->GetTransform().translate);
 
   // 走っている間（転がっていなくて地面にいる時）	//
   // プレイヤーの足元に砂埃エフェクトを生成
   if (!player_->GetIsRolling() &&
       player_->GetTransform().translate.y <= 3.01f) {
-    particleManager_->EmitDust(player_->GetTransform().translate);
+    effectManager_->EmitDust(player_->GetTransform().translate);
   }
 }
 
@@ -681,7 +715,7 @@ void GameScene::EditorUpdate() {
   stageSettings_->EditorUpdate(view);
 
   // パーティクルがデバッグカメラに対応するように、EditorUpdate() を呼び出す
-  particleManager_->EditorUpdate(view);
+  effectManager_->EditorUpdate(view);
 }
 
 void GameScene::CheckCollisions() {
@@ -710,7 +744,7 @@ void GameScene::CheckCollisions() {
 
         // 【演出ポイント: パーティクル】
         // 加速や誘導を示すスピード線のエフェクトや、足元の衝撃波を出す
-        // particleManager_->EmitGuideEffect(player_->GetTransform().translate);
+        // effectManager_->EmitGuideEffect(player_->GetTransform().translate);
 
         // 【演出ポイント: サウンド】
         // SoundManager::Play("GuideDash_SE"); // シューッというSE等
@@ -724,11 +758,7 @@ void GameScene::CheckCollisions() {
         bonusEnemyHitCount_++; // スコア（距離）ボーナス
 
         // プレイヤーの足元にRingエフェクトを出す
-        particleManager_->EmitShockwave(player_->GetTransform().translate);
-
-        // プレイヤーの足元にTornadoエフェクトを出す
-        particleManager_->StartBonusEffect(120.0f); // 60FPS環境で2秒間
-        particleManager_->EmitBonusTornado(player_->GetTransform().translate);
+        effectManager_->EmitShockwave(player_->GetTransform().translate);
 
         continue; // ゲームオーバーにはならず、次の判定へ
       }
@@ -738,7 +768,7 @@ void GameScene::CheckCollisions() {
         ChangePlayingState(PlayingState::OneLane);
 
         // プレイヤーの足元にRingエフェクトを出す(ボーナスと同様の演出)
-        particleManager_->EmitShockwave(player_->GetTransform().translate);
+        effectManager_->EmitShockwave(player_->GetTransform().translate);
 
         continue; // ゲームオーバーにはならず、次の判定へ
       }
@@ -746,13 +776,13 @@ void GameScene::CheckCollisions() {
       if (obstacle->GetType() == Obstacle::Type::BarrierItem) {
         obstacle->OnHit();
         player_->SetHasBarrier(true);
-        particleManager_->EmitShockwave(player_->GetTransform().translate);
+        effectManager_->EmitShockwave(player_->GetTransform().translate);
         continue;
       }
 
       if (obstacle->GetType() == Obstacle::Type::ClearItem) {
         obstacle->OnHit();
-        particleManager_->EmitShockwave(player_->GetTransform().translate);
+        effectManager_->EmitShockwave(player_->GetTransform().translate);
 
         // 画面内の障害物を吹き飛ばす
         for (int j = 0; j < stageSettings_->GetMaxObstacles(); j++) {
@@ -769,7 +799,7 @@ void GameScene::CheckCollisions() {
       if (obstacle->GetType() == Obstacle::Type::BossItem) {
         obstacle->OnHit();
         ChangePlayingState(PlayingState::Boss);
-        particleManager_->EmitShockwave(player_->GetTransform().translate);
+        effectManager_->EmitShockwave(player_->GetTransform().translate);
         continue;
       }
       
@@ -783,7 +813,7 @@ void GameScene::CheckCollisions() {
       if (player_->GetHasBarrier()) {
         player_->SetHasBarrier(false);
         obstacle->OnBlowAway();
-        particleManager_->EmitHitEffect(player_->GetTransform().translate);
+        effectManager_->EmitHitEffect(player_->GetTransform().translate);
         continue; // ゲームオーバーにならず次へ
       }
 
@@ -801,7 +831,7 @@ void GameScene::CheckCollisions() {
       player_->OnHit(isTrip);
 
       // エフェクトの発生位置をプレイヤーから取得する
-      particleManager_->EmitHitEffect(player_->GetTransform().translate);
+      effectManager_->EmitHitEffect(player_->GetTransform().translate);
 
       // ランキング更新
       UpdateRanking();

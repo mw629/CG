@@ -34,6 +34,17 @@ void DebugCamera::Initialize() {
     isMiddleMouseButtonPressed_= false;
 }
 
+void DebugCamera::SetEye(Vector3 eye) {
+    eye_ = eye;
+    Vector3 diff = eye_ - target_;
+    radius_ = Length(diff);
+    if (radius_ > 0.0001f) {
+        phi_ = std::atan2(diff.y, std::sqrt(diff.x * diff.x + diff.z * diff.z));
+        theta_ = std::atan2(diff.x, diff.z);
+    }
+    viewMatrix_ = MakeLookAtLH(eye_, target_, up_);
+}
+
 void DebugCamera::Update() {
     isRightMouseButtonPressed_  = Input::PressMouse(1);  // RMB
     isMiddleMouseButtonPressed_ = Input::PressMouse(2);  // MMB

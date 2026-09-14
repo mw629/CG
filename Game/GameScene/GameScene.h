@@ -3,7 +3,7 @@
 #include "../IScene.h"
 #include "Camera.h"
 #include "GameObjectManager.h"
-#include "GameSceneParticle.h"
+#include "GameSceneEffect.h"
 #include "RenderObject.h"
 #include <Engine.h>
 #include <Entity/Collision.h>
@@ -81,9 +81,9 @@ private:
 	//<< Paused >>//
 	std::unique_ptr<PauseSystem> pauseSystem_ = std::make_unique<PauseSystem>();
 
-	//<< Particles >>//
-	std::unique_ptr<GameSceneParticle> particleManager_ =
-		std::make_unique<GameSceneParticle>();
+	//<< Effects >>//
+	std::unique_ptr<GameSceneEffect> effectManager_ =
+		std::make_unique<GameSceneEffect>();
 
 	// 当たり判定処理
 	void CheckCollisions();
