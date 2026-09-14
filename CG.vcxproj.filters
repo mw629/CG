@@ -174,7 +174,10 @@
     <ClCompile Include="Game\GameScene\GameScene.cpp">
       <Filter>Game</Filter>
     </ClCompile>
-    <ClCompile Include="Game\GameScene\GameSceneEffect.cpp">
+    <ClCompile Include="Game\GameScene\Effect\GameSceneEffect.cpp">
+      <Filter>Game</Filter>
+    </ClCompile>
+    <ClCompile Include="Game\GameScene\Effect\HexBarrier.cpp">
       <Filter>Game</Filter>
     </ClCompile>
     <ClCompile Include="Game\SceneManager.cpp">
@@ -481,7 +484,7 @@
     <ClInclude Include="Game\GameScene\GameScene.h">
       <Filter>Game</Filter>
     </ClInclude>
-    <ClInclude Include="Game\GameScene\GameSceneEffect.h">
+    <ClInclude Include="Game\GameScene\Effect\GameSceneEffect.h">
       <Filter>Game</Filter>
     </ClInclude>
     <ClInclude Include="Game\SceneManager.h">
@@ -582,6 +585,9 @@
     </ClInclude>
     <ClInclude Include="MatchaEngine\GameObjects\Object\RenderObject.h">
       <Filter>ヘッダー ファイル</Filter>
+    </ClInclude>
+    <ClInclude Include="Game\GameScene\Effect\HexBarrier.h">
+      <Filter>Game</Filter>
     </ClInclude>
     <ClInclude Include="Game\GameScene\Entity\Player.h">
       <Filter>ヘッダー ファイル</Filter>

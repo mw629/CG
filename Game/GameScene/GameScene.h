@@ -3,7 +3,7 @@
 #include "../IScene.h"
 #include "Camera.h"
 #include "GameObjectManager.h"
-#include "GameSceneEffect.h"
+#include "Effect/GameSceneEffect.h"
 #include "RenderObject.h"
 #include <Engine.h>
 #include <Entity/Collision.h>

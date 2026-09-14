@@ -221,6 +221,60 @@ void GameScene::ImGui() {
     ImGui::Text("Dodgeable Range: %.1f m ~ %.1f m", minDistance, maxDistance);
   }
 
+  // アイテム効果のデバッグパネル
+  if (ImGui::CollapsingHeader("Item Debug / Effects", ImGuiTreeNodeFlags_DefaultOpen)) {
+    bool hasBarrier = player_->GetHasBarrier();
+    ImGui::Text("Player Barrier Status: %s", hasBarrier ? "ACTIVE (ON)" : "INACTIVE (OFF)");
+
+    if (ImGui::Button("Give Barrier (バリア付与)")) {
+      player_->SetHasBarrier(true);
+      effectManager_->EmitBarrier(player_->GetTransform().translate);
+      effectManager_->EmitShockwave(player_->GetTransform().translate);
+    }
+    ImGui::SameLine();
+    if (ImGui::Button("Break Barrier (バリア破壊/解除)")) {
+      player_->SetHasBarrier(false);
+      effectManager_->BreakBarrier(player_->GetTransform().translate);
+    }
+
+    ImGui::Separator();
+    if (ImGui::Button("Clear All Obstacles (全障害物吹き飛ばし)")) {
+      effectManager_->EmitShockwave(player_->GetTransform().translate);
+      for (int j = 0; j < stageSettings_->GetMaxObstacles(); j++) {
+        Obstacle *obs = stageSettings_->GetObstacle(j);
+        if (obs && obs->GetIsActive() && (obs->GetType() == Obstacle::Type::Low ||
+                                           obs->GetType() == Obstacle::Type::High ||
+                                           obs->GetType() == Obstacle::Type::Wall)) {
+          obs->OnBlowAway();
+        }
+      }
+    }
+
+    if (ImGui::Button("Trigger Camera Item (視点切り替え)")) {
+      ChangePlayingState(PlayingState::OneLane);
+      effectManager_->EmitShockwave(player_->GetTransform().translate);
+    }
+    ImGui::SameLine();
+    if (ImGui::Button("Trigger Boss Item (ボス戦移行)")) {
+      ChangePlayingState(PlayingState::Boss);
+      effectManager_->EmitShockwave(player_->GetTransform().translate);
+    }
+
+    ImGui::Separator();
+    ImGui::Text("Effect Triggers:");
+    if (ImGui::Button("Emit Dust")) {
+      effectManager_->EmitDust(player_->GetTransform().translate);
+    }
+    ImGui::SameLine();
+    if (ImGui::Button("Emit Shockwave")) {
+      effectManager_->EmitShockwave(player_->GetTransform().translate);
+    }
+    ImGui::SameLine();
+    if (ImGui::Button("Emit Hit Spark")) {
+      effectManager_->EmitHitEffect(player_->GetTransform().translate);
+    }
+  }
+
   effectManager_->ImGui();
 
   ImGui::End();
@@ -521,6 +575,7 @@ void GameScene::Update() {
       // PostEffect::SetActivePostEffect(PostEffect::Type::Normal);
       player_->Reset();
       effectManager_->ClearHitParticles(); // 前回の煙をリセット
+      effectManager_->ClearBarrier(); // バリアをリセット
       currentDistance_ = 0.0f;
       currentScore_ = 0.0f;
       bonusEnemyHitCount_ = 0;
@@ -776,6 +831,7 @@ void GameScene::CheckCollisions() {
       if (obstacle->GetType() == Obstacle::Type::BarrierItem) {
         obstacle->OnHit();
         player_->SetHasBarrier(true);
+        effectManager_->EmitBarrier(player_->GetTransform().translate);
         effectManager_->EmitShockwave(player_->GetTransform().translate);
         continue;
       }
@@ -814,6 +870,7 @@ void GameScene::CheckCollisions() {
         player_->SetHasBarrier(false);
         obstacle->OnBlowAway();
         effectManager_->EmitHitEffect(player_->GetTransform().translate);
+        effectManager_->BreakBarrier(player_->GetTransform().translate);
         continue; // ゲームオーバーにならず次へ
       }
 
