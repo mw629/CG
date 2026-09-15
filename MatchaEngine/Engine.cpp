@@ -310,6 +310,10 @@ void Engine::NewFrame() {
 		gpuProfiler->BeginFrame(command->GetCommandList());
 	}
 
+	if (draw) {
+		draw->ResetCullingStats();
+	}
+
 	//コマンドを積み込んで確定させる//
 	renderTextures[0]->TransitionToRenderTarget(command->GetCommandList());
 	renderTextures[0]->Clear(command->GetCommandList());

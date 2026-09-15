@@ -47,6 +47,17 @@ void MaterialComponent::ImGui()
         if (ImGui::Combo(LanguageManager::Tr("Blend Selection"), &current_blend, blendNames, IM_ARRAYSIZE(blendNames))) {
             blend_ = blendModes[current_blend];
         }
+
+        // Cull Mode
+        static const CullMode cullModes[] = { kCullModeNone, kCullModeFront, kCullModeBack };
+        static const char* cullNames[] = { "None (Both Sides)", "Front", "Back (Standard)" };
+        int current_cull = 0;
+        for (int i = 0; i < IM_ARRAYSIZE(cullModes); ++i) {
+            if (cullMode_ == cullModes[i]) { current_cull = i; break; }
+        }
+        if (ImGui::Combo(LanguageManager::Tr("Cull Mode"), &current_cull, cullNames, IM_ARRAYSIZE(cullNames))) {
+            cullMode_ = cullModes[current_cull];
+        }
         
         ImGui::Separator();
         ImGui::Text(LanguageManager::Tr("Texture:"));

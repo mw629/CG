@@ -35,7 +35,16 @@ public:
 	void SetEnvironmentTexture(int textureHandel);
 	void SetGpuProfiler(class GpuProfiler* profiler) { gpuProfiler_ = profiler; }
 
-	void preDraw(ShaderName shader, BlendMode blend);
+	void preDraw(ShaderName shader, BlendMode blend, CullMode cull = kCullModeNone);
+
+	void ResetCullingStats() { totalDrawCalls_ = 0; culledDrawCalls_ = 0; }
+	uint32_t GetTotalDrawCalls() const { return totalDrawCalls_; }
+	uint32_t GetCulledDrawCalls() const { return culledDrawCalls_; }
+	void SetFrustumCullingEnabled(bool enable) { isFrustumCullingEnabled_ = enable; }
+	bool IsFrustumCullingEnabled() const { return isFrustumCullingEnabled_; }
+	void SetDebugDrawAABB(bool enable) { isDebugDrawAABB_ = enable; }
+	bool IsDebugDrawAABB() const { return isDebugDrawAABB_; }
+	void DrawWireframeAABB(const AABB& aabb, const Vector4& color = { 0.0f, 1.0f, 0.0f, 1.0f });
 
 	void DrawObj(ObjectBase *obj);
 
@@ -72,4 +81,9 @@ private:
 	Camera* camera_{};
 	D3D12_GPU_DESCRIPTOR_HANDLE environmentTextureSrvHandleGPU_{};
 	class GpuProfiler* gpuProfiler_{};
+
+	bool isFrustumCullingEnabled_ = true;
+	bool isDebugDrawAABB_ = false;
+	uint32_t totalDrawCalls_ = 0;
+	uint32_t culledDrawCalls_ = 0;
 };

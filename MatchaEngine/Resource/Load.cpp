@@ -7,6 +7,8 @@
 #include <d3dx12.h>
 #include "Texture.h"
 #include "ModelManager.h"
+#include <cfloat>
+#include <algorithm>
 
 
 
@@ -145,6 +147,10 @@ ModelData LoadObjFile(const std::string& directoryPath, const std::string& filen
 
 	std::unique_ptr<Texture> texture = std::make_unique<Texture>();
 
+	Vector3 minPos = { FLT_MAX, FLT_MAX, FLT_MAX };
+	Vector3 maxPos = { -FLT_MAX, -FLT_MAX, -FLT_MAX };
+	bool hasVertices = false;
+
 	for (uint32_t meshIndex = 0; meshIndex < scene->mNumMeshes; ++meshIndex) {
 		aiMesh* mesh = scene->mMeshes[meshIndex];
 		
@@ -168,6 +174,15 @@ ModelData LoadObjFile(const std::string& directoryPath, const std::string& filen
 			vertices[vertexIndex].position = { -position.x,position.y,position.z,1.0f };
 			vertices[vertexIndex].normal = { -normal.x,normal.y,normal.z };
 			vertices[vertexIndex].texcoord = { texcord.x,texcord.y };
+
+			minPos.x = (std::min)(minPos.x, vertices[vertexIndex].position.x);
+			minPos.y = (std::min)(minPos.y, vertices[vertexIndex].position.y);
+			minPos.z = (std::min)(minPos.z, vertices[vertexIndex].position.z);
+
+			maxPos.x = (std::max)(maxPos.x, vertices[vertexIndex].position.x);
+			maxPos.y = (std::max)(maxPos.y, vertices[vertexIndex].position.y);
+			maxPos.z = (std::max)(maxPos.z, vertices[vertexIndex].position.z);
+			hasVertices = true;
 		}
 		
 		for (uint32_t boneIndex = 0; boneIndex < mesh->mNumBones; ++boneIndex) {
@@ -222,6 +237,40 @@ ModelData LoadObjFile(const std::string& directoryPath, const std::string& filen
 		modelData.subMeshes.push_back(subMesh);
 	}
 
+	if (hasVertices) {
+		float sizeX = maxPos.x - minPos.x;
+		float sizeY = maxPos.y - minPos.y;
+		float sizeZ = maxPos.z - minPos.z;
+		bool isFlat = (sizeX < 0.05f || sizeY < 0.05f || sizeZ < 0.05f);
+
+		if (sizeX < 0.05f) { minPos.x -= 0.1f; maxPos.x += 0.1f; }
+		if (sizeY < 0.05f) { minPos.y -= 0.1f; maxPos.y += 0.1f; }
+		if (sizeZ < 0.05f) { minPos.z -= 0.1f; maxPos.z += 0.1f; }
+
+		modelData.localAABB.min = minPos;
+		modelData.localAABB.max = maxPos;
+		modelData.localSphere.center = {
+			(minPos.x + maxPos.x) * 0.5f,
+			(minPos.y + maxPos.y) * 0.5f,
+			(minPos.z + maxPos.z) * 0.5f
+		};
+		Vector3 d = { maxPos.x - modelData.localSphere.center.x, maxPos.y - modelData.localSphere.center.y, maxPos.z - modelData.localSphere.center.z };
+		modelData.localSphere.radius = std::sqrt(d.x * d.x + d.y * d.y + d.z * d.z);
+
+		int twoSided = 0;
+		if (scene->mNumMaterials > 0 && scene->mMaterials[0]->Get(AI_MATKEY_TWOSIDED, twoSided) == AI_SUCCESS && twoSided != 0) {
+			modelData.cullMode = kCullModeNone;
+		} else if (isFlat || filename.find("plane") != std::string::npos || filename.find("Plane") != std::string::npos) {
+			modelData.cullMode = kCullModeNone;
+		} else {
+			modelData.cullMode = kCullModeBack;
+		}
+	} else {
+		modelData.localAABB = { {-0.5f, -0.5f, -0.5f}, {0.5f, 0.5f, 0.5f} };
+		modelData.localSphere = { {0.0f, 0.0f, 0.0f}, 0.866f };
+		modelData.cullMode = kCullModeBack;
+	}
+
 	modelData.rootNode = ReadNode(scene->mRootNode);
 
 	if (!modelData.subMeshes.empty()) {
@@ -258,6 +307,10 @@ ModelData AssimpLoadObjFile(const std::string& directoryPath, const std::string&
 
 	std::unique_ptr<Texture> texture = std::make_unique<Texture>();
 
+	Vector3 minPos = { FLT_MAX, FLT_MAX, FLT_MAX };
+	Vector3 maxPos = { -FLT_MAX, -FLT_MAX, -FLT_MAX };
+	bool hasVertices = false;
+
 	for (uint32_t meshIndex = 0; meshIndex < scene->mNumMeshes; ++meshIndex) {
 		aiMesh* mesh = scene->mMeshes[meshIndex];
 		std::vector<VertexData> vertices;
@@ -280,6 +333,15 @@ ModelData AssimpLoadObjFile(const std::string& directoryPath, const std::string&
 			vertices[vertexIndex].position = { -position.x,position.y,position.z,1.0f };
 			vertices[vertexIndex].normal = { -normal.x,normal.y,normal.z };
 			vertices[vertexIndex].texcoord = { texcord.x,texcord.y };
+
+			minPos.x = (std::min)(minPos.x, vertices[vertexIndex].position.x);
+			minPos.y = (std::min)(minPos.y, vertices[vertexIndex].position.y);
+			minPos.z = (std::min)(minPos.z, vertices[vertexIndex].position.z);
+
+			maxPos.x = (std::max)(maxPos.x, vertices[vertexIndex].position.x);
+			maxPos.y = (std::max)(maxPos.y, vertices[vertexIndex].position.y);
+			maxPos.z = (std::max)(maxPos.z, vertices[vertexIndex].position.z);
+			hasVertices = true;
 		}
 		for (uint32_t boneIndex = 0; boneIndex < mesh->mNumBones; ++boneIndex) {
 			aiBone* bone = mesh->mBones[boneIndex];
@@ -330,6 +392,40 @@ ModelData AssimpLoadObjFile(const std::string& directoryPath, const std::string&
 
 		subMesh.mesh = objManager.get()->CreateMesh(vertices, indices);
 		modelData.subMeshes.push_back(subMesh);
+	}
+
+	if (hasVertices) {
+		float sizeX = maxPos.x - minPos.x;
+		float sizeY = maxPos.y - minPos.y;
+		float sizeZ = maxPos.z - minPos.z;
+		bool isFlat = (sizeX < 0.05f || sizeY < 0.05f || sizeZ < 0.05f);
+
+		if (sizeX < 0.05f) { minPos.x -= 0.1f; maxPos.x += 0.1f; }
+		if (sizeY < 0.05f) { minPos.y -= 0.1f; maxPos.y += 0.1f; }
+		if (sizeZ < 0.05f) { minPos.z -= 0.1f; maxPos.z += 0.1f; }
+
+		modelData.localAABB.min = minPos;
+		modelData.localAABB.max = maxPos;
+		modelData.localSphere.center = {
+			(minPos.x + maxPos.x) * 0.5f,
+			(minPos.y + maxPos.y) * 0.5f,
+			(minPos.z + maxPos.z) * 0.5f
+		};
+		Vector3 d = { maxPos.x - modelData.localSphere.center.x, maxPos.y - modelData.localSphere.center.y, maxPos.z - modelData.localSphere.center.z };
+		modelData.localSphere.radius = std::sqrt(d.x * d.x + d.y * d.y + d.z * d.z);
+
+		int twoSided = 0;
+		if (scene->mNumMaterials > 0 && scene->mMaterials[0]->Get(AI_MATKEY_TWOSIDED, twoSided) == AI_SUCCESS && twoSided != 0) {
+			modelData.cullMode = kCullModeNone;
+		} else if (isFlat || filename.find("plane") != std::string::npos || filename.find("Plane") != std::string::npos) {
+			modelData.cullMode = kCullModeNone;
+		} else {
+			modelData.cullMode = kCullModeBack;
+		}
+	} else {
+		modelData.localAABB = { {-0.5f, -0.5f, -0.5f}, {0.5f, 0.5f, 0.5f} };
+		modelData.localSphere = { {0.0f, 0.0f, 0.0f}, 0.866f };
+		modelData.cullMode = kCullModeBack;
 	}
 
 	modelData.rootNode = ReadNode(scene->mRootNode);

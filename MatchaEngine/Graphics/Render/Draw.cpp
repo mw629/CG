@@ -47,20 +47,65 @@ void Draw::SetEnvironmentTexture(int handle)
 	environmentTextureSrvHandleGPU_ = texture_.get()->TextureData(handle);
 }
 
-void Draw::preDraw(ShaderName shader, BlendMode blend)
+void Draw::preDraw(ShaderName shader, BlendMode blend, CullMode cull)
 {
-	commandList_->SetPipelineState(graphicsPipelineState_->GetGraphicsPipelineState(shader, blend));//PSOを設定
+	commandList_->SetPipelineState(graphicsPipelineState_->GetGraphicsPipelineState(shader, blend, cull));//PSOを設定
 	//形状を設定。PSOに設定しているものとはまた別。同じものを設定すると考えておけばいい
 	commandList_->IASetPrimitiveTopology(D3D_PRIMITIVE_TOPOLOGY_TRIANGLELIST);
 	//RootSignatureを設定。POSに設定しているけど別途設定が必要
 	commandList_->SetGraphicsRootSignature(graphicsPipelineState_->GetRootSignature(shader, blend)->GetRootSignature());
+}
 
+void Draw::DrawWireframeAABB(const AABB& aabb, const Vector4& color)
+{
+	if (!lineRenderer_) return;
+	Vector3 c[8] = {
+		{ aabb.min.x, aabb.min.y, aabb.min.z },
+		{ aabb.max.x, aabb.min.y, aabb.min.z },
+		{ aabb.max.x, aabb.max.y, aabb.min.z },
+		{ aabb.min.x, aabb.max.y, aabb.min.z },
+		{ aabb.min.x, aabb.min.y, aabb.max.z },
+		{ aabb.max.x, aabb.min.y, aabb.max.z },
+		{ aabb.max.x, aabb.max.y, aabb.max.z },
+		{ aabb.min.x, aabb.max.y, aabb.max.z },
+	};
+	lineRenderer_->AddLine(c[0], c[1], color);
+	lineRenderer_->AddLine(c[1], c[2], color);
+	lineRenderer_->AddLine(c[2], c[3], color);
+	lineRenderer_->AddLine(c[3], c[0], color);
 
+	lineRenderer_->AddLine(c[4], c[5], color);
+	lineRenderer_->AddLine(c[5], c[6], color);
+	lineRenderer_->AddLine(c[6], c[7], color);
+	lineRenderer_->AddLine(c[7], c[4], color);
+
+	lineRenderer_->AddLine(c[0], c[4], color);
+	lineRenderer_->AddLine(c[1], c[5], color);
+	lineRenderer_->AddLine(c[2], c[6], color);
+	lineRenderer_->AddLine(c[3], c[7], color);
 }
 
 void Draw::DrawObj(ObjectBase* obj)
 {
-	preDraw(obj->GetShader(), obj->GetBlend());
+	if (!obj) return;
+	totalDrawCalls_++;
+
+	// フラスタムカリング判定
+	if (isFrustumCullingEnabled_ && camera_ && obj->IsFrustumCullingEnabled()) {
+		AABB worldAABB = obj->GetWorldAABB();
+		if (!camera_->GetFrustum().ContainsAABB(worldAABB)) {
+			culledDrawCalls_++;
+			if (isDebugDrawAABB_ && lineRenderer_) {
+				DrawWireframeAABB(worldAABB, { 1.0f, 0.0f, 0.0f, 1.0f });
+			}
+			return;
+		}
+		if (isDebugDrawAABB_ && lineRenderer_) {
+			DrawWireframeAABB(worldAABB, { 0.0f, 1.0f, 0.0f, 1.0f });
+		}
+	}
+
+	preDraw(obj->GetShader(), obj->GetBlend(), obj->GetCullMode());
 
 	Mesh mesh = obj->GetMesh();
 
@@ -86,6 +131,24 @@ void Draw::DrawObj(ObjectBase* obj)
 
 void Draw::DrawAnimation(CharacterAnimator* obj)
 {
+	if (!obj) return;
+	totalDrawCalls_++;
+
+	// フラスタムカリング判定
+	if (isFrustumCullingEnabled_ && camera_ && obj->IsFrustumCullingEnabled()) {
+		AABB worldAABB = obj->GetWorldAABB();
+		if (!camera_->GetFrustum().ContainsAABB(worldAABB)) {
+			culledDrawCalls_++;
+			if (isDebugDrawAABB_ && lineRenderer_) {
+				DrawWireframeAABB(worldAABB, { 1.0f, 0.0f, 0.0f, 1.0f });
+			}
+			return; // 視錐台外ならスキニングCSも描画もスキップ
+		}
+		if (isDebugDrawAABB_ && lineRenderer_) {
+			DrawWireframeAABB(worldAABB, { 0.0f, 1.0f, 0.0f, 1.0f });
+		}
+	}
+
 	ShaderName shader = ObjectShader;
 	BlendMode blend = obj->GetBlend();
 
@@ -131,7 +194,7 @@ void Draw::DrawAnimation(CharacterAnimator* obj)
 		}
 	}
 
-	preDraw(shader, blend);
+	preDraw(shader, blend, obj->GetCullMode());
 
 	// 共通の設定
 	SetSRV(shader, blend, "gTransformationMatrix", obj->GetWvpDataResource()->GetGPUVirtualAddress());
@@ -179,7 +242,25 @@ void Draw::DrawAnimation(CharacterAnimator* obj)
 
 void Draw::DrawModel(Model* model)
 {
-	preDraw(model->GetShader(), model->GetBlend());
+	if (!model) return;
+	totalDrawCalls_++;
+
+	// フラスタムカリング判定
+	if (isFrustumCullingEnabled_ && camera_ && model->IsFrustumCullingEnabled()) {
+		AABB worldAABB = model->GetWorldAABB();
+		if (!camera_->GetFrustum().ContainsAABB(worldAABB)) {
+			culledDrawCalls_++;
+			if (isDebugDrawAABB_ && lineRenderer_) {
+				DrawWireframeAABB(worldAABB, { 1.0f, 0.0f, 0.0f, 1.0f });
+			}
+			return;
+		}
+		if (isDebugDrawAABB_ && lineRenderer_) {
+			DrawWireframeAABB(worldAABB, { 0.0f, 1.0f, 0.0f, 1.0f });
+		}
+	}
+
+	preDraw(model->GetShader(), model->GetBlend(), model->GetCullMode());
 
 	ShaderName shader = model->GetShader();
 	BlendMode blend = model->GetBlend();
@@ -226,7 +307,7 @@ void Draw::DrawParticle(EffectDefinition* particle)
 		// GPU Compute Shader Dispatch (EmitParticle -> UpdateParticle)
 		particle->DispatchGPUParticle(commandList_, graphicsPipelineState_->GetComputePipeline());
 
-		preDraw(particle->GetShader(), particle->GetBlend());
+		preDraw(particle->GetShader(), particle->GetBlend(), kCullModeNone);
 
 		commandList_->IASetVertexBuffers(0, 1, particle->GetVertexBufferView());
 		ShaderName shader = particle->GetShader();
@@ -248,7 +329,7 @@ void Draw::DrawParticle(EffectDefinition* particle)
 		return;
 	}
 
-	preDraw(particle->GetShader(), particle->GetBlend());
+	preDraw(particle->GetShader(), particle->GetBlend(), kCullModeNone);
 
 	commandList_->IASetVertexBuffers(0, 1, particle->GetVertexBufferView());
 	ShaderName shader = particle->GetShader();
@@ -263,7 +344,7 @@ void Draw::DrawParticle(EffectDefinition* particle)
 
 void Draw::DrawSprite(Sprite* sprite)
 {
-	preDraw(sprite->GetShader(), sprite->GetBlend());
+	preDraw(sprite->GetShader(), sprite->GetBlend(), kCullModeNone);
 	ShaderName shader = sprite->GetShader();
 	BlendMode blend = sprite->GetBlend();
 
@@ -284,8 +365,25 @@ void Draw::DrawSprite(Sprite* sprite)
 
 void Draw::DrawSphere(Sphere* sphere)
 {
+	if (!sphere) return;
+	totalDrawCalls_++;
 
-	preDraw(sphere->GetShader(), sphere->GetBlend());
+	// フラスタムカリング判定
+	if (isFrustumCullingEnabled_ && camera_ && sphere->IsFrustumCullingEnabled()) {
+		AABB worldAABB = sphere->GetWorldAABB();
+		if (!camera_->GetFrustum().ContainsAABB(worldAABB)) {
+			culledDrawCalls_++;
+			if (isDebugDrawAABB_ && lineRenderer_) {
+				DrawWireframeAABB(worldAABB, { 1.0f, 0.0f, 0.0f, 1.0f });
+			}
+			return;
+		}
+		if (isDebugDrawAABB_ && lineRenderer_) {
+			DrawWireframeAABB(worldAABB, { 0.0f, 1.0f, 0.0f, 1.0f });
+		}
+	}
+
+	preDraw(sphere->GetShader(), sphere->GetBlend(), sphere->GetCullMode());
 
 
 	//commandList_->IASetIndexBuffer(sphere->GetIndexBufferView());//IBVを設定
@@ -306,7 +404,25 @@ void Draw::DrawSphere(Sphere* sphere)
 
 void Draw::DrawTriangle(Triangle* triangle)
 {
-	preDraw(triangle->GetShader(), triangle->GetBlend());
+	if (!triangle) return;
+	totalDrawCalls_++;
+
+	// フラスタムカリング判定
+	if (isFrustumCullingEnabled_ && camera_ && triangle->IsFrustumCullingEnabled()) {
+		AABB worldAABB = triangle->GetWorldAABB();
+		if (!camera_->GetFrustum().ContainsAABB(worldAABB)) {
+			culledDrawCalls_++;
+			if (isDebugDrawAABB_ && lineRenderer_) {
+				DrawWireframeAABB(worldAABB, { 1.0f, 0.0f, 0.0f, 1.0f });
+			}
+			return;
+		}
+		if (isDebugDrawAABB_ && lineRenderer_) {
+			DrawWireframeAABB(worldAABB, { 0.0f, 1.0f, 0.0f, 1.0f });
+		}
+	}
+
+	preDraw(triangle->GetShader(), triangle->GetBlend(), triangle->GetCullMode());
 
 	commandList_->IASetVertexBuffers(0, 1, triangle->GetVertexBufferView());//VBVを設定
 	ShaderName shader = triangle->GetShader();

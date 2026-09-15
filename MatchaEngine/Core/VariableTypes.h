@@ -15,6 +15,7 @@
 #include <optional>
 #include <span>
 #include <wrl/client.h>
+#include "../PSO/PipelineState.h"
 
 
 /// 構造体///
@@ -255,6 +256,11 @@ struct ModelData {
   // アニメーション
   Node rootNode;
   std::map<std::string, JointWeightData> skinClusterData;
+
+  // 境界ボリューム
+  AABB localAABB{};
+  BoundingSphere localSphere{};
+  CullMode cullMode = kCullModeBack;
 };
 
 // struct KeyframeVector3 {

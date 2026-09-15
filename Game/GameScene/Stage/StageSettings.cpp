@@ -143,6 +143,7 @@ void StageSettings::GenerateRoadChunks(Matrix4x4 view) {
       model->Initialize(planeModelData_);
       model->SetColor({0.0f, 0.0f, 1.0f, 1.0f});
       model->SetLighting(false);
+      model->SetCullMode(kCullModeNone);
       if (auto matComp = model->GetComponent<MaterialComponent>()) {
         matComp->SetTexturePath("Resources/Texture/white64x64.png");
       }

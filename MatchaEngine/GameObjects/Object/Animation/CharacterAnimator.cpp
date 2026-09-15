@@ -31,6 +31,8 @@ void CharacterAnimator::Initialize(ModelData modelData,
                                    const std::string &directoryPath,
                                    const std::string &filename) {
   modelData_ = modelData;
+  localAABB_ = modelData_.localAABB;
+  localSphere_ = modelData_.localSphere;
   animation_ = LoadAnimationFile(directoryPath, filename);
   if (!animation_.animationClips.empty()) {
     currentAnimationName_ = animation_.animationClips.begin()->first;

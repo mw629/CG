@@ -102,6 +102,11 @@ public:
 		if (auto mat = GetComponent<MaterialComponent>()) mat->SetBlend(blend); 
 	}
 
+	void SetCullMode(CullMode cull) {
+		cullMode_ = cull;
+		if (auto mat = GetComponent<MaterialComponent>()) mat->SetCullMode(cull);
+	}
+
 	ShaderName GetShader() { 
 		if (auto mat = GetComponent<MaterialComponent>()) return mat->GetShader();
 		return "ObjectShader"; 
@@ -110,6 +115,29 @@ public:
 		if (auto mat = GetComponent<MaterialComponent>()) return mat->GetBlend();
 		return BlendMode::kBlendModeNone; 
 	}
+	CullMode GetCullMode() const {
+		if (auto mat = GetComponent<MaterialComponent>()) return mat->GetCullMode();
+		return cullMode_;
+	}
 
+	void SetLocalAABB(const AABB& aabb) { localAABB_ = aabb; }
+	const AABB& GetLocalAABB() const { return localAABB_; }
+
+	void SetLocalBoundingSphere(const BoundingSphere& sphere) { localSphere_ = sphere; }
+	const BoundingSphere& GetLocalBoundingSphere() const { return localSphere_; }
+
+	AABB GetWorldAABB() const;
+	BoundingSphere GetWorldBoundingSphere() const;
+
+	void SetFrustumCullingEnabled(bool enable) { isFrustumCullingEnabled_ = enable; }
+	bool IsFrustumCullingEnabled() const { return isFrustumCullingEnabled_; }
+
+	void ImGuiInnerComponents() override;
+
+protected:
+	CullMode cullMode_ = kCullModeBack;
+	AABB localAABB_{ {-0.5f, -0.5f, -0.5f}, {0.5f, 0.5f, 0.5f} };
+	BoundingSphere localSphere_{ {0.0f, 0.0f, 0.0f}, 0.866f };
+	bool isFrustumCullingEnabled_ = true;
 };
 

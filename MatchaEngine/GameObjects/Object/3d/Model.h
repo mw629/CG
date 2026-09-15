@@ -63,5 +63,8 @@ public:
 	int GetModelNumber() { return modelNumber_; }
 
 	const std::vector<ModelSubMeshMaterial>& GetSubMeshMaterials() const { return subMeshMaterials_; }
+
+	AABB GetWorldAABB() const;
+	BoundingSphere GetWorldBoundingSphere() const;
 };
 

@@ -15,6 +15,7 @@ private:
 
     ShaderName shader_ = "ObjectShader";
     BlendMode blend_ = kBlendModeNone;
+    CullMode cullMode_ = kCullModeBack;
 
     std::string texturePath_ = "";
     D3D12_GPU_DESCRIPTOR_HANDLE textureSrvHandleGPU_{};
@@ -34,6 +35,9 @@ public:
 
     BlendMode GetBlend() const { return blend_; }
     void SetBlend(BlendMode blend) { blend_ = blend; }
+
+    CullMode GetCullMode() const { return cullMode_; }
+    void SetCullMode(CullMode cull) { cullMode_ = cull; }
 
     D3D12_GPU_DESCRIPTOR_HANDLE GetTextureSrvHandleGPU() const { return textureSrvHandleGPU_; }
     void SetTexturePath(const std::string& path);

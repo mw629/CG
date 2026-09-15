@@ -621,6 +621,44 @@ void EditorManager::Update(Engine* engine)
 				ImGui::EndTabItem();
 			}
 
+			if (ImGui::BeginTabItem(LanguageManager::Tr("Culling & Rendering"))) {
+				Draw* draw = engine->GetDraw();
+				if (draw) {
+					bool frustumCulling = draw->IsFrustumCullingEnabled();
+					if (ImGui::Checkbox(LanguageManager::Tr("Enable Frustum Culling"), &frustumCulling)) {
+						draw->SetFrustumCullingEnabled(frustumCulling);
+					}
+
+					bool debugAABB = draw->IsDebugDrawAABB();
+					if (ImGui::Checkbox(LanguageManager::Tr("Draw Bounding Boxes (Debug Wireframe)"), &debugAABB)) {
+						draw->SetDebugDrawAABB(debugAABB);
+					}
+
+					ImGui::Separator();
+					ImGui::Text(LanguageManager::Tr("--- Frustum Culling Statistics ---"));
+					uint32_t total = draw->GetTotalDrawCalls();
+					uint32_t culled = draw->GetCulledDrawCalls();
+					uint32_t rendered = (total >= culled) ? (total - culled) : 0;
+					float cullPercent = (total > 0) ? (static_cast<float>(culled) / static_cast<float>(total) * 100.0f) : 0.0f;
+
+					ImGui::Text(LanguageManager::Tr("Total Draw Calls: %u"), total);
+					ImGui::Text(LanguageManager::Tr("Rendered Calls: %u"), rendered);
+					ImGui::Text(LanguageManager::Tr("Culled Calls: %u (%.1f%%)"), culled, cullPercent);
+
+					char overlay[64];
+					snprintf(overlay, sizeof(overlay), "Culled: %u / %u (%.1f%%)", culled, total, cullPercent);
+					ImGui::ProgressBar(cullPercent / 100.0f, ImVec2(-1.0f, 0.0f), overlay);
+
+					ImGui::Separator();
+					ImGui::Text(LanguageManager::Tr("--- Back-face Culling ---"));
+					ImGui::BulletText(LanguageManager::Tr("3D Opaque Models: Back-face culling (CW)"));
+					ImGui::BulletText(LanguageManager::Tr("SkyBox: Front-face culling"));
+					ImGui::BulletText(LanguageManager::Tr("Sprites / UI / Billboards: Cull None (Double-sided)"));
+					ImGui::BulletText(LanguageManager::Tr("Per-object / Per-material CullMode can be changed in Inspector."));
+				}
+				ImGui::EndTabItem();
+			}
+
 			ImGui::EndTabBar();
 		}
 

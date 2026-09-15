@@ -21,6 +21,10 @@ void Model::Initialize(ModelData modelData)
 	modelNumber_ = modelData.modelNumber;
 	textureSrvHandleGPU_ = texture->TextureData(modelData.textureIndex);
 
+	localAABB_ = modelData.localAABB;
+	localSphere_ = modelData.localSphere;
+	SetCullMode(modelData.cullMode);
+
 	//アニメーション
 	rootNode_ = modelData.rootNode;
 
@@ -76,4 +80,19 @@ Mesh Model::GetMesh()
 	ModelData data = ModelManager::GetModelData(modelNumber_);
 	return data.mesh;
 }
+
+AABB Model::GetWorldAABB() const
+{
+	Matrix4x4 worldMatrixObj = MakeAffineMatrix(transform_.translate, transform_.scale, transform_.rotate);
+	Matrix4x4 worldMatrix = MultiplyMatrix4x4(rootNode_.localMatrix, worldMatrixObj);
+	return TransformAABB(localAABB_, worldMatrix);
+}
+
+BoundingSphere Model::GetWorldBoundingSphere() const
+{
+	Matrix4x4 worldMatrixObj = MakeAffineMatrix(transform_.translate, transform_.scale, transform_.rotate);
+	Matrix4x4 worldMatrix = MultiplyMatrix4x4(rootNode_.localMatrix, worldMatrixObj);
+	return TransformBoundingSphere(localSphere_, worldMatrix);
+}
+
 

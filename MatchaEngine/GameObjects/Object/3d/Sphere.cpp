@@ -15,6 +15,9 @@ void Sphere::Initialize(int textureSrvHandle)
 {
 	textureSrvHandleGPU_ = texture.get()->TextureData(textureSrvHandle);
 
+	localAABB_ = { {-1.0f, -1.0f, -1.0f}, {1.0f, 1.0f, 1.0f} };
+	localSphere_ = { {0.0f, 0.0f, 0.0f}, 1.0f };
+
 	AddComponent<MaterialComponent>();
 	
 	CreateObject(); // この行を追加

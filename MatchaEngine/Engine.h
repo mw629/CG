@@ -151,6 +151,7 @@ public:
 	const std::vector<std::unique_ptr<PostEffect>>& GetPostEffects() { return postEffects_; }
 	LightManager* GetLightManager() { return lightManager.get(); }
 	TextureLoader* GetTextureLoader() { return textureLoader.get(); }
+	Draw* GetDraw() { return draw.get(); }
 	RenderTexture* GetRenderTexture() { return renderTextures[0].get(); } // The main scene is always rendered to renderTextures[0]
 	RenderTexture* GetFinalRenderTexture(); // Return the final texture after all post effects
 	int32_t GetClientWidth() const { return kClientWidth_; }

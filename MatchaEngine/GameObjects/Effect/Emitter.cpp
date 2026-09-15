@@ -994,7 +994,6 @@ EffectDefinitionData Emitter::MakeNewParticle()
 {
 	std::uniform_real_distribution<float> distribution(-1.0f, 1.0f);
 	std::uniform_real_distribution<float> dist01(0.0f, 1.0f);
-	const float kPi = 3.1415926535f;
 
 	EffectDefinitionData data = SetEffectDefinitionData_;
 

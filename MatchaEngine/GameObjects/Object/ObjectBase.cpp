@@ -114,3 +114,46 @@ D3D12_VERTEX_BUFFER_VIEW* ObjectBase::GetVertexBufferView()
 {
 	return &vertexBufferView_;
 }
+
+AABB ObjectBase::GetWorldAABB() const
+{
+	Matrix4x4 worldMatrix = MakeAffineMatrix(transform_.translate, transform_.scale, transform_.rotate);
+	return TransformAABB(localAABB_, worldMatrix);
+}
+
+BoundingSphere ObjectBase::GetWorldBoundingSphere() const
+{
+	Matrix4x4 worldMatrix = MakeAffineMatrix(transform_.translate, transform_.scale, transform_.rotate);
+	return TransformBoundingSphere(localSphere_, worldMatrix);
+}
+
+void ObjectBase::ImGuiInnerComponents()
+{
+#ifdef _USE_IMGUI
+	if (ImGui::CollapsingHeader(LanguageManager::Tr("Rendering & Culling"), ImGuiTreeNodeFlags_DefaultOpen)) {
+		ImGui::Checkbox(LanguageManager::Tr("Frustum Culling"), &isFrustumCullingEnabled_);
+
+		if (!GetComponent<MaterialComponent>()) {
+			static const CullMode cullModes[] = { kCullModeNone, kCullModeFront, kCullModeBack };
+			static const char* cullNames[] = { "None (Both Sides)", "Front", "Back (Standard)" };
+			int current_cull = 0;
+			for (int i = 0; i < IM_ARRAYSIZE(cullModes); ++i) {
+				if (cullMode_ == cullModes[i]) { current_cull = i; break; }
+			}
+			if (ImGui::Combo(LanguageManager::Tr("Cull Mode"), &current_cull, cullNames, IM_ARRAYSIZE(cullNames))) {
+				cullMode_ = cullModes[current_cull];
+			}
+		}
+
+		if (ImGui::TreeNode(LanguageManager::Tr("Bounding Box (AABB)"))) {
+			AABB worldAABB = GetWorldAABB();
+			ImGui::Text("Local Min: (%.2f, %.2f, %.2f)", localAABB_.min.x, localAABB_.min.y, localAABB_.min.z);
+			ImGui::Text("Local Max: (%.2f, %.2f, %.2f)", localAABB_.max.x, localAABB_.max.y, localAABB_.max.z);
+			ImGui::Text("World Min: (%.2f, %.2f, %.2f)", worldAABB.min.x, worldAABB.min.y, worldAABB.min.z);
+			ImGui::Text("World Max: (%.2f, %.2f, %.2f)", worldAABB.max.x, worldAABB.max.y, worldAABB.max.z);
+			ImGui::TreePop();
+		}
+	}
+#endif
+}
+

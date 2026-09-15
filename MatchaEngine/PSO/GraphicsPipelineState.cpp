@@ -14,35 +14,28 @@ void GraphicsPipelineState::CreatePSO(ShaderName shaderName, BlendMode blendMode
 	Log(os, "///PSOの生成///\n");
 }
 
-void GraphicsPipelineState::CreateGraphicsPSO(const ShaderName& shaderName, const PipelineConfig& config, BlendMode blendMode, std::ostream& os, ID3D12Device* device)
+void GraphicsPipelineState::CreateGraphicsShaderPipeline(const ShaderName& shaderName, const PipelineConfig& config, std::ostream& os, ID3D12Device* device)
 {
-	//宣言
 	DirectXShaderCompiler directXShaderCompiler{};
 	std::unique_ptr<RootSignature> rootSignature = std::make_unique<RootSignature>();
 	std::unique_ptr<Sampler> sampler = std::make_unique<Sampler>();
 	std::unique_ptr<InputLayout> inputLayout = std::make_unique<InputLayout>();
-	std::unique_ptr<BlendState> blendState = std::make_unique<BlendState>();
-	std::unique_ptr<RasterizerState> rasterizerState = std::make_unique<RasterizerState>();
-	std::unique_ptr<ShaderCompile>  shaderCompile = std::make_unique<ShaderCompile>();
+	std::unique_ptr<ShaderCompile> shaderCompile = std::make_unique<ShaderCompile>();
 	std::unique_ptr<DepthStencilState> depthStencilState = std::make_unique<DepthStencilState>();
 
-	std::string info = std::string("CreateGraphicsPSO: shader=") + ShaderNameToString(shaderName) +
-		", blend=" + BlendModeToString(blendMode) + "\n";
+	std::string info = std::string("CreateGraphicsShaderPipeline: shader=") + ShaderNameToString(shaderName) + "\n";
 	Log(os, info);
 
-
-
-	//1.	VS / PS を先にコンパイル
+	// 1. VS / PS を先にコンパイル
 	directXShaderCompiler.CreateDXC();
 	shaderCompile->CreateShaderCompile(config, os, directXShaderCompiler.GetDxcUtils(), directXShaderCompiler.GetDxcCompiler(), directXShaderCompiler.GetIncludeHandler());
 
-	//2.	シェーダーリフレクションで b / t / s / u の使用状況を取得
-	//3.	その情報から RootParameter / DescriptorRange を自動生成
+	// 2. シェーダーリフレクションで b / t / s / u の使用状況を取得
+	// 3. その情報から RootParameter / DescriptorRange を自動生成
 	std::vector<D3D12_ROOT_PARAMETER> rootParams;
 	std::vector<D3D12_DESCRIPTOR_RANGE> ranges;
-	// 領域を確保しておき、ポインタの無効化を防ぐ
 	ranges.reserve(32);
-	std::map<std::string, UINT>& nameMap = rootParameterIndexMap_[shaderName][blendMode];
+	std::map<std::string, UINT>& nameMap = rootParameterIndexMap_[shaderName];
 
 	auto processReflection = [&](IDxcBlob* shaderBlob, D3D12_SHADER_VISIBILITY visibility) {
 		if (!shaderBlob) return;
@@ -53,6 +46,7 @@ void GraphicsPipelineState::CreateGraphicsPSO(const ShaderName& shaderName, cons
 
 		Microsoft::WRL::ComPtr<ID3D12ShaderReflection> reflection;
 		directXShaderCompiler.GetDxcUtils()->CreateReflection(&reflectionData, IID_PPV_ARGS(&reflection));
+		if (!reflection) return;
 
 		D3D12_SHADER_DESC shaderDesc;
 		reflection->GetDesc(&shaderDesc);
@@ -61,7 +55,6 @@ void GraphicsPipelineState::CreateGraphicsPSO(const ShaderName& shaderName, cons
 			D3D12_SHADER_INPUT_BIND_DESC bindDesc;
 			reflection->GetResourceBindingDesc(i, &bindDesc);
 
-			// すでに登録済みのリソースならスキップするかVisibilityをALLにする
 			if (nameMap.find(bindDesc.Name) != nameMap.end()) {
 				rootParams[nameMap[bindDesc.Name]].ShaderVisibility = D3D12_SHADER_VISIBILITY_ALL;
 				continue;
@@ -106,7 +99,7 @@ void GraphicsPipelineState::CreateGraphicsPSO(const ShaderName& shaderName, cons
 				rootParams.push_back(param);
 			}
 		}
-		};
+	};
 
 	processReflection(shaderCompile->GetVertexShaderBlob(), D3D12_SHADER_VISIBILITY_VERTEX);
 	processReflection(shaderCompile->GetPixelShaderBlob(), D3D12_SHADER_VISIBILITY_PIXEL);
@@ -115,59 +108,61 @@ void GraphicsPipelineState::CreateGraphicsPSO(const ShaderName& shaderName, cons
 	rootSignatureDesc.pParameters = rootParams.data();
 	rootSignatureDesc.NumParameters = static_cast<UINT>(rootParams.size());
 
-	// Sampler設定
 	sampler->CreateSampler(rootSignatureDesc);
-
-	//4.	RootSignature を生成
 	rootSignature->CreateRootSignature(os, device);
 
-	//5.	PSO を生成
 	inputLayout->CreateInputLayout(config);
-	blendState->CreateBlendDesc(blendMode);
-	rasterizerState->CreateRasterizerState(config);
 	depthStencilState->CreateDepthStencilState(config);
 
+	// 5. 各CullMode x BlendModeのPSOを一括生成
+	for (int c = 0; c < kCullNum; ++c) {
+		CullMode cullMode = static_cast<CullMode>(c);
+		PipelineConfig cullConfig = config;
+		cullConfig.cullMode = ToD3D12CullMode(cullMode);
 
-	graphicsPipelineStateDesc_[shaderName][blendMode].pRootSignature = rootSignature->GetRootSignature();//RootSignature
-	graphicsPipelineStateDesc_[shaderName][blendMode].InputLayout = inputLayout->GetInputLayoutDesc();//InputLayout
-	graphicsPipelineStateDesc_[shaderName][blendMode].VS = { shaderCompile->GetVertexShaderBlob()->GetBufferPointer(),
-	 shaderCompile->GetVertexShaderBlob()->GetBufferSize() };//VertexShader
-	graphicsPipelineStateDesc_[shaderName][blendMode].PS = { shaderCompile->GetPixelShaderBlob()->GetBufferPointer(),
-	shaderCompile->GetPixelShaderBlob()->GetBufferSize() };//PixelShader
-	graphicsPipelineStateDesc_[shaderName][blendMode].BlendState = blendState->GetBlendDesc();//BlenderState
-	graphicsPipelineStateDesc_[shaderName][blendMode].RasterizerState = rasterizerState->GetRasterizerDesc();//RasterizerState
-	//書き込むRTVの情報
-	graphicsPipelineStateDesc_[shaderName][blendMode].NumRenderTargets = 1;
-	graphicsPipelineStateDesc_[shaderName][blendMode].RTVFormats[0] = DXGI_FORMAT_R8G8B8A8_UNORM_SRGB;
-	//利用するトポロジ（形状）のタイプ
-	if (shaderName == "LineShader" || shaderName == "LineShaderNoDepth") {
-		graphicsPipelineStateDesc_[shaderName][blendMode].PrimitiveTopologyType = D3D12_PRIMITIVE_TOPOLOGY_TYPE_LINE;
+		std::unique_ptr<RasterizerState> rasterizerState = std::make_unique<RasterizerState>();
+		rasterizerState->CreateRasterizerState(cullConfig);
+
+		for (int b = 0; b < kBlendNum; ++b) {
+			BlendMode blendMode = static_cast<BlendMode>(b);
+			std::unique_ptr<BlendState> blendState = std::make_unique<BlendState>();
+			blendState->CreateBlendDesc(blendMode);
+
+			auto& psoDesc = graphicsPipelineStateDesc_[shaderName][cullMode][blendMode];
+			psoDesc.pRootSignature = rootSignature->GetRootSignature();
+			psoDesc.InputLayout = inputLayout->GetInputLayoutDesc();
+			psoDesc.VS = { shaderCompile->GetVertexShaderBlob()->GetBufferPointer(), shaderCompile->GetVertexShaderBlob()->GetBufferSize() };
+			psoDesc.PS = { shaderCompile->GetPixelShaderBlob()->GetBufferPointer(), shaderCompile->GetPixelShaderBlob()->GetBufferSize() };
+			psoDesc.BlendState = blendState->GetBlendDesc();
+			psoDesc.RasterizerState = rasterizerState->GetRasterizerDesc();
+			psoDesc.NumRenderTargets = 1;
+			psoDesc.RTVFormats[0] = DXGI_FORMAT_R8G8B8A8_UNORM_SRGB;
+
+			if (shaderName == "LineShader" || shaderName == "LineShaderNoDepth") {
+				psoDesc.PrimitiveTopologyType = D3D12_PRIMITIVE_TOPOLOGY_TYPE_LINE;
+			}
+			else {
+				psoDesc.PrimitiveTopologyType = D3D12_PRIMITIVE_TOPOLOGY_TYPE_TRIANGLE;
+			}
+
+			psoDesc.SampleDesc.Count = 1;
+			psoDesc.SampleMask = D3D12_DEFAULT_SAMPLE_MASK;
+			psoDesc.DepthStencilState = depthStencilState->GetDepthStencilDesc();
+			psoDesc.DSVFormat = DXGI_FORMAT_D24_UNORM_S8_UINT;
+
+			hr_ = device->CreateGraphicsPipelineState(&psoDesc, IID_PPV_ARGS(&graphicsPipelineState_[shaderName][cullMode][blendMode]));
+			assert(SUCCEEDED(hr_));
+		}
 	}
-	else if (shaderName == "ParticleShader") {
-		// Particle uses point list for geometry shader or triangle instancing depending on implementation.
-		// For now we assume triangle or point. Since it didn't crash before, triangle is likely correct for instancing quads.
-		graphicsPipelineStateDesc_[shaderName][blendMode].PrimitiveTopologyType = D3D12_PRIMITIVE_TOPOLOGY_TYPE_TRIANGLE;
-	}
-	else {
-		graphicsPipelineStateDesc_[shaderName][blendMode].PrimitiveTopologyType = D3D12_PRIMITIVE_TOPOLOGY_TYPE_TRIANGLE;
-	}
-	//どのように画面に色を打ち込むのかの設定(気にしなくていい)
-	graphicsPipelineStateDesc_[shaderName][blendMode].SampleDesc.Count = 1;
-	graphicsPipelineStateDesc_[shaderName][blendMode].SampleMask = D3D12_DEFAULT_SAMPLE_MASK;
 
-	//作成したらPSOに代入、DSCのFormatを設定する//
-	graphicsPipelineStateDesc_[shaderName][blendMode].DepthStencilState = depthStencilState->GetDepthStencilDesc();
-	graphicsPipelineStateDesc_[shaderName][blendMode].DSVFormat = DXGI_FORMAT_D24_UNORM_S8_UINT;
+	rootSignature_[shaderName] = std::move(rootSignature);
+	Log(os, "///PSOの生成完了///\n");
+}
 
-	//実際に生成
-	rootSignature_[shaderName][blendMode] = std::move(rootSignature);
-
-	hr_ = device->CreateGraphicsPipelineState(&graphicsPipelineStateDesc_[shaderName][blendMode],
-		IID_PPV_ARGS(&graphicsPipelineState_[shaderName][blendMode]));
-	assert(SUCCEEDED(hr_));
-
-	Log(os, "///PSOの生成///\n");
-
+void GraphicsPipelineState::CreateGraphicsPSO(const ShaderName& shaderName, const PipelineConfig& config, BlendMode blendMode, std::ostream& os, ID3D12Device* device)
+{
+	(void)blendMode;
+	CreateGraphicsShaderPipeline(shaderName, config, os, device);
 }
 
 
@@ -196,36 +191,32 @@ void GraphicsPipelineState::ALLPSOCreate(std::ostream& os, ID3D12Device* device)
 	};
 
 	std::vector<std::pair<ShaderName, PipelineConfig>> configs = {
-		//ObjectShaderは通常の3Dオブジェクト用のシェーダー。アニメーションなし
-		{ ObjectShader, { L"Resources/Shader/ObjectShader/Object3D.VS.hlsl", L"Resources/Shader/ObjectShader/Object3D.PS.hlsl", objInput, true, D3D12_DEPTH_WRITE_MASK_ALL, D3D12_COMPARISON_FUNC_LESS_EQUAL, D3D12_CULL_MODE_NONE, D3D12_FILL_MODE_SOLID } },
+		// ObjectShaderは通常の3Dオブジェクト用のシェーダー。アニメーションなし (デフォルトはBack-face culling)
+		{ ObjectShader, { L"Resources/Shader/ObjectShader/Object3D.VS.hlsl", L"Resources/Shader/ObjectShader/Object3D.PS.hlsl", objInput, true, D3D12_DEPTH_WRITE_MASK_ALL, D3D12_COMPARISON_FUNC_LESS_EQUAL, D3D12_CULL_MODE_BACK, D3D12_FILL_MODE_SOLID } },
 		{ WireFrameShader, { L"Resources/Shader/ObjectShader/Object3D.VS.hlsl", L"Resources/Shader/ObjectShader/Object3D.PS.hlsl", objInput, true, D3D12_DEPTH_WRITE_MASK_ALL, D3D12_COMPARISON_FUNC_LESS_EQUAL, D3D12_CULL_MODE_NONE, D3D12_FILL_MODE_WIREFRAME } },
 		{ WireFrameShaderNoDepth, { L"Resources/Shader/ObjectShader/Object3D.VS.hlsl", L"Resources/Shader/ObjectShader/Object3D.PS.hlsl", objInput, false, D3D12_DEPTH_WRITE_MASK_ZERO, D3D12_COMPARISON_FUNC_ALWAYS, D3D12_CULL_MODE_NONE, D3D12_FILL_MODE_WIREFRAME } },
-		{IceShader, { L"Resources/Shader/ObjectShader/Object3D.VS.hlsl", L"Resources/Shader/ObjectShader/IceShader.PS.hlsl", objInput, true, D3D12_DEPTH_WRITE_MASK_ALL, D3D12_COMPARISON_FUNC_LESS_EQUAL, D3D12_CULL_MODE_NONE, D3D12_FILL_MODE_SOLID } },
+		{ IceShader, { L"Resources/Shader/ObjectShader/Object3D.VS.hlsl", L"Resources/Shader/ObjectShader/IceShader.PS.hlsl", objInput, true, D3D12_DEPTH_WRITE_MASK_ALL, D3D12_COMPARISON_FUNC_LESS_EQUAL, D3D12_CULL_MODE_BACK, D3D12_FILL_MODE_SOLID } },
 
-		//AnimationObjはスキニングアニメーション用のシェーダー。アニメーションあり
-		{ AnimationObj, { L"Resources/Shader/SkinningShader/SkinningObject3d.VS.hlsl", L"Resources/Shader/SkinningShader/SkinningObject3d.PS.hlsl", animInput, true, D3D12_DEPTH_WRITE_MASK_ALL, D3D12_COMPARISON_FUNC_LESS_EQUAL, D3D12_CULL_MODE_NONE, D3D12_FILL_MODE_SOLID } },
+		// AnimationObjはスキニングアニメーション用のシェーダー。アニメーションあり
+		{ AnimationObj, { L"Resources/Shader/SkinningShader/SkinningObject3d.VS.hlsl", L"Resources/Shader/SkinningShader/SkinningObject3d.PS.hlsl", animInput, true, D3D12_DEPTH_WRITE_MASK_ALL, D3D12_COMPARISON_FUNC_LESS_EQUAL, D3D12_CULL_MODE_BACK, D3D12_FILL_MODE_SOLID } },
 		
-		//LineShaderはライン描画用のシェーダー。描画モードはラインリストで、頂点バッファの内容をそのままスクリーンに打ち込むようなイメージ。深度は書き込む
+		// LineShaderはライン描画用のシェーダー。描画モードはラインリスト
 		{ LineShader, { L"Resources/Shader/LineShader/Line.VS.hlsl", L"Resources/Shader/LineShader/Line.PS.hlsl", lineInput, true, D3D12_DEPTH_WRITE_MASK_ALL, D3D12_COMPARISON_FUNC_LESS_EQUAL, D3D12_CULL_MODE_NONE, D3D12_FILL_MODE_SOLID } },
 		{ LineShaderNoDepth, { L"Resources/Shader/LineShader/Line.VS.hlsl", L"Resources/Shader/LineShader/Line.PS.hlsl", lineInput, false, D3D12_DEPTH_WRITE_MASK_ZERO, D3D12_COMPARISON_FUNC_ALWAYS, D3D12_CULL_MODE_NONE, D3D12_FILL_MODE_SOLID } },
 		
-		//SkyBoxShaderはスカイボックス用のシェーダー。描画モードは三角形で、頂点バッファの内容をそのままスクリーンに打ち込むようなイメージ。深度は書き込まないが、比較は通常の3Dオブジェクトと同じにすることで、スカイボックスが常に一番奥に描画されるようにする
+		// SkyBoxShaderはスカイボックス用のシェーダー。内側から見るためFrontカリング
 		{ SkyBoxShader, { L"Resources/Shader/SkyBoxShader/SkyBox.VS.hlsl", L"Resources/Shader/SkyBoxShader/SkyBox.PS.hlsl", objInput, true, D3D12_DEPTH_WRITE_MASK_ZERO, D3D12_COMPARISON_FUNC_LESS_EQUAL, D3D12_CULL_MODE_FRONT, D3D12_FILL_MODE_SOLID } },
 
-		//ポストエフェクト用のシェーダーは全て同じ入力レイアウトを使用する
-		// CopyImage (Normal) は先頭に固定登録
+		// ポストエフェクト用のシェーダー
 		{ CopyImageShader, { L"Resources/Shader/PostEffect/PostEffect.VS.hlsl", L"Resources/Shader/PostEffect/CopyImage.PS.hlsl", lineInput, false, D3D12_DEPTH_WRITE_MASK_ZERO, D3D12_COMPARISON_FUNC_ALWAYS, D3D12_CULL_MODE_NONE, D3D12_FILL_MODE_SOLID } },
 	};
 
 	// ---- ポストエフェクトシェーダーをフォルダから自動スキャン ----
-	// "Resources/Shader/PostEffect/" 内の *.PS.hlsl を列挙してPSOを自動生成。
-	// 新しいポストエフェクトを追加するには HLSLファイルを置くだけでよい。
 	std::filesystem::path postEffectShaderDir = "Resources/Shader/PostEffect";
 	if (std::filesystem::exists(postEffectShaderDir)) {
 		std::vector<std::filesystem::path> psFiles;
 		for (const auto& entry : std::filesystem::directory_iterator(postEffectShaderDir)) {
 			const std::string filename = entry.path().filename().string();
-			// "*.PS.hlsl" でかつ "CopyImage" (固定登録済み) は除外
 			if (filename.size() > 8 &&
 				filename.substr(filename.size() - 8) == ".PS.hlsl" &&
 				filename.find("CopyImage") == std::string::npos)
@@ -233,12 +224,10 @@ void GraphicsPipelineState::ALLPSOCreate(std::ostream& os, ID3D12Device* device)
 				psFiles.push_back(entry.path());
 			}
 		}
-		// ファイル名でソートして順序を安定させる
 		std::sort(psFiles.begin(), psFiles.end());
 
 		for (const auto& psPath : psFiles) {
 			const std::string filename = psPath.filename().string();
-			// "GrayScale.PS.hlsl" → shaderName = "GrayScaleShader"
 			const std::string stem = filename.substr(0, filename.find(".PS.hlsl"));
 			const std::string shaderNameStr = stem + "Shader";
 			const std::wstring psWPath = psPath.wstring();
@@ -259,9 +248,7 @@ void GraphicsPipelineState::ALLPSOCreate(std::ostream& os, ID3D12Device* device)
 	}
 
 	for (const auto& pair : configs) {
-		for (int j = 0; j < kBlendNum; j++) {
-			CreateGraphicsPSO(pair.first, pair.second, static_cast<BlendMode>(j), os, device);
-		}
+		CreateGraphicsShaderPipeline(pair.first, pair.second, os, device);
 	}
 
 	computePipeline_ = std::make_unique<ComputePipeline>();

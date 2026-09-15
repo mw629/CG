@@ -50,5 +50,9 @@ public:
 	
 	ID3D12Resource* GetCameraResource() const { return cameraResource_.Get(); }
 
+	const Frustum& GetFrustum() const { return frustum_; }
+
+private:
+	Frustum frustum_{};
 };
 

@@ -12,6 +12,34 @@ enum BlendMode {
 	kBlendNum,
 };
 
+enum CullMode {
+	kCullModeNone,
+	kCullModeFront,
+	kCullModeBack,
+
+	kCullNum,
+};
+
+inline const char* CullModeToString(CullMode mode)
+{
+	switch (mode) {
+	case kCullModeNone: return "kCullModeNone";
+	case kCullModeFront: return "kCullModeFront";
+	case kCullModeBack: return "kCullModeBack";
+	default: return "UnknownCullMode";
+	}
+}
+
+inline D3D12_CULL_MODE ToD3D12CullMode(CullMode mode)
+{
+	switch (mode) {
+	case kCullModeNone: return D3D12_CULL_MODE_NONE;
+	case kCullModeFront: return D3D12_CULL_MODE_FRONT;
+	case kCullModeBack: return D3D12_CULL_MODE_BACK;
+	default: return D3D12_CULL_MODE_BACK;
+	}
+}
+
 
 #include <string>
 #include <vector>
