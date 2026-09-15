@@ -23,6 +23,7 @@ private:
 	DebugCamera debugCamera_;
 
 	bool isDebugCamera_=true;
+	float totalTime_ = 0.0f;
 
 	Microsoft::WRL::ComPtr<ID3D12Resource> cameraResource_;
 	CameraForGPU* cameraData_ = nullptr;

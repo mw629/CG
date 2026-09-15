@@ -123,6 +123,7 @@ struct PerView {
 
 struct CameraForGPU {
   Vector3 worldPosition;
+  float time;
 };
 
 struct LineTransformationMatrix {

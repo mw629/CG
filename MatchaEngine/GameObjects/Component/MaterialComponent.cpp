@@ -25,7 +25,7 @@ void MaterialComponent::ImGui()
         }
 
         // Shader
-        const char* shaders[] = { "ObjectShader", "IceShader", "AnimationObj", "ParticleShader", "SkyBoxShader" };
+        const char* shaders[] = { "ObjectShader", "WaterShader", "IceShader", "AnimationObj", "ParticleShader", "SkyBoxShader" };
         int current_shader = 0;
         for (int i = 0; i < IM_ARRAYSIZE(shaders); ++i) {
             if (shader_ == shaders[i]) {

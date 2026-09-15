@@ -36,6 +36,7 @@ void Camera::Initialize() {
 	
 	// 初期値を設定
 	cameraData_->worldPosition = transform_.translate;
+	cameraData_->time = 0.0f;
 	frustum_ = Frustum::FromViewProjection(GetViewProjectionMatrix());
 }
 
@@ -65,7 +66,9 @@ void Camera::Update() {
         eye = transform_.translate;
     }
 
+    totalTime_ += 1.0f / 60.0f;
     cameraData_->worldPosition = eye;
+    cameraData_->time = totalTime_;
     projectionMatrix_ = MakePerspectiveFovMatrix(fovY_, aspectRatio_, nearClip_, farClip_);
     frustum_ = Frustum::FromViewProjection(GetViewProjectionMatrix());
 }

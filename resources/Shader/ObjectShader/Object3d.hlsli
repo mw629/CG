@@ -3,6 +3,7 @@
 struct Camera
 {
     float32_t3 worldPosition;
+    float32_t time;
 };
 
 struct VertexShaderOutput

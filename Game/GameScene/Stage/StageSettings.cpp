@@ -1,5 +1,6 @@
 #include "StageSettings.h"
 #include "AssetManager.h"
+#include "PSO/PipelineState.h"
 #include <algorithm>
 #include <cstdlib>
 #include <ctime>
@@ -19,7 +20,7 @@ void StageSettings::Initialize(ModelData roadModelData,
   texture_->CreateTexture("Resources/Model/Ground/Ground.png");
   texture_->CreateTexture("Resources/Texture/white64x64.png");
 
-  planeModelData_ = AssetManager::LoadModel("Resources/Model/obj", "plane.obj");
+  planeModelData_ = AssetManager::LoadModel("Resources/Model/obj", "ocean_plane.obj");
 
   roadModelData_ = roadModelData;
   manager_ = manager;
@@ -141,11 +142,13 @@ void StageSettings::GenerateRoadChunks(Matrix4x4 view) {
     if (!sidePlanes_[i]) {
       auto model = std::make_shared<Model>();
       model->Initialize(planeModelData_);
-      model->SetColor({0.0f, 0.0f, 1.0f, 1.0f});
-      model->SetLighting(false);
+      model->SetShader(WaterShader);
+      model->SetColor({0.15f, 0.55f, 0.85f, 0.9f});
+      model->SetLighting(true);
       model->SetCullMode(kCullModeNone);
       if (auto matComp = model->GetComponent<MaterialComponent>()) {
         matComp->SetTexturePath("Resources/Texture/white64x64.png");
+        matComp->SetShader(WaterShader);
       }
       model->SetTexture(
           texture_->TextureData("Resources/Texture/white64x64.png"));
@@ -157,8 +160,8 @@ void StageSettings::GenerateRoadChunks(Matrix4x4 view) {
     Transform t;
     t.scale = {50.0f, chunkLength_ * 2.0f, 1.0f}; // plane.objは2x2なので、Yスケール*2=長さ。4チャンク分=chunkLength_*4
                                                   // -> scale=chunkLength_*2
-    t.rotate = {1.570796f, 0.0f, 0.0f};
-    t.translate = {bounds[i] + offsets[i], 2.0f,
+    t.rotate = {-1.570796f, 0.0f, 0.0f};
+    t.translate = {bounds[i] + offsets[i], 0.0f,
                    chunkLength_ *
                        1.5f}; // カメラの手前から奥までカバーするように配置
     sidePlanes_[i]->SetTransform(t);

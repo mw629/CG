@@ -50,6 +50,7 @@ const ShaderName ObjectShader = "ObjectShader";
 const ShaderName WireFrameShader = "WireFrameShader";
 const ShaderName WireFrameShaderNoDepth = "WireFrameShaderNoDepth";
 const ShaderName IceShader = "IceShader";
+const ShaderName WaterShader = "WaterShader";
 const ShaderName AnimationObj = "AnimationObj";
 const ShaderName ParticleShader = "ParticleShader";
 const ShaderName SmokeShader = "SmokeShader";
