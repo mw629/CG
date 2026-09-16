@@ -31,7 +31,7 @@ public:
     MaterialFactory* GetMaterialFactory() const { return materialFactory_.get(); }
 
     ShaderName GetShader() const { return shader_; }
-    void SetShader(ShaderName shader) { shader_ = shader; }
+    void SetShader(ShaderName shader);
 
     BlendMode GetBlend() const { return blend_; }
     void SetBlend(BlendMode blend) { blend_ = blend; }

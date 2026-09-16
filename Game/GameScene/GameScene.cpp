@@ -435,6 +435,8 @@ void GameScene::Initialize() {
   skyBoxTexture_ = texture_.get()->CreateTexture("Resources/DDS/SnowWorld.dds");
   skyBox_.get()->Initialize(skyBoxTexture_);
   skyBox_.get()->SetShader("SkyBoxShader");
+  skyBox_.get()->SetCullMode(kCullModeFront);
+  skyBox_.get()->SetFrustumCullingEnabled(false);
   skyBox_.get()->SetLighting(false);
   skyBox_.get()->SetTransform(skyBoxTransform_);
   skyBox_.get()->name_ = "SkyBox";
@@ -454,6 +456,7 @@ void GameScene::Initialize() {
   gameObjectManager_->Clear();
   auto skyboxRenderObj = std::make_shared<RenderObject>(skyBox_);
   skyboxRenderObj->SetName("SkyBox");
+  skyboxRenderObj->SetFrustumCullingEnabled(false);
   gameObjectManager_->AddObject(skyboxRenderObj);
   player_->SetName("Player");
   gameObjectManager_->AddObject(player_);

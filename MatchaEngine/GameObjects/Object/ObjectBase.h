@@ -97,6 +97,10 @@ public:
 
 	void SetShader(ShaderName shader) { 
 		if (auto mat = GetComponent<MaterialComponent>()) mat->SetShader(shader); 
+		if (shader == SkyBoxShader) {
+			SetCullMode(kCullModeFront);
+			SetFrustumCullingEnabled(false);
+		}
 	}
 	void SetBlend(BlendMode blend) { 
 		if (auto mat = GetComponent<MaterialComponent>()) mat->SetBlend(blend); 

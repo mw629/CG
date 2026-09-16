@@ -30,7 +30,11 @@ public:
     void Update(Matrix4x4 view, float speedMultiplier = 1.0f) override {
         GameObject::Update(view, speedMultiplier);
         if (objectBase_) {
-            objectBase_->SetTransform(transform_);
+            if (objectBase_->name_ == "SkyBox" || objectBase_->GetShader() == SkyBoxShader) {
+                transform_ = objectBase_->GetTransform();
+            } else {
+                objectBase_->SetTransform(transform_);
+            }
             objectBase_->SettingWvp(view);
         }
     }
@@ -51,6 +55,15 @@ public:
         if (objectBase_) {
             objectBase_->SetTransform(transform_);
         }
+    }
+
+    void SetFrustumCullingEnabled(bool enable) {
+        if (objectBase_) {
+            objectBase_->SetFrustumCullingEnabled(enable);
+        }
+    }
+    bool IsFrustumCullingEnabled() const {
+        return objectBase_ ? objectBase_->IsFrustumCullingEnabled() : false;
     }
 
     void ImGuiInnerComponents() override {

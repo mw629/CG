@@ -90,8 +90,21 @@ void Draw::DrawObj(ObjectBase* obj)
 	if (!obj) return;
 	totalDrawCalls_++;
 
-	// フラスタムカリング判定
-	if (isFrustumCullingEnabled_ && camera_ && obj->IsFrustumCullingEnabled()) {
+	ShaderName shader = obj->GetShader();
+	BlendMode blend = obj->GetBlend();
+	CullMode cull = obj->GetCullMode();
+
+	// SkyBoxShaderの場合はスカイボックス（背景）なのでカリングを自動補正
+	bool isSkyBox = (shader == SkyBoxShader || obj->name_ == "SkyBox");
+	if (isSkyBox) {
+		// 裏面カリングだと立方体の内側から見た時に消えてしまうため、前面カリングに補正
+		if (cull == kCullModeBack) {
+			cull = kCullModeFront;
+		}
+	}
+
+	// フラスタムカリング判定（SkyBox等の背景オブジェクトは視錐台カリングをスキップ）
+	if (!isSkyBox && isFrustumCullingEnabled_ && camera_ && obj->IsFrustumCullingEnabled()) {
 		AABB worldAABB = obj->GetWorldAABB();
 		if (!camera_->GetFrustum().ContainsAABB(worldAABB)) {
 			culledDrawCalls_++;
@@ -105,7 +118,7 @@ void Draw::DrawObj(ObjectBase* obj)
 		}
 	}
 
-	preDraw(obj->GetShader(), obj->GetBlend(), obj->GetCullMode());
+	preDraw(shader, blend, cull);
 
 	Mesh mesh = obj->GetMesh();
 
@@ -114,8 +127,6 @@ void Draw::DrawObj(ObjectBase* obj)
 	commandList_->IASetIndexBuffer(&mesh.indexBufferView_);
 	commandList_->IASetVertexBuffers(0, 1, &mesh.vertexBufferView);  
 	
-	ShaderName shader = obj->GetShader();
-	BlendMode blend = obj->GetBlend();
 	SetCBV(shader, blend, "gMaterial", obj->GetMartial()->GetMaterialResource()->GetGPUVirtualAddress());
 	SetSRV(shader, blend, "gTransformationMatrix", obj->GetWvpDataResource()->GetGPUVirtualAddress());
 	SetTable(shader, blend, "gTexture", obj->GetTextureSrvHandleGPU());

@@ -34,7 +34,7 @@ void MaterialComponent::ImGui()
             }
         }
         if (ImGui::Combo(LanguageManager::Tr("Shader Selection"), &current_shader, shaders, IM_ARRAYSIZE(shaders))) {
-            shader_ = shaders[current_shader];
+            SetShader(shaders[current_shader]);
         }
 
         // Blend
@@ -104,3 +104,12 @@ void MaterialComponent::UpdateUVTransform()
         materialFactory_->SetUVTransform(uvMat);
     }
 }
+
+void MaterialComponent::SetShader(ShaderName shader)
+{
+    shader_ = shader;
+    if (shader_ == SkyBoxShader) {
+        cullMode_ = kCullModeFront;
+    }
+}
+
