@@ -21,10 +21,17 @@ void Camera::ImGui()
 		ImGui::DragFloat3("CameraRotate", &transform_.rotate.x, 0.01f, -FLT_MAX, FLT_MAX, "%.2f");
 	}
 	ImGui::Checkbox("debugCamera", &isDebugCamera_);
+	if (isDebugCamera_) {
+		ImGui::SameLine();
+		if (ImGui::Button("Reset Debug Camera to Game Camera")) {
+			ResetDebugCameraToGameCamera();
+		}
+	}
 #endif // _USE_IMGUI
 }
 
 void Camera::Initialize() {
+	gameTransform_ = transform_;
 	debugCamera_.Initialize();
 	viewMatrix_ = Inverse(MakeAffineMatrix(transform_.translate,transform_.scale,transform_.rotate));
 	projectionMatrix_ = MakePerspectiveFovMatrix(fovY_, aspectRatio_, nearClip_, farClip_);
@@ -41,10 +48,21 @@ void Camera::Initialize() {
 }
 
 void Camera::SetTransform(Transform transform) {
+	gameTransform_ = transform;
 	transform_ = transform;
 	if (isDebugCamera_) {
 		debugCamera_.SetEye(transform.translate);
 	}
+}
+
+void Camera::ResetDebugCameraToGameCamera() {
+	ResetDebugCamera(gameTransform_);
+}
+
+void Camera::ResetDebugCamera(const Transform& transform) {
+	debugCamera_.ResetToCamera(transform.translate, transform.rotate);
+	transform_.translate = transform.translate;
+	viewMatrix_ = debugCamera_.GetViewMatrix();
 }
 
 void Camera::Update() {

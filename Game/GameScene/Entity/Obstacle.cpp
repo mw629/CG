@@ -34,7 +34,7 @@ void Obstacle::SetType(Type type) {
     collisionHeight_ = 1.0f;
     collisionDepth_ = 1.0f;
     transform_.scale = {1.5f, 1.0f, 1.0f};
-    model_->GetMartial()->SetColor({0.0f, 0.0f, 1.0f, 0.8f }); // 緑色
+    model_->GetMartial()->SetColor({0.0f, 0.0f, 1.0f, 0.7f }); // 緑色
     model_->SetBlend(BlendMode::kBlendModeNormal);
     break;
   case Type::High:
@@ -43,7 +43,7 @@ void Obstacle::SetType(Type type) {
     collisionHeight_ = 3.0f;
     collisionDepth_ = 1.0f;
     transform_.scale = {1.5f, 3.0f, 1.0f};
-    model_->GetMartial()->SetColor({1.0f, 0.0f, 0.0f, 0.8f });
+    model_->GetMartial()->SetColor({1.0f, 0.0f, 0.0f, 0.7f });
     model_->SetBlend(BlendMode::kBlendModeNormal);
     break;
   case Type::Wall:
@@ -52,7 +52,7 @@ void Obstacle::SetType(Type type) {
     collisionHeight_ = 3.0f;
     collisionDepth_ = 1.0f;
     transform_.scale = {1.5f, 3.0f, 1.0f};
-    model_->GetMartial()->SetColor({1.0f, 1.0f, 1.0f, 0.8f }); // 白色
+    model_->GetMartial()->SetColor({1.0f, 1.0f, 1.0f, 0.7f }); // 白色
     model_->SetShader("IceShader");
 	model_->SetBlend(BlendMode::kBlendModeNormal);
     break;

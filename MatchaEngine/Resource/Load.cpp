@@ -18,8 +18,13 @@
 MaterialData LoadMaterialTemplateFile(const std::string& directoryPath, const std::string& filename) {
 	MaterialData materiaData;//構築するMaterialData
 	std::string line;//ファイルから読んだ一行を格納する
-	std::ifstream file(directoryPath + "/" + filename);//ファイルを開く
-	assert(file.is_open());
+	std::string fullPath = directoryPath + "/" + filename;
+	std::ifstream file(fullPath);//ファイルを開く
+	if (!file.is_open()) {
+		LOG_ERROR("Failed to open material file: " + fullPath);
+		assert(file.is_open());
+		return materiaData;
+	}
 
 	while (std::getline(file, line))
 	{
@@ -140,9 +145,12 @@ ModelData LoadObjFile(const std::string& directoryPath, const std::string& filen
 	const aiScene* scene = impoter.ReadFile(filePath.c_str(),
 		aiProcess_FlipWindingOrder | aiProcess_FlipUVs | aiProcess_Triangulate);
 	if (!scene || !scene->HasMeshes()) {
-		std::string errorMessage = "Failed to load model file.\nPath: " + filePath;
+		std::string assimpErr = impoter.GetErrorString();
+		std::string errorMessage = std::format("Failed to load model file: {}\nAssimp Error: {}", filePath, assimpErr.empty() ? "(none)" : assimpErr);
+		LOG_ERROR(errorMessage);
 		MessageBoxA(nullptr, errorMessage.c_str(), "Model Load Error", MB_OK | MB_ICONERROR);
 		assert(false && "Model Load Error");
+		return modelData;
 	}
 
 	std::unique_ptr<Texture> texture = std::make_unique<Texture>();
@@ -300,9 +308,12 @@ ModelData AssimpLoadObjFile(const std::string& directoryPath, const std::string&
 	const aiScene* scene = impoter.ReadFile(filePath.c_str(),
 		aiProcess_FlipWindingOrder | aiProcess_FlipUVs | aiProcess_Triangulate);
 	if (!scene || !scene->HasMeshes()) {
-		std::string errorMessage = "Failed to load model file.\nPath: " + filePath;
+		std::string assimpErr = impoter.GetErrorString();
+		std::string errorMessage = std::format("Failed to load model file: {}\nAssimp Error: {}", filePath, assimpErr.empty() ? "(none)" : assimpErr);
+		LOG_ERROR(errorMessage);
 		MessageBoxA(nullptr, errorMessage.c_str(), "Model Load Error", MB_OK | MB_ICONERROR);
 		assert(false && "Model Load Error");
+		return modelData;
 	}
 
 	std::unique_ptr<Texture> texture = std::make_unique<Texture>();
@@ -479,9 +490,12 @@ Animation LoadAnimationFile(const std::string& directoryPath, const std::string&
 	std::string filePath = directoryPath + "/" + filename;
 	const aiScene* scene = importer.ReadFile(filePath.c_str(), 0);
 	if (!scene || scene->mNumAnimations == 0) {
-		std::string errorMessage = "Failed to load animation file.\nPath: " + filePath;
+		std::string assimpErr = importer.GetErrorString();
+		std::string errorMessage = std::format("Failed to load animation file: {}\nAssimp Error: {}", filePath, assimpErr.empty() ? "(none)" : assimpErr);
+		LOG_ERROR(errorMessage);
 		MessageBoxA(nullptr, errorMessage.c_str(), "Animation Load Error", MB_OK | MB_ICONERROR);
 		assert(false && "Animation Load Error");
+		return animation;
 	}
 	for (unsigned int i = 0; i < scene->mNumAnimations; ++i) {
 		aiAnimation* animationAssimp = scene->mAnimations[i];
@@ -544,9 +558,11 @@ DirectX::ScratchImage LoadTexture(const std::string& filePath) {
 		hr = DirectX::LoadFromWICFile(filePathW.c_str(), DirectX::WIC_FLAGS_FORCE_SRGB, nullptr, image);
 	}
 	if (FAILED(hr)) {
-		std::string errorMessage = "Failed to load texture file.\nPath: " + filePath;
+		std::string errorMessage = std::format("Failed to load texture file: {}\nHRESULT: {}", filePath, FormatHResult(hr));
+		LOG_ERROR(errorMessage);
 		MessageBoxA(nullptr, errorMessage.c_str(), "Texture Load Error", MB_OK | MB_ICONERROR);
 		assert(SUCCEEDED(hr) && "Texture Load Error");
+		return image;
 	}
 
 	//ミニマップの作成
@@ -558,9 +574,11 @@ DirectX::ScratchImage LoadTexture(const std::string& filePath) {
 		hr = DirectX::GenerateMipMaps(image.GetImages(), image.GetImageCount(), image.GetMetadata(), DirectX::TEX_FILTER_SRGB, 4, mipImages);
 	}
 	if (FAILED(hr)) {
-		std::string errorMessage = "Failed to generate mipmaps for texture.\nPath: " + filePath;
+		std::string errorMessage = std::format("Failed to generate mipmaps for texture: {}\nHRESULT: {}", filePath, FormatHResult(hr));
+		LOG_ERROR(errorMessage);
 		MessageBoxA(nullptr, errorMessage.c_str(), "Texture Mipmap Error", MB_OK | MB_ICONERROR);
 		assert(SUCCEEDED(hr) && "Texture Mipmap Error");
+		return mipImages;
 	}
 
 	//ミニマップ付きのデータを返す
@@ -597,7 +615,10 @@ Microsoft::WRL::ComPtr<ID3D12Resource> CreateTextureResource(ID3D12Device* devic
 		D3D12_RESOURCE_STATE_COPY_DEST,//データ転送される設定
 		nullptr,//Clear最適値。使わないのでnullptr
 		IID_PPV_ARGS(&resource));
-	assert(SUCCEEDED(hr));
+	if (FAILED(hr)) {
+		CheckHResult(hr, "CreateCommittedResource failed for texture", device);
+		assert(SUCCEEDED(hr));
+	}
 	return resource;
 }
 

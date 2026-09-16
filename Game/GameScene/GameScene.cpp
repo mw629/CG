@@ -58,6 +58,11 @@ void GameScene::ImGui() {
     if (ImGui::Button("Right Side View")) {
       ChangePlayingState(PlayingState::OneLane);
     }
+
+    ImGui::Separator();
+    if (ImGui::Button("Reset Debug Camera to Game Camera")) {
+      camera_->ResetDebugCamera(cameraTransform_);
+    }
   }
 
   if (ImGui::CollapsingHeader("Game State", ImGuiTreeNodeFlags_DefaultOpen)) {
@@ -80,6 +85,32 @@ void GameScene::ImGui() {
       ImGui::Text("Position: (%.2f, %.2f, %.2f)", playerTransform.translate.x,
                   playerTransform.translate.y, playerTransform.translate.z);
       ImGui::Text("Rolling: %s", player_->GetIsRolling() ? "YES" : "NO");
+      ImGui::Text("Jumping: %s", player_->GetIsJumping() ? "YES" : "NO");
+
+      float jumpPower = player_->GetJumpPower();
+      if (ImGui::SliderFloat("Jump Power", &jumpPower, 0.10f, 0.40f, "%.3f")) {
+        player_->SetJumpPower(jumpPower);
+      }
+      float gravity = player_->GetGravity();
+      if (ImGui::SliderFloat("Gravity", &gravity, 0.005f, 0.040f, "%.4f")) {
+        player_->SetGravity(gravity);
+      }
+      float laneSpeed = player_->GetLaneChangeSpeed();
+      if (ImGui::SliderFloat("Lane Speed", &laneSpeed, 0.05f, 0.50f, "%.2f")) {
+        player_->SetLaneChangeSpeed(laneSpeed);
+      }
+      float rollDuration = player_->GetRollDuration();
+      if (ImGui::SliderFloat("Roll Duration", &rollDuration, 10.0f, 60.0f, "%.0f f")) {
+        player_->SetRollDuration(rollDuration);
+      }
+
+      float estAirFrames = gravity > 0.0f ? ((2.0f * jumpPower / gravity) + 1.0f) : 0.0f;
+      float estMaxHeight = gravity > 0.0f ? ((jumpPower * jumpPower) / (2.0f * gravity)) : 0.0f;
+      ImGui::Text("Jump Air Time: %.0f frames (%.2f s)", estAirFrames, estAirFrames / 60.0f);
+      ImGui::Text("Max Jump Height: +%.2f m", estMaxHeight);
+      ImGui::Text("Lane Move Time: %.0f frames", laneSpeed > 0.0f ? (1.0f / laneSpeed) : 0.0f);
+      ImGui::Text("Roll Duration: %.0f frames (%.2f s)", rollDuration, rollDuration / 60.0f);
+
       ImGui::TreePop();
     }
 
@@ -182,7 +213,7 @@ void GameScene::ImGui() {
       stageSettings_->SetMinObstacleDistance(minDistance);
       stageSettings_->SetMaxObstacleDistance(maxDistance);
     }
-    if (ImGui::SliderFloat("Max Obstacle Distance", &maxDistance, 5.0f, 50.0f, "%.1f m")) {
+    if (ImGui::SliderFloat("Max Obstacle Distance", &maxDistance, 5.0f, 60.0f, "%.1f m")) {
       if (maxDistance < minDistance)
         minDistance = maxDistance;
       stageSettings_->SetMinObstacleDistance(minDistance);
@@ -190,7 +221,7 @@ void GameScene::ImGui() {
     }
 
     float baseActionFrames = stageSettings_->GetBaseActionFrames(); // 回避アクション所要フレーム数
-    if (ImGui::SliderFloat("Base Action Frames", &baseActionFrames, 0.0f, 40.0f, "%.0f f")) {
+    if (ImGui::SliderFloat("Base Action Frames", &baseActionFrames, 0.0f, 60.0f, "%.0f f")) {
       stageSettings_->SetBaseActionFrames(baseActionFrames);
     }
 

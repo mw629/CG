@@ -2,6 +2,10 @@
 #include "../GameSceneManager.h"
 #include "Graphics/Render/Draw.h"
 
+#ifdef _USE_IMGUI
+#include <imgui.h>
+#endif
+
 
 Player::Player() {}
 
@@ -223,7 +227,7 @@ void Player::PlayerMove(float speedMultiplier) {
     } else if (!isRolling_ && GameSceneManager::GetInstance()->IsPushRoll()) {
       isRolling_ = true;
       rollTimer_ = rollDuration_;
-      model_->SetAnimation("sneakWalk", 1.0f);
+      model_->SetAnimation("sneakWalk", 1.3f);
       // 転がり中はスケールYを半分にして伏せるようにする
       transform_.scale.y = 0.5f;
       // 重心が変わる分、Y座標を少し下げる（原点が中心の場合）
@@ -272,9 +276,24 @@ void Player::Draw(class Draw &draw) {
 }
 
 void Player::ImGuiInnerComponents() {
+#ifdef _USE_IMGUI
   if (model_) {
     model_->ImGui(false);
   }
+  ImGui::Separator();
+  ImGui::Text("Player Movement Parameters");
+  ImGui::SliderFloat("Jump Power", &jumpPower_, 0.10f, 0.40f, "%.3f");
+  ImGui::SliderFloat("Gravity", &gravity_, 0.005f, 0.040f, "%.4f");
+  ImGui::SliderFloat("Lane Change Speed", &laneChangeSpeed_, 0.05f, 0.50f, "%.2f");
+  ImGui::SliderFloat("Roll Duration", &rollDuration_, 10.0f, 60.0f, "%.0f f");
+
+  float estAirFrames = gravity_ > 0.0f ? ((2.0f * jumpPower_ / gravity_) + 1.0f) : 0.0f;
+  float estMaxHeight = gravity_ > 0.0f ? ((jumpPower_ * jumpPower_) / (2.0f * gravity_)) : 0.0f;
+  ImGui::Text("Est. Jump Air Time: %.0f frames (%.2f s)", estAirFrames, estAirFrames / 60.0f);
+  ImGui::Text("Est. Max Jump Height: +%.2f m", estMaxHeight);
+  ImGui::Text("Lane Move Frames: %.0f frames", laneChangeSpeed_ > 0.0f ? (1.0f / laneChangeSpeed_) : 0.0f);
+  ImGui::Text("Roll Duration: %.0f frames (%.2f s)", rollDuration_, rollDuration_ / 60.0f);
+#endif
 }
 
 void Player::HitUpdate(float speedMultiplier) {

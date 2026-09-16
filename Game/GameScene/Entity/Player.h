@@ -40,13 +40,13 @@ private:
   // アクション用の変数
   bool isJumping_ = false;
   float velocityY_ = 0.0f;
-  float gravity_ = 0.007f;
-  float jumpPower_ = 0.17f;
+  float gravity_ = 0.014f;
+  float jumpPower_ = 0.21f;
   float baseHeight_ = 3.0f; // 地面の高さ（Y座標）
 
   bool isRolling_ = false;
   float rollTimer_ = 0.0f;
-  float rollDuration_ = 45.0f; // 転がりの継続フレーム数
+  float rollDuration_ = 30.0f; // 転がりの継続フレーム数（約0.5秒）
   bool keepRolling_ = false;   // 強制的にしゃがみを維持するフラグ
 
   // 各アクションの硬直（クールタイム）用変数
@@ -100,6 +100,16 @@ public:
   // GetTransform() is inherited from GameObject
   bool GetIsRolling() const { return isRolling_; }
   void SetKeepRolling(bool keep) { keepRolling_ = keep; }
+  bool GetIsJumping() const { return isJumping_; }
+
+  float GetJumpPower() const { return jumpPower_; }
+  void SetJumpPower(float power) { jumpPower_ = power; }
+  float GetGravity() const { return gravity_; }
+  void SetGravity(float gravity) { gravity_ = gravity; }
+  float GetLaneChangeSpeed() const { return laneChangeSpeed_; }
+  void SetLaneChangeSpeed(float speed) { laneChangeSpeed_ = speed; }
+  float GetRollDuration() const { return rollDuration_; }
+  void SetRollDuration(float duration) { rollDuration_ = duration; }
 
   bool GetHasBarrier() const { return hasBarrier_; }
   void SetHasBarrier(bool hasBarrier);

@@ -51,7 +51,7 @@ Microsoft::WRL::ComPtr<ID3D12Resource> GraphicsDevice::CreateUAVBufferResource(s
 
 	Microsoft::WRL::ComPtr<ID3D12Resource> Resource;
 	HRESULT hr = device->CreateCommittedResource(&heapProperties, D3D12_HEAP_FLAG_NONE,
-		&ResourceDesc, D3D12_RESOURCE_STATE_VERTEX_AND_CONSTANT_BUFFER, nullptr,
+		&ResourceDesc, D3D12_RESOURCE_STATE_COMMON, nullptr,
 		IID_PPV_ARGS(&Resource));
 	assert(SUCCEEDED(hr));
 	return Resource;

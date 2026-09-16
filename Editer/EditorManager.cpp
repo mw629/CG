@@ -794,7 +794,24 @@ void EditorManager::Update(Engine* engine)
 			ImGui::BeginChild("ScrollingRegion", ImVec2(0, 0), false, ImGuiWindowFlags_HorizontalScrollbar);
 			const auto& logs = GetLogs();
 			for (const auto& log : logs) {
-				ImGui::TextUnformatted(log.c_str());
+				if (log.find("[ERROR]") != std::string::npos || log.find("[FATAL]") != std::string::npos || log.find("CRASH") != std::string::npos) {
+					ImGui::PushStyleColor(ImGuiCol_Text, ImVec4(1.0f, 0.35f, 0.35f, 1.0f));
+					ImGui::TextUnformatted(log.c_str());
+					ImGui::PopStyleColor();
+				}
+				else if (log.find("[WARN]") != std::string::npos) {
+					ImGui::PushStyleColor(ImGuiCol_Text, ImVec4(1.0f, 0.85f, 0.3f, 1.0f));
+					ImGui::TextUnformatted(log.c_str());
+					ImGui::PopStyleColor();
+				}
+				else if (log.find("[INFO]") != std::string::npos) {
+					ImGui::PushStyleColor(ImGuiCol_Text, ImVec4(0.4f, 0.8f, 1.0f, 1.0f));
+					ImGui::TextUnformatted(log.c_str());
+					ImGui::PopStyleColor();
+				}
+				else {
+					ImGui::TextUnformatted(log.c_str());
+				}
 			}
 			// 自動スクロール
 			if (ImGui::GetScrollY() >= ImGui::GetScrollMaxY()) {

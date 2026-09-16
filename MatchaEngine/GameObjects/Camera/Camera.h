@@ -10,6 +10,7 @@ class Camera
 private:
 
 	Transform transform_{ {1.0f,1.0f,1.0f},{0.0f,0.0f,0.0f},{0.0f,0.0f,0.0f} };
+	Transform gameTransform_{ {1.0f,1.0f,1.0f},{0.0f,0.0f,0.0f},{0.0f,0.0f,0.0f} };
 
 	Matrix4x4 viewMatrix_{};
 	Matrix4x4 projectionMatrix_{};
@@ -42,9 +43,13 @@ public:
 	Matrix4x4 GetViewProjectionMatrix() const { return MultiplyMatrix4x4(viewMatrix_, projectionMatrix_); }
 
 	const Transform& GetTransform() const { return transform_; }
+	const Transform& GetGameTransform() const { return gameTransform_; }
 	void SetTransform(Transform transform);
 	void SetDebugCamera(bool isDebug) { isDebugCamera_ = isDebug; }
 	bool GetDebugCamera() const { return isDebugCamera_; }
+	void ResetDebugCameraToGameCamera();
+	void ResetDebugCamera(const Transform& transform);
+	DebugCamera& GetDebugCameraRef() { return debugCamera_; }
 
 	void SetAspectRatio(float aspectRatio) { aspectRatio_ = aspectRatio; }
 	float GetAspectRatio() const { return aspectRatio_; }

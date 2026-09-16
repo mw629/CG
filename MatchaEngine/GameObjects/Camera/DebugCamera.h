@@ -26,4 +26,5 @@ public:
     Vector3 GetTarget() const { return target_; }
     Vector3 GetEye() const { return eye_; }
     void SetEye(Vector3 eye);
+    void ResetToCamera(const Vector3& eye, const Vector3& rotation, float distance = 15.0f);
 };

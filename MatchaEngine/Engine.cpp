@@ -28,8 +28,10 @@ Engine::Engine(int32_t kClientWidth, int32_t kClientHeight)
 	//時間の初期化
 	reference_ = std::chrono::steady_clock::now();
 
-	SetUnhandledExceptionFilter(ExportDump);
+	InitializeErrorHandlers();
 	logStream = CurrentTimestamp();
+	SetGlobalLogStream(&logStream);
+	LOG_INFO("MatchaEngine Initializing...");
 
 	//DebugLayer//
 #ifdef _DEBUG
@@ -350,9 +352,10 @@ void Engine::EndFrame() {
 
 	//コマンドリストの内容を確定させる。すべてのコマンドを積んでからCloseすること
 	hr_ = command->GetCommandList()->Close();
-	assert(SUCCEEDED(hr_));
-
-
+	if (FAILED(hr_)) {
+		CheckHResult(hr_, "CommandList::Close failed", graphics->GetDevice());
+		assert(SUCCEEDED(hr_));
+	}
 
 	//コマンドをキックする//
 
@@ -361,7 +364,11 @@ void Engine::EndFrame() {
 	command->GetCommandQueue()->ExecuteCommandLists(1, commandLists);
 
 	//GPUとOSに画面の交換を行うよう通知する
-	swapChain->GetSwapChain()->Present(1, 0);
+	HRESULT presentHr = swapChain->GetSwapChain()->Present(1, 0);
+	if (FAILED(presentHr)) {
+		CheckHResult(presentHr, "SwapChain::Present failed", graphics->GetDevice());
+		assert(SUCCEEDED(presentHr));
+	}
 
 	gpuSyncManager.Signal(command.get()->GetCommandQueue());
 
@@ -372,9 +379,15 @@ void Engine::EndFrame() {
 
 	//次のフレーム用のコマンドを準備
 	hr_ = command->GetCommandAllocator()->Reset();
-	assert(SUCCEEDED(hr_));
+	if (FAILED(hr_)) {
+		CheckHResult(hr_, "CommandAllocator::Reset failed", graphics->GetDevice());
+		assert(SUCCEEDED(hr_));
+	}
 	hr_ = command->GetCommandList()->Reset(command->GetCommandAllocator(), nullptr);
-	assert(SUCCEEDED(hr_));
+	if (FAILED(hr_)) {
+		CheckHResult(hr_, "CommandList::Reset failed", graphics->GetDevice());
+		assert(SUCCEEDED(hr_));
+	}
 
 }
 

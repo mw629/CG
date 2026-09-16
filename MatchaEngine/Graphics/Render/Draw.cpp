@@ -1,5 +1,6 @@
 #include "Draw.h"
 #include "Graphics/GraphicsDevice.h"
+#include "Core/LogHandler.h"
 #include <cassert>
 #include "ModelManager.h"
 #include "PostEffect.h"
@@ -49,11 +50,25 @@ void Draw::SetEnvironmentTexture(int handle)
 
 void Draw::preDraw(ShaderName shader, BlendMode blend, CullMode cull)
 {
-	commandList_->SetPipelineState(graphicsPipelineState_->GetGraphicsPipelineState(shader, blend, cull));//PSOを設定
+	if (!graphicsPipelineState_) {
+		LOG_ERROR("preDraw failed: graphicsPipelineState_ is null!");
+		return;
+	}
+	auto* pso = graphicsPipelineState_->GetGraphicsPipelineState(shader, blend, cull);
+	if (!pso) {
+		LOG_ERROR(std::format("Pipeline state not found for shader: '{}', blend: {}, cull: {}", shader, static_cast<int>(blend), static_cast<int>(cull)));
+		return;
+	}
+	commandList_->SetPipelineState(pso);//PSOを設定
 	//形状を設定。PSOに設定しているものとはまた別。同じものを設定すると考えておけばいい
 	commandList_->IASetPrimitiveTopology(D3D_PRIMITIVE_TOPOLOGY_TRIANGLELIST);
 	//RootSignatureを設定。POSに設定しているけど別途設定が必要
-	commandList_->SetGraphicsRootSignature(graphicsPipelineState_->GetRootSignature(shader, blend)->GetRootSignature());
+	auto* rootSig = graphicsPipelineState_->GetRootSignature(shader, blend);
+	if (!rootSig) {
+		LOG_ERROR(std::format("Root signature not found for shader: '{}', blend: {}", shader, static_cast<int>(blend)));
+		return;
+	}
+	commandList_->SetGraphicsRootSignature(rootSig->GetRootSignature());
 }
 
 void Draw::DrawWireframeAABB(const AABB& aabb, const Vector4& color)
@@ -116,6 +131,23 @@ void Draw::DrawObj(ObjectBase* obj)
 		if (isDebugDrawAABB_ && lineRenderer_) {
 			DrawWireframeAABB(worldAABB, { 0.0f, 1.0f, 0.0f, 1.0f });
 		}
+	}
+
+	if (!camera_) {
+		LOG_ERROR(std::format("DrawObj failed: camera_ is null for object '{}'!", obj->name_));
+		return;
+	}
+	if (!obj->GetMartial() || !obj->GetMartial()->GetMaterialResource()) {
+		LOG_ERROR(std::format("DrawObj failed: Material is null for object '{}'!", obj->name_));
+		return;
+	}
+	if (!obj->GetWvpDataResource()) {
+		LOG_ERROR(std::format("DrawObj failed: WvpDataResource is null for object '{}'!", obj->name_));
+		return;
+	}
+	if (!lightManager_ || !lightManager_->GetDirectionalLightResource()) {
+		LOG_ERROR(std::format("DrawObj failed: lightManager_ is null for object '{}'!", obj->name_));
+		return;
 	}
 
 	preDraw(shader, blend, cull);
@@ -271,6 +303,19 @@ void Draw::DrawModel(Model* model)
 		}
 	}
 
+	if (!camera_) {
+		LOG_ERROR(std::format("DrawModel failed: camera_ is null for model '{}'!", model->name_));
+		return;
+	}
+	if (!model->GetWvpDataResource()) {
+		LOG_ERROR(std::format("DrawModel failed: WvpDataResource is null for model '{}'!", model->name_));
+		return;
+	}
+	if (!lightManager_ || !lightManager_->GetDirectionalLightResource()) {
+		LOG_ERROR(std::format("DrawModel failed: lightManager_ is null for model '{}'!", model->name_));
+		return;
+	}
+
 	preDraw(model->GetShader(), model->GetBlend(), model->GetCullMode());
 
 	ShaderName shader = model->GetShader();
@@ -294,11 +339,15 @@ void Draw::DrawModel(Model* model)
 		commandList_->IASetVertexBuffers(0, 1, &mesh.vertexBufferView);
 
 		if (i < subMeshMaterials.size()) {
-			SetCBV(shader, blend, "gMaterial", subMeshMaterials[i].materialFactory->GetMaterialResource()->GetGPUVirtualAddress());
-			SetTable(shader, blend, "gTexture", subMeshMaterials[i].textureSrvHandleGPU);
+			if (subMeshMaterials[i].materialFactory && subMeshMaterials[i].materialFactory->GetMaterialResource()) {
+				SetCBV(shader, blend, "gMaterial", subMeshMaterials[i].materialFactory->GetMaterialResource()->GetGPUVirtualAddress());
+				SetTable(shader, blend, "gTexture", subMeshMaterials[i].textureSrvHandleGPU);
+			}
 		} else {
-			SetCBV(shader, blend, "gMaterial", model->GetMartial()->GetMaterialResource()->GetGPUVirtualAddress());
-			SetTable(shader, blend, "gTexture", model->GetTextureSrvHandleGPU());
+			if (model->GetMartial() && model->GetMartial()->GetMaterialResource()) {
+				SetCBV(shader, blend, "gMaterial", model->GetMartial()->GetMaterialResource()->GetGPUVirtualAddress());
+				SetTable(shader, blend, "gTexture", model->GetTextureSrvHandleGPU());
+			}
 		}
 
 		commandList_->DrawIndexedInstanced(UINT(mesh.indexBufferView_.SizeInBytes / sizeof(uint32_t)), model->GetInstanceCount(), 0, 0, 0);

@@ -45,6 +45,41 @@ void DebugCamera::SetEye(Vector3 eye) {
     viewMatrix_ = MakeLookAtLH(eye_, target_, up_);
 }
 
+void DebugCamera::ResetToCamera(const Vector3& eye, const Vector3& rotation, float distance) {
+    eye_ = eye;
+    up_  = { 0.0f, 1.0f, 0.0f };
+
+    // 回転角からForwardベクトルを計算 (ローカル+Z軸)
+    Matrix4x4 rotMat = Rotation(rotation);
+    Vector3 forward = { rotMat.m[2][0], rotMat.m[2][1], rotMat.m[2][2] };
+    float fLen = Length(forward);
+    if (fLen > 0.0001f) {
+        forward = forward / fLen;
+    } else {
+        forward = { 0.0f, 0.0f, 1.0f };
+    }
+
+    // カメラの注視点を前方 distance の位置に設定
+    float dist = (distance > 0.1f) ? distance : 15.0f;
+    target_ = eye_ + forward * dist;
+
+    // 球座標（diff = eye_ - target_）を再計算
+    Vector3 diff = eye_ - target_;
+    radius_ = Length(diff);
+    if (radius_ > 0.0001f) {
+        phi_   = std::atan2(diff.y, std::sqrt(diff.x * diff.x + diff.z * diff.z));
+        theta_ = std::atan2(diff.x, diff.z);
+    }
+    phi_ = std::fmaxf(-k_PI * 0.5f + 0.01f, std::fminf(k_PI * 0.5f - 0.01f, phi_));
+
+    // 球座標から eye_ を再計算
+    eye_.x = target_.x + radius_ * std::sin(theta_) * std::cos(phi_);
+    eye_.y = target_.y + radius_ * std::sin(phi_);
+    eye_.z = target_.z + radius_ * std::cos(theta_) * std::cos(phi_);
+
+    viewMatrix_ = MakeLookAtLH(eye_, target_, up_);
+}
+
 void DebugCamera::Update() {
     isRightMouseButtonPressed_  = Input::PressMouse(1);  // RMB
     isMiddleMouseButtonPressed_ = Input::PressMouse(2);  // MMB

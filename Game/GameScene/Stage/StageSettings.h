@@ -53,11 +53,11 @@ private:
   float obstacleInterval_ = 7.0f;       // 次回生成までの距離（動的計算値・さらに狭めた設定）
   float distanceSinceLastSpawn_ = 0.0f; // 前回生成からの移動距離
 
-  float baseActionFrames_ = 15.0f;     // 回避アクション所要フレーム数（テンポよく連続回避するための時間）
-  float minGraceFrames_ = 15.0f;       // 最小猶予フレーム数（約0.25秒・極めてスピーディに出現）
-  float maxGraceFrames_ = 30.0f;       // 最大猶予フレーム数（約0.5秒・密集感を維持）
-  float minObstacleDistance_ = 6.0f;   // 最小生成間隔（距離の下限・さらに狭めた下限値）
-  float maxObstacleDistance_ = 14.0f;  // 最大生成間隔（距離の上限・広がりすぎを防止）
+  float baseActionFrames_ = 30.0f;     // 回避アクション所要フレーム数（ジャンプ・しゃがみ完了所要フレーム）
+  float minGraceFrames_ = 5.0f;        // 最小猶予フレーム数（着地・立ち上がり後最低5フレームの猶予を保証）
+  float maxGraceFrames_ = 15.0f;       // 最大猶予フレーム数（5〜15フレームの適度な揺らぎ）
+  float minObstacleDistance_ = 6.0f;   // 最小生成間隔（距離の下限・物理的接触防止）
+  float maxObstacleDistance_ = 45.0f;  // 最大生成間隔（高速時にもフレーム猶予を圧縮しない上限値）
 
   float noSpawnChance_ = 0.05f;        // 障害物が出現しない空ウェーブの発生確率（密度を保つためさらに控えめに設定）
   int consecutiveNoSpawnCount_ = 0;    // 連続して空ウェーブが発生した回数

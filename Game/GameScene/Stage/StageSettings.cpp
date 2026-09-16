@@ -56,7 +56,11 @@ void StageSettings::CalculateNextObstacleInterval() {
   float calculatedDistance = effectiveSpeed * totalFrames; // 移動速度と猶予フレームから計算された距離
 
   // 確実に避けられる距離範囲（最小距離〜最大距離）に制限
-  obstacleInterval_ = (std::min)((std::max)(minObstacleDistance_, calculatedDistance), maxObstacleDistance_); // 次回生成までの距離
+  // 速度が高速になってもアクション完了＋最小猶予フレーム（5f）を下回らないよう上限を動的ガード
+  float minRequiredDistance = effectiveSpeed * (baseActionFrames_ + minGraceFrames_);
+  float dynamicMaxDistance = (std::max)(maxObstacleDistance_, minRequiredDistance);
+
+  obstacleInterval_ = (std::min)((std::max)(minObstacleDistance_, calculatedDistance), dynamicMaxDistance); // 次回生成までの距離
 }
 
 void StageSettings::GenerateRoadChunks(Matrix4x4 view) {
