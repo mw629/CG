@@ -70,6 +70,7 @@ const ShaderName RadialBlurShader = "RadialBlurShader";
 const ShaderName DissolveShader = "DissolveShader";
 const ShaderName RandomShader = "RandomShader";
 const ShaderName MonochromeShader = "MonochromeShader";
+const ShaderName MSDFShader = "MSDFShader";
 
 inline const char* ShaderNameToString(const ShaderName& name)
 {

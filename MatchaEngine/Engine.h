@@ -54,6 +54,7 @@
 #include "ViewportScissor.h"
 #include "RenderTexture.h"
 #include "Graphics/GpuProfiler.h"
+#include "Graphics/Font/TextRenderer.h"
 //PSO
 #include "PipelineState.h"
 #include "ShaderCompiler.h"
@@ -120,6 +121,7 @@ public:
 	std::unique_ptr<LightManager> lightManager;
 	std::unique_ptr<LineRenderer> lineRenderer;
 	std::unique_ptr<GpuProfiler> gpuProfiler;
+	std::unique_ptr<MatchaEngine::TextRenderer> textRenderer;
 
 	ID3D12DescriptorHeap* descriptorHeaps[1];
 
@@ -157,6 +159,7 @@ public:
 	int32_t GetClientWidth() const { return kClientWidth_; }
 	int32_t GetClientHeight() const { return kClientHeight_; }
 	GpuProfiler* GetGpuProfiler() { return gpuProfiler.get(); }
+	MatchaEngine::TextRenderer* GetTextRenderer() { return textRenderer.get(); }
 
 	static void SetEnd(bool isEnd) { isEnd_ = isEnd; }
 	static bool IsEnd() { return isEnd_; }

@@ -3,6 +3,9 @@
 #include "Core/LogHandler.h"
 #include <cassert>
 #include "ModelManager.h"
+#include "CharacterAnimator.h"
+#include "Graphics/Font/TextRenderer.h"
+#include "LightManager.h"
 #include "PostEffect.h"
 #include "Texture.h"
 #include "Graphics/GpuProfiler.h"
@@ -583,6 +586,22 @@ void Draw::DrawPostEffect(D3D12_GPU_DESCRIPTOR_HANDLE textureHandle, ShaderName 
 	}
 
 	commandList_->DrawInstanced(3, 1, 0, 0);
+}
+
+void Draw::DrawMSDFString(const std::string& text, const Vector2& pos, float fontSize,
+	const Vector4& color, bool enableOutline, const Vector4& outlineColor, float outlineWidth)
+{
+	if (textRenderer_ && commandList_) {
+		textRenderer_->DrawString(commandList_, text, pos, fontSize, color, enableOutline, outlineColor, outlineWidth);
+	}
+}
+
+void Draw::DrawMSDFString(const std::wstring& text, const Vector2& pos, float fontSize,
+	const Vector4& color, bool enableOutline, const Vector4& outlineColor, float outlineWidth)
+{
+	if (textRenderer_ && commandList_) {
+		textRenderer_->DrawString(commandList_, text, pos, fontSize, color, enableOutline, outlineColor, outlineWidth);
+	}
 }
 
 

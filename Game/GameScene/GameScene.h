@@ -113,6 +113,7 @@ public:
 	void Update() override;
 
 	void Draw(class Draw& draw) override;
+	void DrawHUD(class Draw& draw);
 
 	void ChangePlayingState(PlayingState newState, bool force = false);
 

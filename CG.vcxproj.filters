@@ -138,6 +138,15 @@
     <ClCompile Include="MatchaEngine\Graphics\DepthStencil.cpp">
       <Filter>MatchaEngine\Graphics</Filter>
     </ClCompile>
+    <ClCompile Include="MatchaEngine\Graphics\Font\MsdfGenerator.cpp">
+      <Filter>MatchaEngine\Graphics</Filter>
+    </ClCompile>
+    <ClCompile Include="MatchaEngine\Graphics\Font\DynamicFontAtlas.cpp">
+      <Filter>MatchaEngine\Graphics</Filter>
+    </ClCompile>
+    <ClCompile Include="MatchaEngine\Graphics\Font\TextRenderer.cpp">
+      <Filter>MatchaEngine\Graphics</Filter>
+    </ClCompile>
     <ClCompile Include="MatchaEngine\Graphics\DescriptorHeap.cpp">
       <Filter>MatchaEngine\Graphics</Filter>
     </ClCompile>
@@ -638,6 +647,15 @@
       <Filter>ヘッダー ファイル</Filter>
     </ClInclude>
     <ClInclude Include="Game\GameScene\Entity\Boss.h">
+      <Filter>ヘッダー ファイル</Filter>
+    </ClInclude>
+    <ClInclude Include="MatchaEngine\Graphics\Font\MsdfGenerator.h">
+      <Filter>ヘッダー ファイル</Filter>
+    </ClInclude>
+    <ClInclude Include="MatchaEngine\Graphics\Font\DynamicFontAtlas.h">
+      <Filter>ヘッダー ファイル</Filter>
+    </ClInclude>
+    <ClInclude Include="MatchaEngine\Graphics\Font\TextRenderer.h">
       <Filter>ヘッダー ファイル</Filter>
     </ClInclude>
   </ItemGroup>

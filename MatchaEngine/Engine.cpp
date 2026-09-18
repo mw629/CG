@@ -167,6 +167,11 @@ void Engine::Setting()
 		lightManager.get(), lineRenderer.get());
 	Texture::Initialize(graphics->GetDevice(), command->GetCommandList(), descriptorHeap.get(), textureLoader.get());
 
+	textRenderer = std::make_unique<MatchaEngine::TextRenderer>();
+	textRenderer->Initialize(graphics->GetDevice(), descriptorHeap.get(), graphicsPipelineState.get(), "Resources/Font/NotoSansJP-VariableFont_wght.ttf");
+	textRenderer->SetScreenSize(static_cast<float>(kClientWidth_), static_cast<float>(kClientHeight_));
+	draw->SetTextRenderer(textRenderer.get());
+
 	// ダミーテクスチャ（0番目）としてロードしておくことで、テクスチャ無しのオブジェクトが描画されたときのクラッシュを防ぐ
 	std::unique_ptr<Texture> dummyTex = std::make_unique<Texture>();
 	try {
@@ -302,6 +307,9 @@ void Engine::NewFrame() {
 		EffectDefinition::SetScreenSize(Client);
 		Triangle::SetScreenSize(Client);
 		Sprite::SetScreenSize(Client);
+		if (textRenderer) {
+			textRenderer->SetScreenSize((float)kClientWidth_, (float)kClientHeight_);
+		}
 	}
 
 #ifdef _USE_IMGUI
@@ -314,6 +322,10 @@ void Engine::NewFrame() {
 
 	if (draw) {
 		draw->ResetCullingStats();
+	}
+
+	if (textRenderer) {
+		textRenderer->BeginFrame();
 	}
 
 	//コマンドを積み込んで確定させる//

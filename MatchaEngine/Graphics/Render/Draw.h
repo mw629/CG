@@ -22,6 +22,10 @@
 
 #include "LightManager.h"
 
+namespace MatchaEngine {
+	class TextRenderer;
+}
+
 class Draw {
 public:
 
@@ -69,6 +73,19 @@ public:
 
 	void DrawPostEffect(D3D12_GPU_DESCRIPTOR_HANDLE textureHandle, ShaderName shader = "CopyShader", class PostEffect* postEffect = nullptr, D3D12_GPU_DESCRIPTOR_HANDLE depthTextureHandle = {0});
 
+	void SetTextRenderer(class MatchaEngine::TextRenderer* textRenderer) { textRenderer_ = textRenderer; }
+	class MatchaEngine::TextRenderer* GetTextRenderer() const { return textRenderer_; }
+
+	void DrawMSDFString(const std::string& text, const Vector2& pos, float fontSize = 32.0f,
+		const Vector4& color = { 1.0f, 1.0f, 1.0f, 1.0f },
+		bool enableOutline = false, const Vector4& outlineColor = { 0.0f, 0.0f, 0.0f, 1.0f },
+		float outlineWidth = 0.15f);
+
+	void DrawMSDFString(const std::wstring& text, const Vector2& pos, float fontSize = 32.0f,
+		const Vector4& color = { 1.0f, 1.0f, 1.0f, 1.0f },
+		bool enableOutline = false, const Vector4& outlineColor = { 0.0f, 0.0f, 0.0f, 1.0f },
+		float outlineWidth = 0.15f);
+
 private:
 	void SetCBV(ShaderName shader, BlendMode blend, const std::string& name, D3D12_GPU_VIRTUAL_ADDRESS address);
 	void SetSRV(ShaderName shader, BlendMode blend, const std::string& name, D3D12_GPU_VIRTUAL_ADDRESS address);
@@ -81,6 +98,7 @@ private:
 	Camera* camera_{};
 	D3D12_GPU_DESCRIPTOR_HANDLE environmentTextureSrvHandleGPU_{};
 	class GpuProfiler* gpuProfiler_{};
+	class MatchaEngine::TextRenderer* textRenderer_{};
 
 	bool isFrustumCullingEnabled_ = true;
 	bool isDebugDrawAABB_ = false;

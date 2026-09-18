@@ -258,6 +258,9 @@ copy "$(WindowsSdkDir)bin\$(TargetPlatformVersion)\x64\dxil.dll" "$(TargetDir)dx
     <ClCompile Include="MatchaEngine\GameObjects\Object\Animation\TransformAnimation.cpp" />
     <ClCompile Include="Game\TestScene\TestScene.cpp" />
     <ClCompile Include="Game\GameScene\System\PauseSystem.cpp" />
+    <ClCompile Include="MatchaEngine\Graphics\Font\MsdfGenerator.cpp" />
+    <ClCompile Include="MatchaEngine\Graphics\Font\DynamicFontAtlas.cpp" />
+    <ClCompile Include="MatchaEngine\Graphics\Font\TextRenderer.cpp" />
   </ItemGroup>
   <ItemGroup>
     <FxCompile Include="Resources\Shader\ComputeShader\Particle.CS.hlsl">
@@ -448,6 +451,9 @@ copy "$(WindowsSdkDir)bin\$(TargetPlatformVersion)\x64\dxil.dll" "$(TargetDir)dx
     <ClInclude Include="MatchaEngine\Core\WindowConfig.h" />
     <ClInclude Include="MatchaEngine\Core\ImGuiManager.h" />
     <ClInclude Include="MatchaEngine\GameObjects\MaterialFactory.h" />
+    <ClInclude Include="MatchaEngine\Graphics\Font\MsdfGenerator.h" />
+    <ClInclude Include="MatchaEngine\Graphics\Font\DynamicFontAtlas.h" />
+    <ClInclude Include="MatchaEngine\Graphics\Font\TextRenderer.h" />
     <ClInclude Include="MatchaEngine\GameObjects\Object\3d\Model.h" />
     <ClInclude Include="MatchaEngine\Resource\TextureLoader.h" />
     <ClInclude Include="MatchaEngine\Graphics\RenderTargetView.h" />

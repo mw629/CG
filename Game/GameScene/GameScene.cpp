@@ -24,6 +24,60 @@ void GameScene::ImGui() {
 #ifdef _USE_IMGUI
   ImGui::Begin("GameScene");
 
+  // ゲームオーバー時の表示
+  if (gameState_ == GameState::GameOver) {
+    ImGui::PushStyleColor(ImGuiCol_Header, ImVec4(0.8f, 0.15f, 0.15f, 1.0f));
+    ImGui::PushStyleColor(ImGuiCol_Text, ImVec4(1.0f, 0.3f, 0.3f, 1.0f));
+    bool open = ImGui::CollapsingHeader("=== GAME OVER ===",
+                                        ImGuiTreeNodeFlags_DefaultOpen);
+    ImGui::PopStyleColor(2);
+
+    if (open) {
+      ImGui::Text("Your Distance: %.2f m", currentDistance_);
+      ImGui::Text("Your Score: %.0f", currentScore_);
+      ImGui::Separator();
+
+      ImGui::Text("--- DISTANCE TOP 3 RANKING ---");
+      for (int i = 0; i < 3; i++) {
+        if (topRankings_[i] > 0.0f) {
+          ImGui::Text("  %d. %.2f m", i + 1, topRankings_[i]);
+        } else {
+          ImGui::Text("  %d. ---", i + 1);
+        }
+      }
+      ImGui::Separator();
+
+      ImGui::Text("--- SCORE TOP 3 RANKING ---");
+      for (int i = 0; i < 3; i++) {
+        if (topScoreRankings_[i] > 0.0f) {
+          ImGui::Text("  %d. %.0f", i + 1, topScoreRankings_[i]);
+        } else {
+          ImGui::Text("  %d. ---", i + 1);
+        }
+      }
+      ImGui::Separator();
+
+      if (ImGui::Button("Restart (1)", ImVec2(160, 35))) {
+        gameState_ = GameState::Playing;
+        stageSettings_->Reset();
+        // PostEffect::SetActivePostEffect(PostEffect::Type::Normal);
+        player_->Reset();
+        effectManager_->ClearHitParticles();
+        effectManager_->ClearBarrier();
+        currentDistance_ = 0.0f;
+        currentScore_ = 0.0f;
+        bonusEnemyHitCount_ = 0;
+        ChangePlayingState(PlayingState::ThreeLane, true);
+      }
+      ImGui::SameLine();
+      if (ImGui::Button("Go to Result (2)", ImVec2(160, 35))) {
+        nextSceneID_ = SceneID::Clear;
+        sceneChangeRequest_ = true;
+      }
+      ImGui::Separator();
+    }
+  }
+
   camera_.get()->ImGui();
 
   if (ImGui::CollapsingHeader("GameScene Camera Settings",
@@ -348,56 +402,6 @@ void GameScene::ImGui() {
     ImGui::End();
   }
 
-  // ゲームオーバーメニュー
-  if (gameState_ == GameState::GameOver) {
-    ImGuiIO &io = ImGui::GetIO();
-    ImGui::SetNextWindowPos(
-        ImVec2(io.DisplaySize.x * 0.5f, io.DisplaySize.y * 0.5f),
-        ImGuiCond_Always, ImVec2(0.5f, 0.5f));
-    ImGui::Begin("Game Over Menu", nullptr,
-                 ImGuiWindowFlags_NoResize | ImGuiWindowFlags_AlwaysAutoResize |
-                     ImGuiWindowFlags_NoCollapse);
-    ImGui::Text("GAME OVER");
-    ImGui::Separator();
-
-    ImGui::Text("Your Distance: %.2f m", currentDistance_);
-    ImGui::Text("Your Score: %.0f", currentScore_);
-    ImGui::Separator();
-    ImGui::Text("--- DISTANCE TOP 3 RANKING ---");
-    for (int i = 0; i < 3; i++) {
-      if (topRankings_[i] > 0.0f) {
-        ImGui::Text("  %d. %.2f m", i + 1, topRankings_[i]);
-      } else {
-        ImGui::Text("  %d. ---", i + 1);
-      }
-    }
-    ImGui::Separator();
-    ImGui::Text("--- SCORE TOP 3 RANKING ---");
-    for (int i = 0; i < 3; i++) {
-      if (topScoreRankings_[i] > 0.0f) {
-        ImGui::Text("  %d. %.0f", i + 1, topScoreRankings_[i]);
-      } else {
-        ImGui::Text("  %d. ---", i + 1);
-      }
-    }
-    ImGui::Separator();
-
-    if (ImGui::Button("Restart (1)", ImVec2(200, 40))) {
-      gameState_ = GameState::Playing;
-      stageSettings_->Reset();
-      // PostEffect::SetActivePostEffect(PostEffect::Type::Normal);
-      player_->Reset();
-      currentDistance_ = 0.0f;
-      currentScore_ = 0.0f;
-      bonusEnemyHitCount_ = 0;
-      ChangePlayingState(PlayingState::ThreeLane, true);
-    }
-    if (ImGui::Button("Go to Result (2)", ImVec2(200, 40))) {
-      nextSceneID_ = SceneID::Clear;
-      sceneChangeRequest_ = true;
-    }
-    ImGui::End();
-  }
 
 #endif // _USE_IMGUI
 }
@@ -454,6 +458,9 @@ void GameScene::Initialize() {
     gameObjectManager_->DrawAll(draw);
     stageSettings_->Draw(draw);
     effectManager_->Draw(draw);
+
+    // Game View 内でも HUD (動的MSDFテキスト) を描画
+    DrawHUD(draw);
 
     // SkyBoxの位置を元に戻す
     skyBox_->SetTransform(originalSkyBoxT);
@@ -647,6 +654,49 @@ void GameScene::Draw(class Draw &draw) {
 
   // ヒットエフェクトの描画
   effectManager_->Draw(draw);
+
+  // HUDの描画
+  DrawHUD(draw);
+}
+
+void GameScene::DrawHUD(class Draw &draw) {
+  if (gameState_ == GameState::GameOver) {
+    draw.DrawMSDFString("GAME OVER", Vector2(440.0f, 200.0f), 64.0f,
+                        Vector4(1.0f, 0.25f, 0.25f, 1.0f), true,
+                        Vector4(0.0f, 0.0f, 0.0f, 1.0f), 0.22f);
+
+    char finalDistBuf[64];
+    snprintf(finalDistBuf, sizeof(finalDistBuf), "到達距離: %.1f m",
+             currentDistance_);
+    draw.DrawMSDFString(finalDistBuf, Vector2(480.0f, 290.0f), 32.0f,
+                        Vector4(1.0f, 1.0f, 1.0f, 1.0f), true,
+                        Vector4(0.0f, 0.0f, 0.0f, 1.0f), 0.18f);
+
+    char finalScoreBuf[64];
+    snprintf(finalScoreBuf, sizeof(finalScoreBuf), "最終スコア: %.0f",
+             currentScore_);
+    draw.DrawMSDFString(finalScoreBuf, Vector2(480.0f, 335.0f), 32.0f,
+                        Vector4(1.0f, 0.9f, 0.2f, 1.0f), true,
+                        Vector4(0.0f, 0.0f, 0.0f, 1.0f), 0.18f);
+
+    draw.DrawMSDFString("1キー: リスタート  |  2キー: リザルトへ",
+                        Vector2(400.0f, 420.0f), 26.0f,
+                        Vector4(0.85f, 0.85f, 0.85f, 1.0f), true,
+                        Vector4(0.0f, 0.0f, 0.0f, 1.0f), 0.15f);
+  } else {
+    // 常時左上に現在の移動距離とスコアを表示（エディタ、プレイ中、ポーズ中、被弾中）
+    char distBuf[64];
+    snprintf(distBuf, sizeof(distBuf), "距離: %.1f m", currentDistance_);
+    draw.DrawMSDFString(distBuf, Vector2(30.0f, 30.0f), 36.0f,
+                        Vector4(1.0f, 1.0f, 1.0f, 1.0f), true,
+                        Vector4(0.0f, 0.0f, 0.0f, 1.0f), 0.20f);
+
+    char scoreBuf[64];
+    snprintf(scoreBuf, sizeof(scoreBuf), "スコア: %.0f", currentScore_);
+    draw.DrawMSDFString(scoreBuf, Vector2(30.0f, 75.0f), 28.0f,
+                        Vector4(1.0f, 0.9f, 0.2f, 1.0f), true,
+                        Vector4(0.0f, 0.0f, 0.0f, 1.0f), 0.18f);
+  }
 }
 
 void GameScene::PlayerHitUpdate() {

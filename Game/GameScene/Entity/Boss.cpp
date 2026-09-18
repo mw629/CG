@@ -111,6 +111,7 @@ void Boss::Draw(class Draw &draw) {
 }
 
 void Boss::ImGuiInnerComponents() {
+#ifdef _USE_IMGUI
   if (model_) {
     model_->ImGui(false);
   }
@@ -121,6 +122,7 @@ void Boss::ImGuiInnerComponents() {
   
   if (ImGui::Button("Test Defeat State")) ChangeState(BossState::Defeat);
   if (ImGui::Button("Test Victory State")) ChangeState(BossState::Victory);
+#endif
 }
 
 void Boss::OnDamage() {
