@@ -116,11 +116,12 @@ void StageSettings::GenerateRoadChunks(Matrix4x4 view) {
       renderObj->SetName("RoadChunk_" + std::to_string(zIndex) + "_Lane_" +
                          std::to_string(laneIdx));
 
+      float effectiveLaneWidth = GetEffectiveLaneWidth();
       int logicalLane = minLaneIndex_ + laneIdx;
-      float x = static_cast<float>(logicalLane) * laneWidth_;
+      float x = static_cast<float>(logicalLane) * effectiveLaneWidth;
 
       Transform t;
-      t.scale = {laneWidth_, 50.0f, 10.1f};
+      t.scale = {effectiveLaneWidth, 50.0f, 10.1f};
       t.rotate = {0.0f, 0.0f, 0.0f};
       t.translate = {x, -23.0f, currentZs[zIndex]};
 
@@ -136,9 +137,10 @@ void StageSettings::GenerateRoadChunks(Matrix4x4 view) {
   }
 
   // サイドプレーンの生成/更新
+  float effectiveLaneWidth = GetEffectiveLaneWidth();
   float bounds[2] = {
-      static_cast<float>(minLaneIndex_) * laneWidth_ - (laneWidth_ / 2.0f),
-      static_cast<float>(maxLaneIndex_) * laneWidth_ + (laneWidth_ / 2.0f)};
+      static_cast<float>(minLaneIndex_) * effectiveLaneWidth - (effectiveLaneWidth / 2.0f),
+      static_cast<float>(maxLaneIndex_) * effectiveLaneWidth + (effectiveLaneWidth / 2.0f)};
   float offsets[2] = {-50.0f, 50.0f};
   const char *planeNames[2] = {"SidePlaneL", "SidePlaneR"};
 

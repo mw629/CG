@@ -76,15 +76,31 @@ public:
 	void SetTextRenderer(class MatchaEngine::TextRenderer* textRenderer) { textRenderer_ = textRenderer; }
 	class MatchaEngine::TextRenderer* GetTextRenderer() const { return textRenderer_; }
 
+	void SetTextBaseBoldness(float boldness);
+	float GetTextBaseBoldness() const;
+
 	void DrawMSDFString(const std::string& text, const Vector2& pos, float fontSize = 32.0f,
 		const Vector4& color = { 1.0f, 1.0f, 1.0f, 1.0f },
 		bool enableOutline = false, const Vector4& outlineColor = { 0.0f, 0.0f, 0.0f, 1.0f },
-		float outlineWidth = 0.15f);
+		float outlineWidth = 0.15f,
+		float boldness = 0.0f);
 
 	void DrawMSDFString(const std::wstring& text, const Vector2& pos, float fontSize = 32.0f,
 		const Vector4& color = { 1.0f, 1.0f, 1.0f, 1.0f },
 		bool enableOutline = false, const Vector4& outlineColor = { 0.0f, 0.0f, 0.0f, 1.0f },
-		float outlineWidth = 0.15f);
+		float outlineWidth = 0.15f,
+		float boldness = 0.0f);
+
+	// 太字描画用の簡易メソッド (アウトラインなしで手軽に太字描画)
+	void DrawMSDFStringBold(const std::string& text, const Vector2& pos, float fontSize = 32.0f,
+		const Vector4& color = { 1.0f, 1.0f, 1.0f, 1.0f },
+		float boldness = 0.08f);
+
+	void DrawMSDFStringBold(const std::wstring& text, const Vector2& pos, float fontSize = 32.0f,
+		const Vector4& color = { 1.0f, 1.0f, 1.0f, 1.0f },
+		float boldness = 0.08f);
+
+	void DrawFillRect(const Vector2& pos, const Vector2& size, const Vector4& color = { 0.0f, 0.0f, 0.0f, 0.7f });
 
 private:
 	void SetCBV(ShaderName shader, BlendMode blend, const std::string& name, D3D12_GPU_VIRTUAL_ADDRESS address);

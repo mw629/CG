@@ -102,6 +102,26 @@ bool DynamicFontAtlas::Initialize(ID3D12Device* device,
     // 2. パッカーの初期化
     packer_->Init(atlasWidth_, atlasHeight_);
 
+    // 2.1 単色矩形描画用の白色8x8ブロックをアトラスに予約
+    stbrp_rect whiteRect{};
+    whiteRect.id = -1;
+    whiteRect.w = 8;
+    whiteRect.h = 8;
+    stbrp_pack_rects(&packer_->context, &whiteRect, 1);
+
+    whitePixelUV_ = Vector2(
+        (static_cast<float>(whiteRect.x) + 4.0f) / static_cast<float>(atlasWidth_),
+        (static_cast<float>(whiteRect.y) + 4.0f) / static_cast<float>(atlasHeight_)
+    );
+
+    PendingRegion whiteRegion{};
+    whiteRegion.dstX = whiteRect.x;
+    whiteRegion.dstY = whiteRect.y;
+    whiteRegion.width = 8;
+    whiteRegion.height = 8;
+    whiteRegion.pixels.assign(8 * 8 * 4, 255); // 全ピクセル RGBA(255, 255, 255, 255)
+    pendingUploads_.push_back(std::move(whiteRegion));
+
     // 3. DirectX 12 テクスチャリソースの作成
     D3D12_RESOURCE_DESC texDesc = {};
     texDesc.Dimension = D3D12_RESOURCE_DIMENSION_TEXTURE2D;
@@ -237,6 +257,14 @@ void DynamicFontAtlas::PreloadString(const std::wstring& wideText) {
     }
 }
 
+void DynamicFontAtlas::BeginFrame(size_t frameIndex) {
+    if (uploadBufferSize_ > 0) {
+        UINT64 half = uploadBufferSize_ / 2;
+        uploadBufferOffset_ = (frameIndex % 2) * half;
+        uploadBufferFrameEnd_ = uploadBufferOffset_ + half;
+    }
+}
+
 void DynamicFontAtlas::UpdateGpu(ID3D12GraphicsCommandList* commandList) {
     if (pendingUploads_.empty() || !uploadMappedPtr_) return;
 
@@ -247,19 +275,21 @@ void DynamicFontAtlas::UpdateGpu(ID3D12GraphicsCommandList* commandList) {
         D3D12_RESOURCE_STATE_COPY_DEST);
     commandList->ResourceBarrier(1, &toCopy);
 
-    UINT64 currentOffset = 0;
+    if (uploadBufferFrameEnd_ == 0) {
+        uploadBufferFrameEnd_ = uploadBufferSize_;
+    }
 
     for (const auto& region : pendingUploads_) {
         UINT rowPitch = AlignTo256(region.width * 4);
         UINT slicePitch = rowPitch * region.height;
 
-        if (currentOffset + slicePitch > uploadBufferSize_) {
-            // バッファが溢れそうな場合はスキップ(次回フレームまたはリセット)
+        if (uploadBufferOffset_ + slicePitch > uploadBufferFrameEnd_) {
+            LOG_WARN("DynamicFontAtlas: Upload buffer full for current frame!");
             break;
         }
 
         // アップロードバッファへコピー (各行ごとに rowPitch に合わせて詰める)
-        uint8_t* dstRow = uploadMappedPtr_ + currentOffset;
+        uint8_t* dstRow = uploadMappedPtr_ + uploadBufferOffset_;
         const uint8_t* srcRow = region.pixels.data();
         for (int y = 0; y < region.height; ++y) {
             memcpy(dstRow, srcRow, region.width * 4);
@@ -276,7 +306,7 @@ void DynamicFontAtlas::UpdateGpu(ID3D12GraphicsCommandList* commandList) {
         D3D12_TEXTURE_COPY_LOCATION srcLoc = {};
         srcLoc.pResource = uploadResource_.Get();
         srcLoc.Type = D3D12_TEXTURE_COPY_TYPE_PLACED_FOOTPRINT;
-        srcLoc.PlacedFootprint.Offset = currentOffset;
+        srcLoc.PlacedFootprint.Offset = uploadBufferOffset_;
         srcLoc.PlacedFootprint.Footprint.Format = DXGI_FORMAT_R8G8B8A8_UNORM;
         srcLoc.PlacedFootprint.Footprint.Width = region.width;
         srcLoc.PlacedFootprint.Footprint.Height = region.height;
@@ -285,8 +315,8 @@ void DynamicFontAtlas::UpdateGpu(ID3D12GraphicsCommandList* commandList) {
 
         commandList->CopyTextureRegion(&dstLoc, region.dstX, region.dstY, 0, &srcLoc, nullptr);
 
-        // D3D12_TEXTURE_DATA_PLACEMENT_ALIGNMENT (512 bytes) にアライメント
-        currentOffset = (currentOffset + slicePitch + 511) & ~511;
+        // D3D12_TEXTURE_DATA_PLACEMENT_ALIGNMENT (512 bytes) にアライメントして次へ
+        uploadBufferOffset_ = (uploadBufferOffset_ + slicePitch + 511) & ~511;
     }
 
     pendingUploads_.clear();

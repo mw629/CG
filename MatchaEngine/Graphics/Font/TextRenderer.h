@@ -17,12 +17,15 @@ struct TextVertex {
 };
 
 struct TextParamsConstantBuffer {
-    Matrix4x4 wvp;          // 画面サイズ用正射影行列
-    Vector4 outlineColor;   // アウトライン色
-    float outlineWidth = 0.0f; // 0.0fでアウトラインなし
-    float pxRange = 4.0f;
-    Vector2 texSize = { 2048.0f, 2048.0f };
+    Matrix4x4 wvp;              // 画面サイズ用正射影行列 (64 bytes)
+    Vector4 outlineColor;       // アウトライン色 (16 bytes)
+    float outlineWidth = 0.0f;  // 0.0fでアウトラインなし (4 bytes)
+    float boldness = 0.0f;      // 0.0fで標準太さ、正で太く、負で細く (4 bytes)
+    Vector2 texSize = { 2048.0f, 2048.0f }; // アトラス解像度 (8 bytes)
+    float pxRange = 4.0f;       // MSDFピクセル範囲 (4 bytes)
+    float pad[3] = { 0.0f, 0.0f, 0.0f };   // 16バイト境界パディング (12 bytes)
 };
+static_assert(sizeof(TextParamsConstantBuffer) == 112, "TextParamsConstantBuffer size mismatch with HLSL TextParams");
 
 class TextRenderer {
 public:
@@ -52,6 +55,7 @@ public:
     // enableOutline: 縁取りを有効にするか
     // outlineColor: 縁取り色
     // outlineWidth: 縁取り幅 (0.0f〜0.5f、通常 0.1f〜0.2f)
+    // boldness: 太さオフセット (0.0fで通常、正の値で太く、負の値で細く。通常 0.02f〜0.15f)
     void DrawString(ID3D12GraphicsCommandList* commandList,
                     const std::string& text,
                     const Vector2& pos,
@@ -59,7 +63,8 @@ public:
                     const Vector4& color = { 1.0f, 1.0f, 1.0f, 1.0f },
                     bool enableOutline = false,
                     const Vector4& outlineColor = { 0.0f, 0.0f, 0.0f, 1.0f },
-                    float outlineWidth = 0.15f);
+                    float outlineWidth = 0.15f,
+                    float boldness = 0.0f);
 
     // 文字列の描画 (wide string)
     void DrawString(ID3D12GraphicsCommandList* commandList,
@@ -69,14 +74,44 @@ public:
                     const Vector4& color = { 1.0f, 1.0f, 1.0f, 1.0f },
                     bool enableOutline = false,
                     const Vector4& outlineColor = { 0.0f, 0.0f, 0.0f, 1.0f },
-                    float outlineWidth = 0.15f);
+                    float outlineWidth = 0.15f,
+                    float boldness = 0.0f);
 
-    // 文字列の描画幅と高さを計測
+    // 太字描画の簡易メソッド (アウトラインなしで手軽に太字描画)
+    void DrawStringBold(ID3D12GraphicsCommandList* commandList,
+                        const std::string& text,
+                        const Vector2& pos,
+                        float fontSize = 32.0f,
+                        const Vector4& color = { 1.0f, 1.0f, 1.0f, 1.0f },
+                        float boldness = 0.08f) {
+        DrawString(commandList, text, pos, fontSize, color, false, { 0.0f, 0.0f, 0.0f, 1.0f }, 0.15f, boldness);
+    }
+
+    void DrawStringBold(ID3D12GraphicsCommandList* commandList,
+                        const std::wstring& text,
+                        const Vector2& pos,
+                        float fontSize = 32.0f,
+                        const Vector4& color = { 1.0f, 1.0f, 1.0f, 1.0f },
+                        float boldness = 0.08f) {
+        DrawString(commandList, text, pos, fontSize, color, false, { 0.0f, 0.0f, 0.0f, 1.0f }, 0.15f, boldness);
+    }
+
+    // 単色塗りつぶし矩形（背景パネルやゲージ用）の描画
+    void DrawFillRect(ID3D12GraphicsCommandList* commandList,
+                      const Vector2& pos,
+                      const Vector2& size,
+                      const Vector4& color);
+
+    // 文字列の描画サイズ計測 (幅, 高さ)
     Vector2 MeasureString(const std::string& text, float fontSize = 32.0f);
     Vector2 MeasureString(const std::wstring& text, float fontSize = 32.0f);
 
     // フレーム開始時のバッファリセット (毎フレーム呼び出し)
     void BeginFrame();
+
+    // 基本の太さオフセット設定（全体の文字を太くするベース値）
+    void SetBaseBoldness(float baseBoldness) { baseBoldness_ = baseBoldness; }
+    float GetBaseBoldness() const { return baseBoldness_; }
 
     DynamicFontAtlas* GetAtlas() { return atlas_.get(); }
 
@@ -93,6 +128,7 @@ private:
 
     float screenWidth_ = 1280.0f;
     float screenHeight_ = 720.0f;
+    float baseBoldness_ = 0.07f; // 全体的なデフォルト太さオフセット (0.0fが標準、0.07fでしっかり太字)
 
     size_t currentFrameIndex_ = 0;
 

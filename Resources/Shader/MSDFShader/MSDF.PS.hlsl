@@ -27,14 +27,14 @@ PixelShaderOutput main(VertexShaderOutput input)
     float32_t2 screenTexSize = float32_t2(1.0f, 1.0f) / max(fwidth(input.texcoord), float32_t2(0.000001f, 0.000001f));
     float32_t screenPxRange = max(0.5f * dot(unitRange, screenTexSize), 1.0f);
 
-    // 0.5が文字輪郭の境界
-    float32_t screenDist = screenPxRange * (sd - 0.5f);
+    // 0.5が文字輪郭の境界 (boldnessを加算して太さを調整)
+    float32_t screenDist = screenPxRange * (sd - 0.5f + gTextParams.boldness);
     float32_t opacity = saturate(screenDist + 0.5f);
 
     // アウトラインの計算
     if (gTextParams.outlineWidth > 0.001f)
     {
-        float32_t outlineDist = screenPxRange * (sd - 0.5f + gTextParams.outlineWidth);
+        float32_t outlineDist = screenPxRange * (sd - 0.5f + gTextParams.boldness + gTextParams.outlineWidth);
         float32_t outlineOpacity = saturate(outlineDist + 0.5f);
 
         float32_t4 finalColor = lerp(gTextParams.outlineColor, input.color, opacity);

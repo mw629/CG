@@ -19,6 +19,8 @@ struct TextParams
     float32_t4x4 wvp;          // 正射影行列 (Orthographic Projection)
     float32_t4   outlineColor; // アウトラインカラー
     float32_t    outlineWidth; // アウトライン幅 (0.0ならアウトライン無効)
-    float32_t    pxRange;      // MSDFのピクセル範囲 (通常 4.0f)
+    float32_t    boldness;     // 太さオフセット (0.0で標準、正で太く、負で細く)
     float32_t2   texSize;      // アトラス解像度 (例: 2048, 2048)
+    float32_t    pxRange;      // MSDFのピクセル範囲 (通常 4.0f)
+    float32_t3   pad;          // 16バイトアライメント用パディング
 };

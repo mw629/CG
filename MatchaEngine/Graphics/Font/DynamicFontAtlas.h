@@ -54,6 +54,12 @@ public:
     // 新規追加されたグリフをGPUテクスチャへアップロード (フレーム描画前に呼ぶ)
     void UpdateGpu(ID3D12GraphicsCommandList* commandList);
 
+    // フレーム開始通知 (ダブルバッファリング管理)
+    void BeginFrame(size_t frameIndex);
+
+    // 単色矩形描画用の白色ピクセルUV
+    Vector2 GetWhitePixelUV() const { return whitePixelUV_; }
+
     // SRVハンドルを取得 (シェーダーでサンプリングする用)
     D3D12_GPU_DESCRIPTOR_HANDLE GetSrvHandleGPU() const { return srvHandleGPU_; }
     D3D12_CPU_DESCRIPTOR_HANDLE GetSrvHandleCPU() const { return srvHandleCPU_; }
@@ -89,6 +95,10 @@ private:
     Microsoft::WRL::ComPtr<ID3D12Resource> uploadResource_;
     uint8_t* uploadMappedPtr_ = nullptr;
     UINT64 uploadBufferSize_ = 0;
+    UINT64 uploadBufferOffset_ = 0;
+    UINT64 uploadBufferFrameEnd_ = 0;
+
+    Vector2 whitePixelUV_{ 0.0f, 0.0f };
 
     D3D12_CPU_DESCRIPTOR_HANDLE srvHandleCPU_{};
     D3D12_GPU_DESCRIPTOR_HANDLE srvHandleGPU_{};

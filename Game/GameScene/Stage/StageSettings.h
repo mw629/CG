@@ -17,7 +17,8 @@ private:
   int laneCount_ = 3;
   int minLaneIndex_ = -1;
   int maxLaneIndex_ = 1;
-  float laneWidth_ = 2.0f;
+  float laneWidth_ = 2.0f; // 1レーンの床の幅（元の2.0fの2倍）
+  float oneLaneWidthMultiplier_ = 1.0f; // 1レーン時の追加倍率
 
   // スクロール速度
   float scrollSpeed_ = 0.2f;        // 現在のスクロール速度
@@ -98,6 +99,11 @@ public:
   int GetMinLaneIndex() const { return minLaneIndex_; }
   int GetMaxLaneIndex() const { return maxLaneIndex_; }
   float GetLaneWidth() const { return laneWidth_; }
+  float GetEffectiveLaneWidth() const {
+    return (laneCount_ == 1) ? (laneWidth_ * oneLaneWidthMultiplier_)
+                             : laneWidth_;
+  }
+  float GetOneLaneWidthMultiplier() const { return oneLaneWidthMultiplier_; }
 
   // セッター
   void SetLaneCount(int count) {
@@ -114,6 +120,12 @@ public:
     if (laneWidth_ == width)
       return;
     laneWidth_ = width;
+    isDirty_ = true;
+  }
+  void SetOneLaneWidthMultiplier(float mult) {
+    if (oneLaneWidthMultiplier_ == mult)
+      return;
+    oneLaneWidthMultiplier_ = mult;
     isDirty_ = true;
   }
   float GetScrollSpeed() const { return scrollSpeed_; }

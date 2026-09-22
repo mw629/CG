@@ -35,7 +35,7 @@ private:
   // レーン設定
   int minLane_ = -1;
   int maxLane_ = 1;
-  float laneWidth_ = 2.0f;
+  float laneWidth_ = 4.0f;
 
   // アクション用の変数
   bool isJumping_ = false;

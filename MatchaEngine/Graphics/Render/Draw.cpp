@@ -588,19 +588,50 @@ void Draw::DrawPostEffect(D3D12_GPU_DESCRIPTOR_HANDLE textureHandle, ShaderName 
 	commandList_->DrawInstanced(3, 1, 0, 0);
 }
 
+void Draw::SetTextBaseBoldness(float boldness)
+{
+	if (textRenderer_) {
+		textRenderer_->SetBaseBoldness(boldness);
+	}
+}
+
+float Draw::GetTextBaseBoldness() const
+{
+	return textRenderer_ ? textRenderer_->GetBaseBoldness() : 0.0f;
+}
+
 void Draw::DrawMSDFString(const std::string& text, const Vector2& pos, float fontSize,
-	const Vector4& color, bool enableOutline, const Vector4& outlineColor, float outlineWidth)
+	const Vector4& color, bool enableOutline, const Vector4& outlineColor, float outlineWidth, float boldness)
 {
 	if (textRenderer_ && commandList_) {
-		textRenderer_->DrawString(commandList_, text, pos, fontSize, color, enableOutline, outlineColor, outlineWidth);
+		textRenderer_->DrawString(commandList_, text, pos, fontSize, color, enableOutline, outlineColor, outlineWidth, boldness);
 	}
 }
 
 void Draw::DrawMSDFString(const std::wstring& text, const Vector2& pos, float fontSize,
-	const Vector4& color, bool enableOutline, const Vector4& outlineColor, float outlineWidth)
+	const Vector4& color, bool enableOutline, const Vector4& outlineColor, float outlineWidth, float boldness)
 {
 	if (textRenderer_ && commandList_) {
-		textRenderer_->DrawString(commandList_, text, pos, fontSize, color, enableOutline, outlineColor, outlineWidth);
+		textRenderer_->DrawString(commandList_, text, pos, fontSize, color, enableOutline, outlineColor, outlineWidth, boldness);
+	}
+}
+
+void Draw::DrawMSDFStringBold(const std::string& text, const Vector2& pos, float fontSize,
+	const Vector4& color, float boldness)
+{
+	DrawMSDFString(text, pos, fontSize, color, false, { 0.0f, 0.0f, 0.0f, 1.0f }, 0.15f, boldness);
+}
+
+void Draw::DrawMSDFStringBold(const std::wstring& text, const Vector2& pos, float fontSize,
+	const Vector4& color, float boldness)
+{
+	DrawMSDFString(text, pos, fontSize, color, false, { 0.0f, 0.0f, 0.0f, 1.0f }, 0.15f, boldness);
+}
+
+void Draw::DrawFillRect(const Vector2& pos, const Vector2& size, const Vector4& color)
+{
+	if (textRenderer_ && commandList_) {
+		textRenderer_->DrawFillRect(commandList_, pos, size, color);
 	}
 }
 

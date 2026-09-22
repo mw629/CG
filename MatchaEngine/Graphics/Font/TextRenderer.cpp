@@ -139,6 +139,9 @@ void TextRenderer::BeginFrame() {
     currentVertexOffset_[currentFrameIndex_] = 0;
     currentIndexOffset_[currentFrameIndex_] = 0;
     currentDrawCall_[currentFrameIndex_] = 0;
+    if (atlas_) {
+        atlas_->BeginFrame(currentFrameIndex_);
+    }
 }
 
 Vector2 TextRenderer::MeasureString(const std::string& text, float fontSize) {
@@ -202,7 +205,8 @@ void TextRenderer::DrawString(ID3D12GraphicsCommandList* commandList,
                               const Vector4& color,
                               bool enableOutline,
                               const Vector4& outlineColor,
-                              float outlineWidth) {
+                              float outlineWidth,
+                              float boldness) {
     if (text.empty() || !atlas_ || !commandList) return;
 
     // 1. 文字列の解析と頂点・インデックスの構築
@@ -293,8 +297,9 @@ void TextRenderer::DrawString(ID3D12GraphicsCommandList* commandList,
     cbPtr->wvp = MakeOrthographicMatrix(0.0f, screenWidth_, 0.0f, screenHeight_, 0.0f, 100.0f);
     cbPtr->outlineColor = outlineColor;
     cbPtr->outlineWidth = enableOutline ? outlineWidth : 0.0f;
-    cbPtr->pxRange = atlas_->GetPxRange();
+    cbPtr->boldness = baseBoldness_ + boldness;
     cbPtr->texSize = atlas_->GetAtlasSize();
+    cbPtr->pxRange = atlas_->GetPxRange();
 
     // 6. パイプライン状態とルートシグネチャの設定
     ShaderName shader = MSDFShader;
@@ -347,7 +352,8 @@ void TextRenderer::DrawString(ID3D12GraphicsCommandList* commandList,
                               const Vector4& color,
                               bool enableOutline,
                               const Vector4& outlineColor,
-                              float outlineWidth) {
+                              float outlineWidth,
+                              float boldness) {
     if (text.empty()) return;
 
     // ワイド文字列を UTF-8 に変換して描画
@@ -371,7 +377,85 @@ void TextRenderer::DrawString(ID3D12GraphicsCommandList* commandList,
         }
     }
 
-    DrawString(commandList, utf8, pos, fontSize, color, enableOutline, outlineColor, outlineWidth);
+    DrawString(commandList, utf8, pos, fontSize, color, enableOutline, outlineColor, outlineWidth, boldness);
+}
+
+void TextRenderer::DrawFillRect(ID3D12GraphicsCommandList* commandList,
+                                const Vector2& pos,
+                                const Vector2& size,
+                                const Vector4& color) {
+    if (!atlas_ || !commandList || size.x <= 0.0f || size.y <= 0.0f) return;
+
+    atlas_->UpdateGpu(commandList);
+
+    size_t f = currentFrameIndex_;
+    if (currentVertexOffset_[f] + 4 > kMaxVerticesPerFrame ||
+        currentIndexOffset_[f] + 6 > kMaxIndicesPerFrame ||
+        currentDrawCall_[f] >= kMaxDrawCallsPerFrame) {
+        currentVertexOffset_[f] = 0;
+        currentIndexOffset_[f] = 0;
+        currentDrawCall_[f] = 0;
+    }
+
+    Vector2 uv = atlas_->GetWhitePixelUV();
+    float x0 = pos.x;
+    float y0 = pos.y;
+    float x1 = pos.x + size.x;
+    float y1 = pos.y + size.y;
+
+    TextVertex v0{ { x0, y0, 0.0f, 1.0f }, uv, color };
+    TextVertex v1{ { x1, y0, 0.0f, 1.0f }, uv, color };
+    TextVertex v2{ { x0, y1, 0.0f, 1.0f }, uv, color };
+    TextVertex v3{ { x1, y1, 0.0f, 1.0f }, uv, color };
+
+    size_t vOffset = currentVertexOffset_[f];
+    size_t iOffset = currentIndexOffset_[f];
+    size_t drawIdx = currentDrawCall_[f];
+
+    TextVertex* vDest = mappedVertices_[f] + vOffset;
+    vDest[0] = v0; vDest[1] = v1; vDest[2] = v2; vDest[3] = v3;
+
+    uint32_t* iDest = mappedIndices_[f] + iOffset;
+    iDest[0] = 0; iDest[1] = 1; iDest[2] = 2;
+    iDest[3] = 1; iDest[4] = 3; iDest[5] = 2;
+
+    size_t cbOffset = drawIdx * kConstantBufferAlignment;
+    auto* cbPtr = reinterpret_cast<TextParamsConstantBuffer*>(mappedConstantBuffers_[f] + cbOffset);
+    cbPtr->wvp = MakeOrthographicMatrix(0.0f, screenWidth_, 0.0f, screenHeight_, 0.0f, 100.0f);
+    cbPtr->outlineColor = { 0.0f, 0.0f, 0.0f, 0.0f };
+    cbPtr->outlineWidth = 0.0f;
+    cbPtr->boldness = 0.0f;
+    cbPtr->texSize = atlas_->GetAtlasSize();
+    cbPtr->pxRange = atlas_->GetPxRange();
+
+    ShaderName shader = MSDFShader;
+    BlendMode blend = BlendMode::kBlendModeNormal;
+    CullMode cull = CullMode::kCullModeNone;
+
+    auto* pso = pipelineState_->GetGraphicsPipelineState(shader, blend, cull);
+    auto* rootSig = pipelineState_->GetRootSignature(shader, blend);
+    if (!pso || !rootSig) return;
+
+    commandList->SetPipelineState(pso);
+    commandList->SetGraphicsRootSignature(rootSig->GetRootSignature());
+    commandList->IASetPrimitiveTopology(D3D_PRIMITIVE_TOPOLOGY_TRIANGLELIST);
+    commandList->IASetVertexBuffers(0, 1, &vertexBufferViews_[f]);
+    commandList->IASetIndexBuffer(&indexBufferViews_[f]);
+
+    UINT cbParamIndex = pipelineState_->GetRootParameterIndex(shader, blend, "gTextParams");
+    if (cbParamIndex != static_cast<UINT>(-1)) {
+        commandList->SetGraphicsRootConstantBufferView(cbParamIndex, constantBuffers_[f]->GetGPUVirtualAddress() + cbOffset);
+    }
+    UINT texParamIndex = pipelineState_->GetRootParameterIndex(shader, blend, "gMSDFTexture");
+    if (texParamIndex != static_cast<UINT>(-1)) {
+        commandList->SetGraphicsRootDescriptorTable(texParamIndex, atlas_->GetSrvHandleGPU());
+    }
+
+    commandList->DrawIndexedInstanced(6, 1, static_cast<UINT>(iOffset), static_cast<INT>(vOffset), 0);
+
+    currentVertexOffset_[f] += 4;
+    currentIndexOffset_[f] += 6;
+    currentDrawCall_[f]++;
 }
 
 } // namespace MatchaEngine

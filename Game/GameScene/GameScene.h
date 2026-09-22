@@ -114,6 +114,13 @@ public:
 
 	void Draw(class Draw& draw) override;
 	void DrawHUD(class Draw& draw);
+	void DrawPlayingHUD(class Draw& draw);
+	void DrawBossHUD(class Draw& draw);
+	void DrawPauseHUD(class Draw& draw);
+	void DrawGameOverHUD(class Draw& draw);
+	void DrawControlsGuide(class Draw& draw);
+
+	float uiTimer_ = 0.0f;
 
 	void ChangePlayingState(PlayingState newState, bool force = false);
 
@@ -124,4 +131,6 @@ public:
 	void PlayerHitUpdate();
 
 	void EditorUpdate();
+
+	class Draw* draw_ = nullptr;
 };
