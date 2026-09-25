@@ -169,6 +169,7 @@ void GameScene::ImGui() {
     if (playingState_ == PlayingState::Boss && boss_->GetIsActive()) {
       if (ImGui::TreeNode("Boss Info")) {
         ImGui::Text("HP: %d / 20", boss_->GetHP());
+        ImGui::DragFloat3("Target Pos", &boss_->GetTargetPosRef().x, 0.1f);
         ImGui::TreePop();
       }
     }
@@ -614,8 +615,8 @@ void GameScene::Initialize() {
   player_->Initialize(modelData);
 
   // ボスの初期化
-  ModelData bossModelData =
-      AssetManager::LoadModel("Resources/Model/StylizedIceKing", "StylizedIceKing.obj");
+  ModelData bossModelData = AssetManager::LoadModel(
+      "Resources/Model/StylizedIceKing", "StylizedIceKing.obj");
   boss_->Initialize(bossModelData);
   boss_->SetName("Boss");
 
@@ -972,8 +973,8 @@ void GameScene::DrawBossHUD(class Draw &draw) {
                     Vector4(0.9f, 0.2f, 0.2f, 0.9f));
 
   // ボスヘッダー
-  draw.DrawMSDFString("=== BOSS: ICE KING ===", Vector2(440.0f, 24.0f),
-                      28.0f, Vector4(0.8f, 0.95f, 1.0f, 1.0f), true,
+  draw.DrawMSDFString("=== BOSS: ICE KING ===", Vector2(440.0f, 24.0f), 28.0f,
+                      Vector4(0.8f, 0.95f, 1.0f, 1.0f), true,
                       Vector4(0.0f, 0.2f, 0.5f, 1.0f), 0.08f);
 
   // ボスHPゲージ (最大20)
@@ -1319,8 +1320,8 @@ void GameScene::PlayingUpdate() {
             if (!obs->GetIsActive()) {
               obs->SetType(type);
               float x = (i - 1) * stageSettings_->GetLaneWidth();
-              obs->Spawn(x, 2.5f,
-                         -13.0f); // ボスが-15.0fなので、少し手前から出現
+              obs->Spawn(x, 0.5f,
+                         -2.0f); // ボスが-2.0fなので、少し手前から出現
               break;
             }
           }
@@ -1726,7 +1727,7 @@ void GameScene::UpdateCameraTransition() {
     } else {
       // カメラ遷移が終わってからボスを出現させる
       if (!boss_->GetIsActive()) {
-        boss_->Spawn(-9.0f, 6.0f, -15.0f);
+        boss_->Spawn(-6.0f, 4.0f, -2.0f);
       }
     }
   }

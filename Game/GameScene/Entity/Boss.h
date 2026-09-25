@@ -43,4 +43,8 @@ public:
 
   BossState GetState() const { return state_; }
   void ChangeState(BossState nextState);
+
+  Vector3 GetTargetPos() const { return targetPos_; }
+  void SetTargetPos(const Vector3 &targetPos) { targetPos_ = targetPos; }
+  Vector3 &GetTargetPosRef() { return targetPos_; }
 };
