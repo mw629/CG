@@ -1,7 +1,8 @@
 #pragma once
+#include "GameObject.h"
 #include <Engine.h>
 #include <memory>
-#include "GameObject.h"
+
 
 enum class BossState {
   Appearance, // 出現
@@ -18,7 +19,7 @@ private:
   float hitTimer_ = 0.0f;
   BossState state_ = BossState::Appearance;
   float stateTimer_ = 0.0f;
-  
+
   Vector3 startPos_;
   Vector3 targetPos_;
 
@@ -28,7 +29,7 @@ public:
 
   void Initialize(ModelData modelData);
   void Spawn(float x, float y, float z);
-  
+
   void Update(Matrix4x4 view, float speedMultiplier = 1.0f) override;
   void Draw(class Draw &draw) override;
   void ImGuiInnerComponents() override;
@@ -38,10 +39,9 @@ public:
            GameObject::HasMaterial();
   }
 
-
   void OnDamage();
   int GetHP() const { return hp_; }
-  
+
   BossState GetState() const { return state_; }
   void ChangeState(BossState nextState);
 };

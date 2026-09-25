@@ -15,7 +15,6 @@ struct ItemCoolDownSetting {
   float currentTimer = 0.0f; // 現在の残りクールタイム（秒、0以下で出現可能）
 };
 
-
 /// <summary>
 /// ステージの無限スクロールと障害物の管理を行うクラス
 /// 道路チャンクを手前に移動させ、画面外に出たチャンクを奥に再配置する
@@ -26,13 +25,13 @@ private:
   int laneCount_ = 3;
   int minLaneIndex_ = -1;
   int maxLaneIndex_ = 1;
-  float laneWidth_ = 2.0f; // 1レーンの床の幅（元の2.0fの2倍）
+  float laneWidth_ = 2.0f;              // 1レーンの床の幅（元の2.0fの2倍）
   float oneLaneWidthMultiplier_ = 1.0f; // 1レーン時の追加倍率
 
   // スクロール速度
-  float scrollSpeed_ = 0.2f;        // 現在のスクロール速度
-  float baseScrollSpeed_ = 0.2f;    // 初期スクロール速度
-  float maxScrollSpeed_ = 1.0f;     // 最大スクロール速度
+  float scrollSpeed_ = 0.2f;           // 現在のスクロール速度
+  float baseScrollSpeed_ = 0.2f;       // 初期スクロール速度
+  float maxScrollSpeed_ = 1.0f;        // 最大スクロール速度
   float scrollAcceleration_ = 0.0001f; // 毎フレームの加速量
 
   // 道路チャンク
@@ -57,23 +56,32 @@ private:
 
   // 障害物管理
   static const int kMaxObstacles_ = 20; // 障害物の最大保持数
-  std::shared_ptr<Obstacle> obstacles_[kMaxObstacles_]; // 障害物インスタンス配列
-  int nextObstacleIndex_ = 0; // 次に使用する障害物のインデックス
+  std::shared_ptr<Obstacle>
+      obstacles_[kMaxObstacles_]; // 障害物インスタンス配列
+  int nextObstacleIndex_ = 0;     // 次に使用する障害物のインデックス
 
-  float obstacleInterval_ = 7.0f;       // 次回生成までの距離（動的計算値・さらに狭めた設定）
+  float obstacleInterval_ =
+      7.0f; // 次回生成までの距離（動的計算値・さらに狭めた設定）
   float distanceSinceLastSpawn_ = 0.0f; // 前回生成からの移動距離
 
-  float baseActionFrames_ = 30.0f;     // 回避アクション所要フレーム数（ジャンプ・しゃがみ完了所要フレーム）
-  float minGraceFrames_ = 5.0f;        // 最小猶予フレーム数（着地・立ち上がり後最低5フレームの猶予を保証）
-  float maxGraceFrames_ = 15.0f;       // 最大猶予フレーム数（5〜15フレームの適度な揺らぎ）
-  float minObstacleDistance_ = 6.0f;   // 最小生成間隔（距離の下限・物理的接触防止）
-  float maxObstacleDistance_ = 45.0f;  // 最大生成間隔（高速時にもフレーム猶予を圧縮しない上限値）
+  float baseActionFrames_ =
+      30.0f; // 回避アクション所要フレーム数（ジャンプ・しゃがみ完了所要フレーム）
+  float minGraceFrames_ =
+      5.0f; // 最小猶予フレーム数（着地・立ち上がり後最低5フレームの猶予を保証）
+  float maxGraceFrames_ =
+      15.0f; // 最大猶予フレーム数（5〜15フレームの適度な揺らぎ）
+  float minObstacleDistance_ =
+      6.0f; // 最小生成間隔（距離の下限・物理的接触防止）
+  float maxObstacleDistance_ =
+      45.0f; // 最大生成間隔（高速時にもフレーム猶予を圧縮しない上限値）
 
-  float noSpawnChance_ = 0.05f;        // 障害物が出現しない空ウェーブの発生確率（密度を保つためさらに控えめに設定）
-  int consecutiveNoSpawnCount_ = 0;    // 連続して空ウェーブが発生した回数
-  int maxConsecutiveNoSpawn_ = 1;      // 連続空ウェーブの最大許容回数
+  float noSpawnChance_ =
+      0.05f; // 障害物が出現しない空ウェーブの発生確率（密度を保つためさらに控えめに設定）
+  int consecutiveNoSpawnCount_ = 0; // 連続して空ウェーブが発生した回数
+  int maxConsecutiveNoSpawn_ = 1;   // 連続空ウェーブの最大許容回数
 
-  float cameraItemInterval_ = 500.0f; // カメラアイテムの生成間隔（旧・互換性用）
+  float cameraItemInterval_ =
+      500.0f; // カメラアイテムの生成間隔（旧・互換性用）
   float distanceSinceLastCameraItem_ =
       0.0f; // 前回カメラアイテム生成からの移動距離（旧・互換性用）
 
@@ -144,28 +152,56 @@ public:
   float GetScrollSpeed() const { return scrollSpeed_; }
   float GetBaseScrollSpeed() const { return baseScrollSpeed_; }
   float GetMaxScrollSpeed() const { return maxScrollSpeed_; }
-  float GetObstacleInterval() const { return obstacleInterval_; } // 現在の生成間隔（距離）を取得
+  float GetObstacleInterval() const {
+    return obstacleInterval_;
+  } // 現在の生成間隔（距離）を取得
 
   // 設定
-  void SetObstacleInterval(float interval) { obstacleInterval_ = interval; } // 生成間隔を設定
+  void SetObstacleInterval(float interval) {
+    obstacleInterval_ = interval;
+  } // 生成間隔を設定
 
-  float GetMinObstacleDistance() const { return minObstacleDistance_; } // 確実に避けられる最小生成間隔（距離）を取得
-  void SetMinObstacleDistance(float dist) { minObstacleDistance_ = dist; } // 確実に避けられる最小生成間隔（距離）を設定
+  float GetMinObstacleDistance() const {
+    return minObstacleDistance_;
+  } // 確実に避けられる最小生成間隔（距離）を取得
+  void SetMinObstacleDistance(float dist) {
+    minObstacleDistance_ = dist;
+  } // 確実に避けられる最小生成間隔（距離）を設定
 
-  float GetMaxObstacleDistance() const { return maxObstacleDistance_; } // 最大生成間隔（距離）を取得
-  void SetMaxObstacleDistance(float dist) { maxObstacleDistance_ = dist; } // 最大生成間隔（距離）を設定
+  float GetMaxObstacleDistance() const {
+    return maxObstacleDistance_;
+  } // 最大生成間隔（距離）を取得
+  void SetMaxObstacleDistance(float dist) {
+    maxObstacleDistance_ = dist;
+  } // 最大生成間隔（距離）を設定
 
-  float GetBaseActionFrames() const { return baseActionFrames_; } // 回避アクション所要フレーム数を取得
-  void SetBaseActionFrames(float frames) { baseActionFrames_ = frames; } // 回避アクション所要フレーム数を設定
+  float GetBaseActionFrames() const {
+    return baseActionFrames_;
+  } // 回避アクション所要フレーム数を取得
+  void SetBaseActionFrames(float frames) {
+    baseActionFrames_ = frames;
+  } // 回避アクション所要フレーム数を設定
 
-  float GetMinGraceFrames() const { return minGraceFrames_; } // 最小猶予フレーム数を取得
-  void SetMinGraceFrames(float frames) { minGraceFrames_ = frames; } // 最小猶予フレーム数を設定
+  float GetMinGraceFrames() const {
+    return minGraceFrames_;
+  } // 最小猶予フレーム数を取得
+  void SetMinGraceFrames(float frames) {
+    minGraceFrames_ = frames;
+  } // 最小猶予フレーム数を設定
 
-  float GetMaxGraceFrames() const { return maxGraceFrames_; } // 最大猶予フレーム数を取得
-  void SetMaxGraceFrames(float frames) { maxGraceFrames_ = frames; } // 最大猶予フレーム数を設定
+  float GetMaxGraceFrames() const {
+    return maxGraceFrames_;
+  } // 最大猶予フレーム数を取得
+  void SetMaxGraceFrames(float frames) {
+    maxGraceFrames_ = frames;
+  } // 最大猶予フレーム数を設定
 
-  float GetNoSpawnChance() const { return noSpawnChance_; } // 空ウェーブ（障害物なし）の確率を取得
-  void SetNoSpawnChance(float chance) { noSpawnChance_ = chance; } // 空ウェーブ（障害物なし）の確率を設定
+  float GetNoSpawnChance() const {
+    return noSpawnChance_;
+  } // 空ウェーブ（障害物なし）の確率を取得
+  void SetNoSpawnChance(float chance) {
+    noSpawnChance_ = chance;
+  } // 空ウェーブ（障害物なし）の確率を設定
 
   // スクロール速度の設定
   void SetBaseScrollSpeed(float speed) {

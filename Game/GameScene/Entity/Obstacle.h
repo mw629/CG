@@ -2,7 +2,6 @@
 #include <Engine.h>
 #include <memory>
 
-
 #include "GameObject.h"
 
 /// <summary>
@@ -12,16 +11,16 @@
 class Obstacle : public GameObject {
 public:
   enum class Type {
-    Low,         // ジャンプで避ける（低い障害物）
-    High,        // 転がりで避ける（高い障害物・バー）
-    Wall,        // レーン移動で避ける（壁）
-    Bonus,       // 当たると吹き飛ぶボーナスエネミー
-    GuideFloor,  // 中央へ誘導するトリガー床
-    CameraItem,  // 取るとカメラが移動するアイテム
-    BarrierItem, // バリアを張るアイテム
-    ClearItem,   // 障害物を消すアイテム
-    BossItem,    // ボス戦へ移行するアイテム
-    BossAttack,  // ボスの攻撃（白、飛び越え不可）
+    Low,                  // ジャンプで避ける（低い障害物）
+    High,                 // 転がりで避ける（高い障害物・バー）
+    Wall,                 // レーン移動で避ける（壁）
+    Bonus,                // 当たると吹き飛ぶボーナスエネミー
+    GuideFloor,           // 中央へ誘導するトリガー床
+    CameraItem,           // 取るとカメラが移動するアイテム
+    BarrierItem,          // バリアを張るアイテム
+    ClearItem,            // 障害物を消すアイテム
+    BossItem,             // ボス戦へ移行するアイテム
+    BossAttack,           // ボスの攻撃（白、飛び越え不可）
     BossAttackReflectable // ボスの攻撃（緑、跳ね返し可能）
   };
 
@@ -32,11 +31,10 @@ private:
   Type type_ = Type::Wall;
 
   bool isHit_ = false;
-  bool isReflected_ = false; // ボスへの跳ね返しフラグ
+  bool isReflected_ = false;                  // ボスへの跳ね返しフラグ
   Vector3 reflectedTarget_{0.0f, 0.0f, 0.0f}; // 跳ね返された際の目標座標
   Vector3 velocity_{0.0f, 0.0f, 0.0f};
   float gravity_ = 0.015f;
-
 
   // 当たり判定のサイズ
   float collisionWidth_ = 1.0f;
@@ -68,7 +66,7 @@ public:
   void OnHit();
   void SetReflected(bool reflected) { isReflected_ = reflected; }
   bool GetIsReflected() const { return isReflected_; }
-  void SetReflectedTarget(const Vector3& target) { reflectedTarget_ = target; }
+  void SetReflectedTarget(const Vector3 &target) { reflectedTarget_ = target; }
 
   // Override standard Update and Draw to avoid GameObjectManager from
   // automatically updating scroll/drawing without context

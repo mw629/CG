@@ -11,7 +11,6 @@
 #include <imgui.h>
 #include <memory>
 
-
 GameScene::~GameScene() {
   EditorManager::SetGameViewDrawCallback(nullptr);
   EditorManager::SetSaveCallback(nullptr);
@@ -112,9 +111,8 @@ void GameScene::ImGui() {
   }
 
   if (ImGui::CollapsingHeader("Game State", ImGuiTreeNodeFlags_DefaultOpen)) {
-    const char *stateNames[] = {"Title",     "Playing",  "Paused",
-                                "PlayerHit", "GameClear", "GameOver",
-                                "Editor"};
+    const char *stateNames[] = {"Title",     "Playing",  "Paused", "PlayerHit",
+                                "GameClear", "GameOver", "Editor"};
     ImGui::Text("Game State: %s", stateNames[gameState_]);
 
     const char *playingStateNames[] = {"ThreeLane", "OneLane", "Boss"};
@@ -147,16 +145,22 @@ void GameScene::ImGui() {
         player_->SetLaneChangeSpeed(laneSpeed);
       }
       float rollDuration = player_->GetRollDuration();
-      if (ImGui::SliderFloat("Roll Duration", &rollDuration, 10.0f, 60.0f, "%.0f f")) {
+      if (ImGui::SliderFloat("Roll Duration", &rollDuration, 10.0f, 60.0f,
+                             "%.0f f")) {
         player_->SetRollDuration(rollDuration);
       }
 
-      float estAirFrames = gravity > 0.0f ? ((2.0f * jumpPower / gravity) + 1.0f) : 0.0f;
-      float estMaxHeight = gravity > 0.0f ? ((jumpPower * jumpPower) / (2.0f * gravity)) : 0.0f;
-      ImGui::Text("Jump Air Time: %.0f frames (%.2f s)", estAirFrames, estAirFrames / 60.0f);
+      float estAirFrames =
+          gravity > 0.0f ? ((2.0f * jumpPower / gravity) + 1.0f) : 0.0f;
+      float estMaxHeight =
+          gravity > 0.0f ? ((jumpPower * jumpPower) / (2.0f * gravity)) : 0.0f;
+      ImGui::Text("Jump Air Time: %.0f frames (%.2f s)", estAirFrames,
+                  estAirFrames / 60.0f);
       ImGui::Text("Max Jump Height: +%.2f m", estMaxHeight);
-      ImGui::Text("Lane Move Time: %.0f frames", laneSpeed > 0.0f ? (1.0f / laneSpeed) : 0.0f);
-      ImGui::Text("Roll Duration: %.0f frames (%.2f s)", rollDuration, rollDuration / 60.0f);
+      ImGui::Text("Lane Move Time: %.0f frames",
+                  laneSpeed > 0.0f ? (1.0f / laneSpeed) : 0.0f);
+      ImGui::Text("Roll Duration: %.0f frames (%.2f s)", rollDuration,
+                  rollDuration / 60.0f);
 
       ImGui::TreePop();
     }
@@ -230,7 +234,8 @@ void GameScene::ImGui() {
   // フォント / 文字の太さ設定パネル
   if (draw_ && ImGui::CollapsingHeader("Font / Text Settings")) {
     float boldness = draw_->GetTextBaseBoldness();
-    if (ImGui::SliderFloat("Global Boldness", &boldness, -0.05f, 0.20f, "%.3f")) {
+    if (ImGui::SliderFloat("Global Boldness", &boldness, -0.05f, 0.20f,
+                           "%.3f")) {
       draw_->SetTextBaseBoldness(boldness);
     }
     ImGui::TextDisabled("Default: 0.070 (Thick / Bold)");
@@ -250,7 +255,8 @@ void GameScene::ImGui() {
     }
 
     float oneLaneMult = stageSettings_->GetOneLaneWidthMultiplier();
-    if (ImGui::SliderFloat("One Lane Width Multiplier", &oneLaneMult, 1.0f, 3.0f, "%.2f")) {
+    if (ImGui::SliderFloat("One Lane Width Multiplier", &oneLaneMult, 1.0f,
+                           3.0f, "%.2f")) {
       stageSettings_->SetOneLaneWidthMultiplier(oneLaneMult);
     }
 
@@ -269,57 +275,74 @@ void GameScene::ImGui() {
       stageSettings_->SetScrollAcceleration(accel);
     }
 
-    float minDistance = stageSettings_->GetMinObstacleDistance(); // 確実に避けられる最小間隔距離
-    float maxDistance = stageSettings_->GetMaxObstacleDistance(); // 避けられる最大間隔距離
-    if (ImGui::SliderFloat("Min Obstacle Distance", &minDistance, 3.0f, 30.0f, "%.1f m")) {
+    float minDistance =
+        stageSettings_
+            ->GetMinObstacleDistance(); // 確実に避けられる最小間隔距離
+    float maxDistance =
+        stageSettings_->GetMaxObstacleDistance(); // 避けられる最大間隔距離
+    if (ImGui::SliderFloat("Min Obstacle Distance", &minDistance, 3.0f, 30.0f,
+                           "%.1f m")) {
       if (minDistance > maxDistance)
         maxDistance = minDistance;
       stageSettings_->SetMinObstacleDistance(minDistance);
       stageSettings_->SetMaxObstacleDistance(maxDistance);
     }
-    if (ImGui::SliderFloat("Max Obstacle Distance", &maxDistance, 5.0f, 60.0f, "%.1f m")) {
+    if (ImGui::SliderFloat("Max Obstacle Distance", &maxDistance, 5.0f, 60.0f,
+                           "%.1f m")) {
       if (maxDistance < minDistance)
         minDistance = maxDistance;
       stageSettings_->SetMinObstacleDistance(minDistance);
       stageSettings_->SetMaxObstacleDistance(maxDistance);
     }
 
-    float baseActionFrames = stageSettings_->GetBaseActionFrames(); // 回避アクション所要フレーム数
-    if (ImGui::SliderFloat("Base Action Frames", &baseActionFrames, 0.0f, 60.0f, "%.0f f")) {
+    float baseActionFrames =
+        stageSettings_->GetBaseActionFrames(); // 回避アクション所要フレーム数
+    if (ImGui::SliderFloat("Base Action Frames", &baseActionFrames, 0.0f, 60.0f,
+                           "%.0f f")) {
       stageSettings_->SetBaseActionFrames(baseActionFrames);
     }
 
     float minGrace = stageSettings_->GetMinGraceFrames(); // 最小猶予フレーム数
     float maxGrace = stageSettings_->GetMaxGraceFrames(); // 最大猶予フレーム数
-    if (ImGui::SliderFloat("Min Grace Frames", &minGrace, 5.0f, 60.0f, "%.0f f")) {
+    if (ImGui::SliderFloat("Min Grace Frames", &minGrace, 5.0f, 60.0f,
+                           "%.0f f")) {
       if (minGrace > maxGrace)
         maxGrace = minGrace;
       stageSettings_->SetMinGraceFrames(minGrace);
       stageSettings_->SetMaxGraceFrames(maxGrace);
     }
-    if (ImGui::SliderFloat("Max Grace Frames", &maxGrace, 5.0f, 80.0f, "%.0f f")) {
+    if (ImGui::SliderFloat("Max Grace Frames", &maxGrace, 5.0f, 80.0f,
+                           "%.0f f")) {
       if (maxGrace < minGrace)
         minGrace = maxGrace;
       stageSettings_->SetMinGraceFrames(minGrace);
       stageSettings_->SetMaxGraceFrames(maxGrace);
     }
 
-    float noSpawnChance = stageSettings_->GetNoSpawnChance() * 100.0f; // 障害物が出ない確率（%）
-    if (ImGui::SliderFloat("No Spawn Chance (%)", &noSpawnChance, 0.0f, 30.0f, "%.1f %%")) {
+    float noSpawnChance =
+        stageSettings_->GetNoSpawnChance() * 100.0f; // 障害物が出ない確率（%）
+    if (ImGui::SliderFloat("No Spawn Chance (%)", &noSpawnChance, 0.0f, 30.0f,
+                           "%.1f %%")) {
       stageSettings_->SetNoSpawnChance(noSpawnChance / 100.0f);
     }
 
-    float currentSpeed = stageSettings_->GetScrollSpeed(); // 現在のスクロール速度
-    float curInterval = stageSettings_->GetObstacleInterval(); // 現在の次回生成間隔
-    float estFrames = currentSpeed > 0.0f ? (curInterval / currentSpeed) : 0.0f; // 到達までの推定フレーム数
-    ImGui::Text("Next Spawn: %.1f m (approx. %.0f frames / %.2f s)", curInterval, estFrames, estFrames / 60.0f);
+    float currentSpeed =
+        stageSettings_->GetScrollSpeed(); // 現在のスクロール速度
+    float curInterval =
+        stageSettings_->GetObstacleInterval(); // 現在の次回生成間隔
+    float estFrames = currentSpeed > 0.0f ? (curInterval / currentSpeed)
+                                          : 0.0f; // 到達までの推定フレーム数
+    ImGui::Text("Next Spawn: %.1f m (approx. %.0f frames / %.2f s)",
+                curInterval, estFrames, estFrames / 60.0f);
     ImGui::Text("Dodgeable Range: %.1f m ~ %.1f m", minDistance, maxDistance);
   }
 
   // アイテムクールタイム設定パネル
-  if (ImGui::CollapsingHeader("Item CoolDowns (アイテムクールタイム設定)", ImGuiTreeNodeFlags_DefaultOpen)) {
+  if (ImGui::CollapsingHeader("Item CoolDowns (アイテムクールタイム設定)",
+                              ImGuiTreeNodeFlags_DefaultOpen)) {
     float spawnChance = stageSettings_->GetItemSpawnChance() * 100.0f;
-    if (ImGui::SliderFloat("Item Spawn Chance (%)", &spawnChance, 0.0f, 100.0f, "%.1f %%")) {
+    if (ImGui::SliderFloat("Item Spawn Chance (%)", &spawnChance, 0.0f, 100.0f,
+                           "%.1f %%")) {
       stageSettings_->SetItemSpawnChance(spawnChance / 100.0f);
     }
     ImGui::Separator();
@@ -330,11 +353,13 @@ void GameScene::ImGui() {
       const char *desc;
     };
     ItemInfo items[] = {
-      { Obstacle::Type::Bonus, "Bonus (ボーナス)", "スコア加算" },
-      { Obstacle::Type::BarrierItem, "Barrier (バリア)", "ミスを1回防御" },
-      { Obstacle::Type::ClearItem, "Clear (障害物全消去)", "画面内の障害物を一掃" },
-      { Obstacle::Type::CameraItem, "Camera (視点切替)", "1レーンモードへ移行" },
-      { Obstacle::Type::BossItem, "Boss (ボス戦突入)", "ボスバトル開始" },
+        {Obstacle::Type::Bonus, "Bonus (ボーナス)", "スコア加算"},
+        {Obstacle::Type::BarrierItem, "Barrier (バリア)", "ミスを1回防御"},
+        {Obstacle::Type::ClearItem, "Clear (障害物全消去)",
+         "画面内の障害物を一掃"},
+        {Obstacle::Type::CameraItem, "Camera (視点切替)",
+         "1レーンモードへ移行"},
+        {Obstacle::Type::BossItem, "Boss (ボス戦突入)", "ボスバトル開始"},
     };
 
     for (const auto &item : items) {
@@ -343,14 +368,17 @@ void GameScene::ImGui() {
       float current = stageSettings_->GetItemCoolDownTimer(item.type);
 
       ImGui::Text("%s - %s", item.name, item.desc);
-      if (ImGui::SliderFloat("CoolTime (s)", &duration, 0.0f, 120.0f, "%.1f s")) {
+      if (ImGui::SliderFloat("CoolTime (s)", &duration, 0.0f, 120.0f,
+                             "%.1f s")) {
         stageSettings_->SetItemCoolDownDuration(item.type, duration);
       }
 
       if (current <= 0.0f) {
-        ImGui::TextColored(ImVec4(0.2f, 1.0f, 0.2f, 1.0f), "  Status: READY (出現可能)");
+        ImGui::TextColored(ImVec4(0.2f, 1.0f, 0.2f, 1.0f),
+                           "  Status: READY (出現可能)");
       } else {
-        ImGui::TextColored(ImVec4(1.0f, 0.6f, 0.2f, 1.0f), "  Status: COOLDOWN (残り %.1f s)", current);
+        ImGui::TextColored(ImVec4(1.0f, 0.6f, 0.2f, 1.0f),
+                           "  Status: COOLDOWN (残り %.1f s)", current);
       }
 
       ImGui::SameLine();
@@ -367,9 +395,11 @@ void GameScene::ImGui() {
   }
 
   // アイテム効果のデバッグパネル
-  if (ImGui::CollapsingHeader("Item Debug / Effects", ImGuiTreeNodeFlags_DefaultOpen)) {
+  if (ImGui::CollapsingHeader("Item Debug / Effects",
+                              ImGuiTreeNodeFlags_DefaultOpen)) {
     bool hasBarrier = player_->GetHasBarrier();
-    ImGui::Text("Player Barrier Status: %s", hasBarrier ? "ACTIVE (ON)" : "INACTIVE (OFF)");
+    ImGui::Text("Player Barrier Status: %s",
+                hasBarrier ? "ACTIVE (ON)" : "INACTIVE (OFF)");
 
     if (ImGui::Button("Give Barrier (バリア付与)")) {
       player_->SetHasBarrier(true);
@@ -387,9 +417,10 @@ void GameScene::ImGui() {
       effectManager_->EmitShockwave(player_->GetTransform().translate);
       for (int j = 0; j < stageSettings_->GetMaxObstacles(); j++) {
         Obstacle *obs = stageSettings_->GetObstacle(j);
-        if (obs && obs->GetIsActive() && (obs->GetType() == Obstacle::Type::Low ||
-                                           obs->GetType() == Obstacle::Type::High ||
-                                           obs->GetType() == Obstacle::Type::Wall)) {
+        if (obs && obs->GetIsActive() &&
+            (obs->GetType() == Obstacle::Type::Low ||
+             obs->GetType() == Obstacle::Type::High ||
+             obs->GetType() == Obstacle::Type::Wall)) {
           obs->OnBlowAway();
         }
       }
@@ -478,7 +509,6 @@ void GameScene::ImGui() {
     ImGui::End();
   }
 
-
 #endif // _USE_IMGUI
 }
 
@@ -499,15 +529,15 @@ void GameScene::Initialize() {
 
   // タイトル用スプライトの生成
   titleTextureHandle_ = texture_->CreateTexture("Resources/Texture/Title.png");
-  titleSpriteData_.transform.scale = { 1.0f, 1.0f, 1.0f };
-  titleSpriteData_.transform.translate = { 640.0f, 360.0f, 0.0f };
-  titleSpriteData_.transform.rotate = { 0.0f, 0.0f, 0.0f };
-  titleSpriteData_.size = { 1280.0f, 720.0f };
-  titleSpriteData_.textureArea[0] = { 0.0f, 0.0f };
-  titleSpriteData_.textureArea[1] = { 1.0f, 1.0f };
+  titleSpriteData_.transform.scale = {1.0f, 1.0f, 1.0f};
+  titleSpriteData_.transform.translate = {640.0f, 360.0f, 0.0f};
+  titleSpriteData_.transform.rotate = {0.0f, 0.0f, 0.0f};
+  titleSpriteData_.size = {1280.0f, 720.0f};
+  titleSpriteData_.textureArea[0] = {0.0f, 0.0f};
+  titleSpriteData_.textureArea[1] = {1.0f, 1.0f};
   titleSprite_ = std::make_unique<Sprite>();
   titleSprite_->Initialize(titleSpriteData_, titleTextureHandle_);
-  titleSprite_->GetMartial()->SetColor({ 1.0f, 1.0f, 1.0f, 1.0f });
+  titleSprite_->GetMartial()->SetColor({1.0f, 1.0f, 1.0f, 1.0f});
 
   if (!EditorManager::IsPlaying()) {
     gameState_ = GameState::Editor;
@@ -598,7 +628,6 @@ void GameScene::Initialize() {
   player_->SetName("Player");
   gameObjectManager_->AddObject(player_);
   gameObjectManager_->AddObject(boss_);
-
 
   // エディターでの保存・読み込み先をJsonSceneに設定
   EditorManager::SetSaveCallback([this](const std::string &filePath) {
@@ -758,10 +787,16 @@ void GameScene::Draw(class Draw &draw) {
 void GameScene::DrawHUD(class Draw &draw) {
   // 初回呼び出し時に頻出文字列をアトラスへ一括プリロード
   static bool s_preloaded = false;
-  if (!s_preloaded && draw.GetTextRenderer() && draw.GetTextRenderer()->GetAtlas()) {
+  if (!s_preloaded && draw.GetTextRenderer() &&
+      draw.GetTextRenderer()->GetAtlas()) {
     s_preloaded = true;
     draw.GetTextRenderer()->GetAtlas()->PreloadString(
-        "0123456789ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz:/.mkmhpt%+-[]()!★◆▼▲●■░|一二三四五六七八九十百千万到達距離スコア速度最高記録ベストゲームオーバーリスタートリザルトへ戻る一時停止中現在獲得順位反撃チャンス左中央右打ち返せ跳ね返しボーナス敵撃破モードシールドバリアアクティブジャンプスライディング走るポーズキーもう一度遊ぶプレイ");
+        "0123456789ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz:/"
+        ".mkmhpt%+-[]()!★◆▼▲●■░|"
+        "一二三四五六七八九十百千万到達距離スコア速度最高記録ベストゲームオーバ"
+        "ーリスタートリザルトへ戻る一時停止中現在獲得順位反撃チャンス左中央右打"
+        "ち返せ跳ね返しボーナス敵撃破モードシールドバリアアクティブジャンプスラ"
+        "イディング走るポーズキーもう一度遊ぶプレイ");
   }
 
   if (gameState_ == GameState::Title) {
@@ -774,8 +809,10 @@ void GameScene::DrawHUD(class Draw &draw) {
   } else if (gameState_ == GameState::PlayerHit) {
     DrawPlayingHUD(draw);
     // 衝突時の大迫力バナー
-    draw.DrawFillRect(Vector2(400.0f, 240.0f), Vector2(480.0f, 100.0f), Vector4(0.1f, 0.0f, 0.0f, 0.85f));
-    draw.DrawFillRect(Vector2(400.0f, 240.0f), Vector2(480.0f, 3.0f), Vector4(1.0f, 0.2f, 0.2f, 0.95f));
+    draw.DrawFillRect(Vector2(400.0f, 240.0f), Vector2(480.0f, 100.0f),
+                      Vector4(0.1f, 0.0f, 0.0f, 0.85f));
+    draw.DrawFillRect(Vector2(400.0f, 240.0f), Vector2(480.0f, 3.0f),
+                      Vector4(1.0f, 0.2f, 0.2f, 0.95f));
     draw.DrawMSDFString("★ CRASH! ★", Vector2(480.0f, 260.0f), 56.0f,
                         Vector4(1.0f, 0.25f, 0.25f, 1.0f), true,
                         Vector4(0.0f, 0.0f, 0.0f, 1.0f), 0.12f);
@@ -786,9 +823,11 @@ void GameScene::DrawHUD(class Draw &draw) {
     }
     DrawControlsGuide(draw);
   } else if (gameState_ == GameState::Editor) {
-    draw.DrawFillRect(Vector2(20.0f, 20.0f), Vector2(300.0f, 75.0f), Vector4(0.04f, 0.06f, 0.1f, 0.8f));
+    draw.DrawFillRect(Vector2(20.0f, 20.0f), Vector2(300.0f, 75.0f),
+                      Vector4(0.04f, 0.06f, 0.1f, 0.8f));
     char distBuf[64];
-    snprintf(distBuf, sizeof(distBuf), "[EDITOR] 距離: %.1f m", currentDistance_);
+    snprintf(distBuf, sizeof(distBuf), "[EDITOR] 距離: %.1f m",
+             currentDistance_);
     draw.DrawMSDFString(distBuf, Vector2(30.0f, 28.0f), 22.0f,
                         Vector4(0.9f, 0.9f, 0.9f, 1.0f), true,
                         Vector4(0.0f, 0.0f, 0.0f, 1.0f), 0.07f);
@@ -802,8 +841,10 @@ void GameScene::DrawHUD(class Draw &draw) {
 
 void GameScene::DrawPlayingHUD(class Draw &draw) {
   // --- 1. 左上: メインステータスパネル（半透明背景カード付き） ---
-  draw.DrawFillRect(Vector2(20.0f, 15.0f), Vector2(390.0f, 155.0f), Vector4(0.04f, 0.07f, 0.12f, 0.82f));
-  draw.DrawFillRect(Vector2(20.0f, 15.0f), Vector2(390.0f, 3.0f), Vector4(0.2f, 0.6f, 0.9f, 0.9f));
+  draw.DrawFillRect(Vector2(20.0f, 15.0f), Vector2(390.0f, 155.0f),
+                    Vector4(0.04f, 0.07f, 0.12f, 0.82f));
+  draw.DrawFillRect(Vector2(20.0f, 15.0f), Vector2(390.0f, 3.0f),
+                    Vector4(0.2f, 0.6f, 0.9f, 0.9f));
 
   char distBuf[64];
   snprintf(distBuf, sizeof(distBuf), "距離: %.1f m", currentDistance_);
@@ -813,7 +854,8 @@ void GameScene::DrawPlayingHUD(class Draw &draw) {
 
   char scoreBuf[96];
   if (bonusEnemyHitCount_ > 0) {
-    snprintf(scoreBuf, sizeof(scoreBuf), "スコア: %.0f pt  (+ボーナスx%d)", currentScore_, bonusEnemyHitCount_);
+    snprintf(scoreBuf, sizeof(scoreBuf), "スコア: %.0f pt  (+ボーナスx%d)",
+             currentScore_, bonusEnemyHitCount_);
   } else {
     snprintf(scoreBuf, sizeof(scoreBuf), "スコア: %.0f pt", currentScore_);
   }
@@ -826,36 +868,47 @@ void GameScene::DrawPlayingHUD(class Draw &draw) {
   float baseSpeed = stageSettings_->GetBaseScrollSpeed();
   float maxSpeed = stageSettings_->GetMaxScrollSpeed();
   float speedKm = currentSpeed * 300.0f;
-  float speedRatio = (maxSpeed > baseSpeed) ? ((currentSpeed - baseSpeed) / (maxSpeed - baseSpeed)) : 0.0f;
-  if (speedRatio < 0.0f) speedRatio = 0.0f;
-  if (speedRatio > 1.0f) speedRatio = 1.0f;
+  float speedRatio = (maxSpeed > baseSpeed)
+                         ? ((currentSpeed - baseSpeed) / (maxSpeed - baseSpeed))
+                         : 0.0f;
+  if (speedRatio < 0.0f)
+    speedRatio = 0.0f;
+  if (speedRatio > 1.0f)
+    speedRatio = 1.0f;
 
   std::string speedBar = "[";
   int totalSegments = 10;
   int filledSegments = static_cast<int>(speedRatio * totalSegments + 0.5f);
   for (int s = 0; s < totalSegments; s++) {
-    if (s < filledSegments) speedBar += "■";
-    else speedBar += "░";
+    if (s < filledSegments)
+      speedBar += "■";
+    else
+      speedBar += "░";
   }
   speedBar += "]";
 
   char speedText[64];
-  snprintf(speedText, sizeof(speedText), "速度: %.0f km/h  %s", speedKm, speedBar.c_str());
-  Vector4 speedColor = Lerp(Vector4{0.3f, 0.9f, 1.0f, 1.0f}, Vector4{1.0f, 0.4f, 0.2f, 1.0f}, speedRatio);
-  draw.DrawMSDFString(speedText, Vector2(32.0f, 102.0f), 20.0f,
-                      speedColor, true,
-                      Vector4(0.0f, 0.0f, 0.0f, 1.0f), 0.07f);
+  snprintf(speedText, sizeof(speedText), "速度: %.0f km/h  %s", speedKm,
+           speedBar.c_str());
+  Vector4 speedColor = Lerp(Vector4{0.3f, 0.9f, 1.0f, 1.0f},
+                            Vector4{1.0f, 0.4f, 0.2f, 1.0f}, speedRatio);
+  draw.DrawMSDFString(speedText, Vector2(32.0f, 102.0f), 20.0f, speedColor,
+                      true, Vector4(0.0f, 0.0f, 0.0f, 1.0f), 0.07f);
 
   // ベスト記録（距離 / スコア）
   char bestText[96];
-  snprintf(bestText, sizeof(bestText), "BEST: %.1f m  /  %.0f pt", topRankings_[0], topScoreRankings_[0]);
+  snprintf(bestText, sizeof(bestText), "BEST: %.1f m  /  %.0f pt",
+           topRankings_[0], topScoreRankings_[0]);
   draw.DrawMSDFString(bestText, Vector2(32.0f, 134.0f), 18.0f,
                       Vector4(0.8f, 0.85f, 0.9f, 0.85f), true,
                       Vector4(0.0f, 0.0f, 0.0f, 1.0f), 0.06f);
 
-  // --- 2. 右上: モード、バリア、プレイヤーステータスバッジ（半透明カード付き） ---
-  draw.DrawFillRect(Vector2(880.0f, 15.0f), Vector2(380.0f, 120.0f), Vector4(0.04f, 0.07f, 0.12f, 0.82f));
-  draw.DrawFillRect(Vector2(880.0f, 15.0f), Vector2(380.0f, 3.0f), Vector4(0.2f, 0.6f, 0.9f, 0.9f));
+  // --- 2. 右上: モード、バリア、プレイヤーステータスバッジ（半透明カード付き）
+  // ---
+  draw.DrawFillRect(Vector2(880.0f, 15.0f), Vector2(380.0f, 120.0f),
+                    Vector4(0.04f, 0.07f, 0.12f, 0.82f));
+  draw.DrawFillRect(Vector2(880.0f, 15.0f), Vector2(380.0f, 3.0f),
+                    Vector4(0.2f, 0.6f, 0.9f, 0.9f));
 
   // モードバッジ
   if (playingState_ == PlayingState::ThreeLane) {
@@ -863,9 +916,12 @@ void GameScene::DrawPlayingHUD(class Draw &draw) {
                         Vector4(0.4f, 0.85f, 1.0f, 1.0f), true,
                         Vector4(0.0f, 0.15f, 0.35f, 1.0f), 0.08f);
   } else if (playingState_ == PlayingState::OneLane) {
-    float remainDist = (200.0f - rightSideDistance_ > 0.0f) ? (200.0f - rightSideDistance_) : 0.0f;
+    float remainDist = (200.0f - rightSideDistance_ > 0.0f)
+                           ? (200.0f - rightSideDistance_)
+                           : 0.0f;
     char oneLaneBuf[64];
-    snprintf(oneLaneBuf, sizeof(oneLaneBuf), "[ 1-LANE DASH: 残り %.0f m ]", remainDist);
+    snprintf(oneLaneBuf, sizeof(oneLaneBuf), "[ 1-LANE DASH: 残り %.0f m ]",
+             remainDist);
     draw.DrawMSDFString(oneLaneBuf, Vector2(910.0f, 25.0f), 24.0f,
                         Vector4(1.0f, 0.45f, 0.9f, 1.0f), true,
                         Vector4(0.35f, 0.0f, 0.35f, 1.0f), 0.08f);
@@ -906,23 +962,29 @@ void GameScene::DrawPlayingHUD(class Draw &draw) {
 
 void GameScene::DrawBossHUD(class Draw &draw) {
   // 中央上部: ボスパネル背景
-  draw.DrawFillRect(Vector2(320.0f, 15.0f), Vector2(640.0f, 115.0f), Vector4(0.10f, 0.03f, 0.03f, 0.85f));
-  draw.DrawFillRect(Vector2(320.0f, 15.0f), Vector2(640.0f, 3.0f), Vector4(0.9f, 0.2f, 0.2f, 0.9f));
+  draw.DrawFillRect(Vector2(320.0f, 15.0f), Vector2(640.0f, 115.0f),
+                    Vector4(0.10f, 0.03f, 0.03f, 0.85f));
+  draw.DrawFillRect(Vector2(320.0f, 15.0f), Vector2(640.0f, 3.0f),
+                    Vector4(0.9f, 0.2f, 0.2f, 0.9f));
 
   // ボスヘッダー
-  draw.DrawMSDFString("=== BOSS: TITAN BLOCK ===", Vector2(430.0f, 24.0f), 28.0f,
-                      Vector4(1.0f, 0.3f, 0.3f, 1.0f), true,
+  draw.DrawMSDFString("=== BOSS: TITAN BLOCK ===", Vector2(430.0f, 24.0f),
+                      28.0f, Vector4(1.0f, 0.3f, 0.3f, 1.0f), true,
                       Vector4(0.0f, 0.0f, 0.0f, 1.0f), 0.08f);
 
   // ボスHPゲージ (最大20)
   int hp = boss_->GetHP();
-  if (hp < 0) hp = 0;
-  if (hp > 20) hp = 20;
+  if (hp < 0)
+    hp = 0;
+  if (hp > 20)
+    hp = 20;
 
   std::string hpGauge = "[";
   for (int i = 0; i < 20; i++) {
-    if (i < hp) hpGauge += "■";
-    else hpGauge += "░";
+    if (i < hp)
+      hpGauge += "■";
+    else
+      hpGauge += "░";
   }
   hpGauge += "]";
 
@@ -938,11 +1000,13 @@ void GameScene::DrawBossHUD(class Draw &draw) {
                       Vector4(0.8f, 0.95f, 0.5f, 1.0f), true,
                       Vector4(0.0f, 0.0f, 0.0f, 1.0f), 0.07f);
 
-  // 緑攻撃（跳ね返し可能弾）が反撃有効範囲（z: -15.0f 〜 15.0f）にあるかチェック
+  // 緑攻撃（跳ね返し可能弾）が反撃有効範囲（z: -15.0f
+  // 〜 15.0f）にあるかチェック
   int reflectLane = -1;
   for (int j = 0; j < stageSettings_->GetMaxObstacles(); j++) {
     Obstacle *obs = stageSettings_->GetObstacle(j);
-    if (!obs || !obs->GetIsActive() || obs->GetIsReflected()) continue;
+    if (!obs || !obs->GetIsActive() || obs->GetIsReflected())
+      continue;
 
     if (obs->GetType() == Obstacle::Type::BossAttackReflectable) {
       float z = obs->GetTransform().translate.z;
@@ -950,8 +1014,10 @@ void GameScene::DrawBossHUD(class Draw &draw) {
         float obsX = obs->GetTransform().translate.x;
         float laneW = stageSettings_->GetLaneWidth();
         int lane = 1;
-        if (obsX < -laneW / 2.0f) lane = 0;
-        else if (obsX > laneW / 2.0f) lane = 2;
+        if (obsX < -laneW / 2.0f)
+          lane = 0;
+        else if (obsX > laneW / 2.0f)
+          lane = 2;
         reflectLane = lane;
         break;
       }
@@ -960,13 +1026,20 @@ void GameScene::DrawBossHUD(class Draw &draw) {
 
   // 反撃チャンスのアラート点滅表示
   if (reflectLane != -1) {
-    const char *keyName = (reflectLane == 0) ? "1" : (reflectLane == 1) ? "2" : "3";
-    const char *laneName = (reflectLane == 0) ? "左レーン" : (reflectLane == 1) ? "中央レーン" : "右レーン";
+    const char *keyName = (reflectLane == 0)   ? "1"
+                          : (reflectLane == 1) ? "2"
+                                               : "3";
+    const char *laneName = (reflectLane == 0)   ? "左レーン"
+                           : (reflectLane == 1) ? "中央レーン"
+                                                : "右レーン";
     char alertBuf[96];
-    snprintf(alertBuf, sizeof(alertBuf), ">>> 反撃チャンス！ [%s] キーで%s打ち返し！ <<<", keyName, laneName);
+    snprintf(alertBuf, sizeof(alertBuf),
+             ">>> 反撃チャンス！ [%s] キーで%s打ち返し！ <<<", keyName,
+             laneName);
 
     float pulseScale = 0.8f + 0.2f * std::sin(uiTimer_ * 12.0f);
-    draw.DrawFillRect(Vector2(290.0f, 125.0f), Vector2(700.0f, 40.0f), Vector4(0.2f, 0.1f, 0.0f, 0.85f));
+    draw.DrawFillRect(Vector2(290.0f, 125.0f), Vector2(700.0f, 40.0f),
+                      Vector4(0.2f, 0.1f, 0.0f, 0.85f));
     draw.DrawMSDFString(alertBuf, Vector2(310.0f, 130.0f), 26.0f,
                         Vector4(1.0f, 0.95f, 0.15f, pulseScale), true,
                         Vector4(0.5f, 0.1f, 0.0f, 1.0f), 0.09f);
@@ -974,8 +1047,10 @@ void GameScene::DrawBossHUD(class Draw &draw) {
 
   // ボス撃破時の演出バナー
   if (boss_->GetState() == BossState::Defeat) {
-    draw.DrawFillRect(Vector2(360.0f, 170.0f), Vector2(560.0f, 95.0f), Vector4(0.05f, 0.12f, 0.05f, 0.9f));
-    draw.DrawFillRect(Vector2(360.0f, 170.0f), Vector2(560.0f, 3.0f), Vector4(1.0f, 0.8f, 0.2f, 0.95f));
+    draw.DrawFillRect(Vector2(360.0f, 170.0f), Vector2(560.0f, 95.0f),
+                      Vector4(0.05f, 0.12f, 0.05f, 0.9f));
+    draw.DrawFillRect(Vector2(360.0f, 170.0f), Vector2(560.0f, 3.0f),
+                      Vector4(1.0f, 0.8f, 0.2f, 0.95f));
     draw.DrawMSDFString("★ BOSS DEFEATED! ★", Vector2(430.0f, 185.0f), 38.0f,
                         Vector4(1.0f, 0.9f, 0.2f, 1.0f), true,
                         Vector4(0.0f, 0.0f, 0.0f, 1.0f), 0.10f);
@@ -986,16 +1061,21 @@ void GameScene::DrawBossHUD(class Draw &draw) {
 }
 
 void GameScene::DrawControlsGuide(class Draw &draw) {
-  draw.DrawFillRect(Vector2(20.0f, 672.0f), Vector2(1240.0f, 36.0f), Vector4(0.04f, 0.07f, 0.12f, 0.85f));
-  draw.DrawFillRect(Vector2(20.0f, 672.0f), Vector2(1240.0f, 2.0f), Vector4(0.3f, 0.5f, 0.7f, 0.8f));
+  draw.DrawFillRect(Vector2(20.0f, 672.0f), Vector2(1240.0f, 36.0f),
+                    Vector4(0.04f, 0.07f, 0.12f, 0.85f));
+  draw.DrawFillRect(Vector2(20.0f, 672.0f), Vector2(1240.0f, 2.0f),
+                    Vector4(0.3f, 0.5f, 0.7f, 0.8f));
 
   const char *guideText = "";
   if (playingState_ == PlayingState::ThreeLane) {
-    guideText = "[A / D] レーン移動    [SPACE / W] ジャンプ    [S] スライド    [ESC] ポーズ";
+    guideText = "[A / D] レーン移動    [SPACE / W] ジャンプ    [S] スライド    "
+                "[ESC] ポーズ";
   } else if (playingState_ == PlayingState::OneLane) {
-    guideText = "[SPACE / W] ジャンプ    [S] スライド    [ESC] ポーズ  (※1レーン固定中)";
+    guideText = "[SPACE / W] ジャンプ    [S] スライド    [ESC] ポーズ  "
+                "(※1レーン固定中)";
   } else if (playingState_ == PlayingState::Boss) {
-    guideText = "[A / D] 移動    [1 / 2 / 3] レーン別反撃    [SPACE / W] ジャンプ    [ESC] ポーズ";
+    guideText = "[A / D] 移動    [1 / 2 / 3] レーン別反撃    [SPACE / W] "
+                "ジャンプ    [ESC] ポーズ";
   }
 
   draw.DrawMSDFString(guideText, Vector2(30.0f, 680.0f), 18.0f,
@@ -1005,11 +1085,14 @@ void GameScene::DrawControlsGuide(class Draw &draw) {
 
 void GameScene::DrawPauseHUD(class Draw &draw) {
   // 全画面暗転オーバーレイ
-  draw.DrawFillRect(Vector2(0.0f, 0.0f), Vector2(1280.0f, 720.0f), Vector4(0.0f, 0.0f, 0.0f, 0.65f));
+  draw.DrawFillRect(Vector2(0.0f, 0.0f), Vector2(1280.0f, 720.0f),
+                    Vector4(0.0f, 0.0f, 0.0f, 0.65f));
 
   // 中央モーダルカード
-  draw.DrawFillRect(Vector2(360.0f, 160.0f), Vector2(560.0f, 410.0f), Vector4(0.06f, 0.08f, 0.12f, 0.94f));
-  draw.DrawFillRect(Vector2(360.0f, 160.0f), Vector2(560.0f, 4.0f), Vector4(1.0f, 0.8f, 0.2f, 0.95f));
+  draw.DrawFillRect(Vector2(360.0f, 160.0f), Vector2(560.0f, 410.0f),
+                    Vector4(0.06f, 0.08f, 0.12f, 0.94f));
+  draw.DrawFillRect(Vector2(360.0f, 160.0f), Vector2(560.0f, 4.0f),
+                    Vector4(1.0f, 0.8f, 0.2f, 0.95f));
 
   draw.DrawMSDFString("=== PAUSE ===", Vector2(490.0f, 190.0f), 52.0f,
                       Vector4(1.0f, 0.9f, 0.2f, 1.0f), true,
@@ -1019,77 +1102,90 @@ void GameScene::DrawPauseHUD(class Draw &draw) {
                       Vector4(0.85f, 0.85f, 0.85f, 1.0f), true,
                       Vector4(0.0f, 0.0f, 0.0f, 1.0f), 0.07f);
 
-  draw.DrawFillRect(Vector2(400.0f, 290.0f), Vector2(480.0f, 2.0f), Vector4(0.3f, 0.4f, 0.5f, 0.7f));
+  draw.DrawFillRect(Vector2(400.0f, 290.0f), Vector2(480.0f, 2.0f),
+                    Vector4(0.3f, 0.4f, 0.5f, 0.7f));
 
   char pDistBuf[64];
-  snprintf(pDistBuf, sizeof(pDistBuf), "現在の到達距離:  %.1f m", currentDistance_);
+  snprintf(pDistBuf, sizeof(pDistBuf), "現在の到達距離:  %.1f m",
+           currentDistance_);
   draw.DrawMSDFString(pDistBuf, Vector2(430.0f, 315.0f), 26.0f,
                       Vector4(1.0f, 1.0f, 1.0f, 1.0f), true,
                       Vector4(0.0f, 0.0f, 0.0f, 1.0f), 0.07f);
 
   char pScoreBuf[64];
-  snprintf(pScoreBuf, sizeof(pScoreBuf), "現在のスコア:    %.0f pt", currentScore_);
+  snprintf(pScoreBuf, sizeof(pScoreBuf), "現在のスコア:    %.0f pt",
+           currentScore_);
   draw.DrawMSDFString(pScoreBuf, Vector2(430.0f, 355.0f), 26.0f,
                       Vector4(1.0f, 0.9f, 0.2f, 1.0f), true,
                       Vector4(0.0f, 0.0f, 0.0f, 1.0f), 0.07f);
 
-  draw.DrawFillRect(Vector2(400.0f, 400.0f), Vector2(480.0f, 2.0f), Vector4(0.3f, 0.4f, 0.5f, 0.7f));
+  draw.DrawFillRect(Vector2(400.0f, 400.0f), Vector2(480.0f, 2.0f),
+                    Vector4(0.3f, 0.4f, 0.5f, 0.7f));
 
-  draw.DrawMSDFString("[ ESC ] ゲームを再開 (RESUME)", Vector2(430.0f, 425.0f), 24.0f,
-                      Vector4(0.3f, 0.9f, 1.0f, 1.0f), true,
+  draw.DrawMSDFString("[ ESC ] ゲームを再開 (RESUME)", Vector2(430.0f, 425.0f),
+                      24.0f, Vector4(0.3f, 0.9f, 1.0f, 1.0f), true,
                       Vector4(0.0f, 0.0f, 0.0f, 1.0f), 0.07f);
 
-  draw.DrawMSDFString("[  1  ] 最初からリスタート (RESTART)", Vector2(430.0f, 465.0f), 24.0f,
+  draw.DrawMSDFString("[  1  ] 最初からリスタート (RESTART)",
+                      Vector2(430.0f, 465.0f), 24.0f,
                       Vector4(0.9f, 0.9f, 0.9f, 1.0f), true,
                       Vector4(0.0f, 0.0f, 0.0f, 1.0f), 0.07f);
 
-  draw.DrawMSDFString("[  2  ] タイトルへ戻る (TITLE)", Vector2(430.0f, 505.0f), 24.0f,
-                      Vector4(0.9f, 0.9f, 0.9f, 1.0f), true,
+  draw.DrawMSDFString("[  2  ] タイトルへ戻る (TITLE)", Vector2(430.0f, 505.0f),
+                      24.0f, Vector4(0.9f, 0.9f, 0.9f, 1.0f), true,
                       Vector4(0.0f, 0.0f, 0.0f, 1.0f), 0.07f);
 }
 
 void GameScene::DrawGameOverHUD(class Draw &draw) {
   // 全画面暗転オーバーレイ
-  draw.DrawFillRect(Vector2(0.0f, 0.0f), Vector2(1280.0f, 720.0f), Vector4(0.0f, 0.0f, 0.0f, 0.72f));
+  draw.DrawFillRect(Vector2(0.0f, 0.0f), Vector2(1280.0f, 720.0f),
+                    Vector4(0.0f, 0.0f, 0.0f, 0.72f));
 
   // 中央モーダルカード
-  draw.DrawFillRect(Vector2(200.0f, 60.0f), Vector2(880.0f, 570.0f), Vector4(0.06f, 0.08f, 0.12f, 0.95f));
-  draw.DrawFillRect(Vector2(200.0f, 60.0f), Vector2(880.0f, 4.0f), Vector4(0.9f, 0.2f, 0.2f, 0.95f));
+  draw.DrawFillRect(Vector2(200.0f, 60.0f), Vector2(880.0f, 570.0f),
+                    Vector4(0.06f, 0.08f, 0.12f, 0.95f));
+  draw.DrawFillRect(Vector2(200.0f, 60.0f), Vector2(880.0f, 4.0f),
+                    Vector4(0.9f, 0.2f, 0.2f, 0.95f));
 
   draw.DrawMSDFString("GAME OVER", Vector2(480.0f, 85.0f), 56.0f,
                       Vector4(1.0f, 0.25f, 0.25f, 1.0f), true,
                       Vector4(0.0f, 0.0f, 0.0f, 1.0f), 0.10f);
 
-  bool isNewDistRecord = (topRankings_[0] > 0.0f && currentDistance_ >= topRankings_[0]);
-  bool isNewScoreRecord = (topScoreRankings_[0] > 0.0f && currentScore_ >= topScoreRankings_[0]);
+  bool isNewDistRecord =
+      (topRankings_[0] > 0.0f && currentDistance_ >= topRankings_[0]);
+  bool isNewScoreRecord =
+      (topScoreRankings_[0] > 0.0f && currentScore_ >= topScoreRankings_[0]);
 
   char distBuf[96];
-  snprintf(distBuf, sizeof(distBuf), "到達距離: %.1f m  %s",
-           currentDistance_, isNewDistRecord ? "★ NEW RECORD! ★" : "");
+  snprintf(distBuf, sizeof(distBuf), "到達距離: %.1f m  %s", currentDistance_,
+           isNewDistRecord ? "★ NEW RECORD! ★" : "");
   draw.DrawMSDFString(distBuf, Vector2(260.0f, 160.0f), 26.0f,
-                      isNewDistRecord ? Vector4(1.0f, 0.9f, 0.2f, 1.0f) : Vector4(1.0f, 1.0f, 1.0f, 1.0f), true,
-                      Vector4(0.0f, 0.0f, 0.0f, 1.0f), 0.07f);
+                      isNewDistRecord ? Vector4(1.0f, 0.9f, 0.2f, 1.0f)
+                                      : Vector4(1.0f, 1.0f, 1.0f, 1.0f),
+                      true, Vector4(0.0f, 0.0f, 0.0f, 1.0f), 0.07f);
 
   char scoreBuf[96];
-  snprintf(scoreBuf, sizeof(scoreBuf), "最終スコア: %.0f pt  %s",
-           currentScore_, isNewScoreRecord ? "★ NEW RECORD! ★" : "");
+  snprintf(scoreBuf, sizeof(scoreBuf), "最終スコア: %.0f pt  %s", currentScore_,
+           isNewScoreRecord ? "★ NEW RECORD! ★" : "");
   draw.DrawMSDFString(scoreBuf, Vector2(260.0f, 200.0f), 26.0f,
                       Vector4(1.0f, 0.9f, 0.2f, 1.0f), true,
                       Vector4(0.0f, 0.0f, 0.0f, 1.0f), 0.07f);
 
   char bonusBuf[64];
-  snprintf(bonusBuf, sizeof(bonusBuf), "ボーナス敵撃破: %d 体", bonusEnemyHitCount_);
+  snprintf(bonusBuf, sizeof(bonusBuf), "ボーナス敵撃破: %d 体",
+           bonusEnemyHitCount_);
   draw.DrawMSDFString(bonusBuf, Vector2(260.0f, 240.0f), 22.0f,
                       Vector4(0.6f, 0.9f, 1.0f, 1.0f), true,
                       Vector4(0.0f, 0.0f, 0.0f, 1.0f), 0.06f);
 
   // 区切りライン
-  draw.DrawFillRect(Vector2(240.0f, 280.0f), Vector2(800.0f, 2.0f), Vector4(0.3f, 0.4f, 0.5f, 0.7f));
+  draw.DrawFillRect(Vector2(240.0f, 280.0f), Vector2(800.0f, 2.0f),
+                    Vector4(0.3f, 0.4f, 0.5f, 0.7f));
 
   // ランキング 2カラム表示
   // 左カラム: 距離ランキング TOP 3
-  draw.DrawMSDFString("【 距離ランキング TOP 3 】", Vector2(260.0f, 305.0f), 22.0f,
-                      Vector4(0.4f, 0.85f, 1.0f, 1.0f), true,
+  draw.DrawMSDFString("【 距離ランキング TOP 3 】", Vector2(260.0f, 305.0f),
+                      22.0f, Vector4(0.4f, 0.85f, 1.0f, 1.0f), true,
                       Vector4(0.0f, 0.0f, 0.0f, 1.0f), 0.07f);
   for (int i = 0; i < 3; i++) {
     char rBuf[64];
@@ -1098,37 +1194,40 @@ void GameScene::DrawGameOverHUD(class Draw &draw) {
     } else {
       snprintf(rBuf, sizeof(rBuf), " %d位: ---", i + 1);
     }
-    Vector4 rankColor = (i == 0) ? Vector4(1.0f, 0.9f, 0.2f, 1.0f) :
-                        (i == 1) ? Vector4(0.85f, 0.85f, 0.9f, 1.0f) :
-                                   Vector4(0.85f, 0.65f, 0.45f, 1.0f);
+    Vector4 rankColor = (i == 0)   ? Vector4(1.0f, 0.9f, 0.2f, 1.0f)
+                        : (i == 1) ? Vector4(0.85f, 0.85f, 0.9f, 1.0f)
+                                   : Vector4(0.85f, 0.65f, 0.45f, 1.0f);
     draw.DrawMSDFString(rBuf, Vector2(270.0f, 345.0f + i * 35.0f), 20.0f,
-                        rankColor, true,
-                        Vector4(0.0f, 0.0f, 0.0f, 1.0f), 0.06f);
+                        rankColor, true, Vector4(0.0f, 0.0f, 0.0f, 1.0f),
+                        0.06f);
   }
 
   // 右カラム: スコアランキング TOP 3
-  draw.DrawMSDFString("【 スコアランキング TOP 3 】", Vector2(660.0f, 305.0f), 22.0f,
-                      Vector4(1.0f, 0.85f, 0.3f, 1.0f), true,
+  draw.DrawMSDFString("【 スコアランキング TOP 3 】", Vector2(660.0f, 305.0f),
+                      22.0f, Vector4(1.0f, 0.85f, 0.3f, 1.0f), true,
                       Vector4(0.0f, 0.0f, 0.0f, 1.0f), 0.07f);
   for (int i = 0; i < 3; i++) {
     char rBuf[64];
     if (topScoreRankings_[i] > 0.0f) {
-      snprintf(rBuf, sizeof(rBuf), " %d位: %.0f pt", i + 1, topScoreRankings_[i]);
+      snprintf(rBuf, sizeof(rBuf), " %d位: %.0f pt", i + 1,
+               topScoreRankings_[i]);
     } else {
       snprintf(rBuf, sizeof(rBuf), " %d位: ---", i + 1);
     }
-    Vector4 rankColor = (i == 0) ? Vector4(1.0f, 0.9f, 0.2f, 1.0f) :
-                        (i == 1) ? Vector4(0.85f, 0.85f, 0.9f, 1.0f) :
-                                   Vector4(0.85f, 0.65f, 0.45f, 1.0f);
+    Vector4 rankColor = (i == 0)   ? Vector4(1.0f, 0.9f, 0.2f, 1.0f)
+                        : (i == 1) ? Vector4(0.85f, 0.85f, 0.9f, 1.0f)
+                                   : Vector4(0.85f, 0.65f, 0.45f, 1.0f);
     draw.DrawMSDFString(rBuf, Vector2(670.0f, 345.0f + i * 35.0f), 20.0f,
-                        rankColor, true,
-                        Vector4(0.0f, 0.0f, 0.0f, 1.0f), 0.06f);
+                        rankColor, true, Vector4(0.0f, 0.0f, 0.0f, 1.0f),
+                        0.06f);
   }
 
   // 区切りライン
-  draw.DrawFillRect(Vector2(240.0f, 470.0f), Vector2(800.0f, 2.0f), Vector4(0.3f, 0.4f, 0.5f, 0.7f));
+  draw.DrawFillRect(Vector2(240.0f, 470.0f), Vector2(800.0f, 2.0f),
+                    Vector4(0.3f, 0.4f, 0.5f, 0.7f));
 
-  draw.DrawMSDFString("[ 1 キー ] もう一度プレイ (RESTART)   |   [ 2 キー ] タイトルへ戻る (TITLE)",
+  draw.DrawMSDFString("[ 1 キー ] もう一度プレイ (RESTART)   |   [ 2 キー ] "
+                      "タイトルへ戻る (TITLE)",
                       Vector2(260.0f, 505.0f), 22.0f,
                       Vector4(0.9f, 0.95f, 1.0f, 1.0f), true,
                       Vector4(0.0f, 0.0f, 0.0f, 1.0f), 0.07f);
@@ -1188,80 +1287,94 @@ void GameScene::PlayingUpdate() {
 
   // ボス戦の更新
   if (playingState_ == PlayingState::Boss) {
-    if (!boss_->GetIsActive() && !isCameraTransitioning_ && !isCameraTransitionPending_) {
+    if (!boss_->GetIsActive() && !isCameraTransitioning_ &&
+        !isCameraTransitionPending_) {
       ChangePlayingState(PlayingState::ThreeLane);
     } else if (boss_->GetIsActive() && boss_->GetState() == BossState::Battle) {
       bossAttackTimer_ += timeScale;
       // 攻撃の生成（約2秒に1回）
       if (bossAttackTimer_ >= 120.0f) {
-      bossAttackTimer_ -= 120.0f;
+        bossAttackTimer_ -= 120.0f;
 
-      // 3レーンのうち、1つを安全地帯、1つを白、1つを緑にする
-      int safeLane = rand() % 3;
-      int greenLane = (safeLane + 1 + rand() % 2) % 3;
+        // 3レーンのうち、1つを安全地帯、1つを白、1つを緑にする
+        int safeLane = rand() % 3;
+        int greenLane = (safeLane + 1 + rand() % 2) % 3;
 
-      for (int i = 0; i < 3; i++) {
-        if (i == safeLane) continue;
+        for (int i = 0; i < 3; i++) {
+          if (i == safeLane)
+            continue;
 
-        Obstacle::Type type = Obstacle::Type::BossAttack;
-        if (i == greenLane) {
-          type = Obstacle::Type::BossAttackReflectable;
-        }
+          Obstacle::Type type = Obstacle::Type::BossAttack;
+          if (i == greenLane) {
+            type = Obstacle::Type::BossAttackReflectable;
+          }
 
-        // 未使用のObstacleを探す
-        for (int j = 0; j < stageSettings_->GetMaxObstacles(); j++) {
-          Obstacle *obs = stageSettings_->GetObstacle(j);
-          if (!obs->GetIsActive()) {
-            obs->SetType(type);
-            float x = (i - 1) * stageSettings_->GetLaneWidth();
-            obs->Spawn(x, 2.5f, -13.0f); // ボスが-15.0fなので、少し手前から出現
-            break;
+          // 未使用のObstacleを探す
+          for (int j = 0; j < stageSettings_->GetMaxObstacles(); j++) {
+            Obstacle *obs = stageSettings_->GetObstacle(j);
+            if (!obs->GetIsActive()) {
+              obs->SetType(type);
+              float x = (i - 1) * stageSettings_->GetLaneWidth();
+              obs->Spawn(x, 2.5f,
+                         -13.0f); // ボスが-15.0fなので、少し手前から出現
+              break;
+            }
           }
         }
       }
-    }
 
-    // 跳ね返し入力判定
-    bool push1 = Input::PushKey(DIK_1) || Input::PushKey(DIK_NUMPAD1);
-    bool push2 = Input::PushKey(DIK_2) || Input::PushKey(DIK_NUMPAD2);
-    bool push3 = Input::PushKey(DIK_3) || Input::PushKey(DIK_NUMPAD3);
+      // 跳ね返し入力判定
+      bool push1 = Input::PushKey(DIK_1) || Input::PushKey(DIK_NUMPAD1);
+      bool push2 = Input::PushKey(DIK_2) || Input::PushKey(DIK_NUMPAD2);
+      bool push3 = Input::PushKey(DIK_3) || Input::PushKey(DIK_NUMPAD3);
 
-    AABB bossAABB = Collision::MakeAABB(boss_->GetTransform(), 5.0f, 5.0f, 5.0f);
+      AABB bossAABB =
+          Collision::MakeAABB(boss_->GetTransform(), 5.0f, 5.0f, 5.0f);
 
-    for (int j = 0; j < stageSettings_->GetMaxObstacles(); j++) {
-      Obstacle *obs = stageSettings_->GetObstacle(j);
-      if (!obs->GetIsActive()) continue;
+      for (int j = 0; j < stageSettings_->GetMaxObstacles(); j++) {
+        Obstacle *obs = stageSettings_->GetObstacle(j);
+        if (!obs->GetIsActive())
+          continue;
 
-      if (obs->GetType() == Obstacle::Type::BossAttackReflectable && !obs->GetIsReflected()) {
-        float obsX = obs->GetTransform().translate.x;
-        float laneW = stageSettings_->GetLaneWidth();
-        int lane = 1; // 0:Left, 1:Center, 2:Right
-        if (obsX < -laneW / 2.0f) lane = 0;
-        else if (obsX > laneW / 2.0f) lane = 2;
+        if (obs->GetType() == Obstacle::Type::BossAttackReflectable &&
+            !obs->GetIsReflected()) {
+          float obsX = obs->GetTransform().translate.x;
+          float laneW = stageSettings_->GetLaneWidth();
+          int lane = 1; // 0:Left, 1:Center, 2:Right
+          if (obsX < -laneW / 2.0f)
+            lane = 0;
+          else if (obsX > laneW / 2.0f)
+            lane = 2;
 
-        // プレイヤーの手前にいる時に跳ね返せる
-        float z = obs->GetTransform().translate.z;
-        if (z > -15.0f && z < 15.0f) {
-          if ((lane == 0 && push1) || (lane == 1 && push2) || (lane == 2 && push3)) {
-            obs->SetReflected(true);
-            obs->SetReflectedTarget(boss_->GetTransform().translate);
-            effectManager_->EmitShockwave(obs->GetTransform().translate);
+          // プレイヤーの手前にいる時に跳ね返せる
+          float z = obs->GetTransform().translate.z;
+          if (z > -15.0f && z < 15.0f) {
+            if ((lane == 0 && push1) || (lane == 1 && push2) ||
+                (lane == 2 && push3)) {
+              obs->SetReflected(true);
+              obs->SetReflectedTarget(boss_->GetTransform().translate);
+              effectManager_->EmitShockwave(obs->GetTransform().translate);
+            }
           }
-        }
-      } else if (obs->GetIsReflected()) {
-        // 跳ね返った障害物とボスとの当たり判定
-        AABB obsAABB = Collision::MakeAABB(obs->GetTransform(), obs->GetCollisionWidth(), obs->GetCollisionHeight(), obs->GetCollisionDepth());
-        if (Collision::CheckAABB(bossAABB, obsAABB)) {
-          obs->Deactivate(); // 障害物を消す
-          boss_->OnDamage();
-          effectManager_->EmitHitEffect(boss_->GetTransform().translate);
-          
-          if (boss_->GetState() == BossState::Defeat) {
-            // 画面内のボス攻撃をすべて消す
-            for (int k = 0; k < stageSettings_->GetMaxObstacles(); k++) {
-              Obstacle *o = stageSettings_->GetObstacle(k);
-              if (o->GetIsActive() && (o->GetType() == Obstacle::Type::BossAttack || o->GetType() == Obstacle::Type::BossAttackReflectable)) {
-                o->OnBlowAway();
+        } else if (obs->GetIsReflected()) {
+          // 跳ね返った障害物とボスとの当たり判定
+          AABB obsAABB = Collision::MakeAABB(
+              obs->GetTransform(), obs->GetCollisionWidth(),
+              obs->GetCollisionHeight(), obs->GetCollisionDepth());
+          if (Collision::CheckAABB(bossAABB, obsAABB)) {
+            obs->Deactivate(); // 障害物を消す
+            boss_->OnDamage();
+            effectManager_->EmitHitEffect(boss_->GetTransform().translate);
+
+            if (boss_->GetState() == BossState::Defeat) {
+              // 画面内のボス攻撃をすべて消す
+              for (int k = 0; k < stageSettings_->GetMaxObstacles(); k++) {
+                Obstacle *o = stageSettings_->GetObstacle(k);
+                if (o->GetIsActive() &&
+                    (o->GetType() == Obstacle::Type::BossAttack ||
+                     o->GetType() == Obstacle::Type::BossAttackReflectable)) {
+                  o->OnBlowAway();
+                }
               }
             }
           }
@@ -1269,7 +1382,6 @@ void GameScene::PlayingUpdate() {
       }
     }
   }
-}
 
   // Update Player lane constraints
   player_->SetLaneLimits(stageSettings_->GetMinLaneIndex(),
@@ -1303,7 +1415,8 @@ void GameScene::TitleUpdate() {
   stageSettings_->EditorUpdate(view);
 
   // スペースキーまたはゲームパッドAボタンでゲーム開始
-  if (Input::PushKey(DIK_SPACE) || GamePadInput::PressButton(XINPUT_GAMEPAD_A)) {
+  if (Input::PushKey(DIK_SPACE) ||
+      GamePadInput::PressButton(XINPUT_GAMEPAD_A)) {
     ResetGame();
     gameState_ = GameState::Playing;
   }
@@ -1416,12 +1529,13 @@ void GameScene::CheckCollisions() {
         effectManager_->EmitShockwave(player_->GetTransform().translate);
         continue;
       }
-      
-      if (obstacle->GetType() == Obstacle::Type::BossAttack || obstacle->GetType() == Obstacle::Type::BossAttackReflectable) {
-        // 跳ね返されている緑障害物はプレイヤーに当たらない
-        if (obstacle->GetIsReflected()) continue;
-      }
 
+      if (obstacle->GetType() == Obstacle::Type::BossAttack ||
+          obstacle->GetType() == Obstacle::Type::BossAttackReflectable) {
+        // 跳ね返されている緑障害物はプレイヤーに当たらない
+        if (obstacle->GetIsReflected())
+          continue;
+      }
 
       // プレイヤーがバリアを持っている場合は消費して防ぐ
       if (player_->GetHasBarrier()) {
@@ -1437,7 +1551,7 @@ void GameScene::CheckCollisions() {
       if (playingState_ == PlayingState::Boss && boss_->GetIsActive()) {
         boss_->ChangeState(BossState::Victory);
       }
-      
+
       stageSettings_->SetGameOver(true);
       // PostEffect::SetActivePostEffect(PostEffect::Type::GrayScale);
 
@@ -1518,8 +1632,9 @@ void GameScene::CheckKeepRolling() {
 }
 
 void GameScene::ChangePlayingState(PlayingState newState, bool force) {
-  if (!force && playingState_ == newState) return;
-  
+  if (!force && playingState_ == newState)
+    return;
+
   playingState_ = newState;
 
   Transform target;
@@ -1554,7 +1669,6 @@ void GameScene::ChangePlayingState(PlayingState newState, bool force) {
     bossAttackTimer_ = 0.0f;
     break;
   }
-
 
   StartCameraTransition(target, laneCount);
 }

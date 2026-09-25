@@ -5,7 +5,6 @@
 #include <cstdlib>
 #include <ctime>
 
-
 void StageSettings::Initialize(ModelData roadModelData,
                                ModelData obstacleModelData,
                                ModelData bonusModelData,
@@ -20,7 +19,8 @@ void StageSettings::Initialize(ModelData roadModelData,
   texture_->CreateTexture("Resources/Model/Ground/Ground.png");
   texture_->CreateTexture("Resources/Texture/white64x64.png");
 
-  planeModelData_ = AssetManager::LoadModel("Resources/Model/obj", "ocean_plane.obj");
+  planeModelData_ =
+      AssetManager::LoadModel("Resources/Model/obj", "ocean_plane.obj");
 
   roadModelData_ = roadModelData;
   manager_ = manager;
@@ -42,32 +42,43 @@ void StageSettings::Initialize(ModelData roadModelData,
   }
 
   // アイテムクールタイム設定の初期化（秒単位）
-  itemCoolDowns_[Obstacle::Type::Bonus]       = { 5.0f,  0.0f };  // ボーナス: 5秒
-  itemCoolDowns_[Obstacle::Type::BarrierItem] = { 15.0f, 0.0f };  // バリア: 15秒
-  itemCoolDowns_[Obstacle::Type::ClearItem]   = { 20.0f, 0.0f };  // 全消去: 20秒
-  itemCoolDowns_[Obstacle::Type::CameraItem]  = { 30.0f, 10.0f }; // カメラ: 30秒（開始時10秒猶予）
-  itemCoolDowns_[Obstacle::Type::BossItem]    = { 45.0f, 20.0f }; // ボス: 45秒（開始時20秒猶予）
+  itemCoolDowns_[Obstacle::Type::Bonus] = {5.0f, 0.0f};        // ボーナス: 5秒
+  itemCoolDowns_[Obstacle::Type::BarrierItem] = {15.0f, 0.0f}; // バリア: 15秒
+  itemCoolDowns_[Obstacle::Type::ClearItem] = {20.0f, 0.0f};   // 全消去: 20秒
+  itemCoolDowns_[Obstacle::Type::CameraItem] = {
+      30.0f, 10.0f}; // カメラ: 30秒（開始時10秒猶予）
+  itemCoolDowns_[Obstacle::Type::BossItem] = {
+      45.0f, 20.0f}; // ボス: 45秒（開始時20秒猶予）
 }
 
 void StageSettings::CalculateNextObstacleInterval() {
   // 猶予フレームを最小〜最大の間でランダムに選定（等間隔にならないようにバリエーションを持たせる）
   float graceFrames = minGraceFrames_; // 決定された猶予フレーム数
-  int frameRange = static_cast<int>(maxGraceFrames_ - minGraceFrames_); // 変動フレーム幅
+  int frameRange =
+      static_cast<int>(maxGraceFrames_ - minGraceFrames_); // 変動フレーム幅
   if (frameRange > 0) {
     graceFrames += static_cast<float>(std::rand() % (frameRange + 1));
   }
 
   // 移動速度（スクロール速度）に（アクション所要フレーム＋猶予フレーム）を乗算して次回間隔（距離）を計算
-  float effectiveSpeed = (std::max)(scrollSpeed_, 0.05f); // 停止時や低速時の0除算・0距離を防ぐ実効速度
-  float totalFrames = baseActionFrames_ + graceFrames;   // 回避に必要な合計フレーム数
-  float calculatedDistance = effectiveSpeed * totalFrames; // 移動速度と猶予フレームから計算された距離
+  float effectiveSpeed =
+      (std::max)(scrollSpeed_,
+                 0.05f); // 停止時や低速時の0除算・0距離を防ぐ実効速度
+  float totalFrames =
+      baseActionFrames_ + graceFrames; // 回避に必要な合計フレーム数
+  float calculatedDistance =
+      effectiveSpeed * totalFrames; // 移動速度と猶予フレームから計算された距離
 
   // 確実に避けられる距離範囲（最小距離〜最大距離）に制限
   // 速度が高速になってもアクション完了＋最小猶予フレーム（5f）を下回らないよう上限を動的ガード
-  float minRequiredDistance = effectiveSpeed * (baseActionFrames_ + minGraceFrames_);
-  float dynamicMaxDistance = (std::max)(maxObstacleDistance_, minRequiredDistance);
+  float minRequiredDistance =
+      effectiveSpeed * (baseActionFrames_ + minGraceFrames_);
+  float dynamicMaxDistance =
+      (std::max)(maxObstacleDistance_, minRequiredDistance);
 
-  obstacleInterval_ = (std::min)((std::max)(minObstacleDistance_, calculatedDistance), dynamicMaxDistance); // 次回生成までの距離
+  obstacleInterval_ =
+      (std::min)((std::max)(minObstacleDistance_, calculatedDistance),
+                 dynamicMaxDistance); // 次回生成までの距離
 }
 
 void StageSettings::GenerateRoadChunks(Matrix4x4 view) {
@@ -145,9 +156,10 @@ void StageSettings::GenerateRoadChunks(Matrix4x4 view) {
 
   // サイドプレーンの生成/更新
   float effectiveLaneWidth = GetEffectiveLaneWidth();
-  float bounds[2] = {
-      static_cast<float>(minLaneIndex_) * effectiveLaneWidth - (effectiveLaneWidth / 2.0f),
-      static_cast<float>(maxLaneIndex_) * effectiveLaneWidth + (effectiveLaneWidth / 2.0f)};
+  float bounds[2] = {static_cast<float>(minLaneIndex_) * effectiveLaneWidth -
+                         (effectiveLaneWidth / 2.0f),
+                     static_cast<float>(maxLaneIndex_) * effectiveLaneWidth +
+                         (effectiveLaneWidth / 2.0f)};
   float offsets[2] = {-50.0f, 50.0f};
   const char *planeNames[2] = {"SidePlaneL", "SidePlaneR"};
 
@@ -171,8 +183,10 @@ void StageSettings::GenerateRoadChunks(Matrix4x4 view) {
         manager_->AddObject(sidePlanes_[i]);
     }
     Transform t;
-    t.scale = {50.0f, chunkLength_ * 2.0f, 1.0f}; // plane.objは2x2なので、Yスケール*2=長さ。4チャンク分=chunkLength_*4
-                                                  // -> scale=chunkLength_*2
+    t.scale = {
+        50.0f, chunkLength_ * 2.0f,
+        1.0f}; // plane.objは2x2なので、Yスケール*2=長さ。4チャンク分=chunkLength_*4
+               // -> scale=chunkLength_*2
     t.rotate = {-1.570796f, 0.0f, 0.0f};
     t.translate = {bounds[i] + offsets[i], 0.0f,
                    chunkLength_ *
@@ -304,7 +318,8 @@ void StageSettings::SpawnObstacles(float z) {
     obstacles_[nextObstacleIndex_]->Spawn(laneWidth_, 2.0f, z);
     nextObstacleIndex_ = (nextObstacleIndex_ + 1) % kMaxObstacles_;
 
-    consecutiveNoSpawnCount_ = 0; // 障害物が配置されたため連続空ウェーブをリセット
+    consecutiveNoSpawnCount_ =
+        0; // 障害物が配置されたため連続空ウェーブをリセット
     return;
   }
   // =============================
@@ -313,7 +328,8 @@ void StageSettings::SpawnObstacles(float z) {
   bool isEmptyWave = false; // 障害物を一切生成しない空ウェーブフラグ
   if (consecutiveNoSpawnCount_ < maxConsecutiveNoSpawn_) {
     int roll = std::rand() % 100; // 0〜99の乱数
-    int chancePercent = static_cast<int>(noSpawnChance_ * 100.0f); // 確率をパーセンテージに変換
+    int chancePercent =
+        static_cast<int>(noSpawnChance_ * 100.0f); // 確率をパーセンテージに変換
     if (roll < chancePercent) {
       isEmptyWave = true;
       consecutiveNoSpawnCount_++; // 連続空ウェーブ回数をカウント
@@ -326,13 +342,15 @@ void StageSettings::SpawnObstacles(float z) {
 
   // たまにボーナスまたはアイテムを配置する（各アイテムのクールタイムを考慮）
   // ただし1レーンの場合は出さない
-  int bonusLane = -1; // ボーナスまたはアイテムを配置するレーン番号（-1は配置なし）
+  int bonusLane =
+      -1; // ボーナスまたはアイテムを配置するレーン番号（-1は配置なし）
   Obstacle::Type itemType = Obstacle::Type::Bonus; // アイテムの種類
   if (laneCount_ > 1) {
     int roll = std::rand() % 100;
     int spawnPercent = static_cast<int>(itemSpawnChance_ * 100.0f);
     if (roll < spawnPercent) {
-      // クールタイムが終了している（currentTimer <= 0.0f）アイテムを候補として収集
+      // クールタイムが終了している（currentTimer <=
+      // 0.0f）アイテムを候補として収集
       std::vector<Obstacle::Type> availableItems;
       for (const auto &pair : itemCoolDowns_) {
         // 1レーン時はCameraItemは除外
@@ -351,7 +369,8 @@ void StageSettings::SpawnObstacles(float z) {
         itemType = availableItems[selectedIndex];
 
         // 選ばれたアイテムのクールタイムを再設定（カウントダウン開始）
-        itemCoolDowns_[itemType].currentTimer = itemCoolDowns_[itemType].duration;
+        itemCoolDowns_[itemType].currentTimer =
+            itemCoolDowns_[itemType].duration;
       }
     }
   }
@@ -443,7 +462,7 @@ void StageSettings::SpawnObstacles(float z) {
     // 障害物の生成
     if (laneSpawns[i] != 0) {
       Obstacle::Type type = Obstacle::Type::Low; // 障害物タイプ
-      float y = 2.5f; // 障害物のY座標
+      float y = 2.5f;                            // 障害物のY座標
 
       if (laneSpawns[i] == 1) {
         type = Obstacle::Type::Low;
@@ -503,8 +522,10 @@ void StageSettings::Reset() {
   itemCoolDowns_[Obstacle::Type::Bonus].currentTimer = 0.0f;
   itemCoolDowns_[Obstacle::Type::BarrierItem].currentTimer = 0.0f;
   itemCoolDowns_[Obstacle::Type::ClearItem].currentTimer = 0.0f;
-  itemCoolDowns_[Obstacle::Type::CameraItem].currentTimer = 10.0f; // 開始後すぐのカメラ変更を防ぐ猶予
-  itemCoolDowns_[Obstacle::Type::BossItem].currentTimer = 20.0f;   // 開始後すぐのボス突入を防ぐ猶予
+  itemCoolDowns_[Obstacle::Type::CameraItem].currentTimer =
+      10.0f; // 開始後すぐのカメラ変更を防ぐ猶予
+  itemCoolDowns_[Obstacle::Type::BossItem].currentTimer =
+      20.0f; // 開始後すぐのボス突入を防ぐ猶予
 }
 
 float StageSettings::GetItemCoolDownDuration(Obstacle::Type type) const {
@@ -515,7 +536,8 @@ float StageSettings::GetItemCoolDownDuration(Obstacle::Type type) const {
   return 0.0f;
 }
 
-void StageSettings::SetItemCoolDownDuration(Obstacle::Type type, float duration) {
+void StageSettings::SetItemCoolDownDuration(Obstacle::Type type,
+                                            float duration) {
   itemCoolDowns_[type].duration = (std::max)(0.0f, duration);
 }
 
@@ -537,4 +559,5 @@ bool StageSettings::IsItemCoolDownReady(Obstacle::Type type) const {
     return it->second.currentTimer <= 0.0f;
   }
   return true;
-}
+}
+

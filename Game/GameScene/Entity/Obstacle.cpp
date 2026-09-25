@@ -34,7 +34,7 @@ void Obstacle::SetType(Type type) {
     collisionHeight_ = 1.0f;
     collisionDepth_ = 1.0f;
     transform_.scale = {1.5f, 1.0f, 1.0f};
-    model_->GetMartial()->SetColor({0.0f, 0.0f, 1.0f, 0.7f }); // 緑色
+    model_->GetMartial()->SetColor({0.0f, 0.0f, 1.0f, 0.7f}); // 緑色
     model_->SetBlend(BlendMode::kBlendModeNormal);
     break;
   case Type::High:
@@ -43,7 +43,7 @@ void Obstacle::SetType(Type type) {
     collisionHeight_ = 3.0f;
     collisionDepth_ = 1.0f;
     transform_.scale = {1.5f, 3.0f, 1.0f};
-    model_->GetMartial()->SetColor({1.0f, 0.0f, 0.0f, 0.7f });
+    model_->GetMartial()->SetColor({1.0f, 0.0f, 0.0f, 0.7f});
     model_->SetBlend(BlendMode::kBlendModeNormal);
     break;
   case Type::Wall:
@@ -52,9 +52,9 @@ void Obstacle::SetType(Type type) {
     collisionHeight_ = 3.0f;
     collisionDepth_ = 1.0f;
     transform_.scale = {1.5f, 3.0f, 1.0f};
-    model_->GetMartial()->SetColor({1.0f, 1.0f, 1.0f, 0.7f }); // 白色
+    model_->GetMartial()->SetColor({1.0f, 1.0f, 1.0f, 0.7f}); // 白色
     model_->SetShader("IceShader");
-	model_->SetBlend(BlendMode::kBlendModeNormal);
+    model_->SetBlend(BlendMode::kBlendModeNormal);
     break;
   case Type::Bonus:
     // 当たると吹き飛ぶボーナスエネミー
@@ -126,7 +126,6 @@ void Obstacle::SetType(Type type) {
     break;
   }
 
-
   model_->SetTransform(transform_);
 }
 
@@ -136,7 +135,6 @@ void Obstacle::Spawn(float x, float y, float z) {
   isHit_ = false; // 初期化
   isReflected_ = false;
   model_->SetTransform(transform_);
-
 }
 
 void Obstacle::StageUpdate(Matrix4x4 view, float scrollSpeed) {
@@ -166,22 +164,23 @@ void Obstacle::StageUpdate(Matrix4x4 view, float scrollSpeed) {
     }
   } else if (isReflected_) {
     // ボス（ターゲット）へ向かって飛ぶ
-    Vector3 dir = {
-      reflectedTarget_.x - transform_.translate.x,
-      reflectedTarget_.y - transform_.translate.y,
-      reflectedTarget_.z - transform_.translate.z
-    };
+    Vector3 dir = {reflectedTarget_.x - transform_.translate.x,
+                   reflectedTarget_.y - transform_.translate.y,
+                   reflectedTarget_.z - transform_.translate.z};
     float len = std::sqrt(dir.x * dir.x + dir.y * dir.y + dir.z * dir.z);
-    
+
     if (len > 0.1f) {
-      dir.x /= len; dir.y /= len; dir.z /= len;
+      dir.x /= len;
+      dir.y /= len;
+      dir.z /= len;
       float speed = scrollSpeed * 5.0f; // 5倍の速度で飛んでいく
-      if (speed > len) speed = len; // 行き過ぎ防止
+      if (speed > len)
+        speed = len; // 行き過ぎ防止
       transform_.translate.x += dir.x * speed;
       transform_.translate.y += dir.y * speed;
       transform_.translate.z += dir.z * speed;
     }
-    
+
     // 回転させながら飛ぶ
     transform_.rotate.x -= 0.3f;
     transform_.rotate.y += 0.2f;
@@ -203,7 +202,6 @@ void Obstacle::StageUpdate(Matrix4x4 view, float scrollSpeed) {
       }
     }
   }
-
 
   model_.get()->SetTransform(transform_);
   model_.get()->SettingWvp(view);
@@ -239,3 +237,4 @@ void Obstacle::ImGuiInnerComponents() {
     model_->ImGui(false);
   }
 }
+
