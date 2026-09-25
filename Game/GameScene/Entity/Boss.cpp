@@ -13,7 +13,8 @@ Boss::~Boss() {}
 void Boss::Initialize(ModelData modelData) {
   model_->Initialize(modelData);
   model_->SetShader("ObjectShader");
-  model_->GetMartial()->SetColor({1.0f, 0.0f, 0.0f, 1.0f}); // ボスは赤色
+  model_->SetColor({1.0f, 1.0f, 1.0f, 1.0f});
+  model_->GetMartial()->SetColor({1.0f, 1.0f, 1.0f, 1.0f});
 }
 
 void Boss::Spawn(float x, float y, float z) {
@@ -26,7 +27,12 @@ void Boss::Spawn(float x, float y, float z) {
   hp_ = 20;
   isHit_ = false;
   hitTimer_ = 0.0f;
-  model_->SetTransform(transform_);
+  model_->SetColor({1.0f, 1.0f, 1.0f, 1.0f});
+  model_->GetMartial()->SetColor({1.0f, 1.0f, 1.0f, 1.0f});
+
+  Transform drawTransform = transform_;
+  drawTransform.translate.y -= transform_.scale.y * 0.5f; // 底面原点(Y=0)を当たり判定中心に合わせるオフセット
+  model_->SetTransform(drawTransform);
   ChangeState(BossState::Appearance);
 }
 
@@ -97,11 +103,14 @@ void Boss::Update(Matrix4x4 view, float speedMultiplier) {
     hitTimer_ -= 0.016f; // 約1フレーム分
     if (hitTimer_ <= 0.0f) {
       isHit_ = false;
-      model_->GetMartial()->SetColor({1.0f, 0.0f, 0.0f, 1.0f});
+      model_->SetColor({1.0f, 1.0f, 1.0f, 1.0f});
+      model_->GetMartial()->SetColor({1.0f, 1.0f, 1.0f, 1.0f});
     }
   }
 
-  model_->SetTransform(transform_);
+  Transform drawTransform = transform_;
+  drawTransform.translate.y -= transform_.scale.y * 0.5f; // 底面原点(Y=0)を当たり判定中心に合わせるオフセット
+  model_->SetTransform(drawTransform);
   model_->SettingWvp(view);
   GameObject::Update(view, speedMultiplier);
 }
@@ -137,13 +146,8 @@ void Boss::OnDamage() {
   hp_--;
   isHit_ = true;
   hitTimer_ = 0.5f; // 0.5秒間ダメージ演出
-  model_->GetMartial()->SetColor({1.0f, 1.0f, 1.0f, 1.0f}); // 白く光る
-
-  if (hp_ <= 0 && state_ == BossState::Battle) {
-    ChangeState(BossState::Defeat);
-  }
-
-  model_->GetMartial()->SetColor({2.0f, 0.4f, 0.4f, 1.0f}); // 赤く光る
+  model_->SetColor({2.0f, 0.4f, 0.4f, 1.0f}); // 赤く光る
+  model_->GetMartial()->SetColor({2.0f, 0.4f, 0.4f, 1.0f});
 
   if (hp_ <= 0 && state_ == BossState::Battle) {
     ChangeState(BossState::Defeat);

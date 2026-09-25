@@ -615,7 +615,7 @@ void GameScene::Initialize() {
 
   // ボスの初期化
   ModelData bossModelData =
-      AssetManager::LoadModel("Resources/Block", "Block.obj");
+      AssetManager::LoadModel("Resources/Model/StylizedIceKing", "StylizedIceKing.obj");
   boss_->Initialize(bossModelData);
   boss_->SetName("Boss");
 
@@ -972,9 +972,9 @@ void GameScene::DrawBossHUD(class Draw &draw) {
                     Vector4(0.9f, 0.2f, 0.2f, 0.9f));
 
   // ボスヘッダー
-  draw.DrawMSDFString("=== BOSS: TITAN BLOCK ===", Vector2(430.0f, 24.0f),
-                      28.0f, Vector4(1.0f, 0.3f, 0.3f, 1.0f), true,
-                      Vector4(0.0f, 0.0f, 0.0f, 1.0f), 0.08f);
+  draw.DrawMSDFString("=== BOSS: ICE KING ===", Vector2(440.0f, 24.0f),
+                      28.0f, Vector4(0.8f, 0.95f, 1.0f, 1.0f), true,
+                      Vector4(0.0f, 0.2f, 0.5f, 1.0f), 0.08f);
 
   // ボスHPゲージ (最大20)
   int hp = boss_->GetHP();
