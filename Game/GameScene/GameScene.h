@@ -18,7 +18,7 @@
 
 class GameScene : public IScene {
 private:
-	enum GameState { Playing, Paused, PlayerHit, GameClear, GameOver, Editor };
+	enum GameState { Title, Playing, Paused, PlayerHit, GameClear, GameOver, Editor };
 
 	std::unique_ptr<Texture> texture_ = std::make_unique<Texture>();
 
@@ -28,7 +28,12 @@ private:
 	Matrix4x4 view;
 
 	// ゲーム状態
-	GameState gameState_ = GameState::Playing;
+	GameState gameState_ = GameState::Title;
+
+	// タイトル用
+	std::unique_ptr<Sprite> titleSprite_;
+	SpriteData titleSpriteData_;
+	int titleTextureHandle_ = -1;
 
 	// プレイ中の状態 (3レーン、1レーン、ボス)
 	enum class PlayingState { ThreeLane, OneLane, Boss };
@@ -114,6 +119,7 @@ public:
 
 	void Draw(class Draw& draw) override;
 	void DrawHUD(class Draw& draw);
+	void DrawTitleHUD(class Draw& draw);
 	void DrawPlayingHUD(class Draw& draw);
 	void DrawBossHUD(class Draw& draw);
 	void DrawPauseHUD(class Draw& draw);
@@ -123,6 +129,10 @@ public:
 	float uiTimer_ = 0.0f;
 
 	void ChangePlayingState(PlayingState newState, bool force = false);
+
+	void ResetGame();
+
+	void TitleUpdate();
 
 	void PlayingUpdate();
 

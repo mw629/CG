@@ -27,6 +27,16 @@ struct TextParamsConstantBuffer {
 };
 static_assert(sizeof(TextParamsConstantBuffer) == 112, "TextParamsConstantBuffer size mismatch with HLSL TextParams");
 
+/// <summary>
+/// 2D・テキスト描画の画面変動時スケーリングモード
+/// </summary>
+enum class TextScaleMode {
+    Fit,     // アスペクト比維持で画面内に収める (Letterbox/Pillarbox、中央配置)
+    Fill,    // アスペクト比維持で画面全体を覆う
+    Stretch, // 画面全体に合わせて引き伸ばす (アスペクト比無視)
+    None     // スケーリングなし (実画面ピクセル直接配置)
+};
+
 class TextRenderer {
 public:
     TextRenderer();
@@ -46,6 +56,21 @@ public:
 
     // 画面サイズの設定 (ウィンドウリサイズ時に呼び出し)
     void SetScreenSize(float screenWidth, float screenHeight);
+
+    // 基準解像度の設定 (デフォルト: 1280x720)
+    void SetReferenceResolution(float refWidth, float refHeight) {
+        referenceWidth_ = refWidth;
+        referenceHeight_ = refHeight;
+    }
+    Vector2 GetReferenceResolution() const { return { referenceWidth_, referenceHeight_ }; }
+    Vector2 GetScreenSize() const { return { screenWidth_, screenHeight_ }; }
+
+    // スケーリングモードの設定
+    void SetScaleMode(TextScaleMode mode) { scaleMode_ = mode; }
+    TextScaleMode GetScaleMode() const { return scaleMode_; }
+
+    // 2D投影行列の計算
+    Matrix4x4 Calculate2DProjectionMatrix() const;
 
     // 文字列の描画 (UTF-8)
     // text: 表示する文字列
@@ -128,6 +153,9 @@ private:
 
     float screenWidth_ = 1280.0f;
     float screenHeight_ = 720.0f;
+    float referenceWidth_ = 1280.0f;
+    float referenceHeight_ = 720.0f;
+    TextScaleMode scaleMode_ = TextScaleMode::Fit;
     float baseBoldness_ = 0.07f; // 全体的なデフォルト太さオフセット (0.0fが標準、0.07fでしっかり太字)
 
     size_t currentFrameIndex_ = 0;

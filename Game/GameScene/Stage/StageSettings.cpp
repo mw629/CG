@@ -40,6 +40,13 @@ void StageSettings::Initialize(ModelData roadModelData,
     if (manager)
       manager->AddObject(obstacles_[i]);
   }
+
+  // アイテムクールタイム設定の初期化（秒単位）
+  itemCoolDowns_[Obstacle::Type::Bonus]       = { 5.0f,  0.0f };  // ボーナス: 5秒
+  itemCoolDowns_[Obstacle::Type::BarrierItem] = { 15.0f, 0.0f };  // バリア: 15秒
+  itemCoolDowns_[Obstacle::Type::ClearItem]   = { 20.0f, 0.0f };  // 全消去: 20秒
+  itemCoolDowns_[Obstacle::Type::CameraItem]  = { 30.0f, 10.0f }; // カメラ: 30秒（開始時10秒猶予）
+  itemCoolDowns_[Obstacle::Type::BossItem]    = { 45.0f, 20.0f }; // ボス: 45秒（開始時20秒猶予）
 }
 
 void StageSettings::CalculateNextObstacleInterval() {
@@ -237,25 +244,25 @@ void StageSettings::Update(Matrix4x4 view, float timeScale) {
     }
   }
 
-  // 障害物の定期生成
+  // アイテムのクールタイム減算（実時間・秒単位）
+  float dt = (1.0f / 60.0f) * timeScale;
+  for (auto &pair : itemCoolDowns_) {
+    if (pair.second.currentTimer > 0.0f) {
+      pair.second.currentTimer -= dt;
+      if (pair.second.currentTimer < 0.0f) {
+        pair.second.currentTimer = 0.0f;
+      }
+    }
+  }
+
+  // 障害物・アイテムの定期生成
   distanceSinceLastSpawn_ += currentScroll;
   distanceSinceLastCameraItem_ += currentScroll;
 
   while (distanceSinceLastSpawn_ >= obstacleInterval_) {
     // 奥の固定位置(チャンクの向こう側)に生成
     if (!isSpawningPaused_) {
-      // 500mを超えていて、かつ1レーンでない時に通常の障害物の代わりにアイテムを配置する
-      if (distanceSinceLastCameraItem_ >= cameraItemInterval_ &&
-          laneCount_ != 1) {
-        obstacles_[nextObstacleIndex_]->SetType(Obstacle::Type::CameraItem);
-        obstacles_[nextObstacleIndex_]->Spawn(0.0f, 2.5f,
-                                              45.0f); // 中央レーンに生成
-        nextObstacleIndex_ = (nextObstacleIndex_ + 1) % kMaxObstacles_;
-
-        distanceSinceLastCameraItem_ -= cameraItemInterval_;
-      } else {
-        SpawnObstacles(45.0f);
-      }
+      SpawnObstacles(45.0f);
     }
     distanceSinceLastSpawn_ -= obstacleInterval_;
 
@@ -317,21 +324,36 @@ void StageSettings::SpawnObstacles(float z) {
     consecutiveNoSpawnCount_ = 0; // 連続上限に達したためリセット
   }
 
-  // たまにボーナスまたはアイテムを配置する (約10%の確率)
+  // たまにボーナスまたはアイテムを配置する（各アイテムのクールタイムを考慮）
   // ただし1レーンの場合は出さない
-  int bonusLane = -1; // ボーナスを配置するレーン番号（-1は配置なし）
+  int bonusLane = -1; // ボーナスまたはアイテムを配置するレーン番号（-1は配置なし）
   Obstacle::Type itemType = Obstacle::Type::Bonus; // アイテムの種類
-  if (laneCount_ > 1 && std::rand() % 10 == 0) {
-    bonusLane = std::rand() % laneCount_;
-    int randItem = std::rand() % 4; // アイテム種別の抽選用乱数
-    if (randItem == 0)
-      itemType = Obstacle::Type::Bonus;
-    else if (randItem == 1)
-      itemType = Obstacle::Type::BarrierItem;
-    else if (randItem == 2)
-      itemType = Obstacle::Type::ClearItem;
-    else if (randItem == 3)
-      itemType = Obstacle::Type::BossItem;
+  if (laneCount_ > 1) {
+    int roll = std::rand() % 100;
+    int spawnPercent = static_cast<int>(itemSpawnChance_ * 100.0f);
+    if (roll < spawnPercent) {
+      // クールタイムが終了している（currentTimer <= 0.0f）アイテムを候補として収集
+      std::vector<Obstacle::Type> availableItems;
+      for (const auto &pair : itemCoolDowns_) {
+        // 1レーン時はCameraItemは除外
+        if (laneCount_ == 1 && pair.first == Obstacle::Type::CameraItem) {
+          continue;
+        }
+        if (pair.second.currentTimer <= 0.0f) {
+          availableItems.push_back(pair.first);
+        }
+      }
+
+      // 候補が存在する場合のみアイテムを配置
+      if (!availableItems.empty()) {
+        bonusLane = std::rand() % laneCount_;
+        int selectedIndex = std::rand() % availableItems.size();
+        itemType = availableItems[selectedIndex];
+
+        // 選ばれたアイテムのクールタイムを再設定（カウントダウン開始）
+        itemCoolDowns_[itemType].currentTimer = itemCoolDowns_[itemType].duration;
+      }
+    }
   }
 
   // 空ウェーブの場合は障害物を配置せず、アイテムのみ生成（または完全な安全区間）
@@ -473,8 +495,46 @@ void StageSettings::Reset() {
     obstacles_[i]->Deactivate();
   }
   nextObstacleIndex_ = 0;
-
   // リセット後も間を空けずすぐに障害物が出現するように設定
   distanceSinceLastSpawn_ = (std::max)(0.0f, obstacleInterval_ - 3.0f);
   distanceSinceLastCameraItem_ = 0.0f;
+
+  // アイテムのクールタイムをリセット（秒単位）
+  itemCoolDowns_[Obstacle::Type::Bonus].currentTimer = 0.0f;
+  itemCoolDowns_[Obstacle::Type::BarrierItem].currentTimer = 0.0f;
+  itemCoolDowns_[Obstacle::Type::ClearItem].currentTimer = 0.0f;
+  itemCoolDowns_[Obstacle::Type::CameraItem].currentTimer = 10.0f; // 開始後すぐのカメラ変更を防ぐ猶予
+  itemCoolDowns_[Obstacle::Type::BossItem].currentTimer = 20.0f;   // 開始後すぐのボス突入を防ぐ猶予
 }
+
+float StageSettings::GetItemCoolDownDuration(Obstacle::Type type) const {
+  auto it = itemCoolDowns_.find(type);
+  if (it != itemCoolDowns_.end()) {
+    return it->second.duration;
+  }
+  return 0.0f;
+}
+
+void StageSettings::SetItemCoolDownDuration(Obstacle::Type type, float duration) {
+  itemCoolDowns_[type].duration = (std::max)(0.0f, duration);
+}
+
+float StageSettings::GetItemCoolDownTimer(Obstacle::Type type) const {
+  auto it = itemCoolDowns_.find(type);
+  if (it != itemCoolDowns_.end()) {
+    return it->second.currentTimer;
+  }
+  return 0.0f;
+}
+
+void StageSettings::SetItemCoolDownTimer(Obstacle::Type type, float timer) {
+  itemCoolDowns_[type].currentTimer = (std::max)(0.0f, timer);
+}
+
+bool StageSettings::IsItemCoolDownReady(Obstacle::Type type) const {
+  auto it = itemCoolDowns_.find(type);
+  if (it != itemCoolDowns_.end()) {
+    return it->second.currentTimer <= 0.0f;
+  }
+  return true;
+}

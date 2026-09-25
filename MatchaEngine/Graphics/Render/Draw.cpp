@@ -635,5 +635,28 @@ void Draw::DrawFillRect(const Vector2& pos, const Vector2& size, const Vector4& 
 	}
 }
 
+void Draw::SetTextReferenceResolution(float width, float height)
+{
+	if (textRenderer_) {
+		textRenderer_->SetReferenceResolution(width, height);
+	}
+}
+
+void Draw::SetTextScaleMode(MatchaEngine::TextScaleMode mode)
+{
+	if (textRenderer_) {
+		textRenderer_->SetScaleMode(mode);
+	}
+}
+
+MatchaEngine::TextScaleMode Draw::GetTextScaleMode() const
+{
+	if (textRenderer_) {
+		return textRenderer_->GetScaleMode();
+	}
+	return MatchaEngine::TextScaleMode::Fit;
+}
+
+
 
 

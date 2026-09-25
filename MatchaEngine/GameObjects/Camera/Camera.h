@@ -4,10 +4,14 @@
 #include <d3d12.h>
 #include <wrl.h>
 #include "Calculation.h"
+#include <vector>
 
 class Camera
 {
 private:
+	static float s_screenWidth_;
+	static float s_screenHeight_;
+	static std::vector<Camera*> s_instances_;
 
 	Transform transform_{ {1.0f,1.0f,1.0f},{0.0f,0.0f,0.0f},{0.0f,0.0f,0.0f} };
 	Transform gameTransform_{ {1.0f,1.0f,1.0f},{0.0f,0.0f,0.0f},{0.0f,0.0f,0.0f} };
@@ -19,7 +23,7 @@ private:
 	float aspectRatio_ = 1280.0f / 720.0f;
 	float nearClip_ = 0.1f;
 	float farClip_ = 10000.0f;
-
+	bool autoAspectRatio_ = true;
 
 	DebugCamera debugCamera_;
 
@@ -29,10 +33,12 @@ private:
 	Microsoft::WRL::ComPtr<ID3D12Resource> cameraResource_;
 	CameraForGPU* cameraData_ = nullptr;
 
-
 public:
 	Camera();
+	~Camera();
 
+	static void SetScreenSize(Vector2 screenSize);
+	static Vector2 GetScreenSize();
 
 	void ImGui();
 
@@ -51,8 +57,10 @@ public:
 	void ResetDebugCamera(const Transform& transform);
 	DebugCamera& GetDebugCameraRef() { return debugCamera_; }
 
-	void SetAspectRatio(float aspectRatio) { aspectRatio_ = aspectRatio; }
+	void SetAspectRatio(float aspectRatio) { aspectRatio_ = aspectRatio; autoAspectRatio_ = false; }
 	float GetAspectRatio() const { return aspectRatio_; }
+	void SetAutoAspectRatio(bool autoAspect) { autoAspectRatio_ = autoAspect; }
+	bool GetAutoAspectRatio() const { return autoAspectRatio_; }
 	
 	ID3D12Resource* GetCameraResource() const { return cameraResource_.Get(); }
 

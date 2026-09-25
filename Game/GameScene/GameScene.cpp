@@ -58,21 +58,13 @@ void GameScene::ImGui() {
       ImGui::Separator();
 
       if (ImGui::Button("Restart (1)", ImVec2(160, 35))) {
+        ResetGame();
         gameState_ = GameState::Playing;
-        stageSettings_->Reset();
-        // PostEffect::SetActivePostEffect(PostEffect::Type::Normal);
-        player_->Reset();
-        effectManager_->ClearHitParticles();
-        effectManager_->ClearBarrier();
-        currentDistance_ = 0.0f;
-        currentScore_ = 0.0f;
-        bonusEnemyHitCount_ = 0;
-        ChangePlayingState(PlayingState::ThreeLane, true);
       }
       ImGui::SameLine();
-      if (ImGui::Button("Go to Result (2)", ImVec2(160, 35))) {
-        nextSceneID_ = SceneID::Clear;
-        sceneChangeRequest_ = true;
+      if (ImGui::Button("Return to Title (2)", ImVec2(160, 35))) {
+        ResetGame();
+        gameState_ = GameState::Title;
       }
       ImGui::Separator();
     }
@@ -120,8 +112,9 @@ void GameScene::ImGui() {
   }
 
   if (ImGui::CollapsingHeader("Game State", ImGuiTreeNodeFlags_DefaultOpen)) {
-    const char *stateNames[] = {"Playing",   "Paused",   "PlayerHit",
-                                "GameClear", "GameOver", "Editor"};
+    const char *stateNames[] = {"Title",     "Playing",  "Paused",
+                                "PlayerHit", "GameClear", "GameOver",
+                                "Editor"};
     ImGui::Text("Game State: %s", stateNames[gameState_]);
 
     const char *playingStateNames[] = {"ThreeLane", "OneLane", "Boss"};
@@ -222,14 +215,15 @@ void GameScene::ImGui() {
     ImGui::Separator();
 
     if (ImGui::Button("Reset Game", ImVec2(120, 0))) {
+      ResetGame();
       gameState_ = GameState::Playing;
       camera_->SetDebugCamera(false);
-      stageSettings_->Reset();
-      player_->Reset();
-      currentDistance_ = 0.0f;
-      currentScore_ = 0.0f;
-      bonusEnemyHitCount_ = 0;
-      ChangePlayingState(PlayingState::ThreeLane, true);
+    }
+    ImGui::SameLine();
+    if (ImGui::Button("Go to Title", ImVec2(120, 0))) {
+      ResetGame();
+      gameState_ = GameState::Title;
+      camera_->SetDebugCamera(false);
     }
   }
 
@@ -322,6 +316,56 @@ void GameScene::ImGui() {
     ImGui::Text("Dodgeable Range: %.1f m ~ %.1f m", minDistance, maxDistance);
   }
 
+  // アイテムクールタイム設定パネル
+  if (ImGui::CollapsingHeader("Item CoolDowns (アイテムクールタイム設定)", ImGuiTreeNodeFlags_DefaultOpen)) {
+    float spawnChance = stageSettings_->GetItemSpawnChance() * 100.0f;
+    if (ImGui::SliderFloat("Item Spawn Chance (%)", &spawnChance, 0.0f, 100.0f, "%.1f %%")) {
+      stageSettings_->SetItemSpawnChance(spawnChance / 100.0f);
+    }
+    ImGui::Separator();
+
+    struct ItemInfo {
+      Obstacle::Type type;
+      const char *name;
+      const char *desc;
+    };
+    ItemInfo items[] = {
+      { Obstacle::Type::Bonus, "Bonus (ボーナス)", "スコア加算" },
+      { Obstacle::Type::BarrierItem, "Barrier (バリア)", "ミスを1回防御" },
+      { Obstacle::Type::ClearItem, "Clear (障害物全消去)", "画面内の障害物を一掃" },
+      { Obstacle::Type::CameraItem, "Camera (視点切替)", "1レーンモードへ移行" },
+      { Obstacle::Type::BossItem, "Boss (ボス戦突入)", "ボスバトル開始" },
+    };
+
+    for (const auto &item : items) {
+      ImGui::PushID(static_cast<int>(item.type));
+      float duration = stageSettings_->GetItemCoolDownDuration(item.type);
+      float current = stageSettings_->GetItemCoolDownTimer(item.type);
+
+      ImGui::Text("%s - %s", item.name, item.desc);
+      if (ImGui::SliderFloat("CoolTime (s)", &duration, 0.0f, 120.0f, "%.1f s")) {
+        stageSettings_->SetItemCoolDownDuration(item.type, duration);
+      }
+
+      if (current <= 0.0f) {
+        ImGui::TextColored(ImVec4(0.2f, 1.0f, 0.2f, 1.0f), "  Status: READY (出現可能)");
+      } else {
+        ImGui::TextColored(ImVec4(1.0f, 0.6f, 0.2f, 1.0f), "  Status: COOLDOWN (残り %.1f s)", current);
+      }
+
+      ImGui::SameLine();
+      if (ImGui::SmallButton("Reset CD (即可能)")) {
+        stageSettings_->SetItemCoolDownTimer(item.type, 0.0f);
+      }
+      ImGui::SameLine();
+      if (ImGui::SmallButton("Trigger CD")) {
+        stageSettings_->SetItemCoolDownTimer(item.type, duration);
+      }
+      ImGui::Separator();
+      ImGui::PopID();
+    }
+  }
+
   // アイテム効果のデバッグパネル
   if (ImGui::CollapsingHeader("Item Debug / Effects", ImGuiTreeNodeFlags_DefaultOpen)) {
     bool hasBarrier = player_->GetHasBarrier();
@@ -412,8 +456,24 @@ void GameScene::ImGui() {
       gameState_ = GameState::Playing;
     }
     if (ImGui::Button("Return to Title", ImVec2(200, 40))) {
-      nextSceneID_ = SceneID::Title;
-      sceneChangeRequest_ = true;
+      ResetGame();
+      gameState_ = GameState::Title;
+    }
+    ImGui::End();
+  }
+
+  // タイトル中のImGui
+  if (gameState_ == GameState::Title) {
+    ImGuiIO &io = ImGui::GetIO();
+    ImGui::SetNextWindowPos(
+        ImVec2(io.DisplaySize.x * 0.5f, io.DisplaySize.y * 0.85f),
+        ImGuiCond_Always, ImVec2(0.5f, 0.5f));
+    ImGui::Begin("Title Menu", nullptr,
+                 ImGuiWindowFlags_NoResize | ImGuiWindowFlags_AlwaysAutoResize |
+                     ImGuiWindowFlags_NoCollapse);
+    if (ImGui::Button("Start Game (SPACE)", ImVec2(220, 45))) {
+      ResetGame();
+      gameState_ = GameState::Playing;
     }
     ImGui::End();
   }
@@ -422,15 +482,38 @@ void GameScene::ImGui() {
 #endif // _USE_IMGUI
 }
 
+void GameScene::ResetGame() {
+  stageSettings_->Reset();
+  player_->Reset();
+  effectManager_->ClearHitParticles();
+  effectManager_->ClearBarrier();
+  currentDistance_ = 0.0f;
+  currentScore_ = 0.0f;
+  bonusEnemyHitCount_ = 0;
+  ChangePlayingState(PlayingState::ThreeLane, true);
+}
+
 void GameScene::Initialize() {
 
   sceneID_ = SceneID::Game;
+
+  // タイトル用スプライトの生成
+  titleTextureHandle_ = texture_->CreateTexture("Resources/Texture/Title.png");
+  titleSpriteData_.transform.scale = { 1.0f, 1.0f, 1.0f };
+  titleSpriteData_.transform.translate = { 640.0f, 360.0f, 0.0f };
+  titleSpriteData_.transform.rotate = { 0.0f, 0.0f, 0.0f };
+  titleSpriteData_.size = { 1280.0f, 720.0f };
+  titleSpriteData_.textureArea[0] = { 0.0f, 0.0f };
+  titleSpriteData_.textureArea[1] = { 1.0f, 1.0f };
+  titleSprite_ = std::make_unique<Sprite>();
+  titleSprite_->Initialize(titleSpriteData_, titleTextureHandle_);
+  titleSprite_->GetMartial()->SetColor({ 1.0f, 1.0f, 1.0f, 1.0f });
 
   if (!EditorManager::IsPlaying()) {
     gameState_ = GameState::Editor;
     camera_->SetDebugCamera(true);
   } else {
-    gameState_ = GameState::Playing;
+    gameState_ = GameState::Title;
     camera_->SetDebugCamera(false);
   }
   sceneChangeRequest_ = false;
@@ -591,9 +674,10 @@ void GameScene::Update() {
   // Engine側のPlay/Stop状態に同期してゲームステートを切り替え
   bool isEnginePlaying = EditorManager::IsPlaying();
   if (isEnginePlaying && gameState_ == GameState::Editor) {
-    gameState_ = GameState::Playing;
+    ResetGame();
+    gameState_ = GameState::Title;
     camera_->SetDebugCamera(false);
-  } else if (!isEnginePlaying && gameState_ == GameState::Playing) {
+  } else if (!isEnginePlaying && gameState_ != GameState::Editor) {
     gameState_ = GameState::Editor;
     camera_->SetDebugCamera(true);
   }
@@ -612,7 +696,9 @@ void GameScene::Update() {
 
   // skyBox_ is now updated in gameObjectManager_
 
-  if (gameState_ == GameState::Playing) {
+  if (gameState_ == GameState::Title) {
+    TitleUpdate();
+  } else if (gameState_ == GameState::Playing) {
     PlayingUpdate();
 
     if (Input::PushKey(DIK_ESCAPE)) {
@@ -628,21 +714,13 @@ void GameScene::Update() {
   } else if (gameState_ == GameState::GameOver) {
     // 1でリスタート
     if (Input::PushKey(DIK_1)) {
+      ResetGame();
       gameState_ = GameState::Playing;
-      stageSettings_->Reset();
-      // PostEffect::SetActivePostEffect(PostEffect::Type::Normal);
-      player_->Reset();
-      effectManager_->ClearHitParticles(); // 前回の煙をリセット
-      effectManager_->ClearBarrier(); // バリアをリセット
-      currentDistance_ = 0.0f;
-      currentScore_ = 0.0f;
-      bonusEnemyHitCount_ = 0;
-      ChangePlayingState(PlayingState::ThreeLane, true);
     }
-    // 2でリザルトへ
+    // 2でタイトルへ
     if (Input::PushKey(DIK_2)) {
-      nextSceneID_ = SceneID::Clear;
-      sceneChangeRequest_ = true;
+      ResetGame();
+      gameState_ = GameState::Title;
     }
   } else if (gameState_ == GameState::Editor) {
     EditorUpdate();
@@ -686,7 +764,9 @@ void GameScene::DrawHUD(class Draw &draw) {
         "0123456789ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz:/.mkmhpt%+-[]()!★◆▼▲●■░|一二三四五六七八九十百千万到達距離スコア速度最高記録ベストゲームオーバーリスタートリザルトへ戻る一時停止中現在獲得順位反撃チャンス左中央右打ち返せ跳ね返しボーナス敵撃破モードシールドバリアアクティブジャンプスライディング走るポーズキーもう一度遊ぶプレイ");
   }
 
-  if (gameState_ == GameState::GameOver) {
+  if (gameState_ == GameState::Title) {
+    DrawTitleHUD(draw);
+  } else if (gameState_ == GameState::GameOver) {
     DrawGameOverHUD(draw);
   } else if (gameState_ == GameState::Paused) {
     DrawPlayingHUD(draw);
@@ -1048,10 +1128,27 @@ void GameScene::DrawGameOverHUD(class Draw &draw) {
   // 区切りライン
   draw.DrawFillRect(Vector2(240.0f, 470.0f), Vector2(800.0f, 2.0f), Vector4(0.3f, 0.4f, 0.5f, 0.7f));
 
-  draw.DrawMSDFString("[ 1 キー ] もう一度プレイ (RESTART)   |   [ 2 キー ] リザルト画面へ (RESULT)",
+  draw.DrawMSDFString("[ 1 キー ] もう一度プレイ (RESTART)   |   [ 2 キー ] タイトルへ戻る (TITLE)",
                       Vector2(260.0f, 505.0f), 22.0f,
                       Vector4(0.9f, 0.95f, 1.0f, 1.0f), true,
                       Vector4(0.0f, 0.0f, 0.0f, 1.0f), 0.07f);
+}
+
+void GameScene::DrawTitleHUD(class Draw &draw) {
+  // 背景のタイトル画像を描画
+  if (titleSprite_) {
+    titleSprite_->Update(titleSpriteData_);
+    draw.DrawSprite(titleSprite_.get());
+  }
+
+  // スタート案内テキストの点滅表示
+  float blink = sinf(uiTimer_ * 5.0f);
+  if (blink > -0.2f) {
+    draw.DrawMSDFString("PRESS SPACE OR [A] BUTTON TO START",
+                        Vector2(370.0f, 600.0f), 28.0f,
+                        Vector4(1.0f, 1.0f, 1.0f, 1.0f), true,
+                        Vector4(0.0f, 0.0f, 0.0f, 1.0f), 0.12f);
+  }
 }
 
 void GameScene::PlayerHitUpdate() {
@@ -1200,22 +1297,27 @@ void GameScene::PlayingUpdate() {
   }
 }
 
+void GameScene::TitleUpdate() {
+  // 背景シーンの更新（スクロールなし、オブジェクト描画準備）
+  gameObjectManager_->UpdateAll(view, 0.0f);
+  stageSettings_->EditorUpdate(view);
+
+  // スペースキーまたはゲームパッドAボタンでゲーム開始
+  if (Input::PushKey(DIK_SPACE) || GamePadInput::PressButton(XINPUT_GAMEPAD_A)) {
+    ResetGame();
+    gameState_ = GameState::Playing;
+  }
+}
+
 void GameScene::PausedUpdate() {
   pauseSystem_->Update();
   if (Input::PushKey(DIK_1)) {
+    ResetGame();
     gameState_ = GameState::Playing;
-    stageSettings_->Reset();
-    player_->Reset();
-    effectManager_->ClearHitParticles();
-    effectManager_->ClearBarrier();
-    currentDistance_ = 0.0f;
-    currentScore_ = 0.0f;
-    bonusEnemyHitCount_ = 0;
-    ChangePlayingState(PlayingState::ThreeLane, true);
   }
   if (Input::PushKey(DIK_2)) {
-    nextSceneID_ = SceneID::Title;
-    sceneChangeRequest_ = true;
+    ResetGame();
+    gameState_ = GameState::Title;
   }
 }
 

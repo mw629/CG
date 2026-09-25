@@ -191,6 +191,7 @@ void Engine::Setting()
     EffectDefinition::SetScreenSize(Client);
 	Triangle::SetScreenSize(Client);
 	Sprite::SetScreenSize(Client);
+	Camera::SetScreenSize(Client);
 
 
   EffectDefinition::SetDescriptorHeap(descriptorHeap.get());
@@ -307,6 +308,7 @@ void Engine::NewFrame() {
 		EffectDefinition::SetScreenSize(Client);
 		Triangle::SetScreenSize(Client);
 		Sprite::SetScreenSize(Client);
+		Camera::SetScreenSize(Client);
 		if (textRenderer) {
 			textRenderer->SetScreenSize((float)kClientWidth_, (float)kClientHeight_);
 		}

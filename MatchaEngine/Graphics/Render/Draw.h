@@ -24,6 +24,7 @@
 
 namespace MatchaEngine {
 	class TextRenderer;
+	enum class TextScaleMode;
 }
 
 class Draw {
@@ -75,6 +76,10 @@ public:
 
 	void SetTextRenderer(class MatchaEngine::TextRenderer* textRenderer) { textRenderer_ = textRenderer; }
 	class MatchaEngine::TextRenderer* GetTextRenderer() const { return textRenderer_; }
+
+	void SetTextReferenceResolution(float width, float height);
+	void SetTextScaleMode(MatchaEngine::TextScaleMode mode);
+	MatchaEngine::TextScaleMode GetTextScaleMode() const;
 
 	void SetTextBaseBoldness(float boldness);
 	float GetTextBaseBoldness() const;

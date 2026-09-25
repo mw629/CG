@@ -22,9 +22,31 @@ void TestScene::ImGui()
 		ImGui::Spacing();
 		ImGui::Text("SpritePos");
 		ImGui::SliderFloat2("##sprite_pos_slider", &spriteData_.transform.translate.x, -9999.9f, 9999.9f, "%.1f");
-
-		// 表示は整数部4桁・小数1桁風に（幅指定で揃える） 
 		ImGui::Text("Pos: %4.1f, %4.1f", spriteData_.transform.translate.x, spriteData_.transform.translate.y);
+
+		ImGui::Spacing();
+		ImGui::SliderFloat2("SpriteSize", &spriteData_.size.x, 1.0f, 2000.0f, "%.1f");
+		ImGui::SliderFloat2("Pivot", &spriteData_.pivot.x, 0.0f, 1.0f, "%.2f");
+
+		const char* scaleModeNames[] = { "Fit", "Fill", "Stretch", "None" };
+		int currentScaleMode = static_cast<int>(spriteData_.scaleMode);
+		if (ImGui::Combo("ScaleMode", &currentScaleMode, scaleModeNames, IM_ARRAYSIZE(scaleModeNames))) {
+			spriteData_.scaleMode = static_cast<SpriteScaleMode>(currentScaleMode);
+		}
+
+		const char* anchorNames[] = {
+			"None (Virtual Res)", "TopLeft", "TopCenter", "TopRight",
+			"MiddleLeft", "Center", "MiddleRight",
+			"BottomLeft", "BottomCenter", "BottomRight"
+		};
+		int currentAnchor = static_cast<int>(spriteData_.anchor);
+		if (ImGui::Combo("Anchor", &currentAnchor, anchorNames, IM_ARRAYSIZE(anchorNames))) {
+			spriteData_.anchor = static_cast<SpriteAnchor>(currentAnchor);
+		}
+
+		Vector2 currentScreen = Sprite::GetScreenSize();
+		Vector2 refRes = Sprite::GetReferenceResolution();
+		ImGui::Text("Screen: %.0f x %.0f  |  Ref: %.0f x %.0f", currentScreen.x, currentScreen.y, refRes.x, refRes.y);
 	}
 
 	for (int i = 0, n = static_cast<int>(particle_.size()); i < n; ++i) {

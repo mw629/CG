@@ -134,6 +134,59 @@ void TextRenderer::SetScreenSize(float screenWidth, float screenHeight) {
     screenHeight_ = screenHeight;
 }
 
+Matrix4x4 TextRenderer::Calculate2DProjectionMatrix() const {
+    float sw = screenWidth_ > 0.0f ? screenWidth_ : referenceWidth_;
+    float sh = screenHeight_ > 0.0f ? screenHeight_ : referenceHeight_;
+    float rw = referenceWidth_ > 0.0f ? referenceWidth_ : 1280.0f;
+    float rh = referenceHeight_ > 0.0f ? referenceHeight_ : 720.0f;
+
+    if (scaleMode_ == TextScaleMode::None) {
+        return MakeOrthographicMatrix(0.0f, sw, 0.0f, sh, 0.0f, 100.0f);
+    }
+
+    float scaleX = 1.0f;
+    float scaleY = 1.0f;
+    float offsetX = 0.0f;
+    float offsetY = 0.0f;
+
+    switch (scaleMode_) {
+    case TextScaleMode::Fit: {
+        float scale = (std::min)(sw / rw, sh / rh);
+        scaleX = scale;
+        scaleY = scale;
+        offsetX = (sw - rw * scale) * 0.5f;
+        offsetY = (sh - rh * scale) * 0.5f;
+        break;
+    }
+    case TextScaleMode::Fill: {
+        float scale = (std::max)(sw / rw, sh / rh);
+        scaleX = scale;
+        scaleY = scale;
+        offsetX = (sw - rw * scale) * 0.5f;
+        offsetY = (sh - rh * scale) * 0.5f;
+        break;
+    }
+    case TextScaleMode::Stretch: {
+        scaleX = sw / rw;
+        scaleY = sh / rh;
+        offsetX = 0.0f;
+        offsetY = 0.0f;
+        break;
+    }
+    default:
+        break;
+    }
+
+    Matrix4x4 view2D = IdentityMatrix();
+    view2D.m[0][0] = scaleX;
+    view2D.m[1][1] = scaleY;
+    view2D.m[3][0] = offsetX;
+    view2D.m[3][1] = offsetY;
+
+    Matrix4x4 ortho = MakeOrthographicMatrix(0.0f, sw, 0.0f, sh, 0.0f, 100.0f);
+    return MultiplyMatrix4x4(view2D, ortho);
+}
+
 void TextRenderer::BeginFrame() {
     currentFrameIndex_ = (currentFrameIndex_ + 1) % kFrameCount;
     currentVertexOffset_[currentFrameIndex_] = 0;
@@ -294,7 +347,7 @@ void TextRenderer::DrawString(ID3D12GraphicsCommandList* commandList,
     // 5. 定数バッファの書き込み (256バイトオフセット単位)
     size_t cbOffset = drawIdx * kConstantBufferAlignment;
     auto* cbPtr = reinterpret_cast<TextParamsConstantBuffer*>(mappedConstantBuffers_[f] + cbOffset);
-    cbPtr->wvp = MakeOrthographicMatrix(0.0f, screenWidth_, 0.0f, screenHeight_, 0.0f, 100.0f);
+    cbPtr->wvp = Calculate2DProjectionMatrix();
     cbPtr->outlineColor = outlineColor;
     cbPtr->outlineWidth = enableOutline ? outlineWidth : 0.0f;
     cbPtr->boldness = baseBoldness_ + boldness;
@@ -421,7 +474,7 @@ void TextRenderer::DrawFillRect(ID3D12GraphicsCommandList* commandList,
 
     size_t cbOffset = drawIdx * kConstantBufferAlignment;
     auto* cbPtr = reinterpret_cast<TextParamsConstantBuffer*>(mappedConstantBuffers_[f] + cbOffset);
-    cbPtr->wvp = MakeOrthographicMatrix(0.0f, screenWidth_, 0.0f, screenHeight_, 0.0f, 100.0f);
+    cbPtr->wvp = Calculate2DProjectionMatrix();
     cbPtr->outlineColor = { 0.0f, 0.0f, 0.0f, 0.0f };
     cbPtr->outlineWidth = 0.0f;
     cbPtr->boldness = 0.0f;

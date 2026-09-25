@@ -192,12 +192,6 @@
     <ClCompile Include="Game\SceneManager.cpp">
       <Filter>Game</Filter>
     </ClCompile>
-    <ClCompile Include="Game\TitleScene\TitleScene.cpp">
-      <Filter>Game</Filter>
-    </ClCompile>
-    <ClCompile Include="Game\ResultScene\ResultScene.cpp">
-      <Filter>Game</Filter>
-    </ClCompile>
     <ClCompile Include="MatchaEngine\GameObjects\Camera\Camera.cpp">
       <Filter>MatchaEngine\GameObjects</Filter>
     </ClCompile>
@@ -497,12 +491,6 @@
       <Filter>Game</Filter>
     </ClInclude>
     <ClInclude Include="Game\SceneManager.h">
-      <Filter>Game</Filter>
-    </ClInclude>
-    <ClInclude Include="Game\TitleScene\TitleScene.h">
-      <Filter>Game</Filter>
-    </ClInclude>
-    <ClInclude Include="Game\ResultScene\ResultScene.h">
       <Filter>Game</Filter>
     </ClInclude>
     <ClInclude Include="MatchaEngine\GameObjects\Camera\Camera.h">

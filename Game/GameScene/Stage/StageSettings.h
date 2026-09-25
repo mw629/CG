@@ -3,8 +3,17 @@
 #include "RenderObject.h"
 #include <Engine.h>
 #include <Entity/Obstacle.h>
+#include <map>
 #include <memory>
 #include <vector>
+
+/// <summary>
+/// アイテムごとのクールタイム設定（秒単位）
+/// </summary>
+struct ItemCoolDownSetting {
+  float duration = 10.0f;    // クールタイム（秒）
+  float currentTimer = 0.0f; // 現在の残りクールタイム（秒、0以下で出現可能）
+};
 
 
 /// <summary>
@@ -64,9 +73,13 @@ private:
   int consecutiveNoSpawnCount_ = 0;    // 連続して空ウェーブが発生した回数
   int maxConsecutiveNoSpawn_ = 1;      // 連続空ウェーブの最大許容回数
 
-  float cameraItemInterval_ = 500.0f; // カメラアイテムの生成間隔
+  float cameraItemInterval_ = 500.0f; // カメラアイテムの生成間隔（旧・互換性用）
   float distanceSinceLastCameraItem_ =
-      0.0f; // 前回カメラアイテム生成からの移動距離
+      0.0f; // 前回カメラアイテム生成からの移動距離（旧・互換性用）
+
+  // アイテムクールタイム管理（秒単位）
+  std::map<Obstacle::Type, ItemCoolDownSetting> itemCoolDowns_;
+  float itemSpawnChance_ = 0.15f; // アイテムが出現するウェーブの確率（15%）
 
   // ゲームオーバーフラグ
   bool isGameOver_ = false;
@@ -178,6 +191,16 @@ public:
   // 障害物リストへのアクセス（当たり判定用）
   Obstacle *GetObstacle(int index) { return obstacles_[index].get(); }
   int GetMaxObstacles() const { return kMaxObstacles_; }
+
+  // アイテムクールタイム設定・取得（秒単位）
+  float GetItemCoolDownDuration(Obstacle::Type type) const;
+  void SetItemCoolDownDuration(Obstacle::Type type, float duration);
+  float GetItemCoolDownTimer(Obstacle::Type type) const;
+  void SetItemCoolDownTimer(Obstacle::Type type, float timer);
+  bool IsItemCoolDownReady(Obstacle::Type type) const;
+
+  float GetItemSpawnChance() const { return itemSpawnChance_; }
+  void SetItemSpawnChance(float chance) { itemSpawnChance_ = chance; }
 
   // リセット
   void Reset();
