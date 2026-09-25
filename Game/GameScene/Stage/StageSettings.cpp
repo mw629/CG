@@ -6,7 +6,9 @@
 #include <ctime>
 
 void StageSettings::Initialize(ModelData roadModelData,
-                               ModelData obstacleModelData,
+                               ModelData fallenTreeModelData,
+                               ModelData iceArchwayModelData,
+                               ModelData iceWallModelData,
                                ModelData bonusModelData,
                                class GameObjectManager *manager) {
   // 乱数の初期化
@@ -35,7 +37,8 @@ void StageSettings::Initialize(ModelData roadModelData,
 
     // ランダムなタイプで初期化
     Obstacle::Type type = static_cast<Obstacle::Type>(std::rand() % 3);
-    obstacles_[i]->Initialize(obstacleModelData, bonusModelData, type);
+    obstacles_[i]->Initialize(fallenTreeModelData, iceArchwayModelData,
+                              iceWallModelData, bonusModelData, type);
 
     if (manager)
       manager->AddObject(obstacles_[i]);
@@ -49,6 +52,14 @@ void StageSettings::Initialize(ModelData roadModelData,
       30.0f, 10.0f}; // カメラ: 30秒（開始時10秒猶予）
   itemCoolDowns_[Obstacle::Type::BossItem] = {
       45.0f, 20.0f}; // ボス: 45秒（開始時20秒猶予）
+}
+
+void StageSettings::Initialize(ModelData roadModelData,
+                               ModelData obstacleModelData,
+                               ModelData bonusModelData,
+                               class GameObjectManager *manager) {
+  Initialize(roadModelData, obstacleModelData, obstacleModelData,
+             obstacleModelData, bonusModelData, manager);
 }
 
 void StageSettings::CalculateNextObstacleInterval() {
@@ -560,4 +571,3 @@ bool StageSettings::IsItemCoolDownReady(Obstacle::Type type) const {
   }
   return true;
 }
-

@@ -109,6 +109,9 @@ private:
   void CalculateNextObstacleInterval();
 
 public:
+  void Initialize(ModelData roadModelData, ModelData fallenTreeModelData,
+                  ModelData iceArchwayModelData, ModelData iceWallModelData,
+                  ModelData bonusModelData, class GameObjectManager *manager);
   void Initialize(ModelData roadModelData, ModelData obstacleModelData,
                   ModelData bonusModelData, class GameObjectManager *manager);
   void Update(Matrix4x4 view, float timeScale = 1.0f);

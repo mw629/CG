@@ -8,125 +8,216 @@ Obstacle::Obstacle() {
 
 Obstacle::~Obstacle() {}
 
+void Obstacle::Initialize(ModelData lowData, ModelData highData,
+                          ModelData wallData, ModelData bonusData,
+                          Type type) {
+  lowModelData_ = lowData;
+  highModelData_ = highData;
+  wallModelData_ = wallData;
+  bonusModelData_ = bonusData;
+
+  lowModel_->Initialize(lowData);
+  lowModel_->SetShader("ObjectShader");
+  lowModel_->GetMartial()->SetColor({1.0f, 1.0f, 1.0f, 1.0f});
+
+  highModel_->Initialize(highData);
+  highModel_->SetShader("ObjectShader");
+  highModel_->GetMartial()->SetColor({1.0f, 1.0f, 1.0f, 1.0f});
+
+  wallModel_->Initialize(wallData);
+  wallModel_->SetShader("ObjectShader");
+  wallModel_->GetMartial()->SetColor({1.0f, 1.0f, 1.0f, 1.0f});
+
+  bonusModel_->Initialize(bonusData);
+  bonusModel_->SetShader("ObjectShader");
+  bonusModel_->GetMartial()->SetColor({1.0f, 0.84f, 0.0f, 1.0f});
+
+  itemModel_->Initialize(wallData);
+  itemModel_->SetShader("ObjectShader");
+
+  SetType(type);
+}
+
 void Obstacle::Initialize(ModelData normalData, ModelData bonusData,
                           Type type) {
-  normalModelData_ = normalData;
-  bonusModelData_ = bonusData;
-  SetType(type);
+  Initialize(normalData, normalData, normalData, bonusData, type);
 }
 
 void Obstacle::SetType(Type type) {
   type_ = type;
 
-  if (type_ == Type::Bonus) {
-    model_->Initialize(bonusModelData_);
-  } else {
-    model_->Initialize(normalModelData_);
-  }
-
-  model_->SetShader("ObjectShader");
-
-  // タイプに応じて当たり判定サイズとスケールを設定
+  // タイプに応じてモデル、当たり判定サイズ、スケール、回転を設定
+  // 前のサイズ: Low(幅1.5, 高さ1.0, 奥行1.0), High/Wall(幅1.5, 高さ3.0, 奥行1.0) に厳密に一致させる
   switch (type_) {
   case Type::Low:
-    // ジャンプで避ける低い障害物
+    // 倒木（ジャンプで避ける低い障害物）
+    currentModel_ = lowModel_.get();
     collisionWidth_ = 1.5f;
     collisionHeight_ = 1.0f;
     collisionDepth_ = 1.0f;
-    transform_.scale = {1.5f, 1.0f, 1.0f};
-    model_->GetMartial()->SetColor({0.0f, 0.0f, 1.0f, 0.7f}); // 緑色
-    model_->SetBlend(BlendMode::kBlendModeNormal);
+    // FallenTree: ローカルX=0.712, Y=0.639, Z=0.999 をY90度回転して幅1.5, 高1.0, 奥1.0にする
+    transform_.scale = {1.404f, 1.565f, 1.502f};
+    transform_.rotate = {0.0f, 1.570796f, 0.0f}; // 横向きに倒れる
+    if (currentModel_) {
+      currentModel_->GetMartial()->SetColor({1.0f, 1.0f, 1.0f, 1.0f});
+      currentModel_->SetShader("ObjectShader");
+      currentModel_->SetBlend(BlendMode::kBlendModeNormal);
+    }
     break;
+
   case Type::High:
-    // 転がりで避ける高い障害物（上に浮いている）
+    // 氷のアーチ（転がり・スライディングで下を潜り抜ける高い障害物）
+    currentModel_ = highModel_.get();
     collisionWidth_ = 1.5f;
     collisionHeight_ = 3.0f;
     collisionDepth_ = 1.0f;
-    transform_.scale = {1.5f, 3.0f, 1.0f};
-    model_->GetMartial()->SetColor({1.0f, 0.0f, 0.0f, 0.7f});
-    model_->SetBlend(BlendMode::kBlendModeNormal);
+    // IceArchway: ローカルX=0.331, Y=0.939, Z=0.958 をY90度回転して幅1.5, 高3.0, 奥1.0にする
+    transform_.scale = {3.021f, 3.195f, 1.566f};
+    transform_.rotate = {0.0f, 1.570796f, 0.0f}; // 開口部をZ軸方向に向ける
+    if (currentModel_) {
+      currentModel_->GetMartial()->SetColor({1.0f, 1.0f, 1.0f, 1.0f});
+      currentModel_->SetShader("ObjectShader");
+      currentModel_->SetBlend(BlendMode::kBlendModeNormal);
+    }
     break;
+
   case Type::Wall:
-    // レーン移動で避ける壁
+    // 氷の壁（レーン移動で避ける壁）
+    currentModel_ = wallModel_.get();
     collisionWidth_ = 1.5f;
     collisionHeight_ = 3.0f;
     collisionDepth_ = 1.0f;
-    transform_.scale = {1.5f, 3.0f, 1.0f};
-    model_->GetMartial()->SetColor({1.0f, 1.0f, 1.0f, 0.7f}); // 白色
-    model_->SetShader("IceShader");
-    model_->SetBlend(BlendMode::kBlendModeNormal);
+    // IceWall: ローカルX=1.002, Y=0.772, Z=0.319 を幅1.5, 高3.0, 奥1.0にする
+    transform_.scale = {1.497f, 3.886f, 3.135f};
+    transform_.rotate = {0.0f, 0.0f, 0.0f};
+    if (currentModel_) {
+      currentModel_->GetMartial()->SetColor({1.0f, 1.0f, 1.0f, 1.0f});
+      currentModel_->SetShader("ObjectShader");
+      currentModel_->SetBlend(BlendMode::kBlendModeNormal);
+    }
     break;
+
   case Type::Bonus:
     // 当たると吹き飛ぶボーナスエネミー
+    currentModel_ = bonusModel_.get();
     collisionWidth_ = 1.0f;
     collisionHeight_ = 1.0f;
     collisionDepth_ = 1.0f;
     transform_.scale = {1.0f, 1.0f, 1.0f};
-    model_->GetMartial()->SetColor({1.0f, 0.84f, 0.0f, 1.0f}); // 金色
-    model_->SetShader("ObjectShader"); // IceShaderから戻す可能性があるため明示
+    transform_.rotate = {0.0f, 0.0f, 0.0f};
+    if (currentModel_) {
+      currentModel_->GetMartial()->SetColor({1.0f, 0.84f, 0.0f, 1.0f});
+      currentModel_->SetShader("ObjectShader");
+      currentModel_->SetBlend(BlendMode::kBlendModeNormal);
+    }
     break;
+
   case Type::GuideFloor:
-    // 中央へ誘導するトリガー床（床に埋め込むか薄くする）
+    // 中央へ誘導するトリガー床
+    currentModel_ = itemModel_.get();
     collisionWidth_ = 2.0f;
     collisionHeight_ = 0.5f;
     collisionDepth_ = 2.0f;
-    transform_.scale = {2.0f, 0.1f,
-                        10.0f}; // 縦長にして光るレールのように見せる
-    model_->GetMartial()->SetColor({0.0f, 1.0f, 1.0f, 0.5f}); // シアン・半透明
-    model_->SetShader("ObjectShader");
+    transform_.scale = {2.0f, 0.1f, 10.0f};
+    transform_.rotate = {0.0f, 0.0f, 0.0f};
+    if (currentModel_) {
+      currentModel_->GetMartial()->SetColor({0.0f, 1.0f, 1.0f, 0.5f});
+      currentModel_->SetShader("ObjectShader");
+    }
     break;
+
   case Type::CameraItem:
+    currentModel_ = itemModel_.get();
     collisionWidth_ = 1.0f;
     collisionHeight_ = 1.0f;
     collisionDepth_ = 1.0f;
     transform_.scale = {1.0f, 1.0f, 1.0f};
-    model_->GetMartial()->SetColor({1.0f, 0.0f, 1.0f, 1.0f}); // マゼンタ
-    model_->SetShader("ObjectShader");
+    transform_.rotate = {0.0f, 0.0f, 0.0f};
+    if (currentModel_) {
+      currentModel_->GetMartial()->SetColor({1.0f, 0.0f, 1.0f, 1.0f});
+      currentModel_->SetShader("ObjectShader");
+    }
     break;
+
   case Type::BarrierItem:
+    currentModel_ = itemModel_.get();
     collisionWidth_ = 1.0f;
     collisionHeight_ = 1.0f;
     collisionDepth_ = 1.0f;
     transform_.scale = {1.0f, 1.0f, 1.0f};
-    model_->GetMartial()->SetColor({0.0f, 1.0f, 0.0f, 1.0f}); // 緑（バリア）
-    model_->SetShader("ObjectShader");
+    transform_.rotate = {0.0f, 0.0f, 0.0f};
+    if (currentModel_) {
+      currentModel_->GetMartial()->SetColor({0.0f, 1.0f, 0.0f, 1.0f});
+      currentModel_->SetShader("ObjectShader");
+    }
     break;
+
   case Type::ClearItem:
+    currentModel_ = itemModel_.get();
     collisionWidth_ = 1.0f;
     collisionHeight_ = 1.0f;
     collisionDepth_ = 1.0f;
     transform_.scale = {1.0f, 1.0f, 1.0f};
-    model_->GetMartial()->SetColor(
-        {1.0f, 0.5f, 0.0f, 1.0f}); // オレンジ（ボム/クリア）
-    model_->SetShader("ObjectShader");
+    transform_.rotate = {0.0f, 0.0f, 0.0f};
+    if (currentModel_) {
+      currentModel_->GetMartial()->SetColor({1.0f, 0.5f, 0.0f, 1.0f});
+      currentModel_->SetShader("ObjectShader");
+    }
     break;
+
   case Type::BossItem:
+    currentModel_ = itemModel_.get();
     collisionWidth_ = 1.5f;
     collisionHeight_ = 1.5f;
     collisionDepth_ = 1.5f;
     transform_.scale = {1.5f, 1.5f, 1.5f};
-    model_->GetMartial()->SetColor({1.0f, 0.0f, 0.0f, 1.0f}); // 赤（ボス）
-    model_->SetShader("ObjectShader");
+    transform_.rotate = {0.0f, 0.0f, 0.0f};
+    if (currentModel_) {
+      currentModel_->GetMartial()->SetColor({1.0f, 0.0f, 0.0f, 1.0f});
+      currentModel_->SetShader("ObjectShader");
+    }
     break;
+
   case Type::BossAttack:
+    // ボスの氷壁攻撃（白）
+    currentModel_ = wallModel_.get();
     collisionWidth_ = 1.5f;
-    collisionHeight_ = 3.0f; // 飛び越え不可
+    collisionHeight_ = 3.0f;
     collisionDepth_ = 1.0f;
-    transform_.scale = {1.5f, 3.0f, 1.0f};
-    model_->GetMartial()->SetColor({1.0f, 1.0f, 1.0f, 1.0f}); // 白
-    model_->SetShader("IceShader");
+    transform_.scale = {1.497f, 3.886f, 3.135f};
+    transform_.rotate = {0.0f, 0.0f, 0.0f};
+    if (currentModel_) {
+      currentModel_->GetMartial()->SetColor({0.9f, 0.95f, 1.0f, 1.0f});
+      currentModel_->SetShader("ObjectShader");
+      currentModel_->SetBlend(BlendMode::kBlendModeNormal);
+    }
     break;
+
   case Type::BossAttackReflectable:
+    // ボスの跳ね返し可能氷壁攻撃（緑）
+    currentModel_ = wallModel_.get();
     collisionWidth_ = 1.5f;
-    collisionHeight_ = 3.0f; // 飛び越え不可
+    collisionHeight_ = 3.0f;
     collisionDepth_ = 1.0f;
-    transform_.scale = {1.5f, 3.0f, 1.0f};
-    model_->GetMartial()->SetColor({0.0f, 1.0f, 0.0f, 1.0f}); // 緑
-    model_->SetShader("IceShader");
+    transform_.scale = {1.497f, 3.886f, 3.135f};
+    transform_.rotate = {0.0f, 0.0f, 0.0f};
+    if (currentModel_) {
+      currentModel_->GetMartial()->SetColor({0.3f, 1.0f, 0.4f, 1.0f});
+      currentModel_->SetShader("ObjectShader");
+      currentModel_->SetBlend(BlendMode::kBlendModeNormal);
+    }
     break;
   }
 
-  model_->SetTransform(transform_);
+  if (currentModel_) {
+    // 新モデルは底面原点(Y=0)のため、中心座標から高さの半分を引いて底面を合わせる
+    Transform drawTransform = transform_;
+    if (currentModel_ == lowModel_.get() || currentModel_ == highModel_.get() ||
+        currentModel_ == wallModel_.get()) {
+      drawTransform.translate.y -= collisionHeight_ * 0.5f;
+    }
+    currentModel_->SetTransform(drawTransform);
+  }
 }
 
 void Obstacle::Spawn(float x, float y, float z) {
@@ -134,7 +225,14 @@ void Obstacle::Spawn(float x, float y, float z) {
   isActive_ = true;
   isHit_ = false; // 初期化
   isReflected_ = false;
-  model_->SetTransform(transform_);
+  if (currentModel_) {
+    Transform drawTransform = transform_;
+    if (currentModel_ == lowModel_.get() || currentModel_ == highModel_.get() ||
+        currentModel_ == wallModel_.get()) {
+      drawTransform.translate.y -= collisionHeight_ * 0.5f;
+    }
+    currentModel_->SetTransform(drawTransform);
+  }
 }
 
 void Obstacle::StageUpdate(Matrix4x4 view, float scrollSpeed) {
@@ -203,8 +301,15 @@ void Obstacle::StageUpdate(Matrix4x4 view, float scrollSpeed) {
     }
   }
 
-  model_.get()->SetTransform(transform_);
-  model_.get()->SettingWvp(view);
+  if (currentModel_) {
+    Transform drawTransform = transform_;
+    if (currentModel_ == lowModel_.get() || currentModel_ == highModel_.get() ||
+        currentModel_ == wallModel_.get()) {
+      drawTransform.translate.y -= collisionHeight_ * 0.5f;
+    }
+    currentModel_->SetTransform(drawTransform);
+    currentModel_->SettingWvp(view);
+  }
 
   // コンポーネント（ColliderComponentなど）のUpdateを呼ぶ
   GameObject::Update(view, 1.0f);
@@ -226,15 +331,14 @@ void Obstacle::OnHit() {
 }
 
 void Obstacle::Draw(class Draw &draw) {
-  if (!isActive_)
+  if (!isActive_ || !currentModel_)
     return;
-  draw.DrawObj(model_.get());
+  draw.DrawObj(currentModel_);
   GameObject::Draw(draw);
 }
 
 void Obstacle::ImGuiInnerComponents() {
-  if (model_) {
-    model_->ImGui(false);
+  if (currentModel_) {
+    currentModel_->ImGui(false);
   }
 }
-

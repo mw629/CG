@@ -25,8 +25,16 @@ public:
   };
 
 private:
-  std::unique_ptr<Model> model_ = std::make_unique<Model>();
-  ModelData normalModelData_;
+  std::unique_ptr<Model> lowModel_ = std::make_unique<Model>();      // FallenTree
+  std::unique_ptr<Model> highModel_ = std::make_unique<Model>();     // IceArchway
+  std::unique_ptr<Model> wallModel_ = std::make_unique<Model>();     // IceWall
+  std::unique_ptr<Model> bonusModel_ = std::make_unique<Model>();    // Bonus
+  std::unique_ptr<Model> itemModel_ = std::make_unique<Model>();     // Items / Fallback
+  Model *currentModel_ = nullptr;
+
+  ModelData lowModelData_;
+  ModelData highModelData_;
+  ModelData wallModelData_;
   ModelData bonusModelData_;
   Type type_ = Type::Wall;
 
@@ -45,6 +53,8 @@ public:
   Obstacle();
   ~Obstacle();
 
+  void Initialize(ModelData lowData, ModelData highData, ModelData wallData,
+                  ModelData bonusData, Type type);
   void Initialize(ModelData normalData, ModelData bonusData, Type type);
   void SetType(Type type);
 
@@ -75,7 +85,7 @@ public:
   void ImGuiInnerComponents() override;
 
   bool HasMaterial() const override {
-    return model_ && model_->GetComponent<MaterialComponent>() != nullptr ||
+    return (currentModel_ && currentModel_->GetComponent<MaterialComponent>() != nullptr) ||
            GameObject::HasMaterial();
   }
 

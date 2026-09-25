@@ -667,10 +667,14 @@ void GameScene::Initialize() {
   // ステージの初期化
   ModelData roadModelData =
       AssetManager::LoadModel("Resources/Block", "Block.obj");
-  ModelData obstacleModelData =
-      AssetManager::LoadModel("Resources/Block", "Block.obj");
-  stageSettings_->Initialize(roadModelData, obstacleModelData, modelData,
-                             gameObjectManager_.get());
+  ModelData fallenTreeModel =
+      AssetManager::LoadModel("Resources/Model/FallenTree", "FallenTree.obj");
+  ModelData iceArchwayModel =
+      AssetManager::LoadModel("Resources/Model/IceArchway", "IceArchway.obj");
+  ModelData iceWallModel =
+      AssetManager::LoadModel("Resources/Model/IceWall", "IceWall.obj");
+  stageSettings_->Initialize(roadModelData, fallenTreeModel, iceArchwayModel,
+                             iceWallModel, modelData, gameObjectManager_.get());
 
   // 指定したJsonファイルを初期シーンとして読み込む
   gameObjectManager_->LoadScene(initialSceneJson_);

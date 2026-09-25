@@ -3,7 +3,6 @@
 #include <Engine.h>
 #include <memory>
 
-
 enum class BossState {
   Appearance, // 出現
   Battle,     // 戦闘
