@@ -1067,9 +1067,9 @@ void GameScene::DrawBossHUD(class Draw &draw) {
   }
   hpGauge += "]";
 
-  char hpText[64];
-  snprintf(hpText, sizeof(hpText), "HP %s %2d / 20", hpGauge.c_str(), hp);
-  draw.DrawMSDFString(hpText, Vector2(395.0f, 58.0f), 22.0f,
+  char hpText[128];
+  snprintf(hpText, sizeof(hpText), "HP %s  %2d / 20", hpGauge.c_str(), hp);
+  draw.DrawMSDFString(hpText, Vector2(365.0f, 58.0f), 22.0f,
                       Vector4(1.0f, 0.45f, 0.45f, 1.0f), true,
                       Vector4(0.2f, 0.0f, 0.0f, 1.0f), 0.07f);
 
