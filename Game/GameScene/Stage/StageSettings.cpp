@@ -113,7 +113,8 @@ void StageSettings::GenerateRoadChunks(Matrix4x4 view) {
     if (zIndex < roadTransforms_.size() && !roadTransforms_[zIndex].empty()) {
       currentZs[zIndex] = roadTransforms_[zIndex][0].translate.z;
     } else {
-      currentZs[zIndex] = static_cast<float>(zIndex) * chunkLength_;
+      currentZs[zIndex] =
+          static_cast<float>(zIndex - kBackwardChunks_) * chunkLength_;
     }
   }
 
@@ -208,14 +209,16 @@ void StageSettings::GenerateRoadChunks(Matrix4x4 view) {
         manager_->AddObject(sidePlanes_[i]);
     }
     Transform t;
+    float roadLength = static_cast<float>(kChunkCount_) * chunkLength_;
+    float minRoadZ = -static_cast<float>(kBackwardChunks_) * chunkLength_;
+    float maxRoadZ = static_cast<float>(kForwardChunks_) * chunkLength_;
+    float centerRoadZ = (minRoadZ + maxRoadZ) * 0.5f;
+
     t.scale = {
-        50.0f, chunkLength_ * 2.0f,
-        1.0f}; // plane.objは2x2なので、Yスケール*2=長さ。4チャンク分=chunkLength_*4
-               // -> scale=chunkLength_*2
+        80.0f, roadLength * 0.6f,
+        1.0f}; // plane.objは2x2なので、Yスケール*2=長さ。道路全体を余裕を持ってカバー
     t.rotate = {-1.570796f, 0.0f, 0.0f};
-    t.translate = {bounds[i] + offsets[i], 0.0f,
-                   chunkLength_ *
-                       1.5f}; // カメラの手前から奥までカバーするように配置
+    t.translate = {bounds[i] + offsets[i], 0.0f, centerRoadZ};
     sidePlanes_[i]->SetTransform(t);
     sidePlanes_[i]->Update(view, 0.0f);
   }
@@ -265,9 +268,11 @@ void StageSettings::Update(Matrix4x4 view, float timeScale) {
       }
     }
 
-    // チャンクがカメラの後ろ（手前）を通り過ぎたら、一番奥に再配置
+    // チャンクが手前の最端（カメラ背後）を通り過ぎたら、一番奥に再配置
+    float recycleThreshold =
+        -static_cast<float>(kBackwardChunks_ + 1) * chunkLength_;
     if (!roadTransforms_[i].empty() &&
-        roadTransforms_[i][0].translate.z < -chunkLength_) {
+        roadTransforms_[i][0].translate.z < recycleThreshold) {
       float newChunkZ = maxZ + chunkLength_;
       for (int laneIdx = 0; laneIdx < laneCount_; laneIdx++) {
         if (laneIdx < roadTransforms_[i].size()) {
@@ -528,7 +533,7 @@ void StageSettings::Reset() {
     for (int laneIdx = 0; laneIdx < laneCount_; laneIdx++) {
       if (laneIdx < roadTransforms_[i].size()) {
         roadTransforms_[i][laneIdx].translate.z =
-            static_cast<float>(i) * chunkLength_;
+            static_cast<float>(i - kBackwardChunks_) * chunkLength_;
         roadChunks_[i][laneIdx]->SetTransform(roadTransforms_[i][laneIdx]);
       }
     }

@@ -35,8 +35,10 @@ private:
   float scrollAcceleration_ = 0.0001f; // 毎フレームの加速量
 
   // 道路チャンク
-  static const int kChunkCount_ = 5; // チャンクの数
-  float chunkLength_ = 10.0f;        // 1チャンクの奥行き（Z軸方向のサイズ）
+  static const int kBackwardChunks_ = 6; // プレイヤーより手前（カメラ側・背後）のチャンク数
+  static const int kForwardChunks_ = 14; // プレイヤーより奥（進行方向）のチャンク数
+  static const int kChunkCount_ = kBackwardChunks_ + kForwardChunks_; // チャンクの総数 (20)
+  float chunkLength_ = 10.0f; // 1チャンクの奥行き（Z軸方向のサイズ）
 
   std::vector<std::vector<std::shared_ptr<RenderObject>>> roadChunks_;
   std::vector<std::vector<Transform>> roadTransforms_;
@@ -133,6 +135,10 @@ public:
                              : laneWidth_;
   }
   float GetOneLaneWidthMultiplier() const { return oneLaneWidthMultiplier_; }
+  int GetChunkCount() const { return kChunkCount_; }
+  int GetBackwardChunks() const { return kBackwardChunks_; }
+  int GetForwardChunks() const { return kForwardChunks_; }
+  float GetChunkLength() const { return chunkLength_; }
 
   // セッター
   void SetLaneCount(int count) {

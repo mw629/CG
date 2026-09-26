@@ -187,6 +187,10 @@ void GameScene::ImGui() {
       ImGui::Text("Lane Width: %.2f (Effective: %.2f)",
                   stageSettings_->GetLaneWidth(),
                   stageSettings_->GetEffectiveLaneWidth());
+      ImGui::Text("Chunks: %d (Behind: %d, Ahead: %d)",
+                  stageSettings_->GetChunkCount(),
+                  stageSettings_->GetBackwardChunks(),
+                  stageSettings_->GetForwardChunks());
       ImGui::TreePop();
     }
 
