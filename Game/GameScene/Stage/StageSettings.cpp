@@ -1,20 +1,18 @@
 #include "StageSettings.h"
 #include "AssetManager.h"
-#include "PSO/PipelineState.h"
 #include "Core/LogHandler.h"
+#include "PSO/PipelineState.h"
 #include <algorithm>
 #include <cstdlib>
 #include <ctime>
 #include <format>
 
-void StageSettings::Initialize(ModelData roadModelData,
-                               ModelData fallenTreeModelData,
-                               ModelData iceArchwayModelData,
-                               ModelData iceWallModelData,
-                               ModelData bonusModelData,
-                               ModelData iceBomModelData,
-                               ModelData reflectingAttackModelData,
-                                class GameObjectManager *manager) {
+
+void StageSettings::Initialize(
+    ModelData roadModelData, ModelData fallenTreeModelData,
+    ModelData iceArchwayModelData, ModelData iceWallModelData,
+    ModelData bonusModelData, ModelData iceBomModelData,
+    ModelData reflectingAttackModelData, class GameObjectManager *manager) {
   // 乱数の初期化
   std::srand(static_cast<unsigned int>(std::time(nullptr)));
 
@@ -42,8 +40,8 @@ void StageSettings::Initialize(ModelData roadModelData,
     // ランダムなタイプで初期化
     Obstacle::Type type = static_cast<Obstacle::Type>(std::rand() % 3);
     obstacles_[i]->Initialize(fallenTreeModelData, iceArchwayModelData,
-                              iceWallModelData, bonusModelData,
-                              iceBomModelData, reflectingAttackModelData, type);
+                              iceWallModelData, bonusModelData, iceBomModelData,
+                              reflectingAttackModelData, type);
 
     if (manager)
       manager->AddObject(obstacles_[i]);
@@ -110,7 +108,8 @@ void StageSettings::CalculateNextObstacleInterval() {
 
 const StageSettings::ChunkRowInfo &
 StageSettings::GetChunkRowInfoAtZ(float z) const {
-  float defaultWidth = (laneCount_ == 1) ? (laneWidth_ * oneLaneWidthMultiplier_) : laneWidth_;
+  float defaultWidth =
+      (laneCount_ == 1) ? (laneWidth_ * oneLaneWidthMultiplier_) : laneWidth_;
   static ChunkRowInfo fallbackInfo;
   fallbackInfo = {laneCount_, minLaneIndex_, maxLaneIndex_, defaultWidth};
 
@@ -238,9 +237,8 @@ void StageSettings::RebuildChunkRow(int rowIndex, int newLaneCount, float newZ,
   info.laneCount = newLaneCount;
   info.minLaneIndex = -(newLaneCount / 2);
   info.maxLaneIndex = (newLaneCount - 1) / 2;
-  info.effectiveLaneWidth = (newLaneCount == 1)
-                                ? (laneWidth_ * oneLaneWidthMultiplier_)
-                                : laneWidth_;
+  info.effectiveLaneWidth =
+      (newLaneCount == 1) ? (laneWidth_ * oneLaneWidthMultiplier_) : laneWidth_;
 
   for (int laneIdx = 0; laneIdx < newLaneCount; laneIdx++) {
     auto &renderObj = roadChunks_[rowIndex][laneIdx];
@@ -295,7 +293,8 @@ void StageSettings::GenerateRoadChunks(Matrix4x4 view) {
   for (int i = 0; i < 2; ++i) {
     LOG_INFO(std::format("GenerateRoadChunks: sidePlane {}", i));
     if (!sidePlanes_[i]) {
-      LOG_INFO(std::format("GenerateRoadChunks: creating sidePlane model {}", i));
+      LOG_INFO(
+          std::format("GenerateRoadChunks: creating sidePlane model {}", i));
       auto model = std::make_shared<Model>();
       model->Initialize(planeModelData_);
       model->SetShader(WaterShader);
@@ -515,7 +514,8 @@ void StageSettings::SpawnObstacles(float z) {
   if (isEmptyWave) {
     if (bonusLane != -1) {
       int lane = currentMinLane + bonusLane; // アイテム配置対象のレーン番号
-      float x = static_cast<float>(lane) * currentLaneWidth; // レーンのワールドX座標
+      float x =
+          static_cast<float>(lane) * currentLaneWidth; // レーンのワールドX座標
       obstacles_[nextObstacleIndex_]->SetType(itemType);
       obstacles_[nextObstacleIndex_]->Spawn(x, 2.5f, z - 5.0f);
       nextObstacleIndex_ = (nextObstacleIndex_ + 1) % kMaxObstacles_;

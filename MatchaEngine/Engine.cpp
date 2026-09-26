@@ -199,8 +199,24 @@ void Engine::Setting()
   EffectDefinition::SetGpuProfiler(gpuProfiler.get());
   draw->SetGpuProfiler(gpuProfiler.get());
 
-  postEffects_.push_back(std::make_unique<PostEffect>());
-  postEffects_[0]->Initialize();
+  // 1段目: アウトライン (OutLineShader)
+  auto outlineEffect = std::make_unique<PostEffect>();
+  outlineEffect->Initialize();
+  outlineEffect->SetActivePostEffect("OutLineShader");
+  outlineEffect->SetValue1(1.0f);            // 感度・強さ
+  outlineEffect->SetValue2(1.0f);            // 線の太さ
+  outlineEffect->SetColor(0.0f, 0.0f, 0.0f); // 輪郭線の色（黒）
+  postEffects_.push_back(std::move(outlineEffect));
+
+  // 2段目: フォグ (FogShader)
+  auto fogEffect = std::make_unique<PostEffect>();
+  fogEffect->Initialize();
+  fogEffect->SetActivePostEffect("FogShader");
+  fogEffect->SetColor(0.82f, 0.88f, 0.95f);  // 冬の雪景色にマッチする淡い水色白
+  fogEffect->SetValue1(7.5f);                 // 濃度
+  fogEffect->SetValue2(12.0f);                // 開始距離 (プレイヤーの手前をクリアに)
+  fogEffect->SetRatio(0.4f);                 // 高さフォグの影響度
+  postEffects_.push_back(std::move(fogEffect));
 }
 
 

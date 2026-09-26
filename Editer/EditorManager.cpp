@@ -547,6 +547,8 @@ void EditorManager::Update(Engine* engine)
 				auto& postEffects = const_cast<std::vector<std::unique_ptr<PostEffect>>&>(engine->GetPostEffects());
 				for (size_t i = 0; i < postEffects.size(); ++i) {
 					ImGui::PushID(static_cast<int>(i));
+					std::string layerTitle = "Layer " + std::to_string(i) + ": " + postEffects[i]->GetActiveShaderName();
+					ImGui::TextColored(ImVec4(0.35f, 0.75f, 1.0f, 1.0f), "%s", layerTitle.c_str());
 					postEffects[i]->ImGuiWindow();
 					if (ImGui::Button(LanguageManager::Tr("Remove Layer"))) {
 						postEffects.erase(postEffects.begin() + i);

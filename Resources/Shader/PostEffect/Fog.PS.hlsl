@@ -50,8 +50,9 @@ PixelShaderOutput main(VertexShaderOutput input)
     float32_t linearDistance = viewSpacePos.z;
 
     // --- 【距離によるフォグの開始位置調整 (Distance Offset)】 ---
-    // gPostEffect.value2 を「フォグが発生し始める距離」として使用
-    float32_t fogDistance = max(0.0f, linearDistance - gPostEffect.value2);
+    // gPostEffect.value2 を「フォグが発生し始める距離」として使用（デフォルト: 12.0m）
+    float32_t startDistance = (gPostEffect.value2 <= 0.0f) ? 12.0f : gPostEffect.value2;
+    float32_t fogDistance = max(0.0f, linearDistance - startDistance);
 
     // --- 【揺らぎの計算 (Swaying Fog)】 ---
     // 空間座標と時間を組み合わせてサイン波による揺らぎを作る
@@ -62,31 +63,44 @@ PixelShaderOutput main(VertexShaderOutput input)
     // viewSpacePos.y はカメラより下がマイナス、上がプラスになります。
     // sway を加算することで、フォグの高さがゆらゆらと動くようになります。
     // ratio を使って「高さによるフォグの消え具合」をコントロールします。
-    // ratioが0.0なら高さに関係なく均一にフォグがかかり、1.0に近づくほど上空のフォグが薄くなります。
-    float32_t heightFog = saturate((viewSpacePos.y + sway) * -0.5f + 1.0f);
-    heightFog = lerp(1.0f, heightFog, gPostEffect.ratio); // ratioスライダーで高さ影響をON/OFF
-    
+    float32_t heightFog = saturate((viewSpacePos.y + sway) * -0.3f + 1.0f);
+    heightFog = lerp(1.0f, heightFog, gPostEffect.ratio);
+
     // --- 【まばらなフォグのムラ (Patchiness)】 ---
     // 奥に向かって流れるようにZ座標に時間を足す（引く）
     float2 noisePos = float2(viewSpacePos.x, viewSpacePos.z);
-    noisePos.y -= gPostEffect.time * 10.0f; // Z方向（奥）へ流れるスピード
-    noisePos.x += gPostEffect.time * 2.0f;  // X方向（横）へ流れるスピード
+    noisePos.y -= gPostEffect.time * 8.0f; // Z方向（奥）へ流れるスピード
+    noisePos.x += gPostEffect.time * 1.5f; // X方向（横）へ流れるスピード
 
     // FBMノイズを使って、周期的ではない自然でランダムなムラを作る
-    float32_t patchiness = fbm(noisePos * 0.1f); 
+    float32_t patchiness = fbm(noisePos * 0.08f); 
     
-    // patchiness (0.0~1.0) を使って、フォグの「濃度(density)」を局所的に変化させる
-    // ノイズの値が大きいところは濃く、小さいところは薄くなるように調整
-    // 完全にゼロにならないように最低値を足す
-    float32_t density = gPostEffect.value1 * (patchiness * 3.0f + 0.1f);
+    // patchiness を使って局所的なムラを作りつつ、扱いやすい濃度(density)を計算
+    // value1が0またはデフォルト値でも綺麗に表示されるスケール
+    float32_t baseDensity = (gPostEffect.value1 <= 0.0f) ? 0.015f : (gPostEffect.value1 * 0.002f);
+    float32_t density = baseDensity * (patchiness * 1.5f + 0.5f);
 
     // 3. 指数関数モデルでフォグ係数を計算 (0.0 ～ 1.0)
     float32_t fogFactor = exp(-fogDistance * density * heightFog);
     fogFactor = saturate(fogFactor);
 
+    // スカイボックス（背景）の特別処理: 空や遠山のグラデーションを美しく残す
+    if (depth >= 0.9999f)
+    {
+        // 遠景の空は地平線付近（下部）ほど霞み、上空は青空が抜けるようにブレンド
+        float32_t skyFogRatio = saturate(0.65f + 0.25f * (1.0f - input.texcoord.y));
+        fogFactor = max(fogFactor, 1.0f - skyFogRatio);
+    }
+
     // 4. 元の色とフォグカラーを線形補間
-    // gPostEffect.color に設定された色を使用します
-    float32_t3 finalColor = lerp(gPostEffect.color, sceneColor.rgb, fogFactor);
+    float32_t3 fogColor = gPostEffect.color;
+    // デフォルト色または未設定の場合のフォールバック (淡い雪景色のアイスブルーホワイト)
+    if (dot(fogColor, float32_t3(1.0f, 1.0f, 1.0f)) < 0.01f)
+    {
+        fogColor = float32_t3(0.82f, 0.88f, 0.95f);
+    }
+    
+    float32_t3 finalColor = lerp(fogColor, sceneColor.rgb, fogFactor);
 
     output.color = float32_t4(finalColor, sceneColor.a);
     

@@ -944,7 +944,8 @@ void GameScene::DrawHUD(class Draw &draw) {
 }
 
 void GameScene::DrawPlayingHUD(class Draw &draw) {
-  // --- 1. 左上: メインステータスパネル (テキスト幅に合わせて横の余白を最適化) ---
+  // --- 1. 左上: メインステータスパネル (テキスト幅に合わせて横の余白を最適化)
+  // ---
   const float panelX = 20.0f;
   const float panelY = 15.0f;
   const float panelW = 265.0f; // 元の390pxから余分な横の余白を詰める
@@ -1003,8 +1004,8 @@ void GameScene::DrawPlayingHUD(class Draw &draw) {
            speedBar.c_str());
   Vector4 speedColor = Lerp(Vector4{0.3f, 0.9f, 1.0f, 1.0f},
                             Vector4{1.0f, 0.4f, 0.2f, 1.0f}, speedRatio);
-  draw.DrawMSDFString(speedText, Vector2(textX, panelY + 81.0f), 19.0f, speedColor,
-                      true, Vector4(0.0f, 0.0f, 0.0f, 1.0f), 0.07f);
+  draw.DrawMSDFString(speedText, Vector2(textX, panelY + 81.0f), 19.0f,
+                      speedColor, true, Vector4(0.0f, 0.0f, 0.0f, 1.0f), 0.07f);
 
   // ベスト記録（距離 / スコア）
   char bestText[96];
@@ -1014,7 +1015,8 @@ void GameScene::DrawPlayingHUD(class Draw &draw) {
                       Vector4(0.8f, 0.85f, 0.9f, 0.85f), true,
                       Vector4(0.0f, 0.0f, 0.0f, 1.0f), 0.06f);
 
-  // --- 2. 右上: 1レーン時のみ残り距離を表示（横の余白を詰めたコンパクト設計） ---
+  // --- 2. 右上: 1レーン時のみ残り距離を表示（横の余白を詰めたコンパクト設計）
+  // ---
   if (playingState_ == PlayingState::OneLane) {
     float remainDist = (200.0f - rightSideDistance_ > 0.0f)
                            ? (200.0f - rightSideDistance_)
@@ -1032,12 +1034,11 @@ void GameScene::DrawPlayingHUD(class Draw &draw) {
                       Vector4(0.04f, 0.07f, 0.12f, 0.82f));
     draw.DrawFillRect(Vector2(rightX, rightY), Vector2(rightW, 3.0f),
                       Vector4(1.0f, 0.45f, 0.9f, 0.9f));
-    draw.DrawMSDFString(oneLaneBuf, Vector2(rightX + 12.0f, rightY + 10.0f), 22.0f,
-                        Vector4(1.0f, 0.45f, 0.9f, 1.0f), true,
+    draw.DrawMSDFString(oneLaneBuf, Vector2(rightX + 12.0f, rightY + 10.0f),
+                        22.0f, Vector4(1.0f, 0.45f, 0.9f, 1.0f), true,
                         Vector4(0.35f, 0.0f, 0.35f, 1.0f), 0.08f);
   }
 }
-
 
 void GameScene::DrawBossHUD(class Draw &draw) {
   // 中央上部: ボスパネル背景
@@ -1067,9 +1068,9 @@ void GameScene::DrawBossHUD(class Draw &draw) {
   }
   hpGauge += "]";
 
-  char hpText[128];
-  snprintf(hpText, sizeof(hpText), "HP %s  %2d / 20", hpGauge.c_str(), hp);
-  draw.DrawMSDFString(hpText, Vector2(365.0f, 58.0f), 22.0f,
+  char hpText[64];
+  snprintf(hpText, sizeof(hpText), "HP %s %2d / 20", hpGauge.c_str(), hp);
+  draw.DrawMSDFString(hpText, Vector2(395.0f, 58.0f), 22.0f,
                       Vector4(1.0f, 0.45f, 0.45f, 1.0f), true,
                       Vector4(0.2f, 0.0f, 0.0f, 1.0f), 0.07f);
 
