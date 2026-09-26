@@ -944,15 +944,22 @@ void GameScene::DrawHUD(class Draw &draw) {
 }
 
 void GameScene::DrawPlayingHUD(class Draw &draw) {
-  // --- 1. 左上: メインステータスパネル（半透明背景カード付き） ---
-  draw.DrawFillRect(Vector2(20.0f, 15.0f), Vector2(390.0f, 155.0f),
+  // --- 1. 左上: メインステータスパネル (テキスト幅に合わせて横の余白を最適化) ---
+  const float panelX = 20.0f;
+  const float panelY = 15.0f;
+  const float panelW = 265.0f; // 元の390pxから余分な横の余白を詰める
+  const float panelH = 145.0f;
+
+  draw.DrawFillRect(Vector2(panelX, panelY), Vector2(panelW, panelH),
                     Vector4(0.04f, 0.07f, 0.12f, 0.82f));
-  draw.DrawFillRect(Vector2(20.0f, 15.0f), Vector2(390.0f, 3.0f),
+  draw.DrawFillRect(Vector2(panelX, panelY), Vector2(panelW, 3.0f),
                     Vector4(0.2f, 0.6f, 0.9f, 0.9f));
+
+  const float textX = panelX + 12.0f;
 
   char distBuf[64];
   snprintf(distBuf, sizeof(distBuf), "距離: %.1f m", currentDistance_);
-  draw.DrawMSDFString(distBuf, Vector2(32.0f, 24.0f), 32.0f,
+  draw.DrawMSDFString(distBuf, Vector2(textX, panelY + 9.0f), 30.0f,
                       Vector4(1.0f, 1.0f, 1.0f, 1.0f), true,
                       Vector4(0.05f, 0.15f, 0.25f, 1.0f), 0.08f);
 
@@ -963,7 +970,7 @@ void GameScene::DrawPlayingHUD(class Draw &draw) {
   } else {
     snprintf(scoreBuf, sizeof(scoreBuf), "スコア: %.0f pt", currentScore_);
   }
-  draw.DrawMSDFString(scoreBuf, Vector2(32.0f, 66.0f), 26.0f,
+  draw.DrawMSDFString(scoreBuf, Vector2(textX, panelY + 47.0f), 24.0f,
                       Vector4(1.0f, 0.9f, 0.2f, 1.0f), true,
                       Vector4(0.15f, 0.10f, 0.0f, 1.0f), 0.08f);
 
@@ -996,73 +1003,41 @@ void GameScene::DrawPlayingHUD(class Draw &draw) {
            speedBar.c_str());
   Vector4 speedColor = Lerp(Vector4{0.3f, 0.9f, 1.0f, 1.0f},
                             Vector4{1.0f, 0.4f, 0.2f, 1.0f}, speedRatio);
-  draw.DrawMSDFString(speedText, Vector2(32.0f, 102.0f), 20.0f, speedColor,
+  draw.DrawMSDFString(speedText, Vector2(textX, panelY + 81.0f), 19.0f, speedColor,
                       true, Vector4(0.0f, 0.0f, 0.0f, 1.0f), 0.07f);
 
   // ベスト記録（距離 / スコア）
   char bestText[96];
   snprintf(bestText, sizeof(bestText), "BEST: %.1f m  /  %.0f pt",
            topRankings_[0], topScoreRankings_[0]);
-  draw.DrawMSDFString(bestText, Vector2(32.0f, 134.0f), 18.0f,
+  draw.DrawMSDFString(bestText, Vector2(textX, panelY + 111.0f), 17.0f,
                       Vector4(0.8f, 0.85f, 0.9f, 0.85f), true,
                       Vector4(0.0f, 0.0f, 0.0f, 1.0f), 0.06f);
 
-  // --- 2. 右上: モード、バリア、プレイヤーステータスバッジ（半透明カード付き）
-  // ---
-  draw.DrawFillRect(Vector2(880.0f, 15.0f), Vector2(380.0f, 120.0f),
-                    Vector4(0.04f, 0.07f, 0.12f, 0.82f));
-  draw.DrawFillRect(Vector2(880.0f, 15.0f), Vector2(380.0f, 3.0f),
-                    Vector4(0.2f, 0.6f, 0.9f, 0.9f));
-
-  // モードバッジ
-  if (playingState_ == PlayingState::ThreeLane) {
-    draw.DrawMSDFString("[ 3-LANE RUN ]", Vector2(1040.0f, 25.0f), 24.0f,
-                        Vector4(0.4f, 0.85f, 1.0f, 1.0f), true,
-                        Vector4(0.0f, 0.15f, 0.35f, 1.0f), 0.08f);
-  } else if (playingState_ == PlayingState::OneLane) {
+  // --- 2. 右上: 1レーン時のみ残り距離を表示（横の余白を詰めたコンパクト設計） ---
+  if (playingState_ == PlayingState::OneLane) {
     float remainDist = (200.0f - rightSideDistance_ > 0.0f)
                            ? (200.0f - rightSideDistance_)
                            : 0.0f;
     char oneLaneBuf[64];
     snprintf(oneLaneBuf, sizeof(oneLaneBuf), "[ 1-LANE DASH: 残り %.0f m ]",
              remainDist);
-    draw.DrawMSDFString(oneLaneBuf, Vector2(910.0f, 25.0f), 24.0f,
+
+    const float rightW = 275.0f;
+    const float rightH = 46.0f;
+    const float rightX = 1260.0f - rightW; // 画面右端から20pxマージン
+    const float rightY = 15.0f;
+
+    draw.DrawFillRect(Vector2(rightX, rightY), Vector2(rightW, rightH),
+                      Vector4(0.04f, 0.07f, 0.12f, 0.82f));
+    draw.DrawFillRect(Vector2(rightX, rightY), Vector2(rightW, 3.0f),
+                      Vector4(1.0f, 0.45f, 0.9f, 0.9f));
+    draw.DrawMSDFString(oneLaneBuf, Vector2(rightX + 12.0f, rightY + 10.0f), 22.0f,
                         Vector4(1.0f, 0.45f, 0.9f, 1.0f), true,
                         Vector4(0.35f, 0.0f, 0.35f, 1.0f), 0.08f);
-  } else if (playingState_ == PlayingState::Boss) {
-    float flashAlpha = 0.7f + 0.3f * std::sin(uiTimer_ * 8.0f);
-    draw.DrawMSDFString("[ ! BOSS BATTLE ! ]", Vector2(1010.0f, 25.0f), 24.0f,
-                        Vector4(1.0f, 0.25f, 0.25f, flashAlpha), true,
-                        Vector4(0.4f, 0.0f, 0.0f, 1.0f), 0.08f);
-  }
-
-  // バリア（シールド）バッジ
-  if (player_->GetHasBarrier()) {
-    float pulse = 0.85f + 0.15f * std::sin(uiTimer_ * 6.0f);
-    draw.DrawMSDFString("[◆ SHIELD: ACTIVE ]", Vector2(1005.0f, 62.0f), 22.0f,
-                        Vector4(0.0f, 1.0f, 0.9f, pulse), true,
-                        Vector4(0.0f, 0.35f, 0.35f, 1.0f), 0.08f);
-  } else {
-    draw.DrawMSDFString("[ SHIELD: OFF ]", Vector2(1060.0f, 62.0f), 22.0f,
-                        Vector4(0.55f, 0.6f, 0.65f, 0.75f), true,
-                        Vector4(0.1f, 0.1f, 0.1f, 1.0f), 0.06f);
-  }
-
-  // プレイヤーアクション状態バッジ
-  if (player_->GetIsRolling()) {
-    draw.DrawMSDFString("[▼ SLIDING ]", Vector2(1070.0f, 96.0f), 20.0f,
-                        Vector4(1.0f, 0.75f, 0.2f, 1.0f), true,
-                        Vector4(0.35f, 0.2f, 0.0f, 1.0f), 0.07f);
-  } else if (player_->GetIsJumping()) {
-    draw.DrawMSDFString("[▲ JUMPING ]", Vector2(1070.0f, 96.0f), 20.0f,
-                        Vector4(0.3f, 0.85f, 1.0f, 1.0f), true,
-                        Vector4(0.0f, 0.2f, 0.4f, 1.0f), 0.07f);
-  } else {
-    draw.DrawMSDFString("[● RUNNING ]", Vector2(1070.0f, 96.0f), 20.0f,
-                        Vector4(0.35f, 0.95f, 0.45f, 1.0f), true,
-                        Vector4(0.0f, 0.3f, 0.1f, 1.0f), 0.07f);
   }
 }
+
 
 void GameScene::DrawBossHUD(class Draw &draw) {
   // 中央上部: ボスパネル背景
