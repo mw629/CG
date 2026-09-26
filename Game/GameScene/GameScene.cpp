@@ -1,8 +1,8 @@
 #include "GameScene.h"
 #include "../../Editer/EditorManager.h"
 #include "AssetManager.h"
-#include "Graphics/Render/Draw.h"
 #include "Graphics/Font/TextRenderer.h"
+#include "Graphics/Render/Draw.h"
 #include <Engine.h>
 #include <GameObjects/Object/3d/Model.h>
 #include <Math/Calculation.h>
@@ -887,12 +887,17 @@ void GameScene::DrawHUD(class Draw &draw) {
     draw.GetTextRenderer()->GetAtlas()->PreloadString(
         "0123456789ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz:/"
         ".mkmhpt%+-[]()!★◆▼▲●■░|【】①②③※・「」←→ "
+        "ぁあぃいぅうぇえぉおかがきぎくぐけげこごさざしじすずせぜそぞただちぢっ"
+        "つづてでとど"
+        "なにぬねのはばぱひびぴふぶぷへべぺほぼぽまみむめもゃやゅゆょよらりるれ"
+        "ろゎわゐゑをん"
         "一二三四五六七八九十百千万到達距離スコア速度最高記録ベストゲームオーバ"
         "ーリスタートリザルトへ戻る一時停止中現在獲得順位反撃チャンス左中央右打"
         "ち返せ跳ね返しボーナス敵撃破モードシールドバリアアクティブジャンプスラ"
         "イディング走るポーズキーもう一度遊ぶプレイ"
         "ペンギンダッシュ―—"
-        "操作方法十字説明攻略倒し方緑赤色迫る直撃減少命中削切回避手前当てろ避けろ戦指令");
+        "操作方法十字説明攻略倒し方緑赤色迫る直撃減少命中削切回避手前当てろ避け"
+        "ろ戦指令障害物魚押飛進");
   }
 
   if (gameState_ == GameState::Title) {
@@ -1094,10 +1099,10 @@ void GameScene::DrawBossHUD(class Draw &draw) {
                       Vector4(0.2f, 0.0f, 0.0f, 1.0f), 0.07f);
 
   // 反撃（跳ね返し）基本操作ガイド
-  draw.DrawMSDFString("[1] 左打ち返し  |  [2] 中央打ち返し  |  [3] 右打ち返し",
-                      Vector2(400.0f, 92.0f), 20.0f,
-                      Vector4(0.8f, 0.95f, 0.5f, 1.0f), true,
-                      Vector4(0.0f, 0.0f, 0.0f, 1.0f), 0.07f);
+  draw.DrawMSDFString(
+      "[1] 左レーン  |  [2] 中央レーン  |  [3] 右レーン (魚を押して敵へ飛ばす)",
+      Vector2(325.0f, 92.0f), 20.0f, Vector4(0.8f, 0.95f, 0.5f, 1.0f), true,
+      Vector4(0.0f, 0.0f, 0.0f, 1.0f), 0.07f);
 
   // 緑攻撃（跳ね返し可能弾）が反撃有効範囲（z: -15.0f
   // 〜 15.0f）にあるかチェック
@@ -1134,13 +1139,13 @@ void GameScene::DrawBossHUD(class Draw &draw) {
                                                 : "右レーン";
     char alertBuf[96];
     snprintf(alertBuf, sizeof(alertBuf),
-             ">>> 反撃チャンス！ [%s] キーで%s打ち返し！ <<<", keyName,
+             ">>> 反撃チャンス！ [%s] キーで%sの魚を敵に飛ばせ！ <<<", keyName,
              laneName);
 
     float pulseScale = 0.8f + 0.2f * std::sin(uiTimer_ * 12.0f);
     draw.DrawFillRect(Vector2(290.0f, 125.0f), Vector2(700.0f, 40.0f),
                       Vector4(0.2f, 0.1f, 0.0f, 0.85f));
-    draw.DrawMSDFString(alertBuf, Vector2(310.0f, 130.0f), 26.0f,
+    draw.DrawMSDFString(alertBuf, Vector2(300.0f, 130.0f), 25.0f,
                         Vector4(1.0f, 0.95f, 0.15f, pulseScale), true,
                         Vector4(0.5f, 0.1f, 0.0f, 1.0f), 0.09f);
   }
@@ -1160,11 +1165,13 @@ void GameScene::DrawBossHUD(class Draw &draw) {
                       Vector4(1.0f, 0.45f, 0.2f, 0.95f));
 
     // ヘッダー
-    draw.DrawMSDFString("【 ボスの倒し方 】", Vector2(guideX + 16.0f, guideY + 12.0f),
-                        22.0f, Vector4(1.0f, 0.88f, 0.25f, 1.0f), true,
+    draw.DrawMSDFString("【 ボスの倒し方 】",
+                        Vector2(guideX + 16.0f, guideY + 12.0f), 22.0f,
+                        Vector4(1.0f, 0.88f, 0.25f, 1.0f), true,
                         Vector4(0.3f, 0.05f, 0.0f, 1.0f), 0.12f, 0.08f);
-    draw.DrawMSDFString("HOW TO DEFEAT", Vector2(guideX + 225.0f, guideY + 16.0f),
-                        15.0f, Vector4(0.85f, 0.65f, 0.5f, 0.85f), true,
+    draw.DrawMSDFString("HOW TO DEFEAT",
+                        Vector2(guideX + 225.0f, guideY + 16.0f), 15.0f,
+                        Vector4(0.85f, 0.65f, 0.5f, 0.85f), true,
                         Vector4(0.0f, 0.0f, 0.0f, 1.0f), 0.08f, 0.05f);
 
     // 区切り線
@@ -1172,34 +1179,34 @@ void GameScene::DrawBossHUD(class Draw &draw) {
                       Vector2(guideW - 28.0f, 1.0f),
                       Vector4(0.5f, 0.25f, 0.2f, 0.65f));
 
-    // ステップ1: 緑の弾を打ち返す
-    draw.DrawMSDFString("① 緑の弾を手前で打ち返せ！",
+    // ステップ1: 障害物をよける
+    draw.DrawMSDFString("① 障害物をよけて進め！",
                         Vector2(guideX + 16.0f, guideY + 52.0f), 19.0f,
-                        Vector4(0.3f, 1.0f, 0.6f, 1.0f), true,
-                        Vector4(0.0f, 0.2f, 0.1f, 1.0f), 0.10f, 0.06f);
-    draw.DrawMSDFString("   手前に来たら [1]左 / [2]中央 / [3]右",
+                        Vector4(1.0f, 0.5f, 0.5f, 1.0f), true,
+                        Vector4(0.2f, 0.0f, 0.0f, 1.0f), 0.10f, 0.06f);
+    draw.DrawMSDFString("   移動で回避",
                         Vector2(guideX + 16.0f, guideY + 77.0f), 16.0f,
-                        Vector4(1.0f, 0.95f, 0.65f, 0.95f), true,
-                        Vector4(0.0f, 0.0f, 0.0f, 1.0f), 0.08f, 0.05f);
-
-    // ステップ2: ボスに当ててダメージ
-    draw.DrawMSDFString("② 跳ね返した弾をボスに当てろ！",
-                        Vector2(guideX + 16.0f, guideY + 104.0f), 19.0f,
-                        Vector4(1.0f, 0.75f, 0.25f, 1.0f), true,
-                        Vector4(0.2f, 0.1f, 0.0f, 1.0f), 0.10f, 0.06f);
-    draw.DrawMSDFString("   命中させるとボスのHP減少 (0で撃破)",
-                        Vector2(guideX + 16.0f, guideY + 129.0f), 16.0f,
                         Vector4(0.9f, 0.9f, 0.9f, 0.9f), true,
                         Vector4(0.0f, 0.0f, 0.0f, 1.0f), 0.08f, 0.05f);
 
-    // ステップ3: 赤い攻撃は回避
-    draw.DrawMSDFString("③ 赤い攻撃は打ち返せない！",
+    // ステップ2: 魚がいるレーンを押す
+    draw.DrawMSDFString("② 魚がいるレーンを押せ！",
+                        Vector2(guideX + 16.0f, guideY + 104.0f), 19.0f,
+                        Vector4(0.3f, 1.0f, 0.6f, 1.0f), true,
+                        Vector4(0.0f, 0.2f, 0.1f, 1.0f), 0.10f, 0.06f);
+    draw.DrawMSDFString("   魚が手前に来たら [1]左 / [2]中 / [3]右",
+                        Vector2(guideX + 16.0f, guideY + 129.0f), 16.0f,
+                        Vector4(1.0f, 0.95f, 0.65f, 0.95f), true,
+                        Vector4(0.0f, 0.0f, 0.0f, 1.0f), 0.08f, 0.05f);
+
+    // ステップ3: 魚を敵に飛ばして撃破
+    draw.DrawMSDFString("③ 魚を敵に飛ばして撃破！",
                         Vector2(guideX + 16.0f, guideY + 156.0f), 19.0f,
-                        Vector4(1.0f, 0.4f, 0.4f, 1.0f), true,
-                        Vector4(0.2f, 0.0f, 0.0f, 1.0f), 0.10f, 0.06f);
-    draw.DrawMSDFString("   ジャンプ / スライド / 移動で回避！",
+                        Vector4(1.0f, 0.8f, 0.25f, 1.0f), true,
+                        Vector4(0.2f, 0.1f, 0.0f, 1.0f), 0.10f, 0.06f);
+    draw.DrawMSDFString("   飛ばした魚を当ててHPを削り切れ！",
                         Vector2(guideX + 16.0f, guideY + 181.0f), 16.0f,
-                        Vector4(0.85f, 0.85f, 0.85f, 0.85f), true,
+                        Vector4(0.95f, 0.95f, 0.95f, 0.9f), true,
                         Vector4(0.0f, 0.0f, 0.0f, 1.0f), 0.08f, 0.05f);
   }
 
@@ -1218,20 +1225,20 @@ void GameScene::DrawBossHUD(class Draw &draw) {
                         Vector4(1.0f, 0.9f, 0.2f, alpha), true,
                         Vector4(0.3f, 0.0f, 0.0f, alpha), 0.12f, 0.08f);
 
-    draw.DrawMSDFString("① 手前に迫る「緑の弾」を [1] [2] [3] キーで打ち返せ！",
-                        Vector2(290.0f, 305.0f), 22.0f,
+    draw.DrawMSDFString("① 障害物をよけろ！ (移動で回避)",
+                        Vector2(290.0f, 305.0f), 21.0f,
+                        Vector4(1.0f, 0.5f, 0.5f, alpha), true,
+                        Vector4(0.2f, 0.0f, 0.0f, alpha), 0.10f, 0.06f);
+
+    draw.DrawMSDFString("② 魚がいるレーンを手前で [1] [2] [3] キーで押せ！",
+                        Vector2(290.0f, 345.0f), 21.0f,
                         Vector4(0.3f, 1.0f, 0.6f, alpha), true,
                         Vector4(0.0f, 0.2f, 0.1f, alpha), 0.10f, 0.06f);
 
-    draw.DrawMSDFString("② 跳ね返した弾をボスに命中させて HP を削り切れ！",
-                        Vector2(290.0f, 345.0f), 21.0f,
-                        Vector4(1.0f, 0.8f, 0.3f, alpha), true,
+    draw.DrawMSDFString("③ 魚を敵に飛ばして命中させ、HP を削り切れ！",
+                        Vector2(290.0f, 385.0f), 21.0f,
+                        Vector4(1.0f, 0.85f, 0.3f, alpha), true,
                         Vector4(0.2f, 0.1f, 0.0f, alpha), 0.10f, 0.06f);
-
-    draw.DrawMSDFString("※ 赤い攻撃は跳ね返せない！ ジャンプ・スライド・移動で回避せよ！",
-                        Vector2(290.0f, 385.0f), 19.0f,
-                        Vector4(1.0f, 0.45f, 0.45f, alpha), true,
-                        Vector4(0.2f, 0.0f, 0.0f, alpha), 0.08f, 0.05f);
   }
 
   // ボス撃破時の演出バナー
@@ -1263,7 +1270,8 @@ void GameScene::DrawControlsGuide(class Draw &draw) {
     guideText = "[SPACE / W] ジャンプ    [S] スライド    [ESC] ポーズ  "
                 "(※1レーン固定中)";
   } else if (playingState_ == PlayingState::Boss) {
-    guideText = "【ボス倒し方】手前の緑弾を [1/2/3] で打ち返しボスへ直撃！ 赤攻撃は回避！  "
+    guideText = "【ボス倒し方】障害物をよけて魚がいるレーンを押し敵に飛ばす！ "
+                "[1/2/3] 魚飛ばし  "
                 "[A/D] 移動  [SPACE] ジャンプ  [S] スライド  [ESC] ポーズ";
   }
 
@@ -1498,10 +1506,9 @@ void GameScene::DrawTitleHUD(class Draw &draw) {
   if (mainAlpha > 0.01f) {
     // ドロップシャドウ
     Vector4 shadowColor = Vector4(0.01f, 0.04f, 0.12f, 0.8f * mainAlpha);
-    draw.DrawMSDFString(titleText,
-                        Vector2(titleX + 4.0f, currentTitleY + 5.0f), fontSize,
-                        shadowColor, false, {0.0f, 0.0f, 0.0f, 0.0f}, 0.0f,
-                        0.18f);
+    draw.DrawMSDFString(titleText, Vector2(titleX + 4.0f, currentTitleY + 5.0f),
+                        fontSize, shadowColor, false, {0.0f, 0.0f, 0.0f, 0.0f},
+                        0.0f, 0.18f);
 
     // メインテキスト（清涼感のあるアイスホワイト & 濃紺アウトライン）
     Vector4 textColor = Vector4(0.95f, 0.98f, 1.0f, mainAlpha);
@@ -1558,12 +1565,11 @@ void GameScene::DrawTitleHUD(class Draw &draw) {
       const char *key;
       const char *desc;
     };
-    ControlItem items[] = {
-        {"[A / D] / [← →]", "レーン移動 (PAD: 十字キー)"},
-        {"[SPACE / W / ↑]", "ジャンプ   (PAD: Aボタン)"},
-        {"[S] / [↓]",       "スライド   (PAD: Bボタン)"},
-        {"[ESC]",           "ポーズ / メニュー"},
-        {"[1] / [2] / [3]", "ボス弾打ち返し (ボス戦時)"}};
+    ControlItem items[] = {{"[A / D] / [← →]", "レーン移動 (PAD: 十字キー)"},
+                           {"[SPACE / W / ↑]", "ジャンプ   (PAD: Aボタン)"},
+                           {"[S] / [↓]", "スライド   (PAD: Bボタン)"},
+                           {"[ESC]", "ポーズ / メニュー"},
+                           {"[1] / [2] / [3]", "魚を敵に飛ばす (ボス戦時)"}};
 
     float itemY = guideCardY + 52.0f;
     for (const auto &item : items) {
@@ -1685,7 +1691,8 @@ void GameScene::PlayingUpdate() {
             !obs->GetIsReflected() && !obs->GetIsFalling()) {
           float obsX = obs->GetTransform().translate.x;
           float laneW = stageSettings_->GetLaneWidth();
-          int lane = 1; // 0:画面左([1]キー), 1:画面中央([2]キー), 2:画面右([3]キー)
+          int lane =
+              1; // 0:画面左([1]キー), 1:画面中央([2]キー), 2:画面右([3]キー)
           // ボス戦カメラ（Y回転180度）ではワールド+Xが画面左、ワールド-Xが画面右に見える
           if (obsX > laneW / 2.0f)
             lane = 0; // 画面左（[1]キー対応）
@@ -1736,8 +1743,8 @@ void GameScene::PlayingUpdate() {
 
   // カメラが反転視点（ボス戦等でY回転が約90度以上反転している状態）の時は、
   // 画面の見た目通りに動くようにプレイヤーの左右操作を反転させる
-  bool isCameraInverted =
-      (playingState_ == PlayingState::Boss && cameraTransform_.rotate.y > 1.57f);
+  bool isCameraInverted = (playingState_ == PlayingState::Boss &&
+                           cameraTransform_.rotate.y > 1.57f);
   player_->SetInvertedControls(isCameraInverted);
 
   // オブジェクトの一括更新
