@@ -170,6 +170,10 @@ void GameScene::ImGui() {
       if (ImGui::TreeNode("Boss Info")) {
         ImGui::Text("HP: %d / 20", boss_->GetHP());
         ImGui::DragFloat3("Target Pos", &boss_->GetTargetPosRef().x, 0.1f);
+        ImGui::DragFloat("Attack Spawn Z", &bossAttackSpawnZ_, 0.5f, -60.0f, 0.0f, "%.1f m");
+        ImGui::DragFloat("Attack Drop Height", &bossAttackDropHeight_, 0.5f, 5.0f, 35.0f, "%.1f m");
+        ImGui::DragFloat("Attack Fall Frames", &bossAttackFallDuration_, 1.0f, 5.0f, 60.0f, "%.0f frames");
+        ImGui::Text("Attack Distance to Player: %.1f m", -bossAttackSpawnZ_);
         ImGui::TreePop();
       }
     }
@@ -1329,9 +1333,11 @@ void GameScene::PlayingUpdate() {
             Obstacle *obs = stageSettings_->GetObstacle(j);
             if (!obs->GetIsActive()) {
               obs->SetType(type);
+              obs->SetDropHeight(bossAttackDropHeight_);
+              obs->SetFallDuration(bossAttackFallDuration_);
               float x = (i - 1) * stageSettings_->GetLaneWidth();
               obs->Spawn(x, 2.0f + obs->GetCollisionHeight() * 0.5f,
-                         -2.0f); // ボスが-2.0fなので、少し手前から出現
+                         bossAttackSpawnZ_); // ボスの攻撃を奥の上空から降らせて出現させる
               break;
             }
           }
@@ -1351,8 +1357,14 @@ void GameScene::PlayingUpdate() {
         if (!obs->GetIsActive())
           continue;
 
+        // 着地時の砂煙・衝撃波エフェクト
+        if (obs->GetJustLanded()) {
+          effectManager_->EmitDust(obs->GetTransform().translate);
+          effectManager_->EmitShockwave(obs->GetTransform().translate);
+        }
+
         if (obs->GetType() == Obstacle::Type::BossAttackReflectable &&
-            !obs->GetIsReflected()) {
+            !obs->GetIsReflected() && !obs->GetIsFalling()) {
           float obsX = obs->GetTransform().translate.x;
           float laneW = stageSettings_->GetLaneWidth();
           int lane = 1; // 0:Left, 1:Center, 2:Right
@@ -1363,7 +1375,8 @@ void GameScene::PlayingUpdate() {
 
           // プレイヤーの手前にいる時に跳ね返せる
           float z = obs->GetTransform().translate.z;
-          if (z > -15.0f && z < 15.0f) {
+          float reflectMinZ = (std::min)(-15.0f, bossAttackSpawnZ_ - 1.0f);
+          if (z > reflectMinZ && z < 15.0f) {
             if ((lane == 0 && push1) || (lane == 1 && push2) ||
                 (lane == 2 && push3)) {
               obs->SetReflected(true);
@@ -1549,6 +1562,9 @@ void GameScene::CheckCollisions() {
           obstacle->GetType() == Obstacle::Type::BossAttackReflectable) {
         // 跳ね返されている緑障害物はプレイヤーに当たらない
         if (obstacle->GetIsReflected())
+          continue;
+        // 落下中（上空にいる間）はプレイヤーに当たらない
+        if (obstacle->GetIsFalling())
           continue;
       }
 

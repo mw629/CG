@@ -242,7 +242,17 @@ void Obstacle::SetType(Type type) {
 }
 
 void Obstacle::Spawn(float x, float y, float z) {
-  transform_.translate = {x, y, z};
+  targetY_ = y;
+  if (type_ == Type::BossAttack || type_ == Type::BossAttackReflectable) {
+    isFalling_ = true;
+    fallTimer_ = 0.0f;
+    justLanded_ = false;
+    transform_.translate = {x, targetY_ + dropHeight_, z};
+  } else {
+    isFalling_ = false;
+    justLanded_ = false;
+    transform_.translate = {x, y, z};
+  }
   isActive_ = true;
   isHit_ = false; // 初期化
   isReflected_ = false;
@@ -262,7 +272,11 @@ void Obstacle::StageUpdate(Matrix4x4 view, float scrollSpeed) {
   if (!isActive_)
     return;
 
+  // 前フレームの着地フラグをクリア
+  justLanded_ = false;
+
   if (isHit_) {
+    isFalling_ = false;
     // 吹き飛び演出
     transform_.translate.x += velocity_.x;
     transform_.translate.y += velocity_.y;
@@ -284,6 +298,7 @@ void Obstacle::StageUpdate(Matrix4x4 view, float scrollSpeed) {
       isActive_ = false; // 画面外で消す
     }
   } else if (isReflected_) {
+    isFalling_ = false;
     // ボス（ターゲット）へ向かって飛ぶ
     Vector3 dir = {reflectedTarget_.x - transform_.translate.x,
                    reflectedTarget_.y - transform_.translate.y,
@@ -308,10 +323,28 @@ void Obstacle::StageUpdate(Matrix4x4 view, float scrollSpeed) {
   } else {
     // スクロール
     if (type_ == Type::BossAttack || type_ == Type::BossAttackReflectable) {
+      // 上空からの落下演出
+      if (isFalling_) {
+        fallTimer_ += 1.0f;
+        float t = fallTimer_ / fallDuration_;
+        if (t >= 1.0f) {
+          t = 1.0f;
+          isFalling_ = false;
+          justLanded_ = true;
+          transform_.translate.y = targetY_;
+        } else {
+          // Ease-In (重力加速): t * t
+          float easeT = t * t;
+          float startY = targetY_ + dropHeight_;
+          transform_.translate.y = startY + (targetY_ - startY) * easeT;
+        }
+      }
+
       // ボスの攻撃は奥から手前(+Z方向)へ
       transform_.translate.z += scrollSpeed;
       if (transform_.translate.z > 20.0f) {
         isActive_ = false;
+        isFalling_ = false;
       }
     } else {
       // 手前にスクロール
@@ -344,6 +377,7 @@ void Obstacle::OnBlowAway() {
   if (isHit_)
     return;
   isHit_ = true;
+  isFalling_ = false;
   // 上と手前(画面方向)に勢いよく飛ぶ
   float randX = ((float)rand() / RAND_MAX - 0.5f) * 0.4f;
   velocity_ = {randX, 0.6f, -0.8f};
@@ -353,6 +387,7 @@ void Obstacle::OnHit() {
   if (isHit_)
     return;
   isHit_ = true;
+  isFalling_ = false;
 }
 
 void Obstacle::Draw(class Draw &draw) {

@@ -48,6 +48,14 @@ private:
   Vector3 velocity_{0.0f, 0.0f, 0.0f};
   float gravity_ = 0.015f;
 
+  // 上空からの落下演出用
+  bool isFalling_ = false;
+  float fallTimer_ = 0.0f;
+  float fallDuration_ = 25.0f; // 落下にかかるフレーム数
+  float dropHeight_ = 15.0f;   // 落下開始の高さオフセット
+  float targetY_ = 0.0f;       // 着地目標Y座標
+  bool justLanded_ = false;    // 着地した瞬間フラグ
+
   // 当たり判定のサイズ
   float collisionWidth_ = 1.0f;
   float collisionHeight_ = 1.0f;
@@ -81,9 +89,22 @@ public:
   void OnBlowAway();
 
   void OnHit();
-  void SetReflected(bool reflected) { isReflected_ = reflected; }
+  void SetReflected(bool reflected) {
+    isReflected_ = reflected;
+    if (reflected) {
+      isFalling_ = false;
+    }
+  }
   bool GetIsReflected() const { return isReflected_; }
   void SetReflectedTarget(const Vector3 &target) { reflectedTarget_ = target; }
+
+  // 落下関連
+  bool GetIsFalling() const { return isFalling_; }
+  bool GetJustLanded() const { return justLanded_; }
+  void SetDropHeight(float height) { dropHeight_ = height; }
+  float GetDropHeight() const { return dropHeight_; }
+  void SetFallDuration(float duration) { fallDuration_ = duration; }
+  float GetFallDuration() const { return fallDuration_; }
 
   // Override standard Update and Draw to avoid GameObjectManager from
   // automatically updating scroll/drawing without context
@@ -99,7 +120,11 @@ public:
   /// <summary>
   /// 画面の手前を過ぎたら非アクティブにする
   /// </summary>
-  void Deactivate() { isActive_ = false; }
+  void Deactivate() {
+    isActive_ = false;
+    isFalling_ = false;
+    justLanded_ = false;
+  }
 
   // ゲッター
   Type GetType() const { return type_; }
