@@ -18,6 +18,7 @@ private:
   float hitTimer_ = 0.0f;
   BossState state_ = BossState::Appearance;
   float stateTimer_ = 0.0f;
+  float battleAnimTimer_ = 0.0f;
 
   Vector3 startPos_;
   Vector3 targetPos_;
@@ -27,6 +28,7 @@ public:
   ~Boss();
 
   void Initialize(ModelData modelData);
+  void Reset();
   void Spawn(float x, float y, float z);
 
   void Update(Matrix4x4 view, float speedMultiplier = 1.0f) override;

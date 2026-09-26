@@ -34,6 +34,9 @@ private:
 	std::unique_ptr<Sprite> titleSprite_;
 	SpriteData titleSpriteData_;
 	int titleTextureHandle_ = -1;
+	bool isTitleExiting_ = false;
+	float titleExitTimer_ = 0.0f;
+	const float kTitleExitDuration_ = 0.7f;
 
 	// プレイ中の状態 (3レーン、1レーン、ボス)
 	enum class PlayingState { ThreeLane, OneLane, Boss };
@@ -139,6 +142,8 @@ public:
 	void ChangePlayingState(PlayingState newState, bool force = false);
 
 	void ResetGame();
+	void StartGame();
+	void ReturnToTitle();
 
 	void TitleUpdate();
 

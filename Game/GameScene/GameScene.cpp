@@ -2,6 +2,7 @@
 #include "../../Editer/EditorManager.h"
 #include "AssetManager.h"
 #include "Graphics/Render/Draw.h"
+#include "Graphics/Font/TextRenderer.h"
 #include <Engine.h>
 #include <GameObjects/Object/3d/Model.h>
 #include <Math/Calculation.h>
@@ -59,11 +60,11 @@ void GameScene::ImGui() {
       if (ImGui::Button("Restart (1)", ImVec2(160, 35))) {
         ResetGame();
         gameState_ = GameState::Playing;
+        isTitleExiting_ = false;
       }
       ImGui::SameLine();
       if (ImGui::Button("Return to Title (2)", ImVec2(160, 35))) {
-        ResetGame();
-        gameState_ = GameState::Title;
+        ReturnToTitle();
       }
       ImGui::Separator();
     }
@@ -255,12 +256,12 @@ void GameScene::ImGui() {
     if (ImGui::Button("Reset Game", ImVec2(120, 0))) {
       ResetGame();
       gameState_ = GameState::Playing;
+      isTitleExiting_ = false;
       camera_->SetDebugCamera(false);
     }
     ImGui::SameLine();
     if (ImGui::Button("Go to Title", ImVec2(120, 0))) {
-      ResetGame();
-      gameState_ = GameState::Title;
+      ReturnToTitle();
       camera_->SetDebugCamera(false);
     }
   }
@@ -466,7 +467,15 @@ void GameScene::ImGui() {
     }
     ImGui::SameLine();
     if (ImGui::Button("Trigger Boss Item (ボス戦移行)")) {
-      ChangePlayingState(PlayingState::Boss);
+      for (int j = 0; j < stageSettings_->GetMaxObstacles(); j++) {
+        Obstacle *obs = stageSettings_->GetObstacle(j);
+        if (obs->GetIsActive() && (obs->GetType() == Obstacle::Type::Low ||
+                                   obs->GetType() == Obstacle::Type::High ||
+                                   obs->GetType() == Obstacle::Type::Wall)) {
+          obs->OnBlowAway();
+        }
+      }
+      ChangePlayingState(PlayingState::Boss, true);
       effectManager_->EmitShockwave(player_->GetTransform().translate);
     }
 
@@ -521,8 +530,7 @@ void GameScene::ImGui() {
       gameState_ = GameState::Playing;
     }
     if (ImGui::Button("Return to Title", ImVec2(200, 40))) {
-      ResetGame();
-      gameState_ = GameState::Title;
+      ReturnToTitle();
     }
     ImGui::End();
   }
@@ -537,8 +545,7 @@ void GameScene::ImGui() {
                  ImGuiWindowFlags_NoResize | ImGuiWindowFlags_AlwaysAutoResize |
                      ImGuiWindowFlags_NoCollapse);
     if (ImGui::Button("Start Game (SPACE)", ImVec2(220, 45))) {
-      ResetGame();
-      gameState_ = GameState::Playing;
+      StartGame();
     }
     ImGui::End();
   }
@@ -549,12 +556,45 @@ void GameScene::ImGui() {
 void GameScene::ResetGame() {
   stageSettings_->Reset();
   player_->Reset();
+  boss_->Reset();
+  bossAttackTimer_ = 0.0f;
   effectManager_->ClearHitParticles();
   effectManager_->ClearBarrier();
   currentDistance_ = 0.0f;
   currentScore_ = 0.0f;
   bonusEnemyHitCount_ = 0;
-  ChangePlayingState(PlayingState::ThreeLane, true);
+
+  // カメラと遷移状態の即座初期化
+  isCameraTransitionPending_ = false;
+  isCameraTransitioning_ = false;
+  cameraTransitionTimer_ = 0.0f;
+
+  cameraTransform_.scale = {1.0f, 1.0f, 1.0f};
+  cameraTransform_.rotate = {0.3f, 0.0f, 0.0f};
+  cameraTransform_.translate = {0.0f, 8.0f, -15.0f};
+  camera_->SetTransform(cameraTransform_);
+  gameCamera_->SetTransform(cameraTransform_);
+
+  playingState_ = PlayingState::ThreeLane;
+  isRightSideMode_ = false;
+  rightSideDistance_ = 0.0f;
+  stageSettings_->SetLaneCount(3);
+  stageSettings_->SetSpawningPaused(false);
+  player_->SetInvertedControls(false);
+}
+
+void GameScene::StartGame() {
+  ResetGame();
+  gameState_ = GameState::Playing;
+  isTitleExiting_ = true;
+  titleExitTimer_ = 0.0f;
+}
+
+void GameScene::ReturnToTitle() {
+  ResetGame();
+  gameState_ = GameState::Title;
+  isTitleExiting_ = false;
+  titleExitTimer_ = 0.0f;
 }
 
 void GameScene::Initialize() {
@@ -729,6 +769,15 @@ void GameScene::Update() {
   EffectDefinition::SetWvpIndex(0);
   uiTimer_ += 1.0f / 60.0f;
 
+  // タイトル文字の退出（上へ流れる）アニメーション更新
+  if (isTitleExiting_) {
+    titleExitTimer_ += 1.0f / 60.0f;
+    if (titleExitTimer_ >= kTitleExitDuration_) {
+      isTitleExiting_ = false;
+      titleExitTimer_ = 0.0f;
+    }
+  }
+
 #ifdef _DEBUG
   if (Input::PushKey(DIK_Q)) {
     ChangePlayingState(PlayingState::ThreeLane);
@@ -746,8 +795,7 @@ void GameScene::Update() {
   // Engine側のPlay/Stop状態に同期してゲームステートを切り替え
   bool isEnginePlaying = EditorManager::IsPlaying();
   if (isEnginePlaying && gameState_ == GameState::Editor) {
-    ResetGame();
-    gameState_ = GameState::Title;
+    ReturnToTitle();
     camera_->SetDebugCamera(false);
   } else if (!isEnginePlaying && gameState_ != GameState::Editor) {
     gameState_ = GameState::Editor;
@@ -788,11 +836,11 @@ void GameScene::Update() {
     if (Input::PushKey(DIK_1)) {
       ResetGame();
       gameState_ = GameState::Playing;
+      isTitleExiting_ = false;
     }
     // 2でタイトルへ
     if (Input::PushKey(DIK_2)) {
-      ResetGame();
-      gameState_ = GameState::Title;
+      ReturnToTitle();
     }
   } else if (gameState_ == GameState::Editor) {
     EditorUpdate();
@@ -839,7 +887,8 @@ void GameScene::DrawHUD(class Draw &draw) {
         "一二三四五六七八九十百千万到達距離スコア速度最高記録ベストゲームオーバ"
         "ーリスタートリザルトへ戻る一時停止中現在獲得順位反撃チャンス左中央右打"
         "ち返せ跳ね返しボーナス敵撃破モードシールドバリアアクティブジャンプスラ"
-        "イディング走るポーズキーもう一度遊ぶプレイ");
+        "イディング走るポーズキーもう一度遊ぶプレイ"
+        "ペンギンダッシュ―—");
   }
 
   if (gameState_ == GameState::Title) {
@@ -865,6 +914,9 @@ void GameScene::DrawHUD(class Draw &draw) {
       DrawBossHUD(draw);
     }
     DrawControlsGuide(draw);
+    if (isTitleExiting_) {
+      DrawTitleHUD(draw);
+    }
   } else if (gameState_ == GameState::Editor) {
     draw.DrawFillRect(Vector2(20.0f, 20.0f), Vector2(300.0f, 75.0f),
                       Vector4(0.04f, 0.06f, 0.1f, 0.8f));
@@ -1278,19 +1330,107 @@ void GameScene::DrawGameOverHUD(class Draw &draw) {
 }
 
 void GameScene::DrawTitleHUD(class Draw &draw) {
-  // 背景のタイトル画像を描画
-  if (titleSprite_) {
-    titleSprite_->Update(titleSpriteData_);
-    draw.DrawSprite(titleSprite_.get());
+  // 画像は出さないでください（titleSprite_ の描画は行わない）
+
+  // タイトル文字およびアニメーション計算
+  const std::string titleText = "ペンギンダッシュ";
+  const std::string subTitleText = "― PENGUIN DASH ―";
+  const std::string startText = "PRESS SPACE OR [A] BUTTON TO START";
+
+  const float fontSize = 82.0f;
+  const float subFontSize = 24.0f;
+  const float startFontSize = 26.0f;
+
+  // テキストサイズの計測とセンタリング
+  float titleWidth = 0.0f;
+  float subWidth = 0.0f;
+  float startWidth = 0.0f;
+  if (draw.GetTextRenderer()) {
+    titleWidth = draw.GetTextRenderer()->MeasureString(titleText, fontSize).x;
+    subWidth =
+        draw.GetTextRenderer()->MeasureString(subTitleText, subFontSize).x;
+    startWidth =
+        draw.GetTextRenderer()->MeasureString(startText, startFontSize).x;
+  }
+  if (titleWidth <= 0.0f)
+    titleWidth = 560.0f;
+  if (subWidth <= 0.0f)
+    subWidth = 260.0f;
+  if (startWidth <= 0.0f)
+    startWidth = 500.0f;
+
+  float titleX = (1280.0f - titleWidth) * 0.5f;
+  float subX = (1280.0f - subWidth) * 0.5f;
+  float startX = (1280.0f - startWidth) * 0.5f;
+
+  // 基準Y座標
+  const float baseTitleY = 210.0f;
+  const float baseSubY = baseTitleY + 95.0f;
+  const float baseStartY = 570.0f;
+
+  float currentTitleY = baseTitleY;
+  float currentSubY = baseSubY;
+  float currentStartY = baseStartY;
+
+  float mainAlpha = 1.0f;
+  float subAlpha = 0.95f;
+  float startAlpha = 1.0f;
+
+  if (isTitleExiting_) {
+    // スタート時：文字が加速しながら上に流れて消える（EaseInCubic）
+    float progress =
+        std::clamp(titleExitTimer_ / kTitleExitDuration_, 0.0f, 1.0f);
+    float ease = progress * progress * progress;
+    float flyOffset = ease * 750.0f;
+
+    currentTitleY = baseTitleY - flyOffset;
+    currentSubY = baseSubY - flyOffset;
+    currentStartY = baseStartY - ease * 450.0f;
+
+    mainAlpha = std::clamp(1.0f - progress * 1.25f, 0.0f, 1.0f);
+    subAlpha = std::clamp(0.95f - progress * 1.4f, 0.0f, 1.0f);
+    startAlpha = std::clamp(1.0f - progress * 2.5f, 0.0f, 1.0f);
+  } else {
+    // タイトル待機中：心地よい上下の浮遊モーション
+    float hover = sinf(uiTimer_ * 2.2f) * 6.0f;
+    currentTitleY = baseTitleY + hover;
+    currentSubY = baseSubY + hover;
+
+    // スタート案内の点滅表示
+    float blink = sinf(uiTimer_ * 5.0f);
+    startAlpha = (blink > -0.2f) ? 1.0f : 0.0f;
   }
 
-  // スタート案内テキストの点滅表示
-  float blink = sinf(uiTimer_ * 5.0f);
-  if (blink > -0.2f) {
-    draw.DrawMSDFString("PRESS SPACE OR [A] BUTTON TO START",
-                        Vector2(370.0f, 600.0f), 28.0f,
-                        Vector4(1.0f, 1.0f, 1.0f, 1.0f), true,
-                        Vector4(0.0f, 0.0f, 0.0f, 1.0f), 0.12f);
+  // タイトル文字の描画（背景が3Dの雪景色でもクッキリ見えるよう、シャドウ＋アウトライン太字で描画）
+  if (mainAlpha > 0.01f) {
+    // ドロップシャドウ
+    Vector4 shadowColor = Vector4(0.01f, 0.04f, 0.12f, 0.8f * mainAlpha);
+    draw.DrawMSDFString(titleText,
+                        Vector2(titleX + 4.0f, currentTitleY + 5.0f), fontSize,
+                        shadowColor, false, {0.0f, 0.0f, 0.0f, 0.0f}, 0.0f,
+                        0.18f);
+
+    // メインテキスト（清涼感のあるアイスホワイト & 濃紺アウトライン）
+    Vector4 textColor = Vector4(0.95f, 0.98f, 1.0f, mainAlpha);
+    Vector4 outlineColor = Vector4(0.06f, 0.16f, 0.35f, mainAlpha);
+    draw.DrawMSDFString(titleText, Vector2(titleX, currentTitleY), fontSize,
+                        textColor, true, outlineColor, 0.22f, 0.15f);
+  }
+
+  // 英語サブタイトル
+  if (subAlpha > 0.01f) {
+    Vector4 subColor = Vector4(0.65f, 0.88f, 1.0f, subAlpha);
+    Vector4 subOutline = Vector4(0.04f, 0.1f, 0.24f, subAlpha);
+    draw.DrawMSDFString(subTitleText, Vector2(subX, currentSubY), subFontSize,
+                        subColor, true, subOutline, 0.18f, 0.08f);
+  }
+
+  // スタート案内テキスト
+  if (startAlpha > 0.02f) {
+    draw.DrawMSDFString(startText, Vector2(startX, currentStartY),
+                        startFontSize, Vector4(1.0f, 1.0f, 1.0f, startAlpha),
+                        true, Vector4(0.0f, 0.0f, 0.0f, startAlpha), 0.15f,
+                        0.08f);
   }
 }
 
@@ -1477,8 +1617,7 @@ void GameScene::TitleUpdate() {
   // スペースキーまたはゲームパッドAボタンでゲーム開始
   if (Input::PushKey(DIK_SPACE) ||
       GamePadInput::PressButton(XINPUT_GAMEPAD_A)) {
-    ResetGame();
-    gameState_ = GameState::Playing;
+    StartGame();
   }
 }
 
@@ -1487,10 +1626,10 @@ void GameScene::PausedUpdate() {
   if (Input::PushKey(DIK_1)) {
     ResetGame();
     gameState_ = GameState::Playing;
+    isTitleExiting_ = false;
   }
   if (Input::PushKey(DIK_2)) {
-    ResetGame();
-    gameState_ = GameState::Title;
+    ReturnToTitle();
   }
 }
 
@@ -1585,6 +1724,15 @@ void GameScene::CheckCollisions() {
 
       if (obstacle->GetType() == Obstacle::Type::BossItem) {
         obstacle->OnHit();
+        // 画面内の通常障害物を吹き飛ばしてボス戦へスムーズに移行
+        for (int j = 0; j < stageSettings_->GetMaxObstacles(); j++) {
+          Obstacle *obs = stageSettings_->GetObstacle(j);
+          if (obs->GetIsActive() && (obs->GetType() == Obstacle::Type::Low ||
+                                     obs->GetType() == Obstacle::Type::High ||
+                                     obs->GetType() == Obstacle::Type::Wall)) {
+            obs->OnBlowAway();
+          }
+        }
         ChangePlayingState(PlayingState::Boss);
         effectManager_->EmitShockwave(player_->GetTransform().translate);
         continue;
@@ -1711,6 +1859,8 @@ void GameScene::ChangePlayingState(PlayingState newState, bool force) {
     laneCount = 3;
     isRightSideMode_ = false;
     rightSideDistance_ = 0.0f;
+    boss_->Reset();
+    bossAttackTimer_ = 0.0f;
     break;
 
   case PlayingState::OneLane:
@@ -1719,6 +1869,8 @@ void GameScene::ChangePlayingState(PlayingState newState, bool force) {
     laneCount = 1;
     isRightSideMode_ = true;
     rightSideDistance_ = 0.0f;
+    boss_->Reset();
+    bossAttackTimer_ = 0.0f;
     break;
 
   case PlayingState::Boss:
@@ -1730,6 +1882,7 @@ void GameScene::ChangePlayingState(PlayingState newState, bool force) {
     rightSideDistance_ = 0.0f;
     stageSettings_->SetSpawningPaused(true);
     bossAttackTimer_ = 0.0f;
+    boss_->Reset();
     break;
   }
 
@@ -1749,11 +1902,11 @@ void GameScene::StartCameraTransition(const Transform &targetTransform,
 
 void GameScene::UpdateCameraTransition() {
   if (isCameraTransitionPending_) {
-    // アクティブな障害物が残っているかチェック
+    // アクティブな障害物が残っているかチェック（ヒット済みの障害物は無視する）
     bool hasActiveObstacles = false;
     for (int i = 0; i < stageSettings_->GetMaxObstacles(); i++) {
       Obstacle *obstacle = stageSettings_->GetObstacle(i);
-      if (obstacle->GetIsActive()) {
+      if (obstacle->GetIsActive() && !obstacle->GetIsHit()) {
         hasActiveObstacles = true;
         break;
       }
@@ -1784,9 +1937,7 @@ void GameScene::UpdateCameraTransition() {
       stageSettings_->SetSpawningPaused(false);
     } else {
       // カメラ遷移が終わってからボスを出現させる
-      if (!boss_->GetIsActive()) {
-        boss_->Spawn(-6.0f, 3.0f, -2.0f);
-      }
+      boss_->Spawn(-6.0f, 3.0f, -2.0f);
     }
   }
 

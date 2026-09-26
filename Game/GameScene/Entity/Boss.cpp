@@ -13,8 +13,33 @@ Boss::~Boss() {}
 void Boss::Initialize(ModelData modelData) {
   model_->Initialize(modelData);
   model_->SetShader("ObjectShader");
-  model_->SetColor({1.0f, 1.0f, 1.0f, 1.0f});
-  model_->GetMartial()->SetColor({1.0f, 1.0f, 1.0f, 1.0f});
+  Reset();
+}
+
+void Boss::Reset() {
+  isActive_ = false;
+  hp_ = 20;
+  isHit_ = false;
+  hitTimer_ = 0.0f;
+  state_ = BossState::Appearance;
+  stateTimer_ = 0.0f;
+  battleAnimTimer_ = 0.0f;
+
+  startPos_ = {-18.0f, 20.0f, -40.0f};
+  targetPos_ = {-6.0f, 3.0f, -2.0f};
+  transform_.translate = startPos_;
+  transform_.rotate = {0.0f, 0.0f, 0.0f};
+  transform_.scale = {5.0f, 5.0f, 5.0f};
+
+  if (model_) {
+    model_->SetColor({1.0f, 1.0f, 1.0f, 1.0f});
+    if (model_->GetMartial()) {
+      model_->GetMartial()->SetColor({1.0f, 1.0f, 1.0f, 1.0f});
+    }
+    Transform drawTransform = transform_;
+    drawTransform.translate.y -= transform_.scale.y * 0.5f;
+    model_->SetTransform(drawTransform);
+  }
 }
 
 void Boss::Spawn(float x, float y, float z) {
@@ -22,17 +47,23 @@ void Boss::Spawn(float x, float y, float z) {
   // 画面の右奥上空（カメラはZ=-向きなので、X負が右、Z負が奥）
   startPos_ = {-18.0f, 20.0f, -40.0f};
   transform_.translate = startPos_;
+  transform_.rotate = {0.0f, 0.0f, 0.0f};
   transform_.scale = {5.0f, 5.0f, 5.0f}; // 大きめに設定
   isActive_ = true;
   hp_ = 20;
   isHit_ = false;
   hitTimer_ = 0.0f;
-  model_->SetColor({1.0f, 1.0f, 1.0f, 1.0f});
-  model_->GetMartial()->SetColor({1.0f, 1.0f, 1.0f, 1.0f});
+  battleAnimTimer_ = 0.0f;
+  if (model_) {
+    model_->SetColor({1.0f, 1.0f, 1.0f, 1.0f});
+    if (model_->GetMartial()) {
+      model_->GetMartial()->SetColor({1.0f, 1.0f, 1.0f, 1.0f});
+    }
 
-  Transform drawTransform = transform_;
-  drawTransform.translate.y -= transform_.scale.y * 0.5f; // 底面原点(Y=0)を当たり判定中心に合わせるオフセット
-  model_->SetTransform(drawTransform);
+    Transform drawTransform = transform_;
+    drawTransform.translate.y -= transform_.scale.y * 0.5f; // 底面原点(Y=0)を当たり判定中心に合わせるオフセット
+    model_->SetTransform(drawTransform);
+  }
   ChangeState(BossState::Appearance);
 }
 
@@ -78,11 +109,10 @@ void Boss::Update(Matrix4x4 view, float speedMultiplier) {
   }
   case BossState::Battle: {
     // ふわふわ浮かぶアニメーション
-    static float time = 0.0f;
-    time += 0.05f * speedMultiplier;
+    battleAnimTimer_ += 0.05f * speedMultiplier;
     transform_.translate.x = targetPos_.x;
     transform_.translate.z = targetPos_.z;
-    transform_.translate.y = targetPos_.y + std::sin(time) * 1.0f;
+    transform_.translate.y = targetPos_.y + std::sin(battleAnimTimer_) * 1.0f;
     break;
   }
   case BossState::Defeat:
@@ -132,8 +162,15 @@ void Boss::ImGuiInnerComponents() {
   ImGui::Text("Boss State: %s", stateNames[static_cast<int>(state_)]);
   ImGui::Text("State Timer: %.2f", stateTimer_);
 
+  if (ImGui::Button("Spawn Boss"))
+    Spawn(-6.0f, 3.0f, -2.0f);
+  ImGui::SameLine();
+  if (ImGui::Button("Reset Boss"))
+    Reset();
+
   if (ImGui::Button("Test Defeat State"))
     ChangeState(BossState::Defeat);
+  ImGui::SameLine();
   if (ImGui::Button("Test Victory State"))
     ChangeState(BossState::Victory);
 #endif
