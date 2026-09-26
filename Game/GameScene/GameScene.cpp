@@ -873,8 +873,11 @@ void GameScene::Draw(class Draw &draw) {
 
   // ヒットエフェクトの描画
   effectManager_->Draw(draw);
+}
 
-  // HUDの描画
+void GameScene::DrawUI(class Draw &draw) {
+  draw_ = &draw;
+  // HUDの描画（ポストエフェクト後に描画することでUIにエフェクトがかからないようにする）
   DrawHUD(draw);
 }
 

@@ -149,6 +149,7 @@ public:
   void Update() override;
 
   void Draw(class Draw &draw) override;
+  void DrawUI(class Draw &draw) override;
   void DrawHUD(class Draw &draw);
   void DrawTitleHUD(class Draw &draw);
   void DrawPlayingHUD(class Draw &draw);

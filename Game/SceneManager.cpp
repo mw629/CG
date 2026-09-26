@@ -37,6 +37,12 @@ void SceneManager::Draw(class Draw& draw) {
 	scene_->Draw(draw);
 }
 
+void SceneManager::DrawUI(class Draw& draw) {
+	if (scene_) {
+		scene_->DrawUI(draw);
+	}
+}
+
 void SceneManager::Run(class Draw& draw)
 {
 	ImGui();

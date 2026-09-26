@@ -135,11 +135,11 @@ public:
 
 	void Setting();
 
-	void PostDraw();
+	void PostDraw(const std::function<void()>& drawUI = nullptr);
 
 	void NewFrame();
 
-	void EndFrame();
+	void EndFrame(const std::function<void()>& drawUI = nullptr);
 
 	void End();
 

@@ -220,7 +220,7 @@ void Engine::Setting()
 }
 
 
-void Engine::PostDraw()
+void Engine::PostDraw(const std::function<void()>& drawUI)
 {
 	// Draw all lines using the active camera from Draw class
 	draw->DrawAllLines(lineRenderer.get());
@@ -250,6 +250,26 @@ void Engine::PostDraw()
 		renderTextures[nextRT]->TransitionToShaderResource(command->GetCommandList());
 
 		std::swap(currentRT, nextRT);
+	}
+
+	// ポストエフェクト適用後のテクスチャに対して UI (HUD/Sprite/Text) を描画
+	if (drawUI) {
+		renderTextures[currentRT]->TransitionToRenderTarget(command->GetCommandList());
+
+		depthStencil->TransitionToDepthWrite(command->GetCommandList());
+		D3D12_CPU_DESCRIPTOR_HANDLE rtvHandle = renderTextures[currentRT]->GetRtvHandle();
+		depthStencil->SetDSV(command->GetCommandList(), &rtvHandle);
+
+		command->GetCommandList()->RSSetViewports(1, viewportScissor->GetViewport());
+		command->GetCommandList()->RSSetScissorRects(1, viewportScissor->GetScissorRect());
+
+		ID3D12DescriptorHeap* descriptorHeaps[] = { descriptorHeap->GetSrvDescriptorHeap() };
+		command->GetCommandList()->SetDescriptorHeaps(1, descriptorHeaps);
+
+		drawUI();
+
+		renderTextures[currentRT]->TransitionToShaderResource(command->GetCommandList());
+		depthStencil->TransitionToShaderResource(command->GetCommandList());
 	}
 
 	//SwapchainをRenderTargetへ
@@ -376,9 +396,9 @@ void Engine::NewFrame() {
 	}
 }
 
-void Engine::EndFrame() {
+void Engine::EndFrame(const std::function<void()>& drawUI) {
 
-	PostDraw();
+	PostDraw(drawUI);
 
 	//コマンドリストの内容を確定させる。すべてのコマンドを積んでからCloseすること
 	hr_ = command->GetCommandList()->Close();

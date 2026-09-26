@@ -34,7 +34,9 @@ void GameApplication::Run() {
 		sceneManager.get()->Run(*engine->draw);
 #endif
 
-		engine.get()->EndFrame();
+		engine.get()->EndFrame([&]() {
+			sceneManager.get()->DrawUI(*engine->draw);
+		});
 	}
 	engine.get()->End();
 }
