@@ -6,7 +6,6 @@
 #include <imgui.h>
 #endif
 
-
 Player::Player() {}
 
 Player::~Player() {}
@@ -76,6 +75,7 @@ void Player::Reset() {
   forcedCenterStartX_ = 0.0f;
 
   SetHasBarrier(false);
+  isInvertedControls_ = false;
 
   Transform drawTransform = transform_;
   drawTransform.scale.y = 1.0f;
@@ -162,11 +162,24 @@ void Player::PlayerMove(float speedMultiplier) {
   else if (laneIndex_ == targetLaneIndex_) {
     // キー入力で目標レーンを設定
     if (canAct) {
-      if (GameSceneManager::GetInstance()->IsPushLeft()) {
-        targetLaneIndex_ = laneIndex_ - 1;
-      }
-      if (GameSceneManager::GetInstance()->IsPushRight()) {
-        targetLaneIndex_ = laneIndex_ + 1;
+      bool pushLeft = GameSceneManager::GetInstance()->IsPushLeft();
+      bool pushRight = GameSceneManager::GetInstance()->IsPushRight();
+      if (isInvertedControls_) {
+        // ボス戦等でカメラが正面（180度反転）を向いている場合、
+        // 画面の見た目通りに動くように操作を反転（左入力で画面左/ワールド+Xへ、右入力で画面右/ワールド-Xへ）
+        if (pushLeft) {
+          targetLaneIndex_ = laneIndex_ + 1;
+        }
+        if (pushRight) {
+          targetLaneIndex_ = laneIndex_ - 1;
+        }
+      } else {
+        if (pushLeft) {
+          targetLaneIndex_ = laneIndex_ - 1;
+        }
+        if (pushRight) {
+          targetLaneIndex_ = laneIndex_ + 1;
+        }
       }
     }
 
@@ -284,15 +297,21 @@ void Player::ImGuiInnerComponents() {
   ImGui::Text("Player Movement Parameters");
   ImGui::SliderFloat("Jump Power", &jumpPower_, 0.10f, 0.40f, "%.3f");
   ImGui::SliderFloat("Gravity", &gravity_, 0.005f, 0.040f, "%.4f");
-  ImGui::SliderFloat("Lane Change Speed", &laneChangeSpeed_, 0.05f, 0.50f, "%.2f");
+  ImGui::SliderFloat("Lane Change Speed", &laneChangeSpeed_, 0.05f, 0.50f,
+                     "%.2f");
   ImGui::SliderFloat("Roll Duration", &rollDuration_, 10.0f, 60.0f, "%.0f f");
 
-  float estAirFrames = gravity_ > 0.0f ? ((2.0f * jumpPower_ / gravity_) + 1.0f) : 0.0f;
-  float estMaxHeight = gravity_ > 0.0f ? ((jumpPower_ * jumpPower_) / (2.0f * gravity_)) : 0.0f;
-  ImGui::Text("Est. Jump Air Time: %.0f frames (%.2f s)", estAirFrames, estAirFrames / 60.0f);
+  float estAirFrames =
+      gravity_ > 0.0f ? ((2.0f * jumpPower_ / gravity_) + 1.0f) : 0.0f;
+  float estMaxHeight =
+      gravity_ > 0.0f ? ((jumpPower_ * jumpPower_) / (2.0f * gravity_)) : 0.0f;
+  ImGui::Text("Est. Jump Air Time: %.0f frames (%.2f s)", estAirFrames,
+              estAirFrames / 60.0f);
   ImGui::Text("Est. Max Jump Height: +%.2f m", estMaxHeight);
-  ImGui::Text("Lane Move Frames: %.0f frames", laneChangeSpeed_ > 0.0f ? (1.0f / laneChangeSpeed_) : 0.0f);
-  ImGui::Text("Roll Duration: %.0f frames (%.2f s)", rollDuration_, rollDuration_ / 60.0f);
+  ImGui::Text("Lane Move Frames: %.0f frames",
+              laneChangeSpeed_ > 0.0f ? (1.0f / laneChangeSpeed_) : 0.0f);
+  ImGui::Text("Roll Duration: %.0f frames (%.2f s)", rollDuration_,
+              rollDuration_ / 60.0f);
 #endif
 }
 

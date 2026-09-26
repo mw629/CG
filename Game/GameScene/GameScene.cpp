@@ -103,6 +103,10 @@ void GameScene::ImGui() {
     if (ImGui::Button("Right Side View")) {
       ChangePlayingState(PlayingState::OneLane);
     }
+    ImGui::SameLine();
+    if (ImGui::Button("Boss View")) {
+      ChangePlayingState(PlayingState::Boss, true);
+    }
 
     ImGui::Separator();
     if (ImGui::Button("Reset Debug Camera to Game Camera")) {
@@ -170,10 +174,31 @@ void GameScene::ImGui() {
       if (ImGui::TreeNode("Boss Info")) {
         ImGui::Text("HP: %d / 20", boss_->GetHP());
         ImGui::DragFloat3("Target Pos", &boss_->GetTargetPosRef().x, 0.1f);
-        ImGui::DragFloat("Attack Spawn Z", &bossAttackSpawnZ_, 0.5f, -60.0f, 0.0f, "%.1f m");
-        ImGui::DragFloat("Attack Drop Height", &bossAttackDropHeight_, 0.5f, 5.0f, 35.0f, "%.1f m");
-        ImGui::DragFloat("Attack Fall Frames", &bossAttackFallDuration_, 1.0f, 5.0f, 60.0f, "%.0f frames");
+        ImGui::DragFloat("Attack Spawn Z", &bossAttackSpawnZ_, 0.5f, -100.0f,
+                         0.0f, "%.1f m");
+        ImGui::DragFloat("Attack Drop Height", &bossAttackDropHeight_, 0.5f,
+                         5.0f, 40.0f, "%.1f m");
+        ImGui::DragFloat("Attack Fall Frames", &bossAttackFallDuration_, 1.0f,
+                         5.0f, 60.0f, "%.0f frames");
+        ImGui::DragFloat("Reflect Min Z", &bossAttackReflectMinZ_, 0.5f, -40.0f,
+                         0.0f, "%.1f m");
         ImGui::Text("Attack Distance to Player: %.1f m", -bossAttackSpawnZ_);
+        ImGui::Separator();
+        ImGui::Text("Boss Camera Settings:");
+        if (ImGui::DragFloat3("Boss Cam Pos", &bossCameraTranslate_.x, 0.1f)) {
+          if (playingState_ == PlayingState::Boss && !isCameraTransitioning_) {
+            cameraTransform_.translate = bossCameraTranslate_;
+            camera_->SetTransform(cameraTransform_);
+            gameCamera_->SetTransform(cameraTransform_);
+          }
+        }
+        if (ImGui::DragFloat3("Boss Cam Rot", &bossCameraRotate_.x, 0.01f)) {
+          if (playingState_ == PlayingState::Boss && !isCameraTransitioning_) {
+            cameraTransform_.rotate = bossCameraRotate_;
+            camera_->SetTransform(cameraTransform_);
+            gameCamera_->SetTransform(cameraTransform_);
+          }
+        }
         ImGui::TreePop();
       }
     }
@@ -684,9 +709,8 @@ void GameScene::Initialize() {
       AssetManager::LoadModel("Resources/Model/IceWall", "IceWall.obj");
   ModelData iceBomModel =
       AssetManager::LoadModel("Resources/Model/IceBom", "IceBom.obj");
-  ModelData reflectingAttackModel =
-      AssetManager::LoadModel("Resources/Model/ReflectingAttack",
-                              "ReflectingAttack.obj");
+  ModelData reflectingAttackModel = AssetManager::LoadModel(
+      "Resources/Model/ReflectingAttack", "ReflectingAttack.obj");
   stageSettings_->Initialize(roadModelData, fallenTreeModel, iceArchwayModel,
                              iceWallModel, modelData, iceBomModel,
                              reflectingAttackModel, gameObjectManager_.get());
@@ -1029,14 +1053,15 @@ void GameScene::DrawBossHUD(class Draw &draw) {
 
     if (obs->GetType() == Obstacle::Type::BossAttackReflectable) {
       float z = obs->GetTransform().translate.z;
-      if (z > -15.0f && z < 15.0f) {
+      if (z > bossAttackReflectMinZ_ && z < 15.0f) {
         float obsX = obs->GetTransform().translate.x;
         float laneW = stageSettings_->GetLaneWidth();
         int lane = 1;
-        if (obsX < -laneW / 2.0f)
-          lane = 0;
-        else if (obsX > laneW / 2.0f)
-          lane = 2;
+        // ボス戦カメラ（Y回転180度）ではワールド+Xが画面左（[1]キー）、ワールド-Xが画面右（[3]キー）に見える
+        if (obsX > laneW / 2.0f)
+          lane = 0; // 画面左レーン（[1]キー）
+        else if (obsX < -laneW / 2.0f)
+          lane = 2; // 画面右レーン（[3]キー）
         reflectLane = lane;
         break;
       }
@@ -1336,8 +1361,9 @@ void GameScene::PlayingUpdate() {
               obs->SetDropHeight(bossAttackDropHeight_);
               obs->SetFallDuration(bossAttackFallDuration_);
               float x = (i - 1) * stageSettings_->GetLaneWidth();
-              obs->Spawn(x, 2.0f + obs->GetCollisionHeight() * 0.5f,
-                         bossAttackSpawnZ_); // ボスの攻撃を奥の上空から降らせて出現させる
+              obs->Spawn(
+                  x, 2.0f + obs->GetCollisionHeight() * 0.5f,
+                  bossAttackSpawnZ_); // ボスの攻撃を奥の上空から降らせて出現させる
               break;
             }
           }
@@ -1367,16 +1393,16 @@ void GameScene::PlayingUpdate() {
             !obs->GetIsReflected() && !obs->GetIsFalling()) {
           float obsX = obs->GetTransform().translate.x;
           float laneW = stageSettings_->GetLaneWidth();
-          int lane = 1; // 0:Left, 1:Center, 2:Right
-          if (obsX < -laneW / 2.0f)
-            lane = 0;
-          else if (obsX > laneW / 2.0f)
-            lane = 2;
+          int lane = 1; // 0:画面左([1]キー), 1:画面中央([2]キー), 2:画面右([3]キー)
+          // ボス戦カメラ（Y回転180度）ではワールド+Xが画面左、ワールド-Xが画面右に見える
+          if (obsX > laneW / 2.0f)
+            lane = 0; // 画面左（[1]キー対応）
+          else if (obsX < -laneW / 2.0f)
+            lane = 2; // 画面右（[3]キー対応）
 
           // プレイヤーの手前にいる時に跳ね返せる
           float z = obs->GetTransform().translate.z;
-          float reflectMinZ = (std::min)(-15.0f, bossAttackSpawnZ_ - 1.0f);
-          if (z > reflectMinZ && z < 15.0f) {
+          if (z > bossAttackReflectMinZ_ && z < 15.0f) {
             if ((lane == 0 && push1) || (lane == 1 && push2) ||
                 (lane == 2 && push3)) {
               obs->SetReflected(true);
@@ -1415,6 +1441,12 @@ void GameScene::PlayingUpdate() {
   player_->SetLaneLimits(stageSettings_->GetMinLaneIndex(),
                          stageSettings_->GetMaxLaneIndex(),
                          stageSettings_->GetLaneWidth());
+
+  // カメラが反転視点（ボス戦等でY回転が約90度以上反転している状態）の時は、
+  // 画面の見た目通りに動くようにプレイヤーの左右操作を反転させる
+  bool isCameraInverted =
+      (playingState_ == PlayingState::Boss && cameraTransform_.rotate.y > 1.57f);
+  player_->SetInvertedControls(isCameraInverted);
 
   // オブジェクトの一括更新
   gameObjectManager_->UpdateAll(view, speedMultiplier * timeScale);
@@ -1690,9 +1722,9 @@ void GameScene::ChangePlayingState(PlayingState newState, bool force) {
     break;
 
   case PlayingState::Boss:
-    // ボス用のカメラ位置（ここをいじればすぐに変更できます）
-    target.rotate = {0.3f, 3.25f, 0.0f};
-    target.translate = {0.0f, 8.0f, 14.0f};
+    // ボス用のカメラ位置・角度 (bossCameraTranslate_, bossCameraRotate_)
+    target.rotate = bossCameraRotate_;
+    target.translate = bossCameraTranslate_;
     laneCount = 3;
     isRightSideMode_ = false;
     rightSideDistance_ = 0.0f;
@@ -1753,7 +1785,7 @@ void GameScene::UpdateCameraTransition() {
     } else {
       // カメラ遷移が終わってからボスを出現させる
       if (!boss_->GetIsActive()) {
-        boss_->Spawn(-6.0f, 4.0f, -2.0f);
+        boss_->Spawn(-6.0f, 3.0f, -2.0f);
       }
     }
   }

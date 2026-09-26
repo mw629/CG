@@ -71,9 +71,14 @@ private:
 	// ボス管理
 	std::shared_ptr<Boss> boss_ = std::make_shared<Boss>();
 	float bossAttackTimer_ = 0.0f;
-	float bossAttackSpawnZ_ = -15.0f; // ボスの攻撃生成Z座標 (奥から手前に向かってくる)
-	float bossAttackDropHeight_ = 15.0f; // ボス攻撃が上空から降ってくる初期高さ
-	float bossAttackFallDuration_ = 25.0f; // 落下にかかるフレーム数 (約0.4秒)
+	float bossAttackSpawnZ_ = -35.0f; // ボスの攻撃生成Z座標 (奥から手前に向かってくる)
+	float bossAttackDropHeight_ = 18.0f; // ボス攻撃が上空から降ってくる初期高さ
+	float bossAttackFallDuration_ = 28.0f; // 落下にかかるフレーム数 (約0.45秒)
+	float bossAttackReflectMinZ_ = -15.0f; // 反撃（跳ね返し）有効範囲の開始Z座標
+
+	// ボス戦カメラ設定
+	Vector3 bossCameraTranslate_{0.0f, 5.0f, 14.0f}; // ボス戦のカメラ位置 (少し下げた位置)
+	Vector3 bossCameraRotate_{0.15f, 3.25f, 0.0f};    // ボス戦のカメラ角度 (角度を上げた/上向きにした角度)
 
 	// オブジェクト管理
 	std::unique_ptr<GameObjectManager> gameObjectManager_ =

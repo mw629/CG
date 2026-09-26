@@ -3,7 +3,6 @@
 #include <Engine.h>
 #include <memory>
 
-
 #include "GameObject.h"
 #include <CharacterAnimator.h>
 
@@ -71,6 +70,9 @@ private:
   // バリアアイテム取得時の状態
   bool hasBarrier_ = false;
 
+  // 操作反転（ボス戦等でカメラが180度反転した際に画面の見た目通りに動くようにするフラグ）
+  bool isInvertedControls_ = false;
+
 public:
   Player();
   ~Player();
@@ -113,6 +115,9 @@ public:
 
   bool GetHasBarrier() const { return hasBarrier_; }
   void SetHasBarrier(bool hasBarrier);
+
+  void SetInvertedControls(bool inv) { isInvertedControls_ = inv; }
+  bool GetInvertedControls() const { return isInvertedControls_; }
 
   // ヒット演出用
   void OnHit(bool isTrip = false);
