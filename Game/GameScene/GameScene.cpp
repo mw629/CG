@@ -1045,13 +1045,24 @@ void GameScene::DrawPlayingHUD(class Draw &draw) {
 
 void GameScene::DrawBossHUD(class Draw &draw) {
   // 中央上部: ボスパネル背景
-  draw.DrawFillRect(Vector2(320.0f, 15.0f), Vector2(640.0f, 115.0f),
+  const float panelX = 320.0f;
+  const float panelY = 15.0f;
+  const float panelW = 640.0f;
+  const float panelH = 115.0f;
+
+  draw.DrawFillRect(Vector2(panelX, panelY), Vector2(panelW, panelH),
                     Vector4(0.10f, 0.03f, 0.03f, 0.85f));
-  draw.DrawFillRect(Vector2(320.0f, 15.0f), Vector2(640.0f, 3.0f),
+  draw.DrawFillRect(Vector2(panelX, panelY), Vector2(panelW, 3.0f),
                     Vector4(0.9f, 0.2f, 0.2f, 0.9f));
 
-  // ボスヘッダー
-  draw.DrawMSDFString("=== BOSS: ICE KING ===", Vector2(440.0f, 24.0f), 28.0f,
+  auto *tr = draw.GetTextRenderer();
+
+  // ボスヘッダー (パネル中央揃え)
+  const char *titleStr = "=== BOSS: ICE KING ===";
+  const float titleSize = 28.0f;
+  float titleW = tr ? tr->MeasureString(titleStr, titleSize).x : 307.0f;
+  float titleX = panelX + (panelW - titleW) * 0.5f;
+  draw.DrawMSDFString(titleStr, Vector2(titleX, 24.0f), titleSize,
                       Vector4(0.8f, 0.95f, 1.0f, 1.0f), true,
                       Vector4(0.0f, 0.2f, 0.5f, 1.0f), 0.08f);
 
@@ -1071,17 +1082,24 @@ void GameScene::DrawBossHUD(class Draw &draw) {
   }
   hpGauge += "]";
 
-  char hpText[64];
-  snprintf(hpText, sizeof(hpText), "HP %s %2d / 20", hpGauge.c_str(), hp);
-  draw.DrawMSDFString(hpText, Vector2(395.0f, 58.0f), 22.0f,
+  char hpText[128];
+  snprintf(hpText, sizeof(hpText), "HP %s  %2d / 20", hpGauge.c_str(), hp);
+  const float hpSize = 22.0f;
+  float hpW = tr ? tr->MeasureString(hpText, hpSize).x : 567.0f;
+  float hpX = panelX + (panelW - hpW) * 0.5f;
+  draw.DrawMSDFString(hpText, Vector2(hpX, 58.0f), hpSize,
                       Vector4(1.0f, 0.45f, 0.45f, 1.0f), true,
                       Vector4(0.2f, 0.0f, 0.0f, 1.0f), 0.07f);
 
-  // 反撃（跳ね返し）基本操作ガイド
-  draw.DrawMSDFString(
-      "[1] 左レーン  |  [2] 中央レーン  |  [3] 右レーン (魚を押して敵へ飛ばす)",
-      Vector2(325.0f, 92.0f), 20.0f, Vector4(0.8f, 0.95f, 0.5f, 1.0f), true,
-      Vector4(0.0f, 0.0f, 0.0f, 1.0f), 0.07f);
+  // 反撃（跳ね返し）基本操作ガイド (パネル中央揃え)
+  const char *guideStr =
+      "[1] 左レーン  |  [2] 中央レーン  |  [3] 右レーン (魚を押して敵へ飛ばす)";
+  const float guideSize = 20.0f;
+  float guideW = tr ? tr->MeasureString(guideStr, guideSize).x : 608.0f;
+  float guideX = panelX + (panelW - guideW) * 0.5f;
+  draw.DrawMSDFString(guideStr, Vector2(guideX, 92.0f), guideSize,
+                      Vector4(0.8f, 0.95f, 0.5f, 1.0f), true,
+                      Vector4(0.0f, 0.0f, 0.0f, 1.0f), 0.07f);
 
   // 緑攻撃（跳ね返し可能弾）が反撃有効範囲（z: -15.0f
   // 〜 15.0f）にあるかチェック
@@ -1108,7 +1126,7 @@ void GameScene::DrawBossHUD(class Draw &draw) {
     }
   }
 
-  // 反撃チャンスのアラート点滅表示
+  // 反撃チャンスのアラート点滅表示 (中央揃え)
   if (reflectLane != -1) {
     const char *keyName = (reflectLane == 0)   ? "1"
                           : (reflectLane == 1) ? "2"
@@ -1122,17 +1140,21 @@ void GameScene::DrawBossHUD(class Draw &draw) {
              laneName);
 
     float pulseScale = 0.8f + 0.2f * std::sin(uiTimer_ * 12.0f);
-    draw.DrawFillRect(Vector2(290.0f, 125.0f), Vector2(700.0f, 40.0f),
+    const float alertW = 700.0f;
+    const float alertX = 640.0f - alertW * 0.5f;
+    draw.DrawFillRect(Vector2(alertX, 125.0f), Vector2(alertW, 40.0f),
                       Vector4(0.2f, 0.1f, 0.0f, 0.85f));
-    draw.DrawMSDFString(alertBuf, Vector2(300.0f, 130.0f), 25.0f,
+    float alertTextW = tr ? tr->MeasureString(alertBuf, 25.0f).x : 670.0f;
+    float alertTextX = alertX + (alertW - alertTextW) * 0.5f;
+    draw.DrawMSDFString(alertBuf, Vector2(alertTextX, 130.0f), 25.0f,
                         Vector4(1.0f, 0.95f, 0.15f, pulseScale), true,
                         Vector4(0.5f, 0.1f, 0.0f, 1.0f), 0.09f);
   }
 
-  // --- 右上: ボス倒し方（攻略ガイド）パネル ---
+  // --- 右下: ボス倒し方（攻略ガイド）パネル ---
   {
     const float guideX = 880.0f;
-    const float guideY = 150.0f;
+    const float guideY = 455.0f;
     const float guideW = 380.0f;
     const float guideH = 205.0f;
 

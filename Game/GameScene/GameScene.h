@@ -98,10 +98,10 @@ private:
   float bossAttackReflectMinZ_ = -15.0f; // 反撃（跳ね返し）有効範囲の開始Z座標
 
   // ボス戦カメラ設定
-  Vector3 bossCameraTranslate_{0.0f, 5.0f,
-                               14.0f}; // ボス戦のカメラ位置 (少し下げた位置)
+  Vector3 bossCameraTranslate_{0.0f, 7.0f,
+                               14.0f}; // ボス戦のカメラ位置 (少し高く調整)
   Vector3 bossCameraRotate_{
-      0.15f, 3.25f, 0.0f}; // ボス戦のカメラ角度 (角度を上げた/上向きにした角度)
+      0.24f, 3.25f, 0.0f}; // ボス戦のカメラ角度 (高さに合わせて見下ろし角を調整)
 
   // オブジェクト管理
   std::unique_ptr<GameObjectManager> gameObjectManager_ =
