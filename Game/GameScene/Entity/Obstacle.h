@@ -30,12 +30,16 @@ private:
   std::unique_ptr<Model> wallModel_ = std::make_unique<Model>();     // IceWall
   std::unique_ptr<Model> bonusModel_ = std::make_unique<Model>();    // Bonus
   std::unique_ptr<Model> itemModel_ = std::make_unique<Model>();     // Items / Fallback
+  std::unique_ptr<Model> iceBomModel_ = std::make_unique<Model>();           // IceBom
+  std::unique_ptr<Model> reflectingAttackModel_ = std::make_unique<Model>(); // ReflectingAttack
   Model *currentModel_ = nullptr;
 
   ModelData lowModelData_;
   ModelData highModelData_;
   ModelData wallModelData_;
   ModelData bonusModelData_;
+  ModelData iceBomModelData_;
+  ModelData reflectingAttackModelData_;
   Type type_ = Type::Wall;
 
   bool isHit_ = false;
@@ -53,6 +57,9 @@ public:
   Obstacle();
   ~Obstacle();
 
+  void Initialize(ModelData lowData, ModelData highData, ModelData wallData,
+                  ModelData bonusData, ModelData iceBomData,
+                  ModelData reflectingAttackData, Type type);
   void Initialize(ModelData lowData, ModelData highData, ModelData wallData,
                   ModelData bonusData, Type type);
   void Initialize(ModelData normalData, ModelData bonusData, Type type);

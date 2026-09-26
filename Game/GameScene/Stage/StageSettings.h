@@ -111,6 +111,11 @@ private:
 public:
   void Initialize(ModelData roadModelData, ModelData fallenTreeModelData,
                   ModelData iceArchwayModelData, ModelData iceWallModelData,
+                  ModelData bonusModelData, ModelData iceBomModelData,
+                  ModelData reflectingAttackModelData,
+                  class GameObjectManager *manager);
+  void Initialize(ModelData roadModelData, ModelData fallenTreeModelData,
+                  ModelData iceArchwayModelData, ModelData iceWallModelData,
                   ModelData bonusModelData, class GameObjectManager *manager);
   void Initialize(ModelData roadModelData, ModelData obstacleModelData,
                   ModelData bonusModelData, class GameObjectManager *manager);

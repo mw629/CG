@@ -674,8 +674,14 @@ void GameScene::Initialize() {
       AssetManager::LoadModel("Resources/Model/IceArchway", "IceArchway.obj");
   ModelData iceWallModel =
       AssetManager::LoadModel("Resources/Model/IceWall", "IceWall.obj");
+  ModelData iceBomModel =
+      AssetManager::LoadModel("Resources/Model/IceBom", "IceBom.obj");
+  ModelData reflectingAttackModel =
+      AssetManager::LoadModel("Resources/Model/ReflectingAttack",
+                              "ReflectingAttack.obj");
   stageSettings_->Initialize(roadModelData, fallenTreeModel, iceArchwayModel,
-                             iceWallModel, modelData, gameObjectManager_.get());
+                             iceWallModel, modelData, iceBomModel,
+                             reflectingAttackModel, gameObjectManager_.get());
 
   // 指定したJsonファイルを初期シーンとして読み込む
   gameObjectManager_->LoadScene(initialSceneJson_);
@@ -1320,7 +1326,7 @@ void GameScene::PlayingUpdate() {
             if (!obs->GetIsActive()) {
               obs->SetType(type);
               float x = (i - 1) * stageSettings_->GetLaneWidth();
-              obs->Spawn(x, 0.5f,
+              obs->Spawn(x, 2.0f + obs->GetCollisionHeight() * 0.5f,
                          -2.0f); // ボスが-2.0fなので、少し手前から出現
               break;
             }

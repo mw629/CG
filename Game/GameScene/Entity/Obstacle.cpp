@@ -10,11 +10,14 @@ Obstacle::~Obstacle() {}
 
 void Obstacle::Initialize(ModelData lowData, ModelData highData,
                           ModelData wallData, ModelData bonusData,
+                          ModelData iceBomData, ModelData reflectingAttackData,
                           Type type) {
   lowModelData_ = lowData;
   highModelData_ = highData;
   wallModelData_ = wallData;
   bonusModelData_ = bonusData;
+  iceBomModelData_ = iceBomData;
+  reflectingAttackModelData_ = reflectingAttackData;
 
   lowModel_->Initialize(lowData);
   lowModel_->SetShader("ObjectShader");
@@ -35,7 +38,21 @@ void Obstacle::Initialize(ModelData lowData, ModelData highData,
   itemModel_->Initialize(wallData);
   itemModel_->SetShader("ObjectShader");
 
+  iceBomModel_->Initialize(iceBomData);
+  iceBomModel_->SetShader("ObjectShader");
+  iceBomModel_->GetMartial()->SetColor({1.0f, 1.0f, 1.0f, 1.0f});
+
+  reflectingAttackModel_->Initialize(reflectingAttackData);
+  reflectingAttackModel_->SetShader("ObjectShader");
+  reflectingAttackModel_->GetMartial()->SetColor({1.0f, 1.0f, 1.0f, 1.0f});
+
   SetType(type);
+}
+
+void Obstacle::Initialize(ModelData lowData, ModelData highData,
+                          ModelData wallData, ModelData bonusData,
+                          Type type) {
+  Initialize(lowData, highData, wallData, bonusData, wallData, wallData, type);
 }
 
 void Obstacle::Initialize(ModelData normalData, ModelData bonusData,
@@ -179,30 +196,32 @@ void Obstacle::SetType(Type type) {
     break;
 
   case Type::BossAttack:
-    // ボスの氷壁攻撃（白）
-    currentModel_ = wallModel_.get();
-    collisionWidth_ = 1.5f;
-    collisionHeight_ = 3.0f;
-    collisionDepth_ = 1.0f;
-    transform_.scale = {1.497f, 3.886f, 3.135f};
+    // ボスの氷爆弾攻撃（IceBom / 回避専用）
+    currentModel_ = iceBomModel_.get();
+    collisionWidth_ = 1.6f;
+    collisionHeight_ = 2.0f;
+    collisionDepth_ = 1.6f;
+    // IceBom: 約100x94x99 を幅約1.6, 高約1.5, 奥約1.6にする
+    transform_.scale = {0.016f, 0.016f, 0.016f};
     transform_.rotate = {0.0f, 0.0f, 0.0f};
     if (currentModel_) {
-      currentModel_->GetMartial()->SetColor({0.9f, 0.95f, 1.0f, 1.0f});
+      currentModel_->GetMartial()->SetColor({1.0f, 1.0f, 1.0f, 1.0f});
       currentModel_->SetShader("ObjectShader");
       currentModel_->SetBlend(BlendMode::kBlendModeNormal);
     }
     break;
 
   case Type::BossAttackReflectable:
-    // ボスの跳ね返し可能氷壁攻撃（緑）
-    currentModel_ = wallModel_.get();
-    collisionWidth_ = 1.5f;
-    collisionHeight_ = 3.0f;
-    collisionDepth_ = 1.0f;
-    transform_.scale = {1.497f, 3.886f, 3.135f};
+    // ボスの跳ね返し可能攻撃（ReflectingAttack）
+    currentModel_ = reflectingAttackModel_.get();
+    collisionWidth_ = 1.6f;
+    collisionHeight_ = 2.0f;
+    collisionDepth_ = 2.5f;
+    // ReflectingAttack: 約58x71x99 を幅約1.44, 高約1.78, 奥約2.49にする (+Zが前方)
+    transform_.scale = {0.025f, 0.025f, 0.025f};
     transform_.rotate = {0.0f, 0.0f, 0.0f};
     if (currentModel_) {
-      currentModel_->GetMartial()->SetColor({0.3f, 1.0f, 0.4f, 1.0f});
+      currentModel_->GetMartial()->SetColor({1.0f, 1.0f, 1.0f, 1.0f});
       currentModel_->SetShader("ObjectShader");
       currentModel_->SetBlend(BlendMode::kBlendModeNormal);
     }
@@ -213,7 +232,9 @@ void Obstacle::SetType(Type type) {
     // 新モデルは底面原点(Y=0)のため、中心座標から高さの半分を引いて底面を合わせる
     Transform drawTransform = transform_;
     if (currentModel_ == lowModel_.get() || currentModel_ == highModel_.get() ||
-        currentModel_ == wallModel_.get()) {
+        currentModel_ == wallModel_.get() ||
+        currentModel_ == iceBomModel_.get() ||
+        currentModel_ == reflectingAttackModel_.get()) {
       drawTransform.translate.y -= collisionHeight_ * 0.5f;
     }
     currentModel_->SetTransform(drawTransform);
@@ -228,7 +249,9 @@ void Obstacle::Spawn(float x, float y, float z) {
   if (currentModel_) {
     Transform drawTransform = transform_;
     if (currentModel_ == lowModel_.get() || currentModel_ == highModel_.get() ||
-        currentModel_ == wallModel_.get()) {
+        currentModel_ == wallModel_.get() ||
+        currentModel_ == iceBomModel_.get() ||
+        currentModel_ == reflectingAttackModel_.get()) {
       drawTransform.translate.y -= collisionHeight_ * 0.5f;
     }
     currentModel_->SetTransform(drawTransform);
@@ -304,7 +327,9 @@ void Obstacle::StageUpdate(Matrix4x4 view, float scrollSpeed) {
   if (currentModel_) {
     Transform drawTransform = transform_;
     if (currentModel_ == lowModel_.get() || currentModel_ == highModel_.get() ||
-        currentModel_ == wallModel_.get()) {
+        currentModel_ == wallModel_.get() ||
+        currentModel_ == iceBomModel_.get() ||
+        currentModel_ == reflectingAttackModel_.get()) {
       drawTransform.translate.y -= collisionHeight_ * 0.5f;
     }
     currentModel_->SetTransform(drawTransform);

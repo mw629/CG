@@ -10,6 +10,8 @@ void StageSettings::Initialize(ModelData roadModelData,
                                ModelData iceArchwayModelData,
                                ModelData iceWallModelData,
                                ModelData bonusModelData,
+                               ModelData iceBomModelData,
+                               ModelData reflectingAttackModelData,
                                class GameObjectManager *manager) {
   // 乱数の初期化
   std::srand(static_cast<unsigned int>(std::time(nullptr)));
@@ -38,7 +40,8 @@ void StageSettings::Initialize(ModelData roadModelData,
     // ランダムなタイプで初期化
     Obstacle::Type type = static_cast<Obstacle::Type>(std::rand() % 3);
     obstacles_[i]->Initialize(fallenTreeModelData, iceArchwayModelData,
-                              iceWallModelData, bonusModelData, type);
+                              iceWallModelData, bonusModelData,
+                              iceBomModelData, reflectingAttackModelData, type);
 
     if (manager)
       manager->AddObject(obstacles_[i]);
@@ -52,6 +55,17 @@ void StageSettings::Initialize(ModelData roadModelData,
       30.0f, 10.0f}; // カメラ: 30秒（開始時10秒猶予）
   itemCoolDowns_[Obstacle::Type::BossItem] = {
       45.0f, 20.0f}; // ボス: 45秒（開始時20秒猶予）
+}
+
+void StageSettings::Initialize(ModelData roadModelData,
+                               ModelData fallenTreeModelData,
+                               ModelData iceArchwayModelData,
+                               ModelData iceWallModelData,
+                               ModelData bonusModelData,
+                               class GameObjectManager *manager) {
+  Initialize(roadModelData, fallenTreeModelData, iceArchwayModelData,
+             iceWallModelData, bonusModelData, iceWallModelData,
+             iceWallModelData, manager);
 }
 
 void StageSettings::Initialize(ModelData roadModelData,
