@@ -44,6 +44,7 @@ public:
   int GetHP() const { return hp_; }
 
   BossState GetState() const { return state_; }
+  float GetStateTimer() const { return stateTimer_; }
   void ChangeState(BossState nextState);
 
   Vector3 GetTargetPos() const { return targetPos_; }

@@ -40,6 +40,18 @@ private:
   static const int kChunkCount_ = kBackwardChunks_ + kForwardChunks_; // チャンクの総数 (20)
   float chunkLength_ = 10.0f; // 1チャンクの奥行き（Z軸方向のサイズ）
 
+public:
+  struct ChunkRowInfo {
+    int laneCount = 3;
+    int minLaneIndex = -1;
+    int maxLaneIndex = 1;
+    float effectiveLaneWidth = 2.0f;
+  };
+
+private:
+  int targetLaneCount_ = 3;
+  std::vector<ChunkRowInfo> chunkRowInfos_;
+
   std::vector<std::vector<std::shared_ptr<RenderObject>>> roadChunks_;
   std::vector<std::vector<Transform>> roadTransforms_;
 
@@ -52,6 +64,7 @@ private:
   std::vector<std::shared_ptr<RenderObject>> chunkPool_;
 
   void GenerateRoadChunks(Matrix4x4 view = IdentityMatrix());
+  void RebuildChunkRow(int rowIndex, int newLaneCount, float newZ, Matrix4x4 view = IdentityMatrix());
 
   // テクスチャ
   std::unique_ptr<Texture> texture_ = std::make_unique<Texture>();
@@ -126,31 +139,31 @@ public:
   void Draw(class Draw &draw);
 
   // ゲッター
-  int GetLaneCount() const { return laneCount_; }
-  int GetMinLaneIndex() const { return minLaneIndex_; }
-  int GetMaxLaneIndex() const { return maxLaneIndex_; }
+  int GetTargetLaneCount() const { return targetLaneCount_; }
+  int GetLaneCount() const { return GetLaneCountAtZ(0.0f); }
+  int GetMinLaneIndex() const { return GetMinLaneIndexAtZ(0.0f); }
+  int GetMaxLaneIndex() const { return GetMaxLaneIndexAtZ(0.0f); }
   float GetLaneWidth() const { return laneWidth_; }
-  float GetEffectiveLaneWidth() const {
-    return (laneCount_ == 1) ? (laneWidth_ * oneLaneWidthMultiplier_)
-                             : laneWidth_;
-  }
+  float GetEffectiveLaneWidth() const { return GetEffectiveLaneWidthAtZ(0.0f); }
   float GetOneLaneWidthMultiplier() const { return oneLaneWidthMultiplier_; }
   int GetChunkCount() const { return kChunkCount_; }
   int GetBackwardChunks() const { return kBackwardChunks_; }
   int GetForwardChunks() const { return kForwardChunks_; }
   float GetChunkLength() const { return chunkLength_; }
 
+  // 任意Z座標におけるレーン情報の取得
+  const ChunkRowInfo& GetChunkRowInfoAtZ(float z) const;
+  int GetLaneCountAtZ(float z) const;
+  int GetMinLaneIndexAtZ(float z) const;
+  int GetMaxLaneIndexAtZ(float z) const;
+  float GetEffectiveLaneWidthAtZ(float z) const;
+
   // セッター
-  void SetLaneCount(int count) {
-    if (count < 1)
-      count = 1;
-    if (laneCount_ == count)
-      return;
-    laneCount_ = count;
-    minLaneIndex_ = -(laneCount_ / 2);
-    maxLaneIndex_ = (laneCount_ - 1) / 2;
-    isDirty_ = true;
-  }
+  // レーン数変更（奥から新しく出現する床から変化させる）
+  void SetLaneCount(int count);
+  // 全チャンク即時変更用（リセット等）
+  void SetLaneCountImmediate(int count, Matrix4x4 view = IdentityMatrix());
+
   void SetLaneWidth(float width) {
     if (laneWidth_ == width)
       return;

@@ -1,9 +1,11 @@
 #include "StageSettings.h"
 #include "AssetManager.h"
 #include "PSO/PipelineState.h"
+#include "Core/LogHandler.h"
 #include <algorithm>
 #include <cstdlib>
 #include <ctime>
+#include <format>
 
 void StageSettings::Initialize(ModelData roadModelData,
                                ModelData fallenTreeModelData,
@@ -12,7 +14,7 @@ void StageSettings::Initialize(ModelData roadModelData,
                                ModelData bonusModelData,
                                ModelData iceBomModelData,
                                ModelData reflectingAttackModelData,
-                               class GameObjectManager *manager) {
+                                class GameObjectManager *manager) {
   // 乱数の初期化
   std::srand(static_cast<unsigned int>(std::time(nullptr)));
 
@@ -106,41 +108,110 @@ void StageSettings::CalculateNextObstacleInterval() {
                  dynamicMaxDistance); // 次回生成までの距離
 }
 
-void StageSettings::GenerateRoadChunks(Matrix4x4 view) {
-  // 既存のZ座標を保存（ゲーム中にレーン数が変わった際に地面が飛ぶのを防ぐため）
-  std::vector<float> currentZs(kChunkCount_);
-  for (int zIndex = 0; zIndex < kChunkCount_; zIndex++) {
-    if (zIndex < roadTransforms_.size() && !roadTransforms_[zIndex].empty()) {
-      currentZs[zIndex] = roadTransforms_[zIndex][0].translate.z;
-    } else {
-      currentZs[zIndex] =
-          static_cast<float>(zIndex - kBackwardChunks_) * chunkLength_;
+const StageSettings::ChunkRowInfo &
+StageSettings::GetChunkRowInfoAtZ(float z) const {
+  float defaultWidth = (laneCount_ == 1) ? (laneWidth_ * oneLaneWidthMultiplier_) : laneWidth_;
+  static ChunkRowInfo fallbackInfo;
+  fallbackInfo = {laneCount_, minLaneIndex_, maxLaneIndex_, defaultWidth};
+
+  if (chunkRowInfos_.empty() || roadTransforms_.empty()) {
+    return fallbackInfo;
+  }
+
+  int closestIdx = -1;
+  float minDiff = 1000000.0f;
+  for (int i = 0; i < kChunkCount_; i++) {
+    if (i < roadTransforms_.size() && !roadTransforms_[i].empty()) {
+      float chunkZ = roadTransforms_[i][0].translate.z;
+      float diff = std::abs(chunkZ - z);
+      if (diff < minDiff) {
+        minDiff = diff;
+        closestIdx = i;
+      }
     }
   }
 
-  // 既存のチャンクをマネージャーから削除し、プールに保存する
-  for (auto &row : roadChunks_) {
-    for (auto &chunk : row) {
-      if (manager_)
-        manager_->RemoveObject(chunk);
-      chunkPool_.push_back(chunk);
+  if (closestIdx >= 0 && closestIdx < static_cast<int>(chunkRowInfos_.size())) {
+    return chunkRowInfos_[closestIdx];
+  }
+  return fallbackInfo;
+}
+
+int StageSettings::GetLaneCountAtZ(float z) const {
+  return GetChunkRowInfoAtZ(z).laneCount;
+}
+
+int StageSettings::GetMinLaneIndexAtZ(float z) const {
+  return GetChunkRowInfoAtZ(z).minLaneIndex;
+}
+
+int StageSettings::GetMaxLaneIndexAtZ(float z) const {
+  return GetChunkRowInfoAtZ(z).maxLaneIndex;
+}
+
+float StageSettings::GetEffectiveLaneWidthAtZ(float z) const {
+  return GetChunkRowInfoAtZ(z).effectiveLaneWidth;
+}
+
+void StageSettings::SetLaneCount(int count) {
+  if (count < 1)
+    count = 1;
+  if (targetLaneCount_ == count)
+    return;
+  targetLaneCount_ = count;
+
+  // 画面外の奥（Z >= 70.0f）にあるチャンクを targetLaneCount_ に事前変換する
+  // これにより、画面内（プレイヤー視界内）の床は変えずに、地平線奥から即座に新レーンが出現して流れてくる
+  for (int i = 0; i < kChunkCount_; i++) {
+    if (i < roadTransforms_.size() && !roadTransforms_[i].empty()) {
+      if (roadTransforms_[i][0].translate.z >= 70.0f) {
+        RebuildChunkRow(i, targetLaneCount_, roadTransforms_[i][0].translate.z,
+                        IdentityMatrix());
+      }
     }
   }
-  roadChunks_.clear();
-  roadTransforms_.clear();
+}
 
-  roadChunks_.resize(kChunkCount_);
-  roadTransforms_.resize(kChunkCount_);
+void StageSettings::SetLaneCountImmediate(int count, Matrix4x4 view) {
+  if (count < 1)
+    count = 1;
+  targetLaneCount_ = count;
+  laneCount_ = count;
+  minLaneIndex_ = -(laneCount_ / 2);
+  maxLaneIndex_ = (laneCount_ - 1) / 2;
+  isDirty_ = true;
+}
 
-  // 現在のレーン幅・数にあわせてチャンクを生成
-  for (int zIndex = 0; zIndex < kChunkCount_; zIndex++) {
-    roadChunks_[zIndex].resize(laneCount_);
-    roadTransforms_[zIndex].resize(laneCount_);
+void StageSettings::RebuildChunkRow(int rowIndex, int newLaneCount, float newZ,
+                                    Matrix4x4 view) {
+  if (rowIndex < 0 || rowIndex >= kChunkCount_)
+    return;
 
-    for (int laneIdx = 0; laneIdx < laneCount_; laneIdx++) {
+  if (chunkRowInfos_.size() < kChunkCount_) {
+    chunkRowInfos_.resize(kChunkCount_);
+  }
+  if (roadChunks_.size() < kChunkCount_) {
+    roadChunks_.resize(kChunkCount_);
+  }
+  if (roadTransforms_.size() < kChunkCount_) {
+    roadTransforms_.resize(kChunkCount_);
+  }
+
+  int currentCount = static_cast<int>(roadChunks_[rowIndex].size());
+  if (currentCount > newLaneCount) {
+    for (int l = newLaneCount; l < currentCount; l++) {
+      if (manager_ && roadChunks_[rowIndex][l]) {
+        manager_->RemoveObject(roadChunks_[rowIndex][l]);
+      }
+      chunkPool_.push_back(roadChunks_[rowIndex][l]);
+    }
+    roadChunks_[rowIndex].resize(newLaneCount);
+    roadTransforms_[rowIndex].resize(newLaneCount);
+  } else if (currentCount < newLaneCount) {
+    roadChunks_[rowIndex].resize(newLaneCount);
+    roadTransforms_[rowIndex].resize(newLaneCount);
+    for (int l = currentCount; l < newLaneCount; l++) {
       std::shared_ptr<RenderObject> renderObj;
-
-      // プールから取得するか、新規作成する
       if (!chunkPool_.empty()) {
         renderObj = chunkPool_.back();
         chunkPool_.pop_back();
@@ -156,28 +227,60 @@ void StageSettings::GenerateRoadChunks(Matrix4x4 view) {
 
         renderObj = std::make_shared<RenderObject>(roadModel);
       }
-
-      renderObj->SetName("RoadChunk_" + std::to_string(zIndex) + "_Lane_" +
-                         std::to_string(laneIdx));
-
-      float effectiveLaneWidth = GetEffectiveLaneWidth();
-      int logicalLane = minLaneIndex_ + laneIdx;
-      float x = static_cast<float>(logicalLane) * effectiveLaneWidth;
-
-      Transform t;
-      t.scale = {effectiveLaneWidth, 50.0f, 10.1f};
-      t.rotate = {0.0f, 0.0f, 0.0f};
-      t.translate = {x, -23.0f, currentZs[zIndex]};
-
-      renderObj->SetTransform(t);
-      renderObj->Update(view, 0.0f);
-
-      roadChunks_[zIndex][laneIdx] = renderObj;
-      roadTransforms_[zIndex][laneIdx] = t;
-
-      if (manager_)
+      roadChunks_[rowIndex][l] = renderObj;
+      if (manager_) {
         manager_->AddObject(renderObj);
+      }
     }
+  }
+
+  ChunkRowInfo &info = chunkRowInfos_[rowIndex];
+  info.laneCount = newLaneCount;
+  info.minLaneIndex = -(newLaneCount / 2);
+  info.maxLaneIndex = (newLaneCount - 1) / 2;
+  info.effectiveLaneWidth = (newLaneCount == 1)
+                                ? (laneWidth_ * oneLaneWidthMultiplier_)
+                                : laneWidth_;
+
+  for (int laneIdx = 0; laneIdx < newLaneCount; laneIdx++) {
+    auto &renderObj = roadChunks_[rowIndex][laneIdx];
+    renderObj->SetName("RoadChunk_" + std::to_string(rowIndex) + "_Lane_" +
+                       std::to_string(laneIdx));
+
+    int logicalLane = info.minLaneIndex + laneIdx;
+    float x = static_cast<float>(logicalLane) * info.effectiveLaneWidth;
+
+    Transform t;
+    t.scale = {info.effectiveLaneWidth, 50.0f, 10.1f};
+    t.rotate = {0.0f, 0.0f, 0.0f};
+    t.translate = {x, -23.0f, newZ};
+
+    renderObj->SetTransform(t);
+    renderObj->Update(view, 0.0f);
+
+    roadTransforms_[rowIndex][laneIdx] = t;
+  }
+}
+
+void StageSettings::GenerateRoadChunks(Matrix4x4 view) {
+  // 既存のZ座標を保存（ゲーム中にレーン数が変わった際に地面が飛ぶのを防ぐため）
+  std::vector<float> currentZs(kChunkCount_);
+  for (int zIndex = 0; zIndex < kChunkCount_; zIndex++) {
+    if (zIndex < roadTransforms_.size() && !roadTransforms_[zIndex].empty()) {
+      currentZs[zIndex] = roadTransforms_[zIndex][0].translate.z;
+    } else {
+      currentZs[zIndex] =
+          static_cast<float>(zIndex - kBackwardChunks_) * chunkLength_;
+    }
+  }
+
+  targetLaneCount_ = laneCount_;
+  chunkRowInfos_.resize(kChunkCount_);
+  roadChunks_.resize(kChunkCount_);
+  roadTransforms_.resize(kChunkCount_);
+
+  for (int zIndex = 0; zIndex < kChunkCount_; zIndex++) {
+    RebuildChunkRow(zIndex, laneCount_, currentZs[zIndex], view);
   }
 
   // サイドプレーンの生成/更新
@@ -190,7 +293,9 @@ void StageSettings::GenerateRoadChunks(Matrix4x4 view) {
   const char *planeNames[2] = {"SidePlaneL", "SidePlaneR"};
 
   for (int i = 0; i < 2; ++i) {
+    LOG_INFO(std::format("GenerateRoadChunks: sidePlane {}", i));
     if (!sidePlanes_[i]) {
+      LOG_INFO(std::format("GenerateRoadChunks: creating sidePlane model {}", i));
       auto model = std::make_shared<Model>();
       model->Initialize(planeModelData_);
       model->SetShader(WaterShader);
@@ -250,47 +355,44 @@ void StageSettings::Update(Matrix4x4 view, float timeScale) {
 
   // 道路チャンクのスクロール
   for (int i = 0; i < kChunkCount_; i++) {
-    for (int laneIdx = 0; laneIdx < laneCount_; laneIdx++) {
-      if (laneIdx < roadTransforms_[i].size()) {
-        roadTransforms_[i][laneIdx].translate.z -= currentScroll;
+    for (size_t laneIdx = 0; laneIdx < roadTransforms_[i].size(); laneIdx++) {
+      roadTransforms_[i][laneIdx].translate.z -= currentScroll;
+    }
+  }
+
+  // 最も奥にあるチャンクのZ座標を探す
+  float maxZ = -999999.0f;
+  for (int j = 0; j < kChunkCount_; j++) {
+    if (!roadTransforms_[j].empty()) {
+      if (roadTransforms_[j][0].translate.z > maxZ) {
+        maxZ = roadTransforms_[j][0].translate.z;
       }
     }
+  }
 
-    // 最も奥にあるチャンクのZ座標を探す (基準は0番レーンのZ)
-    float maxZ = 0.0f;
-    if (!roadTransforms_.empty() && !roadTransforms_[0].empty()) {
-      maxZ = roadTransforms_[0][0].translate.z;
-      for (int j = 1; j < kChunkCount_; j++) {
-        if (!roadTransforms_[j].empty() &&
-            roadTransforms_[j][0].translate.z > maxZ) {
-          maxZ = roadTransforms_[j][0].translate.z;
-        }
-      }
-    }
-
-    // チャンクが手前の最端（カメラ背後）を通り過ぎたら、一番奥に再配置
-    float recycleThreshold =
-        -static_cast<float>(kBackwardChunks_ + 1) * chunkLength_;
+  // チャンクが手前の最端（カメラ背後）を通り過ぎたら、一番奥に再配置
+  float recycleThreshold =
+      -static_cast<float>(kBackwardChunks_ + 1) * chunkLength_;
+  for (int i = 0; i < kChunkCount_; i++) {
     if (!roadTransforms_[i].empty() &&
         roadTransforms_[i][0].translate.z < recycleThreshold) {
       float newChunkZ = maxZ + chunkLength_;
-      for (int laneIdx = 0; laneIdx < laneCount_; laneIdx++) {
-        if (laneIdx < roadTransforms_[i].size()) {
-          roadTransforms_[i][laneIdx].translate.z = newChunkZ;
-        }
-      }
+      RebuildChunkRow(i, targetLaneCount_, newChunkZ, view);
+      maxZ = newChunkZ;
     }
 
-    for (int laneIdx = 0; laneIdx < laneCount_; laneIdx++) {
-      if (laneIdx < roadChunks_[i].size()) {
-        roadChunks_[i][laneIdx]->SetTransform(roadTransforms_[i][laneIdx]);
-      }
+    for (size_t laneIdx = 0; laneIdx < roadChunks_[i].size(); laneIdx++) {
+      roadChunks_[i][laneIdx]->SetTransform(roadTransforms_[i][laneIdx]);
     }
   }
 
   // アイテムのクールタイム減算（実時間・秒単位）
   float dt = (1.0f / 60.0f) * timeScale;
   for (auto &pair : itemCoolDowns_) {
+    // スポーン停止中（ボス戦中やカメラ遷移中）はボスアイテムのクールタイムを減算しない
+    if (pair.first == Obstacle::Type::BossItem && isSpawningPaused_) {
+      continue;
+    }
     if (pair.second.currentTimer > 0.0f) {
       pair.second.currentTimer -= dt;
       if (pair.second.currentTimer < 0.0f) {
@@ -337,15 +439,19 @@ void StageSettings::Draw(class Draw &draw) {
 }
 
 void StageSettings::SpawnObstacles(float z) {
+  int currentLaneCount = GetLaneCountAtZ(z);
+  int currentMinLane = GetMinLaneIndexAtZ(z);
+  float currentLaneWidth = GetEffectiveLaneWidthAtZ(z);
+
   // === 狭まる区間の専用処理 ===
-  if (isNarrowingSection_ && laneCount_ == 3) {
+  if (isNarrowingSection_ && currentLaneCount == 3) {
     // 左右レーンに GuideFloor を配置する
     obstacles_[nextObstacleIndex_]->SetType(Obstacle::Type::GuideFloor);
-    obstacles_[nextObstacleIndex_]->Spawn(-laneWidth_, 2.0f, z);
+    obstacles_[nextObstacleIndex_]->Spawn(-currentLaneWidth, 2.0f, z);
     nextObstacleIndex_ = (nextObstacleIndex_ + 1) % kMaxObstacles_;
 
     obstacles_[nextObstacleIndex_]->SetType(Obstacle::Type::GuideFloor);
-    obstacles_[nextObstacleIndex_]->Spawn(laneWidth_, 2.0f, z);
+    obstacles_[nextObstacleIndex_]->Spawn(currentLaneWidth, 2.0f, z);
     nextObstacleIndex_ = (nextObstacleIndex_ + 1) % kMaxObstacles_;
 
     consecutiveNoSpawnCount_ =
@@ -375,7 +481,7 @@ void StageSettings::SpawnObstacles(float z) {
   int bonusLane =
       -1; // ボーナスまたはアイテムを配置するレーン番号（-1は配置なし）
   Obstacle::Type itemType = Obstacle::Type::Bonus; // アイテムの種類
-  if (laneCount_ > 1) {
+  if (currentLaneCount > 1) {
     int roll = std::rand() % 100;
     int spawnPercent = static_cast<int>(itemSpawnChance_ * 100.0f);
     if (roll < spawnPercent) {
@@ -384,7 +490,7 @@ void StageSettings::SpawnObstacles(float z) {
       std::vector<Obstacle::Type> availableItems;
       for (const auto &pair : itemCoolDowns_) {
         // 1レーン時はCameraItemは除外
-        if (laneCount_ == 1 && pair.first == Obstacle::Type::CameraItem) {
+        if (currentLaneCount == 1 && pair.first == Obstacle::Type::CameraItem) {
           continue;
         }
         if (pair.second.currentTimer <= 0.0f) {
@@ -394,7 +500,7 @@ void StageSettings::SpawnObstacles(float z) {
 
       // 候補が存在する場合のみアイテムを配置
       if (!availableItems.empty()) {
-        bonusLane = std::rand() % laneCount_;
+        bonusLane = std::rand() % currentLaneCount;
         int selectedIndex = std::rand() % availableItems.size();
         itemType = availableItems[selectedIndex];
 
@@ -408,8 +514,8 @@ void StageSettings::SpawnObstacles(float z) {
   // 空ウェーブの場合は障害物を配置せず、アイテムのみ生成（または完全な安全区間）
   if (isEmptyWave) {
     if (bonusLane != -1) {
-      int lane = minLaneIndex_ + bonusLane; // アイテム配置対象のレーン番号
-      float x = static_cast<float>(lane) * laneWidth_; // レーンのワールドX座標
+      int lane = currentMinLane + bonusLane; // アイテム配置対象のレーン番号
+      float x = static_cast<float>(lane) * currentLaneWidth; // レーンのワールドX座標
       obstacles_[nextObstacleIndex_]->SetType(itemType);
       obstacles_[nextObstacleIndex_]->Spawn(x, 2.5f, z - 5.0f);
       nextObstacleIndex_ = (nextObstacleIndex_ + 1) % kMaxObstacles_;
@@ -418,11 +524,11 @@ void StageSettings::SpawnObstacles(float z) {
   }
 
   // レーンの状態を決定 (0: None, 1: Low, 2: High, 3: Wall, 4: Bonus)
-  std::vector<int> laneSpawns(laneCount_);
+  std::vector<int> laneSpawns(currentLaneCount);
   int wallCount = 0;
   int noneCount = 0;
 
-  for (int i = 0; i < laneCount_; i++) {
+  for (int i = 0; i < currentLaneCount; i++) {
     laneSpawns[i] = std::rand() % 4; // 0~3
     if (laneSpawns[i] == 3) {
       wallCount++;
@@ -432,9 +538,9 @@ void StageSettings::SpawnObstacles(float z) {
   }
 
   // すべて「何もない(None)」の場合は、最低1つの障害物を配置する
-  if (noneCount == laneCount_) {
-    int changeIndex = std::rand() % laneCount_;
-    if (laneCount_ == 1) {
+  if (noneCount == currentLaneCount) {
+    int changeIndex = std::rand() % currentLaneCount;
+    if (currentLaneCount == 1) {
       // レーンが1つの場合はWall(3)を生成しないようにする(1:Low, 2:High)
       laneSpawns[changeIndex] = 1 + (std::rand() % 2);
     } else {
@@ -444,16 +550,16 @@ void StageSettings::SpawnObstacles(float z) {
 
   // noneCountの処理でWallが増えた可能性があるのでwallCountを再計算
   wallCount = 0;
-  for (int i = 0; i < laneCount_; i++) {
+  for (int i = 0; i < currentLaneCount; i++) {
     if (laneSpawns[i] == 3) {
       wallCount++;
     }
   }
 
   // 全てWallの場合は1つを確実に通れるようにする
-  if (wallCount == laneCount_) {
-    int changeIndex = std::rand() % laneCount_;
-    if (laneCount_ == 1) {
+  if (wallCount == currentLaneCount) {
+    int changeIndex = std::rand() % currentLaneCount;
+    if (currentLaneCount == 1) {
       // 1レーンしかなく全てWallの場合は、必ず通れる障害物にする
       laneSpawns[changeIndex] = 1 + (std::rand() % 2); // 1:Low または 2:High
     } else {
@@ -464,7 +570,7 @@ void StageSettings::SpawnObstacles(float z) {
   // ボーナス配置時に障害物があるレーンを優先する処理（通常ウェーブ時）
   if (bonusLane != -1) {
     std::vector<int> obstacleLanes; // 障害物が存在するレーンのリスト
-    for (int i = 0; i < laneCount_; i++) {
+    for (int i = 0; i < currentLaneCount; i++) {
       if (laneSpawns[i] != 0) {
         obstacleLanes.push_back(i);
       }
@@ -475,12 +581,12 @@ void StageSettings::SpawnObstacles(float z) {
   }
 
   // 決定した内容で各レーンに生成
-  for (int i = 0; i < laneCount_; i++) {
+  for (int i = 0; i < currentLaneCount; i++) {
     if (laneSpawns[i] == 0 && i != bonusLane)
       continue; // None 且つ ボーナスも無いならスキップ
 
-    int lane = minLaneIndex_ + i; // レーンインデックス（-1, 0, 1）
-    float x = static_cast<float>(lane) * laneWidth_; // レーンのX座標
+    int lane = currentMinLane + i; // レーンインデックス（-1, 0, 1）
+    float x = static_cast<float>(lane) * currentLaneWidth; // レーンのX座標
 
     // ボーナスまたはアイテムの生成（障害物の手前に配置）
     if (i == bonusLane) {
@@ -529,14 +635,14 @@ void StageSettings::Reset() {
   CalculateNextObstacleInterval();
 
   // 道路チャンクの位置をリセット
+  targetLaneCount_ = 3;
+  laneCount_ = 3;
+  minLaneIndex_ = -1;
+  maxLaneIndex_ = 1;
+  chunkRowInfos_.resize(kChunkCount_);
   for (int i = 0; i < kChunkCount_; i++) {
-    for (int laneIdx = 0; laneIdx < laneCount_; laneIdx++) {
-      if (laneIdx < roadTransforms_[i].size()) {
-        roadTransforms_[i][laneIdx].translate.z =
-            static_cast<float>(i - kBackwardChunks_) * chunkLength_;
-        roadChunks_[i][laneIdx]->SetTransform(roadTransforms_[i][laneIdx]);
-      }
-    }
+    float z = static_cast<float>(i - kBackwardChunks_) * chunkLength_;
+    RebuildChunkRow(i, 3, z, IdentityMatrix());
   }
 
   // 障害物を全て非アクティブに

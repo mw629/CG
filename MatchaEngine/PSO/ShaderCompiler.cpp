@@ -41,12 +41,13 @@ Microsoft::WRL::ComPtr<IDxcBlob> ShaderCompile::CompileShader(std::ostream& os,
 	Microsoft::WRL::ComPtr<IDxcBlobEncoding> shaderSource = nullptr;
 	HRESULT hr = dxcUtils.Get()->LoadFile(filePath.c_str(), nullptr, &shaderSource);
 	//読めなかったら止める
-	if (SUCCEEDED(hr)) {
-		Log(os, ConvertString(std::format(L"File loaded successfully,[{}]\n", shaderName)));
-	} else {
-		Log(os, ConvertString(std::format(L"Failed to load file,[{}]\n", shaderName)));
+	if (FAILED(hr) || !shaderSource) {
+		Log(os, ConvertString(std::format(L"Failed to load file,[{}], path:{}\n", shaderName, filePath)));
+		assert(SUCCEEDED(hr));
+		return nullptr;
 	}
-	assert(SUCCEEDED(hr));
+	Log(os, ConvertString(std::format(L"File loaded successfully,[{}]\n", shaderName)));
+
 	//読み込んだファイルの内容を設定する
 	DxcBuffer shaderSourceBuffer;
 	shaderSourceBuffer.Ptr = shaderSource->GetBufferPointer();

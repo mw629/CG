@@ -57,6 +57,9 @@ private:
 	bool isRightSideMode_ = false;
 	float rightSideDistance_ = 0.0f;
 
+	// ボス戦終了後のクールタイム開始用フラグ
+	bool wasBossBattle_ = false;
+
 	void StartCameraTransition(const Transform& targetTransform, int laneCount);
 	void UpdateCameraTransition();
 

@@ -278,10 +278,13 @@ void GameScene::ImGui() {
 
   // ステージ設定のデバッグパネル
   if (ImGui::CollapsingHeader("Stage Settings Debug")) {
-    int laneCount = stageSettings_->GetLaneCount();
-    if (ImGui::SliderInt("Lane Count", &laneCount, 1, 11)) {
+    int currentLane = stageSettings_->GetLaneCount();
+    ImGui::Text("Current (Player Foot) Lane: %d", currentLane);
+
+    int targetLane = stageSettings_->GetTargetLaneCount();
+    if (ImGui::SliderInt("Target Lane Count", &targetLane, 1, 11)) {
       // Ensure it's preferably an odd number, or just pass it to the setter
-      stageSettings_->SetLaneCount(laneCount);
+      stageSettings_->SetLaneCount(targetLane);
     }
 
     float laneWidth = stageSettings_->GetLaneWidth();
@@ -563,6 +566,7 @@ void GameScene::ResetGame() {
   currentDistance_ = 0.0f;
   currentScore_ = 0.0f;
   bonusEnemyHitCount_ = 0;
+  wasBossBattle_ = false;
 
   // カメラと遷移状態の即座初期化
   isCameraTransitionPending_ = false;
@@ -578,7 +582,7 @@ void GameScene::ResetGame() {
   playingState_ = PlayingState::ThreeLane;
   isRightSideMode_ = false;
   rightSideDistance_ = 0.0f;
-  stageSettings_->SetLaneCount(3);
+  stageSettings_->SetLaneCountImmediate(3);
   stageSettings_->SetSpawningPaused(false);
   player_->SetInvertedControls(false);
 }
@@ -598,7 +602,6 @@ void GameScene::ReturnToTitle() {
 }
 
 void GameScene::Initialize() {
-
   sceneID_ = SceneID::Game;
 
   // タイトル用スプライトの生成
@@ -883,12 +886,13 @@ void GameScene::DrawHUD(class Draw &draw) {
     s_preloaded = true;
     draw.GetTextRenderer()->GetAtlas()->PreloadString(
         "0123456789ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz:/"
-        ".mkmhpt%+-[]()!★◆▼▲●■░|"
+        ".mkmhpt%+-[]()!★◆▼▲●■░|【】①②③※・「」←→ "
         "一二三四五六七八九十百千万到達距離スコア速度最高記録ベストゲームオーバ"
         "ーリスタートリザルトへ戻る一時停止中現在獲得順位反撃チャンス左中央右打"
         "ち返せ跳ね返しボーナス敵撃破モードシールドバリアアクティブジャンプスラ"
         "イディング走るポーズキーもう一度遊ぶプレイ"
-        "ペンギンダッシュ―—");
+        "ペンギンダッシュ―—"
+        "操作方法十字説明攻略倒し方緑赤色迫る直撃減少命中削切回避手前当てろ避けろ戦指令");
   }
 
   if (gameState_ == GameState::Title) {
@@ -1141,6 +1145,95 @@ void GameScene::DrawBossHUD(class Draw &draw) {
                         Vector4(0.5f, 0.1f, 0.0f, 1.0f), 0.09f);
   }
 
+  // --- 右上: ボス倒し方（攻略ガイド）パネル ---
+  {
+    const float guideX = 880.0f;
+    const float guideY = 150.0f;
+    const float guideW = 380.0f;
+    const float guideH = 205.0f;
+
+    // パネル背景（ダーククリムゾン）
+    draw.DrawFillRect(Vector2(guideX, guideY), Vector2(guideW, guideH),
+                      Vector4(0.08f, 0.03f, 0.04f, 0.88f));
+    // 上部アクセントバー（ゴールド/オレンジ）
+    draw.DrawFillRect(Vector2(guideX, guideY), Vector2(guideW, 3.0f),
+                      Vector4(1.0f, 0.45f, 0.2f, 0.95f));
+
+    // ヘッダー
+    draw.DrawMSDFString("【 ボスの倒し方 】", Vector2(guideX + 16.0f, guideY + 12.0f),
+                        22.0f, Vector4(1.0f, 0.88f, 0.25f, 1.0f), true,
+                        Vector4(0.3f, 0.05f, 0.0f, 1.0f), 0.12f, 0.08f);
+    draw.DrawMSDFString("HOW TO DEFEAT", Vector2(guideX + 225.0f, guideY + 16.0f),
+                        15.0f, Vector4(0.85f, 0.65f, 0.5f, 0.85f), true,
+                        Vector4(0.0f, 0.0f, 0.0f, 1.0f), 0.08f, 0.05f);
+
+    // 区切り線
+    draw.DrawFillRect(Vector2(guideX + 14.0f, guideY + 42.0f),
+                      Vector2(guideW - 28.0f, 1.0f),
+                      Vector4(0.5f, 0.25f, 0.2f, 0.65f));
+
+    // ステップ1: 緑の弾を打ち返す
+    draw.DrawMSDFString("① 緑の弾を手前で打ち返せ！",
+                        Vector2(guideX + 16.0f, guideY + 52.0f), 19.0f,
+                        Vector4(0.3f, 1.0f, 0.6f, 1.0f), true,
+                        Vector4(0.0f, 0.2f, 0.1f, 1.0f), 0.10f, 0.06f);
+    draw.DrawMSDFString("   手前に来たら [1]左 / [2]中央 / [3]右",
+                        Vector2(guideX + 16.0f, guideY + 77.0f), 16.0f,
+                        Vector4(1.0f, 0.95f, 0.65f, 0.95f), true,
+                        Vector4(0.0f, 0.0f, 0.0f, 1.0f), 0.08f, 0.05f);
+
+    // ステップ2: ボスに当ててダメージ
+    draw.DrawMSDFString("② 跳ね返した弾をボスに当てろ！",
+                        Vector2(guideX + 16.0f, guideY + 104.0f), 19.0f,
+                        Vector4(1.0f, 0.75f, 0.25f, 1.0f), true,
+                        Vector4(0.2f, 0.1f, 0.0f, 1.0f), 0.10f, 0.06f);
+    draw.DrawMSDFString("   命中させるとボスのHP減少 (0で撃破)",
+                        Vector2(guideX + 16.0f, guideY + 129.0f), 16.0f,
+                        Vector4(0.9f, 0.9f, 0.9f, 0.9f), true,
+                        Vector4(0.0f, 0.0f, 0.0f, 1.0f), 0.08f, 0.05f);
+
+    // ステップ3: 赤い攻撃は回避
+    draw.DrawMSDFString("③ 赤い攻撃は打ち返せない！",
+                        Vector2(guideX + 16.0f, guideY + 156.0f), 19.0f,
+                        Vector4(1.0f, 0.4f, 0.4f, 1.0f), true,
+                        Vector4(0.2f, 0.0f, 0.0f, 1.0f), 0.10f, 0.06f);
+    draw.DrawMSDFString("   ジャンプ / スライド / 移動で回避！",
+                        Vector2(guideX + 16.0f, guideY + 181.0f), 16.0f,
+                        Vector4(0.85f, 0.85f, 0.85f, 0.85f), true,
+                        Vector4(0.0f, 0.0f, 0.0f, 1.0f), 0.08f, 0.05f);
+  }
+
+  // ボス登場時の大迫力作戦指令バナー (Appearance演出中)
+  if (boss_->GetState() == BossState::Appearance) {
+    float alpha = std::clamp(boss_->GetStateTimer() * 2.0f, 0.0f, 1.0f);
+    draw.DrawFillRect(Vector2(260.0f, 240.0f), Vector2(760.0f, 190.0f),
+                      Vector4(0.06f, 0.02f, 0.02f, 0.94f * alpha));
+    draw.DrawFillRect(Vector2(260.0f, 240.0f), Vector2(760.0f, 4.0f),
+                      Vector4(1.0f, 0.8f, 0.2f, 0.95f * alpha));
+    draw.DrawFillRect(Vector2(260.0f, 426.0f), Vector2(760.0f, 4.0f),
+                      Vector4(1.0f, 0.8f, 0.2f, 0.95f * alpha));
+
+    draw.DrawMSDFString("★ MISSION: ボス ICE KING を撃破せよ！ ★",
+                        Vector2(300.0f, 255.0f), 30.0f,
+                        Vector4(1.0f, 0.9f, 0.2f, alpha), true,
+                        Vector4(0.3f, 0.0f, 0.0f, alpha), 0.12f, 0.08f);
+
+    draw.DrawMSDFString("① 手前に迫る「緑の弾」を [1] [2] [3] キーで打ち返せ！",
+                        Vector2(290.0f, 305.0f), 22.0f,
+                        Vector4(0.3f, 1.0f, 0.6f, alpha), true,
+                        Vector4(0.0f, 0.2f, 0.1f, alpha), 0.10f, 0.06f);
+
+    draw.DrawMSDFString("② 跳ね返した弾をボスに命中させて HP を削り切れ！",
+                        Vector2(290.0f, 345.0f), 21.0f,
+                        Vector4(1.0f, 0.8f, 0.3f, alpha), true,
+                        Vector4(0.2f, 0.1f, 0.0f, alpha), 0.10f, 0.06f);
+
+    draw.DrawMSDFString("※ 赤い攻撃は跳ね返せない！ ジャンプ・スライド・移動で回避せよ！",
+                        Vector2(290.0f, 385.0f), 19.0f,
+                        Vector4(1.0f, 0.45f, 0.45f, alpha), true,
+                        Vector4(0.2f, 0.0f, 0.0f, alpha), 0.08f, 0.05f);
+  }
+
   // ボス撃破時の演出バナー
   if (boss_->GetState() == BossState::Defeat) {
     draw.DrawFillRect(Vector2(360.0f, 170.0f), Vector2(560.0f, 95.0f),
@@ -1170,8 +1263,8 @@ void GameScene::DrawControlsGuide(class Draw &draw) {
     guideText = "[SPACE / W] ジャンプ    [S] スライド    [ESC] ポーズ  "
                 "(※1レーン固定中)";
   } else if (playingState_ == PlayingState::Boss) {
-    guideText = "[A / D] 移動    [1 / 2 / 3] レーン別反撃    [SPACE / W] "
-                "ジャンプ    [ESC] ポーズ";
+    guideText = "【ボス倒し方】手前の緑弾を [1/2/3] で打ち返しボスへ直撃！ 赤攻撃は回避！  "
+                "[A/D] 移動  [SPACE] ジャンプ  [S] スライド  [ESC] ポーズ";
   }
 
   draw.DrawMSDFString(guideText, Vector2(30.0f, 680.0f), 18.0f,
@@ -1432,6 +1525,59 @@ void GameScene::DrawTitleHUD(class Draw &draw) {
                         true, Vector4(0.0f, 0.0f, 0.0f, startAlpha), 0.15f,
                         0.08f);
   }
+
+  // --- タイトル右下: 操作方法パネル ---
+  if (mainAlpha > 0.01f) {
+    const float guideCardX = 880.0f;
+    const float guideCardY = 465.0f;
+    const float guideCardW = 380.0f;
+    const float guideCardH = 230.0f;
+
+    // パネル背景（半透明ダークブルー）
+    draw.DrawFillRect(Vector2(guideCardX, guideCardY),
+                      Vector2(guideCardW, guideCardH),
+                      Vector4(0.04f, 0.07f, 0.12f, 0.82f * mainAlpha));
+    // 上部アクセントバー（アイスブルー）
+    draw.DrawFillRect(Vector2(guideCardX, guideCardY),
+                      Vector2(guideCardW, 3.0f),
+                      Vector4(0.3f, 0.7f, 1.0f, 0.95f * mainAlpha));
+
+    // ヘッダータイトル
+    draw.DrawMSDFString("【 操作方法 / CONTROLS 】",
+                        Vector2(guideCardX + 16.0f, guideCardY + 12.0f), 22.0f,
+                        Vector4(0.4f, 0.85f, 1.0f, mainAlpha), true,
+                        Vector4(0.0f, 0.1f, 0.25f, mainAlpha), 0.12f, 0.08f);
+
+    // 区切りライン
+    draw.DrawFillRect(Vector2(guideCardX + 14.0f, guideCardY + 42.0f),
+                      Vector2(guideCardW - 28.0f, 1.0f),
+                      Vector4(0.2f, 0.4f, 0.6f, 0.6f * mainAlpha));
+
+    // 操作リスト
+    struct ControlItem {
+      const char *key;
+      const char *desc;
+    };
+    ControlItem items[] = {
+        {"[A / D] / [← →]", "レーン移動 (PAD: 十字キー)"},
+        {"[SPACE / W / ↑]", "ジャンプ   (PAD: Aボタン)"},
+        {"[S] / [↓]",       "スライド   (PAD: Bボタン)"},
+        {"[ESC]",           "ポーズ / メニュー"},
+        {"[1] / [2] / [3]", "ボス弾打ち返し (ボス戦時)"}};
+
+    float itemY = guideCardY + 52.0f;
+    for (const auto &item : items) {
+      // キー名（目立つライトゴールド/イエロー）
+      draw.DrawMSDFString(item.key, Vector2(guideCardX + 16.0f, itemY), 17.0f,
+                          Vector4(1.0f, 0.9f, 0.35f, mainAlpha), true,
+                          Vector4(0.0f, 0.0f, 0.0f, mainAlpha), 0.10f, 0.06f);
+      // 説明（ホワイト）
+      draw.DrawMSDFString(item.desc, Vector2(guideCardX + 155.0f, itemY), 16.0f,
+                          Vector4(0.9f, 0.95f, 1.0f, 0.9f * mainAlpha), true,
+                          Vector4(0.0f, 0.0f, 0.0f, mainAlpha), 0.08f, 0.05f);
+      itemY += 34.0f;
+    }
+  }
 }
 
 void GameScene::PlayerHitUpdate() {
@@ -1471,6 +1617,12 @@ void GameScene::PlayingUpdate() {
 
   // ボス戦の更新
   if (playingState_ == PlayingState::Boss) {
+    // ボス戦中はボスアイテムのクールタイムを満タンに維持（ボス戦終了後にクールタイムを開始させるため）
+    float bossItemDuration =
+        stageSettings_->GetItemCoolDownDuration(Obstacle::Type::BossItem);
+    stageSettings_->SetItemCoolDownTimer(Obstacle::Type::BossItem,
+                                         bossItemDuration);
+
     if (!boss_->GetIsActive() && !isCameraTransitioning_ &&
         !isCameraTransitionPending_) {
       ChangePlayingState(PlayingState::ThreeLane);
@@ -1846,7 +1998,17 @@ void GameScene::ChangePlayingState(PlayingState newState, bool force) {
   if (!force && playingState_ == newState)
     return;
 
+  PlayingState prevState = playingState_;
   playingState_ = newState;
+
+  if (prevState == PlayingState::Boss && newState != PlayingState::Boss) {
+    wasBossBattle_ = true;
+    // ボス戦終了時：ボスアイテムのクールタイムを満タンに設定
+    float bossItemDuration =
+        stageSettings_->GetItemCoolDownDuration(Obstacle::Type::BossItem);
+    stageSettings_->SetItemCoolDownTimer(Obstacle::Type::BossItem,
+                                         bossItemDuration);
+  }
 
   Transform target;
   target.scale = {1.0f, 1.0f, 1.0f};
@@ -1894,7 +2056,8 @@ void GameScene::StartCameraTransition(const Transform &targetTransform,
   // 障害物の生成を即座に停止
   stageSettings_->SetSpawningPaused(true);
 
-  // トランジションの予約を行う
+  // トランジションの予約を行う（奥から新レーンが出現するように設定）
+  stageSettings_->SetLaneCount(laneCount);
   isCameraTransitionPending_ = true;
   pendingCameraTargetTransform_ = targetTransform;
   pendingLaneCount_ = laneCount;
@@ -1935,6 +2098,14 @@ void GameScene::UpdateCameraTransition() {
     isCameraTransitioning_ = false;
     if (playingState_ != PlayingState::Boss) {
       stageSettings_->SetSpawningPaused(false);
+      // ボス戦から通常走行へ復帰した瞬間からクールタイムを改めて開始
+      if (wasBossBattle_) {
+        wasBossBattle_ = false;
+        float bossItemDuration =
+            stageSettings_->GetItemCoolDownDuration(Obstacle::Type::BossItem);
+        stageSettings_->SetItemCoolDownTimer(Obstacle::Type::BossItem,
+                                             bossItemDuration);
+      }
     } else {
       // カメラ遷移が終わってからボスを出現させる
       boss_->Spawn(-6.0f, 3.0f, -2.0f);
