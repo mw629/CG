@@ -231,7 +231,7 @@ void GameScene::ImGui() {
     // ボス情報
     if (playingState_ == PlayingState::Boss && boss_->GetIsActive()) {
       if (ImGui::TreeNode("Boss Info")) {
-        ImGui::Text("HP: %d / 20", boss_->GetHP());
+        ImGui::Text("HP: %d / %d", boss_->GetHP(), boss_->GetMaxHP());
         ImGui::DragFloat3("Target Pos", &boss_->GetTargetPosRef().x, 0.1f);
         ImGui::DragFloat("Attack Spawn Z", &bossAttackSpawnZ_, 0.5f, -100.0f,
                          0.0f, "%.1f m");
@@ -1167,15 +1167,16 @@ void GameScene::DrawBossHUD(class Draw &draw) {
                       Vector4(0.8f, 0.95f, 1.0f, 1.0f), true,
                       Vector4(0.0f, 0.2f, 0.5f, 1.0f), 0.08f);
 
-  // ボスHPゲージ (最大20)
+  // ボスHPゲージ
+  int maxHp = boss_->GetMaxHP();
   int hp = boss_->GetHP();
   if (hp < 0)
     hp = 0;
-  if (hp > 20)
-    hp = 20;
+  if (hp > maxHp)
+    hp = maxHp;
 
   std::string hpGauge = "[";
-  for (int i = 0; i < 20; i++) {
+  for (int i = 0; i < maxHp; i++) {
     if (i < hp)
       hpGauge += "■";
     else
@@ -1184,7 +1185,7 @@ void GameScene::DrawBossHUD(class Draw &draw) {
   hpGauge += "]";
 
   char hpText[128];
-  snprintf(hpText, sizeof(hpText), "HP %s  %2d / 20", hpGauge.c_str(), hp);
+  snprintf(hpText, sizeof(hpText), "HP %s  %d / %d", hpGauge.c_str(), hp, maxHp);
   const float hpSize = 22.0f;
   float hpW = tr ? tr->MeasureString(hpText, hpSize).x : 567.0f;
   float hpX = panelX + (panelW - hpW) * 0.5f;

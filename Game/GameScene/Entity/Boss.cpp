@@ -18,7 +18,7 @@ void Boss::Initialize(ModelData modelData) {
 
 void Boss::Reset() {
   isActive_ = false;
-  hp_ = 20;
+  hp_ = kMaxHP;
   isHit_ = false;
   hitTimer_ = 0.0f;
   state_ = BossState::Appearance;
@@ -50,7 +50,7 @@ void Boss::Spawn(float x, float y, float z) {
   transform_.rotate = {0.0f, 0.0f, 0.0f};
   transform_.scale = {5.0f, 5.0f, 5.0f}; // 大きめに設定
   isActive_ = true;
-  hp_ = 20;
+  hp_ = kMaxHP;
   isHit_ = false;
   hitTimer_ = 0.0f;
   battleAnimTimer_ = 0.0f;

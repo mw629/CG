@@ -48,7 +48,7 @@ void WindowConfig::SetWindowData(const int32_t kClientWidth, const int32_t kClie
 	//ウィンドウプロシージャ
 	wc.lpfnWndProc = WindowProc;
 	//ウィンドウクラス名
-	wc.lpszClassName = L"CGWindowClass";
+	wc.lpszClassName = L"ペンギンダッシュ";
 	//インスタンスハンドル
 	wc.hInstance = GetModuleHandle(nullptr);
 	//カーソル
@@ -69,7 +69,7 @@ void WindowConfig::SetWindowData(const int32_t kClientWidth, const int32_t kClie
 	//ウィンドウの作成//
 	hwnd = CreateWindow(
 		wc.lpszClassName, //利用するクラス名
-		L"LE3B_29_ワタナベ_マサト",//タイトルバーの文字
+		L"ペンギンダッシュ",//タイトルバーの文字
 		WS_OVERLAPPEDWINDOW,//よく見るウィンドウスタイル
 		CW_USEDEFAULT,//表示X座標（Windowsに任せる）
 		CW_USEDEFAULT,//表示Y座標（Windowsに任せる）

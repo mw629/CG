@@ -11,9 +11,12 @@ enum class BossState {
 };
 
 class Boss : public GameObject {
+public:
+  static constexpr int kMaxHP = 5;
+
 private:
   std::unique_ptr<Model> model_ = std::make_unique<Model>();
-  int hp_ = 5;
+  int hp_ = kMaxHP;
   bool isHit_ = false;
   float hitTimer_ = 0.0f;
   BossState state_ = BossState::Appearance;
@@ -42,6 +45,7 @@ public:
 
   void OnDamage();
   int GetHP() const { return hp_; }
+  int GetMaxHP() const { return kMaxHP; }
 
   BossState GetState() const { return state_; }
   float GetStateTimer() const { return stateTimer_; }
