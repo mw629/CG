@@ -33,7 +33,7 @@ void Obstacle::Initialize(ModelData lowData, ModelData highData,
 
   bonusModel_->Initialize(bonusData);
   bonusModel_->SetShader("ObjectShader");
-  bonusModel_->GetMartial()->SetColor({1.0f, 0.84f, 0.0f, 1.0f});
+  bonusModel_->GetMartial()->SetColor({1.0f, 1.0f, 1.0f, 1.0f});
 
   itemModel_->Initialize(wallData);
   itemModel_->SetShader("ObjectShader");
@@ -121,9 +121,9 @@ void Obstacle::SetType(Type type) {
     collisionHeight_ = 1.0f;
     collisionDepth_ = 1.0f;
     transform_.scale = {1.0f, 1.0f, 1.0f};
-    transform_.rotate = {0.0f, 0.0f, 0.0f};
+    transform_.rotate = {0.0f, 3.141592f, 0.0f};
     if (currentModel_) {
-      currentModel_->GetMartial()->SetColor({1.0f, 0.84f, 0.0f, 1.0f});
+      currentModel_->GetMartial()->SetColor({1.0f, 1.0f, 1.0f, 1.0f});
       currentModel_->SetShader("ObjectShader");
       currentModel_->SetBlend(BlendMode::kBlendModeNormal);
     }
@@ -234,7 +234,8 @@ void Obstacle::SetType(Type type) {
     if (currentModel_ == lowModel_.get() || currentModel_ == highModel_.get() ||
         currentModel_ == wallModel_.get() ||
         currentModel_ == iceBomModel_.get() ||
-        currentModel_ == reflectingAttackModel_.get()) {
+        currentModel_ == reflectingAttackModel_.get() ||
+        currentModel_ == bonusModel_.get()) {
       drawTransform.translate.y -= collisionHeight_ * 0.5f;
     }
     currentModel_->SetTransform(drawTransform);
@@ -261,7 +262,8 @@ void Obstacle::Spawn(float x, float y, float z) {
     if (currentModel_ == lowModel_.get() || currentModel_ == highModel_.get() ||
         currentModel_ == wallModel_.get() ||
         currentModel_ == iceBomModel_.get() ||
-        currentModel_ == reflectingAttackModel_.get()) {
+        currentModel_ == reflectingAttackModel_.get() ||
+        currentModel_ == bonusModel_.get()) {
       drawTransform.translate.y -= collisionHeight_ * 0.5f;
     }
     currentModel_->SetTransform(drawTransform);
@@ -362,7 +364,8 @@ void Obstacle::StageUpdate(Matrix4x4 view, float scrollSpeed) {
     if (currentModel_ == lowModel_.get() || currentModel_ == highModel_.get() ||
         currentModel_ == wallModel_.get() ||
         currentModel_ == iceBomModel_.get() ||
-        currentModel_ == reflectingAttackModel_.get()) {
+        currentModel_ == reflectingAttackModel_.get() ||
+        currentModel_ == bonusModel_.get()) {
       drawTransform.translate.y -= collisionHeight_ * 0.5f;
     }
     currentModel_->SetTransform(drawTransform);

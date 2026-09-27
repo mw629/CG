@@ -815,8 +815,8 @@ void GameScene::Initialize() {
       AssetManager::LoadModel("Resources/Model/IceBom", "IceBom.obj");
   ModelData reflectingAttackModel = AssetManager::LoadModel(
       "Resources/Model/ReflectingAttack", "ReflectingAttack.obj");
-  ModelData bonusEnemyModel =
-      AssetManager::LoadModel("Resources/Model/Player", "Player.obj");
+  ModelData bonusEnemyModel = AssetManager::LoadModel(
+      "Resources/Model/StylizedSnowman", "StylizedSnowman.obj");
   stageSettings_->Initialize(roadModelData, fallenTreeModel, iceArchwayModel,
                              iceWallModel, bonusEnemyModel, iceBomModel,
                              reflectingAttackModel, gameObjectManager_.get());
