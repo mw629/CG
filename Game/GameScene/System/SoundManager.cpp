@@ -44,7 +44,16 @@ void SoundManager::Finalize() {
 
 float SoundManager::GetEffectiveBGMVolume() const {
     auto* gsm = GameSceneManager::GetInstance();
-    return gsm->GetMasterVolume() * gsm->GetBGMVolume();
+    float vol = gsm->GetMasterVolume() * gsm->GetBGMVolume();
+
+    // ゲームプレイ中BGM（BGM::Play）は音圧が高いため、SEや他シーンとのバランスを考慮して音量を下げる
+    if (currentBGM_ == BGM::Play) {
+        vol *= 0.5f;
+    } else if (currentBGM_ == BGM::Boss) {
+        vol *= 0.7f;
+    }
+
+    return std::clamp(vol, 0.0f, 1.0f);
 }
 
 float SoundManager::GetEffectiveSEVolume(float volumeMultiplier) const {
