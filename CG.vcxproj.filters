@@ -204,9 +204,6 @@
     <ClCompile Include="MatchaEngine\GameObjects\Effect\EffectDefinition.cpp">
       <Filter>ソース ファイル</Filter>
     </ClCompile>
-    <ClCompile Include="Game\Direction\Fade.cpp">
-      <Filter>ソース ファイル</Filter>
-    </ClCompile>
     <ClCompile Include="MatchaEngine\GameObjects\Effect\Emitter.cpp">
       <Filter>ソース ファイル</Filter>
     </ClCompile>
@@ -238,9 +235,6 @@
       <Filter>ソース ファイル</Filter>
     </ClCompile>
     <ClCompile Include="MatchaEngine\GameObjects\Object\3d\Cube.cpp">
-      <Filter>ソース ファイル</Filter>
-    </ClCompile>
-    <ClCompile Include="Game\TestScene\TestScene.cpp">
       <Filter>ソース ファイル</Filter>
     </ClCompile>
     <ClCompile Include="MatchaEngine\Graphics\RenderTexture.cpp">
@@ -298,9 +292,6 @@
       <Filter>ソース ファイル</Filter>
     </ClCompile>
     <ClCompile Include="externals\imgui\ImGuizmo.cpp">
-      <Filter>ソース ファイル</Filter>
-    </ClCompile>
-    <ClCompile Include="Game\JsonScene\JsonScene.cpp">
       <Filter>ソース ファイル</Filter>
     </ClCompile>
     <ClCompile Include="MatchaEngine\System\GameObjectManager.cpp">
@@ -508,9 +499,6 @@
     <ClInclude Include="Game\IScene.h">
       <Filter>ヘッダー ファイル</Filter>
     </ClInclude>
-    <ClInclude Include="Game\Direction\Fade.h">
-      <Filter>ヘッダー ファイル</Filter>
-    </ClInclude>
     <ClInclude Include="MatchaEngine\GameObjects\Effect\Emitter.h">
       <Filter>ヘッダー ファイル</Filter>
     </ClInclude>
@@ -542,9 +530,6 @@
       <Filter>ヘッダー ファイル</Filter>
     </ClInclude>
     <ClInclude Include="MatchaEngine\GameObjects\Object\3d\Cube.h">
-      <Filter>ヘッダー ファイル</Filter>
-    </ClInclude>
-    <ClInclude Include="Game\TestScene\TestScene.h">
       <Filter>ヘッダー ファイル</Filter>
     </ClInclude>
     <ClInclude Include="MatchaEngine\Graphics\RenderTexture.h">
@@ -614,9 +599,6 @@
       <Filter>ヘッダー ファイル</Filter>
     </ClInclude>
     <ClInclude Include="externals\imgui\ImGuizmo.h">
-      <Filter>ヘッダー ファイル</Filter>
-    </ClInclude>
-    <ClInclude Include="Game\JsonScene\JsonScene.h">
       <Filter>ヘッダー ファイル</Filter>
     </ClInclude>
     <ClInclude Include="MatchaEngine\System\GameObjectManager.h">

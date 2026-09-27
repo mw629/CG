@@ -135,10 +135,6 @@ private:
   int bonusEnemyHitCount_ = 0;
   void UpdateScoreRanking();
 
-  // 初期読み込みするSceneJsonのファイルパス
-  // (変更することで読み込むJsonを決定できる)
-  std::string initialSceneJson_ = "Resources/Json/Scene/scene.json";
-
 public:
   ~GameScene() override;
 

@@ -79,7 +79,7 @@
       <AdditionalOptions>/utf-8 %(AdditionalOptions)</AdditionalOptions>
       <MultiProcessorCompilation>true</MultiProcessorCompilation>
       <RuntimeLibrary>MultiThreadedDebug</RuntimeLibrary>
-      <AdditionalIncludeDirectories>$(ProjectDir)Editer;$(ProjectDir)MatchaEngine\System;$(ProjectDir)externals;$(ProjectDir)Game/Direction;$(ProjectDir)Game/GameScene;$(ProjectDir)Game/TestScene;$(ProjectDir)externals\assimp\include;$(ProjectDir)MatchaEngine;$(ProjectDir)externals\imgui;$(ProjectDir)externals\DirectXTex;$(ProjectDir)MatchaEngine\Common;$(ProjectDir)MatchaEngine\Core;$(ProjectDir)MatchaEngine\GameObjects;$(ProjectDir)MatchaEngine\GameObjects\Light;$(ProjectDir)MatchaEngine\GameObjects\Effect;$(ProjectDir)MatchaEngine\GameObjects\Camera;$(ProjectDir)MatchaEngine\GameObjects\Object;$(ProjectDir)MatchaEngine\GameObjects\Object\2d;$(ProjectDir)MatchaEngine\GameObjects\Object\3d;$(ProjectDir)MatchaEngine\GameObjects\Object\Animation;$(ProjectDir)MatchaEngine\GameObjects\Line;$(ProjectDir)MatchaEngine\Graphics;$(ProjectDir)MatchaEngine\Graphics\Render;$(ProjectDir)MatchaEngine\Input;$(ProjectDir)MatchaEngine\Math;$(ProjectDir)MatchaEngine\PSO;$(ProjectDir)MatchaEngine\Resource;$(ProjectDir)Shared;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+      <AdditionalIncludeDirectories>$(ProjectDir)Editer;$(ProjectDir)MatchaEngine\System;$(ProjectDir)externals;$(ProjectDir)Game/GameScene;$(ProjectDir)externals\assimp\include;$(ProjectDir)MatchaEngine;$(ProjectDir)externals\imgui;$(ProjectDir)externals\DirectXTex;$(ProjectDir)MatchaEngine\Common;$(ProjectDir)MatchaEngine\Core;$(ProjectDir)MatchaEngine\GameObjects;$(ProjectDir)MatchaEngine\GameObjects\Light;$(ProjectDir)MatchaEngine\GameObjects\Effect;$(ProjectDir)MatchaEngine\GameObjects\Camera;$(ProjectDir)MatchaEngine\GameObjects\Object;$(ProjectDir)MatchaEngine\GameObjects\Object\2d;$(ProjectDir)MatchaEngine\GameObjects\Object\3d;$(ProjectDir)MatchaEngine\GameObjects\Object\Animation;$(ProjectDir)MatchaEngine\GameObjects\Line;$(ProjectDir)MatchaEngine\Graphics;$(ProjectDir)MatchaEngine\Graphics\Render;$(ProjectDir)MatchaEngine\Input;$(ProjectDir)MatchaEngine\Math;$(ProjectDir)MatchaEngine\PSO;$(ProjectDir)MatchaEngine\Resource;$(ProjectDir)Shared;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
     </ClCompile>
     <Link>
       <SubSystem>Windows</SubSystem>
@@ -108,7 +108,7 @@ if %ERRORLEVEL% LSS 8 exit /b 0</Command>
       <AdditionalOptions>/utf-8 %(AdditionalOptions)</AdditionalOptions>
       <MultiProcessorCompilation>true</MultiProcessorCompilation>
       <RuntimeLibrary>MultiThreaded</RuntimeLibrary>
-      <AdditionalIncludeDirectories>$(ProjectDir)Editer;$(ProjectDir)MatchaEngine\System;$(ProjectDir)externals;$(ProjectDir)Game/Direction;$(ProjectDir)Game/GameScene;$(ProjectDir)Game/TestScene;$(ProjectDir)externals\assimp\include;$(ProjectDir)MatchaEngine;$(ProjectDir)externals\imgui;$(ProjectDir)externals\DirectXTex;$(ProjectDir)MatchaEngine\Common;$(ProjectDir)MatchaEngine\Core;$(ProjectDir)MatchaEngine\GameObjects;$(ProjectDir)MatchaEngine\GameObjects\Light;$(ProjectDir)MatchaEngine\GameObjects\Effect;$(ProjectDir)MatchaEngine\GameObjects\Camera;$(ProjectDir)MatchaEngine\GameObjects\Object;$(ProjectDir)MatchaEngine\GameObjects\Object\2d;$(ProjectDir)MatchaEngine\GameObjects\Object\3d;$(ProjectDir)MatchaEngine\GameObjects\Object\Animation;$(ProjectDir)MatchaEngine\GameObjects\Line;$(ProjectDir)MatchaEngine\Graphics;$(ProjectDir)MatchaEngine\Graphics\Render;$(ProjectDir)MatchaEngine\Input;$(ProjectDir)MatchaEngine\Math;$(ProjectDir)MatchaEngine\PSO;$(ProjectDir)MatchaEngine\Resource;$(ProjectDir)Shared;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+      <AdditionalIncludeDirectories>$(ProjectDir)Editer;$(ProjectDir)MatchaEngine\System;$(ProjectDir)externals;$(ProjectDir)Game/GameScene;$(ProjectDir)externals\assimp\include;$(ProjectDir)MatchaEngine;$(ProjectDir)externals\imgui;$(ProjectDir)externals\DirectXTex;$(ProjectDir)MatchaEngine\Common;$(ProjectDir)MatchaEngine\Core;$(ProjectDir)MatchaEngine\GameObjects;$(ProjectDir)MatchaEngine\GameObjects\Light;$(ProjectDir)MatchaEngine\GameObjects\Effect;$(ProjectDir)MatchaEngine\GameObjects\Camera;$(ProjectDir)MatchaEngine\GameObjects\Object;$(ProjectDir)MatchaEngine\GameObjects\Object\2d;$(ProjectDir)MatchaEngine\GameObjects\Object\3d;$(ProjectDir)MatchaEngine\GameObjects\Object\Animation;$(ProjectDir)MatchaEngine\GameObjects\Line;$(ProjectDir)MatchaEngine\Graphics;$(ProjectDir)MatchaEngine\Graphics\Render;$(ProjectDir)MatchaEngine\Input;$(ProjectDir)MatchaEngine\Math;$(ProjectDir)MatchaEngine\PSO;$(ProjectDir)MatchaEngine\Resource;$(ProjectDir)Shared;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
     </ClCompile>
     <Link>
       <SubSystem>Windows</SubSystem>
@@ -137,7 +137,7 @@ if %ERRORLEVEL% LSS 8 exit /b 0</Command>
       <AdditionalOptions>/utf-8 %(AdditionalOptions)</AdditionalOptions>
       <MultiProcessorCompilation>true</MultiProcessorCompilation>
       <RuntimeLibrary>MultiThreaded</RuntimeLibrary>
-      <AdditionalIncludeDirectories>$(ProjectDir)Editer;$(ProjectDir)MatchaEngine\System;$(ProjectDir)externals;$(ProjectDir)Game/Direction;$(ProjectDir)Game/GameScene;$(ProjectDir)Game/TestScene;$(ProjectDir)externals\assimp\include;$(ProjectDir)MatchaEngine;$(ProjectDir)externals\imgui;$(ProjectDir)externals\DirectXTex;$(ProjectDir)MatchaEngine\Common;$(ProjectDir)MatchaEngine\Core;$(ProjectDir)MatchaEngine\GameObjects;$(ProjectDir)MatchaEngine\GameObjects\Light;$(ProjectDir)MatchaEngine\GameObjects\Effect;$(ProjectDir)MatchaEngine\GameObjects\Camera;$(ProjectDir)MatchaEngine\GameObjects\Object;$(ProjectDir)MatchaEngine\GameObjects\Object\2d;$(ProjectDir)MatchaEngine\GameObjects\Object\3d;$(ProjectDir)MatchaEngine\GameObjects\Object\Animation;$(ProjectDir)MatchaEngine\GameObjects\Line;$(ProjectDir)MatchaEngine\Graphics;$(ProjectDir)MatchaEngine\Graphics\Render;$(ProjectDir)MatchaEngine\Input;$(ProjectDir)MatchaEngine\Math;$(ProjectDir)MatchaEngine\PSO;$(ProjectDir)MatchaEngine\Resource;$(ProjectDir)Shared;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+      <AdditionalIncludeDirectories>$(ProjectDir)Editer;$(ProjectDir)MatchaEngine\System;$(ProjectDir)externals;$(ProjectDir)Game/GameScene;$(ProjectDir)externals\assimp\include;$(ProjectDir)MatchaEngine;$(ProjectDir)externals\imgui;$(ProjectDir)externals\DirectXTex;$(ProjectDir)MatchaEngine\Common;$(ProjectDir)MatchaEngine\Core;$(ProjectDir)MatchaEngine\GameObjects;$(ProjectDir)MatchaEngine\GameObjects\Light;$(ProjectDir)MatchaEngine\GameObjects\Effect;$(ProjectDir)MatchaEngine\GameObjects\Camera;$(ProjectDir)MatchaEngine\GameObjects\Object;$(ProjectDir)MatchaEngine\GameObjects\Object\2d;$(ProjectDir)MatchaEngine\GameObjects\Object\3d;$(ProjectDir)MatchaEngine\GameObjects\Object\Animation;$(ProjectDir)MatchaEngine\GameObjects\Line;$(ProjectDir)MatchaEngine\Graphics;$(ProjectDir)MatchaEngine\Graphics\Render;$(ProjectDir)MatchaEngine\Input;$(ProjectDir)MatchaEngine\Math;$(ProjectDir)MatchaEngine\PSO;$(ProjectDir)MatchaEngine\Resource;$(ProjectDir)Shared;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
       <Optimization>Disabled</Optimization>
       <WholeProgramOptimization>false</WholeProgramOptimization>
     </ClCompile>
@@ -163,7 +163,6 @@ if %ERRORLEVEL% LSS 8 exit /b 0</Command>
     <ClCompile Include="Editer\EditorManager.cpp" />
     <ClCompile Include="Editer\LanguageManager.cpp" />
     <ClCompile Include="Game\GameScene\GameSceneManager.cpp" />
-    <ClCompile Include="Game\JsonScene\JsonScene.cpp" />
     <ClCompile Include="MatchaEngine\Graphics\Render\LineRenderer.cpp" />
     <ClCompile Include="MatchaEngine\System\GameObjectManager.cpp" />
     <ClCompile Include="MatchaEngine\System\CollisionManager.cpp" />
@@ -186,7 +185,6 @@ if %ERRORLEVEL% LSS 8 exit /b 0</Command>
     <ClCompile Include="MatchaEngine\Graphics\RenderTexture.cpp" />
     <ClCompile Include="MatchaEngine\GameObjects\Object\3d\Ring.cpp" />
     <ClCompile Include="MatchaEngine\GameObjects\Effect\Emitter.cpp" />
-    <ClCompile Include="Game\Direction\Fade.cpp" />
     <ClCompile Include="MatchaEngine\GameObjects\Camera\Camera.cpp" />
     <ClCompile Include="Game\GameScene\GameScene.cpp" />
     <ClCompile Include="Game\GameScene\Effect\GameSceneEffect.cpp" />
@@ -260,7 +258,6 @@ if %ERRORLEVEL% LSS 8 exit /b 0</Command>
     <ClCompile Include="MatchaEngine\GameObjects\Effect\EffectDefinition.cpp" />
     <ClCompile Include="MatchaEngine\GameObjects\Light\SpotLight.cpp" />
     <ClCompile Include="MatchaEngine\GameObjects\Object\Animation\TransformAnimation.cpp" />
-    <ClCompile Include="Game\TestScene\TestScene.cpp" />
     <ClCompile Include="Game\GameScene\System\PauseSystem.cpp" />
     <ClCompile Include="Game\GameScene\System\SoundManager.cpp" />
     <ClCompile Include="MatchaEngine\Graphics\Font\MsdfGenerator.cpp" />
@@ -383,7 +380,6 @@ if %ERRORLEVEL% LSS 8 exit /b 0</Command>
     <ClInclude Include="Editer\EditorManager.h" />
     <ClInclude Include="Editer\LanguageManager.h" />
     <ClInclude Include="Game\GameScene\GameSceneManager.h" />
-    <ClInclude Include="Game\JsonScene\JsonScene.h" />
     <ClInclude Include="MatchaEngine\Graphics\Render\LineRenderer.h" />
     <ClInclude Include="MatchaEngine\System\GameObjectManager.h" />
     <ClInclude Include="MatchaEngine\System\CollisionManager.h" />
@@ -409,7 +405,6 @@ if %ERRORLEVEL% LSS 8 exit /b 0</Command>
     <ClInclude Include="MatchaEngine\Graphics\RenderTexture.h" />
     <ClInclude Include="MatchaEngine\GameObjects\Object\3d\Ring.h" />
     <ClInclude Include="MatchaEngine\GameObjects\Effect\Emitter.h" />
-    <ClInclude Include="Game\Direction\Fade.h" />
     <ClInclude Include="Game\IScene.h" />
     <ClInclude Include="MatchaEngine\GameObjects\Camera\Camera.h" />
     <ClInclude Include="Game\GameScene\GameScene.h" />
@@ -473,7 +468,6 @@ if %ERRORLEVEL% LSS 8 exit /b 0</Command>
     <ClInclude Include="MatchaEngine\GameObjects\Effect\EffectDefinition.h" />
     <ClInclude Include="MatchaEngine\GameObjects\Light\SpotLight.h" />
     <ClInclude Include="MatchaEngine\GameObjects\Object\Animation\TransformAnimation.h" />
-    <ClInclude Include="Game\TestScene\TestScene.h" />
     <ClInclude Include="Game\GameScene\System\PauseSystem.h" />
     <ClInclude Include="Game\GameScene\System\SoundManager.h" />
   </ItemGroup>

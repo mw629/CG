@@ -796,7 +796,7 @@ void GameScene::Initialize() {
   gameObjectManager_->AddObject(player_);
   gameObjectManager_->AddObject(boss_);
 
-  // エディターでの保存・読み込み先をJsonSceneに設定
+  // エディターでの保存・読み込みコールバックの設定
   EditorManager::SetSaveCallback([this](const std::string &filePath) {
     gameObjectManager_->SaveScene(filePath);
   });
@@ -850,9 +850,6 @@ void GameScene::Initialize() {
                              iceWallModel, bonusEnemyModel, iceBomModel,
                              reflectingAttackModel, gameObjectManager_.get());
 
-  // 指定したJsonファイルを初期シーンとして読み込む
-  gameObjectManager_->LoadScene(initialSceneJson_);
-
   // ゲーム状態・カメラ・ステージの初期化（カメラ遷移アニメーションを起こさず即座に初期状態にする）
   ResetGame();
 
@@ -889,8 +886,6 @@ void GameScene::Update() {
     ColliderComponent::s_isDrawDebug_ = !ColliderComponent::s_isDrawDebug_;
   }
 #endif // _DEBUG
-
-  // PostEffect::SetActivePostEffect(PostEffect::Type::GaussianFilter);
 
   // Engine側のPlay/Stop状態に同期してゲームステートを切り替え
   bool isEnginePlaying = EditorManager::IsPlaying();

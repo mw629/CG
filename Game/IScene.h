@@ -2,13 +2,11 @@
 
 enum SceneID
 {
-	Test = 0,
-	Title = 1,
-	StageSelect = 2,
-	Game = 3,
-	Clear = 4,
-	GameOver = 5,
-	Json = 6
+	Title = 0,
+	StageSelect = 1,
+	Game = 2,
+	Clear = 3,
+	GameOver = 4
 };
 
 class IScene
