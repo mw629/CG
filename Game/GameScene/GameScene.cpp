@@ -1,8 +1,10 @@
 #include "GameScene.h"
+#include "GameSceneManager.h"
 #include "../../Editer/EditorManager.h"
 #include "AssetManager.h"
 #include "Graphics/Font/TextRenderer.h"
 #include "Graphics/Render/Draw.h"
+#include "System/SoundManager.h"
 #include <Engine.h>
 #include <GameObjects/Object/3d/Model.h>
 #include <Math/Calculation.h>
@@ -61,6 +63,8 @@ void GameScene::ImGui() {
         ResetGame();
         gameState_ = GameState::Playing;
         isTitleExiting_ = false;
+        SoundManager::GetInstance()->PlaySE(SoundManager::SE::Start);
+        SoundManager::GetInstance()->PlayBGM(SoundManager::BGM::Play);
       }
       ImGui::SameLine();
       if (ImGui::Button("Return to Title (2)", ImVec2(160, 35))) {
@@ -113,6 +117,60 @@ void GameScene::ImGui() {
     if (ImGui::Button("Reset Debug Camera to Game Camera")) {
       camera_->ResetDebugCamera(cameraTransform_);
     }
+  }
+
+  if (ImGui::CollapsingHeader("Sound Settings", ImGuiTreeNodeFlags_DefaultOpen)) {
+    auto* gsm = GameSceneManager::GetInstance();
+    float masterVol = gsm->GetMasterVolume();
+    float bgmVol = gsm->GetBGMVolume();
+    float seVol = gsm->GetSEVolume();
+
+    if (ImGui::SliderFloat("Master Volume", &masterVol, 0.0f, 1.0f, "%.2f")) {
+      gsm->SetMasterVolume(masterVol);
+    }
+    if (ImGui::SliderFloat("BGM Volume", &bgmVol, 0.0f, 1.0f, "%.2f")) {
+      gsm->SetBGMVolume(bgmVol);
+    }
+    if (ImGui::SliderFloat("SE Volume", &seVol, 0.0f, 1.0f, "%.2f")) {
+      gsm->SetSEVolume(seVol);
+    }
+
+    ImGui::Separator();
+    ImGui::Text("BGM Test:");
+    if (ImGui::Button("Title BGM")) {
+      SoundManager::GetInstance()->PlayBGM(SoundManager::BGM::Title);
+    }
+    ImGui::SameLine();
+    if (ImGui::Button("Play BGM (BlackDiamond)")) {
+      SoundManager::GetInstance()->PlayBGM(SoundManager::BGM::Play);
+    }
+    ImGui::SameLine();
+    if (ImGui::Button("Boss BGM")) {
+      SoundManager::GetInstance()->PlayBGM(SoundManager::BGM::Boss);
+    }
+    ImGui::SameLine();
+    if (ImGui::Button("Stop BGM")) {
+      SoundManager::GetInstance()->StopBGM();
+    }
+
+    ImGui::Text("SE Test:");
+    if (ImGui::Button("Jump")) SoundManager::GetInstance()->PlaySE(SoundManager::SE::Jump);
+    ImGui::SameLine();
+    if (ImGui::Button("Land")) SoundManager::GetInstance()->PlaySE(SoundManager::SE::Land);
+    ImGui::SameLine();
+    if (ImGui::Button("Slide")) SoundManager::GetInstance()->PlaySE(SoundManager::SE::Slide);
+    ImGui::SameLine();
+    if (ImGui::Button("Barrier")) SoundManager::GetInstance()->PlaySE(SoundManager::SE::Barrier);
+    ImGui::SameLine();
+    if (ImGui::Button("Break")) SoundManager::GetInstance()->PlaySE(SoundManager::SE::BarrierBreak);
+
+    if (ImGui::Button("BonusHit")) SoundManager::GetInstance()->PlaySE(SoundManager::SE::BonusHit);
+    ImGui::SameLine();
+    if (ImGui::Button("Reflect")) SoundManager::GetInstance()->PlaySE(SoundManager::SE::BossReflect);
+    ImGui::SameLine();
+    if (ImGui::Button("Defeat")) SoundManager::GetInstance()->PlaySE(SoundManager::SE::BossDefeat);
+    ImGui::SameLine();
+    if (ImGui::Button("Crash")) SoundManager::GetInstance()->PlaySE(SoundManager::SE::Crash);
   }
 
   if (ImGui::CollapsingHeader("Game State", ImGuiTreeNodeFlags_DefaultOpen)) {
@@ -592,6 +650,8 @@ void GameScene::StartGame() {
   gameState_ = GameState::Playing;
   isTitleExiting_ = true;
   titleExitTimer_ = 0.0f;
+  SoundManager::GetInstance()->PlaySE(SoundManager::SE::Start);
+  SoundManager::GetInstance()->PlayBGM(SoundManager::BGM::Play);
 }
 
 void GameScene::ReturnToTitle() {
@@ -599,6 +659,7 @@ void GameScene::ReturnToTitle() {
   gameState_ = GameState::Title;
   isTitleExiting_ = false;
   titleExitTimer_ = 0.0f;
+  SoundManager::GetInstance()->PlayBGM(SoundManager::BGM::Title);
 }
 
 void GameScene::Initialize() {
@@ -686,9 +747,9 @@ void GameScene::Initialize() {
   skyBox_.get()->name_ = "SkyBox";
 
   // プレイヤーの初期化
-  ModelData modelData =
-      AssimpLoadObjFile("Resources/Model/Player", "Player.obj");
-  player_->Initialize(modelData);
+  ModelData playerModelData =
+      AssimpLoadObjFile("Resources/gltf/Penguin", "RunPenguin.gltf");
+  player_->Initialize(playerModelData);
 
   // ボスの初期化
   ModelData bossModelData = AssetManager::LoadModel(
@@ -754,23 +815,30 @@ void GameScene::Initialize() {
       AssetManager::LoadModel("Resources/Model/IceBom", "IceBom.obj");
   ModelData reflectingAttackModel = AssetManager::LoadModel(
       "Resources/Model/ReflectingAttack", "ReflectingAttack.obj");
+  ModelData bonusEnemyModel =
+      AssetManager::LoadModel("Resources/Model/Player", "Player.obj");
   stageSettings_->Initialize(roadModelData, fallenTreeModel, iceArchwayModel,
-                             iceWallModel, modelData, iceBomModel,
+                             iceWallModel, bonusEnemyModel, iceBomModel,
                              reflectingAttackModel, gameObjectManager_.get());
 
   // 指定したJsonファイルを初期シーンとして読み込む
   gameObjectManager_->LoadScene(initialSceneJson_);
 
-  currentDistance_ = 0.0f;
-  currentScore_ = 0.0f;
-  bonusEnemyHitCount_ = 0;
-  ChangePlayingState(PlayingState::ThreeLane, true);
+  // ゲーム状態・カメラ・ステージの初期化（カメラ遷移アニメーションを起こさず即座に初期状態にする）
+  ResetGame();
+
+  // サウンドマネージャー初期化＆タイトルBGM再生
+  SoundManager::GetInstance()->Initialize();
+  if (gameState_ == GameState::Title) {
+    SoundManager::GetInstance()->PlayBGM(SoundManager::BGM::Title);
+  }
 }
 
 void GameScene::Update() {
   ObjectBase::SetWvpIndex(0);
   EffectDefinition::SetWvpIndex(0);
   uiTimer_ += 1.0f / 60.0f;
+  SoundManager::GetInstance()->Update();
 
   // タイトル文字の退出（上へ流れる）アニメーション更新
   if (isTitleExiting_) {
@@ -826,11 +894,13 @@ void GameScene::Update() {
 
     if (Input::PushKey(DIK_ESCAPE)) {
       gameState_ = GameState::Paused;
+      SoundManager::GetInstance()->PauseBGM();
     }
   } else if (gameState_ == GameState::Paused) {
     PausedUpdate();
     if (Input::PushKey(DIK_ESCAPE)) {
       gameState_ = GameState::Playing;
+      SoundManager::GetInstance()->ResumeBGM();
     }
   } else if (gameState_ == GameState::PlayerHit) {
     PlayerHitUpdate();
@@ -840,6 +910,8 @@ void GameScene::Update() {
       ResetGame();
       gameState_ = GameState::Playing;
       isTitleExiting_ = false;
+      SoundManager::GetInstance()->PlaySE(SoundManager::SE::Start);
+      SoundManager::GetInstance()->PlayBGM(SoundManager::BGM::Play);
     }
     // 2でタイトルへ
     if (Input::PushKey(DIK_2)) {
@@ -1686,6 +1758,7 @@ void GameScene::PlayingUpdate() {
         if (obs->GetJustLanded()) {
           effectManager_->EmitDust(obs->GetTransform().translate);
           effectManager_->EmitShockwave(obs->GetTransform().translate);
+          SoundManager::GetInstance()->PlaySE(SoundManager::SE::BossLand);
         }
 
         if (obs->GetType() == Obstacle::Type::BossAttackReflectable &&
@@ -1708,6 +1781,7 @@ void GameScene::PlayingUpdate() {
               obs->SetReflected(true);
               obs->SetReflectedTarget(boss_->GetTransform().translate);
               effectManager_->EmitShockwave(obs->GetTransform().translate);
+              SoundManager::GetInstance()->PlaySE(SoundManager::SE::BossReflect);
             }
           }
         } else if (obs->GetIsReflected()) {
@@ -1719,8 +1793,10 @@ void GameScene::PlayingUpdate() {
             obs->Deactivate(); // 障害物を消す
             boss_->OnDamage();
             effectManager_->EmitHitEffect(boss_->GetTransform().translate);
+            SoundManager::GetInstance()->PlaySE(SoundManager::SE::BossHit);
 
             if (boss_->GetState() == BossState::Defeat) {
+              SoundManager::GetInstance()->PlaySE(SoundManager::SE::BossDefeat);
               // 画面内のボス攻撃をすべて消す
               for (int k = 0; k < stageSettings_->GetMaxObstacles(); k++) {
                 Obstacle *o = stageSettings_->GetObstacle(k);
@@ -1787,6 +1863,8 @@ void GameScene::PausedUpdate() {
     ResetGame();
     gameState_ = GameState::Playing;
     isTitleExiting_ = false;
+    SoundManager::GetInstance()->PlaySE(SoundManager::SE::Start);
+    SoundManager::GetInstance()->PlayBGM(SoundManager::BGM::Play);
   }
   if (Input::PushKey(DIK_2)) {
     ReturnToTitle();
@@ -1826,13 +1904,7 @@ void GameScene::CheckCollisions() {
       if (obstacle->GetType() == Obstacle::Type::GuideFloor) {
         // プレイヤーを滑らかに中央へ誘導 (30フレーム)
         player_->StartForceToCenter(30.0f);
-
-        // 【演出ポイント: パーティクル】
-        // 加速や誘導を示すスピード線のエフェクトや、足元の衝撃波を出す
-        // effectManager_->EmitGuideEffect(player_->GetTransform().translate);
-
-        // 【演出ポイント: サウンド】
-        // SoundManager::Play("GuideDash_SE"); // シューッというSE等
+        SoundManager::GetInstance()->PlaySE(SoundManager::SE::Slide);
 
         continue; // ゲームオーバーにはならない
       }
@@ -1841,6 +1913,7 @@ void GameScene::CheckCollisions() {
         // ボーナスエネミーに当たった場合の処理（吹き飛ばす）
         obstacle->OnBlowAway();
         bonusEnemyHitCount_++; // スコア（距離）ボーナス
+        SoundManager::GetInstance()->PlaySE(SoundManager::SE::BonusHit);
 
         // プレイヤーの足元にRingエフェクトを出す
         effectManager_->EmitShockwave(player_->GetTransform().translate);
@@ -1851,6 +1924,7 @@ void GameScene::CheckCollisions() {
       if (obstacle->GetType() == Obstacle::Type::CameraItem) {
         obstacle->OnHit();
         ChangePlayingState(PlayingState::OneLane);
+        SoundManager::GetInstance()->PlaySE(SoundManager::SE::ItemGet);
 
         // プレイヤーの足元にRingエフェクトを出す(ボーナスと同様の演出)
         effectManager_->EmitShockwave(player_->GetTransform().translate);
@@ -1861,6 +1935,7 @@ void GameScene::CheckCollisions() {
       if (obstacle->GetType() == Obstacle::Type::BarrierItem) {
         obstacle->OnHit();
         player_->SetHasBarrier(true);
+        SoundManager::GetInstance()->PlaySE(SoundManager::SE::Barrier);
         effectManager_->EmitBarrier(player_->GetTransform().translate);
         effectManager_->EmitShockwave(player_->GetTransform().translate);
         continue;
@@ -1868,6 +1943,7 @@ void GameScene::CheckCollisions() {
 
       if (obstacle->GetType() == Obstacle::Type::ClearItem) {
         obstacle->OnHit();
+        SoundManager::GetInstance()->PlaySE(SoundManager::SE::ClearBomb);
         effectManager_->EmitShockwave(player_->GetTransform().translate);
 
         // 画面内の障害物を吹き飛ばす
@@ -1884,6 +1960,7 @@ void GameScene::CheckCollisions() {
 
       if (obstacle->GetType() == Obstacle::Type::BossItem) {
         obstacle->OnHit();
+        SoundManager::GetInstance()->PlaySE(SoundManager::SE::Barrier);
         // 画面内の通常障害物を吹き飛ばしてボス戦へスムーズに移行
         for (int j = 0; j < stageSettings_->GetMaxObstacles(); j++) {
           Obstacle *obs = stageSettings_->GetObstacle(j);
@@ -1912,6 +1989,7 @@ void GameScene::CheckCollisions() {
       if (player_->GetHasBarrier()) {
         player_->SetHasBarrier(false);
         obstacle->OnBlowAway();
+        SoundManager::GetInstance()->PlaySE(SoundManager::SE::BarrierBreak);
         effectManager_->EmitHitEffect(player_->GetTransform().translate);
         effectManager_->BreakBarrier(player_->GetTransform().translate);
         continue; // ゲームオーバーにならず次へ
@@ -1919,6 +1997,7 @@ void GameScene::CheckCollisions() {
 
       // 衝突！ヒット演出へ移行
       gameState_ = GameState::PlayerHit;
+      SoundManager::GetInstance()->PlaySE(SoundManager::SE::Crash);
       if (playingState_ == PlayingState::Boss && boss_->GetIsActive()) {
         boss_->ChangeState(BossState::Victory);
       }
@@ -2011,6 +2090,7 @@ void GameScene::ChangePlayingState(PlayingState newState, bool force) {
 
   if (prevState == PlayingState::Boss && newState != PlayingState::Boss) {
     wasBossBattle_ = true;
+    SoundManager::GetInstance()->PlayBGM(SoundManager::BGM::Play);
     // ボス戦終了時：ボスアイテムのクールタイムを満タンに設定
     float bossItemDuration =
         stageSettings_->GetItemCoolDownDuration(Obstacle::Type::BossItem);
@@ -2053,6 +2133,7 @@ void GameScene::ChangePlayingState(PlayingState newState, bool force) {
     stageSettings_->SetSpawningPaused(true);
     bossAttackTimer_ = 0.0f;
     boss_->Reset();
+    SoundManager::GetInstance()->PlayBGM(SoundManager::BGM::Boss);
     break;
   }
 

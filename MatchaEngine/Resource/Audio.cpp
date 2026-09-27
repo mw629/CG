@@ -191,3 +191,26 @@ void Audio::SetPitch(int soundHandle, float pitch)
         data.pSourceVoice->SetFrequencyRatio(pitch);
     }
 }
+
+void Audio::SetVolume(int soundHandle, float volume)
+{
+    if (soundHandle < 0 || soundHandle >= sSoundData.size()) return;
+
+    SoundData& data = sSoundData[soundHandle];
+    if (data.pSourceVoice) {
+        data.pSourceVoice->SetVolume(volume);
+    }
+}
+
+bool Audio::IsPlaying(int soundHandle)
+{
+    if (soundHandle < 0 || soundHandle >= sSoundData.size()) return false;
+
+    SoundData& data = sSoundData[soundHandle];
+    if (!data.pSourceVoice) return false;
+
+    XAUDIO2_VOICE_STATE state;
+    data.pSourceVoice->GetState(&state);
+    return (state.BuffersQueued > 0);
+}
+

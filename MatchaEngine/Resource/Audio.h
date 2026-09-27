@@ -56,4 +56,8 @@ public:
 
     static void SetPitch(int soundHandle, float pitch);
 
+    static void SetVolume(int soundHandle, float volume);
+
+    static bool IsPlaying(int soundHandle);
+
 };

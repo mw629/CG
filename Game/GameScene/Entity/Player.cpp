@@ -1,5 +1,7 @@
 #include "Player.h"
 #include "../GameSceneManager.h"
+#include "../System/SoundManager.h"
+#include "AssetManager.h"
 #include "Graphics/Render/Draw.h"
 
 #ifdef _USE_IMGUI
@@ -10,18 +12,49 @@ Player::Player() {}
 
 Player::~Player() {}
 
+void Player::UpdateDrawTransform(float speedMultiplier) {
+  (void)speedMultiplier;
+  Transform drawTransform = transform_;
+
+  // しゃがみ時のモデルのサイズ変化（潰れ）を防ぐため、モデルスケールは常に modelOffset_.scale を維持
+  drawTransform.scale = modelOffset_.scale;
+
+  // 平行移動オフセットの適用
+  drawTransform.translate.x += modelOffset_.translate.x;
+  drawTransform.translate.y +=
+      modelOffset_.translate.y + (isRolling_ ? 0.5f : 0.0f);
+  drawTransform.translate.z += modelOffset_.translate.z;
+
+  // 回転オフセットの適用
+  drawTransform.rotate.x += modelOffset_.rotate.x;
+  drawTransform.rotate.y += modelOffset_.rotate.y;
+  drawTransform.rotate.z += modelOffset_.rotate.z;
+
+  model_->SetTransform(drawTransform);
+}
+
 void Player::Initialize(ModelData modelData) {
+  (void)modelData;
   transform_.translate.y = baseHeight_;
-  // Animationの初期化
+
+  // GLTF ペンギンアニメーションモデルの初期化
   ModelData animModel =
-      AssimpLoadObjFile("Resources/gltf/human", "sneakWalk.gltf");
-  model_->Initialize(animModel, "Resources/gltf/human", "sneakWalk.gltf");
-  model_->LoadAdditionalAnimation("Resources/gltf/human", "sneakWalk.gltf",
+      AssimpLoadObjFile("Resources/gltf/Penguin", "RunPenguin.gltf");
+  int texIndex =
+      AssetManager::LoadTexture("Resources/gltf/Penguin/Penguin_basecolor.jpg");
+  animModel.textureIndex = texIndex;
+  for (auto &subMesh : animModel.subMeshes) {
+    subMesh.textureIndex = texIndex;
+  }
+
+  model_->Initialize(animModel, "Resources/gltf/Penguin", "RunPenguin.gltf");
+  model_->LoadAdditionalAnimation("Resources/gltf/Penguin", "RunPenguin.gltf",
+                                  "walk");
+  model_->LoadAdditionalAnimation("Resources/gltf/Penguin", "SlidePenguin.gltf",
                                   "sneakWalk");
-  model_->LoadAdditionalAnimation("Resources/gltf/human", "walk.gltf", "walk");
   model_->SetAnimation("walk");
-  model_->name_ = "Player Animation Model";
-  model_->SetVisibleBones(true);
+  model_->name_ = "Player Penguin Animation Model";
+  model_->SetVisibleBones(false);
 
   // 手のボーンを登録
   model_->SetBoneMapping(BoneType::RightHand, "mixamorig:RightHand");
@@ -35,15 +68,12 @@ void Player::Initialize(ModelData modelData) {
   axeOffset_.rotate = {0.0f, 0.0f, 0.0f};
   axeOffset_.translate = {0.0f, 0.0f, 0.0f};
 
-  // コライダーの初期化
+  // コライダーの初期化（判定サイズは一切変更しない！）
   auto collider = AddComponent<ColliderComponent>();
   collider->SetShape(ColliderShape::Box);
   collider->SetSize({0.8f, 1.5f, 0.8f});
 
-  Transform drawTransform = transform_;
-  drawTransform.scale.y = 1.0f;
-  drawTransform.translate.y -= (isRolling_ ? 0.5f : 1.0f);
-  model_->SetTransform(drawTransform);
+  UpdateDrawTransform(0.0f);
 }
 
 void Player::Reset() {
@@ -77,10 +107,9 @@ void Player::Reset() {
   SetHasBarrier(false);
   isInvertedControls_ = false;
 
-  Transform drawTransform = transform_;
-  drawTransform.scale.y = 1.0f;
-  drawTransform.translate.y -= (isRolling_ ? 0.5f : 1.0f);
-  model_->SetTransform(drawTransform);
+  model_->SetAnimation("walk", 0.0f);
+
+  UpdateDrawTransform(0.0f);
 }
 
 void Player::Update(Matrix4x4 view, float speedMultiplier) {
@@ -106,14 +135,16 @@ void Player::Update(Matrix4x4 view, float speedMultiplier) {
   model_->SettingWvp(view);
 
   // Axeのアタッチ処理
-  Transform handTransform = model_->GetBoneTransform(BoneType::RightHand);
-  Matrix4x4 boneMatrix = MakeAffineMatrix(
-      handTransform.translate, handTransform.scale, handTransform.rotate);
-  Matrix4x4 offsetMatrix = MakeAffineMatrix(
-      axeOffset_.translate, axeOffset_.scale, axeOffset_.rotate);
-  Matrix4x4 finalMatrix = MultiplyMatrix4x4(offsetMatrix, boneMatrix);
-  axe_->SetTransform(DecomposeMatrix(finalMatrix));
-  axe_->SettingWvp(view);
+  if (isDrawAxe_) {
+    Transform handTransform = model_->GetBoneTransform(BoneType::RightHand);
+    Matrix4x4 boneMatrix = MakeAffineMatrix(
+        handTransform.translate, handTransform.scale, handTransform.rotate);
+    Matrix4x4 offsetMatrix = MakeAffineMatrix(
+        axeOffset_.translate, axeOffset_.scale, axeOffset_.rotate);
+    Matrix4x4 finalMatrix = MultiplyMatrix4x4(offsetMatrix, boneMatrix);
+    axe_->SetTransform(DecomposeMatrix(finalMatrix));
+    axe_->SettingWvp(view);
+  }
 
   if (auto collider = GetComponent<ColliderComponent>()) {
     collider->SetSize({0.8f, isRolling_ ? 0.5f : 1.5f, 0.8f});
@@ -123,10 +154,7 @@ void Player::Update(Matrix4x4 view, float speedMultiplier) {
 
 void Player::PlayerMove(float speedMultiplier) {
   if (speedMultiplier <= 0.0f) {
-    Transform drawTransform = transform_;
-    drawTransform.scale.y = 1.0f;
-    drawTransform.translate.y -= (isRolling_ ? 0.5f : 1.0f);
-    model_->SetTransform(drawTransform);
+    UpdateDrawTransform(0.0f);
     return;
   }
 
@@ -193,13 +221,14 @@ void Player::PlayerMove(float speedMultiplier) {
     if (targetLaneIndex_ != laneIndex_) {
       startX_ = transform_.translate.x;
       lerpTime_ = 0.0f;
+      SoundManager::GetInstance()->PlaySE(SoundManager::SE::LaneChange);
 
       // 横移動時にしゃがみ（転がり）をキャンセルして硬直をなくす
       if (isRolling_ && !keepRolling_) {
         isRolling_ = false;
         transform_.scale.y = 1.0f;
         transform_.translate.y = baseHeight_;
-        model_->SetAnimation("walk", 1.0f);
+        model_->SetAnimation("walk", walkTransitionDuration_);
       }
     }
   }
@@ -228,21 +257,21 @@ void Player::PlayerMove(float speedMultiplier) {
       if (!(isRolling_ && keepRolling_)) {
         isJumping_ = true;
         velocityY_ = jumpPower_ * speedMultiplier;
+        SoundManager::GetInstance()->PlaySE(SoundManager::SE::Jump);
 
         // ジャンプ時にしゃがみをキャンセル
         if (isRolling_) {
           isRolling_ = false;
           transform_.scale.y = 1.0f;
           transform_.translate.y = baseHeight_;
-          model_->SetAnimation("walk", 1.0f);
+          model_->SetAnimation("walk", walkTransitionDuration_);
         }
       }
     } else if (!isRolling_ && GameSceneManager::GetInstance()->IsPushRoll()) {
       isRolling_ = true;
       rollTimer_ = rollDuration_;
-      model_->SetAnimation("sneakWalk", 1.3f);
-      // 転がり中はスケールYを半分にして伏せるようにする
-      transform_.scale.y = 0.5f;
+      SoundManager::GetInstance()->PlaySE(SoundManager::SE::Slide);
+      model_->SetAnimation("sneakWalk", rollTransitionDuration_);
       // 重心が変わる分、Y座標を少し下げる（原点が中心の場合）
       transform_.translate.y = baseHeight_ - 0.5f;
     }
@@ -259,6 +288,7 @@ void Player::PlayerMove(float speedMultiplier) {
       isJumping_ = false;
       velocityY_ = 0.0f;
       currentRecoveryTimer_ = jumpRecovery_;
+      SoundManager::GetInstance()->PlaySE(SoundManager::SE::Land);
     }
   }
 
@@ -270,21 +300,20 @@ void Player::PlayerMove(float speedMultiplier) {
       // 姿勢を元に戻す
       transform_.scale.y = 1.0f;
       transform_.translate.y = baseHeight_;
-      model_->SetAnimation("walk", 1.0f);
+      model_->SetAnimation("walk", walkTransitionDuration_);
       currentRecoveryTimer_ = rollRecovery_;
     }
   }
 
   // トランスフォームをモデルに適用
-  Transform drawTransform = transform_;
-  drawTransform.scale.y = 1.0f;
-  drawTransform.translate.y -= (isRolling_ ? 0.5f : 1.0f);
-  model_->SetTransform(drawTransform);
+  UpdateDrawTransform(speedMultiplier);
 }
 
 void Player::Draw(class Draw &draw) {
   draw.DrawAnimation(model_.get());
-  draw.DrawModel(axe_.get());
+  if (isDrawAxe_) {
+    draw.DrawModel(axe_.get());
+  }
   GameObject::Draw(draw);
 }
 
@@ -294,12 +323,23 @@ void Player::ImGuiInnerComponents() {
     model_->ImGui(false);
   }
   ImGui::Separator();
+  ImGui::Text("Penguin Model Settings");
+  ImGui::DragFloat3("Model Scale", &modelOffset_.scale.x, 0.5f, 10.0f, 500.0f);
+  ImGui::DragFloat3("Model Rotate", &modelOffset_.rotate.x, 0.02f, -3.14f, 3.14f);
+  ImGui::DragFloat3("Model Offset", &modelOffset_.translate.x, 0.02f, -5.0f, 5.0f);
+  ImGui::Checkbox("Draw Axe", &isDrawAxe_);
+
+  ImGui::Separator();
   ImGui::Text("Player Movement Parameters");
   ImGui::SliderFloat("Jump Power", &jumpPower_, 0.10f, 0.40f, "%.3f");
   ImGui::SliderFloat("Gravity", &gravity_, 0.005f, 0.040f, "%.4f");
   ImGui::SliderFloat("Lane Change Speed", &laneChangeSpeed_, 0.05f, 0.50f,
                      "%.2f");
   ImGui::SliderFloat("Roll Duration", &rollDuration_, 10.0f, 60.0f, "%.0f f");
+  ImGui::SliderFloat("Roll Transition", &rollTransitionDuration_, 0.01f, 0.50f,
+                     "%.2f s");
+  ImGui::SliderFloat("Walk Transition", &walkTransitionDuration_, 0.01f, 0.50f,
+                     "%.2f s");
 
   float estAirFrames =
       gravity_ > 0.0f ? ((2.0f * jumpPower_ / gravity_) + 1.0f) : 0.0f;
@@ -319,10 +359,7 @@ void Player::HitUpdate(float speedMultiplier) {
   // ノックバック処理
   if (isHit_) {
     if (speedMultiplier == 0.0f) {
-      Transform drawTransform = transform_;
-      drawTransform.scale.y = 1.0f;
-      drawTransform.translate.y -= (isRolling_ ? 0.5f : 1.0f);
-      model_->SetTransform(drawTransform);
+      UpdateDrawTransform(0.0f);
       return;
     }
 
@@ -348,10 +385,7 @@ void Player::HitUpdate(float speedMultiplier) {
       knockbackVelocity_.z *= 0.8f;
     }
 
-    Transform drawTransform = transform_;
-    drawTransform.scale.y = 1.0f;
-    drawTransform.translate.y -= (isRolling_ ? 0.5f : 1.0f);
-    model_->SetTransform(drawTransform);
+    UpdateDrawTransform(0.0f);
   }
 }
 
@@ -364,7 +398,7 @@ void Player::OnHit(bool isTrip) {
   isRolling_ = false;
   isJumping_ = false;
   transform_.scale = {1.0f, 1.0f, 1.0f};
-  model_->SetAnimation("walk", 1.0f);
+  model_->SetAnimation("walk", walkTransitionDuration_);
   currentRecoveryTimer_ = 0.0f;
 
   float randX = ((float)rand() / RAND_MAX - 0.5f) * 0.1f;
@@ -396,7 +430,7 @@ void Player::StartForceToCenter(float duration) {
     isRolling_ = false;
     transform_.scale.y = 1.0f;
     transform_.translate.y = baseHeight_;
-    model_->SetAnimation("walk", 1.0f);
+    model_->SetAnimation("walk", walkTransitionDuration_);
   }
 }
 

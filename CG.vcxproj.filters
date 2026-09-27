@@ -288,6 +288,9 @@
     <ClCompile Include="Game\GameScene\System\PauseSystem.cpp">
       <Filter>ソース ファイル</Filter>
     </ClCompile>
+    <ClCompile Include="Game\GameScene\System\SoundManager.cpp">
+      <Filter>ソース ファイル</Filter>
+    </ClCompile>
     <ClCompile Include="MatchaEngine\Graphics\Render\PostEffect.cpp">
       <Filter>ソース ファイル</Filter>
     </ClCompile>
@@ -599,6 +602,9 @@
       <Filter>ヘッダー ファイル</Filter>
     </ClInclude>
     <ClInclude Include="Game\GameScene\System\PauseSystem.h">
+      <Filter>ヘッダー ファイル</Filter>
+    </ClInclude>
+    <ClInclude Include="Game\GameScene\System\SoundManager.h">
       <Filter>ヘッダー ファイル</Filter>
     </ClInclude>
     <ClInclude Include="MatchaEngine\Graphics\Render\PostEffect.h">

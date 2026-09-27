@@ -262,6 +262,7 @@ if %ERRORLEVEL% LSS 8 exit /b 0</Command>
     <ClCompile Include="MatchaEngine\GameObjects\Object\Animation\TransformAnimation.cpp" />
     <ClCompile Include="Game\TestScene\TestScene.cpp" />
     <ClCompile Include="Game\GameScene\System\PauseSystem.cpp" />
+    <ClCompile Include="Game\GameScene\System\SoundManager.cpp" />
     <ClCompile Include="MatchaEngine\Graphics\Font\MsdfGenerator.cpp" />
     <ClCompile Include="MatchaEngine\Graphics\Font\DynamicFontAtlas.cpp" />
     <ClCompile Include="MatchaEngine\Graphics\Font\TextRenderer.cpp" />
@@ -474,6 +475,7 @@ if %ERRORLEVEL% LSS 8 exit /b 0</Command>
     <ClInclude Include="MatchaEngine\GameObjects\Object\Animation\TransformAnimation.h" />
     <ClInclude Include="Game\TestScene\TestScene.h" />
     <ClInclude Include="Game\GameScene\System\PauseSystem.h" />
+    <ClInclude Include="Game\GameScene\System\SoundManager.h" />
   </ItemGroup>
   <ItemGroup>
     <Text Include="externals\imgui\LICENSE.txt" />

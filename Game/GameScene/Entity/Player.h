@@ -20,6 +20,12 @@ private:
                            0.0f,
                        },
                        {0.0f, 0.0f, 0.0f}};
+  bool isDrawAxe_ = false;
+
+  // ペンギンモデルのスケール・オフセット（GLTFモデルの0.01スケールを等身大に補正）
+  Transform modelOffset_{{140.0f, 140.0f, 140.0f},
+                         {0.0f, 0.0f, 0.0f},
+                         {0.0f, -1.0f, 0.0f}};
   // transform_ is inherited from GameObject
 
   // レーン移動のための変数
@@ -47,6 +53,8 @@ private:
   float rollTimer_ = 0.0f;
   float rollDuration_ = 30.0f; // 転がりの継続フレーム数（約0.5秒）
   bool keepRolling_ = false;   // 強制的にしゃがみを維持するフラグ
+  float rollTransitionDuration_ = 0.06f; // しゃがみ（sneakWalk）への遷移ブレンド秒数（約3〜4フレーム）
+  float walkTransitionDuration_ = 0.08f; // 立ち上がり（walk）への遷移ブレンド秒数（約5フレーム）
 
   // 各アクションの硬直（クールタイム）用変数
   float laneChangeRecovery_ = 0.0f;   // レーン移動終了後の硬直フレーム数
@@ -72,6 +80,8 @@ private:
 
   // 操作反転（ボス戦等でカメラが180度反転した際に画面の見た目通りに動くようにするフラグ）
   bool isInvertedControls_ = false;
+
+  void UpdateDrawTransform(float speedMultiplier = 1.0f);
 
 public:
   Player();
