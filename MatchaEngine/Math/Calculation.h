@@ -329,9 +329,9 @@ Matrix4x4 IdentityMatrix();
 /// <summary>
 /// この関数は、行列をスケーリングします。
 /// </summary>
-/// <param name="scall">スケーリング値</param>
+/// <param name="scale">スケーリング値</param>
 /// <returns>スケーリング行列</returns>
-Matrix4x4 Scale(Vector3 scall);
+Matrix4x4 Scale(Vector3 scale);
 
 /// <summary>
 /// この関数は、X軸を中心に回転する行列を計算します。
@@ -361,7 +361,7 @@ Matrix4x4 RotationZ(float angle);
 /// <param name="angleY">Y軸回転角度</param>
 /// <param name="angleZ">Z軸回転角度</param>
 /// <returns>回転行列</returns>
-Matrix4x4 Rotation(Vector3 angle);//不安
+Matrix4x4 Rotation(Vector3 angle);
 
 /// <summary>
 /// この関数は、ベクトルを行列で変換します。

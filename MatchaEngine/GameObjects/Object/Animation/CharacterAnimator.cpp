@@ -59,8 +59,8 @@ void CharacterAnimator::Initialize(ModelData modelData,
 
   AddComponent<MaterialComponent>();
   auto matComp = GetComponent<MaterialComponent>();
-  if (matComp && !modelData_.material.textureDilePath.empty()) {
-    matComp->SetTexturePath(modelData_.material.textureDilePath);
+  if (matComp && !modelData_.material.textureFilePath.empty()) {
+    matComp->SetTexturePath(modelData_.material.textureFilePath);
   }
 
   subMeshMaterials_.clear();
@@ -705,12 +705,12 @@ void CharacterAnimator::CreateSkinCluster() {
       skinCluster_.inverseBindPoseMatrices[(*it).second] =
           JointWeight.second.inverseBindPoseMatrix;
 
-      for (const auto &vertexWight : JointWeight.second.vertexWeights) {
-        auto &currentInfluece = mappedSpan[vertexWight.VertexIndex];
+      for (const auto &vertexWeight : JointWeight.second.vertexWeights) {
+        auto &currentInfluence = mappedSpan[vertexWeight.VertexIndex];
         for (uint32_t index = 0; index < kNumMaxInfluence; ++index) {
-          if (currentInfluece.wights[index] == 0.0f) {
-            currentInfluece.wights[index] = vertexWight.weight;
-            currentInfluece.jointIndices[index] = (*it).second;
+          if (currentInfluence.weights[index] == 0.0f) {
+            currentInfluence.weights[index] = vertexWeight.weight;
+            currentInfluence.jointIndices[index] = (*it).second;
             break;
           }
         }

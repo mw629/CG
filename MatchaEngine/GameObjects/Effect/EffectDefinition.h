@@ -195,10 +195,12 @@ public:
 	const Matrix4x4& GetCustomProjectionMatrix() const { return customProjectionMatrix_; }
 
 	ModelData GetModelData() { return modelData_; }
-	MaterialFactory* GetMartial() { 
+	MaterialFactory* GetMaterial() { 
 		auto matComp = GetComponent<MaterialComponent>();
 		return matComp ? matComp->GetMaterialFactory() : nullptr;
 	}
+	[[deprecated("Use GetMaterial instead")]]
+	MaterialFactory* GetMartial() { return GetMaterial(); }
 	D3D12_GPU_DESCRIPTOR_HANDLE GetTextureSrvHandleGPU()const { return textureSrvHandleGPU_; }
 
 	D3D12_VERTEX_BUFFER_VIEW* GetVertexBufferView() { return &vertexBufferView_; }

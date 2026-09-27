@@ -37,7 +37,7 @@ MaterialData LoadMaterialTemplateFile(const std::string& directoryPath, const st
 			std::string textureFilename;
 			s >> textureFilename;
 			//連結してファイルパス
-			materiaData.textureDilePath = directoryPath + "/" + textureFilename;
+			materiaData.textureFilePath = directoryPath + "/" + textureFilename;
 		}
 	}
 	return materiaData;
@@ -236,8 +236,8 @@ ModelData LoadObjFile(const std::string& directoryPath, const std::string& filen
 			if (material->GetTextureCount(aiTextureType_DIFFUSE) != 0) {
 				aiString textureFilePath;
 				material->GetTexture(aiTextureType_DIFFUSE, 0, &textureFilePath);
-				subMesh.material.textureDilePath = directoryPath + "/" + textureFilePath.C_Str();
-				subMesh.textureIndex = texture->CreateTexture(subMesh.material.textureDilePath);
+				subMesh.material.textureFilePath = directoryPath + "/" + textureFilePath.C_Str();
+				subMesh.textureIndex = texture->CreateTexture(subMesh.material.textureFilePath);
 			}
 		}
 
@@ -396,8 +396,8 @@ ModelData AssimpLoadObjFile(const std::string& directoryPath, const std::string&
 			if (material->GetTextureCount(aiTextureType_DIFFUSE) != 0) {
 				aiString textureFilePath;
 				material->GetTexture(aiTextureType_DIFFUSE, 0, &textureFilePath);
-				subMesh.material.textureDilePath = directoryPath + "/" + textureFilePath.C_Str();
-				subMesh.textureIndex = texture->CreateTexture(subMesh.material.textureDilePath);
+				subMesh.material.textureFilePath = directoryPath + "/" + textureFilePath.C_Str();
+				subMesh.textureIndex = texture->CreateTexture(subMesh.material.textureFilePath);
 			}
 		}
 

@@ -436,11 +436,11 @@ void Player::StartForceToCenter(float duration) {
 
 void Player::SetHasBarrier(bool hasBarrier) {
   hasBarrier_ = hasBarrier;
-  if (model_ && model_->GetMartial()) {
+  if (model_ && model_->GetMaterial()) {
     if (hasBarrier_) {
-      model_->GetMartial()->SetColor({0.0f, 1.0f, 1.0f, 1.0f}); // シアン
+      model_->GetMaterial()->SetColor({0.0f, 1.0f, 1.0f, 1.0f}); // シアン
     } else {
-      model_->GetMartial()->SetColor(
+      model_->GetMaterial()->SetColor(
           {1.0f, 1.0f, 1.0f, 1.0f}); // 白（デフォルト）
     }
   }

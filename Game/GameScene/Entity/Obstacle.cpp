@@ -23,30 +23,30 @@ void Obstacle::Initialize(ModelData lowData, ModelData highData,
 
   lowModel_->Initialize(lowData);
   lowModel_->SetShader("ObjectShader");
-  lowModel_->GetMartial()->SetColor({1.0f, 1.0f, 1.0f, 1.0f});
+  lowModel_->GetMaterial()->SetColor({1.0f, 1.0f, 1.0f, 1.0f});
 
   highModel_->Initialize(highData);
   highModel_->SetShader("ObjectShader");
-  highModel_->GetMartial()->SetColor({1.0f, 1.0f, 1.0f, 1.0f});
+  highModel_->GetMaterial()->SetColor({1.0f, 1.0f, 1.0f, 1.0f});
 
   wallModel_->Initialize(wallData);
   wallModel_->SetShader("ObjectShader");
-  wallModel_->GetMartial()->SetColor({1.0f, 1.0f, 1.0f, 1.0f});
+  wallModel_->GetMaterial()->SetColor({1.0f, 1.0f, 1.0f, 1.0f});
 
   bonusModel_->Initialize(bonusData);
   bonusModel_->SetShader("ObjectShader");
-  bonusModel_->GetMartial()->SetColor({1.0f, 1.0f, 1.0f, 1.0f});
+  bonusModel_->GetMaterial()->SetColor({1.0f, 1.0f, 1.0f, 1.0f});
 
   itemModel_->Initialize(wallData);
   itemModel_->SetShader("ObjectShader");
 
   iceBomModel_->Initialize(iceBomData);
   iceBomModel_->SetShader("ObjectShader");
-  iceBomModel_->GetMartial()->SetColor({1.0f, 1.0f, 1.0f, 1.0f});
+  iceBomModel_->GetMaterial()->SetColor({1.0f, 1.0f, 1.0f, 1.0f});
 
   reflectingAttackModel_->Initialize(reflectingAttackData);
   reflectingAttackModel_->SetShader("ObjectShader");
-  reflectingAttackModel_->GetMartial()->SetColor({1.0f, 1.0f, 1.0f, 1.0f});
+  reflectingAttackModel_->GetMaterial()->SetColor({1.0f, 1.0f, 1.0f, 1.0f});
 
   // ビルボードアイテム用平面モデルの初期化
   ModelData planeData =
@@ -54,7 +54,7 @@ void Obstacle::Initialize(ModelData lowData, ModelData highData,
 
   // 1. バリアを張るアイテム (shieldItem)
   ModelData barrierData = planeData;
-  barrierData.material.textureDilePath = "Resources/Texture/shieldItem.png";
+  barrierData.material.textureFilePath = "Resources/Texture/shieldItem.png";
   barrierData.textureIndex =
       AssetManager::LoadTexture("Resources/Texture/shieldItem.png");
   barrierItemModel_->Initialize(barrierData);
@@ -62,11 +62,11 @@ void Obstacle::Initialize(ModelData lowData, ModelData highData,
   barrierItemModel_->SetCullMode(kCullModeNone);
   barrierItemModel_->SetLighting(false);
   barrierItemModel_->SetBillboard(true);
-  barrierItemModel_->GetMartial()->SetColor({1.0f, 1.0f, 1.0f, 1.0f});
+  barrierItemModel_->GetMaterial()->SetColor({1.0f, 1.0f, 1.0f, 1.0f});
 
   // 2. ボス戦アイテム (BossItems)
   ModelData bossData = planeData;
-  bossData.material.textureDilePath = "Resources/Texture/BossItems.png";
+  bossData.material.textureFilePath = "Resources/Texture/BossItems.png";
   bossData.textureIndex =
       AssetManager::LoadTexture("Resources/Texture/BossItems.png");
   bossItemModel_->Initialize(bossData);
@@ -74,11 +74,11 @@ void Obstacle::Initialize(ModelData lowData, ModelData highData,
   bossItemModel_->SetCullMode(kCullModeNone);
   bossItemModel_->SetLighting(false);
   bossItemModel_->SetBillboard(true);
-  bossItemModel_->GetMartial()->SetColor({1.0f, 1.0f, 1.0f, 1.0f});
+  bossItemModel_->GetMaterial()->SetColor({1.0f, 1.0f, 1.0f, 1.0f});
 
   // 3. レーン消去アイテム (BomItem)
   ModelData clearData = planeData;
-  clearData.material.textureDilePath = "Resources/Texture/BomItem.png";
+  clearData.material.textureFilePath = "Resources/Texture/BomItem.png";
   clearData.textureIndex =
       AssetManager::LoadTexture("Resources/Texture/BomItem.png");
   clearItemModel_->Initialize(clearData);
@@ -86,11 +86,11 @@ void Obstacle::Initialize(ModelData lowData, ModelData highData,
   clearItemModel_->SetCullMode(kCullModeNone);
   clearItemModel_->SetLighting(false);
   clearItemModel_->SetBillboard(true);
-  clearItemModel_->GetMartial()->SetColor({1.0f, 1.0f, 1.0f, 1.0f});
+  clearItemModel_->GetMaterial()->SetColor({1.0f, 1.0f, 1.0f, 1.0f});
 
   // 4. 1レーン化アイテム (Onelane)
   ModelData oneLaneData = planeData;
-  oneLaneData.material.textureDilePath = "Resources/Texture/Onelane.png";
+  oneLaneData.material.textureFilePath = "Resources/Texture/Onelane.png";
   oneLaneData.textureIndex =
       AssetManager::LoadTexture("Resources/Texture/Onelane.png");
   oneLaneItemModel_->Initialize(oneLaneData);
@@ -98,7 +98,7 @@ void Obstacle::Initialize(ModelData lowData, ModelData highData,
   oneLaneItemModel_->SetCullMode(kCullModeNone);
   oneLaneItemModel_->SetLighting(false);
   oneLaneItemModel_->SetBillboard(true);
-  oneLaneItemModel_->GetMartial()->SetColor({1.0f, 1.0f, 1.0f, 1.0f});
+  oneLaneItemModel_->GetMaterial()->SetColor({1.0f, 1.0f, 1.0f, 1.0f});
 
   SetType(type);
 }
@@ -130,7 +130,7 @@ void Obstacle::SetType(Type type) {
     transform_.scale = {1.404f, 1.565f, 1.502f};
     transform_.rotate = {0.0f, 1.570796f, 0.0f}; // 横向きに倒れる
     if (currentModel_) {
-      currentModel_->GetMartial()->SetColor({1.0f, 1.0f, 1.0f, 1.0f});
+      currentModel_->GetMaterial()->SetColor({1.0f, 1.0f, 1.0f, 1.0f});
       currentModel_->SetShader("ObjectShader");
       currentModel_->SetBlend(BlendMode::kBlendModeNormal);
     }
@@ -146,7 +146,7 @@ void Obstacle::SetType(Type type) {
     transform_.scale = {3.021f, 3.195f, 1.566f};
     transform_.rotate = {0.0f, 1.570796f, 0.0f}; // 開口部をZ軸方向に向ける
     if (currentModel_) {
-      currentModel_->GetMartial()->SetColor({1.0f, 1.0f, 1.0f, 1.0f});
+      currentModel_->GetMaterial()->SetColor({1.0f, 1.0f, 1.0f, 1.0f});
       currentModel_->SetShader("ObjectShader");
       currentModel_->SetBlend(BlendMode::kBlendModeNormal);
     }
@@ -162,7 +162,7 @@ void Obstacle::SetType(Type type) {
     transform_.scale = {1.497f, 3.886f, 3.135f};
     transform_.rotate = {0.0f, 0.0f, 0.0f};
     if (currentModel_) {
-      currentModel_->GetMartial()->SetColor({1.0f, 1.0f, 1.0f, 1.0f});
+      currentModel_->GetMaterial()->SetColor({1.0f, 1.0f, 1.0f, 1.0f});
       currentModel_->SetShader("ObjectShader");
       currentModel_->SetBlend(BlendMode::kBlendModeNormal);
     }
@@ -177,7 +177,7 @@ void Obstacle::SetType(Type type) {
     transform_.scale = {1.0f, 1.0f, 1.0f};
     transform_.rotate = {0.0f, 3.141592f, 0.0f};
     if (currentModel_) {
-      currentModel_->GetMartial()->SetColor({1.0f, 1.0f, 1.0f, 1.0f});
+      currentModel_->GetMaterial()->SetColor({1.0f, 1.0f, 1.0f, 1.0f});
       currentModel_->SetShader("ObjectShader");
       currentModel_->SetBlend(BlendMode::kBlendModeNormal);
     }
@@ -192,7 +192,7 @@ void Obstacle::SetType(Type type) {
     transform_.scale = {2.0f, 0.1f, 10.0f};
     transform_.rotate = {0.0f, 0.0f, 0.0f};
     if (currentModel_) {
-      currentModel_->GetMartial()->SetColor({0.0f, 1.0f, 1.0f, 0.5f});
+      currentModel_->GetMaterial()->SetColor({0.0f, 1.0f, 1.0f, 0.5f});
       currentModel_->SetShader("ObjectShader");
     }
     break;
@@ -247,7 +247,7 @@ void Obstacle::SetType(Type type) {
     transform_.scale = {0.016f, 0.016f, 0.016f};
     transform_.rotate = {0.0f, 0.0f, 0.0f};
     if (currentModel_) {
-      currentModel_->GetMartial()->SetColor({1.0f, 1.0f, 1.0f, 1.0f});
+      currentModel_->GetMaterial()->SetColor({1.0f, 1.0f, 1.0f, 1.0f});
       currentModel_->SetShader("ObjectShader");
       currentModel_->SetBlend(BlendMode::kBlendModeNormal);
     }
@@ -263,7 +263,7 @@ void Obstacle::SetType(Type type) {
     transform_.scale = {0.025f, 0.025f, 0.025f};
     transform_.rotate = {0.0f, 0.0f, 0.0f};
     if (currentModel_) {
-      currentModel_->GetMartial()->SetColor({1.0f, 1.0f, 1.0f, 1.0f});
+      currentModel_->GetMaterial()->SetColor({1.0f, 1.0f, 1.0f, 1.0f});
       currentModel_->SetShader("ObjectShader");
       currentModel_->SetBlend(BlendMode::kBlendModeNormal);
     }

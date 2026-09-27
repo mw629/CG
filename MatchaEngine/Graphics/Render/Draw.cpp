@@ -47,8 +47,45 @@ void Draw::SetCamera(Camera* setCamera)
 
 void Draw::SetEnvironmentTexture(int handle)
 {
-	std::unique_ptr<Texture> texture_ = std::make_unique<Texture>();
-	environmentTextureSrvHandleGPU_ = texture_.get()->TextureData(handle);
+	Texture texture;
+	environmentTextureSrvHandleGPU_ = texture.TextureData(handle);
+}
+
+void Draw::BindCommonSceneParameters(ShaderName shader, BlendMode blend)
+{
+	if (camera_ && camera_->GetCameraResource()) {
+		SetCBV(shader, blend, "gCamera", camera_->GetCameraResource()->GetGPUVirtualAddress());
+	}
+	if (lightManager_) {
+		if (lightManager_->GetDirectionalLightResource()) {
+			SetCBV(shader, blend, "gDirectionalLightGroup", lightManager_->GetDirectionalLightResource()->GetGPUVirtualAddress());
+		}
+		if (lightManager_->GetPointLightResource()) {
+			SetCBV(shader, blend, "gPointLightGroup", lightManager_->GetPointLightResource()->GetGPUVirtualAddress());
+		}
+		if (lightManager_->GetSpotLightResource()) {
+			SetCBV(shader, blend, "gSpotLightGroup", lightManager_->GetSpotLightResource()->GetGPUVirtualAddress());
+		}
+	}
+	SetTable(shader, blend, "gEnvironmentTexture", environmentTextureSrvHandleGPU_);
+}
+
+bool Draw::IsFrustumCulled(const AABB& worldAABB, bool cullingEnabled)
+{
+	if (!isFrustumCullingEnabled_ || !camera_ || !cullingEnabled) {
+		return false;
+	}
+	if (!camera_->GetFrustum().ContainsAABB(worldAABB)) {
+		culledDrawCalls_++;
+		if (isDebugDrawAABB_ && lineRenderer_) {
+			DrawWireframeAABB(worldAABB, { 1.0f, 0.0f, 0.0f, 1.0f });
+		}
+		return true;
+	}
+	if (isDebugDrawAABB_ && lineRenderer_) {
+		DrawWireframeAABB(worldAABB, { 0.0f, 1.0f, 0.0f, 1.0f });
+	}
+	return false;
 }
 
 void Draw::preDraw(ShaderName shader, BlendMode blend, CullMode cull)
@@ -122,25 +159,15 @@ void Draw::DrawObj(ObjectBase* obj)
 	}
 
 	// フラスタムカリング判定（SkyBox等の背景オブジェクトは視錐台カリングをスキップ）
-	if (!isSkyBox && isFrustumCullingEnabled_ && camera_ && obj->IsFrustumCullingEnabled()) {
-		AABB worldAABB = obj->GetWorldAABB();
-		if (!camera_->GetFrustum().ContainsAABB(worldAABB)) {
-			culledDrawCalls_++;
-			if (isDebugDrawAABB_ && lineRenderer_) {
-				DrawWireframeAABB(worldAABB, { 1.0f, 0.0f, 0.0f, 1.0f });
-			}
-			return;
-		}
-		if (isDebugDrawAABB_ && lineRenderer_) {
-			DrawWireframeAABB(worldAABB, { 0.0f, 1.0f, 0.0f, 1.0f });
-		}
+	if (!isSkyBox && IsFrustumCulled(obj->GetWorldAABB(), obj->IsFrustumCullingEnabled())) {
+		return;
 	}
 
 	if (!camera_) {
 		LOG_ERROR(std::format("DrawObj failed: camera_ is null for object '{}'!", obj->name_));
 		return;
 	}
-	if (!obj->GetMartial() || !obj->GetMartial()->GetMaterialResource()) {
+	if (!obj->GetMaterial() || !obj->GetMaterial()->GetMaterialResource()) {
 		LOG_ERROR(std::format("DrawObj failed: Material is null for object '{}'!", obj->name_));
 		return;
 	}
@@ -157,22 +184,16 @@ void Draw::DrawObj(ObjectBase* obj)
 
 	Mesh mesh = obj->GetMesh();
 
-
 	//objectの描画
 	commandList_->IASetIndexBuffer(&mesh.indexBufferView_);
 	commandList_->IASetVertexBuffers(0, 1, &mesh.vertexBufferView);  
 	
-	SetCBV(shader, blend, "gMaterial", obj->GetMartial()->GetMaterialResource()->GetGPUVirtualAddress());
+	SetCBV(shader, blend, "gMaterial", obj->GetMaterial()->GetMaterialResource()->GetGPUVirtualAddress());
 	SetSRV(shader, blend, "gTransformationMatrix", obj->GetWvpDataResource()->GetGPUVirtualAddress());
 	SetTable(shader, blend, "gTexture", obj->GetTextureSrvHandleGPU());
-	SetCBV(shader, blend, "gCamera", camera_->GetCameraResource()->GetGPUVirtualAddress());
-	SetCBV(shader, blend, "gDirectionalLightGroup", lightManager_->GetDirectionalLightResource()->GetGPUVirtualAddress());
-	SetCBV(shader, blend, "gPointLightGroup", lightManager_->GetPointLightResource()->GetGPUVirtualAddress());
-	SetCBV(shader, blend, "gSpotLightGroup", lightManager_->GetSpotLightResource()->GetGPUVirtualAddress());
-	SetTable(shader, blend, "gEnvironmentTexture", environmentTextureSrvHandleGPU_);
+	BindCommonSceneParameters(shader, blend);
 
 	commandList_->DrawIndexedInstanced(UINT(mesh.indexBufferView_.SizeInBytes / sizeof(uint32_t)), obj->GetInstanceCount(), 0, 0, 0);
-
 }
 
 void Draw::DrawAnimation(CharacterAnimator* obj)
@@ -181,18 +202,8 @@ void Draw::DrawAnimation(CharacterAnimator* obj)
 	totalDrawCalls_++;
 
 	// フラスタムカリング判定
-	if (isFrustumCullingEnabled_ && camera_ && obj->IsFrustumCullingEnabled()) {
-		AABB worldAABB = obj->GetWorldAABB();
-		if (!camera_->GetFrustum().ContainsAABB(worldAABB)) {
-			culledDrawCalls_++;
-			if (isDebugDrawAABB_ && lineRenderer_) {
-				DrawWireframeAABB(worldAABB, { 1.0f, 0.0f, 0.0f, 1.0f });
-			}
-			return; // 視錐台外ならスキニングCSも描画もスキップ
-		}
-		if (isDebugDrawAABB_ && lineRenderer_) {
-			DrawWireframeAABB(worldAABB, { 0.0f, 1.0f, 0.0f, 1.0f });
-		}
+	if (IsFrustumCulled(obj->GetWorldAABB(), obj->IsFrustumCullingEnabled())) {
+		return; // 視錐台外ならスキニングCSも描画もスキップ
 	}
 
 	ShaderName shader = ObjectShader;
@@ -244,11 +255,7 @@ void Draw::DrawAnimation(CharacterAnimator* obj)
 
 	// 共通の設定
 	SetSRV(shader, blend, "gTransformationMatrix", obj->GetWvpDataResource()->GetGPUVirtualAddress());
-	SetCBV(shader, blend, "gCamera", camera_->GetCameraResource()->GetGPUVirtualAddress());
-	SetCBV(shader, blend, "gDirectionalLightGroup", lightManager_->GetDirectionalLightResource()->GetGPUVirtualAddress());
-	SetCBV(shader, blend, "gPointLightGroup", lightManager_->GetPointLightResource()->GetGPUVirtualAddress());
-	SetCBV(shader, blend, "gSpotLightGroup", lightManager_->GetSpotLightResource()->GetGPUVirtualAddress());
-	SetTable(shader, blend, "gEnvironmentTexture", environmentTextureSrvHandleGPU_);
+	BindCommonSceneParameters(shader, blend);
 
 	auto& subMeshMaterials = obj->GetSubMeshMaterials();
 	auto modelData = obj->GetModelData();
@@ -267,7 +274,7 @@ void Draw::DrawAnimation(CharacterAnimator* obj)
 			SetCBV(shader, blend, "gMaterial", subMeshMaterials[i].materialFactory->GetMaterialResource()->GetGPUVirtualAddress());
 			SetTable(shader, blend, "gTexture", subMeshMaterials[i].textureSrvHandleGPU);
 		} else {
-			SetCBV(shader, blend, "gMaterial", obj->GetMartial()->GetMaterialResource()->GetGPUVirtualAddress());
+			SetCBV(shader, blend, "gMaterial", obj->GetMaterial()->GetMaterialResource()->GetGPUVirtualAddress());
 			SetTable(shader, blend, "gTexture", obj->GetTextureSrvHandleGPU());
 		}
 
@@ -292,18 +299,8 @@ void Draw::DrawModel(Model* model)
 	totalDrawCalls_++;
 
 	// フラスタムカリング判定
-	if (isFrustumCullingEnabled_ && camera_ && model->IsFrustumCullingEnabled()) {
-		AABB worldAABB = model->GetWorldAABB();
-		if (!camera_->GetFrustum().ContainsAABB(worldAABB)) {
-			culledDrawCalls_++;
-			if (isDebugDrawAABB_ && lineRenderer_) {
-				DrawWireframeAABB(worldAABB, { 1.0f, 0.0f, 0.0f, 1.0f });
-			}
-			return;
-		}
-		if (isDebugDrawAABB_ && lineRenderer_) {
-			DrawWireframeAABB(worldAABB, { 0.0f, 1.0f, 0.0f, 1.0f });
-		}
+	if (IsFrustumCulled(model->GetWorldAABB(), model->IsFrustumCullingEnabled())) {
+		return;
 	}
 
 	if (!camera_) {
@@ -325,11 +322,7 @@ void Draw::DrawModel(Model* model)
 	BlendMode blend = model->GetBlend();
 
 	SetSRV(shader, blend, "gTransformationMatrix", model->GetWvpDataResource()->GetGPUVirtualAddress());
-	SetCBV(shader, blend, "gCamera", camera_->GetCameraResource()->GetGPUVirtualAddress());
-	SetCBV(shader, blend, "gDirectionalLightGroup", lightManager_->GetDirectionalLightResource()->GetGPUVirtualAddress());
-	SetCBV(shader, blend, "gPointLightGroup", lightManager_->GetPointLightResource()->GetGPUVirtualAddress());
-	SetCBV(shader, blend, "gSpotLightGroup", lightManager_->GetSpotLightResource()->GetGPUVirtualAddress());
-	SetTable(shader, blend, "gEnvironmentTexture", environmentTextureSrvHandleGPU_);
+	BindCommonSceneParameters(shader, blend);
 
 	auto& subMeshMaterials = model->GetSubMeshMaterials();
 	auto modelData = ModelManager::GetModelData(model->GetModelNumber());
@@ -341,16 +334,12 @@ void Draw::DrawModel(Model* model)
 		commandList_->IASetIndexBuffer(&mesh.indexBufferView_);
 		commandList_->IASetVertexBuffers(0, 1, &mesh.vertexBufferView);
 
-		if (i < subMeshMaterials.size()) {
-			if (subMeshMaterials[i].materialFactory && subMeshMaterials[i].materialFactory->GetMaterialResource()) {
-				SetCBV(shader, blend, "gMaterial", subMeshMaterials[i].materialFactory->GetMaterialResource()->GetGPUVirtualAddress());
-				SetTable(shader, blend, "gTexture", subMeshMaterials[i].textureSrvHandleGPU);
-			}
-		} else {
-			if (model->GetMartial() && model->GetMartial()->GetMaterialResource()) {
-				SetCBV(shader, blend, "gMaterial", model->GetMartial()->GetMaterialResource()->GetGPUVirtualAddress());
-				SetTable(shader, blend, "gTexture", model->GetTextureSrvHandleGPU());
-			}
+		MaterialFactory* mat = (i < subMeshMaterials.size()) ? subMeshMaterials[i].materialFactory.get() : model->GetMaterial();
+		D3D12_GPU_DESCRIPTOR_HANDLE texHandle = (i < subMeshMaterials.size()) ? subMeshMaterials[i].textureSrvHandleGPU : model->GetTextureSrvHandleGPU();
+
+		if (mat && mat->GetMaterialResource()) {
+			SetCBV(shader, blend, "gMaterial", mat->GetMaterialResource()->GetGPUVirtualAddress());
+			SetTable(shader, blend, "gTexture", texHandle);
 		}
 
 		commandList_->DrawIndexedInstanced(UINT(mesh.indexBufferView_.SizeInBytes / sizeof(uint32_t)), model->GetInstanceCount(), 0, 0, 0);
@@ -375,7 +364,7 @@ void Draw::DrawParticle(EffectDefinition* particle)
 		commandList_->IASetVertexBuffers(0, 1, particle->GetVertexBufferView());
 		ShaderName shader = particle->GetShader();
 		BlendMode blend = particle->GetBlend();
-		SetCBV(shader, blend, "gMaterial", particle->GetMartial()->GetMaterialResource()->GetGPUVirtualAddress());
+		SetCBV(shader, blend, "gMaterial", particle->GetMaterial()->GetMaterialResource()->GetGPUVirtualAddress());
 		SetCBV(shader, blend, "gPerView", particle->GetPerViewResource()->GetGPUVirtualAddress());
 		SetTable(shader, blend, "gTexture", particle->GetTextureSrvHandleGPU());
 
@@ -397,7 +386,7 @@ void Draw::DrawParticle(EffectDefinition* particle)
 	commandList_->IASetVertexBuffers(0, 1, particle->GetVertexBufferView());
 	ShaderName shader = particle->GetShader();
 	BlendMode blend = particle->GetBlend();
-	SetCBV(shader, blend, "gMaterial", particle->GetMartial()->GetMaterialResource()->GetGPUVirtualAddress());
+	SetCBV(shader, blend, "gMaterial", particle->GetMaterial()->GetMaterialResource()->GetGPUVirtualAddress());
 	SetCBV(shader, blend, "gPerView", particle->GetPerViewResource()->GetGPUVirtualAddress());
 	SetSRV(shader, blend, "gParticle", particle->GetInstancingResource()->GetGPUVirtualAddress());
 	SetTable(shader, blend, "gTexture", particle->GetTextureSrvHandleGPU());
@@ -414,14 +403,10 @@ void Draw::DrawSprite(Sprite* sprite)
 	commandList_->IASetIndexBuffer(sprite->GetIndexBufferView());//IBVを設定
 	commandList_->IASetVertexBuffers(0, 1, sprite->GetVertexBufferView());//VBVを設定
 	
-	SetCBV(shader, blend, "gMaterial", sprite->GetMartial()->GetMaterialResource()->GetGPUVirtualAddress());
+	SetCBV(shader, blend, "gMaterial", sprite->GetMaterial()->GetMaterialResource()->GetGPUVirtualAddress());
 	SetSRV(shader, blend, "gTransformationMatrix", sprite->GetVertexResource()->GetGPUVirtualAddress());
 	SetTable(shader, blend, "gTexture", sprite->GetTextureSrvHandleGPU());
-	SetCBV(shader, blend, "gCamera", camera_->GetCameraResource()->GetGPUVirtualAddress());
-	SetCBV(shader, blend, "gDirectionalLightGroup", lightManager_->GetDirectionalLightResource()->GetGPUVirtualAddress());
-	SetCBV(shader, blend, "gPointLightGroup", lightManager_->GetPointLightResource()->GetGPUVirtualAddress());
-	SetCBV(shader, blend, "gSpotLightGroup", lightManager_->GetSpotLightResource()->GetGPUVirtualAddress());
-	SetTable(shader, blend, "gEnvironmentTexture", environmentTextureSrvHandleGPU_);
+	BindCommonSceneParameters(shader, blend);
 
 	commandList_->DrawIndexedInstanced(6, 1, 0, 0, 0);
 }
@@ -432,35 +417,19 @@ void Draw::DrawSphere(Sphere* sphere)
 	totalDrawCalls_++;
 
 	// フラスタムカリング判定
-	if (isFrustumCullingEnabled_ && camera_ && sphere->IsFrustumCullingEnabled()) {
-		AABB worldAABB = sphere->GetWorldAABB();
-		if (!camera_->GetFrustum().ContainsAABB(worldAABB)) {
-			culledDrawCalls_++;
-			if (isDebugDrawAABB_ && lineRenderer_) {
-				DrawWireframeAABB(worldAABB, { 1.0f, 0.0f, 0.0f, 1.0f });
-			}
-			return;
-		}
-		if (isDebugDrawAABB_ && lineRenderer_) {
-			DrawWireframeAABB(worldAABB, { 0.0f, 1.0f, 0.0f, 1.0f });
-		}
+	if (IsFrustumCulled(sphere->GetWorldAABB(), sphere->IsFrustumCullingEnabled())) {
+		return;
 	}
 
 	preDraw(sphere->GetShader(), sphere->GetBlend(), sphere->GetCullMode());
 
-
-	//commandList_->IASetIndexBuffer(sphere->GetIndexBufferView());//IBVを設定
 	commandList_->IASetVertexBuffers(0, 1, sphere->GetVertexBufferView());//VBVを設定
 	ShaderName shader = sphere->GetShader();
 	BlendMode blend = sphere->GetBlend();
-	SetCBV(shader, blend, "gMaterial", sphere->GetMartial()->GetMaterialResource()->GetGPUVirtualAddress());
+	SetCBV(shader, blend, "gMaterial", sphere->GetMaterial()->GetMaterialResource()->GetGPUVirtualAddress());
 	SetSRV(shader, blend, "gTransformationMatrix", sphere->GetWvpDataResource()->GetGPUVirtualAddress());
 	SetTable(shader, blend, "gTexture", sphere->GetTextureSrvHandleGPU());
-	SetCBV(shader, blend, "gCamera", camera_->GetCameraResource()->GetGPUVirtualAddress());
-	SetCBV(shader, blend, "gDirectionalLightGroup", lightManager_->GetDirectionalLightResource()->GetGPUVirtualAddress());
-	SetCBV(shader, blend, "gPointLightGroup", lightManager_->GetPointLightResource()->GetGPUVirtualAddress());
-	SetCBV(shader, blend, "gSpotLightGroup", lightManager_->GetSpotLightResource()->GetGPUVirtualAddress());
-	SetTable(shader, blend, "gEnvironmentTexture", environmentTextureSrvHandleGPU_);
+	BindCommonSceneParameters(shader, blend);
 
 	commandList_->DrawInstanced(static_cast<UINT>(pow(sphere->GetSubdivision(), 2) * 6), sphere->GetInstanceCount(), 0, 0);
 }
@@ -471,18 +440,8 @@ void Draw::DrawTriangle(Triangle* triangle)
 	totalDrawCalls_++;
 
 	// フラスタムカリング判定
-	if (isFrustumCullingEnabled_ && camera_ && triangle->IsFrustumCullingEnabled()) {
-		AABB worldAABB = triangle->GetWorldAABB();
-		if (!camera_->GetFrustum().ContainsAABB(worldAABB)) {
-			culledDrawCalls_++;
-			if (isDebugDrawAABB_ && lineRenderer_) {
-				DrawWireframeAABB(worldAABB, { 1.0f, 0.0f, 0.0f, 1.0f });
-			}
-			return;
-		}
-		if (isDebugDrawAABB_ && lineRenderer_) {
-			DrawWireframeAABB(worldAABB, { 0.0f, 1.0f, 0.0f, 1.0f });
-		}
+	if (IsFrustumCulled(triangle->GetWorldAABB(), triangle->IsFrustumCullingEnabled())) {
+		return;
 	}
 
 	preDraw(triangle->GetShader(), triangle->GetBlend(), triangle->GetCullMode());
@@ -490,15 +449,10 @@ void Draw::DrawTriangle(Triangle* triangle)
 	commandList_->IASetVertexBuffers(0, 1, triangle->GetVertexBufferView());//VBVを設定
 	ShaderName shader = triangle->GetShader();
 	BlendMode blend = triangle->GetBlend();
-	SetCBV(shader, blend, "gMaterial", triangle->GetMartial()->GetMaterialResource()->GetGPUVirtualAddress());
+	SetCBV(shader, blend, "gMaterial", triangle->GetMaterial()->GetMaterialResource()->GetGPUVirtualAddress());
 	SetSRV(shader, blend, "gTransformationMatrix", triangle->GetVertexResource()->GetGPUVirtualAddress());
 	SetTable(shader, blend, "gTexture", triangle->GetTextureSrvHandleGPU());
-	SetCBV(shader, blend, "gCamera", camera_->GetCameraResource()->GetGPUVirtualAddress());
-	SetCBV(shader, blend, "gDirectionalLightGroup", lightManager_->GetDirectionalLightResource()->GetGPUVirtualAddress());
-	SetCBV(shader, blend, "gPointLightGroup", lightManager_->GetPointLightResource()->GetGPUVirtualAddress());
-	SetCBV(shader, blend, "gSpotLightGroup", lightManager_->GetSpotLightResource()->GetGPUVirtualAddress());
-	SetTable(shader, blend, "gEnvironmentTexture", environmentTextureSrvHandleGPU_);
-
+	BindCommonSceneParameters(shader, blend);
 
 	commandList_->DrawInstanced(3, 1, 0, 0);
 }

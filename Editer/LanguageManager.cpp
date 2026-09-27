@@ -93,7 +93,7 @@ const char* LanguageManager::Tr(const char* englishText) {
         {"Outer Radius", "外半径"},
         {"Inner Radius", "内半径"},
         {"Radial Velocity", "放射初速"},
-        {"Angle", "広がり角度"},
+        {"Spread Angle", "広がり角度"},
         {"Speed", "初速度"},
         {"Spawn / Burst Mode", "発生 / バーストモード"},
         {"Loop Emission", "ループ発生"},

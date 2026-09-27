@@ -71,10 +71,12 @@ public:
 
 	//getter
 	Transform GetTransform() const { return transform_; }
-	MaterialFactory* GetMartial() { 
+	MaterialFactory* GetMaterial() { 
 		auto matComp = GetComponent<MaterialComponent>();
 		return matComp ? matComp->GetMaterialFactory() : nullptr;
 	}
+	[[deprecated("Use GetMaterial instead")]]
+	MaterialFactory* GetMartial() { return GetMaterial(); }
 	D3D12_GPU_DESCRIPTOR_HANDLE GetTextureSrvHandleGPU()const { 
 		auto matComp = GetComponent<MaterialComponent>();
 		if (matComp && matComp->GetTextureSrvHandleGPU().ptr != 0) {

@@ -478,7 +478,7 @@ void GameScene::ImGui() {
       }
 
       ImGui::SameLine();
-      if (ImGui::SmallButton("Reset CD (即可能)")) {
+      if (ImGui::SmallButton("Reset CD (即時可能)")) {
         stageSettings_->SetItemCoolDownTimer(item.type, 0.0f);
       }
       ImGui::SameLine();
@@ -704,7 +704,7 @@ void GameScene::Initialize() {
   titleSpriteData_.textureArea[1] = {1.0f, 1.0f};
   titleSprite_ = std::make_unique<Sprite>();
   titleSprite_->Initialize(titleSpriteData_, titleTextureHandle_);
-  titleSprite_->GetMartial()->SetColor({1.0f, 1.0f, 1.0f, 1.0f});
+  titleSprite_->GetMaterial()->SetColor({1.0f, 1.0f, 1.0f, 1.0f});
 
   if (!EditorManager::IsPlaying()) {
     gameState_ = GameState::Editor;
@@ -990,18 +990,19 @@ void GameScene::DrawHUD(class Draw &draw) {
     s_preloaded = true;
     draw.GetTextRenderer()->GetAtlas()->PreloadString(
         "0123456789ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz:/"
-        ".mkmhpt%+-[]()!★◆▼▲●■░|【】①②③※・「」←→ "
+        ".mkmhpt%+-[]()!★◆▼▲●■░|【】①②③※・「」←→↑↓=<>,！、 "
         "ぁあぃいぅうぇえぉおかがきぎくぐけげこごさざしじすずせぜそぞただちぢっ"
         "つづてでとど"
         "なにぬねのはばぱひびぴふぶぷへべぺほぼぽまみむめもゃやゅゆょよらりるれ"
         "ろゎわゐゑをん"
+        "アイウエオカキクケコサシスセソタチツテトナニヌネノハヒフヘホマミムメモヤユヨラリルレロワヲンッャュョー"
         "一二三四五六七八九十百千万到達距離スコア速度最高記録ベストゲームオーバ"
         "ーリスタートリザルトへ戻る一時停止中現在獲得順位反撃チャンス左中央右打"
         "ち返せ跳ね返しボーナス敵撃破モードシールドバリアアクティブジャンプスラ"
-        "イディング走るポーズキーもう一度遊ぶプレイ"
+        "イディング走るポーズキーもう一度遊ぶプレイメニュー"
         "ペンギンダッシュ―—"
         "操作方法十字説明攻略倒し方緑赤色迫る直撃減少命中削切回避手前当てろ避け"
-        "ろ戦指令障害物魚押飛進");
+        "ろ戦指令障害物魚押飛進残移動来固定再開初終体");
   }
 
   if (gameState_ == GameState::Title) {
@@ -1373,7 +1374,7 @@ void GameScene::DrawControlsGuide(class Draw &draw) {
     guideText = "[SPACE / W] ジャンプ    [S] スライド    [ESC] ポーズ  "
                 "(※1レーン固定中)";
   } else if (playingState_ == PlayingState::Boss) {
-    guideText = "【ボス倒し方】障害物をよけて魚がいるレーンを押し敵に飛ばす！ "
+    guideText = "【ボスの倒し方】障害物をよけて魚がいるレーンを押して敵に飛ばす！ "
                 "[1/2/3] 魚飛ばし  "
                 "[A/D] 移動  [SPACE] ジャンプ  [S] スライド  [ESC] ポーズ";
   }

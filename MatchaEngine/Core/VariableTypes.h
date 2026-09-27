@@ -77,7 +77,7 @@ struct Transform {
 
 struct QuaternionTransform {
   Vector3 scale = {1.0f, 1.0f, 1.0f};
-  Quaternion rotate = {0.0f, 0.0f, 0.0f};
+  Quaternion rotate = {0.0f, 0.0f, 0.0f, 1.0f};
   Vector3 translate = {0.0f, 0.0f, 0.0f};
 };
 
@@ -211,7 +211,7 @@ struct SpotLightGroupData {
 };
 
 struct MaterialData {
-  std::string textureDilePath;
+  std::string textureFilePath;
 };
 
 struct Node {
@@ -308,7 +308,7 @@ struct Joint {
   QuaternionTransform transform;
   Matrix4x4 localMatrix;
   Matrix4x4 skeletonSpaceMatrix;
-  std::string name;              // 名まえ
+  std::string name;              // 名前
   std::vector<int32_t> children; // 子ジョイントのインデックス
   int32_t index;                 // 自身のインデックス
   std::optional<int32_t> parent; // 親ジョイント
@@ -322,7 +322,7 @@ struct Skeleton {
 
 const uint32_t kNumMaxInfluence = 4;
 struct VertexInfluence {
-  std::array<float, kNumMaxInfluence> wights;
+  std::array<float, kNumMaxInfluence> weights;
   std::array<int32_t, kNumMaxInfluence> jointIndices;
 };
 

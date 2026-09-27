@@ -16,16 +16,16 @@ void GamePadInput::DrawImGui()
 #ifdef _USE_IMGUI
 bool press = PressButton(XINPUT_GAMEPAD_A);
 	bool trigger = PushButton(XINPUT_GAMEPAD_A);
-	bool releas = ReleaseButton(XINPUT_GAMEPAD_A);
+	bool release = ReleaseButton(XINPUT_GAMEPAD_A);
 	bool free = FreeButton(XINPUT_GAMEPAD_A);
 
 	Vector3 leftStick = GetLeftStick();
 	Vector3 rightStick = GetRightStick();
 
-	ImGui::Begin("Contoller");
+	ImGui::Begin("Controller");
 	ImGui::Checkbox("Press", &press);
 	ImGui::Checkbox("Trigger", &trigger);
-	ImGui::Checkbox("Releas", &releas);
+	ImGui::Checkbox("Release", &release);
 	ImGui::Checkbox("Free", &free);
 
 

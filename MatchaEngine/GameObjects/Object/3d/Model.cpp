@@ -30,8 +30,8 @@ void Model::Initialize(ModelData modelData)
 
 	AddComponent<MaterialComponent>();
 	auto matComp = GetComponent<MaterialComponent>();
-	if (matComp && !modelData.material.textureDilePath.empty()) {
-		matComp->SetTexturePath(modelData.material.textureDilePath);
+	if (matComp && !modelData.material.textureFilePath.empty()) {
+		matComp->SetTexturePath(modelData.material.textureFilePath);
 	}
 
 	subMeshMaterials_.clear();

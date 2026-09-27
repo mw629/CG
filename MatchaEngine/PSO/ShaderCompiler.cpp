@@ -30,7 +30,7 @@ Microsoft::WRL::ComPtr<IDxcBlob> ShaderCompile::CompileShader(std::ostream& os,
 	Microsoft::WRL::ComPtr<IDxcIncludeHandler> includeHandler)
 {
 
-	//hldlファイルを読み込む//
+	//hlslファイルを読み込む//
 
 	//Shaderのファイル名を取得
 	std::wstring shaderName = filePath.substr(filePath.find_last_of(L"\\/") + 1);
@@ -54,7 +54,7 @@ Microsoft::WRL::ComPtr<IDxcBlob> ShaderCompile::CompileShader(std::ostream& os,
 	shaderSourceBuffer.Size = shaderSource->GetBufferSize();
 	shaderSourceBuffer.Encoding = DXC_CP_UTF8;//UTF8の文字コードであることを通知
 
-	//Compilする//
+	//Compileする//
 	Log(os, ConvertString(std::format(L"Starting compilation,[{}],profile:{}\n", shaderName, profile)));
 
 	LPCWSTR arguments[] = {

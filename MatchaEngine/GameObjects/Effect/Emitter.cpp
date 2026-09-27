@@ -73,7 +73,7 @@ void Emitter::ImGui() {
 				ImGui::DragFloat3(LanguageManager::Tr("Position"), &emitterCone_.translate.x, 0.01f, -FLT_MAX, FLT_MAX, "%.2f");
 				ImGui::DragFloat3(LanguageManager::Tr("Rotation"), &emitterCone_.rotate.x, 0.01f, -FLT_MAX, FLT_MAX, "%.2f");
 				ImGui::DragFloat(LanguageManager::Tr("Radius"), &emitterCone_.radius, 0.01f, 0.0f, FLT_MAX, "%.2f");
-				ImGui::SliderAngle(LanguageManager::Tr("Angle"), &emitterCone_.angle, 0.0f, 90.0f);
+				ImGui::SliderAngle(LanguageManager::Tr("Spread Angle"), &emitterCone_.angle, 0.0f, 90.0f);
 				ImGui::DragFloat(LanguageManager::Tr("Speed"), &emitterCone_.speed, 0.01f, -FLT_MAX, FLT_MAX, "%.2f");
 				ImGui::DragInt(LanguageManager::Tr("Count"), reinterpret_cast<int*>(&emitterCone_.count), 1, 0, 10000);
 				ImGui::DragFloat(LanguageManager::Tr("Frequency"), &emitterCone_.frequency, 0.01f, 0.0f, 10.0f, "%.2f");

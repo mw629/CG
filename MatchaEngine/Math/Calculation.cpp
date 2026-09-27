@@ -55,10 +55,12 @@ float Length(Vector3 v)
 Vector3 Normalize(Vector3 v)
 {
 	Vector3 result{};
-	if (Length(v) != 0) {
-		result.x = v.x / Length(v);
-		result.y = v.y / Length(v);
-		result.z = v.z / Length(v);
+	float len = Length(v);
+	if (len != 0.0f) {
+		float invLen = 1.0f / len;
+		result.x = v.x * invLen;
+		result.y = v.y * invLen;
+		result.z = v.z * invLen;
 	}
 	return result;
 }
@@ -311,13 +313,13 @@ Vector3 TransformMatrix(const Vector3& v, const Matrix4x4& m)
 	return result;
 }
 
-Matrix4x4 Scale(Vector3 scall)
+Matrix4x4 Scale(Vector3 scale)
 {
 	Matrix4x4 result;
 
-	result.m[0][0] = 1.0f * scall.x;
-	result.m[1][1] = 1.0f * scall.y;
-	result.m[2][2] = 1.0f * scall.z;
+	result.m[0][0] = 1.0f * scale.x;
+	result.m[1][1] = 1.0f * scale.y;
+	result.m[2][2] = 1.0f * scale.z;
 	result.m[3][3] = 1.0f;
 	return result;
 }

@@ -49,10 +49,12 @@ public:
 
 	D3D12_VERTEX_BUFFER_VIEW* GetVertexBufferView() { return &vertexBufferView_; }
 	ID3D12Resource* GetVertexResource()const { return wvpResource_.Get(); }
-	MaterialFactory* GetMartial()const { 
+	MaterialFactory* GetMaterial()const { 
 		auto matComp = GetComponent<MaterialComponent>();
 		return matComp ? matComp->GetMaterialFactory() : nullptr;
 	}
+	[[deprecated("Use GetMaterial instead")]]
+	MaterialFactory* GetMartial()const { return GetMaterial(); }
 	D3D12_GPU_DESCRIPTOR_HANDLE GetTextureSrvHandleGPU()const { return textureSrvHandleGPU_; }
 
 	void SetBlend(BlendMode blend) { blend_ = blend; }

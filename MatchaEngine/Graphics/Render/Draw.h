@@ -37,7 +37,7 @@ public:
 	LineRenderer* GetLineRenderer() const { return lineRenderer_; }
 
 	void SetCamera(Camera* setcamera);
-	void SetEnvironmentTexture(int textureHandel);
+	void SetEnvironmentTexture(int textureHandle);
 	void SetGpuProfiler(class GpuProfiler* profiler) { gpuProfiler_ = profiler; }
 
 	void preDraw(ShaderName shader, BlendMode blend, CullMode cull = kCullModeNone);
@@ -111,6 +111,9 @@ private:
 	void SetCBV(ShaderName shader, BlendMode blend, const std::string& name, D3D12_GPU_VIRTUAL_ADDRESS address);
 	void SetSRV(ShaderName shader, BlendMode blend, const std::string& name, D3D12_GPU_VIRTUAL_ADDRESS address);
 	void SetTable(ShaderName shader, BlendMode blend, const std::string& name, D3D12_GPU_DESCRIPTOR_HANDLE handle);
+
+	void BindCommonSceneParameters(ShaderName shader, BlendMode blend);
+	bool IsFrustumCulled(const AABB& worldAABB, bool cullingEnabled);
 
 	ID3D12GraphicsCommandList* commandList_{};
 	GraphicsPipelineState* graphicsPipelineState_{};

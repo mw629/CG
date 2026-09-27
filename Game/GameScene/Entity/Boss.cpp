@@ -33,8 +33,8 @@ void Boss::Reset() {
 
   if (model_) {
     model_->SetColor({1.0f, 1.0f, 1.0f, 1.0f});
-    if (model_->GetMartial()) {
-      model_->GetMartial()->SetColor({1.0f, 1.0f, 1.0f, 1.0f});
+    if (model_->GetMaterial()) {
+      model_->GetMaterial()->SetColor({1.0f, 1.0f, 1.0f, 1.0f});
     }
     Transform drawTransform = transform_;
     drawTransform.translate.y -= transform_.scale.y * 0.5f;
@@ -43,27 +43,9 @@ void Boss::Reset() {
 }
 
 void Boss::Spawn(float x, float y, float z) {
+  Reset();
   targetPos_ = {x, y, z};
-  // 画面の右奥上空（カメラはZ=-向きなので、X負が右、Z負が奥）
-  startPos_ = {-18.0f, 20.0f, -40.0f};
-  transform_.translate = startPos_;
-  transform_.rotate = {0.0f, 0.0f, 0.0f};
-  transform_.scale = {5.0f, 5.0f, 5.0f}; // 大きめに設定
   isActive_ = true;
-  hp_ = kMaxHP;
-  isHit_ = false;
-  hitTimer_ = 0.0f;
-  battleAnimTimer_ = 0.0f;
-  if (model_) {
-    model_->SetColor({1.0f, 1.0f, 1.0f, 1.0f});
-    if (model_->GetMartial()) {
-      model_->GetMartial()->SetColor({1.0f, 1.0f, 1.0f, 1.0f});
-    }
-
-    Transform drawTransform = transform_;
-    drawTransform.translate.y -= transform_.scale.y * 0.5f; // 底面原点(Y=0)を当たり判定中心に合わせるオフセット
-    model_->SetTransform(drawTransform);
-  }
   ChangeState(BossState::Appearance);
 }
 
@@ -134,7 +116,7 @@ void Boss::Update(Matrix4x4 view, float speedMultiplier) {
     if (hitTimer_ <= 0.0f) {
       isHit_ = false;
       model_->SetColor({1.0f, 1.0f, 1.0f, 1.0f});
-      model_->GetMartial()->SetColor({1.0f, 1.0f, 1.0f, 1.0f});
+      model_->GetMaterial()->SetColor({1.0f, 1.0f, 1.0f, 1.0f});
     }
   }
 
@@ -184,7 +166,7 @@ void Boss::OnDamage() {
   isHit_ = true;
   hitTimer_ = 0.5f; // 0.5秒間ダメージ演出
   model_->SetColor({2.0f, 0.4f, 0.4f, 1.0f}); // 赤く光る
-  model_->GetMartial()->SetColor({2.0f, 0.4f, 0.4f, 1.0f});
+  model_->GetMaterial()->SetColor({2.0f, 0.4f, 0.4f, 1.0f});
 
   if (hp_ <= 0 && state_ == BossState::Battle) {
     ChangeState(BossState::Defeat);

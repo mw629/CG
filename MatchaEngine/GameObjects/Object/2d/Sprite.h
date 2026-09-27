@@ -118,9 +118,9 @@ public:
 
 	void Update(SpriteData spriteData);
 
-	void SetMaterialLighting(bool isActiv) { 
+	void SetMaterialLighting(bool isActive) { 
 		auto matComp = GetComponent<MaterialComponent>();
-		if(matComp) matComp->GetMaterialFactory()->SetMaterialLighting(isActiv);
+		if(matComp) matComp->GetMaterialFactory()->SetMaterialLighting(isActive);
 	}
 
 	void SetTexture(D3D12_GPU_DESCRIPTOR_HANDLE textureSrvHandleGPU) { textureSrvHandleGPU_ = textureSrvHandleGPU; }
@@ -131,10 +131,12 @@ public:
 
 	Transform& GetTransform() { return transform_; }
 	
-	MaterialFactory* GetMartial() { 
+	MaterialFactory* GetMaterial() { 
 		auto matComp = GetComponent<MaterialComponent>();
 		return matComp ? matComp->GetMaterialFactory() : nullptr;
 	}
+	[[deprecated("Use GetMaterial instead")]]
+	MaterialFactory* GetMartial() { return GetMaterial(); }
 	D3D12_GPU_DESCRIPTOR_HANDLE GetTextureSrvHandleGPU() { return textureSrvHandleGPU_; }
 
 private:
