@@ -1,5 +1,7 @@
 #include "Obstacle.h"
 #include "Graphics/Render/Draw.h"
+#include "Resource/AssetManager.h"
+#include <cmath>
 
 Obstacle::Obstacle() {
   name_ = "Obstacle";
@@ -45,6 +47,58 @@ void Obstacle::Initialize(ModelData lowData, ModelData highData,
   reflectingAttackModel_->Initialize(reflectingAttackData);
   reflectingAttackModel_->SetShader("ObjectShader");
   reflectingAttackModel_->GetMartial()->SetColor({1.0f, 1.0f, 1.0f, 1.0f});
+
+  // ビルボードアイテム用平面モデルの初期化
+  ModelData planeData =
+      AssetManager::LoadModel("Resources/Model/obj", "plane.obj");
+
+  // 1. バリアを張るアイテム (shieldItem)
+  ModelData barrierData = planeData;
+  barrierData.material.textureDilePath = "Resources/Texture/shieldItem.png";
+  barrierData.textureIndex =
+      AssetManager::LoadTexture("Resources/Texture/shieldItem.png");
+  barrierItemModel_->Initialize(barrierData);
+  barrierItemModel_->SetShader("ObjectShader");
+  barrierItemModel_->SetCullMode(kCullModeNone);
+  barrierItemModel_->SetLighting(false);
+  barrierItemModel_->SetBillboard(true);
+  barrierItemModel_->GetMartial()->SetColor({1.0f, 1.0f, 1.0f, 1.0f});
+
+  // 2. ボス戦アイテム (BossItems)
+  ModelData bossData = planeData;
+  bossData.material.textureDilePath = "Resources/Texture/BossItems.png";
+  bossData.textureIndex =
+      AssetManager::LoadTexture("Resources/Texture/BossItems.png");
+  bossItemModel_->Initialize(bossData);
+  bossItemModel_->SetShader("ObjectShader");
+  bossItemModel_->SetCullMode(kCullModeNone);
+  bossItemModel_->SetLighting(false);
+  bossItemModel_->SetBillboard(true);
+  bossItemModel_->GetMartial()->SetColor({1.0f, 1.0f, 1.0f, 1.0f});
+
+  // 3. レーン消去アイテム (BomItem)
+  ModelData clearData = planeData;
+  clearData.material.textureDilePath = "Resources/Texture/BomItem.png";
+  clearData.textureIndex =
+      AssetManager::LoadTexture("Resources/Texture/BomItem.png");
+  clearItemModel_->Initialize(clearData);
+  clearItemModel_->SetShader("ObjectShader");
+  clearItemModel_->SetCullMode(kCullModeNone);
+  clearItemModel_->SetLighting(false);
+  clearItemModel_->SetBillboard(true);
+  clearItemModel_->GetMartial()->SetColor({1.0f, 1.0f, 1.0f, 1.0f});
+
+  // 4. 1レーン化アイテム (Onelane)
+  ModelData oneLaneData = planeData;
+  oneLaneData.material.textureDilePath = "Resources/Texture/Onelane.png";
+  oneLaneData.textureIndex =
+      AssetManager::LoadTexture("Resources/Texture/Onelane.png");
+  oneLaneItemModel_->Initialize(oneLaneData);
+  oneLaneItemModel_->SetShader("ObjectShader");
+  oneLaneItemModel_->SetCullMode(kCullModeNone);
+  oneLaneItemModel_->SetLighting(false);
+  oneLaneItemModel_->SetBillboard(true);
+  oneLaneItemModel_->GetMartial()->SetColor({1.0f, 1.0f, 1.0f, 1.0f});
 
   SetType(type);
 }
@@ -144,55 +198,43 @@ void Obstacle::SetType(Type type) {
     break;
 
   case Type::CameraItem:
-    currentModel_ = itemModel_.get();
+    // 一レーンにするアイテム（Onelane ビルボード）
+    currentModel_ = oneLaneItemModel_.get();
     collisionWidth_ = 1.0f;
     collisionHeight_ = 1.0f;
     collisionDepth_ = 1.0f;
-    transform_.scale = {1.0f, 1.0f, 1.0f};
+    transform_.scale = {0.8f, 0.8f, 1.0f};
     transform_.rotate = {0.0f, 0.0f, 0.0f};
-    if (currentModel_) {
-      currentModel_->GetMartial()->SetColor({1.0f, 0.0f, 1.0f, 1.0f});
-      currentModel_->SetShader("ObjectShader");
-    }
     break;
 
   case Type::BarrierItem:
-    currentModel_ = itemModel_.get();
+    // バリアを張るアイテム（shieldItem ビルボード）
+    currentModel_ = barrierItemModel_.get();
     collisionWidth_ = 1.0f;
     collisionHeight_ = 1.0f;
     collisionDepth_ = 1.0f;
-    transform_.scale = {1.0f, 1.0f, 1.0f};
+    transform_.scale = {0.8f, 0.8f, 1.0f};
     transform_.rotate = {0.0f, 0.0f, 0.0f};
-    if (currentModel_) {
-      currentModel_->GetMartial()->SetColor({0.0f, 1.0f, 0.0f, 1.0f});
-      currentModel_->SetShader("ObjectShader");
-    }
     break;
 
   case Type::ClearItem:
-    currentModel_ = itemModel_.get();
+    // レーン消去アイテム（BomItem ビルボード）
+    currentModel_ = clearItemModel_.get();
     collisionWidth_ = 1.0f;
     collisionHeight_ = 1.0f;
     collisionDepth_ = 1.0f;
-    transform_.scale = {1.0f, 1.0f, 1.0f};
+    transform_.scale = {0.8f, 0.8f, 1.0f};
     transform_.rotate = {0.0f, 0.0f, 0.0f};
-    if (currentModel_) {
-      currentModel_->GetMartial()->SetColor({1.0f, 0.5f, 0.0f, 1.0f});
-      currentModel_->SetShader("ObjectShader");
-    }
     break;
 
   case Type::BossItem:
-    currentModel_ = itemModel_.get();
+    // ボス戦アイテム（BossItems ビルボード）
+    currentModel_ = bossItemModel_.get();
     collisionWidth_ = 1.5f;
     collisionHeight_ = 1.5f;
     collisionDepth_ = 1.5f;
-    transform_.scale = {1.5f, 1.5f, 1.5f};
+    transform_.scale = {1.1f, 1.1f, 1.0f};
     transform_.rotate = {0.0f, 0.0f, 0.0f};
-    if (currentModel_) {
-      currentModel_->GetMartial()->SetColor({1.0f, 0.0f, 0.0f, 1.0f});
-      currentModel_->SetShader("ObjectShader");
-    }
     break;
 
   case Type::BossAttack:
@@ -367,6 +409,11 @@ void Obstacle::StageUpdate(Matrix4x4 view, float scrollSpeed) {
         currentModel_ == reflectingAttackModel_.get() ||
         currentModel_ == bonusModel_.get()) {
       drawTransform.translate.y -= collisionHeight_ * 0.5f;
+    } else if (type_ == Type::BarrierItem || type_ == Type::BossItem ||
+               type_ == Type::ClearItem || type_ == Type::CameraItem) {
+      // ビルボードアイテムの浮遊ボビング演出（上下に優しく揺れる）
+      itemFloatTimer_ += 0.05f;
+      drawTransform.translate.y += std::sin(itemFloatTimer_ + transform_.translate.x * 2.0f) * 0.15f;
     }
     currentModel_->SetTransform(drawTransform);
     currentModel_->SettingWvp(view);
@@ -391,6 +438,12 @@ void Obstacle::OnHit() {
     return;
   isHit_ = true;
   isFalling_ = false;
+
+  // アイテム取得時は即座に非アクティブ（消去）にする
+  if (type_ == Type::BarrierItem || type_ == Type::BossItem ||
+      type_ == Type::ClearItem || type_ == Type::CameraItem) {
+    isActive_ = false;
+  }
 }
 
 void Obstacle::Draw(class Draw &draw) {

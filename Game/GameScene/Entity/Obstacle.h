@@ -32,7 +32,13 @@ private:
   std::unique_ptr<Model> itemModel_ = std::make_unique<Model>();     // Items / Fallback
   std::unique_ptr<Model> iceBomModel_ = std::make_unique<Model>();           // IceBom
   std::unique_ptr<Model> reflectingAttackModel_ = std::make_unique<Model>(); // ReflectingAttack
+  std::unique_ptr<Model> barrierItemModel_ = std::make_unique<Model>();      // shieldItem (Billboard)
+  std::unique_ptr<Model> bossItemModel_ = std::make_unique<Model>();         // BossItems (Billboard)
+  std::unique_ptr<Model> clearItemModel_ = std::make_unique<Model>();        // BomItem (Billboard)
+  std::unique_ptr<Model> oneLaneItemModel_ = std::make_unique<Model>();      // Onelane (Billboard)
   Model *currentModel_ = nullptr;
+
+  float itemFloatTimer_ = 0.0f; // アイテムの浮遊ボビング演出用タイマー
 
   ModelData lowModelData_;
   ModelData highModelData_;

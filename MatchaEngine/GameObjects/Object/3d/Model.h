@@ -16,6 +16,7 @@ private:
 	Node rootNode_;
 
 	std::vector<ModelSubMeshMaterial> subMeshMaterials_;
+	bool isBillboard_ = false;
 
 public:
 	
@@ -28,6 +29,9 @@ public:
 	void SettingWvp(Matrix4x4 viewMatrix, const Matrix4x4* customProjection);
 	
 	void CreateObject()override;
+
+	void SetBillboard(bool isBillboard) { isBillboard_ = isBillboard; }
+	bool GetBillboard() const { return isBillboard_; }
 
 	void SetLighting(bool isActive) {
 		ObjectBase::SetLighting(isActive);

@@ -59,7 +59,35 @@ void Model::SettingWvp(Matrix4x4 viewMatrix, const Matrix4x4* customProjection) 
 	Matrix4x4 projectionMatri = customProjection
 		? *customProjection
 		: MakePerspectiveFovMatrix(0.45f, float(kClientWidth_) / float(kClientHeight_), 0.1f, 10000.0f);
-	Matrix4x4 worldMatrixObj = MakeAffineMatrix(transform_.translate, transform_.scale, transform_.rotate);
+
+	Matrix4x4 worldMatrixObj;
+	if (isBillboard_) {
+		Matrix4x4 invView = Inverse(viewMatrix);
+		Vector3 right = Normalize(Vector3{ invView.m[0][0], invView.m[0][1], invView.m[0][2] });
+		Vector3 up    = Normalize(Vector3{ invView.m[1][0], invView.m[1][1], invView.m[1][2] });
+		Vector3 fwd   = Normalize(Vector3{ invView.m[2][0], invView.m[2][1], invView.m[2][2] });
+
+		worldMatrixObj = IdentityMatrix();
+		worldMatrixObj.m[0][0] = right.x * transform_.scale.x;
+		worldMatrixObj.m[0][1] = right.y * transform_.scale.x;
+		worldMatrixObj.m[0][2] = right.z * transform_.scale.x;
+
+		worldMatrixObj.m[1][0] = up.x * transform_.scale.y;
+		worldMatrixObj.m[1][1] = up.y * transform_.scale.y;
+		worldMatrixObj.m[1][2] = up.z * transform_.scale.y;
+
+		worldMatrixObj.m[2][0] = fwd.x * transform_.scale.z;
+		worldMatrixObj.m[2][1] = fwd.y * transform_.scale.z;
+		worldMatrixObj.m[2][2] = fwd.z * transform_.scale.z;
+
+		worldMatrixObj.m[3][0] = transform_.translate.x;
+		worldMatrixObj.m[3][1] = transform_.translate.y;
+		worldMatrixObj.m[3][2] = transform_.translate.z;
+		worldMatrixObj.m[3][3] = 1.0f;
+	} else {
+		worldMatrixObj = MakeAffineMatrix(transform_.translate, transform_.scale, transform_.rotate);
+	}
+
 	Matrix4x4 worldViewProjectionMatrixObj = MultiplyMatrix4x4(worldMatrixObj, MultiplyMatrix4x4(viewMatrix, projectionMatri));
 	Matrix4x4 worldInverseTranspose = TransposeMatrix4x4(Inverse(worldMatrixObj));
 
@@ -83,6 +111,13 @@ Mesh Model::GetMesh()
 
 AABB Model::GetWorldAABB() const
 {
+	if (isBillboard_) {
+		float maxScale = (std::max)({ transform_.scale.x, transform_.scale.y, transform_.scale.z });
+		AABB aabb;
+		aabb.min = { transform_.translate.x - maxScale, transform_.translate.y - maxScale, transform_.translate.z - maxScale };
+		aabb.max = { transform_.translate.x + maxScale, transform_.translate.y + maxScale, transform_.translate.z + maxScale };
+		return aabb;
+	}
 	Matrix4x4 worldMatrixObj = MakeAffineMatrix(transform_.translate, transform_.scale, transform_.rotate);
 	Matrix4x4 worldMatrix = MultiplyMatrix4x4(rootNode_.localMatrix, worldMatrixObj);
 	return TransformAABB(localAABB_, worldMatrix);
@@ -90,6 +125,13 @@ AABB Model::GetWorldAABB() const
 
 BoundingSphere Model::GetWorldBoundingSphere() const
 {
+	if (isBillboard_) {
+		float maxScale = (std::max)({ transform_.scale.x, transform_.scale.y, transform_.scale.z });
+		BoundingSphere sphere;
+		sphere.center = transform_.translate;
+		sphere.radius = maxScale * 1.5f;
+		return sphere;
+	}
 	Matrix4x4 worldMatrixObj = MakeAffineMatrix(transform_.translate, transform_.scale, transform_.rotate);
 	Matrix4x4 worldMatrix = MultiplyMatrix4x4(rootNode_.localMatrix, worldMatrixObj);
 	return TransformBoundingSphere(localSphere_, worldMatrix);

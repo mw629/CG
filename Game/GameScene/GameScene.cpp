@@ -541,6 +541,35 @@ void GameScene::ImGui() {
     }
 
     ImGui::Separator();
+    ImGui::Text("Spawn Billboard Items Ahead (テスト生成):");
+    auto spawnItemAhead = [this](Obstacle::Type itemType) {
+      for (int j = 0; j < stageSettings_->GetMaxObstacles(); j++) {
+        Obstacle *obs = stageSettings_->GetObstacle(j);
+        if (obs && !obs->GetIsActive()) {
+          obs->SetType(itemType);
+          obs->Spawn(player_->GetTransform().translate.x, 2.5f,
+                     player_->GetTransform().translate.z + 20.0f);
+          break;
+        }
+      }
+    };
+    if (ImGui::Button("Spawn Shield (バリア)")) {
+      spawnItemAhead(Obstacle::Type::BarrierItem);
+    }
+    ImGui::SameLine();
+    if (ImGui::Button("Spawn Boss (王冠)")) {
+      spawnItemAhead(Obstacle::Type::BossItem);
+    }
+    ImGui::SameLine();
+    if (ImGui::Button("Spawn Bomb (ボム)")) {
+      spawnItemAhead(Obstacle::Type::ClearItem);
+    }
+    ImGui::SameLine();
+    if (ImGui::Button("Spawn OneLane (1)")) {
+      spawnItemAhead(Obstacle::Type::CameraItem);
+    }
+
+    ImGui::Separator();
     ImGui::Text("Effect Triggers:");
     if (ImGui::Button("Emit Dust")) {
       effectManager_->EmitDust(player_->GetTransform().translate);
