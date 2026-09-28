@@ -128,7 +128,15 @@ const char* LanguageManager::Tr(const char* englishText) {
         {"Particle Editor", "パーティクルエディター"},
         {"Debug Info", "デバッグ情報"},
         {"Resources", "リソース"},
-        {"Logs", "ログ"}
+        {"Logs", "ログ"},
+        {"Reset Layout", "レイアウト初期化"},
+        {"Layout", "レイアウト"},
+        {"Save Layout", "レイアウトを保存"},
+        {"Restore Layout", "保存したレイアウトを復元"},
+        {"Reset to Default", "デフォルト配置に初期化"},
+        {"Layout saved.", "レイアウトを保存しました。"},
+        {"Layout restored.", "レイアウトを復元しました。"},
+        {"Layout reset to default.", "デフォルト配置に初期化しました。"}
     };
 
     auto it = dictionary.find(englishText);

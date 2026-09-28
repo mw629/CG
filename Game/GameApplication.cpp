@@ -24,11 +24,12 @@ void GameApplication::Run() {
     sceneManager.get()->Update();
 
 #ifdef _USE_IMGUI
-    // 2. シーンのImGui
-    sceneManager.get()->ImGui();
-
-    // 3. エディタ全体のImGuiおよびGameView描画（Update後の最新状態を描画）
+    // 2. エディタ全体のImGuiおよびGameView描画（メインメニューバー、DockSpace、各種エディタウィンドウ）
+    // ※DockSpaceを先に宣言しないと、シーン側ウィンドウ(Hierarchy/Inspector等)が毎フレームDockSpaceから切断される
     editorManager->Update(engine.get());
+
+    // 3. シーン固有のImGui（Hierarchy, Inspector, GameScene等）
+    sceneManager.get()->ImGui();
 
     // 4. メインシーン描画
     sceneManager.get()->Draw(*engine->draw);

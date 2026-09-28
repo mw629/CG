@@ -4,9 +4,11 @@
 #include <vector>
 #include <chrono>
 #include <windows.h>
+#include <fstream>
 
 #ifdef _USE_IMGUI
 #include "../externals/imgui/imgui.h"
+#include "../externals/imgui/imgui_internal.h"
 #include "../externals/imgui/ImGuizmo.h"
 #endif // _USE_IMGUI
 
@@ -32,6 +34,12 @@
 static std::filesystem::path s_selectedResourceDir = "resources";
 static std::unordered_map<std::string, D3D12_GPU_DESCRIPTOR_HANDLE> s_iconCache;
 static std::unique_ptr<Texture> s_editorTexture;
+static bool s_resetLayoutRequested = false;
+static bool s_saveLayoutRequested = false;
+static bool s_loadLayoutRequested = false;
+static float s_layoutNoticeTimer = 0.0f;
+static std::string s_layoutNoticeMsg = "";
+static const std::string s_layoutFilePath = "Resources/Layout/saved_layout.ini";
 
 int EditorManager::s_gizmoOp = 0;
 
@@ -330,6 +338,21 @@ void EditorManager::Update(Engine* engine)
 			ImGui::MenuItem(LanguageManager::Tr("Particle Editor"), nullptr, &showParticleViewer_);
 			ImGui::MenuItem(LanguageManager::Tr("Object Editor"), nullptr, &showModelViewer_);
 			ImGui::MenuItem(LanguageManager::Tr("Game View"), nullptr, &showGameViewWindow_);
+			ImGui::Separator();
+			if (ImGui::BeginMenu(LanguageManager::Tr("Layout"))) {
+				if (ImGui::MenuItem(LanguageManager::Tr("Save Layout"))) {
+					s_saveLayoutRequested = true;
+				}
+				bool hasSavedLayout = std::filesystem::exists(s_layoutFilePath);
+				if (ImGui::MenuItem(LanguageManager::Tr("Restore Layout"), nullptr, false, hasSavedLayout)) {
+					s_loadLayoutRequested = true;
+				}
+				ImGui::Separator();
+				if (ImGui::MenuItem(LanguageManager::Tr("Reset to Default"))) {
+					s_resetLayoutRequested = true;
+				}
+				ImGui::EndMenu();
+			}
 			ImGui::EndMenu();
 		}
 		if (ImGui::BeginMenu(LanguageManager::Tr("Settings"))) {
@@ -379,7 +402,128 @@ void EditorManager::Update(Engine* engine)
 			playSpeed_ = speedValues[speedIndex];
 		}
 
+		if (s_layoutNoticeTimer > 0.0f) {
+			s_layoutNoticeTimer -= ImGui::GetIO().DeltaTime;
+			float textWidth = ImGui::CalcTextSize(s_layoutNoticeMsg.c_str()).x;
+			ImGui::SetCursorPosX(ImGui::GetWindowWidth() - textWidth - 20.0f);
+			ImGui::TextColored(ImVec4(0.3f, 0.85f, 0.3f, 1.0f), "%s", s_layoutNoticeMsg.c_str());
+		}
+
 		ImGui::EndMainMenuBar();
+	}
+
+	if (s_loadLayoutRequested) {
+		s_loadLayoutRequested = false;
+		if (std::filesystem::exists(s_layoutFilePath)) {
+			ImGui::LoadIniSettingsFromDisk(s_layoutFilePath.c_str());
+
+			// ウィンドウの表示状態 (EditorState) を復元
+			std::ifstream in(s_layoutFilePath);
+			if (in.is_open()) {
+				std::string line;
+				bool inEditorState = false;
+				while (std::getline(in, line)) {
+					if (!line.empty() && line.back() == '\r') {
+						line.pop_back();
+					}
+					if (line == "[EditorState]") {
+						inEditorState = true;
+						continue;
+					}
+					if (inEditorState) {
+						if (line.empty() || line[0] == '[') {
+							break;
+						}
+						auto eq = line.find('=');
+						if (eq != std::string::npos) {
+							std::string key = line.substr(0, eq);
+							try {
+								int val = std::stoi(line.substr(eq + 1));
+								if (key == "showFinalWindow") showFinalWindow_ = (val != 0);
+								else if (key == "showResourcesWindow") showResourcesWindow_ = (val != 0);
+								else if (key == "showLogsWindow") showLogsWindow_ = (val != 0);
+								else if (key == "showParticleViewer") showParticleViewer_ = (val != 0);
+								else if (key == "showModelViewer") showModelViewer_ = (val != 0);
+								else if (key == "showGameViewWindow") showGameViewWindow_ = (val != 0);
+							} catch (...) {}
+						}
+					}
+				}
+			}
+
+			s_layoutNoticeMsg = LanguageManager::Tr("Layout restored.");
+			s_layoutNoticeTimer = 3.0f;
+			Log("[Editor] Layout restored from Resources/Layout/saved_layout.ini\n");
+		}
+	}
+
+	// ウィンドウ全体をDockSpaceとして設定（各ImGuiウィンドウをドッキング固定可能にする）
+	// ※すべてのImGuiウィンドウ生成より前に呼び出す必要があります
+	ImGuiID dockspace_id = ImGui::DockSpaceOverViewport(0, ImGui::GetMainViewport(), ImGuiDockNodeFlags_PassthruCentralNode);
+
+	if (s_saveLayoutRequested) {
+		s_saveLayoutRequested = false;
+		try {
+			std::filesystem::create_directories("Resources/Layout");
+			ImGui::SaveIniSettingsToDisk(s_layoutFilePath.c_str());
+
+			// ウィンドウの表示状態 (EditorState) を追記保存
+			std::ofstream out(s_layoutFilePath, std::ios::app);
+			if (out.is_open()) {
+				out << "\n[EditorState]\n";
+				out << "showFinalWindow=" << (showFinalWindow_ ? 1 : 0) << "\n";
+				out << "showResourcesWindow=" << (showResourcesWindow_ ? 1 : 0) << "\n";
+				out << "showLogsWindow=" << (showLogsWindow_ ? 1 : 0) << "\n";
+				out << "showParticleViewer=" << (showParticleViewer_ ? 1 : 0) << "\n";
+				out << "showModelViewer=" << (showModelViewer_ ? 1 : 0) << "\n";
+				out << "showGameViewWindow=" << (showGameViewWindow_ ? 1 : 0) << "\n";
+			}
+
+			s_layoutNoticeMsg = LanguageManager::Tr("Layout saved.");
+			s_layoutNoticeTimer = 3.0f;
+			Log("[Editor] Layout saved to Resources/Layout/saved_layout.ini\n");
+		} catch (...) {
+			Log("[Editor] Failed to save layout.\n");
+		}
+	}
+
+	if (s_resetLayoutRequested) {
+		s_resetLayoutRequested = false;
+		ImGui::DockBuilderRemoveNode(dockspace_id);
+		ImGui::DockBuilderAddNode(dockspace_id, ImGuiDockNodeFlags_DockSpace);
+		ImGui::DockBuilderSetNodeSize(dockspace_id, ImGui::GetMainViewport()->WorkSize);
+
+		ImGuiID dock_main_id = dockspace_id;
+		ImGuiID dock_left = ImGui::DockBuilderSplitNode(dock_main_id, ImGuiDir_Left, 0.2f, nullptr, &dock_main_id);
+		ImGuiID dock_right = ImGui::DockBuilderSplitNode(dock_main_id, ImGuiDir_Right, 0.25f, nullptr, &dock_main_id);
+		ImGuiID dock_down = ImGui::DockBuilderSplitNode(dock_main_id, ImGuiDir_Down, 0.3f, nullptr, &dock_main_id);
+
+		ImGui::DockBuilderDockWindow("Hierarchy", dock_left);
+		ImGui::DockBuilderDockWindow("ヒエラルキー", dock_left);
+		ImGui::DockBuilderDockWindow("Inspector", dock_right);
+		ImGui::DockBuilderDockWindow("インスペクター", dock_right);
+		ImGui::DockBuilderDockWindow("Debug Info", dock_right);
+		ImGui::DockBuilderDockWindow("デバッグ情報", dock_right);
+		ImGui::DockBuilderDockWindow("Resources", dock_down);
+		ImGui::DockBuilderDockWindow("リソース", dock_down);
+		ImGui::DockBuilderDockWindow("Logs", dock_down);
+		ImGui::DockBuilderDockWindow("ログ", dock_down);
+		ImGui::DockBuilderDockWindow("Scene", dock_main_id);
+		ImGui::DockBuilderDockWindow("シーン", dock_main_id);
+		ImGui::DockBuilderDockWindow("Game View", dock_main_id);
+		ImGui::DockBuilderDockWindow("GameScene", dock_main_id);
+		ImGui::DockBuilderFinish(dockspace_id);
+
+		showFinalWindow_ = true;
+		showResourcesWindow_ = true;
+		showLogsWindow_ = true;
+		showParticleViewer_ = false;
+		showModelViewer_ = false;
+		showGameViewWindow_ = true;
+
+		s_layoutNoticeMsg = LanguageManager::Tr("Layout reset to default.");
+		s_layoutNoticeTimer = 3.0f;
+		Log("[Editor] Layout reset to default.\n");
 	}
 
 	// Ctrl+S / Ctrl+L ショートカット
@@ -466,8 +610,7 @@ void EditorManager::Update(Engine* engine)
 		ImGui::EndPopup();
 	}
 
-	// ウィンドウ全体をDockSpaceとして設定（各ImGuiウィンドウをドッキング固定可能にする）
-	ImGui::DockSpaceOverViewport(0, ImGui::GetMainViewport(), ImGuiDockNodeFlags_PassthruCentralNode);
+	// 各種ウィンドウ描画
 
 	if (showFinalWindow_) {
 		ImGui::SetNextWindowSize(ImVec2(500, 400), ImGuiCond_FirstUseEver);
