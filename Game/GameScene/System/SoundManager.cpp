@@ -30,7 +30,7 @@ void SoundManager::Initialize() {
     seHandles_[static_cast<int>(SE::Crash)]        = Audio::Load("Resources/Audio/SE/SE_Crash.wav");
     seHandles_[static_cast<int>(SE::BossReflect)]  = Audio::Load("Resources/Audio/SE/SE_BossReflect.wav");
     seHandles_[static_cast<int>(SE::BossLand)]     = Audio::Load("Resources/Audio/SE/SE_BossLand.wav");
-    seHandles_[static_cast<int>(SE::BossHit)]      = Audio::Load("Resources/Audio/SE/SE_BossHit.wav");
+    seHandles_[static_cast<int>(SE::BossHit)]      = Audio::Load("Resources/Audio/SE/SE_BossDamage.wav");
     seHandles_[static_cast<int>(SE::BossDefeat)]   = Audio::Load("Resources/Audio/SE/SE_BossDefeat.wav");
     seHandles_[static_cast<int>(SE::Start)]        = Audio::Load("Resources/Audio/SE/SE_Start.wav");
 
