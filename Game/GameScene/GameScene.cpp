@@ -1,7 +1,7 @@
 #include "GameScene.h"
-#include "GameSceneManager.h"
 #include "../../Editer/EditorManager.h"
 #include "AssetManager.h"
+#include "GameSceneManager.h"
 #include "Graphics/Font/TextRenderer.h"
 #include "Graphics/Render/Draw.h"
 #include "System/SoundManager.h"
@@ -13,6 +13,7 @@
 #include <cmath>
 #include <imgui.h>
 #include <memory>
+
 
 GameScene::~GameScene() {
   EditorManager::SetGameViewDrawCallback(nullptr, nullptr);
@@ -119,8 +120,9 @@ void GameScene::ImGui() {
     }
   }
 
-  if (ImGui::CollapsingHeader("Sound Settings", ImGuiTreeNodeFlags_DefaultOpen)) {
-    auto* gsm = GameSceneManager::GetInstance();
+  if (ImGui::CollapsingHeader("Sound Settings",
+                              ImGuiTreeNodeFlags_DefaultOpen)) {
+    auto *gsm = GameSceneManager::GetInstance();
     float masterVol = gsm->GetMasterVolume();
     float bgmVol = gsm->GetBGMVolume();
     float seVol = gsm->GetSEVolume();
@@ -154,23 +156,32 @@ void GameScene::ImGui() {
     }
 
     ImGui::Text("SE Test:");
-    if (ImGui::Button("Jump")) SoundManager::GetInstance()->PlaySE(SoundManager::SE::Jump);
+    if (ImGui::Button("Jump"))
+      SoundManager::GetInstance()->PlaySE(SoundManager::SE::Jump);
     ImGui::SameLine();
-    if (ImGui::Button("Land")) SoundManager::GetInstance()->PlaySE(SoundManager::SE::Land);
+    if (ImGui::Button("Land"))
+      SoundManager::GetInstance()->PlaySE(SoundManager::SE::Land);
     ImGui::SameLine();
-    if (ImGui::Button("Slide")) SoundManager::GetInstance()->PlaySE(SoundManager::SE::Slide);
+    if (ImGui::Button("Slide"))
+      SoundManager::GetInstance()->PlaySE(SoundManager::SE::Slide);
     ImGui::SameLine();
-    if (ImGui::Button("Barrier")) SoundManager::GetInstance()->PlaySE(SoundManager::SE::Barrier);
+    if (ImGui::Button("Barrier"))
+      SoundManager::GetInstance()->PlaySE(SoundManager::SE::Barrier);
     ImGui::SameLine();
-    if (ImGui::Button("Break")) SoundManager::GetInstance()->PlaySE(SoundManager::SE::BarrierBreak);
+    if (ImGui::Button("Break"))
+      SoundManager::GetInstance()->PlaySE(SoundManager::SE::BarrierBreak);
 
-    if (ImGui::Button("BonusHit")) SoundManager::GetInstance()->PlaySE(SoundManager::SE::BonusHit);
+    if (ImGui::Button("BonusHit"))
+      SoundManager::GetInstance()->PlaySE(SoundManager::SE::BonusHit);
     ImGui::SameLine();
-    if (ImGui::Button("Reflect")) SoundManager::GetInstance()->PlaySE(SoundManager::SE::BossReflect);
+    if (ImGui::Button("Reflect"))
+      SoundManager::GetInstance()->PlaySE(SoundManager::SE::BossReflect);
     ImGui::SameLine();
-    if (ImGui::Button("Defeat")) SoundManager::GetInstance()->PlaySE(SoundManager::SE::BossDefeat);
+    if (ImGui::Button("Defeat"))
+      SoundManager::GetInstance()->PlaySE(SoundManager::SE::BossDefeat);
     ImGui::SameLine();
-    if (ImGui::Button("Crash")) SoundManager::GetInstance()->PlaySE(SoundManager::SE::Crash);
+    if (ImGui::Button("Crash"))
+      SoundManager::GetInstance()->PlaySE(SoundManager::SE::Crash);
   }
 
   if (ImGui::CollapsingHeader("Game State", ImGuiTreeNodeFlags_DefaultOpen)) {
@@ -731,7 +742,8 @@ void GameScene::Initialize() {
   gameCamera_->SetTransform(cameraTransform_);
   gameCamera_->Update();
 
-  // Game View描画コールバックの登録（3D描画とUI描画を分離してポストエフェクトが正しく適用されるようにする）
+  // Game
+  // View描画コールバックの登録（3D描画とUI描画を分離してポストエフェクトが正しく適用されるようにする）
   EditorManager::SetGameViewDrawCallback(
       [this](class Draw &draw) {
         Matrix4x4 gameViewMat = gameCamera_->GetViewMatrix();
@@ -955,8 +967,8 @@ void GameScene::Update() {
     EditorUpdate();
   }
 
-  // 雪などの常時出続けるパーティクルの更新
-  effectManager_->AlwaysUpdate(view, camera_->GetTransform().translate);
+  // 雪などの常時出続けるパーティクルの更新（snow.json の設定に従って動作）
+  effectManager_->AlwaysUpdate(view);
 }
 
 void GameScene::Draw(class Draw &draw) {
@@ -1000,7 +1012,8 @@ void GameScene::DrawHUD(class Draw &draw) {
         "つづてでとど"
         "なにぬねのはばぱひびぴふぶぷへべぺほぼぽまみむめもゃやゅゆょよらりるれ"
         "ろゎわゐゑをん"
-        "アイウエオカキクケコサシスセソタチツテトナニヌネノハヒフヘホマミムメモヤユヨラリルレロワヲンッャュョー"
+        "アイウエオカキクケコサシスセソタチツテトナニヌネノハヒフヘホマミムメモ"
+        "ヤユヨラリルレロワヲンッャュョー"
         "一二三四五六七八九十百千万到達距離スコア速度最高記録ベストゲームオーバ"
         "ーリスタートリザルトへ戻る一時停止中現在獲得順位反撃チャンス左中央右打"
         "ち返せ跳ね返しボーナス敵撃破モードシールドバリアアクティブジャンプスラ"
@@ -1191,7 +1204,8 @@ void GameScene::DrawBossHUD(class Draw &draw) {
   hpGauge += "]";
 
   char hpText[128];
-  snprintf(hpText, sizeof(hpText), "HP %s  %d / %d", hpGauge.c_str(), hp, maxHp);
+  snprintf(hpText, sizeof(hpText), "HP %s  %d / %d", hpGauge.c_str(), hp,
+           maxHp);
   const float hpSize = 22.0f;
   float hpW = tr ? tr->MeasureString(hpText, hpSize).x : 567.0f;
   float hpX = panelX + (panelW - hpW) * 0.5f;
@@ -1379,9 +1393,10 @@ void GameScene::DrawControlsGuide(class Draw &draw) {
     guideText = "[SPACE / W] ジャンプ    [S] スライド    [ESC] ポーズ  "
                 "(※1レーン固定中)";
   } else if (playingState_ == PlayingState::Boss) {
-    guideText = "【ボスの倒し方】障害物をよけて魚がいるレーンを押して敵に飛ばす！ "
-                "[1/2/3] 魚飛ばし  "
-                "[A/D] 移動  [SPACE] ジャンプ  [S] スライド  [ESC] ポーズ";
+    guideText =
+        "【ボスの倒し方】障害物をよけて魚がいるレーンを押して敵に飛ばす！ "
+        "[1/2/3] 魚飛ばし  "
+        "[A/D] 移動  [SPACE] ジャンプ  [S] スライド  [ESC] ポーズ";
   }
 
   draw.DrawMSDFString(guideText, Vector2(30.0f, 680.0f), 18.0f,
@@ -1817,7 +1832,8 @@ void GameScene::PlayingUpdate() {
               obs->SetReflected(true);
               obs->SetReflectedTarget(boss_->GetTransform().translate);
               effectManager_->EmitShockwave(obs->GetTransform().translate);
-              SoundManager::GetInstance()->PlaySE(SoundManager::SE::BossReflect);
+              SoundManager::GetInstance()->PlaySE(
+                  SoundManager::SE::BossReflect);
             }
           }
         } else if (obs->GetIsReflected()) {
