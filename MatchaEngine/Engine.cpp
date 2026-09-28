@@ -366,6 +366,8 @@ void Engine::NewFrame() {
 		textRenderer->BeginFrame();
 	}
 
+	EffectDefinition::BeginFrame();
+
 	//コマンドを積み込んで確定させる//
 	renderTextures[0]->TransitionToRenderTarget(command->GetCommandList());
 	renderTextures[0]->Clear(command->GetCommandList());

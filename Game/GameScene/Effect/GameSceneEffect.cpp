@@ -101,6 +101,9 @@ void GameSceneEffect::PlayerHitUpdate(const Matrix4x4& view)
 void GameSceneEffect::EditorUpdate(const Matrix4x4& view)
 {
 	UpdateBarrier(view, lastPlayerPos_);
+	if (snowEffect_) {
+		snowEffect_->SettingWvp(view);
+	}
 }
 
 void GameSceneEffect::AlwaysUpdate(const Matrix4x4& view, const Vector3& cameraPos)
@@ -109,8 +112,9 @@ void GameSceneEffect::AlwaysUpdate(const Matrix4x4& view, const Vector3& cameraP
 	// カメラの周囲に常に雪が降るように追従させる
 	EmitterData sd = snowEffect_->GetEmitterData();
 	sd.transform.translate.x = cameraPos.x;
-	sd.transform.translate.y = cameraPos.y + 15.0f; // カメラより少し上から降らせる
-	sd.transform.translate.z = cameraPos.z + 20.0f; // カメラの少し前を中心に
+	sd.transform.translate.y = cameraPos.y + 10.0f;
+	sd.transform.translate.z = cameraPos.z + 15.0f;
+	sd.transform.scale = { 90.0f, 24.0f, 90.0f };
 	snowEffect_->SetEmitterData(sd);
 	
 	// Editorモード等でも常に更新されるようにする

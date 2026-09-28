@@ -24,6 +24,7 @@ namespace {
 
 int EffectDefinition::DescriptorNum = 5;
 int EffectDefinition::s_wvpIndex = 0;
+uint64_t EffectDefinition::s_currentFrame = 0;
 
 void EffectDefinition::SetDevice(ID3D12Device* device)
 {
@@ -442,6 +443,20 @@ void EffectDefinition::DispatchGPUParticle(ID3D12GraphicsCommandList* commandLis
 {
 	if (!isGpuInitialized_ || !cp) return;
 
+	if (lastDispatchedFrame_ == s_currentFrame) {
+		if (gpuParticleState_ != D3D12_RESOURCE_STATE_NON_PIXEL_SHADER_RESOURCE) {
+			D3D12_RESOURCE_BARRIER barrier{};
+			barrier.Type = D3D12_RESOURCE_BARRIER_TYPE_TRANSITION;
+			barrier.Transition.pResource = gpuParticleResource_.Get();
+			barrier.Transition.StateBefore = gpuParticleState_;
+			barrier.Transition.StateAfter = D3D12_RESOURCE_STATE_NON_PIXEL_SHADER_RESOURCE;
+			commandList->ResourceBarrier(1, &barrier);
+			gpuParticleState_ = D3D12_RESOURCE_STATE_NON_PIXEL_SHADER_RESOURCE;
+		}
+		return;
+	}
+	lastDispatchedFrame_ = s_currentFrame;
+
 	gpuParticleTime_ += deltaTime;
 
 	if (gpuParticleState_ != D3D12_RESOURCE_STATE_UNORDERED_ACCESS) {
@@ -564,6 +579,13 @@ void EffectDefinition::DispatchGPUParticle(ID3D12GraphicsCommandList* commandLis
 		barrier.Type = D3D12_RESOURCE_BARRIER_TYPE_UAV;
 		barrier.UAV.pResource = gpuParticleResource_.Get();
 		commandList->ResourceBarrier(1, &barrier);
+	}
+
+	if (emitterBoxData_) {
+		emitterBoxData_->emit = 0;
+	}
+	if (emitterSphereData_) {
+		emitterSphereData_->emit = 0;
 	}
 
 	if (gpuParticleState_ != D3D12_RESOURCE_STATE_NON_PIXEL_SHADER_RESOURCE) {

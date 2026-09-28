@@ -230,6 +230,12 @@ public:
 	void Update(Matrix4x4 viewMatrix, Vector3 scale);
 
 	void EditorUpdate(Matrix4x4 viewMatrix);
+	void SettingWvp(const Matrix4x4& viewMatrix) {
+		if (effectDefinition_) {
+			effectDefinition_->SettingWvp(viewMatrix);
+		}
+	}
+	EffectDefinition* GetEffectDefinition() const { return effectDefinition_.get(); }
 
 	void Draw(class Draw& draw);
 	

@@ -838,6 +838,7 @@ void Emitter::Update(Matrix4x4 viewMatrix) {
 		if (freq <= 0.0f || freq <= *pFreqTime) {
 			Emit();
 			emitFrame = true;
+			manualEmitTriggered_ = false;
 			if (freq > 0.0f) *pFreqTime -= freq;
 		}
 	}
@@ -947,6 +948,7 @@ void Emitter::Update(Matrix4x4 viewMatrix, std::function<EffectDefinitionData(co
 		if (freq <= 0.0f || freq <= *pFreqTime) {
 			Emit();
 			emitFrame = true;
+			manualEmitTriggered_ = false;
 			if (freq > 0.0f) *pFreqTime -= freq;
 		}
 	}
@@ -1170,8 +1172,10 @@ void Emitter::Emit()
 	case EmitterType::Box:
 	default: break;
 	}
-	for (uint32_t i = 0; i < count; ++i) {
-		effectDefinitionData_.push_back(MakeNewParticle());
+	if (!GetUseGpuParticle()) {
+		for (uint32_t i = 0; i < count; ++i) {
+			effectDefinitionData_.push_back(MakeNewParticle());
+		}
 	}
 	manualEmitTriggered_ = true;
 }

@@ -155,9 +155,12 @@ public:
 	static void SetDescriptorHeap(DescriptorHeap* descriptorHeap);
 	static void SetGpuProfiler(class GpuProfiler* profiler) { gpuProfiler_ = profiler; }
 	static void SetWvpIndex(int index) { s_wvpIndex = index; }
+	static void BeginFrame() { s_currentFrame++; }
 
 private:
 	static class GpuProfiler* gpuProfiler_;
+	static uint64_t s_currentFrame;
+	uint64_t lastDispatchedFrame_ = 0;
 
 public:
 
