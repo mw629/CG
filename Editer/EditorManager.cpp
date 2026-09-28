@@ -204,6 +204,7 @@ EditorManager::EditorCallback EditorManager::s_saveCallback_ = nullptr;
 EditorManager::EditorCallback EditorManager::s_loadCallback_ = nullptr;
 EditorManager::FileDropCallback EditorManager::s_fileDropCallback_ = nullptr;
 EditorManager::GameViewDrawCallback EditorManager::s_gameViewDrawCallback_ = nullptr;
+EditorManager::GameViewUIDrawCallback EditorManager::s_gameViewUIDrawCallback_ = nullptr;
 std::string EditorManager::s_currentFileName_ = "scene";
 
 EditorManager::~EditorManager() = default;
@@ -1262,10 +1263,18 @@ void EditorManager::Update(Engine* engine)
 	// Game View Window
 	if (showGameViewWindow_) {
 		if (!isGameViewInitialized_) {
-			gameViewRenderTexture_ = std::make_unique<RenderTexture>();
+			for (int i = 0; i < 2; ++i) {
+				gameViewRenderTextures_[i] = std::make_unique<RenderTexture>();
+				gameViewRenderTextures_[i]->Initialize(
+					engine->graphics->GetDevice(), 1280, 720,
+					engine->descriptorHeap->GetSrvDescriptorHeap(),
+					engine->descriptorHeap->GetDescriptorSizeSRV());
+			}
 			gameViewDepthStencil_ = std::make_unique<DepthStencil>();
-			gameViewRenderTexture_->Initialize(engine->graphics->GetDevice(), 1280, 720, engine->descriptorHeap->GetSrvDescriptorHeap(), engine->descriptorHeap->GetDescriptorSizeSRV());
-			gameViewDepthStencil_->CreateDepthStencil(engine->graphics->GetDevice(), 1280, 720);
+			gameViewDepthStencil_->CreateDepthStencil(
+				engine->graphics->GetDevice(), 1280, 720,
+				engine->descriptorHeap->GetSrvDescriptorHeap(),
+				engine->descriptorHeap->GetDescriptorSizeSRV());
 			isGameViewInitialized_ = true;
 		}
 
@@ -1290,15 +1299,16 @@ void EditorManager::Update(Engine* engine)
 			float offsetY = (availSize.y - imageSize.y) * 0.5f;
 			ImGui::SetCursorPos(ImVec2(cursorStart.x + offsetX, cursorStart.y + offsetY));
 
-			ImGui::Image((ImTextureID)gameViewRenderTexture_->GetSrvHandleGPU().ptr, imageSize);
+			ImGui::Image((ImTextureID)gameViewRenderTextures_[gameViewFinalRTIndex_]->GetSrvHandleGPU().ptr, imageSize);
 		}
 		ImGui::End();
 
 		// Draw into Game View Render Texture
 		auto cmdList = engine->command->GetCommandList();
-		gameViewRenderTexture_->TransitionToRenderTarget(cmdList);
-		gameViewRenderTexture_->Clear(cmdList);
-		D3D12_CPU_DESCRIPTOR_HANDLE rtvHandle = gameViewRenderTexture_->GetRtvHandle();
+		gameViewRenderTextures_[0]->TransitionToRenderTarget(cmdList);
+		gameViewRenderTextures_[0]->Clear(cmdList);
+		gameViewDepthStencil_->TransitionToDepthWrite(cmdList);
+		D3D12_CPU_DESCRIPTOR_HANDLE rtvHandle = gameViewRenderTextures_[0]->GetRtvHandle();
 		gameViewDepthStencil_->SetDSV(cmdList, &rtvHandle);
 
 		D3D12_VIEWPORT vp = { 0.0f, 0.0f, 1280.0f, 720.0f, 0.0f, 1.0f };
@@ -1306,17 +1316,73 @@ void EditorManager::Update(Engine* engine)
 		cmdList->RSSetViewports(1, &vp);
 		cmdList->RSSetScissorRects(1, &scissor);
 
+		ID3D12DescriptorHeap* descriptorHeaps[] = { engine->descriptorHeap->GetSrvDescriptorHeap() };
+		cmdList->SetDescriptorHeaps(1, descriptorHeaps);
+
 		if (s_gameViewDrawCallback_) {
 			s_gameViewDrawCallback_(*engine->draw);
-		}
 
-		gameViewRenderTexture_->TransitionToShaderResource(cmdList);
+			gameViewRenderTextures_[0]->TransitionToShaderResource(cmdList);
+			gameViewDepthStencil_->TransitionToShaderResource(cmdList);
+
+			// ポストエフェクト適用 (Ping-pong 描画)
+			int currentRT = 0;
+			int nextRT = 1;
+
+			const auto& postEffects = engine->GetPostEffects();
+			for (auto& effect : postEffects) {
+				if (effect->IsNormalEffect()) continue;
+
+				gameViewRenderTextures_[nextRT]->TransitionToRenderTarget(cmdList);
+				D3D12_CPU_DESCRIPTOR_HANDLE nextRtvHandle = gameViewRenderTextures_[nextRT]->GetRtvHandle();
+				cmdList->OMSetRenderTargets(1, &nextRtvHandle, false, nullptr);
+
+				cmdList->RSSetViewports(1, &vp);
+				cmdList->RSSetScissorRects(1, &scissor);
+
+				cmdList->SetDescriptorHeaps(1, descriptorHeaps);
+
+				engine->draw->DrawPostEffect(
+					gameViewRenderTextures_[currentRT]->GetSrvHandleGPU(),
+					effect->GetActiveShaderName(),
+					effect.get(),
+					gameViewDepthStencil_->GetSrvHandleGPU());
+
+				gameViewRenderTextures_[nextRT]->TransitionToShaderResource(cmdList);
+
+				std::swap(currentRT, nextRT);
+			}
+
+			// Game View UI (HUD) 描画（ポストエフェクト後に描画することでUIが汚れないようにする）
+			if (s_gameViewUIDrawCallback_) {
+				gameViewRenderTextures_[currentRT]->TransitionToRenderTarget(cmdList);
+				gameViewDepthStencil_->TransitionToDepthWrite(cmdList);
+				D3D12_CPU_DESCRIPTOR_HANDLE uiRtvHandle = gameViewRenderTextures_[currentRT]->GetRtvHandle();
+				gameViewDepthStencil_->SetDSV(cmdList, &uiRtvHandle);
+
+				cmdList->RSSetViewports(1, &vp);
+				cmdList->RSSetScissorRects(1, &scissor);
+
+				cmdList->SetDescriptorHeaps(1, descriptorHeaps);
+
+				s_gameViewUIDrawCallback_(*engine->draw);
+
+				gameViewRenderTextures_[currentRT]->TransitionToShaderResource(cmdList);
+				gameViewDepthStencil_->TransitionToShaderResource(cmdList);
+			}
+
+			gameViewFinalRTIndex_ = currentRT;
+		} else {
+			gameViewRenderTextures_[0]->TransitionToShaderResource(cmdList);
+			gameViewFinalRTIndex_ = 0;
+		}
 
 		// Restore engine's main render target
 		D3D12_CPU_DESCRIPTOR_HANDLE mainRtv = engine->GetRenderTexture()->GetRtvHandle();
 		engine->depthStencil->SetDSV(cmdList, &mainRtv);
 		cmdList->RSSetViewports(1, engine->viewportScissor->GetViewport());
 		cmdList->RSSetScissorRects(1, engine->viewportScissor->GetScissorRect());
+		cmdList->SetDescriptorHeaps(1, descriptorHeaps);
 	}
 
 #endif

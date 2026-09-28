@@ -27,6 +27,7 @@ public:
 	using FileDropCallback = std::function<void(const std::string&)>;
 	// Game View描画コールバック型
 	using GameViewDrawCallback = std::function<void(Draw&)>;
+	using GameViewUIDrawCallback = std::function<void(Draw&)>;
 
 private:
 	static bool isPlaying_;
@@ -36,6 +37,7 @@ private:
 	static EditorCallback s_loadCallback_;
 	static FileDropCallback s_fileDropCallback_;
 	static GameViewDrawCallback s_gameViewDrawCallback_;
+	static GameViewUIDrawCallback s_gameViewUIDrawCallback_;
 	static std::string s_currentFileName_;
 	
 	bool showFinalWindow_ = true;
@@ -54,9 +56,10 @@ private:
 	bool showGridInViewer_ = true;
 	bool showEmitterCube_ = true;
 
-	std::unique_ptr<RenderTexture> gameViewRenderTexture_;
+	std::unique_ptr<RenderTexture> gameViewRenderTextures_[2];
 	std::unique_ptr<DepthStencil> gameViewDepthStencil_;
 	bool isGameViewInitialized_ = false;
+	int gameViewFinalRTIndex_ = 0;
 
 	bool showModelViewer_ = false;
 	std::unique_ptr<RenderTexture> modelRenderTexture_;
@@ -84,7 +87,13 @@ public:
 	static void SetLoadCallback(EditorCallback cb) { s_loadCallback_ = cb; }
 	static void SetFileDropCallback(FileDropCallback cb) { s_fileDropCallback_ = cb; }
 
-	static void SetGameViewDrawCallback(GameViewDrawCallback cb) { s_gameViewDrawCallback_ = cb; }
+	static void SetGameViewDrawCallback(GameViewDrawCallback cb, GameViewUIDrawCallback uiCb = nullptr) {
+		s_gameViewDrawCallback_ = cb;
+		s_gameViewUIDrawCallback_ = uiCb;
+	}
+	static void SetGameViewUIDrawCallback(GameViewUIDrawCallback uiCb) {
+		s_gameViewUIDrawCallback_ = uiCb;
+	}
 
 	static void SetCurrentFileName(const std::string& name) { s_currentFileName_ = name; }
 	static std::string GetCurrentFileName() { return s_currentFileName_; }

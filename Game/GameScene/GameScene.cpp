@@ -15,7 +15,7 @@
 #include <memory>
 
 GameScene::~GameScene() {
-  EditorManager::SetGameViewDrawCallback(nullptr);
+  EditorManager::SetGameViewDrawCallback(nullptr, nullptr);
   EditorManager::SetSaveCallback(nullptr);
   EditorManager::SetLoadCallback(nullptr);
   EditorManager::SetFileDropCallback(nullptr);
@@ -730,40 +730,42 @@ void GameScene::Initialize() {
   gameCamera_->SetTransform(cameraTransform_);
   gameCamera_->Update();
 
-  // Game View描画コールバックの登録
-  EditorManager::SetGameViewDrawCallback([this](class Draw &draw) {
-    Matrix4x4 gameViewMat = gameCamera_->GetViewMatrix();
+  // Game View描画コールバックの登録（3D描画とUI描画を分離してポストエフェクトが正しく適用されるようにする）
+  EditorManager::SetGameViewDrawCallback(
+      [this](class Draw &draw) {
+        Matrix4x4 gameViewMat = gameCamera_->GetViewMatrix();
 
-    // 一時的にSkyBoxをGameCameraの位置へ移動
-    Transform originalSkyBoxT = skyBox_->GetTransform();
-    Transform gameSkyBoxT = originalSkyBoxT;
-    gameSkyBoxT.translate = gameCamera_->GetTransform().translate;
-    skyBox_->SetTransform(gameSkyBoxT);
+        // 一時的にSkyBoxをGameCameraの位置へ移動
+        Transform originalSkyBoxT = skyBox_->GetTransform();
+        Transform gameSkyBoxT = originalSkyBoxT;
+        gameSkyBoxT.translate = gameCamera_->GetTransform().translate;
+        skyBox_->SetTransform(gameSkyBoxT);
 
-    // ゲームカメラのView行列でオブジェクトのWVPを更新 (speedMultiplier=0.0f
-    // でアニメーションは進めない)
-    ObjectBase::SetWvpIndex(1);
-    EffectDefinition::SetWvpIndex(1);
+        // ゲームカメラのView行列でオブジェクトのWVPを更新 (speedMultiplier=0.0f
+        // でアニメーションは進めない)
+        ObjectBase::SetWvpIndex(1);
+        EffectDefinition::SetWvpIndex(1);
 
-    gameObjectManager_->UpdateAll(gameViewMat, 0.0f);
-    stageSettings_->EditorUpdate(gameViewMat);
-    effectManager_->EditorUpdate(gameViewMat);
+        gameObjectManager_->UpdateAll(gameViewMat, 0.0f);
+        stageSettings_->EditorUpdate(gameViewMat);
+        effectManager_->EditorUpdate(gameViewMat);
 
-    draw.SetCamera(gameCamera_.get());
-    draw.SetEnvironmentTexture(skyBoxTexture_);
-    gameObjectManager_->DrawAll(draw);
-    stageSettings_->Draw(draw);
-    effectManager_->Draw(draw);
+        draw.SetCamera(gameCamera_.get());
+        draw.SetEnvironmentTexture(skyBoxTexture_);
+        gameObjectManager_->DrawAll(draw);
+        stageSettings_->Draw(draw);
+        effectManager_->Draw(draw);
 
-    // Game View 内でも HUD (動的MSDFテキスト) を描画
-    DrawHUD(draw);
+        // SkyBoxの位置を元に戻す
+        skyBox_->SetTransform(originalSkyBoxT);
 
-    // SkyBoxの位置を元に戻す
-    skyBox_->SetTransform(originalSkyBoxT);
-
-    ObjectBase::SetWvpIndex(0);
-    EffectDefinition::SetWvpIndex(0);
-  });
+        ObjectBase::SetWvpIndex(0);
+        EffectDefinition::SetWvpIndex(0);
+      },
+      [this](class Draw &draw) {
+        // Game View 内でも ポストエフェクト後に HUD (動的MSDFテキスト) を描画
+        DrawHUD(draw);
+      });
 
   // スカイボックスの初期化
   skyBoxTexture_ = texture_.get()->CreateTexture("Resources/DDS/SnowWorld.dds");
