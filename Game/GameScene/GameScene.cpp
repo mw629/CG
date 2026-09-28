@@ -14,7 +14,6 @@
 #include <imgui.h>
 #include <memory>
 
-
 GameScene::~GameScene() {
   EditorManager::SetGameViewDrawCallback(nullptr, nullptr);
   EditorManager::SetSaveCallback(nullptr);

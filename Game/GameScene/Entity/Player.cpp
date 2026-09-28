@@ -16,7 +16,8 @@ void Player::UpdateDrawTransform(float speedMultiplier) {
   (void)speedMultiplier;
   Transform drawTransform = transform_;
 
-  // しゃがみ時のモデルのサイズ変化（潰れ）を防ぐため、モデルスケールは常に modelOffset_.scale を維持
+  // しゃがみ時のモデルのサイズ変化（潰れ）を防ぐため、モデルスケールは常に
+  // modelOffset_.scale を維持
   drawTransform.scale = modelOffset_.scale;
 
   // 平行移動オフセットの適用
@@ -325,8 +326,10 @@ void Player::ImGuiInnerComponents() {
   ImGui::Separator();
   ImGui::Text("Penguin Model Settings");
   ImGui::DragFloat3("Model Scale", &modelOffset_.scale.x, 0.5f, 10.0f, 500.0f);
-  ImGui::DragFloat3("Model Rotate", &modelOffset_.rotate.x, 0.02f, -3.14f, 3.14f);
-  ImGui::DragFloat3("Model Offset", &modelOffset_.translate.x, 0.02f, -5.0f, 5.0f);
+  ImGui::DragFloat3("Model Rotate", &modelOffset_.rotate.x, 0.02f, -3.14f,
+                    3.14f);
+  ImGui::DragFloat3("Model Offset", &modelOffset_.translate.x, 0.02f, -5.0f,
+                    5.0f);
   ImGui::Checkbox("Draw Axe", &isDrawAxe_);
 
   ImGui::Separator();

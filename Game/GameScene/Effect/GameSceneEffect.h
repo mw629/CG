@@ -4,7 +4,6 @@
 #include <Engine.h>
 #include <memory>
 
-
 enum class BarrierEffectState { Inactive, Deploying, Active, Breaking };
 
 class GameSceneEffect {

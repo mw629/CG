@@ -83,7 +83,6 @@ void GameSceneEffect::Initialize() {
         3.14159265f /
         2.0f; // 盾（縦）になっているリングを90度回転させて地面と平行（横）にする
   };
-
 }
 
 void GameSceneEffect::PlayingUpdate(const Matrix4x4 &view,
