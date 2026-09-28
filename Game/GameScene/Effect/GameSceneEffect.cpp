@@ -56,11 +56,12 @@ void GameSceneEffect::Initialize() {
 
   dustEffect_->Initialize();
   dustEffect_->LoadFromJson("Dustparticle");
-  dustEffect_->SetBlend(BlendMode::kBlendModeNormal); // アルファブレンドを強制
   dustEffect_->name_ = "Dust Effect";
   dustEffect_->generatorBehavior = nullptr; // JSONの設定に完全に従う
   dustEffect_->SetStop(
       true); // 自動発生を停止（スクリプトから手動でのみEmitする）
+  strncpy_s(dustEffect_->saveFileName_, sizeof(dustEffect_->saveFileName_),
+            "Dustparticle", _TRUNCATE);
 
   // ボーナスヒット時のショックウェーブ（Ring）の初期化
   EmitterData shockwaveEmitter;
@@ -88,20 +89,47 @@ void GameSceneEffect::Initialize() {
 void GameSceneEffect::PlayingUpdate(const Matrix4x4 &view,
                                     const Vector3 &playerPos) {
   UpdateBarrier(view, playerPos);
+  if (dustEffect_) {
+    dustEffect_->Update(view);
+  }
+  if (hitEffect_) {
+    hitEffect_->Update(view);
+  }
+  if (shockwaveEffect_) {
+    shockwaveEffect_->Update(view);
+  }
 }
 
 void GameSceneEffect::PlayerHitUpdate(const Matrix4x4 &view) {
   UpdateBarrier(view, lastPlayerPos_);
+  if (dustEffect_) {
+    dustEffect_->Update(view);
+  }
+  if (hitEffect_) {
+    hitEffect_->Update(view);
+  }
+  if (shockwaveEffect_) {
+    shockwaveEffect_->Update(view);
+  }
 }
 
 void GameSceneEffect::EditorUpdate(const Matrix4x4 &view) {
   UpdateBarrier(view, lastPlayerPos_);
+  if (dustEffect_) {
+    dustEffect_->SettingWvp(view);
+  }
+  if (hitEffect_) {
+    hitEffect_->SettingWvp(view);
+  }
+  if (shockwaveEffect_) {
+    shockwaveEffect_->SettingWvp(view);
+  }
 }
 
 void GameSceneEffect::EmitDust(const Vector3 &playerPos) {
   EmitterData ed = dustEffect_->GetEmitterData();
   ed.transform.translate = playerPos;
-  ed.transform.translate.y += 0.5f; // さらに高く調整
+  ed.transform.translate.y -= 0.8f; // ペンギンの足元（地面Y=2.0付近）に発生させる
   dustEffect_->SetEmitterData(ed);
   dustEffect_->Emit();
 }
@@ -243,9 +271,15 @@ void GameSceneEffect::UpdateBarrier(const Matrix4x4 &view,
 }
 
 void GameSceneEffect::Draw(class Draw &draw) {
-  // hitEffect_->Draw(draw);
-  // shockwaveEffect_->Draw(draw);
-  // dustEffect_->Draw(draw);
+  if (dustEffect_) {
+    dustEffect_->Draw(draw);
+  }
+  if (hitEffect_) {
+    hitEffect_->Draw(draw);
+  }
+  if (shockwaveEffect_) {
+    shockwaveEffect_->Draw(draw);
+  }
 
   // バリア描画
   if (barrier_ && barrierState_ != BarrierEffectState::Inactive) {
@@ -309,9 +343,12 @@ void GameSceneEffect::ImGui() {
   }
 
   if (ImGui::CollapsingHeader("Particles")) {
-    // if (hitEffect_) hitEffect_->ImGui();
-    // if (dustEffect_) dustEffect_->ImGui();
-    // if (shockwaveEffect_) shockwaveEffect_->ImGui();
+    if (dustEffect_)
+      dustEffect_->ImGui();
+    if (hitEffect_)
+      hitEffect_->ImGui();
+    if (shockwaveEffect_)
+      shockwaveEffect_->ImGui();
   }
 #endif
 }

@@ -1,0 +1,91 @@
+{
+    "emitter": {
+        "type": 0,
+        "transform": {
+            "translate": [0.0, 0.0, 0.0],
+            "rotate": [0.0, 0.0, 0.0],
+            "scale": [0.4, 0.2, 0.4]
+        },
+        "count": 1,
+        "frequency": 9999.0,
+        "sphere": {
+            "translate": [0.0, 0.0, 0.0],
+            "radius": 0.5,
+            "count": 1,
+            "frequency": 9999.0
+        },
+        "circle": {
+            "translate": [0.0, 0.0, 0.0],
+            "rotate": [0.0, 0.0, 0.0],
+            "outerRadius": 0.5,
+            "innerRadius": 0.0,
+            "radialVelocity": 0.0,
+            "count": 1,
+            "frequency": 9999.0
+        },
+        "cone": {
+            "translate": [0.0, 0.0, 0.0],
+            "rotate": [0.0, 0.0, 0.0],
+            "radius": 0.2,
+            "angle": 0.5,
+            "speed": 1.0,
+            "count": 1,
+            "frequency": 9999.0
+        }
+    },
+    "spawn": {
+        "isLoop": false,
+        "burstCount": 1
+    },
+    "particle": {
+        "transform": {
+            "translate": [0.0, 0.0, 0.0],
+            "scale": [0.3, 0.3, 0.3],
+            "rotate": [0.0, 0.0, 0.0]
+        },
+        "color": [0.95, 0.95, 1.0, 0.75],
+        "lifeTime": 0.35,
+        "alignToVelocity": false
+    },
+    "scaleOverLifetime": {
+        "enable": true,
+        "curveType": 0,
+        "startScale": [0.25, 0.25, 0.25],
+        "endScale": [0.65, 0.65, 0.65]
+    },
+    "colorOverLifetime": {
+        "enable": true,
+        "startColor": [0.95, 0.95, 1.0, 0.75],
+        "endColor": [0.85, 0.9, 0.98, 0.0]
+    },
+    "movement": {
+        "baseVelocity": [0.0, 0.018, -0.04],
+        "velocityVariance": [0.025, 0.012, 0.02],
+        "radialSpeed": 0.0,
+        "radialSpeedVariance": 0.0,
+        "acceleration": [0.0, -0.0008, 0.0],
+        "sizeVariance": [0.05, 0.05, 0.05],
+        "sizeDelta": [1.0, 1.0, 1.0]
+    },
+    "field": {
+        "type": 0,
+        "strength": 0.0,
+        "position": [0.0, 0.0, 0.0]
+    },
+    "visual": {
+        "texturePath": "Resources/Texture/circle.png",
+        "shape": 0,
+        "blendMode": 1,
+        "isBillboard": true,
+        "shader": "ParticleShader",
+        "useGpuParticle": false,
+        "cylinderDivide": 32,
+        "cylinderTopRadius": 1.0,
+        "cylinderBottomRadius": 1.0,
+        "cylinderHeight": 3.0,
+        "ringDivide": 32,
+        "ringOuterRadius": 1.0,
+        "ringInnerRadius": 0.8,
+        "cubeSize": [1.0, 1.0, 1.0]
+    }
+}
