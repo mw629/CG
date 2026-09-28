@@ -8,7 +8,6 @@ GameSceneEffect::GameSceneEffect() {
   hitEffect_ = std::make_unique<Emitter>();
   dustEffect_ = std::make_unique<Emitter>();
   shockwaveEffect_ = std::make_unique<Emitter>();
-  snowEffect_ = std::make_unique<Emitter>();
   barrier_ = std::make_unique<HexBarrier>();
 }
 
@@ -85,11 +84,6 @@ void GameSceneEffect::Initialize() {
         2.0f; // 盾（縦）になっているリングを90度回転させて地面と平行（横）にする
   };
 
-  // 雪エフェクト（GPUパーティクル）の初期化
-  snowEffect_->Initialize();
-  snowEffect_->LoadFromJson("snow");
-  snowEffect_->name_ = "Snow Effect";
-  snowEffect_->generatorBehavior = nullptr; // JSONの設定に従う
 }
 
 void GameSceneEffect::PlayingUpdate(const Matrix4x4 &view,
@@ -103,14 +97,6 @@ void GameSceneEffect::PlayerHitUpdate(const Matrix4x4 &view) {
 
 void GameSceneEffect::EditorUpdate(const Matrix4x4 &view) {
   UpdateBarrier(view, lastPlayerPos_);
-  if (snowEffect_) {
-    snowEffect_->SettingWvp(view);
-  }
-}
-
-void GameSceneEffect::AlwaysUpdate(const Matrix4x4 &view) {
-  // 雪エフェクトの更新（snow.json の設定に従って常時更新）
-  snowEffect_->Update(view);
 }
 
 void GameSceneEffect::EmitDust(const Vector3 &playerPos) {
@@ -261,7 +247,6 @@ void GameSceneEffect::Draw(class Draw &draw) {
   // hitEffect_->Draw(draw);
   // shockwaveEffect_->Draw(draw);
   // dustEffect_->Draw(draw);
-  snowEffect_->Draw(draw);
 
   // バリア描画
   if (barrier_ && barrierState_ != BarrierEffectState::Inactive) {
@@ -328,8 +313,6 @@ void GameSceneEffect::ImGui() {
     // if (hitEffect_) hitEffect_->ImGui();
     // if (dustEffect_) dustEffect_->ImGui();
     // if (shockwaveEffect_) shockwaveEffect_->ImGui();
-    if (snowEffect_)
-      snowEffect_->ImGui();
   }
 #endif
 }

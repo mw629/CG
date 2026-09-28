@@ -17,7 +17,6 @@ public:
   void PlayingUpdate(const Matrix4x4 &view, const Vector3 &playerPos);
   void PlayerHitUpdate(const Matrix4x4 &view);
   void EditorUpdate(const Matrix4x4 &view);
-  void AlwaysUpdate(const Matrix4x4 &view);
 
   void EmitDust(const Vector3 &playerPos);
   void EmitShockwave(const Vector3 &playerPos);
@@ -40,7 +39,6 @@ private:
   std::unique_ptr<Emitter> hitEffect_;
   std::unique_ptr<Emitter> dustEffect_;
   std::unique_ptr<Emitter> shockwaveEffect_;
-  std::unique_ptr<Emitter> snowEffect_;
 
   // バリア
   std::unique_ptr<HexBarrier> barrier_;

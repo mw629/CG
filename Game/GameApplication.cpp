@@ -20,15 +20,21 @@ void GameApplication::Run() {
 
     sceneManager.get()->PreUpdate();
 
-    editorManager->Update(engine.get());
+    // 1. まずシーンの更新を実行（入力、オブジェクト・パーティクルの更新、emitフラグ確定）
+    sceneManager.get()->Update();
 
 #ifdef _USE_IMGUI
-    // エディタモード: Play/Stop問わずInitialize・Drawは常に通す
-    // Play状態でのみUpdate（ゲームロジック）を実行
-    sceneManager.get()->Run(*engine->draw);
+    // 2. シーンのImGui
+    sceneManager.get()->ImGui();
+
+    // 3. エディタ全体のImGuiおよびGameView描画（Update後の最新状態を描画）
+    editorManager->Update(engine.get());
+
+    // 4. メインシーン描画
+    sceneManager.get()->Draw(*engine->draw);
 #else
-    // Release/Developmentでは常に実行
-    sceneManager.get()->Run(*engine->draw);
+    // Release/Developmentでは直接シーンを描画
+    sceneManager.get()->Draw(*engine->draw);
 #endif
 
     engine.get()->EndFrame(

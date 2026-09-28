@@ -966,9 +966,6 @@ void GameScene::Update() {
   } else if (gameState_ == GameState::Editor) {
     EditorUpdate();
   }
-
-  // 雪などの常時出続けるパーティクルの更新（snow.json の設定に従って動作）
-  effectManager_->AlwaysUpdate(view);
 }
 
 void GameScene::Draw(class Draw &draw) {
