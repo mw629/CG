@@ -9,6 +9,7 @@
 #include "PostEffect.h"
 #include "Texture.h"
 #include <cassert>
+#include <unordered_set>
 
 
 void Draw::SetCBV(ShaderName shader, BlendMode blend, const std::string &name,
@@ -428,11 +429,11 @@ void Draw::DrawParticle(EffectDefinition *particle) {
     particle->DispatchGPUParticle(commandList_,
                                   graphicsPipelineState_->GetComputePipeline());
 
-    static bool s_gpuParticleLogged = false;
-    if (!s_gpuParticleLogged) {
-      s_gpuParticleLogged = true;
-      LOG_INFO(std::format("DrawParticle: GPU Particle drawing. shader='{}', blend={}, vertexSize={}",
-                           particle->GetShader(), static_cast<int>(particle->GetBlend()), particle->GetVertexSize()));
+    static std::unordered_set<std::string> s_gpuLoggedNames;
+    if (s_gpuLoggedNames.find(particle->name_) == s_gpuLoggedNames.end()) {
+      s_gpuLoggedNames.insert(particle->name_);
+      LOG_INFO(std::format("DrawParticle: GPU Particle drawing. name='{}', shader='{}', blend={}, vertexSize={}",
+                           particle->name_, particle->GetShader(), static_cast<int>(particle->GetBlend()), particle->GetVertexSize()));
     }
 
     preDraw(particle->GetShader(), particle->GetBlend(), kCullModeNone);

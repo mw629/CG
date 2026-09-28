@@ -559,69 +559,78 @@ void EffectDefinition::DispatchGPUParticle(
   }
 
   if (cp->GetPipelineState(emitShader)) {
-    commandList->SetComputeRootSignature(cp->GetRootSignature(emitShader));
-    commandList->SetPipelineState(cp->GetPipelineState(emitShader));
-
-    UINT count = 1;
+    bool shouldEmit = false;
+    UINT count = 0;
     if (isBoxEmitter_) {
       if (emitterBoxData_) {
         emitterBoxData_->frequencyTime = gpuParticleTime_;
         count = static_cast<UINT>(emitterBoxData_->count);
-      }
-      UINT pEmitter = cp->GetRootParameterIndex(emitShader, "gEmitterBox");
-      if (pEmitter != static_cast<UINT>(-1)) {
-        commandList->SetComputeRootConstantBufferView(
-            pEmitter, emitterBoxResource_->GetGPUVirtualAddress());
+        shouldEmit = (emitterBoxData_->emit != 0 && count > 0);
       }
     } else {
       if (emitterSphereData_) {
         emitterSphereData_->frequencyTime = gpuParticleTime_;
         count = static_cast<UINT>(emitterSphereData_->count);
+        shouldEmit = (emitterSphereData_->emit != 0 && count > 0);
       }
-      UINT pEmitter = cp->GetRootParameterIndex(emitShader, "gEmitterSphere");
-      if (pEmitter != static_cast<UINT>(-1)) {
+    }
+
+    if (shouldEmit) {
+      commandList->SetComputeRootSignature(cp->GetRootSignature(emitShader));
+      commandList->SetPipelineState(cp->GetPipelineState(emitShader));
+
+      if (isBoxEmitter_) {
+        UINT pEmitter = cp->GetRootParameterIndex(emitShader, "gEmitterBox");
+        if (pEmitter != static_cast<UINT>(-1)) {
+          commandList->SetComputeRootConstantBufferView(
+              pEmitter, emitterBoxResource_->GetGPUVirtualAddress());
+        }
+      } else {
+        UINT pEmitter = cp->GetRootParameterIndex(emitShader, "gEmitterSphere");
+        if (pEmitter != static_cast<UINT>(-1)) {
+          commandList->SetComputeRootConstantBufferView(
+              pEmitter, emitterSphereResource_->GetGPUVirtualAddress());
+        }
+      }
+
+      if (perFrameData_) {
+        perFrameData_->deltaTime = deltaTime;
+        perFrameData_->time = gpuParticleTime_;
+      }
+
+      UINT pPerFrame = cp->GetRootParameterIndex(emitShader, "gPerFrame");
+      if (pPerFrame != static_cast<UINT>(-1)) {
         commandList->SetComputeRootConstantBufferView(
-            pEmitter, emitterSphereResource_->GetGPUVirtualAddress());
+            pPerFrame, perFrameResource_->GetGPUVirtualAddress());
       }
+
+      UINT pParticles = cp->GetRootParameterIndex(emitShader, "gParticles");
+      if (pParticles != static_cast<UINT>(-1)) {
+        commandList->SetComputeRootDescriptorTable(pParticles,
+                                                   gpuParticleUavHandleGPU_);
+      }
+
+      UINT pCounter = cp->GetRootParameterIndex(emitShader, "gFreeCounter");
+      if (pCounter != static_cast<UINT>(-1)) {
+        commandList->SetComputeRootDescriptorTable(pCounter,
+                                                   gpuFreeCounterUavHandleGPU_);
+      }
+
+      UINT emitThreadGroups = (count + 1023) / 1024;
+      if (emitThreadGroups < 1)
+        emitThreadGroups = 1;
+
+      if (gpuProfiler_)
+        gpuProfiler_->BeginProfile(commandList, emitShader);
+      commandList->Dispatch(emitThreadGroups, 1, 1);
+      if (gpuProfiler_)
+        gpuProfiler_->EndProfile(commandList, emitShader);
+
+      D3D12_RESOURCE_BARRIER barrier{};
+      barrier.Type = D3D12_RESOURCE_BARRIER_TYPE_UAV;
+      barrier.UAV.pResource = gpuParticleResource_.Get();
+      commandList->ResourceBarrier(1, &barrier);
     }
-
-    if (perFrameData_) {
-      perFrameData_->deltaTime = deltaTime;
-      perFrameData_->time = gpuParticleTime_;
-    }
-
-    UINT pPerFrame = cp->GetRootParameterIndex(emitShader, "gPerFrame");
-    if (pPerFrame != static_cast<UINT>(-1)) {
-      commandList->SetComputeRootConstantBufferView(
-          pPerFrame, perFrameResource_->GetGPUVirtualAddress());
-    }
-
-    UINT pParticles = cp->GetRootParameterIndex(emitShader, "gParticles");
-    if (pParticles != static_cast<UINT>(-1)) {
-      commandList->SetComputeRootDescriptorTable(pParticles,
-                                                 gpuParticleUavHandleGPU_);
-    }
-
-    UINT pCounter = cp->GetRootParameterIndex(emitShader, "gFreeCounter");
-    if (pCounter != static_cast<UINT>(-1)) {
-      commandList->SetComputeRootDescriptorTable(pCounter,
-                                                 gpuFreeCounterUavHandleGPU_);
-    }
-
-    UINT emitThreadGroups = (count + 1023) / 1024;
-    if (emitThreadGroups < 1)
-      emitThreadGroups = 1;
-
-    if (gpuProfiler_)
-      gpuProfiler_->BeginProfile(commandList, emitShader);
-    commandList->Dispatch(emitThreadGroups, 1, 1);
-    if (gpuProfiler_)
-      gpuProfiler_->EndProfile(commandList, emitShader);
-
-    D3D12_RESOURCE_BARRIER barrier{};
-    barrier.Type = D3D12_RESOURCE_BARRIER_TYPE_UAV;
-    barrier.UAV.pResource = gpuParticleResource_.Get();
-    commandList->ResourceBarrier(1, &barrier);
   }
 
   // -------------------------------------------------------------
@@ -663,13 +672,6 @@ void EffectDefinition::DispatchGPUParticle(
     barrier.Type = D3D12_RESOURCE_BARRIER_TYPE_UAV;
     barrier.UAV.pResource = gpuParticleResource_.Get();
     commandList->ResourceBarrier(1, &barrier);
-  }
-
-  if (emitterBoxData_) {
-    emitterBoxData_->emit = 0;
-  }
-  if (emitterSphereData_) {
-    emitterSphereData_->emit = 0;
   }
 
   if (gpuParticleState_ != D3D12_RESOURCE_STATE_NON_PIXEL_SHADER_RESOURCE) {

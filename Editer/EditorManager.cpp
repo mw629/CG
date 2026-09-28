@@ -827,6 +827,34 @@ void EditorManager::Update(Engine* engine)
 
 	// Particle Viewer Window
 	if (showParticleViewer_) {
+		auto FocusParticleCamera = [&]() {
+			if (!previewParticle_ || !previewCamera_) return;
+			EmitterData ped = previewParticle_->GetEmitterData();
+			EmitterSphere pes = previewParticle_->GetEmitterSphere();
+			EmitterCircle pec = previewParticle_->GetEmitterCircle();
+			EmitterCone pecone = previewParticle_->GetEmitterCone();
+			EmitterType peType = previewParticle_->GetEmitterType();
+			Vector3 pBasePos = previewParticle_->GetBaseParticleData().transform.translate;
+
+			Vector3 center;
+			float maxDim = 5.0f;
+			if (peType == EmitterType::Sphere) {
+				center = pes.translate + pBasePos;
+				maxDim = (std::max)(pes.radius * 2.0f, 3.0f);
+			} else if (peType == EmitterType::Circle) {
+				center = pec.translate + pBasePos;
+				maxDim = (std::max)(pec.outerRadius * 2.0f, 3.0f);
+			} else if (peType == EmitterType::Cone) {
+				center = pecone.translate + pBasePos + Vector3{ 0.0f, 1.0f, 0.0f };
+				maxDim = (std::max)(pecone.radius * 3.0f, 3.0f);
+			} else {
+				center = ped.transform.translate + pBasePos;
+				maxDim = (std::max)({ ped.transform.scale.x, ped.transform.scale.y, ped.transform.scale.z, 3.0f });
+			}
+			float distance = (std::max)(maxDim * 1.5f, 8.0f);
+			previewCamera_->Focus(center, distance);
+		};
+
 		if (!isParticleViewerInitialized_) {
 			particleRenderTexture_ = std::make_unique<RenderTexture>();
 			particleDepthStencil_ = std::make_unique<DepthStencil>();
@@ -838,19 +866,12 @@ void EditorManager::Update(Engine* engine)
 			particleDepthStencil_->CreateDepthStencil(engine->graphics->GetDevice(), 512, 512);
 			previewGrid_->CreateGrid();
 
-			EmitterData ed;
-			ed.frequency = 0.1f;
-			ed.count = 5;
-			EffectDefinitionData baseData;
-			baseData.color = { 1.0f,1.0f,1.0f,1.0f };
-			baseData.lifeTime = 2.0f;
-			previewParticle_->Initialize(ed, baseData, EffectShape::Plane);
-			previewParticle_->SetUseGpuParticle(false);
-			previewParticle_->name_ = "Preview Particle";
+			previewParticle_->Initialize();
+			previewParticle_->LoadFromJson("snow");
 
+			previewCamera_->GetDebugCameraRef().SetEnableInput(false);
 			previewCamera_->SetAspectRatio(1.0f);
-			Transform camT = { {1.0f,1.0f,1.0f}, {0.0f,0.0f,0.0f}, {0.0f, 2.0f, -10.0f} };
-			previewCamera_->SetTransform(camT);
+			FocusParticleCamera();
 			previewCamera_->Update();
 
 			isParticleViewerInitialized_ = true;
@@ -865,6 +886,29 @@ void EditorManager::Update(Engine* engine)
 			ImGui::Text(LanguageManager::Tr("Preview:"));
 			ImVec2 vMin = ImGui::GetCursorScreenPos();
 			ImGui::Image((ImTextureID)particleRenderTexture_->GetSrvHandleGPU().ptr, ImVec2(512, 512));
+			bool isPreviewHovered = ImGui::IsItemHovered();
+
+			// プレビュー画像上での直感的なカメラ操作（Orbit / Pan / Zoom）
+			if (isPreviewHovered && !ImGuizmo::IsUsing()) {
+				ImGuiIO& io = ImGui::GetIO();
+				if (io.MouseWheel != 0.0f) {
+					previewCamera_->GetDebugCameraRef().Zoom(io.MouseWheel * 2.0f);
+				}
+				if (ImGui::IsMouseDragging(ImGuiMouseButton_Right)) {
+					ImVec2 dragDelta = ImGui::GetMouseDragDelta(ImGuiMouseButton_Right);
+					ImGui::ResetMouseDragDelta(ImGuiMouseButton_Right);
+					if (io.KeyShift) {
+						previewCamera_->GetDebugCameraRef().Pan(dragDelta.x, dragDelta.y);
+					} else {
+						previewCamera_->GetDebugCameraRef().Orbit(dragDelta.x, dragDelta.y);
+					}
+				}
+				if (ImGui::IsMouseDragging(ImGuiMouseButton_Middle)) {
+					ImVec2 dragDelta = ImGui::GetMouseDragDelta(ImGuiMouseButton_Middle);
+					ImGui::ResetMouseDragDelta(ImGuiMouseButton_Middle);
+					previewCamera_->GetDebugCameraRef().Pan(dragDelta.x, dragDelta.y);
+				}
+			}
 
 			ImGuizmo::SetOrthographic(false);
 			ImGuizmo::SetDrawlist(ImGui::GetWindowDrawList());
@@ -992,25 +1036,30 @@ void EditorManager::Update(Engine* engine)
 						{-0.5f, -0.5f, -0.5f}, { 0.5f, -0.5f, -0.5f}, { 0.5f,  0.5f, -0.5f}, {-0.5f,  0.5f, -0.5f},
 						{-0.5f, -0.5f,  0.5f}, { 0.5f, -0.5f,  0.5f}, { 0.5f,  0.5f,  0.5f}, {-0.5f,  0.5f,  0.5f}
 					};
-					ImVec2 points[8];
-					bool allInFront = true;
-					for (int i = 0; i < 8; ++i) {
-						float w = corners[i].x * wvp.m[0][3] + corners[i].y * wvp.m[1][3] + corners[i].z * wvp.m[2][3] + wvp.m[3][3];
-						if (w < 0.1f) allInFront = false;
-						Vector3 projected = TransformMatrix(corners[i], wvp);
-						points[i].x = vMin.x + (projected.x + 1.0f) * 0.5f * 512.0f;
-						points[i].y = vMin.y + (1.0f - projected.y) * 0.5f * 512.0f;
-					}
-					
-					if (allInFront) {
-						int edges[12][2] = {
-							{0,1}, {1,2}, {2,3}, {3,0},
-							{4,5}, {5,6}, {6,7}, {7,4},
-							{0,4}, {1,5}, {2,6}, {3,7}
-						};
-						for (int i = 0; i < 12; ++i) {
-							drawList->AddLine(points[edges[i][0]], points[edges[i][1]], color, 2.0f);
+					int edges[12][2] = {
+						{0,1}, {1,2}, {2,3}, {3,0},
+						{4,5}, {5,6}, {6,7}, {7,4},
+						{0,4}, {1,5}, {2,6}, {3,7}
+					};
+					// 辺ごとにクリッピングして描画（カメラが近づいても線が消えないようにする）
+					for (int i = 0; i < 12; ++i) {
+						Vector3 p0 = corners[edges[i][0]];
+						Vector3 p1 = corners[edges[i][1]];
+						float w0 = p0.x * wvp.m[0][3] + p0.y * wvp.m[1][3] + p0.z * wvp.m[2][3] + wvp.m[3][3];
+						float w1 = p1.x * wvp.m[0][3] + p1.y * wvp.m[1][3] + p1.z * wvp.m[2][3] + wvp.m[3][3];
+						if (w0 < 0.1f && w1 < 0.1f) continue;
+						if (w0 < 0.1f) {
+							float t = (0.1f - w0) / (w1 - w0);
+							p0 = p0 + (p1 - p0) * t;
+						} else if (w1 < 0.1f) {
+							float t = (0.1f - w1) / (w0 - w1);
+							p1 = p1 + (p0 - p1) * t;
 						}
+						Vector3 prj0 = TransformMatrix(p0, wvp);
+						Vector3 prj1 = TransformMatrix(p1, wvp);
+						ImVec2 s0 = { vMin.x + (prj0.x + 1.0f) * 0.5f * 512.0f, vMin.y + (1.0f - prj0.y) * 0.5f * 512.0f };
+						ImVec2 s1 = { vMin.x + (prj1.x + 1.0f) * 0.5f * 512.0f, vMin.y + (1.0f - prj1.y) * 0.5f * 512.0f };
+						drawList->AddLine(s0, s1, color, 2.0f);
 					}
 				}
 			}
@@ -1059,14 +1108,44 @@ void EditorManager::Update(Engine* engine)
 			if (ImGui::RadioButton(LanguageManager::Tr("Rotate"), currentOp == ImGuizmo::ROTATE)) currentOp = ImGuizmo::ROTATE;
 			ImGui::SameLine();
 			if (ImGui::RadioButton(LanguageManager::Tr("Scale"), currentOp == ImGuizmo::SCALE)) currentOp = ImGuizmo::SCALE;
-			// Optional: Camera controls for preview
+
+			ImGui::Separator();
+			ImGui::Text(LanguageManager::Tr("Camera:"));
+			if (ImGui::Button(LanguageManager::Tr("Focus Emitter"))) {
+				FocusParticleCamera();
+			}
+			ImGui::SameLine();
+			if (ImGui::Button(LanguageManager::Tr("Reset to Origin"))) {
+				previewCamera_->Focus({ 0.0f, 0.0f, 0.0f }, 15.0f);
+			}
+
+			Vector3 camTarget = previewCamera_->GetTarget();
+			if (ImGui::DragFloat3(LanguageManager::Tr("Camera Target"), &camTarget.x, 0.1f)) {
+				previewCamera_->SetTarget(camTarget);
+			}
 			Transform& camT = const_cast<Transform&>(previewCamera_->GetTransform());
 			if (ImGui::DragFloat3(LanguageManager::Tr("Camera Pos"), &camT.translate.x, 0.1f)) {
 				previewCamera_->SetTransform(camT);
 			}
+			ImGui::TextDisabled(LanguageManager::Tr("(Preview: RMB: Orbit, Shift+RMB/MMB: Pan, Wheel: Zoom)"));
 
 			ImGui::Separator();
+			Vector3 prevPos = previewParticle_->GetPosition();
+			float prevScale = previewParticle_->GetEmitterData().transform.scale.x;
+			EmitterType prevType = previewParticle_->GetEmitterType();
+
 			previewParticle_->ImGui();
+
+			Vector3 newPos = previewParticle_->GetPosition();
+			float newScale = previewParticle_->GetEmitterData().transform.scale.x;
+			EmitterType newType = previewParticle_->GetEmitterType();
+			if ((std::abs(prevPos.x - newPos.x) > 0.01f ||
+				 std::abs(prevPos.y - newPos.y) > 0.01f ||
+				 std::abs(prevPos.z - newPos.z) > 0.01f ||
+				 std::abs(prevScale - newScale) > 0.01f ||
+				 prevType != newType) && !ImGuizmo::IsUsing()) {
+				FocusParticleCamera();
+			}
 
 			ImGui::EndChild();
 
@@ -1081,8 +1160,12 @@ void EditorManager::Update(Engine* engine)
 		previewParticle_->Update(previewCamera_->GetViewMatrix());
 
 		auto cmdList = engine->command->GetCommandList();
+		ID3D12DescriptorHeap* descriptorHeaps[] = { engine->descriptorHeap->GetSrvDescriptorHeap() };
+		cmdList->SetDescriptorHeaps(1, descriptorHeaps);
+
 		particleRenderTexture_->TransitionToRenderTarget(cmdList);
 		particleRenderTexture_->Clear(cmdList);
+		particleDepthStencil_->TransitionToDepthWrite(cmdList);
 		D3D12_CPU_DESCRIPTOR_HANDLE rtvHandle = particleRenderTexture_->GetRtvHandle();
 		particleDepthStencil_->SetDSV(cmdList, &rtvHandle);
 
@@ -1097,6 +1180,18 @@ void EditorManager::Update(Engine* engine)
 			previewGrid_->SettingWvp(previewCamera_->GetViewMatrix(), &projMat);
 			engine->draw->DrawGrid(previewGrid_.get());
 		}
+
+		static int s_viewerFrameCount = 0;
+		if (s_viewerFrameCount++ % 120 == 0) {
+			EmitterData ped = previewParticle_->GetEmitterData();
+			const Transform& pcamT = previewCamera_->GetTransform();
+			LOG_INFO(std::format("ParticleViewer: useGpu={}, emitterPos=({:.1f},{:.1f},{:.1f}), emitterScale=({:.1f},{:.1f},{:.1f}), camPos=({:.1f},{:.1f},{:.1f})",
+				previewParticle_->GetUseGpuParticle(),
+				ped.transform.translate.x, ped.transform.translate.y, ped.transform.translate.z,
+				ped.transform.scale.x, ped.transform.scale.y, ped.transform.scale.z,
+				pcamT.translate.x, pcamT.translate.y, pcamT.translate.z));
+		}
+
 		previewParticle_->Draw(*engine->draw);
 
 		particleRenderTexture_->TransitionToShaderResource(cmdList);

@@ -57,6 +57,14 @@ public:
 	void ResetDebugCamera(const Transform& transform);
 	DebugCamera& GetDebugCameraRef() { return debugCamera_; }
 
+	void SetTarget(const Vector3& target) { debugCamera_.SetTarget(target); }
+	Vector3 GetTarget() const { return debugCamera_.GetTarget(); }
+	void Focus(const Vector3& target, float distance = 15.0f) {
+		debugCamera_.Focus(target, distance);
+		transform_.translate = debugCamera_.GetEye();
+		viewMatrix_ = debugCamera_.GetViewMatrix();
+	}
+
 	void SetAspectRatio(float aspectRatio) { aspectRatio_ = aspectRatio; autoAspectRatio_ = false; }
 	float GetAspectRatio() const { return aspectRatio_; }
 	void SetAutoAspectRatio(bool autoAspect) { autoAspectRatio_ = autoAspect; }
