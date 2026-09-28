@@ -163,6 +163,9 @@ public:
 
 	static void SetEnd(bool isEnd) { isEnd_ = isEnd; }
 	static bool IsEnd() { return isEnd_; }
+
+	void ShowWindow() { window.Show(); }
+	WindowConfig& GetWindow() { return window; }
 };
 
 

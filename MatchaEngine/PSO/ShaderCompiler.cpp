@@ -1,5 +1,6 @@
 #include "ShaderCompiler.h"
 #include <cassert>
+#include <unordered_map>
 #include "Core/LogHandler.h"
 
 // ---------------------------------------------------------
@@ -18,6 +19,10 @@ void DirectXShaderCompiler::CreateDXC()
 	assert(SUCCEEDED(hr_));
 }
 
+namespace {
+	std::unordered_map<std::wstring, Microsoft::WRL::ComPtr<IDxcBlob>> s_shaderCache;
+}
+
 // ---------------------------------------------------------
 // ShaderCompile
 // ---------------------------------------------------------
@@ -29,6 +34,12 @@ Microsoft::WRL::ComPtr<IDxcBlob> ShaderCompile::CompileShader(std::ostream& os,
 	Microsoft::WRL::ComPtr<IDxcCompiler3> dxcCompiler,
 	Microsoft::WRL::ComPtr<IDxcIncludeHandler> includeHandler)
 {
+	std::wstring cacheKey = filePath + L"|" + profile;
+	auto itCache = s_shaderCache.find(cacheKey);
+	if (itCache != s_shaderCache.end()) {
+		Log(os, ConvertString(std::format(L"Shader loaded from cache, [{}], profile:{}\n", filePath, profile)));
+		return itCache->second;
+	}
 
 	//hlslファイルを読み込む//
 
@@ -110,6 +121,8 @@ Microsoft::WRL::ComPtr<IDxcBlob> ShaderCompile::CompileShader(std::ostream& os,
 	assert(SUCCEEDED(hr));
 	//成功したログを出す
 	Log(os, ConvertString(std::format(L"Compile Succeeded,[{}],path:{},profile:{}\n", shaderName, filePath, profile)));
+	//キャッシュに保存
+	s_shaderCache[cacheKey] = shaderBlob;
 	//実行用のバイナリを返却
 	return shaderBlob;
 

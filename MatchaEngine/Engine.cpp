@@ -36,8 +36,8 @@ Engine::Engine(int32_t kClientWidth, int32_t kClientHeight) {
   if (SUCCEEDED(D3D12GetDebugInterface(IID_PPV_ARGS(&debugController)))) {
     // デバッグレイヤーを有効化する
     debugController->EnableDebugLayer();
-    // さらにGPU側でもチェックを行うようにする
-    debugController->SetEnableGPUBasedValidation(TRUE);
+    // GPU-Based Validation はシェーダーコンパイルとPSO生成を極端に遅くするため、GPUクラッシュ検証時以外は無効化
+    // debugController->SetEnableGPUBasedValidation(TRUE);
   }
 #endif
 
@@ -453,6 +453,9 @@ void Engine::EndFrame(const std::function<void()> &drawUI) {
     CheckHResult(presentHr, "SwapChain::Present failed", graphics->GetDevice());
     assert(SUCCEEDED(presentHr));
   }
+
+  // 初回フレームのPresent完了後にウィンドウを可視化（白い未描画画面の露出を防止）
+  window.Show();
 
   gpuSyncManager.Signal(command.get()->GetCommandQueue());
 

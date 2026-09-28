@@ -111,6 +111,10 @@ void SetGlobalLogStream(std::ostream* os) {
 	g_globalLogStream = os;
 }
 
+std::ostream* GetGlobalLogStream() {
+	return g_globalLogStream;
+}
+
 void Log(const std::string& message) {
 	std::lock_guard<std::mutex> lock(g_logMutex);
 

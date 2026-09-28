@@ -1,5 +1,6 @@
 #include "GraphicsPipelineState.h"
 #include "LogHandler.h"
+#include <iostream>
 #include <cassert>
 #include <d3d12shader.h>
 #include <vector>
@@ -168,6 +169,8 @@ void GraphicsPipelineState::CreateGraphicsPSO(const ShaderName& shaderName, cons
 
 void GraphicsPipelineState::ALLPSOCreate(std::ostream& os, ID3D12Device* device)
 {
+	device_ = device;
+
 	std::vector<D3D12_INPUT_ELEMENT_DESC> objInput = {
 		{ "POSITION", 0, DXGI_FORMAT_R32G32B32A32_FLOAT, 0, D3D12_APPEND_ALIGNED_ELEMENT, D3D12_INPUT_CLASSIFICATION_PER_VERTEX_DATA, 0 },
 		{ "TEXCOORD", 0, DXGI_FORMAT_R32G32_FLOAT, 0, D3D12_APPEND_ALIGNED_ELEMENT, D3D12_INPUT_CLASSIFICATION_PER_VERTEX_DATA, 0 },
@@ -220,7 +223,12 @@ void GraphicsPipelineState::ALLPSOCreate(std::ostream& os, ID3D12Device* device)
 		{ CopyImageShader, { L"Resources/Shader/PostEffect/PostEffect.VS.hlsl", L"Resources/Shader/PostEffect/CopyImage.PS.hlsl", lineInput, false, D3D12_DEPTH_WRITE_MASK_ZERO, D3D12_COMPARISON_FUNC_ALWAYS, D3D12_CULL_MODE_NONE, D3D12_FILL_MODE_SOLID } },
 	};
 
-	// ---- ポストエフェクトシェーダーをフォルダから自動スキャン ----
+	registeredConfigs_.clear();
+	for (const auto& pair : configs) {
+		registeredConfigs_[pair.first] = pair.second;
+	}
+
+	// ---- ポストエフェクトシェーダーをフォルダから自動スキャンして構成登録 ----
 	std::filesystem::path postEffectShaderDir = "Resources/Shader/PostEffect";
 	if (std::filesystem::exists(postEffectShaderDir)) {
 		std::vector<std::filesystem::path> psFiles;
@@ -240,10 +248,11 @@ void GraphicsPipelineState::ALLPSOCreate(std::ostream& os, ID3D12Device* device)
 			const std::string stem = filename.substr(0, filename.find(".PS.hlsl"));
 			const std::string shaderNameStr = stem + "Shader";
 			const std::wstring psWPath = psPath.wstring();
-			configs.push_back({ shaderNameStr, { L"Resources/Shader/PostEffect/PostEffect.VS.hlsl", psWPath, lineInput, false, D3D12_DEPTH_WRITE_MASK_ZERO, D3D12_COMPARISON_FUNC_ALWAYS, D3D12_CULL_MODE_NONE, D3D12_FILL_MODE_SOLID } });
+			registeredConfigs_[shaderNameStr] = { L"Resources/Shader/PostEffect/PostEffect.VS.hlsl", psWPath, lineInput, false, D3D12_DEPTH_WRITE_MASK_ZERO, D3D12_COMPARISON_FUNC_ALWAYS, D3D12_CULL_MODE_NONE, D3D12_FILL_MODE_SOLID };
 		}
 	}
 
+	// ---- パーティクルシェーダーをフォルダから自動スキャンして構成登録 ----
 	std::filesystem::path particleShaderDir = "Resources/Shader/ParticleShader";
 	if (std::filesystem::exists(particleShaderDir)) {
 		for (const auto& entry : std::filesystem::directory_iterator(particleShaderDir)) {
@@ -251,15 +260,61 @@ void GraphicsPipelineState::ALLPSOCreate(std::ostream& os, ID3D12Device* device)
 			if (filename.find(".PS.hlsl") != std::string::npos) {
 				std::string shaderNameStr = filename.substr(0, filename.find(".PS.hlsl")) + "Shader";
 				std::wstring psPath = entry.path().wstring();
-				configs.push_back({ shaderNameStr, { L"Resources/Shader/ParticleShader/Particle.VS.hlsl", psPath, particleInput, true, D3D12_DEPTH_WRITE_MASK_ZERO, D3D12_COMPARISON_FUNC_LESS_EQUAL, D3D12_CULL_MODE_NONE, D3D12_FILL_MODE_SOLID } });
+				registeredConfigs_[shaderNameStr] = { L"Resources/Shader/ParticleShader/Particle.VS.hlsl", psPath, particleInput, true, D3D12_DEPTH_WRITE_MASK_ZERO, D3D12_COMPARISON_FUNC_LESS_EQUAL, D3D12_CULL_MODE_NONE, D3D12_FILL_MODE_SOLID };
 			}
 		}
 	}
 
-	for (const auto& pair : configs) {
-		CreateGraphicsShaderPipeline(pair.first, pair.second, os, device);
+	// 起動時に先行生成するベースシェーダー一覧
+	// （通常3D描画、UIフォント、ライン、スカイボックス、起動時有効なポストエフェクト）
+	std::vector<ShaderName> baseShaders = {
+		MSDFShader,
+		ObjectShader,
+		WireFrameShader,
+		WireFrameShaderNoDepth,
+		IceShader,
+		WaterShader,
+		AnimationObj,
+		LineShader,
+		LineShaderNoDepth,
+		SkyBoxShader,
+		CopyImageShader,
+		"OutLineShader",
+		"FogShader",
+	};
+
+	// 基本パーティクルシェーダーも先行生成
+	if (std::filesystem::exists(particleShaderDir)) {
+		for (const auto& entry : std::filesystem::directory_iterator(particleShaderDir)) {
+			std::string filename = entry.path().filename().string();
+			if (filename.find(".PS.hlsl") != std::string::npos) {
+				std::string shaderNameStr = filename.substr(0, filename.find(".PS.hlsl")) + "Shader";
+				baseShaders.push_back(shaderNameStr);
+			}
+		}
+	}
+
+	for (const auto& shaderName : baseShaders) {
+		auto it = registeredConfigs_.find(shaderName);
+		if (it != registeredConfigs_.end()) {
+			CreateGraphicsShaderPipeline(it->first, it->second, os, device);
+		}
 	}
 
 	computePipeline_ = std::make_unique<ComputePipeline>();
 	computePipeline_->CreatePipeline(os, device);
+}
+
+void GraphicsPipelineState::EnsurePipelineCreated(const ShaderName& shaderName)
+{
+	if (graphicsPipelineState_.find(shaderName) != graphicsPipelineState_.end()) {
+		return;
+	}
+	auto it = registeredConfigs_.find(shaderName);
+	if (it != registeredConfigs_.end() && device_) {
+		std::ostream* os = GetGlobalLogStream();
+		std::ostream& targetStream = os ? *os : std::cout;
+		Log(targetStream, std::format("On-demand creating PSO for shader: '{}'\n", shaderName));
+		CreateGraphicsShaderPipeline(shaderName, it->second, targetStream, device_);
+	}
 }

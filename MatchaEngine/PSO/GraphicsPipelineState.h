@@ -20,7 +20,12 @@ private:
 
 	std::unique_ptr<ComputePipeline> computePipeline_;
 
+	ID3D12Device* device_ = nullptr;
+	std::map<ShaderName, PipelineConfig> registeredConfigs_;
+
 	HRESULT hr_;
+
+	void EnsurePipelineCreated(const ShaderName& shaderName);
 
 public:
 
@@ -32,10 +37,12 @@ public:
 	void ALLPSOCreate(std::ostream& os, ID3D12Device* device);
 
 	D3D12_GRAPHICS_PIPELINE_STATE_DESC GetGraphicsPipelineStateDesc(const ShaderName& shaderName, BlendMode blendMode, CullMode cullMode = kCullModeBack) {
+		EnsurePipelineCreated(shaderName);
 		return graphicsPipelineStateDesc_[shaderName][cullMode][blendMode];
 	}
 
 	ID3D12PipelineState* GetGraphicsPipelineState(const ShaderName& shaderName, BlendMode blendMode, CullMode cullMode = kCullModeBack) {
+		EnsurePipelineCreated(shaderName);
 		auto itShader = graphicsPipelineState_.find(shaderName);
 		if (itShader != graphicsPipelineState_.end()) {
 			auto itCull = itShader->second.find(cullMode);
@@ -58,6 +65,7 @@ public:
 
 	RootSignature* GetRootSignature(const ShaderName& shaderName, BlendMode blendMode = kBlendModeNone) {
 		(void)blendMode;
+		EnsurePipelineCreated(shaderName);
 		auto it = rootSignature_.find(shaderName);
 		if (it != rootSignature_.end()) return it->second.get();
 		return nullptr;
@@ -67,6 +75,7 @@ public:
 
 	UINT GetRootParameterIndex(ShaderName shaderName, BlendMode blendMode, const std::string& name) {
 		(void)blendMode;
+		EnsurePipelineCreated(shaderName);
 		auto itShader = rootParameterIndexMap_.find(shaderName);
 		if (itShader != rootParameterIndexMap_.end()) {
 			auto itName = itShader->second.find(name);

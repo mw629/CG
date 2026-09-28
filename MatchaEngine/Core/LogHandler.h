@@ -29,8 +29,9 @@ std::wstring ConvertString(const std::string& str);
 // 現在時刻を取得してログファイルを開く（互換性維持）
 std::ofstream CurrentTimestamp();
 
-// グローバルログストリームの設定
+// グローバルログストリームの設定・取得
 void SetGlobalLogStream(std::ostream* os);
+std::ostream* GetGlobalLogStream();
 
 // 各種クラッシュ・エラーハンドラの初期化
 void InitializeErrorHandlers();
