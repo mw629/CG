@@ -94,6 +94,7 @@ void SoundManager::StopBGM() {
     }
     currentBGM_ = BGM::None;
     currentBgmHandle_ = -1;
+    isBgmPaused_ = false;
 }
 
 void SoundManager::PauseBGM() {
@@ -136,6 +137,20 @@ void SoundManager::StopSE(SE se) {
     if (handle >= 0) {
         Audio::Stop(handle);
     }
+}
+
+void SoundManager::StopAllSE() {
+    for (int i = 0; i < static_cast<int>(SE::Count); ++i) {
+        int handle = seHandles_[i];
+        if (handle >= 0) {
+            Audio::Stop(handle);
+        }
+    }
+}
+
+void SoundManager::StopAll() {
+    StopBGM();
+    StopAllSE();
 }
 
 void SoundManager::Update() {

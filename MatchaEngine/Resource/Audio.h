@@ -54,6 +54,8 @@ public:
    
     static void Stop(int soundHandle);
 
+    static void StopAll();
+
     static void SetPitch(int soundHandle, float pitch);
 
     static void SetVolume(int soundHandle, float volume);

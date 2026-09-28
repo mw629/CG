@@ -44,6 +44,8 @@ public:
 
     void PlaySE(SE se, float volumeMultiplier = 1.0f);
     void StopSE(SE se);
+    void StopAllSE();
+    void StopAll();
 
 private:
     SoundManager() = default;

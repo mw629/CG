@@ -709,6 +709,7 @@ void GameScene::Initialize() {
   if (!EditorManager::IsPlaying()) {
     gameState_ = GameState::Editor;
     camera_->SetDebugCamera(true);
+    SoundManager::GetInstance()->StopBGM();
   } else {
     gameState_ = GameState::Title;
     camera_->SetDebugCamera(false);
@@ -902,6 +903,8 @@ void GameScene::Update() {
   } else if (!isEnginePlaying && gameState_ != GameState::Editor) {
     gameState_ = GameState::Editor;
     camera_->SetDebugCamera(true);
+    SoundManager::GetInstance()->StopBGM();
+    SoundManager::GetInstance()->StopAllSE();
   }
 
   UpdateCameraTransition();

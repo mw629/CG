@@ -182,6 +182,16 @@ void Audio::Stop(int soundHandle) {
     }
 }
 
+void Audio::StopAll() {
+    for (auto& data : sSoundData) {
+        if (data.pSourceVoice) {
+            data.pSourceVoice->Stop();
+            data.pSourceVoice->DestroyVoice();
+            data.pSourceVoice = nullptr;
+        }
+    }
+}
+
 void Audio::SetPitch(int soundHandle, float pitch)
 {
     if (soundHandle < 0 || soundHandle >= sSoundData.size()) return;
