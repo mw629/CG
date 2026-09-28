@@ -428,6 +428,13 @@ void Draw::DrawParticle(EffectDefinition *particle) {
     particle->DispatchGPUParticle(commandList_,
                                   graphicsPipelineState_->GetComputePipeline());
 
+    static bool s_gpuParticleLogged = false;
+    if (!s_gpuParticleLogged) {
+      s_gpuParticleLogged = true;
+      LOG_INFO(std::format("DrawParticle: GPU Particle drawing. shader='{}', blend={}, vertexSize={}",
+                           particle->GetShader(), static_cast<int>(particle->GetBlend()), particle->GetVertexSize()));
+    }
+
     preDraw(particle->GetShader(), particle->GetBlend(), kCullModeNone);
 
     commandList_->IASetVertexBuffers(0, 1, particle->GetVertexBufferView());
