@@ -52,6 +52,15 @@ private:
   float titleExitTimer_ = 0.0f;
   const float kTitleExitDuration_ = 2.0f;
 
+  // タイトル用カメラ旋回（オービット）
+  bool isTitleOrbitCamera_ = true;
+  float titleCameraAngle_ = 0.0f;
+  float titleCameraSpeed_ = 0.35f;
+  float titleCameraRadius_ = 14.0f;
+  float titleCameraHeight_ = 4.0f;
+  float titleTargetOffsetY_ = 1.2f;
+  Transform titleExitStartCamTransform_;
+
   // プレイ中の状態 (3レーン、1レーン、ボス)
   enum class PlayingState { ThreeLane, OneLane, Boss };
   PlayingState playingState_ = PlayingState::ThreeLane;
@@ -175,6 +184,7 @@ public:
   void ReturnToTitle();
 
   void TitleUpdate();
+  void UpdateTitleCamera();
   void UpdateTitleAutoPilot();
   void CheckTitleCollisions();
 

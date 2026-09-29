@@ -142,6 +142,16 @@ void GameScene::ImGui() {
     ImGui::DragFloat3("FPV Camera Rotate", &firstPersonRotate_.x, 0.01f);
   }
 
+  if (ImGui::CollapsingHeader("Title Orbit Camera Settings",
+                              ImGuiTreeNodeFlags_DefaultOpen)) {
+    ImGui::Checkbox("Enable Orbit Camera", &isTitleOrbitCamera_);
+    ImGui::SliderFloat("Orbit Speed", &titleCameraSpeed_, -2.0f, 2.0f, "%.2f rad/s");
+    ImGui::DragFloat("Orbit Radius", &titleCameraRadius_, 0.2f, 3.0f, 40.0f);
+    ImGui::DragFloat("Orbit Height", &titleCameraHeight_, 0.2f, -10.0f, 20.0f);
+    ImGui::DragFloat("Target Offset Y", &titleTargetOffsetY_, 0.1f, -5.0f, 10.0f);
+    ImGui::SliderAngle("Current Angle", &titleCameraAngle_);
+  }
+
   if (ImGui::CollapsingHeader("Sound Settings",
                               ImGuiTreeNodeFlags_DefaultOpen)) {
     auto *gsm = GameSceneManager::GetInstance();
@@ -713,6 +723,7 @@ void GameScene::StartGame() {
   // 1. 開始演出フェーズへ移行（まだ GameState::Title のまま、文字上昇開始）
   isTitleExiting_ = true;
   titleExitTimer_ = 0.0f;
+  titleExitStartCamTransform_ = cameraTransform_;
 
   // 2. 障害物の新規生成をストップ（今出ている障害物は消さずにそのまま流れる）
   stageSettings_->SetSpawningPaused(true);
@@ -726,6 +737,13 @@ void GameScene::StartPlaying() {
   gameState_ = GameState::Playing;
   isTitleExiting_ = false;
   titleExitTimer_ = 0.0f;
+
+  // 本編ゲーム用の通常カメラをセット
+  cameraTransform_.scale = {1.0f, 1.0f, 1.0f};
+  cameraTransform_.rotate = {0.3f, 0.0f, 0.0f};
+  cameraTransform_.translate = {0.0f, 8.0f, -15.0f};
+  camera_->SetTransform(cameraTransform_);
+  gameCamera_->SetTransform(cameraTransform_);
 
   // 1. オートパイロット解除（プレイヤー手動操作へ移行）
   player_->SetAutoPilot(false);
@@ -764,6 +782,7 @@ void GameScene::ReturnToTitle() {
   gameState_ = GameState::Title;
   isTitleExiting_ = false;
   titleExitTimer_ = 0.0f;
+  titleCameraAngle_ = 0.0f;
   SoundManager::GetInstance()->PlayBGM(SoundManager::BGM::Title);
 }
 
@@ -998,6 +1017,8 @@ void GameScene::Update() {
 
   if (isFirstPersonView_) {
     UpdateFirstPersonCamera();
+  } else if (gameState_ == GameState::Title && isTitleOrbitCamera_) {
+    UpdateTitleCamera();
   }
 
   camera_->Update();
@@ -2606,4 +2627,83 @@ void GameScene::UpdateFirstPersonCamera() {
   gameCamera_->SetTransform(fpTransform);
 
   player_->SetVisible(drawPlayerInFirstPerson_);
+}
+
+void GameScene::UpdateTitleCamera() {
+  if (!player_) {
+    return;
+  }
+
+  float timeScale = EditorManager::GetPlaySpeed();
+  float dt = (1.0f / 60.0f) * timeScale;
+
+  Vector3 playerPos = player_->GetTransform().translate;
+  Vector3 targetPos = {playerPos.x, playerPos.y + titleTargetOffsetY_,
+                       playerPos.z};
+
+  Transform defaultCamTransform;
+  defaultCamTransform.scale = {1.0f, 1.0f, 1.0f};
+  defaultCamTransform.rotate = {0.3f, 0.0f, 0.0f};
+  defaultCamTransform.translate = {0.0f, 8.0f, -15.0f};
+
+  if (isTitleExiting_) {
+    // ゲーム開始演出中：旋回位置から通常プレイ用カメラ位置へと滑らかにイージング復帰
+    float progress =
+        (kTitleExitDuration_ > 0.0f) ? (titleExitTimer_ / kTitleExitDuration_) : 1.0f;
+    if (progress > 1.0f) {
+      progress = 1.0f;
+    }
+
+    // easeInOutQuad
+    float easeT = (progress < 0.5f)
+                      ? (2.0f * progress * progress)
+                      : (1.0f - std::pow(-2.0f * progress + 2.0f, 2.0f) * 0.5f);
+
+    // 平行移動・スケールの補間
+    cameraTransform_.translate =
+        Lerp(titleExitStartCamTransform_.translate, defaultCamTransform.translate, easeT);
+    cameraTransform_.scale =
+        Lerp(titleExitStartCamTransform_.scale, defaultCamTransform.scale, easeT);
+
+    // 回転（Y軸の最短角度差補間）
+    float startY = titleExitStartCamTransform_.rotate.y;
+    float targetY = defaultCamTransform.rotate.y;
+    float diffY = targetY - startY;
+    while (diffY > 3.14159265f) diffY -= 6.2831853f;
+    while (diffY < -3.14159265f) diffY += 6.2831853f;
+
+    cameraTransform_.rotate.x =
+        Lerp(titleExitStartCamTransform_.rotate.x, defaultCamTransform.rotate.x, easeT);
+    cameraTransform_.rotate.y = startY + diffY * easeT;
+    cameraTransform_.rotate.z =
+        Lerp(titleExitStartCamTransform_.rotate.z, defaultCamTransform.rotate.z, easeT);
+  } else {
+    // タイトル通常待機中：プレイヤーを中心に回転
+    titleCameraAngle_ += titleCameraSpeed_ * dt;
+    if (titleCameraAngle_ >= 6.2831853f) {
+      titleCameraAngle_ -= 6.2831853f;
+    } else if (titleCameraAngle_ < 0.0f) {
+      titleCameraAngle_ += 6.2831853f;
+    }
+
+    // カメラ位置の算出（プレイヤー中心の円周軌道）
+    Vector3 camPos;
+    camPos.x = targetPos.x + std::sin(titleCameraAngle_) * titleCameraRadius_;
+    camPos.y = targetPos.y + titleCameraHeight_;
+    camPos.z = targetPos.z - std::cos(titleCameraAngle_) * titleCameraRadius_;
+
+    // カメラの向き（プレイヤー注視）の算出
+    Vector3 dir = {targetPos.x - camPos.x, targetPos.y - camPos.y,
+                   targetPos.z - camPos.z};
+    float distXZ = std::sqrt(dir.x * dir.x + dir.z * dir.z);
+
+    cameraTransform_.scale = {1.0f, 1.0f, 1.0f};
+    cameraTransform_.translate = camPos;
+    cameraTransform_.rotate.x = std::atan2(-dir.y, distXZ);
+    cameraTransform_.rotate.y = std::atan2(dir.x, dir.z);
+    cameraTransform_.rotate.z = 0.0f;
+  }
+
+  camera_->SetTransform(cameraTransform_);
+  gameCamera_->SetTransform(cameraTransform_);
 }
