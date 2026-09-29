@@ -2102,13 +2102,15 @@ void GameScene::UpdateTitleAutoPilot() {
 
   float playerZ = player_->GetTransform().translate.z;
 
-  // 各レーン（-1: 左, 0: 中央, 1: 右）における直近の障害物情報
-  struct LaneObstacle {
-    Obstacle* obstacle = nullptr;
-    float distZ = 999.0f;
-    Obstacle::Type type = Obstacle::Type::Wall;
+  // 各レーン（index 0: -1(Left), 1: 0(Center), 2: 1(Right)）の情報
+  struct LaneInfo {
+    float minDistZ = 999.0f;       // すべての障害物の中で直近のrelZ
+    Obstacle::Type minType = Obstacle::Type::Wall;
+    Obstacle* minObs = nullptr;
+
+    float minWallDistZ = 999.0f;   // 回避不能障害物（Wall等）の中で直近のrelZ
   };
-  LaneObstacle laneObs[3]; // index 0: -1(Left), 1: 0(Center), 2: 1(Right)
+  LaneInfo lanes[3];
 
   Obstacle* imminentObs = nullptr;
   float minActiveDistZ = 999.0f;
@@ -2118,22 +2120,33 @@ void GameScene::UpdateTitleAutoPilot() {
     if (!obs || !obs->GetIsActive() || obs->GetIsHit()) continue;
 
     float relZ = obs->GetTransform().translate.z - playerZ;
-    // プレイヤーの背後へ通り過ぎたもの（-1.5m未満）は無視
-    if (relZ < -1.5f) continue;
+    // プレイヤーの当たり判定（背面側約-0.8m）を完全に通り過ぎたものは除外
+    if (relZ < -0.8f) continue;
 
     float obsX = obs->GetTransform().translate.x;
     int obsLane = static_cast<int>(std::round(obsX / laneWidth));
     if (obsLane < -1) obsLane = -1;
     if (obsLane > 1) obsLane = 1;
 
-    int laneArrIdx = obsLane + 1; // 0, 1, 2
-    if (relZ < laneObs[laneArrIdx].distZ) {
-      laneObs[laneArrIdx].obstacle = obs;
-      laneObs[laneArrIdx].distZ = relZ;
-      laneObs[laneArrIdx].type = obs->GetType();
+    int idx = obsLane + 1; // 0, 1, 2
+
+    // 直近障害物の更新
+    if (relZ < lanes[idx].minDistZ) {
+      lanes[idx].minDistZ = relZ;
+      lanes[idx].minType = obs->GetType();
+      lanes[idx].minObs = obs;
     }
 
-    // プレイヤーが現在いる（または移動中の）レーンにある直近の障害物
+    // 壁系（回避不能障害物）の直近距離の更新
+    if (obs->GetType() == Obstacle::Type::Wall ||
+        obs->GetType() == Obstacle::Type::BossAttack ||
+        obs->GetType() == Obstacle::Type::BossAttackReflectable) {
+      if (relZ < lanes[idx].minWallDistZ) {
+        lanes[idx].minWallDistZ = relZ;
+      }
+    }
+
+    // プレイヤーが現在いる（または移動中の）レーンにある直近障害物
     if (obsLane == activeLane && relZ > -0.5f && relZ < minActiveDistZ) {
       minActiveDistZ = relZ;
       imminentObs = obs;
@@ -2166,32 +2179,50 @@ void GameScene::UpdateTitleAutoPilot() {
     else if (type == Obstacle::Type::Wall ||
              type == Obstacle::Type::BossAttack ||
              type == Obstacle::Type::BossAttackReflectable) {
-      if (minActiveDistZ <= 13.5f && !player_->IsChangingLane() && player_->CanAct()) {
-        // 空いている安全な隣接レーンを探して移動
+      if (minActiveDistZ <= 15.0f && !player_->IsChangingLane() && player_->CanAct()) {
         if (activeLane == 0) {
-          // 中央にいる場合: 左(-1)と右(+1)を比較
-          float leftDist = laneObs[0].distZ;
-          float rightDist = laneObs[2].distZ;
+          // 中央にいる場合: 左(-1, idx 0) と 右(+1, idx 2) の安全度を比較
+          float leftWallDist = lanes[0].minWallDistZ;
+          float rightWallDist = lanes[2].minWallDistZ;
+          float leftMinDist = lanes[0].minDistZ;
+          float rightMinDist = lanes[2].minDistZ;
 
-          if (leftDist > rightDist && leftDist > 8.0f) {
+          // 1. 壁の有無を優先比較（壁がない、または壁が遠い方を優先）
+          if (leftWallDist > 15.0f && rightWallDist <= 15.0f) {
+            // 左は壁がなく安全、右は壁がある -> 左へ
             player_->TriggerMoveLeft();
-          } else if (rightDist > 8.0f) {
+          } else if (rightWallDist > 15.0f && leftWallDist <= 15.0f) {
+            // 右は壁がなく安全、左は壁がある -> 右へ
             player_->TriggerMoveRight();
-          } else if (leftDist > 4.0f) {
-            player_->TriggerMoveLeft();
-          } else if (rightDist > 4.0f) {
-            player_->TriggerMoveRight();
+          } else if (leftWallDist > 15.0f && rightWallDist > 15.0f) {
+            // どちらも壁はない -> より距離が開いている（何もない）方へ移動
+            if (leftMinDist >= rightMinDist && leftMinDist > 5.0f) {
+              player_->TriggerMoveLeft();
+            } else if (rightMinDist > 5.0f) {
+              player_->TriggerMoveRight();
+            } else if (leftMinDist >= rightMinDist) {
+              player_->TriggerMoveLeft();
+            } else {
+              player_->TriggerMoveRight();
+            }
+          } else {
+            // 両方に壁がある場合 -> 壁までの距離がより遠い方へ逃げる
+            if (leftWallDist > rightWallDist) {
+              player_->TriggerMoveLeft();
+            } else {
+              player_->TriggerMoveRight();
+            }
           }
         } else if (activeLane == -1) {
-          // 左にいる場合: 中央(0)が安全なら右へ移動
-          float centerDist = laneObs[1].distZ;
-          if (centerDist > 7.0f) {
+          // 左にいる場合: 中央(0, idx 1)へ移動
+          // 中央の壁が目前（4.0m未満）でなければ、左の壁を避けるために中央へ移動
+          if (lanes[1].minWallDistZ > 4.0f) {
             player_->TriggerMoveRight();
           }
         } else if (activeLane == 1) {
-          // 右にいる場合: 中央(0)が安全なら左へ移動
-          float centerDist = laneObs[1].distZ;
-          if (centerDist > 7.0f) {
+          // 右にいる場合: 中央(0, idx 1)へ移動
+          // 中央の壁が目前（4.0m未満）でなければ、右の壁を避けるために中央へ移動
+          if (lanes[1].minWallDistZ > 4.0f) {
             player_->TriggerMoveLeft();
           }
         }
@@ -2199,11 +2230,11 @@ void GameScene::UpdateTitleAutoPilot() {
     }
   }
 
-  // 目の前に差し迫った危険がない場合、安全に中央（0）へ戻る（中央復帰性）
-  if ((!imminentObs || minActiveDistZ > 16.0f) && !player_->IsChangingLane() && player_->CanAct()) {
+  // 目の前に差し迫った危険がなく、中央レーンが十分に安全な場合のみ中央（0）へ戻る
+  if ((!imminentObs || minActiveDistZ > 20.0f) && !player_->IsChangingLane() && player_->CanAct()) {
     if (activeLane != 0) {
-      float centerDist = laneObs[1].distZ;
-      if (centerDist > 16.0f) {
+      // 中央レーンに 22m 以内に障害物がなく、かつ 30m 以内に壁がない場合のみ復帰
+      if (lanes[1].minDistZ > 22.0f && lanes[1].minWallDistZ > 30.0f) {
         if (activeLane < 0) {
           player_->TriggerMoveRight();
         } else {
