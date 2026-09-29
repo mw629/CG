@@ -2043,6 +2043,9 @@ void GameScene::TitleUpdate() {
                          stageSettings_->GetLaneWidth());
   player_->SetInvertedControls(false);
 
+  // しゃがみ中に頭上に障害物がある場合はしゃがみを維持
+  CheckKeepRolling();
+
   // 3. 3Dオブジェクトの一括更新（プレイヤーのアニメーションと移動を前進させる）
   gameObjectManager_->UpdateAll(view, speedMultiplier * timeScale);
 
@@ -2142,16 +2145,18 @@ void GameScene::UpdateTitleAutoPilot() {
     Obstacle::Type type = imminentObs->GetType();
 
     // Low（倒木・ジャンプで飛び越える）
+    // 早すぎると着地時に障害物に激突するため、十分に引きつけてから跳ぶ（距離約3.6m）
     if (type == Obstacle::Type::Low) {
-      if (minActiveDistZ <= 7.2f && minActiveDistZ >= 1.5f) {
+      if (minActiveDistZ <= 3.6f && minActiveDistZ >= 0.8f) {
         if (!player_->GetIsJumping()) {
           player_->TriggerJump();
         }
       }
     }
     // High（氷のアーチ・スライディングで潜り抜ける）
+    // 早すぎると立った瞬間に障害物に激突するため、十分に引きつけてから潜る（距離約3.8m）
     else if (type == Obstacle::Type::High) {
-      if (minActiveDistZ <= 7.5f && minActiveDistZ >= 1.5f) {
+      if (minActiveDistZ <= 3.8f && minActiveDistZ >= 0.8f) {
         if (!player_->GetIsRolling() && !player_->GetIsJumping()) {
           player_->TriggerRoll();
         }
