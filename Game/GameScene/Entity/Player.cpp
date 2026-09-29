@@ -108,6 +108,7 @@ void Player::Reset() {
   SetHasBarrier(false);
   isInvertedControls_ = false;
   isAutoPilot_ = false;
+  isVisible_ = true;
 
   model_->SetAnimation("walk", 0.0f);
 
@@ -312,6 +313,9 @@ void Player::PlayerMove(float speedMultiplier) {
 }
 
 void Player::Draw(class Draw &draw) {
+  if (!isVisible_) {
+    return;
+  }
   draw.DrawAnimation(model_.get());
   if (isDrawAxe_) {
     draw.DrawModel(axe_.get());

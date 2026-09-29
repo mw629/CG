@@ -74,8 +74,15 @@ private:
   // ボス戦終了後のクールタイム開始用フラグ
   bool wasBossBattle_ = false;
 
+  // 一人称視点
+  bool isFirstPersonView_ = false;
+  bool drawPlayerInFirstPerson_ = false;
+  Vector3 firstPersonOffset_{0.0f, 0.5f, 0.0f};
+  Vector3 firstPersonRotate_{0.0f, 0.0f, 0.0f}; // 20度下向き (20 deg)
+
   void StartCameraTransition(const Transform &targetTransform, int laneCount);
   void UpdateCameraTransition();
+  void UpdateFirstPersonCamera();
 
   //<<Common>>
 

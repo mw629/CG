@@ -85,6 +85,9 @@ private:
   // オートパイロット（タイトル画面での自動運転モード）
   bool isAutoPilot_ = false;
 
+  // 表示・非表示（一人称視点時の自キャラメッシュ非表示用など）
+  bool isVisible_ = true;
+
   void UpdateDrawTransform(float speedMultiplier = 1.0f);
 
 public:
@@ -136,6 +139,10 @@ public:
   // オートパイロット設定
   void SetAutoPilot(bool autoPilot) { isAutoPilot_ = autoPilot; }
   bool GetAutoPilot() const { return isAutoPilot_; }
+
+  // 表示設定
+  void SetVisible(bool visible) { isVisible_ = visible; }
+  bool GetVisible() const { return isVisible_; }
 
   // 外部からのアクション発動（オートパイロット用）
   bool TriggerJump();

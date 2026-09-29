@@ -112,11 +112,34 @@ void GameScene::ImGui() {
     if (ImGui::Button("Boss View")) {
       ChangePlayingState(PlayingState::Boss, true);
     }
+    ImGui::SameLine();
+    if (ImGui::Button(isFirstPersonView_ ? "Disable FPV (F2)" : "First Person View (F2)")) {
+      isFirstPersonView_ = !isFirstPersonView_;
+      if (!isFirstPersonView_) {
+        camera_->SetTransform(cameraTransform_);
+        gameCamera_->SetTransform(cameraTransform_);
+        player_->SetVisible(true);
+      }
+    }
 
     ImGui::Separator();
     if (ImGui::Button("Reset Debug Camera to Game Camera")) {
       camera_->ResetDebugCamera(cameraTransform_);
     }
+  }
+
+  if (ImGui::CollapsingHeader("First Person Camera Settings (F2)",
+                              ImGuiTreeNodeFlags_DefaultOpen)) {
+    if (ImGui::Checkbox("Enable First Person View (F2)", &isFirstPersonView_)) {
+      if (!isFirstPersonView_) {
+        camera_->SetTransform(cameraTransform_);
+        gameCamera_->SetTransform(cameraTransform_);
+        player_->SetVisible(true);
+      }
+    }
+    ImGui::Checkbox("Draw Player Body in First Person", &drawPlayerInFirstPerson_);
+    ImGui::DragFloat3("FPV Camera Offset", &firstPersonOffset_.x, 0.02f);
+    ImGui::DragFloat3("FPV Camera Rotate", &firstPersonRotate_.x, 0.01f);
   }
 
   if (ImGui::CollapsingHeader("Sound Settings",
@@ -947,6 +970,16 @@ void GameScene::Update() {
   }
 #endif // _DEBUG
 
+  // F2キーでPlayerの一人称固定モードの切り替え
+  if (Input::PushKey(DIK_F2)) {
+    isFirstPersonView_ = !isFirstPersonView_;
+    if (!isFirstPersonView_) {
+      camera_->SetTransform(cameraTransform_);
+      gameCamera_->SetTransform(cameraTransform_);
+      player_->SetVisible(true);
+    }
+  }
+
   // PostEffect::SetActivePostEffect(PostEffect::Type::GaussianFilter);
 
   // Engine側のPlay/Stop状態に同期してゲームステートを切り替え
@@ -962,6 +995,10 @@ void GameScene::Update() {
   }
 
   UpdateCameraTransition();
+
+  if (isFirstPersonView_) {
+    UpdateFirstPersonCamera();
+  }
 
   camera_->Update();
   view = camera_->GetViewMatrix();
@@ -1007,6 +1044,18 @@ void GameScene::Update() {
     }
   } else if (gameState_ == GameState::Editor) {
     EditorUpdate();
+  }
+
+  // 一人称視点時はプレイヤーの移動後にもカメラ位置を最新状態に同期
+  if (isFirstPersonView_) {
+    UpdateFirstPersonCamera();
+    camera_->Update();
+    view = camera_->GetViewMatrix();
+    gameCamera_->Update();
+
+    skyboxTransform = skyBox_->GetTransform();
+    skyboxTransform.translate = camera_->GetTransform().translate;
+    skyBox_->SetTransform(skyboxTransform);
   }
 }
 
@@ -1059,7 +1108,7 @@ void GameScene::DrawHUD(class Draw &draw) {
         "イディング走るポーズキーもう一度遊ぶプレイメニュー"
         "ペンギンダッシュ―—"
         "操作方法十字説明攻略倒し方緑赤色迫る直撃減少命中削切回避手前当てろ避け"
-        "ろ戦指令障害物魚押飛進残移動来固定再開初終体");
+        "ろ戦指令障害物魚押飛進残移動来固定再開初終体視替人称");
   }
 
   if (gameState_ == GameState::Title) {
@@ -1102,6 +1151,21 @@ void GameScene::DrawHUD(class Draw &draw) {
     draw.DrawMSDFString(scoreBuf, Vector2(30.0f, 58.0f), 20.0f,
                         Vector4(1.0f, 0.9f, 0.2f, 1.0f), true,
                         Vector4(0.0f, 0.0f, 0.0f, 1.0f), 0.07f);
+  }
+
+  // 一人称視点（FPV）アクティブ時のバッジ表示
+  if (isFirstPersonView_ && gameState_ != GameState::Editor) {
+    const float fpx = 20.0f;
+    const float fpy = 675.0f;
+    const float fpw = 175.0f;
+    const float fph = 30.0f;
+    draw.DrawFillRect(Vector2(fpx, fpy), Vector2(fpw, fph),
+                      Vector4(0.04f, 0.10f, 0.18f, 0.85f));
+    draw.DrawFillRect(Vector2(fpx, fpy), Vector2(3.0f, fph),
+                      Vector4(0.3f, 0.85f, 1.0f, 1.0f));
+    draw.DrawMSDFString("[F2] 1ST PERSON", Vector2(fpx + 10.0f, fpy + 6.0f), 16.0f,
+                        Vector4(0.4f, 0.9f, 1.0f, 1.0f), true,
+                        Vector4(0.0f, 0.0f, 0.0f, 1.0f), 0.08f);
   }
 }
 
@@ -1700,9 +1764,9 @@ void GameScene::DrawTitleHUD(class Draw &draw) {
   float guideAlpha = isTitleExiting_ ? std::clamp(1.0f - (titleExitTimer_ / 0.4f), 0.0f, 1.0f) : mainAlpha;
   if (guideAlpha > 0.01f) {
     const float guideCardX = 880.0f;
-    const float guideCardY = 465.0f;
+    const float guideCardY = 430.0f;
     const float guideCardW = 380.0f;
-    const float guideCardH = 230.0f;
+    const float guideCardH = 265.0f;
 
     // パネル背景（半透明ダークブルー）
     draw.DrawFillRect(Vector2(guideCardX, guideCardY),
@@ -1732,6 +1796,7 @@ void GameScene::DrawTitleHUD(class Draw &draw) {
     ControlItem items[] = {{"[A / D] / [← →]", "レーン移動 (PAD: 十字キー)"},
                            {"[SPACE / W / ↑]", "ジャンプ   (PAD: Aボタン)"},
                            {"[S] / [↓]", "スライド   (PAD: Bボタン)"},
+                           {"[F2]", "一人称視点 切り替え"},
                            {"[ESC]", "ポーズ / メニュー"},
                            {"[1] / [2] / [3]", "魚を敵に飛ばす (ボス戦時)"}};
 
@@ -2514,4 +2579,31 @@ void GameScene::UpdateCameraTransition() {
 
   camera_->SetTransform(cameraTransform_);
   gameCamera_->SetTransform(cameraTransform_);
+}
+
+void GameScene::UpdateFirstPersonCamera() {
+  if (!player_) {
+    return;
+  }
+
+  Vector3 playerPos = player_->GetTransform().translate;
+  Vector3 playerRot = player_->GetTransform().rotate;
+
+  Transform fpTransform;
+  fpTransform.scale = {1.0f, 1.0f, 1.0f};
+  fpTransform.rotate = {
+      playerRot.x + firstPersonRotate_.x,
+      playerRot.y + firstPersonRotate_.y,
+      playerRot.z + firstPersonRotate_.z,
+  };
+  fpTransform.translate = {
+      playerPos.x + firstPersonOffset_.x,
+      playerPos.y + firstPersonOffset_.y,
+      playerPos.z + firstPersonOffset_.z,
+  };
+
+  camera_->SetTransform(fpTransform);
+  gameCamera_->SetTransform(fpTransform);
+
+  player_->SetVisible(drawPlayerInFirstPerson_);
 }
