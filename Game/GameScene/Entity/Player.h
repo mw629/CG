@@ -82,6 +82,9 @@ private:
   // 操作反転（ボス戦等でカメラが180度反転した際に画面の見た目通りに動くようにするフラグ）
   bool isInvertedControls_ = false;
 
+  // オートパイロット（タイトル画面での自動運転モード）
+  bool isAutoPilot_ = false;
+
   void UpdateDrawTransform(float speedMultiplier = 1.0f);
 
 public:
@@ -129,6 +132,21 @@ public:
 
   void SetInvertedControls(bool inv) { isInvertedControls_ = inv; }
   bool GetInvertedControls() const { return isInvertedControls_; }
+
+  // オートパイロット設定
+  void SetAutoPilot(bool autoPilot) { isAutoPilot_ = autoPilot; }
+  bool GetAutoPilot() const { return isAutoPilot_; }
+
+  // 外部からのアクション発動（オートパイロット用）
+  bool TriggerJump();
+  bool TriggerRoll();
+  bool TriggerMoveLeft();
+  bool TriggerMoveRight();
+
+  int GetLaneIndex() const { return laneIndex_; }
+  int GetTargetLaneIndex() const { return targetLaneIndex_; }
+  bool IsChangingLane() const { return laneIndex_ != targetLaneIndex_; }
+  bool CanAct() const { return currentRecoveryTimer_ <= 0.0f; }
 
   // ヒット演出用
   void OnHit(bool isTrip = false);

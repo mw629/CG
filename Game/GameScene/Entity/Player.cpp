@@ -107,6 +107,7 @@ void Player::Reset() {
 
   SetHasBarrier(false);
   isInvertedControls_ = false;
+  isAutoPilot_ = false;
 
   model_->SetAnimation("walk", 0.0f);
 
@@ -190,7 +191,7 @@ void Player::PlayerMove(float speedMultiplier) {
   // レーンの移動中ではなかったら（強制移動中でない時のみ入力受付）
   else if (laneIndex_ == targetLaneIndex_) {
     // キー入力で目標レーンを設定
-    if (canAct) {
+    if (canAct && !isAutoPilot_) {
       bool pushLeft = GameSceneManager::GetInstance()->IsPushLeft();
       bool pushRight = GameSceneManager::GetInstance()->IsPushRight();
       if (isInvertedControls_) {
@@ -253,7 +254,7 @@ void Player::PlayerMove(float speedMultiplier) {
 
   // === アクション（ジャンプと転がり） ===
   // 地上にいてジャンプ中でなければアクション可能（転がり中でもジャンプでキャンセル可能）
-  if (!isJumping_ && canAct) {
+  if (!isJumping_ && canAct && !isAutoPilot_) {
     if (GameSceneManager::GetInstance()->IsPushJump()) {
       if (!(isRolling_ && keepRolling_)) {
         isJumping_ = true;
@@ -448,3 +449,77 @@ void Player::SetHasBarrier(bool hasBarrier) {
     }
   }
 }
+
+bool Player::TriggerJump() {
+  if (!isJumping_ && (currentRecoveryTimer_ <= 0.0f)) {
+    if (!(isRolling_ && keepRolling_)) {
+      isJumping_ = true;
+      velocityY_ = jumpPower_;
+      SoundManager::GetInstance()->PlaySE(SoundManager::SE::Jump);
+
+      if (isRolling_) {
+        isRolling_ = false;
+        transform_.scale.y = 1.0f;
+        transform_.translate.y = baseHeight_;
+        model_->SetAnimation("walk", walkTransitionDuration_);
+      }
+      return true;
+    }
+  }
+  return false;
+}
+
+bool Player::TriggerRoll() {
+  if (!isJumping_ && !isRolling_ && (currentRecoveryTimer_ <= 0.0f)) {
+    isRolling_ = true;
+    rollTimer_ = rollDuration_;
+    SoundManager::GetInstance()->PlaySE(SoundManager::SE::Slide);
+    model_->SetAnimation("sneakWalk", rollTransitionDuration_);
+    transform_.translate.y = baseHeight_ - 0.5f;
+    return true;
+  }
+  return false;
+}
+
+bool Player::TriggerMoveLeft() {
+  if (laneIndex_ == targetLaneIndex_ && (currentRecoveryTimer_ <= 0.0f) && !isForcedCentering_) {
+    int nextLane = laneIndex_ - 1;
+    if (nextLane >= minLane_) {
+      targetLaneIndex_ = nextLane;
+      startX_ = transform_.translate.x;
+      lerpTime_ = 0.0f;
+      SoundManager::GetInstance()->PlaySE(SoundManager::SE::LaneChange);
+
+      if (isRolling_ && !keepRolling_) {
+        isRolling_ = false;
+        transform_.scale.y = 1.0f;
+        transform_.translate.y = baseHeight_;
+        model_->SetAnimation("walk", walkTransitionDuration_);
+      }
+      return true;
+    }
+  }
+  return false;
+}
+
+bool Player::TriggerMoveRight() {
+  if (laneIndex_ == targetLaneIndex_ && (currentRecoveryTimer_ <= 0.0f) && !isForcedCentering_) {
+    int nextLane = laneIndex_ + 1;
+    if (nextLane <= maxLane_) {
+      targetLaneIndex_ = nextLane;
+      startX_ = transform_.translate.x;
+      lerpTime_ = 0.0f;
+      SoundManager::GetInstance()->PlaySE(SoundManager::SE::LaneChange);
+
+      if (isRolling_ && !keepRolling_) {
+        isRolling_ = false;
+        transform_.scale.y = 1.0f;
+        transform_.translate.y = baseHeight_;
+        model_->SetAnimation("walk", walkTransitionDuration_);
+      }
+      return true;
+    }
+  }
+  return false;
+}
+

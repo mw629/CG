@@ -265,6 +265,9 @@ public:
   float GetItemSpawnChance() const { return itemSpawnChance_; }
   void SetItemSpawnChance(float chance) { itemSpawnChance_ = chance; }
 
+  // 障害物を一掃する（ゲーム開始時用）
+  void ClearObstacles(float safeDistance = 15.0f);
+
   // リセット
   void Reset();
 };

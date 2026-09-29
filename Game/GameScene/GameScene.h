@@ -50,7 +50,7 @@ private:
   int titleTextureHandle_ = -1;
   bool isTitleExiting_ = false;
   float titleExitTimer_ = 0.0f;
-  const float kTitleExitDuration_ = 0.7f;
+  const float kTitleExitDuration_ = 2.0f;
 
   // プレイ中の状態 (3レーン、1レーン、ボス)
   enum class PlayingState { ThreeLane, OneLane, Boss };
@@ -164,9 +164,12 @@ public:
 
   void ResetGame();
   void StartGame();
+  void StartPlaying();
   void ReturnToTitle();
 
   void TitleUpdate();
+  void UpdateTitleAutoPilot();
+  void CheckTitleCollisions();
 
   void PlayingUpdate();
 

@@ -685,16 +685,59 @@ void GameScene::ResetGame() {
 }
 
 void GameScene::StartGame() {
-  ResetGame();
-  gameState_ = GameState::Playing;
+  if (isTitleExiting_) return;
+
+  // 1. 開始演出フェーズへ移行（まだ GameState::Title のまま、文字上昇開始）
   isTitleExiting_ = true;
   titleExitTimer_ = 0.0f;
+
+  // 2. 障害物の新規生成をストップ（今出ている障害物は消さずにそのまま流れる）
+  stageSettings_->SetSpawningPaused(true);
+
+  // 3. スタート決定音を再生
   SoundManager::GetInstance()->PlaySE(SoundManager::SE::Start);
+}
+
+void GameScene::StartPlaying() {
+  // 障害物が完全になくなったタイミングで呼ばれる本編ゲームスタート！
+  gameState_ = GameState::Playing;
+  isTitleExiting_ = false;
+  titleExitTimer_ = 0.0f;
+
+  // 1. オートパイロット解除（プレイヤー手動操作へ移行）
+  player_->SetAutoPilot(false);
+  player_->SetInvertedControls(false);
+
+  // 2. 通常プレイ用の障害物スポーン再開＆設定（助走区間12m）
+  stageSettings_->ClearObstacles(12.0f);
+  stageSettings_->SetSpawningPaused(false);
+  stageSettings_->SetItemSpawnChance(0.15f);
+  stageSettings_->SetBaseScrollSpeed(0.2f);
+  stageSettings_->SetScrollAcceleration(0.0001f);
+
+  // 3. スコア・距離などのプレイデータを0から開始
+  currentDistance_ = 0.0f;
+  currentScore_ = 0.0f;
+  bonusEnemyHitCount_ = 0;
+  wasBossBattle_ = false;
+  bossAttackTimer_ = 0.0f;
+  boss_->Reset();
+
+  // 4. エフェクトのクリア
+  effectManager_->ClearHitParticles();
+  effectManager_->ClearBarrier();
+
+  // 5. プレイ用BGM開始
   SoundManager::GetInstance()->PlayBGM(SoundManager::BGM::Play);
 }
 
 void GameScene::ReturnToTitle() {
   ResetGame();
+  player_->SetAutoPilot(true);
+  stageSettings_->SetItemSpawnChance(0.0f);
+  stageSettings_->SetBaseScrollSpeed(0.22f);
+  stageSettings_->SetScrollAcceleration(0.0f);
+  stageSettings_->SetSpawningPaused(false);
   gameState_ = GameState::Title;
   isTitleExiting_ = false;
   titleExitTimer_ = 0.0f;
@@ -868,7 +911,11 @@ void GameScene::Initialize() {
   gameObjectManager_->LoadScene(initialSceneJson_);
 
   // ゲーム状態・カメラ・ステージの初期化（カメラ遷移アニメーションを起こさず即座に初期状態にする）
-  ResetGame();
+  if (gameState_ == GameState::Title) {
+    ReturnToTitle();
+  } else {
+    ResetGame();
+  }
 
   // サウンドマネージャー初期化＆タイトルBGM再生
   SoundManager::GetInstance()->Initialize();
@@ -886,10 +933,6 @@ void GameScene::Update() {
   // タイトル文字の退出（上へ流れる）アニメーション更新
   if (isTitleExiting_) {
     titleExitTimer_ += 1.0f / 60.0f;
-    if (titleExitTimer_ >= kTitleExitDuration_) {
-      isTitleExiting_ = false;
-      titleExitTimer_ = 0.0f;
-    }
   }
 
 #ifdef _DEBUG
@@ -1598,19 +1641,19 @@ void GameScene::DrawTitleHUD(class Draw &draw) {
   float startAlpha = 1.0f;
 
   if (isTitleExiting_) {
-    // スタート時：文字が加速しながら上に流れて消える（EaseInCubic）
+    // スタート時：文字がゆったりと上へ昇っていく演出（ゆっくり上昇）
     float progress =
         std::clamp(titleExitTimer_ / kTitleExitDuration_, 0.0f, 1.0f);
-    float ease = progress * progress * progress;
-    float flyOffset = ease * 750.0f;
+    float ease = 1.0f - std::pow(1.0f - progress, 2.5f);
+    float flyOffset = ease * 380.0f;
 
     currentTitleY = baseTitleY - flyOffset;
     currentSubY = baseSubY - flyOffset;
-    currentStartY = baseStartY - ease * 450.0f;
+    currentStartY = baseStartY - ease * 250.0f;
 
-    mainAlpha = std::clamp(1.0f - progress * 1.25f, 0.0f, 1.0f);
-    subAlpha = std::clamp(0.95f - progress * 1.4f, 0.0f, 1.0f);
-    startAlpha = std::clamp(1.0f - progress * 2.5f, 0.0f, 1.0f);
+    mainAlpha = (progress < 0.65f) ? 1.0f : std::clamp(1.0f - (progress - 0.65f) / 0.35f, 0.0f, 1.0f);
+    subAlpha = (progress < 0.55f) ? 0.95f : std::clamp(0.95f - (progress - 0.55f) / 0.45f, 0.0f, 1.0f);
+    startAlpha = std::clamp(1.0f - progress * 3.5f, 0.0f, 1.0f);
   } else {
     // タイトル待機中：心地よい上下の浮遊モーション
     float hover = sinf(uiTimer_ * 2.2f) * 6.0f;
@@ -1654,7 +1697,8 @@ void GameScene::DrawTitleHUD(class Draw &draw) {
   }
 
   // --- タイトル右下: 操作方法パネル ---
-  if (mainAlpha > 0.01f) {
+  float guideAlpha = isTitleExiting_ ? std::clamp(1.0f - (titleExitTimer_ / 0.4f), 0.0f, 1.0f) : mainAlpha;
+  if (guideAlpha > 0.01f) {
     const float guideCardX = 880.0f;
     const float guideCardY = 465.0f;
     const float guideCardW = 380.0f;
@@ -1663,22 +1707,22 @@ void GameScene::DrawTitleHUD(class Draw &draw) {
     // パネル背景（半透明ダークブルー）
     draw.DrawFillRect(Vector2(guideCardX, guideCardY),
                       Vector2(guideCardW, guideCardH),
-                      Vector4(0.04f, 0.07f, 0.12f, 0.82f * mainAlpha));
+                      Vector4(0.04f, 0.07f, 0.12f, 0.82f * guideAlpha));
     // 上部アクセントバー（アイスブルー）
     draw.DrawFillRect(Vector2(guideCardX, guideCardY),
                       Vector2(guideCardW, 3.0f),
-                      Vector4(0.3f, 0.7f, 1.0f, 0.95f * mainAlpha));
+                      Vector4(0.3f, 0.7f, 1.0f, 0.95f * guideAlpha));
 
     // ヘッダータイトル
     draw.DrawMSDFString("【 操作方法 / CONTROLS 】",
                         Vector2(guideCardX + 16.0f, guideCardY + 12.0f), 22.0f,
-                        Vector4(0.4f, 0.85f, 1.0f, mainAlpha), true,
-                        Vector4(0.0f, 0.1f, 0.25f, mainAlpha), 0.12f, 0.08f);
+                        Vector4(0.4f, 0.85f, 1.0f, guideAlpha), true,
+                        Vector4(0.0f, 0.1f, 0.25f, guideAlpha), 0.12f, 0.08f);
 
     // 区切りライン
     draw.DrawFillRect(Vector2(guideCardX + 14.0f, guideCardY + 42.0f),
                       Vector2(guideCardW - 28.0f, 1.0f),
-                      Vector4(0.2f, 0.4f, 0.6f, 0.6f * mainAlpha));
+                      Vector4(0.2f, 0.4f, 0.6f, 0.6f * guideAlpha));
 
     // 操作リスト
     struct ControlItem {
@@ -1695,12 +1739,12 @@ void GameScene::DrawTitleHUD(class Draw &draw) {
     for (const auto &item : items) {
       // キー名（目立つライトゴールド/イエロー）
       draw.DrawMSDFString(item.key, Vector2(guideCardX + 16.0f, itemY), 17.0f,
-                          Vector4(1.0f, 0.9f, 0.35f, mainAlpha), true,
-                          Vector4(0.0f, 0.0f, 0.0f, mainAlpha), 0.10f, 0.06f);
+                          Vector4(1.0f, 0.9f, 0.35f, guideAlpha), true,
+                          Vector4(0.0f, 0.0f, 0.0f, guideAlpha), 0.10f, 0.06f);
       // 説明（ホワイト）
       draw.DrawMSDFString(item.desc, Vector2(guideCardX + 155.0f, itemY), 16.0f,
-                          Vector4(0.9f, 0.95f, 1.0f, 0.9f * mainAlpha), true,
-                          Vector4(0.0f, 0.0f, 0.0f, mainAlpha), 0.08f, 0.05f);
+                          Vector4(0.9f, 0.95f, 1.0f, 0.9f * guideAlpha), true,
+                          Vector4(0.0f, 0.0f, 0.0f, guideAlpha), 0.08f, 0.05f);
       itemY += 34.0f;
     }
   }
@@ -1894,14 +1938,218 @@ void GameScene::PlayingUpdate() {
 }
 
 void GameScene::TitleUpdate() {
-  // 背景シーンの更新（スクロールなし、オブジェクト描画準備）
-  gameObjectManager_->UpdateAll(view, 0.0f);
-  stageSettings_->EditorUpdate(view);
+  float timeScale = EditorManager::GetPlaySpeed();
+  float speedMultiplier = 1.0f;
 
-  // スペースキーまたはゲームパッドAボタンでゲーム開始
-  if (Input::PushKey(DIK_SPACE) ||
-      GamePadInput::PressButton(XINPUT_GAMEPAD_A)) {
-    StartGame();
+  // タイトル中は心地よい見やすい一定スクロール速度をキープ
+  stageSettings_->SetBaseScrollSpeed(0.22f);
+  stageSettings_->SetScrollAcceleration(0.0f);
+
+  // スタート移行中（isTitleExiting_）なら障害物の新規生成を停止、待機中は生成する
+  stageSettings_->SetSpawningPaused(isTitleExiting_);
+
+  // 1. オートパイロットAIによる回避・アクション判断
+  UpdateTitleAutoPilot();
+
+  // 2. プレイヤーのレーン制限を更新
+  player_->SetLaneLimits(stageSettings_->GetMinLaneIndex(),
+                         stageSettings_->GetMaxLaneIndex(),
+                         stageSettings_->GetLaneWidth());
+  player_->SetInvertedControls(false);
+
+  // 3. 3Dオブジェクトの一括更新（プレイヤーのアニメーションと移動を前進させる）
+  gameObjectManager_->UpdateAll(view, speedMultiplier * timeScale);
+
+  // 4. ステージ・障害物のスクロール更新
+  stageSettings_->Update(view, timeScale);
+
+  // 5. タイトル専用の衝突判定（ゲームオーバーにならず、雪だるまは吹っ飛び、通常障害物も安全処理）
+  CheckTitleCollisions();
+
+  // 6. エフェクト更新
+  effectManager_->PlayingUpdate(view, player_->GetTransform().translate);
+
+  // 7. プレイヤーの足元に砂煙エフェクトを発生（走っている躍動感）
+  if (!player_->GetIsRolling() && player_->GetTransform().translate.y <= 3.01f) {
+    effectManager_->EmitDust(player_->GetTransform().translate);
+  }
+
+  // 8. 開始演出中の完了判定、またはキー入力受付
+  if (isTitleExiting_) {
+    // 画面内にアクティブな障害物が残っているかチェック
+    bool hasActiveObstacles = false;
+    for (int i = 0; i < stageSettings_->GetMaxObstacles(); i++) {
+      Obstacle* obs = stageSettings_->GetObstacle(i);
+      if (obs && obs->GetIsActive()) {
+        hasActiveObstacles = true;
+        break;
+      }
+    }
+
+    // 障害物が完全になくなったタイミングで正式にゲームスタート！
+    // （※最低でも文字の上昇が少し進んだ titleExitTimer_ >= 1.0f、またはタイムアウト時）
+    if ((!hasActiveObstacles && titleExitTimer_ >= 1.0f) || (titleExitTimer_ >= kTitleExitDuration_ + 3.0f)) {
+      StartPlaying();
+    }
+  } else {
+    // スペースキーまたはゲームパッドAボタンでゲーム開始シーケンス突入
+    if (Input::PushKey(DIK_SPACE) ||
+        GamePadInput::PressButton(XINPUT_GAMEPAD_A)) {
+      StartGame();
+    }
+  }
+}
+
+void GameScene::UpdateTitleAutoPilot() {
+  if (!player_) return;
+
+  int currentLane = player_->GetLaneIndex();
+  int targetLane = player_->GetTargetLaneIndex();
+  // レーン移動中の場合は目標レーンを基準に障害物を判断
+  int activeLane = player_->IsChangingLane() ? targetLane : currentLane;
+
+  float laneWidth = stageSettings_->GetLaneWidth();
+  if (laneWidth <= 0.0f) laneWidth = 2.0f;
+
+  float playerZ = player_->GetTransform().translate.z;
+
+  // 各レーン（-1: 左, 0: 中央, 1: 右）における直近の障害物情報
+  struct LaneObstacle {
+    Obstacle* obstacle = nullptr;
+    float distZ = 999.0f;
+    Obstacle::Type type = Obstacle::Type::Wall;
+  };
+  LaneObstacle laneObs[3]; // index 0: -1(Left), 1: 0(Center), 2: 1(Right)
+
+  Obstacle* imminentObs = nullptr;
+  float minActiveDistZ = 999.0f;
+
+  for (int i = 0; i < stageSettings_->GetMaxObstacles(); i++) {
+    Obstacle* obs = stageSettings_->GetObstacle(i);
+    if (!obs || !obs->GetIsActive() || obs->GetIsHit()) continue;
+
+    float relZ = obs->GetTransform().translate.z - playerZ;
+    // プレイヤーの背後へ通り過ぎたもの（-1.5m未満）は無視
+    if (relZ < -1.5f) continue;
+
+    float obsX = obs->GetTransform().translate.x;
+    int obsLane = static_cast<int>(std::round(obsX / laneWidth));
+    if (obsLane < -1) obsLane = -1;
+    if (obsLane > 1) obsLane = 1;
+
+    int laneArrIdx = obsLane + 1; // 0, 1, 2
+    if (relZ < laneObs[laneArrIdx].distZ) {
+      laneObs[laneArrIdx].obstacle = obs;
+      laneObs[laneArrIdx].distZ = relZ;
+      laneObs[laneArrIdx].type = obs->GetType();
+    }
+
+    // プレイヤーが現在いる（または移動中の）レーンにある直近の障害物
+    if (obsLane == activeLane && relZ > -0.5f && relZ < minActiveDistZ) {
+      minActiveDistZ = relZ;
+      imminentObs = obs;
+    }
+  }
+
+  // 直近に迫っている障害物の回避アクション
+  if (imminentObs) {
+    Obstacle::Type type = imminentObs->GetType();
+
+    // Low（倒木・ジャンプで飛び越える）
+    if (type == Obstacle::Type::Low) {
+      if (minActiveDistZ <= 7.2f && minActiveDistZ >= 1.5f) {
+        if (!player_->GetIsJumping()) {
+          player_->TriggerJump();
+        }
+      }
+    }
+    // High（氷のアーチ・スライディングで潜り抜ける）
+    else if (type == Obstacle::Type::High) {
+      if (minActiveDistZ <= 7.5f && minActiveDistZ >= 1.5f) {
+        if (!player_->GetIsRolling() && !player_->GetIsJumping()) {
+          player_->TriggerRoll();
+        }
+      }
+    }
+    // Wall（壁）またはその他の避けられない障害物（レーン移動で回避）
+    else if (type == Obstacle::Type::Wall ||
+             type == Obstacle::Type::BossAttack ||
+             type == Obstacle::Type::BossAttackReflectable) {
+      if (minActiveDistZ <= 13.5f && !player_->IsChangingLane() && player_->CanAct()) {
+        // 空いている安全な隣接レーンを探して移動
+        if (activeLane == 0) {
+          // 中央にいる場合: 左(-1)と右(+1)を比較
+          float leftDist = laneObs[0].distZ;
+          float rightDist = laneObs[2].distZ;
+
+          if (leftDist > rightDist && leftDist > 8.0f) {
+            player_->TriggerMoveLeft();
+          } else if (rightDist > 8.0f) {
+            player_->TriggerMoveRight();
+          } else if (leftDist > 4.0f) {
+            player_->TriggerMoveLeft();
+          } else if (rightDist > 4.0f) {
+            player_->TriggerMoveRight();
+          }
+        } else if (activeLane == -1) {
+          // 左にいる場合: 中央(0)が安全なら右へ移動
+          float centerDist = laneObs[1].distZ;
+          if (centerDist > 7.0f) {
+            player_->TriggerMoveRight();
+          }
+        } else if (activeLane == 1) {
+          // 右にいる場合: 中央(0)が安全なら左へ移動
+          float centerDist = laneObs[1].distZ;
+          if (centerDist > 7.0f) {
+            player_->TriggerMoveLeft();
+          }
+        }
+      }
+    }
+  }
+
+  // 目の前に差し迫った危険がない場合、安全に中央（0）へ戻る（中央復帰性）
+  if ((!imminentObs || minActiveDistZ > 16.0f) && !player_->IsChangingLane() && player_->CanAct()) {
+    if (activeLane != 0) {
+      float centerDist = laneObs[1].distZ;
+      if (centerDist > 16.0f) {
+        if (activeLane < 0) {
+          player_->TriggerMoveRight();
+        } else {
+          player_->TriggerMoveLeft();
+        }
+      }
+    }
+  }
+}
+
+void GameScene::CheckTitleCollisions() {
+  const Transform& playerTransform = player_->GetTransform();
+  float playerHeight = player_->GetIsRolling() ? 0.5f : 1.5f;
+  AABB playerAABB = Collision::MakeAABB(playerTransform, 0.8f, playerHeight, 0.8f);
+
+  for (int i = 0; i < stageSettings_->GetMaxObstacles(); i++) {
+    Obstacle* obstacle = stageSettings_->GetObstacle(i);
+    if (!obstacle || !obstacle->GetIsActive() || obstacle->GetIsHit()) continue;
+
+    AABB obstacleAABB = Collision::MakeAABB(
+        obstacle->GetTransform(), obstacle->GetCollisionWidth(),
+        obstacle->GetCollisionHeight(), obstacle->GetCollisionDepth());
+
+    if (Collision::CheckAABB(playerAABB, obstacleAABB)) {
+      if (obstacle->GetType() == Obstacle::Type::Bonus) {
+        // 雪だるまに当たった！吹き飛ばしてボーナス演出
+        obstacle->OnBlowAway();
+        bonusEnemyHitCount_++;
+        SoundManager::GetInstance()->PlaySE(SoundManager::SE::BonusHit);
+        effectManager_->EmitShockwave(player_->GetTransform().translate);
+      } else {
+        // 万が一通常の障害物に接触してもゲームオーバーにせず吹き飛ばす（セーフティネット）
+        obstacle->OnBlowAway();
+        SoundManager::GetInstance()->PlaySE(SoundManager::SE::BarrierBreak);
+        effectManager_->EmitHitEffect(player_->GetTransform().translate);
+      }
+    }
   }
 }
 

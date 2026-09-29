@@ -621,6 +621,29 @@ void StageSettings::SpawnObstacles(float z) {
   }
 }
 
+void StageSettings::ClearObstacles(float safeDistance) {
+  // 画面内および奥の障害物を全て非アクティブにしてクリアにする
+  for (int i = 0; i < kMaxObstacles_; i++) {
+    if (obstacles_[i]) {
+      obstacles_[i]->Deactivate();
+    }
+  }
+  nextObstacleIndex_ = 0;
+
+  // ゲーム開始直後に安全に走れる助走区間（約15m）を設ける
+  distanceSinceLastSpawn_ = -safeDistance;
+  distanceSinceLastCameraItem_ = 0.0f;
+
+  CalculateNextObstacleInterval();
+
+  // アイテムのクールタイムを開始時用に設定
+  itemCoolDowns_[Obstacle::Type::Bonus].currentTimer = 0.0f;
+  itemCoolDowns_[Obstacle::Type::BarrierItem].currentTimer = 0.0f;
+  itemCoolDowns_[Obstacle::Type::ClearItem].currentTimer = 0.0f;
+  itemCoolDowns_[Obstacle::Type::CameraItem].currentTimer = 10.0f;
+  itemCoolDowns_[Obstacle::Type::BossItem].currentTimer = 20.0f;
+}
+
 void StageSettings::Reset() {
   isGameOver_ = false;
   isNarrowingSection_ = false;
