@@ -783,6 +783,15 @@ void GameScene::ReturnToTitle() {
   isTitleExiting_ = false;
   titleExitTimer_ = 0.0f;
   titleCameraAngle_ = 0.0f;
+  for (int i = 0; i < 5; ++i) {
+    if (titlePenguinSprites_[i]) {
+      Transform pt = titlePenguinSprites_[i]->GetTransform();
+      pt.translate = {-300.0f, 460.0f, 0.0f};
+      pt.rotate = {0.0f, 0.0f, 0.0f};
+      titlePenguinSprites_[i]->SetTransform(pt);
+      titlePenguinSprites_[i]->SettingWvp();
+    }
+  }
   SoundManager::GetInstance()->PlayBGM(SoundManager::BGM::Title);
 }
 
@@ -800,6 +809,23 @@ void GameScene::Initialize() {
   titleSprite_ = std::make_unique<Sprite>();
   titleSprite_->Initialize(titleSpriteData_, titleTextureHandle_);
   titleSprite_->GetMaterial()->SetColor({1.0f, 1.0f, 1.0f, 1.0f});
+
+  // タイトル用ペンギン走りスプライトの生成 (5体 ＞の字隊形用)
+  titlePenguinTextureHandle_ = texture_->CreateTexture("Resources/Texture/penguin_run.png");
+  for (int i = 0; i < 5; ++i) {
+    SpriteData penguinSpriteData;
+    penguinSpriteData.transform.scale = {1.0f, 1.0f, 1.0f};
+    penguinSpriteData.transform.translate = {-300.0f, 460.0f, 0.0f};
+    penguinSpriteData.transform.rotate = {0.0f, 0.0f, 0.0f};
+    penguinSpriteData.size = {130.0f, 130.0f};
+    penguinSpriteData.pivot = {0.5f, 0.5f};
+    penguinSpriteData.textureArea[0] = {0.0f, 0.0f};
+    penguinSpriteData.textureArea[1] = {0.5f, 1.0f};
+    penguinSpriteData.scaleMode = SpriteScaleMode::Fit;
+    titlePenguinSprites_[i] = std::make_unique<Sprite>();
+    titlePenguinSprites_[i]->Initialize(penguinSpriteData, titlePenguinTextureHandle_);
+    titlePenguinSprites_[i]->GetMaterial()->SetColor({1.0f, 1.0f, 1.0f, 1.0f});
+  }
 
   if (!EditorManager::IsPlaying()) {
     gameState_ = GameState::Editor;
@@ -1834,6 +1860,83 @@ void GameScene::DrawTitleHUD(class Draw &draw) {
       itemY += 34.0f;
     }
   }
+
+  // --- スタート時のペンギン疾走演出 (5体 ＞の字フォーメーション) ---
+  if (isTitleExiting_ && titlePenguinSprites_[0]) {
+    float progress = std::clamp(titleExitTimer_ / kTitleExitDuration_, 0.0f, 1.0f);
+
+    // ゆっくり等速〜なだらかなイーズで心地よいスピード感で右へ進む
+    float runProgress = progress * progress * (3.0f - 2.0f * progress) * 0.15f + progress * 0.85f;
+    float runStartX = -160.0f; // 先頭の開始X（一番後ろのペンギンも画面左外からスタート）
+    float runEndX = 1580.0f;   // 先頭の終了X（一番後ろのペンギンも画面右外へ完全に抜ける）
+    float leaderX = runStartX + (runEndX - runStartX) * runProgress;
+
+    const float baseY = 460.0f;
+
+    // 「＞の字」隊形定義 (先頭が中央、上下斜め後ろに広がる)
+    struct FormationParam {
+      float offsetX;
+      float offsetY;
+      float animTimeOffset; // コマ送りの時間ズレ（群れとしての自然な躍動感）
+      float scale;          // 遠近感
+    };
+
+    const FormationParam kFormations[5] = {
+      {   0.0f,    0.0f, 0.00f, 1.05f }, // 0: 中央先頭（リーダー・少し大きめ）
+      { -75.0f,  -48.0f, 0.08f, 0.98f }, // 1: 斜め上（前）
+      { -75.0f,   48.0f, 0.16f, 0.98f }, // 2: 斜め下（前）
+      { -150.0f, -96.0f, 0.24f, 0.90f }, // 3: 最上（後ろ）
+      { -150.0f,  96.0f, 0.32f, 0.90f }, // 4: 最下（後ろ）
+    };
+
+    // 描画順序: 後ろのペンギンから描画して、手前の先頭が一番手前に重なるようにする
+    const int drawOrder[5] = { 3, 4, 1, 2, 0 };
+
+    for (int idx : drawOrder) {
+      if (!titlePenguinSprites_[idx]) continue;
+
+      const auto& form = kFormations[idx];
+      float posX = leaderX + form.offsetX;
+      float posY = baseY + form.offsetY;
+
+      // アニメーションコマ送り (約1秒間に10回切り替え = 少しゆったりトコトコ走る)
+      float timerWithOffset = titleExitTimer_ + form.animTimeOffset;
+      int animFrame = (static_cast<int>(timerWithOffset * 10.0f)) % 2;
+      Vector2 uvArea[2];
+      if (animFrame == 0) {
+        uvArea[0] = {0.0f, 0.0f};
+        uvArea[1] = {0.5f, 1.0f};
+      } else {
+        uvArea[0] = {0.5f, 0.0f};
+        uvArea[1] = {1.0f, 1.0f};
+      }
+
+      // 上下のボビング（跳ね）と少しの前傾姿勢
+      float bobbing = (animFrame == 1) ? -5.0f * form.scale : 0.0f;
+      float tilt = -0.06f;
+
+      Transform pTransform;
+      pTransform.scale = {form.scale, form.scale, 1.0f};
+      pTransform.rotate = {0.0f, 0.0f, tilt};
+      pTransform.translate = {posX, posY + bobbing, 0.0f};
+
+      titlePenguinSprites_[idx]->SetTransform(pTransform);
+      titlePenguinSprites_[idx]->SetTextureArea(uvArea);
+      titlePenguinSprites_[idx]->UpdateVertexBuffer();
+      titlePenguinSprites_[idx]->SettingWvp();
+
+      // 各ペンギンの背後に風の疾走ラインを描画（画面内にいる時）
+      if (posX > 0.0f && posX < 1360.0f) {
+        float trailAlpha = std::clamp(runProgress * 1.5f, 0.0f, 0.75f) * form.scale;
+        draw.DrawFillRect(Vector2(posX - 90.0f * form.scale, posY + 5.0f + bobbing),
+                          Vector2(70.0f * form.scale, 2.5f),
+                          Vector4(0.85f, 0.95f, 1.0f, trailAlpha * 0.7f));
+      }
+
+      // ペンギンスプライトを描画
+      draw.DrawSprite(titlePenguinSprites_[idx].get());
+    }
+  }
 }
 
 void GameScene::PlayerHitUpdate() {
@@ -2076,8 +2179,8 @@ void GameScene::TitleUpdate() {
     }
 
     // 障害物が完全になくなったタイミングで正式にゲームスタート！
-    // （※最低でも文字の上昇が少し進んだ titleExitTimer_ >= 1.0f、またはタイムアウト時）
-    if ((!hasActiveObstacles && titleExitTimer_ >= 1.0f) || (titleExitTimer_ >= kTitleExitDuration_ + 3.0f)) {
+    // （※ペンギンが右端まで走り抜けきる titleExitTimer_ >= kTitleExitDuration_、またはタイムアウト時）
+    if ((!hasActiveObstacles && titleExitTimer_ >= kTitleExitDuration_) || (titleExitTimer_ >= kTitleExitDuration_ + 3.0f)) {
       StartPlaying();
     }
   } else {

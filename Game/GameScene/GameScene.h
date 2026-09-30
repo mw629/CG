@@ -50,7 +50,11 @@ private:
   int titleTextureHandle_ = -1;
   bool isTitleExiting_ = false;
   float titleExitTimer_ = 0.0f;
-  const float kTitleExitDuration_ = 2.0f;
+  const float kTitleExitDuration_ = 3.0f;
+
+  // タイトル用ペンギン疾走演出 (5体)
+  std::unique_ptr<Sprite> titlePenguinSprites_[5];
+  int titlePenguinTextureHandle_ = -1;
 
   // タイトル用カメラ旋回（オービット）
   bool isTitleOrbitCamera_ = true;
