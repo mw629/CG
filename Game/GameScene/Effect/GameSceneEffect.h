@@ -18,9 +18,6 @@ public:
   void EditorUpdate(const Matrix4x4 &view);
 
   void EmitDust(const Vector3 &playerPos);
-  void EmitShockwave(const Vector3 &playerPos);
-  void EmitHitEffect(const Vector3 &playerPos);
-  void ClearHitParticles();
 
   // バリア演出
   void EmitBarrier(const Vector3 &playerPos);
@@ -35,9 +32,7 @@ private:
   void UpdateBarrier(const Matrix4x4 &view, const Vector3 &playerPos,
                      float deltaTime = 1.0f / 60.0f);
 
-  std::unique_ptr<Emitter> hitEffect_;
   std::unique_ptr<Emitter> dustEffect_;
-  std::unique_ptr<Emitter> shockwaveEffect_;
 
   // バリア
   std::unique_ptr<HexBarrier> barrier_;

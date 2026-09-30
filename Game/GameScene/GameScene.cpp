@@ -550,7 +550,6 @@ void GameScene::ImGui() {
     if (ImGui::Button("Give Barrier (バリア付与)")) {
       player_->SetHasBarrier(true);
       effectManager_->EmitBarrier(player_->GetTransform().translate);
-      effectManager_->EmitShockwave(player_->GetTransform().translate);
     }
     ImGui::SameLine();
     if (ImGui::Button("Break Barrier (バリア破壊/解除)")) {
@@ -560,7 +559,6 @@ void GameScene::ImGui() {
 
     ImGui::Separator();
     if (ImGui::Button("Clear All Obstacles (全障害物吹き飛ばし)")) {
-      effectManager_->EmitShockwave(player_->GetTransform().translate);
       for (int j = 0; j < stageSettings_->GetMaxObstacles(); j++) {
         Obstacle *obs = stageSettings_->GetObstacle(j);
         if (obs && obs->GetIsActive() &&
@@ -574,7 +572,6 @@ void GameScene::ImGui() {
 
     if (ImGui::Button("Trigger Camera Item (視点切り替え)")) {
       ChangePlayingState(PlayingState::OneLane);
-      effectManager_->EmitShockwave(player_->GetTransform().translate);
     }
     ImGui::SameLine();
     if (ImGui::Button("Trigger Boss Item (ボス戦移行)")) {
@@ -587,7 +584,6 @@ void GameScene::ImGui() {
         }
       }
       ChangePlayingState(PlayingState::Boss, true);
-      effectManager_->EmitShockwave(player_->GetTransform().translate);
     }
 
     ImGui::Separator();
@@ -623,14 +619,6 @@ void GameScene::ImGui() {
     ImGui::Text("Effect Triggers:");
     if (ImGui::Button("Emit Dust")) {
       effectManager_->EmitDust(player_->GetTransform().translate);
-    }
-    ImGui::SameLine();
-    if (ImGui::Button("Emit Shockwave")) {
-      effectManager_->EmitShockwave(player_->GetTransform().translate);
-    }
-    ImGui::SameLine();
-    if (ImGui::Button("Emit Hit Spark")) {
-      effectManager_->EmitHitEffect(player_->GetTransform().translate);
     }
   }
 
@@ -698,7 +686,6 @@ void GameScene::ResetGame() {
   player_->Reset();
   boss_->Reset();
   bossAttackTimer_ = 0.0f;
-  effectManager_->ClearHitParticles();
   effectManager_->ClearBarrier();
   currentDistance_ = 0.0f;
   currentScore_ = 0.0f;
@@ -772,7 +759,6 @@ void GameScene::StartPlaying() {
   boss_->Reset();
 
   // 4. エフェクトのクリア
-  effectManager_->ClearHitParticles();
   effectManager_->ClearBarrier();
 
   // 5. プレイ用BGM開始
@@ -2041,10 +2027,9 @@ void GameScene::PlayingUpdate() {
         if (!obs->GetIsActive())
           continue;
 
-        // 着地時の砂煙・衝撃波エフェクト
+        // 着地時の砂煙エフェクト
         if (obs->GetJustLanded()) {
           effectManager_->EmitDust(obs->GetTransform().translate);
-          effectManager_->EmitShockwave(obs->GetTransform().translate);
           SoundManager::GetInstance()->PlaySE(SoundManager::SE::BossLand);
         }
 
@@ -2067,7 +2052,6 @@ void GameScene::PlayingUpdate() {
                 (lane == 2 && push3)) {
               obs->SetReflected(true);
               obs->SetReflectedTarget(boss_->GetTransform().translate);
-              effectManager_->EmitShockwave(obs->GetTransform().translate);
               SoundManager::GetInstance()->PlaySE(
                   SoundManager::SE::BossReflect);
             }
@@ -2080,7 +2064,6 @@ void GameScene::PlayingUpdate() {
           if (Collision::CheckAABB(bossAABB, obsAABB)) {
             obs->Deactivate(); // 障害物を消す
             boss_->OnDamage();
-            effectManager_->EmitHitEffect(boss_->GetTransform().translate);
             SoundManager::GetInstance()->PlaySE(SoundManager::SE::BossHit);
 
             if (boss_->GetState() == BossState::Defeat) {
@@ -2374,12 +2357,10 @@ void GameScene::CheckTitleCollisions() {
         obstacle->OnBlowAway();
         bonusEnemyHitCount_++;
         SoundManager::GetInstance()->PlaySE(SoundManager::SE::BonusHit);
-        effectManager_->EmitShockwave(player_->GetTransform().translate);
       } else {
         // 万が一通常の障害物に接触してもゲームオーバーにせず吹き飛ばす（セーフティネット）
         obstacle->OnBlowAway();
         SoundManager::GetInstance()->PlaySE(SoundManager::SE::BarrierBreak);
-        effectManager_->EmitHitEffect(player_->GetTransform().translate);
       }
     }
   }
@@ -2443,9 +2424,6 @@ void GameScene::CheckCollisions() {
         bonusEnemyHitCount_++; // スコア（距離）ボーナス
         SoundManager::GetInstance()->PlaySE(SoundManager::SE::BonusHit);
 
-        // プレイヤーの足元にRingエフェクトを出す
-        effectManager_->EmitShockwave(player_->GetTransform().translate);
-
         continue; // ゲームオーバーにはならず、次の判定へ
       }
 
@@ -2453,9 +2431,6 @@ void GameScene::CheckCollisions() {
         obstacle->OnHit();
         ChangePlayingState(PlayingState::OneLane);
         SoundManager::GetInstance()->PlaySE(SoundManager::SE::ItemGet);
-
-        // プレイヤーの足元にRingエフェクトを出す(ボーナスと同様の演出)
-        effectManager_->EmitShockwave(player_->GetTransform().translate);
 
         continue; // ゲームオーバーにはならず、次の判定へ
       }
@@ -2465,14 +2440,12 @@ void GameScene::CheckCollisions() {
         player_->SetHasBarrier(true);
         SoundManager::GetInstance()->PlaySE(SoundManager::SE::Barrier);
         effectManager_->EmitBarrier(player_->GetTransform().translate);
-        effectManager_->EmitShockwave(player_->GetTransform().translate);
         continue;
       }
 
       if (obstacle->GetType() == Obstacle::Type::ClearItem) {
         obstacle->OnHit();
         SoundManager::GetInstance()->PlaySE(SoundManager::SE::ClearBomb);
-        effectManager_->EmitShockwave(player_->GetTransform().translate);
 
         // 画面内の障害物を吹き飛ばす
         for (int j = 0; j < stageSettings_->GetMaxObstacles(); j++) {
@@ -2499,7 +2472,6 @@ void GameScene::CheckCollisions() {
           }
         }
         ChangePlayingState(PlayingState::Boss);
-        effectManager_->EmitShockwave(player_->GetTransform().translate);
         continue;
       }
 
@@ -2518,7 +2490,6 @@ void GameScene::CheckCollisions() {
         player_->SetHasBarrier(false);
         obstacle->OnBlowAway();
         SoundManager::GetInstance()->PlaySE(SoundManager::SE::BarrierBreak);
-        effectManager_->EmitHitEffect(player_->GetTransform().translate);
         effectManager_->BreakBarrier(player_->GetTransform().translate);
         continue; // ゲームオーバーにならず次へ
       }
@@ -2537,8 +2508,6 @@ void GameScene::CheckCollisions() {
       bool isTrip = (obstacle->GetType() == Obstacle::Type::Low);
       player_->OnHit(isTrip);
 
-      // エフェクトの発生位置をプレイヤーから取得する
-      effectManager_->EmitHitEffect(player_->GetTransform().translate);
 
       // ランキング更新
       UpdateRanking();

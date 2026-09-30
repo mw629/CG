@@ -5,9 +5,7 @@
 #include <imgui.h>
 
 GameSceneEffect::GameSceneEffect() {
-  hitEffect_ = std::make_unique<Emitter>();
   dustEffect_ = std::make_unique<Emitter>();
-  shockwaveEffect_ = std::make_unique<Emitter>();
   barrier_ = std::make_unique<HexBarrier>();
 }
 
@@ -18,41 +16,6 @@ void GameSceneEffect::Initialize() {
     barrier_->SetRadius(0.5f);
     barrier_->SetShape(HexBarrierShape::Honeycomb);
   }
-  // ヒットエフェクトの初期化（ヒットスパーク演出）
-  EmitterData hitEmitter;
-  hitEmitter.transform.scale = {0.0f, 0.0f, 0.0f}; // 中心の一点から発生させる
-  hitEmitter.count = 40;                           // 粒を増やして派手にする
-  hitEmitter.frequency = 9999.0f; // 自動発生させず、手動のEmitのみにする
-  EffectDefinitionData hitData;
-  hitData.color = {1.0f, 1.0f, 1.0f, 1.0f}; // 白色
-  hitData.lifeTime = 1.0f; // ライフ（余韻の長さ）を少し短く調整
-  hitData.transform.scale = {
-      0.1f, 0.8f,
-      0.1f}; // エミッタ（パーティクル）のサイズを調整して見やすくする
-
-  // テクスチャ指定なしなら自動的にcircle.pngが使われます
-  hitEffect_->Initialize(hitEmitter, hitData, EffectShape::Plane);
-  hitEffect_->SetBlend(
-      BlendMode::kBlendModeAdd); // 黒い部分を透過させるために加算ブレンドに戻す
-  hitEffect_->name_ = "Hit Effect";
-  hitEffect_->generatorBehavior = [](EffectDefinitionData &p) {
-    // 中心から円状に放射状に広がるためのランダムな方向
-    float randX = ((float)rand() / RAND_MAX - 0.5f) * 2.0f;
-    float randY = ((float)rand() / RAND_MAX - 0.5f) * 2.0f;
-
-    // 位置を固定するために速度を0にする
-    p.velocity = {0.0f, 0.0f, 0.0f};
-
-    // 長さに少しランダムなばらつきを持たせる
-    p.transform.scale.y = 0.6f + ((float)rand() / RAND_MAX) * 0.8f;
-
-    // Y軸ベースの細長いPlaneを、放射状に向きを合わせる
-    p.transform.rotate.z = std::atan2(randY, randX) - 3.14159f / 2.0f;
-
-    // X, Yの回転を消して純粋にカメラに対してフラットな星型にする
-    p.transform.rotate.x = 0.0f;
-    p.transform.rotate.y = 0.0f;
-  };
 
   dustEffect_->Initialize();
   dustEffect_->LoadFromJson("Dustparticle");
@@ -63,27 +26,6 @@ void GameSceneEffect::Initialize() {
   strncpy_s(dustEffect_->saveFileName_, sizeof(dustEffect_->saveFileName_),
             "Dustparticle", _TRUNCATE);
 
-  // ボーナスヒット時のショックウェーブ（Ring）の初期化
-  EmitterData shockwaveEmitter;
-  shockwaveEmitter.transform.scale = {0.1f, 0.1f, 0.1f};
-  shockwaveEmitter.count = 1;
-  shockwaveEmitter.frequency = 9999.0f; // 手動Emit
-  EffectDefinitionData shockwaveData;
-  shockwaveData.color = {1.0f, 1.0f, 0.0f, 1.0f}; // 黄色（Yellow）
-  shockwaveData.lifeTime = 0.5f;                  // スパッと消えるように短め
-  shockwaveData.transform.scale = {0.1f, 0.1f, 0.1f};
-  shockwaveEffect_->Initialize(shockwaveEmitter, shockwaveData,
-                               EffectShape::Ring);
-  shockwaveEffect_->SetBlend(
-      BlendMode::
-          kBlendModeNone); // 加算だと背景と同化して薄くなるため、通常ブレンドで濃く（クッキリ）表示させる
-  shockwaveEffect_->name_ = "Bonus Shockwave";
-  shockwaveEffect_->generatorBehavior = [](EffectDefinitionData &p) {
-    p.velocity = {0.0f, 0.0f, 0.0f}; // 発生時は移動なし
-    p.transform.rotate.x =
-        3.14159265f /
-        2.0f; // 盾（縦）になっているリングを90度回転させて地面と平行（横）にする
-  };
 }
 
 void GameSceneEffect::PlayingUpdate(const Matrix4x4 &view,
@@ -92,12 +34,6 @@ void GameSceneEffect::PlayingUpdate(const Matrix4x4 &view,
   if (dustEffect_) {
     dustEffect_->Update(view);
   }
-  if (hitEffect_) {
-    hitEffect_->Update(view);
-  }
-  if (shockwaveEffect_) {
-    shockwaveEffect_->Update(view);
-  }
 }
 
 void GameSceneEffect::PlayerHitUpdate(const Matrix4x4 &view) {
@@ -105,24 +41,12 @@ void GameSceneEffect::PlayerHitUpdate(const Matrix4x4 &view) {
   if (dustEffect_) {
     dustEffect_->Update(view);
   }
-  if (hitEffect_) {
-    hitEffect_->Update(view);
-  }
-  if (shockwaveEffect_) {
-    shockwaveEffect_->Update(view);
-  }
 }
 
 void GameSceneEffect::EditorUpdate(const Matrix4x4 &view) {
   UpdateBarrier(view, lastPlayerPos_);
   if (dustEffect_) {
     dustEffect_->SettingWvp(view);
-  }
-  if (hitEffect_) {
-    hitEffect_->SettingWvp(view);
-  }
-  if (shockwaveEffect_) {
-    shockwaveEffect_->SettingWvp(view);
   }
 }
 
@@ -134,25 +58,7 @@ void GameSceneEffect::EmitDust(const Vector3 &playerPos) {
   dustEffect_->Emit();
 }
 
-void GameSceneEffect::EmitShockwave(const Vector3 &playerPos) {
-  EmitterData ringData = shockwaveEffect_->GetEmitterData();
-  ringData.transform.translate = playerPos;
-  ringData.transform.translate.y -=
-      0.4f; // 足元より少し上（腰から足の間くらい）に設定
-  shockwaveEffect_->SetEmitterData(ringData);
-  shockwaveEffect_->Emit();
-}
 
-void GameSceneEffect::EmitHitEffect(const Vector3 &playerPos) {
-  EmitterData emData = hitEffect_->GetEmitterData();
-  emData.transform.translate = playerPos;
-  emData.transform.translate.y += 4.0f; // プレイヤーの体より上に発生させる
-  emData.count = 10;                    // 数を半分にする
-  hitEffect_->SetEmitterData(emData);
-  hitEffect_->Emit();
-}
-
-void GameSceneEffect::ClearHitParticles() { hitEffect_->ClearParticles(); }
 
 void GameSceneEffect::EmitBarrier(const Vector3 &playerPos) {
   barrierState_ = BarrierEffectState::Deploying;
@@ -274,12 +180,6 @@ void GameSceneEffect::Draw(class Draw &draw) {
   if (dustEffect_) {
     dustEffect_->Draw(draw);
   }
-  if (hitEffect_) {
-    hitEffect_->Draw(draw);
-  }
-  if (shockwaveEffect_) {
-    shockwaveEffect_->Draw(draw);
-  }
 
   // バリア描画
   if (barrier_ && barrierState_ != BarrierEffectState::Inactive) {
@@ -345,10 +245,6 @@ void GameSceneEffect::ImGui() {
   if (ImGui::CollapsingHeader("Particles")) {
     if (dustEffect_)
       dustEffect_->ImGui();
-    if (hitEffect_)
-      hitEffect_->ImGui();
-    if (shockwaveEffect_)
-      shockwaveEffect_->ImGui();
   }
 #endif
 }
