@@ -1,5 +1,6 @@
 #include "Texture.h"
 #include "Load.h"
+#include "Core/LogHandler.h"
 
 
 namespace {
@@ -28,7 +29,16 @@ int Texture::CreateTexture(const std::string& filePath)
 
 	const DirectX::TexMetadata& metaData = mipImages.GetMetadata();
 	Microsoft::WRL::ComPtr<ID3D12Resource>  textureResource = CreateTextureResource(device_, metaData);
+	if (!textureResource) {
+		LOG_ERROR(std::format("CreateTexture failed: could not create resource for '{}'. Falling back to default texture.", filePath));
+		return 0;
+	}
+
 	Microsoft::WRL::ComPtr<ID3D12Resource>  intermediateResource = UploadTextureData(textureResource.Get(), mipImages, device_, commandList_);
+	if (!intermediateResource) {
+		LOG_ERROR(std::format("CreateTexture failed: could not upload texture data for '{}'. Falling back to default texture.", filePath));
+		return 0;
+	}
 
 	//実際にShaderResourceView
 

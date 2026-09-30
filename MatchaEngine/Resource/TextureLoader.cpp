@@ -82,5 +82,15 @@ D3D12_GPU_DESCRIPTOR_HANDLE TextureLoader::GetTexture(int index)
 	return D3D12_GPU_DESCRIPTOR_HANDLE{ 0 };
 }
 
+void TextureLoader::ReleaseIntermediateResources()
+{
+	for (auto& [path, tex] : textureMap_) {
+		if (tex.intermediateResource) {
+			tex.intermediateResource.Reset();
+		}
+	}
+}
+
+
 
 

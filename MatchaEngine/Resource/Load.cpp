@@ -625,6 +625,10 @@ Microsoft::WRL::ComPtr<ID3D12Resource> CreateTextureResource(ID3D12Device* devic
 [[nodiscard]]
 Microsoft::WRL::ComPtr<ID3D12Resource> UploadTextureData(ID3D12Resource* texture, const DirectX::ScratchImage& mipImages, ID3D12Device* device, ID3D12GraphicsCommandList* commandList)
 {
+	if (!texture || !device || !commandList) {
+		return nullptr;
+	}
+
 	std::vector<D3D12_SUBRESOURCE_DATA> subresources;
 
 	DirectX::PrepareUpload(device, mipImages.GetImages(), mipImages.GetImageCount(), mipImages.GetMetadata(), subresources);

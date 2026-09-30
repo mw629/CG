@@ -5,6 +5,10 @@ GameApplication::GameApplication(int32_t kClientWidth, int32_t kClientHeight) {
   engine.get()->Setting();
   sceneManager = std::make_unique<SceneManager>();
   editorManager = std::make_unique<EditorManager>();
+
+  // 初期化時に読み込まれたリソースの転送をGPUへ確定・実行し、
+  // 不要になった中間アップロードバッファを全破棄してVRAMをクリーンにする
+  engine->FlushGpu();
 }
 
 void GameApplication::Run() {

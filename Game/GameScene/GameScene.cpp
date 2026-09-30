@@ -474,6 +474,13 @@ void GameScene::ImGui() {
     ImGui::Text("Next Spawn: %.1f m (approx. %.0f frames / %.2f s)",
                 curInterval, estFrames, estFrames / 60.0f);
     ImGui::Text("Dodgeable Range: %.1f m ~ %.1f m", minDistance, maxDistance);
+
+    Vector4 roadColor = stageSettings_->GetRoadColor();
+    float roadColorArr[4] = {roadColor.x, roadColor.y, roadColor.z, roadColor.w};
+    if (ImGui::ColorEdit4("Ground Color", roadColorArr)) {
+      stageSettings_->SetRoadColor(
+          {roadColorArr[0], roadColorArr[1], roadColorArr[2], roadColorArr[3]});
+    }
   }
 
   // アイテムクールタイム設定パネル

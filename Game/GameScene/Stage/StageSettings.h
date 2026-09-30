@@ -60,6 +60,7 @@ private:
   ModelData planeModelData_;
 
   ModelData roadModelData_;
+  Vector4 roadColor_ = {1.0f, 1.0f, 1.0f, 1.0f};
   class GameObjectManager *manager_ = nullptr;
   std::vector<std::shared_ptr<RenderObject>> chunkPool_;
 
@@ -157,6 +158,9 @@ public:
   int GetMinLaneIndexAtZ(float z) const;
   int GetMaxLaneIndexAtZ(float z) const;
   float GetEffectiveLaneWidthAtZ(float z) const;
+
+  const Vector4 &GetRoadColor() const { return roadColor_; }
+  void SetRoadColor(const Vector4 &color);
 
   // セッター
   // レーン数変更（奥から新しく出現する床から変化させる）

@@ -181,6 +181,26 @@ void StageSettings::SetLaneCountImmediate(int count, Matrix4x4 view) {
   isDirty_ = true;
 }
 
+void StageSettings::SetRoadColor(const Vector4 &color) {
+  roadColor_ = color;
+  for (auto &row : roadChunks_) {
+    for (auto &chunk : row) {
+      if (chunk) {
+        if (auto model = dynamic_cast<Model *>(chunk->GetObjectBase().get())) {
+          model->SetColor(roadColor_);
+        }
+      }
+    }
+  }
+  for (auto &chunk : chunkPool_) {
+    if (chunk) {
+      if (auto model = dynamic_cast<Model *>(chunk->GetObjectBase().get())) {
+        model->SetColor(roadColor_);
+      }
+    }
+  }
+}
+
 void StageSettings::RebuildChunkRow(int rowIndex, int newLaneCount, float newZ,
                                     Matrix4x4 view) {
   if (rowIndex < 0 || rowIndex >= kChunkCount_)
@@ -214,6 +234,11 @@ void StageSettings::RebuildChunkRow(int rowIndex, int newLaneCount, float newZ,
       if (!chunkPool_.empty()) {
         renderObj = chunkPool_.back();
         chunkPool_.pop_back();
+        if (renderObj) {
+          if (auto model = dynamic_cast<Model *>(renderObj->GetObjectBase().get())) {
+            model->SetColor(roadColor_);
+          }
+        }
       } else {
         auto roadModel = std::make_shared<Model>();
         roadModel->Initialize(roadModelData_);
@@ -223,6 +248,7 @@ void StageSettings::RebuildChunkRow(int rowIndex, int newLaneCount, float newZ,
         roadModel->SetLighting(false);
         roadModel->SetTexture(
             texture_->TextureData("Resources/Model/Ground/Ground.png"));
+        roadModel->SetColor(roadColor_);
 
         renderObj = std::make_shared<RenderObject>(roadModel);
       }

@@ -141,6 +141,8 @@ public:
 
 	void EndFrame(const std::function<void()>& drawUI = nullptr);
 
+	void FlushGpu();
+
 	void End();
 
 	void UpdateFixFPS();

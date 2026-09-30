@@ -461,6 +461,11 @@ void Engine::EndFrame(const std::function<void()> &drawUI) {
 
   gpuSyncManager.WaitForGpu();
 
+  // GPU転送完了後に中間アップロードバッファを解放してVRAM消費を半減させる
+  if (textureLoader) {
+    textureLoader->ReleaseIntermediateResources();
+  }
+
   UpdateFixFPS();
 
   // 次のフレーム用のコマンドを準備
@@ -473,6 +478,39 @@ void Engine::EndFrame(const std::function<void()> &drawUI) {
       command->GetCommandList()->Reset(command->GetCommandAllocator(), nullptr);
   if (FAILED(hr_)) {
     CheckHResult(hr_, "CommandList::Reset failed", graphics->GetDevice());
+    assert(SUCCEEDED(hr_));
+  }
+}
+
+void Engine::FlushGpu() {
+  // 蓄積されたコマンドリストを確定してキック
+  hr_ = command->GetCommandList()->Close();
+  if (FAILED(hr_)) {
+    CheckHResult(hr_, "CommandList::Close failed in FlushGpu", graphics->GetDevice());
+    assert(SUCCEEDED(hr_));
+    return;
+  }
+
+  ID3D12CommandList *commandLists[] = {command->GetCommandList()};
+  command->GetCommandQueue()->ExecuteCommandLists(1, commandLists);
+
+  gpuSyncManager.Signal(command.get()->GetCommandQueue());
+  gpuSyncManager.WaitForGpu();
+
+  // 初期化等で生成された転送用中間バッファを全破棄してVRAMを即時解放
+  if (textureLoader) {
+    textureLoader->ReleaseIntermediateResources();
+  }
+
+  // 次の描画コマンドのためにコマンドリストをリセット
+  hr_ = command->GetCommandAllocator()->Reset();
+  if (FAILED(hr_)) {
+    CheckHResult(hr_, "CommandAllocator::Reset failed in FlushGpu", graphics->GetDevice());
+    assert(SUCCEEDED(hr_));
+  }
+  hr_ = command->GetCommandList()->Reset(command->GetCommandAllocator(), nullptr);
+  if (FAILED(hr_)) {
+    CheckHResult(hr_, "CommandList::Reset failed in FlushGpu", graphics->GetDevice());
     assert(SUCCEEDED(hr_));
   }
 }

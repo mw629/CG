@@ -54,9 +54,9 @@ void Obstacle::Initialize(ModelData lowData, ModelData highData,
 
   // 1. バリアを張るアイテム (shieldItem)
   ModelData barrierData = planeData;
-  barrierData.material.textureFilePath = "Resources/Texture/shieldItem.png";
+  barrierData.material.textureFilePath = "Resources/Texture/Item/shieldItem.png";
   barrierData.textureIndex =
-      AssetManager::LoadTexture("Resources/Texture/shieldItem.png");
+      AssetManager::LoadTexture("Resources/Texture/Item/shieldItem.png");
   barrierItemModel_->Initialize(barrierData);
   barrierItemModel_->SetShader("ObjectShader");
   barrierItemModel_->SetCullMode(kCullModeNone);
@@ -66,9 +66,9 @@ void Obstacle::Initialize(ModelData lowData, ModelData highData,
 
   // 2. ボス戦アイテム (BossItems)
   ModelData bossData = planeData;
-  bossData.material.textureFilePath = "Resources/Texture/BossItems.png";
+  bossData.material.textureFilePath = "Resources/Texture/Item/BossItems.png";
   bossData.textureIndex =
-      AssetManager::LoadTexture("Resources/Texture/BossItems.png");
+      AssetManager::LoadTexture("Resources/Texture/Item/BossItems.png");
   bossItemModel_->Initialize(bossData);
   bossItemModel_->SetShader("ObjectShader");
   bossItemModel_->SetCullMode(kCullModeNone);
@@ -78,9 +78,9 @@ void Obstacle::Initialize(ModelData lowData, ModelData highData,
 
   // 3. レーン消去アイテム (BomItem)
   ModelData clearData = planeData;
-  clearData.material.textureFilePath = "Resources/Texture/BomItem.png";
+  clearData.material.textureFilePath = "Resources/Texture/Item/BomItem.png";
   clearData.textureIndex =
-      AssetManager::LoadTexture("Resources/Texture/BomItem.png");
+      AssetManager::LoadTexture("Resources/Texture/Item/BomItem.png");
   clearItemModel_->Initialize(clearData);
   clearItemModel_->SetShader("ObjectShader");
   clearItemModel_->SetCullMode(kCullModeNone);
@@ -90,9 +90,9 @@ void Obstacle::Initialize(ModelData lowData, ModelData highData,
 
   // 4. 1レーン化アイテム (Onelane)
   ModelData oneLaneData = planeData;
-  oneLaneData.material.textureFilePath = "Resources/Texture/Onelane.png";
+  oneLaneData.material.textureFilePath = "Resources/Texture/Item/Onelane.png";
   oneLaneData.textureIndex =
-      AssetManager::LoadTexture("Resources/Texture/Onelane.png");
+      AssetManager::LoadTexture("Resources/Texture/Item/Onelane.png");
   oneLaneItemModel_->Initialize(oneLaneData);
   oneLaneItemModel_->SetShader("ObjectShader");
   oneLaneItemModel_->SetCullMode(kCullModeNone);
@@ -295,6 +295,10 @@ void Obstacle::Spawn(float x, float y, float z) {
     isFalling_ = false;
     justLanded_ = false;
     transform_.translate = {x, y, z};
+  }
+  if (type_ == Type::BarrierItem || type_ == Type::BossItem ||
+      type_ == Type::ClearItem || type_ == Type::CameraItem) {
+    transform_.translate.y += 0.5f;
   }
   isActive_ = true;
   isHit_ = false; // 初期化
