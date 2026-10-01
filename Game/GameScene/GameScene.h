@@ -14,6 +14,7 @@
 
 #include <System/CollisionManager.h>
 #include <System/PauseSystem.h>
+#include "../Direction/Fade.h"
 #include <memory>
 
 class GameScene : public IScene {
@@ -169,6 +170,18 @@ private:
   // 初期読み込みするSceneJsonのファイルパス
   // (変更することで読み込むJsonを決定できる)
   std::string initialSceneJson_ = "Resources/Json/Scene/scene.json";
+
+  // フェード演出
+  std::unique_ptr<Fade> fade_ = std::make_unique<Fade>();
+  enum class ResultTransition {
+    None,
+    Restart,
+    Title
+  };
+  ResultTransition resultTransition_ = ResultTransition::None;
+  float fadeDuration_ = 0.5f;
+
+  void StartResultTransition(ResultTransition target);
 
 public:
   ~GameScene() override;

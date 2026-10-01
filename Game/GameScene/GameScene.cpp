@@ -60,16 +60,13 @@ void GameScene::ImGui() {
       ImGui::Separator();
 
       if (ImGui::Button("Restart (1)", ImVec2(160, 35))) {
-        ResetGame();
-        gameState_ = GameState::Playing;
-        isTitleExiting_ = false;
-        SoundManager::GetInstance()->PlaySE(SoundManager::SE::Start);
-        SoundManager::GetInstance()->PlayBGM(SoundManager::BGM::Play);
+        StartResultTransition(ResultTransition::Restart);
       }
       ImGui::SameLine();
       if (ImGui::Button("Return to Title (2)", ImVec2(160, 35))) {
-        ReturnToTitle();
+        StartResultTransition(ResultTransition::Title);
       }
+      ImGui::SliderFloat("Fade Duration", &fadeDuration_, 0.1f, 2.0f, "%.2f s");
       ImGui::Separator();
     }
   }
@@ -803,6 +800,15 @@ void GameScene::StartPlaying() {
   SoundManager::GetInstance()->PlayBGM(SoundManager::BGM::Play);
 }
 
+void GameScene::StartResultTransition(ResultTransition target) {
+  if (fade_->IsFading() || resultTransition_ != ResultTransition::None) {
+    return;
+  }
+  resultTransition_ = target;
+  fade_->StartFadeOut(fadeDuration_);
+  SoundManager::GetInstance()->PlaySE(SoundManager::SE::Start);
+}
+
 void GameScene::ReturnToTitle() {
   ResetGame();
   player_->SetAutoPilot(true);
@@ -828,6 +834,8 @@ void GameScene::ReturnToTitle() {
 
 void GameScene::Initialize() {
   sceneID_ = SceneID::Game;
+  fade_->Initialize();
+  resultTransition_ = ResultTransition::None;
 
   // タイトル用ペンギン走りスプライトの生成 (5体 ＞の字隊形用)
   titlePenguinTextureHandle_ = texture_->CreateTexture("Resources/Texture/penguin_run.png");
@@ -1033,6 +1041,26 @@ void GameScene::Update() {
   uiTimer_ += 1.0f / 60.0f;
   SoundManager::GetInstance()->Update();
 
+  // フェードの更新
+  if (fade_) {
+    fade_->Update(1.0f / 60.0f);
+
+    // リザルトからのフェードアウト完了時の遷移処理
+    if (resultTransition_ != ResultTransition::None && fade_->IsFadeOutFinished()) {
+      if (resultTransition_ == ResultTransition::Restart) {
+        ResetGame();
+        gameState_ = GameState::Playing;
+        isTitleExiting_ = false;
+        SoundManager::GetInstance()->PlayBGM(SoundManager::BGM::Play);
+        fade_->StartFadeIn(fadeDuration_);
+      } else if (resultTransition_ == ResultTransition::Title) {
+        ReturnToTitle();
+        fade_->StartFadeIn(fadeDuration_);
+      }
+      resultTransition_ = ResultTransition::None;
+    }
+  }
+
   // タイトル文字の退出（上へ流れる）アニメーション更新
   if (isTitleExiting_) {
     titleExitTimer_ += 1.0f / 60.0f;
@@ -1112,17 +1140,15 @@ void GameScene::Update() {
   } else if (gameState_ == GameState::PlayerHit) {
     PlayerHitUpdate();
   } else if (gameState_ == GameState::GameOver) {
-    // 1でリスタート
-    if (Input::PushKey(DIK_1)) {
-      ResetGame();
-      gameState_ = GameState::Playing;
-      isTitleExiting_ = false;
-      SoundManager::GetInstance()->PlaySE(SoundManager::SE::Start);
-      SoundManager::GetInstance()->PlayBGM(SoundManager::BGM::Play);
-    }
-    // 2でタイトルへ
-    if (Input::PushKey(DIK_2)) {
-      ReturnToTitle();
+    if (resultTransition_ == ResultTransition::None && !fade_->IsFading()) {
+      // 1キー または ゲームパッドAボタンでリスタート
+      if (Input::PushKey(DIK_1) || GamePadInput::PressButton(XINPUT_GAMEPAD_A)) {
+        StartResultTransition(ResultTransition::Restart);
+      }
+      // 2キー または ゲームパッドBボタンでタイトルへ
+      if (Input::PushKey(DIK_2) || GamePadInput::PressButton(XINPUT_GAMEPAD_B)) {
+        StartResultTransition(ResultTransition::Title);
+      }
     }
   } else if (gameState_ == GameState::Editor) {
     EditorUpdate();
@@ -1244,6 +1270,11 @@ void GameScene::DrawHUD(class Draw &draw) {
     draw.DrawMSDFString("[F2] 1ST PERSON", Vector2(fpx + 10.0f, fpy + 6.0f), 16.0f,
                         Vector4(0.4f, 0.9f, 1.0f, 1.0f), true,
                         Vector4(0.0f, 0.0f, 0.0f, 1.0f), 0.08f);
+  }
+
+  // 最前面にフェード描画
+  if (fade_) {
+    fade_->Draw(draw);
   }
 }
 
@@ -1728,9 +1759,9 @@ void GameScene::DrawGameOverHUD(class Draw &draw) {
   draw.DrawFillRect(Vector2(240.0f, 470.0f), Vector2(800.0f, 2.0f),
                     Vector4(0.3f, 0.4f, 0.5f, 0.7f));
 
-  draw.DrawMSDFString("[ 1 キー ] もう一度プレイ (RESTART)   |   [ 2 キー ] "
+  draw.DrawMSDFString("[ 1 / Aボタン ] もう一度プレイ (RESTART)   |   [ 2 / Bボタン ] "
                       "タイトルへ戻る (TITLE)",
-                      Vector2(260.0f, 505.0f), 22.0f,
+                      Vector2(245.0f, 505.0f), 22.0f,
                       Vector4(0.9f, 0.95f, 1.0f, 1.0f), true,
                       Vector4(0.0f, 0.0f, 0.0f, 1.0f), 0.07f);
 }
@@ -2240,9 +2271,10 @@ void GameScene::TitleUpdate() {
       StartPlaying();
     }
   } else {
-    // スペースキーまたはゲームパッドAボタンでゲーム開始シーケンス突入
-    if (Input::PushKey(DIK_SPACE) ||
-        GamePadInput::PressButton(XINPUT_GAMEPAD_A)) {
+    // スペースキーまたはゲームパッドAボタンでゲーム開始シーケンス突入 (フェード中は誤操作防止)
+    if ((!fade_ || !fade_->IsFading()) &&
+        (Input::PushKey(DIK_SPACE) ||
+         GamePadInput::PressButton(XINPUT_GAMEPAD_A))) {
       StartGame();
     }
   }
