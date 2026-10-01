@@ -829,18 +829,6 @@ void GameScene::ReturnToTitle() {
 void GameScene::Initialize() {
   sceneID_ = SceneID::Game;
 
-  // タイトル用スプライトの生成
-  titleTextureHandle_ = texture_->CreateTexture("Resources/Texture/Title.png");
-  titleSpriteData_.transform.scale = {1.0f, 1.0f, 1.0f};
-  titleSpriteData_.transform.translate = {640.0f, 360.0f, 0.0f};
-  titleSpriteData_.transform.rotate = {0.0f, 0.0f, 0.0f};
-  titleSpriteData_.size = {1280.0f, 720.0f};
-  titleSpriteData_.textureArea[0] = {0.0f, 0.0f};
-  titleSpriteData_.textureArea[1] = {1.0f, 1.0f};
-  titleSprite_ = std::make_unique<Sprite>();
-  titleSprite_->Initialize(titleSpriteData_, titleTextureHandle_);
-  titleSprite_->GetMaterial()->SetColor({1.0f, 1.0f, 1.0f, 1.0f});
-
   // タイトル用ペンギン走りスプライトの生成 (5体 ＞の字隊形用)
   titlePenguinTextureHandle_ = texture_->CreateTexture("Resources/Texture/penguin_run.png");
   for (int i = 0; i < 5; ++i) {
