@@ -266,6 +266,19 @@ void StageSettings::RebuildChunkRow(int rowIndex, int newLaneCount, float newZ,
   info.effectiveLaneWidth =
       (newLaneCount == 1) ? (laneWidth_ * oneLaneWidthMultiplier_) : laneWidth_;
 
+  float modelWidth =
+      roadModelData_.localAABB.max.x - roadModelData_.localAABB.min.x;
+  float modelHeight =
+      roadModelData_.localAABB.max.y - roadModelData_.localAABB.min.y;
+  float modelDepth =
+      roadModelData_.localAABB.max.z - roadModelData_.localAABB.min.z;
+  if (modelWidth <= 0.001f)
+    modelWidth = 1.0f;
+  if (modelHeight <= 0.001f)
+    modelHeight = 1.0f;
+  if (modelDepth <= 0.001f)
+    modelDepth = 1.0f;
+
   for (int laneIdx = 0; laneIdx < newLaneCount; laneIdx++) {
     auto &renderObj = roadChunks_[rowIndex][laneIdx];
     renderObj->SetName("RoadChunk_" + std::to_string(rowIndex) + "_Lane_" +
@@ -275,9 +288,18 @@ void StageSettings::RebuildChunkRow(int rowIndex, int newLaneCount, float newZ,
     float x = static_cast<float>(logicalLane) * info.effectiveLaneWidth;
 
     Transform t;
-    t.scale = {info.effectiveLaneWidth, 50.0f, 10.1f};
+    t.scale = {info.effectiveLaneWidth / modelWidth, 50.0f / modelHeight,
+               10.1f / modelDepth};
     t.rotate = {0.0f, 0.0f, 0.0f};
-    t.translate = {x, -23.0f, newZ};
+    constexpr float kRoadTopY = 2.0f;
+    t.translate = {
+        x - t.scale.x * ((roadModelData_.localAABB.min.x +
+                          roadModelData_.localAABB.max.x) *
+                         0.5f),
+        kRoadTopY - (t.scale.y * roadModelData_.localAABB.max.y),
+        newZ - t.scale.z * ((roadModelData_.localAABB.min.z +
+                            roadModelData_.localAABB.max.z) *
+                           0.5f)};
 
     renderObj->SetTransform(t);
     renderObj->Update(view, 0.0f);

@@ -56,6 +56,15 @@ private:
   std::unique_ptr<Sprite> titlePenguinSprites_[5];
   int titlePenguinTextureHandle_ = -1;
 
+  // クラッシュ演出用
+  std::unique_ptr<Sprite> crashSprite_;
+  SpriteData crashSpriteData_;
+  int crashTextureHandle_ = -1;
+  float crashTimer_ = 0.0f;
+  float crashScaleDuration_ = 0.35f;
+  Vector2 crashBaseSize_ = {580.0f, 580.0f * (569.0f / 1024.0f)};
+  Vector2 crashPosition_ = {640.0f, 320.0f};
+
   // タイトル用カメラ旋回（オービット）
   bool isTitleOrbitCamera_ = true;
   float titleCameraAngle_ = 0.0f;
@@ -116,6 +125,8 @@ private:
   float bossAttackDropHeight_ = 18.0f;   // ボス攻撃が上空から降ってくる初期高さ
   float bossAttackFallDuration_ = 28.0f; // 落下にかかるフレーム数 (約0.45秒)
   float bossAttackReflectMinZ_ = -15.0f; // 反撃（跳ね返し）有効範囲の開始Z座標
+  float bossReflectArcHeight_ = 7.0f;    // ボス跳ね返し時の弧の高さ（Y方向の膨らみ）
+  float bossReflectDuration_ = 36.0f;    // ボス跳ね返しにかかるフレーム数 (約0.6秒)
 
   // ボス戦カメラ設定
   Vector3 bossCameraTranslate_{0.0f, 7.0f,

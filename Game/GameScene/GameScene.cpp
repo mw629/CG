@@ -284,6 +284,10 @@ void GameScene::ImGui() {
                          5.0f, 60.0f, "%.0f frames");
         ImGui::DragFloat("Reflect Min Z", &bossAttackReflectMinZ_, 0.5f, -40.0f,
                          0.0f, "%.1f m");
+        ImGui::DragFloat("Reflect Arc Height", &bossReflectArcHeight_, 0.2f,
+                         1.0f, 25.0f, "%.1f m");
+        ImGui::DragFloat("Reflect Duration", &bossReflectDuration_, 1.0f,
+                         10.0f, 120.0f, "%.0f frames");
         ImGui::Text("Attack Distance to Player: %.1f m", -bossAttackSpawnZ_);
         ImGui::Separator();
         ImGui::Text("Boss Camera Settings:");
@@ -620,6 +624,31 @@ void GameScene::ImGui() {
     if (ImGui::Button("Emit Dust")) {
       effectManager_->EmitDust(player_->GetTransform().translate);
     }
+    ImGui::SameLine();
+    if (ImGui::Button("Trigger Crash Effect")) {
+      gameState_ = GameState::PlayerHit;
+      crashTimer_ = 0.0f;
+      SoundManager::GetInstance()->PlaySE(SoundManager::SE::Crash);
+      player_->OnHit(false);
+      if (crashSprite_) {
+        Transform ct = crashSpriteData_.transform;
+        ct.scale = {0.0f, 0.0f, 1.0f};
+        ct.translate = {crashPosition_.x, crashPosition_.y, 0.0f};
+        crashSprite_->SetTransform(ct);
+        crashSprite_->SettingWvp();
+      }
+    }
+    if (ImGui::TreeNode("Crash Effect Settings")) {
+      ImGui::DragFloat2("Position", &crashPosition_.x, 1.0f, 0.0f, 1280.0f);
+      ImGui::DragFloat("Scale Duration", &crashScaleDuration_, 0.02f, 0.05f, 2.0f);
+      if (ImGui::DragFloat2("Base Size", &crashBaseSize_.x, 1.0f, 50.0f, 1280.0f)) {
+        if (crashSprite_) {
+          crashSprite_->SetSize(crashBaseSize_);
+          crashSprite_->UpdateVertexBuffer();
+        }
+      }
+      ImGui::TreePop();
+    }
   }
 
   effectManager_->ImGui();
@@ -709,6 +738,15 @@ void GameScene::ResetGame() {
   stageSettings_->SetLaneCountImmediate(3);
   stageSettings_->SetSpawningPaused(false);
   player_->SetInvertedControls(false);
+
+  crashTimer_ = 0.0f;
+  if (crashSprite_) {
+    Transform ct = crashSpriteData_.transform;
+    ct.scale = {0.0f, 0.0f, 1.0f};
+    ct.translate = {crashPosition_.x, crashPosition_.y, 0.0f};
+    crashSprite_->SetTransform(ct);
+    crashSprite_->SettingWvp();
+  }
 }
 
 void GameScene::StartGame() {
@@ -819,6 +857,22 @@ void GameScene::Initialize() {
     titlePenguinSprites_[i]->Initialize(penguinSpriteData, titlePenguinTextureHandle_);
     titlePenguinSprites_[i]->GetMaterial()->SetColor({1.0f, 1.0f, 1.0f, 1.0f});
   }
+
+  // クラッシュ演出用スプライトの生成
+  crashTextureHandle_ = texture_->CreateTexture("Resources/Texture/Crash.png");
+  crashSpriteData_.transform.scale = {0.0f, 0.0f, 1.0f};
+  crashSpriteData_.transform.translate = {crashPosition_.x, crashPosition_.y, 0.0f};
+  crashSpriteData_.transform.rotate = {0.0f, 0.0f, 0.0f};
+  crashSpriteData_.size = crashBaseSize_;
+  crashSpriteData_.pivot = {0.5f, 0.5f};
+  crashSpriteData_.textureArea[0] = {0.0f, 0.0f};
+  crashSpriteData_.textureArea[1] = {1.0f, 1.0f};
+  crashSpriteData_.scaleMode = SpriteScaleMode::Fit;
+  crashSpriteData_.anchor = SpriteAnchor::None;
+  crashSprite_ = std::make_unique<Sprite>();
+  crashSprite_->Initialize(crashSpriteData_, crashTextureHandle_);
+  crashSprite_->GetMaterial()->SetColor({1.0f, 1.0f, 1.0f, 1.0f});
+  crashSprite_->SettingWvp();
 
   if (!EditorManager::IsPlaying()) {
     gameState_ = GameState::Editor;
@@ -951,7 +1005,7 @@ void GameScene::Initialize() {
 
   // ステージの初期化
   ModelData roadModelData =
-      AssetManager::LoadModel("Resources/Block", "Block.obj");
+      AssetManager::LoadModel("Resources/Model/Ground", "Ground.obj");
   ModelData fallenTreeModel =
       AssetManager::LoadModel("Resources/Model/FallenTree", "FallenTree.obj");
   ModelData iceArchwayModel =
@@ -1160,14 +1214,10 @@ void GameScene::DrawHUD(class Draw &draw) {
     DrawPauseHUD(draw);
   } else if (gameState_ == GameState::PlayerHit) {
     DrawPlayingHUD(draw);
-    // 衝突時の大迫力バナー
-    draw.DrawFillRect(Vector2(400.0f, 240.0f), Vector2(480.0f, 100.0f),
-                      Vector4(0.1f, 0.0f, 0.0f, 0.85f));
-    draw.DrawFillRect(Vector2(400.0f, 240.0f), Vector2(480.0f, 3.0f),
-                      Vector4(1.0f, 0.2f, 0.2f, 0.95f));
-    draw.DrawMSDFString("★ CRASH! ★", Vector2(480.0f, 260.0f), 56.0f,
-                        Vector4(1.0f, 0.25f, 0.25f, 1.0f), true,
-                        Vector4(0.0f, 0.0f, 0.0f, 1.0f), 0.12f);
+    // 衝突演出（Crash.png）
+    if (crashSprite_) {
+      draw.DrawSprite(crashSprite_.get());
+    }
   } else if (gameState_ == GameState::Playing) {
     DrawPlayingHUD(draw);
     if (playingState_ == PlayingState::Boss && boss_->GetIsActive()) {
@@ -1933,6 +1983,24 @@ void GameScene::DrawTitleHUD(class Draw &draw) {
 }
 
 void GameScene::PlayerHitUpdate() {
+  crashTimer_ += (1.0f / 60.0f);
+
+  // Crash.png をサイズ0から勢いよく大きく拡大するアニメーション
+  if (crashSprite_) {
+    float t = std::clamp(crashTimer_ / crashScaleDuration_, 0.0f, 1.0f);
+    // EaseOutBack: 0から勢いよく拡大して少しバウンドする迫力ある出現演出
+    const float c1 = 1.70158f;
+    const float c3 = c1 + 1.0f;
+    float s = (t >= 1.0f) ? 1.0f : (1.0f + c3 * std::pow(t - 1.0f, 3.0f) + c1 * std::pow(t - 1.0f, 2.0f));
+    if (s < 0.0f) s = 0.0f;
+
+    Transform ct = crashSpriteData_.transform;
+    ct.scale = {s, s, 1.0f};
+    ct.translate = {crashPosition_.x, crashPosition_.y, 0.0f};
+    crashSprite_->SetTransform(ct);
+    crashSprite_->SettingWvp();
+  }
+
   // カメラやビューの更新は GameScene::Update で行われている
   effectManager_->PlayerHitUpdate(view);
 
@@ -2004,6 +2072,8 @@ void GameScene::PlayingUpdate() {
               obs->SetType(type);
               obs->SetDropHeight(bossAttackDropHeight_);
               obs->SetFallDuration(bossAttackFallDuration_);
+              obs->SetReflectArcHeight(bossReflectArcHeight_);
+              obs->SetReflectDuration(bossReflectDuration_);
               float x = (i - 1) * stageSettings_->GetLaneWidth();
               obs->Spawn(
                   x, 2.0f + obs->GetCollisionHeight() * 0.5f,
@@ -2050,6 +2120,8 @@ void GameScene::PlayingUpdate() {
           if (z > bossAttackReflectMinZ_ && z < 15.0f) {
             if ((lane == 0 && push1) || (lane == 1 && push2) ||
                 (lane == 2 && push3)) {
+              obs->SetReflectArcHeight(bossReflectArcHeight_);
+              obs->SetReflectDuration(bossReflectDuration_);
               obs->SetReflected(true);
               obs->SetReflectedTarget(boss_->GetTransform().translate);
               SoundManager::GetInstance()->PlaySE(
@@ -2057,11 +2129,17 @@ void GameScene::PlayingUpdate() {
             }
           }
         } else if (obs->GetIsReflected()) {
+          // ボスの最新位置を追従（浮遊アニメーションにも追従）
+          obs->SetReflectedTarget(boss_->GetTransform().translate);
+
           // 跳ね返った障害物とボスとの当たり判定
           AABB obsAABB = Collision::MakeAABB(
               obs->GetTransform(), obs->GetCollisionWidth(),
               obs->GetCollisionHeight(), obs->GetCollisionDepth());
-          if (Collision::CheckAABB(bossAABB, obsAABB)) {
+          // 弧の降下フェーズ（進行度70%以上）でボスAABBに接触、または終点(100%)到達でヒット
+          if ((obs->GetReflectProgress() >= 0.7f &&
+               Collision::CheckAABB(bossAABB, obsAABB)) ||
+              obs->GetReflectProgress() >= 1.0f) {
             obs->Deactivate(); // 障害物を消す
             boss_->OnDamage();
             SoundManager::GetInstance()->PlaySE(SoundManager::SE::BossHit);
@@ -2496,6 +2574,14 @@ void GameScene::CheckCollisions() {
 
       // 衝突！ヒット演出へ移行
       gameState_ = GameState::PlayerHit;
+      crashTimer_ = 0.0f;
+      if (crashSprite_) {
+        Transform ct = crashSpriteData_.transform;
+        ct.scale = {0.0f, 0.0f, 1.0f};
+        ct.translate = {crashPosition_.x, crashPosition_.y, 0.0f};
+        crashSprite_->SetTransform(ct);
+        crashSprite_->SettingWvp();
+      }
       SoundManager::GetInstance()->PlaySE(SoundManager::SE::Crash);
       if (playingState_ == PlayingState::Boss && boss_->GetIsActive()) {
         boss_->ChangeState(BossState::Victory);

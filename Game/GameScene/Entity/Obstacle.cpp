@@ -303,6 +303,7 @@ void Obstacle::Spawn(float x, float y, float z) {
   isActive_ = true;
   isHit_ = false; // 初期化
   isReflected_ = false;
+  reflectTimer_ = 0.0f;
   if (currentModel_) {
     Transform drawTransform = transform_;
     if (currentModel_ == lowModel_.get() || currentModel_ == highModel_.get() ||
@@ -347,27 +348,34 @@ void Obstacle::StageUpdate(Matrix4x4 view, float scrollSpeed) {
     }
   } else if (isReflected_) {
     isFalling_ = false;
-    // ボス（ターゲット）へ向かって飛ぶ
-    Vector3 dir = {reflectedTarget_.x - transform_.translate.x,
-                   reflectedTarget_.y - transform_.translate.y,
-                   reflectedTarget_.z - transform_.translate.z};
-    float len = std::sqrt(dir.x * dir.x + dir.y * dir.y + dir.z * dir.z);
 
-    if (len > 0.1f) {
-      dir.x /= len;
-      dir.y /= len;
-      dir.z /= len;
-      float speed = scrollSpeed * 5.0f; // 5倍の速度で飛んでいく
-      if (speed > len)
-        speed = len; // 行き過ぎ防止
-      transform_.translate.x += dir.x * speed;
-      transform_.translate.y += dir.y * speed;
-      transform_.translate.z += dir.z * speed;
+    // スクロール速度（またはtimeScale）に応じてタイマーを進める
+    // 通常スクロール速度(0.2f)基準で1フレームあたり1.0加算（停止時は加算しない）
+    float speedFactor = (scrollSpeed > 0.0f) ? (scrollSpeed / 0.2f) : 0.0f;
+    reflectTimer_ += speedFactor;
+
+    float t =
+        (reflectDuration_ > 0.0f) ? (reflectTimer_ / reflectDuration_) : 1.0f;
+    if (t > 1.0f) {
+      t = 1.0f;
     }
 
-    // 回転させながら飛ぶ
-    transform_.rotate.x -= 0.3f;
-    transform_.rotate.y += 0.2f;
+    // 水平方向（X, Z）は始点から目標への線形補間（放物線の等速運動）
+    transform_.translate.x =
+        reflectStartPos_.x + (reflectedTarget_.x - reflectStartPos_.x) * t;
+    transform_.translate.z =
+        reflectStartPos_.z + (reflectedTarget_.z - reflectStartPos_.z) * t;
+
+    // 垂直方向（Y）：始点から目標への線形補間にサイン波オフセットを加えて上向きの弧（山なり）を描く
+    float baseY =
+        reflectStartPos_.y + (reflectedTarget_.y - reflectStartPos_.y) * t;
+    float arcOffset = std::sin(t * 3.14159265f) * reflectArcHeight_;
+    transform_.translate.y = baseY + arcOffset;
+
+    // 勢いよく回転させながら飛ぶ
+    transform_.rotate.x -= 0.35f;
+    transform_.rotate.y += 0.25f;
+    transform_.rotate.z += 0.15f;
   } else {
     // スクロール
     if (type_ == Type::BossAttack || type_ == Type::BossAttackReflectable) {
@@ -461,4 +469,11 @@ void Obstacle::ImGuiInnerComponents() {
   if (currentModel_) {
     currentModel_->ImGui(false);
   }
+#ifdef _USE_IMGUI
+  if (isReflected_) {
+    ImGui::Text("Reflect Progress: %.2f", GetReflectProgress());
+    ImGui::DragFloat("Arc Height", &reflectArcHeight_, 0.1f);
+    ImGui::DragFloat("Duration", &reflectDuration_, 1.0f);
+  }
+#endif
 }

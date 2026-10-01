@@ -51,6 +51,10 @@ private:
   bool isHit_ = false;
   bool isReflected_ = false;                  // ボスへの跳ね返しフラグ
   Vector3 reflectedTarget_{0.0f, 0.0f, 0.0f}; // 跳ね返された際の目標座標
+  Vector3 reflectStartPos_{0.0f, 0.0f, 0.0f}; // 跳ね返された瞬間の座標
+  float reflectTimer_ = 0.0f;                 // 跳ね返り経過フレーム数
+  float reflectDuration_ = 36.0f;             // 跳ね返りにかかるフレーム数 (約0.6秒)
+  float reflectArcHeight_ = 7.0f;             // 弧の高さ（Y方向の膨らみ）
   Vector3 velocity_{0.0f, 0.0f, 0.0f};
   float gravity_ = 0.015f;
 
@@ -99,10 +103,19 @@ public:
     isReflected_ = reflected;
     if (reflected) {
       isFalling_ = false;
+      reflectStartPos_ = transform_.translate;
+      reflectTimer_ = 0.0f;
     }
   }
   bool GetIsReflected() const { return isReflected_; }
   void SetReflectedTarget(const Vector3 &target) { reflectedTarget_ = target; }
+  void SetReflectArcHeight(float height) { reflectArcHeight_ = height; }
+  float GetReflectArcHeight() const { return reflectArcHeight_; }
+  void SetReflectDuration(float duration) { reflectDuration_ = duration; }
+  float GetReflectDuration() const { return reflectDuration_; }
+  float GetReflectProgress() const {
+    return (reflectDuration_ > 0.0f) ? (reflectTimer_ / reflectDuration_) : 1.0f;
+  }
 
   // 落下関連
   bool GetIsFalling() const { return isFalling_; }
@@ -130,6 +143,8 @@ public:
     isActive_ = false;
     isFalling_ = false;
     justLanded_ = false;
+    isReflected_ = false;
+    reflectTimer_ = 0.0f;
   }
 
   // ゲッター
